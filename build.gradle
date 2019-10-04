@@ -1,0 +1,96 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.8.RELEASE"
+    }
+}
+
+rootProject.version = "0.0.1"
+group = "com.spaceshift"
+
+allprojects {
+
+    apply plugin: "java"
+    apply plugin: "groovy"
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
+        maven { url "https://dl.bintray.com/javasabr/maven" }
+    }
+
+    ext {
+        annotationVersion = "17.0.0"
+        rlibVersion = "9.4.0"
+        lombokVersion = '1.18.4'
+        springbootVersion = '2.1.8.RELEASE'
+        springVersion = '5.1.6.RELEASE'
+        junitJupiterVersion = "5.5.2"
+        testcontainersVersion = "1.12.1"
+        groovyVersion = "2.5.8"
+        spockVersion = "1.2-groovy-2.5"
+        projectReactorVersion = "3.3.0.RELEASE"
+    }
+
+    dependencies {
+        implementation "com.spaceshift:rlib.network:$rlibVersion"
+        implementation "com.spaceshift:rlib.logger.slf4j:$rlibVersion"
+        implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
+        compileOnly "org.jetbrains:annotations:$annotationVersion"
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        
+        // FIXME to remove
+        testCompile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDirs 'src/main/groovy'
+            }
+        }
+        test {
+            java {
+                srcDirs 'src/test/groovy'
+            }
+        }
+    }
+    
+    tasks.withType(Test) {
+        maxParallelForks = 2
+        forkEvery = 100
+    }
+    
+    processResources {
+        filter(ReplaceTokens, tokens: [
+        ])
+    }
+}
+
+task buildSingleArtifact(type: GradleBuild) {
+    group = 'build'
+    description = 'Build all modules -> Build result artifact'
+    tasks = ['build', 'bootJar']
+}
+
+task buildSingleArtifactWithoutTests(type: GradleBuild) {
+    group = 'build'
+    description = 'Build all modules without tests -> Build result artifact'
+    tasks = ['classes', 'bootJar']
+}
+
+wrapper {
+    gradleVersion = '5.5.1'
+    distributionType = Wrapper.DistributionType.ALL
+}
