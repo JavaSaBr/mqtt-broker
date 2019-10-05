@@ -7,6 +7,7 @@ import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
 import com.ss.rlib.network.NetworkCryptor;
 import com.ss.rlib.network.impl.IdBasedPacketConnection;
+import com.ss.rlib.network.packet.PacketReader;
 import com.ss.rlib.network.packet.registry.ReadablePacketRegistry;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,21 @@ public class MqttConnection extends IdBasedPacketConnection<MqttReadablePacket, 
             maxPacketsByRead,
             packetLengthHeaderSize,
             packetIdHeaderSize
+        );
+    }
+
+    @Override
+    protected @NotNull PacketReader createPacketReader() {
+        return new MqttPacketReader(
+            this,
+            channel,
+            bufferAllocator,
+            this::updateLastActivity,
+            this::handleReadPacket,
+            packetLengthHeaderSize,
+            maxPacketsByRead,
+            getPacketIdHeaderSize(),
+            getPacketRegistry()
         );
     }
 }

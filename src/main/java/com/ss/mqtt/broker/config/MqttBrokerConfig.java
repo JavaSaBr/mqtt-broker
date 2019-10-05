@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 @Log4j2
 @Configuration
@@ -56,16 +57,28 @@ public class MqttBrokerConfig {
     @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network(
         @NotNull ReadablePacketRegistry<MqttReadablePacket> packetRegistry,
         @NotNull ServerNetworkConfig networkConfig,
-        @NotNull BufferAllocator bufferAllocator
+        @NotNull BufferAllocator bufferAllocator,
+        @NotNull Consumer<MqttConnection> mqttConnectionConsumer
     ) {
 
         ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(networkConfig,
             networkChannelFactory(packetRegistry, bufferAllocator)
         );
 
-        log.info("Start mqtt server...");
+        serverNetwork.start(new InetSocketAddress("localhost", 1883));
+        serverNetwork.onAccept(mqttConnectionConsumer);
 
-        return serverNetwork.start(new InetSocketAddress("localhost", 1883));
+        return serverNetwork;
+    }
+
+    @Bean
+    @NotNull Consumer<MqttConnection> mqttConnectionConsumer() {
+        return mqttConnection -> {
+            log.info("Connection: {}", mqttConnection);
+            mqttConnection.onReceive((connection, packet) -> {
+                log.info("Receive packet: {}", packet);
+            });
+        };
     }
 
     private @NotNull BiFunction<Network<MqttConnection>, AsynchronousSocketChannel, MqttConnection> networkChannelFactory(

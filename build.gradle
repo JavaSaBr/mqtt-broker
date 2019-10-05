@@ -52,6 +52,11 @@ allprojects {
         
         // FIXME to remove
         testCompile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+    
+        testCompile "org.springframework:spring-test:$springVersion"
+        testCompile "org.spockframework:spock-core:$spockVersion"
+        testCompile "org.spockframework:spock-spring:$spockVersion"
+        testCompile "org.codehaus.groovy:groovy-all:$groovyVersion"
     }
 
     sourceSets {
