@@ -66,12 +66,20 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         return ((int) dataSize) + readBytes;
     }
 
+
     @Override
     protected @Nullable MqttReadablePacket createPacketFor(
         @NotNull ByteBuffer buffer,
+        int startPacketPosition,
         int packetLength,
         int dataLength
     ) {
-        return null;
+
+        var startByte = buffer.get(startPacketPosition);
+        var type = (byte) (startByte >> 4);
+        var info = (byte) (startByte & 0x0f);
+
+        return packetRegistry.findById(type)
+            .newInstance(info);
     }
 }

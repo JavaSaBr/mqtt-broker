@@ -6,14 +6,23 @@ import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
 import com.ss.rlib.network.NetworkCryptor;
-import com.ss.rlib.network.impl.IdBasedPacketConnection;
+import com.ss.rlib.network.impl.AbstractConnection;
 import com.ss.rlib.network.packet.PacketReader;
+import com.ss.rlib.network.packet.PacketWriter;
+import com.ss.rlib.network.packet.impl.IdBasedPacketWriter;
 import com.ss.rlib.network.packet.registry.ReadablePacketRegistry;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.channels.AsynchronousSocketChannel;
 
-public class MqttConnection extends IdBasedPacketConnection<MqttReadablePacket, MqttWritablePacket> {
+@Getter(AccessLevel.PROTECTED)
+public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttWritablePacket> {
+
+    private final ReadablePacketRegistry<MqttReadablePacket> packetRegistry;
+    private final PacketReader packetReader;
+    private final PacketWriter packetWriter;
 
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
@@ -21,23 +30,20 @@ public class MqttConnection extends IdBasedPacketConnection<MqttReadablePacket, 
         @NotNull NetworkCryptor crypt,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull ReadablePacketRegistry<MqttReadablePacket> packetRegistry,
-        int maxPacketsByRead,
-        int packetLengthHeaderSize,
-        int packetIdHeaderSize
+        int maxPacketsByRead
     ) {
         super(
             network,
             channel,
             crypt,
             bufferAllocator,
-            packetRegistry,
-            maxPacketsByRead,
-            packetLengthHeaderSize,
-            packetIdHeaderSize
+            maxPacketsByRead
         );
+        this.packetRegistry = packetRegistry;
+        this.packetReader = createPacketReader();
+        this.packetWriter = createPacketWriter();
     }
 
-    @Override
     protected @NotNull PacketReader createPacketReader() {
         return new MqttPacketReader(
             this,
@@ -45,10 +51,20 @@ public class MqttConnection extends IdBasedPacketConnection<MqttReadablePacket, 
             bufferAllocator,
             this::updateLastActivity,
             this::handleReadPacket,
-            packetLengthHeaderSize,
             maxPacketsByRead,
-            getPacketIdHeaderSize(),
             getPacketRegistry()
+        );
+    }
+
+    protected @NotNull PacketWriter createPacketWriter() {
+        return new IdBasedPacketWriter<>(
+            this,
+            channel,
+            bufferAllocator,
+            this::updateLastActivity,
+            this::nextPacketToWrite,
+            0,
+            0
         );
     }
 }

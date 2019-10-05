@@ -90,9 +90,7 @@ public class MqttBrokerConfig {
             NetworkCryptor.NULL,
             bufferAllocator,
             packetRegistry,
-            100,
-            1,
-            1
+            100
         );
     }
 }
