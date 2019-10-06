@@ -8,6 +8,7 @@ public class MqttDataUtils {
 
     /**
      * Write a MQTT multi-byte integer to byte buffer.
+     * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
      *
      * @throws IllegalArgumentException if number is too big.
      */
@@ -38,6 +39,7 @@ public class MqttDataUtils {
 
     /**
      * Read a MQTT multi-byte integer from byte buffer.
+     * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
      *
      * @return -1 if buffer's data isn't enough to read integer.
      */

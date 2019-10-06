@@ -22,6 +22,10 @@ public enum MqttVersion {
 
         for (var mqttVersion : values()) {
 
+            if (mqttVersion.version < 0) {
+                continue;
+            }
+
             var versions = map.computeIfAbsent(mqttVersion.name, name -> new MqttVersion[mqttVersion.version + 1]);
 
             if (versions.length > mqttVersion.version) {
@@ -39,6 +43,10 @@ public enum MqttVersion {
     }
 
     public static @NotNull MqttVersion of(@NotNull String name, byte level) {
+
+        if (level < 0) {
+            return MqttVersion.UNKNOWN;
+        }
 
         var availableVersions = NAME_LEVEL_VERSIONS.get(name);
 

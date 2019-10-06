@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network.packet.out;
 
+import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.network.packet.impl.AbstractWritablePacket;
 
 public class MqttWritablePacket extends AbstractWritablePacket {
@@ -9,7 +10,7 @@ public class MqttWritablePacket extends AbstractWritablePacket {
         var type = getPacketType();
         var controlFlags = getPacketFlags();
 
-        return ((type & 0x0F) << 4) ^ (controlFlags & 0x0F);
+        return NumberUtils.setHighByteBits(controlFlags, type);
     }
 
     protected byte getPacketType() {
