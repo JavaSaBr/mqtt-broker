@@ -23,6 +23,8 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     private final PacketReader packetReader;
     private final PacketWriter packetWriter;
 
+    private final @Getter MqttClient client;
+
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
         @NotNull AsynchronousSocketChannel channel,
@@ -39,6 +41,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         );
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
+        this.client = new MqttClient(this);
     }
 
     private @NotNull PacketReader createPacketReader() {

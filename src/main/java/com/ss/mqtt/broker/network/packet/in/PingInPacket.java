@@ -3,13 +3,13 @@ package com.ss.mqtt.broker.network.packet.in;
 import com.ss.mqtt.broker.network.packet.PacketType;
 
 /**
- * Disconnect notification.
+ * PING request.
  */
-public class DisconnectInPacket extends MqttReadablePacket {
+public class PingInPacket extends MqttReadablePacket {
 
-    public static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
+    public static final byte PACKET_TYPE = (byte) PacketType.PING_REQUEST.ordinal();
 
-    public DisconnectInPacket(byte info) {
+    protected PingInPacket(byte info) {
         super(info);
     }
 

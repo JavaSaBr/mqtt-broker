@@ -52,6 +52,7 @@ allprojects {
         
         // FIXME to remove
         testCompile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+        testCompile "io.moquette:moquette-broker:0.12.1"
     
         testCompile "org.springframework:spring-test:$springVersion"
         testCompile "org.spockframework:spock-core:$spockVersion"

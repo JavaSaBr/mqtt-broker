@@ -2,9 +2,68 @@ package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.rlib.network.packet.impl.AbstractReadablePacket;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class MqttReadablePacket extends AbstractReadablePacket<MqttConnection> {
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+
+public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConnection> {
+
+    protected static final int MAX_MSB_LSB = 65535;
 
     protected MqttReadablePacket(byte info) {
+    }
+
+    public abstract byte getPacketType();
+
+    protected short readUnsignedByte(@NotNull ByteBuffer buffer) {
+        return (short) (buffer.get() & 0xFF);
+    }
+
+    protected int readMsbLsbInt(@NotNull ByteBuffer buffer) {
+        return readMsbLsbInt(buffer, 0, MAX_MSB_LSB);
+    }
+
+    protected int readMsbLsbInt(@NotNull ByteBuffer buffer, int min, int max) {
+
+        var msbSize = readUnsignedByte(buffer);
+        var lsbSize = readUnsignedByte(buffer);
+        var result = msbSize << 8 | lsbSize;
+
+        if (result < min || result > max) {
+            result = -1;
+        }
+
+        return result;
+    }
+
+    @Override
+    protected @NotNull String readString(@NotNull ByteBuffer buffer) {
+        var stringData = new byte[readMsbLsbInt(buffer)];
+        buffer.get(stringData);
+        return new String(stringData, StandardCharsets.UTF_8);
+    }
+
+    protected @Nullable String readString(@NotNull ByteBuffer buffer, int minBytes, int maxBytes) {
+
+        var length = readMsbLsbInt(buffer);
+
+        if (length < minBytes || length > maxBytes) {
+            buffer.position(buffer.position() + length);
+            return null;
+        }
+
+        var stringData = new byte[length];
+
+        buffer.get(stringData);
+
+        return new String(stringData, StandardCharsets.UTF_8);
+    }
+
+    protected @NotNull byte[] readBytes(@NotNull ByteBuffer buffer) {
+        var data = new byte[readMsbLsbInt(buffer)];
+        buffer.get(data);
+        return data;
     }
 }

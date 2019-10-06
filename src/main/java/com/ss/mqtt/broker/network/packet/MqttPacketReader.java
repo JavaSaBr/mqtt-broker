@@ -1,9 +1,11 @@
 package com.ss.mqtt.broker.network.packet;
 
 import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
+import com.ss.mqtt.broker.network.packet.in.ConnectRequestInPacket;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.util.MqttDataUtils;
+import com.ss.rlib.common.function.ByteFunction;
+import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.packet.impl.AbstractPacketReader;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +18,11 @@ import java.util.function.Consumer;
 public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, MqttConnection> {
 
     public static final int PACKET_LENGTH_START_BYTE = 2;
+
+    private static final ByteFunction<MqttReadablePacket>[] PACKET_FACTORIES = ArrayFactory.toArray(
+        null,
+        ConnectRequestInPacket::new
+    );
 
     public MqttPacketReader(
         @NotNull MqttConnection connection,
@@ -75,15 +82,6 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         var type = (byte) (startByte >> 4);
         var info = (byte) (startByte & 0x0f);
 
-        return createPacketFor(type, info);
-    }
-
-    private @NotNull MqttReadablePacket createPacketFor(int type, byte info) {
-        switch (type) {
-            case ConnectInPacket.PACKET_TYPE:
-                return new ConnectInPacket(info);
-            default:
-                throw new IllegalArgumentException("Unknown packet type: " + type);
-        }
+        return PACKET_FACTORIES[type].apply(info);
     }
 }
