@@ -8,7 +8,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Import({MqttBrokerConfig.class})
+@Import({
+    MqttBrokerConfig.class
+})
 @Configuration
 @RequiredArgsConstructor
 public class MqttBrokerApplication {

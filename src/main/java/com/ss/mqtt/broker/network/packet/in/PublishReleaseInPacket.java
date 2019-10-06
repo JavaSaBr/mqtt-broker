@@ -1,8 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.rlib.network.annotation.PacketDescription;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@PacketDescription(id = 6)
-public class PublishReleaseInPacket extends MqttReadablePacket {}
+public class PublishReleaseInPacket extends MqttReadablePacket {
+    protected PublishReleaseInPacket(byte info) {
+        super(info);
+    }
+}

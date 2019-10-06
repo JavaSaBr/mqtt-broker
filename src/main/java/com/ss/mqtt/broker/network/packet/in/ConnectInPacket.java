@@ -1,8 +1,13 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.rlib.network.annotation.PacketDescription;
-import lombok.NoArgsConstructor;
+/**
+ * Connection request.
+ */
+public class ConnectInPacket extends MqttReadablePacket {
 
-@NoArgsConstructor
-@PacketDescription(id = 1)
-public class ConnectInPacket extends MqttReadablePacket {}
+    public static final int PACKET_TYPE = 1;
+
+    public ConnectInPacket(byte info) {
+        super(info);
+    }
+}

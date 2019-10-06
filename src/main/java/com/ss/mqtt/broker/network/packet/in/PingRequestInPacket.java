@@ -1,8 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.rlib.network.annotation.PacketDescription;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@PacketDescription(id = 12)
-public class PingRequestInPacket extends MqttReadablePacket {}
+public class PingRequestInPacket extends MqttReadablePacket {
+    protected PingRequestInPacket(byte info) {
+        super(info);
+    }
+}

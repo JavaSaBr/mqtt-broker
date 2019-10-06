@@ -1,10 +1,11 @@
-package com.ss.mqtt.broker.network;
+package com.ss.mqtt.broker.network.packet;
 
+import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.packet.impl.AbstractPacketReader;
-import com.ss.rlib.network.packet.registry.ReadablePacketRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,16 +17,13 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
 
     public static final int PACKET_LENGTH_START_BYTE = 2;
 
-    private final ReadablePacketRegistry<MqttReadablePacket> packetRegistry;
-
     public MqttPacketReader(
         @NotNull MqttConnection connection,
         @NotNull AsynchronousSocketChannel channel,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Runnable updateActivityFunction,
         @NotNull Consumer<MqttReadablePacket> readPacketHandler,
-        int maxPacketsByRead,
-        @NotNull ReadablePacketRegistry<MqttReadablePacket> packetRegistry
+        int maxPacketsByRead
     ) {
         super(
             connection,
@@ -35,7 +33,6 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
             readPacketHandler,
             maxPacketsByRead
         );
-        this.packetRegistry = packetRegistry;
     }
 
     @Override
@@ -44,7 +41,7 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
     }
 
     @Override
-    protected int calcDataLength(int packetLength, int readBytes, @NotNull ByteBuffer buffer) {
+    protected int getDataLength(int packetLength, int readBytes, @NotNull ByteBuffer buffer) {
         return packetLength - readBytes;
     }
 
@@ -66,7 +63,6 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         return ((int) dataSize) + readBytes;
     }
 
-
     @Override
     protected @Nullable MqttReadablePacket createPacketFor(
         @NotNull ByteBuffer buffer,
@@ -79,7 +75,15 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         var type = (byte) (startByte >> 4);
         var info = (byte) (startByte & 0x0f);
 
-        return packetRegistry.findById(type)
-            .newInstance(info);
+        return createPacketFor(type, info);
+    }
+
+    private @NotNull MqttReadablePacket createPacketFor(int type, byte info) {
+        switch (type) {
+            case ConnectInPacket.PACKET_TYPE:
+                return new ConnectInPacket(info);
+            default:
+                throw new IllegalArgumentException("Unknown packet type: " + type);
+        }
     }
 }
