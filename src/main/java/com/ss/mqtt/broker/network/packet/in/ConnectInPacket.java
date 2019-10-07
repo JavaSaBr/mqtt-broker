@@ -117,6 +117,70 @@ public class ConnectInPacket extends MqttReadablePacket {
         PacketProperty.AUTHENTICATION_DATA
     );
 
+    private static final Set<PacketProperty> WILL_PROPERTIES = EnumSet.of(
+        /*
+          Followed by the Four Byte Integer representing the Will Delay Interval in seconds. It is a Protocol Error to
+          include the Will Delay Interval more than once. If the Will Delay Interval is absent, the default value is 0
+          and there is no delay before the Will Message is published.
+
+          The Server delays publishing the Client’s Will Message until the Will Delay Interval has passed or the
+          Session ends, whichever happens first. If a new Network Connection to this Session is made before the
+          Will Delay Interval has passed, the Server MUST NOT send the Will Message
+         */
+        PacketProperty.WILL_DELAY_INTERVAL,
+        /*
+          Followed by the value of the Payload Format Indicator, either of:
+          • 0 (0x00) Byte Indicates that the Will Message is unspecified bytes, which is equivalent to not
+            sending a Payload Format Indicator.
+          • 1 (0x01) Byte Indicates that the Will Message is UTF-8 Encoded Character Data. The UTF-8 data
+            in the Payload MUST be well-formed UTF-8 as defined by the Unicode specification
+            [Unicode] and restated in RFC 3629 [RFC3629].
+
+          It is a Protocol Error to include the Payload Format Indicator more than once. The Server MAY validate
+          that the Will Message is of the format indicated, and if it is not se
+         */
+        PacketProperty.PAYLOAD_FORMAT_INDICATOR,
+        /*
+          Followed by the Four Byte Integer representing the Message Expiry Interval. It is a Protocol Error to
+          include the Message Expiry Interval more than once.
+
+          If present, the Four Byte value is the lifetime of the Will Message in seconds and is sent as the
+          Publication Expiry Interval when the Server publishes the Will Message.
+
+          If absent, no Message Expiry Interval is sent when the Server publishes the Will Message.
+         */
+        PacketProperty.MESSAGE_EXPIRY_INTERVAL,
+        /*
+          Followed by a UTF-8 Encoded String describing the content of the Will Message. It is a Protocol Error to
+          include the Content Type more than once. The value of the Content Type is defined by the sending and
+          receiving application.
+         */
+        PacketProperty.CONTENT_TYPE,
+        /*
+          Followed by a UTF-8 Encoded String which is used as the Topic Name for a response message. It is a
+          Protocol Error to include the Response Topic more than once. The presence of a Response Topic
+          identifies the Will Message as a Request.
+         */
+        PacketProperty.RESPONSE_TOPIC,
+        /*
+          Followed by Binary Data. The Correlation Data is used by the sender of the Request Message to identify
+          which request the Response Message is for when it is received. It is a Protocol Error to include
+          Correlation Data more than once. If the Correlation Data is not present, the Requester does not require
+          any correlation data.
+
+          The value of the Correlation Data only has meaning to the sender of the Request Message and receiver
+          of the Response Message.
+         */
+        PacketProperty.CORRELATION_DATA,
+        /*
+          Followed by a UTF-8 String Pair. The User Property is allowed to appear multiple times to represent
+          multiple name, value pairs. The same name is allowed to appear more than once.
+
+          The Server MUST maintain the order of User Properties when publishing the Will Message
+         */
+        PacketProperty.USER_PROPERTY
+    );
+
     private @Getter MqttVersion mqttVersion;
 
     private @Getter String clientId;
@@ -124,7 +188,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     private @Getter String username;
     private @Getter String password;
 
-    private @Getter byte[] willMessage;
+    private @Getter byte[] willPayload;
 
     private @Getter int keepAlive;
     private @Getter int willQos;
@@ -158,7 +222,7 @@ public class ConnectInPacket extends MqttReadablePacket {
 
         var flags = readUnsignedByte(buffer);
 
-        keepAlive = readMsbLsbInt(buffer);
+        keepAlive = readShort(buffer);
         willRetain = NumberUtils.isSetBit(flags, 5);
         willQos = (flags & 0x18) >> 3;
         cleanStart = NumberUtils.isSetBit(flags, 1);
@@ -169,9 +233,11 @@ public class ConnectInPacket extends MqttReadablePacket {
             var zeroReservedFlag = NumberUtils.isNotSetBit(flags, 0);
 
             if (!zeroReservedFlag) {
-                //The Server MUST validate that the reserved flag in the CONNECT packet is set to 0 [MQTT-3.1.2-3]. If
-                //the reserved flag is not 0 it is a Malformed Packet. Refer to section 4.13 for information about handling
-                //errors.
+                /*
+                 The Server MUST validate that the reserved flag in the CONNECT packet is set to 0 [MQTT-3.1.2-3]. If
+                 the reserved flag is not 0 it is a Malformed Packet. Refer to section 4.13 for information about handling
+                 errors.
+                */
                 throw new IllegalStateException("non-zero reserved flag");
             }
         }
@@ -184,12 +250,34 @@ public class ConnectInPacket extends MqttReadablePacket {
             readProperties(buffer);
         }
 
+        /*
+          The ClientID MUST be present and is the first field in the CONNECT packet Payload
+          The ClientID MUST be a UTF-8 Encoded String as defined in
+
+          The Server MUST allow ClientID’s which are between 1 and 23 UTF-8 encoded bytes in length, and that
+          contain only the characters 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+          The Server MAY allow ClientID’s that contain more than 23 encoded bytes. The Server MAY allow
+          ClientID’s that contain characters not included in the list given above.
+
+          A Server MAY allow a Client to supply a ClientID that has a length of zero bytes, however if it does so the
+          Server MUST treat this as a special case and assign a unique ClientID to that Client. It
+          MUST then process the CONNECT packet as if the Client had provided that unique ClientID, and MUST
+          return the Assigned Client Identifier in the CONNACK packet
+
+          If the Server rejects the ClientID it MAY respond to the CONNECT packet with a CONNACK using
+          Reason Code 0x85 (Client Identifier not valid) and then it MUST close the Network Connection
+         */
         clientId = readString(buffer);
 
         // FIXME validate client id here
 
+        if (willFlag && mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal()) {
+            readProperties(buffer, WILL_PROPERTIES);
+        }
+
         willTopic = willFlag ? readString(buffer, 0, Short.MAX_VALUE) : null;
-        willMessage = willFlag ? readBytes(buffer) : null;
+        willPayload = willFlag ? readBytes(buffer) : null;
         username = hasUserName ? readString(buffer) : null;
         password = hasPassword ? readString(buffer) : null;
 

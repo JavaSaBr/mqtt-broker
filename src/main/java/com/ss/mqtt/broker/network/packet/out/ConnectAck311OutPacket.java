@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.ConnectReasonCode;
+import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -10,12 +10,17 @@ import java.nio.ByteBuffer;
 /**
  * Connect acknowledgment.
  */
-@RequiredArgsConstructor
-public class ConnectAckOutPacket extends MqttWritablePacket {
+public class ConnectAck311OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_ACK.ordinal();
 
-    private final ConnectReasonCode connectReasonCode;
+    /**
+     * The values the Connect Reason Code are shown below. If a well formed CONNECT packet is received
+     * by the Server, but the Server is unable to complete the Connection the Server MAY send a CONNACK
+     * packet containing the appropriate Connect Reason code from this table. If a Server sends a CONNACK
+     * packet containing a Reason code of 128 or greater it MUST then close the Network Connection
+     */
+    private final ConnectReasonCode reasonCode;
 
     /**
      * The Session Present flag informs the Client whether the Server is using Session State from a
@@ -25,6 +30,16 @@ public class ConnectAckOutPacket extends MqttWritablePacket {
      * Present to 0 in the CONNACK packet in addition to setting a 0x00 (Success) Reason Code in the CONNACK packet
      */
     private final boolean sessionPresent;
+
+    public ConnectAck311OutPacket(
+        @NotNull MqttClient client,
+        @NotNull ConnectReasonCode reasonCode,
+        boolean sessionPresent
+    ) {
+        super(client);
+        this.reasonCode = reasonCode;
+        this.sessionPresent = sessionPresent;
+    }
 
     @Override
     protected byte getPacketType() {
@@ -42,6 +57,6 @@ public class ConnectAckOutPacket extends MqttWritablePacket {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901077
         buffer.put((byte) (sessionPresent ? 0x01 : 0x00));
-        buffer.put(connectReasonCode.getValue());
+        buffer.put(reasonCode.getValue());
     }
 }

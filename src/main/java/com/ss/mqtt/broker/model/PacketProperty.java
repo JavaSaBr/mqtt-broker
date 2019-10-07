@@ -28,7 +28,7 @@ public enum PacketProperty {
     TOPIC_ALIAS(0x23, PacketDataType.SHORT),
     MAXIMUM_QOS(0x24, PacketDataType.BYTE),
     RETAIN_AVAILABLE(0x25, PacketDataType.BYTE),
-    USER_PROPERTY(0x26, PacketDataType.UTF_8_STRING),
+    USER_PROPERTY(0x26, PacketDataType.UTF_8_STRING_PAIR),
     MAXIMUM_PACKET_SIZE(0x27, PacketDataType.INTEGER),
     WILDCARD_SUBSCRIPTION_AVAILABLE(0x28, PacketDataType.BYTE),
     SUBSCRIPTION_IDENTIFIER_AVAILABLE(0x29, PacketDataType.BYTE),

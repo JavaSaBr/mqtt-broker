@@ -1,5 +1,8 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.mqtt.broker.network.packet.factory.Mqtt311PacketOutFactory;
+import com.ss.mqtt.broker.network.packet.factory.Mqtt5PacketOutFactory;
+import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,9 +13,9 @@ import java.util.Map;
 
 @Getter
 public enum MqttVersion {
-    UNKNOWN("Unknown", -1),
-    MQTT_3_1_1("MQTT", 4),
-    MQTT_5("MQTT", 5);
+    UNKNOWN("Unknown", -1, new Mqtt311PacketOutFactory()),
+    MQTT_3_1_1("MQTT", 4, new Mqtt311PacketOutFactory()),
+    MQTT_5("MQTT", 5, new Mqtt5PacketOutFactory());
 
     private static final Map<String, MqttVersion[]> NAME_LEVEL_VERSIONS;
 
@@ -62,10 +65,12 @@ public enum MqttVersion {
     private final String name;
     private final byte[] nameInBytes;
     private final byte version;
+    private final MqttPacketOutFactory packetOutFactory;
 
-    MqttVersion(@NotNull String name, int version) {
+    MqttVersion(@NotNull String name, int version, @NotNull MqttPacketOutFactory packetOutFactory) {
         this.name = name;
         this.version = (byte) version;
         this.nameInBytes = name.getBytes(StandardCharsets.UTF_8);
+        this.packetOutFactory = packetOutFactory;
     }
 }

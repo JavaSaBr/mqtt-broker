@@ -23,6 +23,10 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     public abstract byte getPacketType();
 
     protected void readProperties(@NotNull ByteBuffer buffer) {
+        readProperties(buffer, getAvailableProperties());
+    }
+
+    protected void readProperties(@NotNull ByteBuffer buffer, @NotNull Set<PacketProperty> availableProperties) {
 
         var propertiesLength = MqttDataUtils.readMbi(buffer);
 
@@ -33,13 +37,12 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         }
 
         var lastPositionInBuffer = buffer.position() + (int) propertiesLength;
-        var properties = getAvailableProperties();
 
         while (buffer.position() < lastPositionInBuffer) {
 
             var property = PacketProperty.of(readUnsignedByte(buffer));
 
-            if (!properties.contains(property)) {
+            if (!availableProperties.contains(property)) {
                 throw new IllegalStateException("Property: " + property + " is not available for this packet.");
             }
 
@@ -60,7 +63,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
                     applyProperty(property, readString(buffer));
                     break;
                 case BINARY:
-                    applyProperty(property, readBinary(buffer));
+                    applyProperty(property, readBytes(buffer));
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported data type: " + property.getDataType());
@@ -110,14 +113,14 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
     @Override
     protected @NotNull String readString(@NotNull ByteBuffer buffer) {
-        var stringData = new byte[readMsbLsbInt(buffer)];
+        var stringData = new byte[readShort(buffer) & 0xFFFF];
         buffer.get(stringData);
         return new String(stringData, StandardCharsets.UTF_8);
     }
 
     protected @Nullable String readString(@NotNull ByteBuffer buffer, int minBytes, int maxBytes) {
 
-        var length = readMsbLsbInt(buffer);
+        var length = readShort(buffer) & 0xFFFF;
 
         if (length < minBytes || length > maxBytes) {
             buffer.position(buffer.position() + length);
@@ -132,7 +135,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     }
 
     protected @NotNull byte[] readBytes(@NotNull ByteBuffer buffer) {
-        var data = new byte[readMsbLsbInt(buffer)];
+        var data = new byte[readShort(buffer) & 0xFFFF];
         buffer.get(data);
         return data;
     }

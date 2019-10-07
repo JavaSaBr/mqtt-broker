@@ -1,3 +1,11 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-public class DisconnectOutPacket extends MqttWritablePacket {}
+import com.ss.mqtt.broker.network.MqttClient;
+import org.jetbrains.annotations.NotNull;
+
+public class DisconnectOutPacket extends MqttWritablePacket {
+
+    public DisconnectOutPacket(@NotNull MqttClient client) {
+        super(client);
+    }
+}
