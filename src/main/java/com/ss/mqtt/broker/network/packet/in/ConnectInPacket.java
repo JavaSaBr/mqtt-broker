@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.model.ConnectReasonCode;
+import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
@@ -8,6 +9,7 @@ import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -96,6 +98,7 @@ public class ConnectInPacket extends MqttReadablePacket {
           The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
           name is allowed to appear more than once
          */
+        // FIXME to do supporting
         PacketProperty.USER_PROPERTY,
         /*
           Followed by a UTF-8 Encoded String containing the name of the authentication method used for
@@ -190,9 +193,19 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     private @Getter byte[] willPayload;
 
+    // properties
+    private @Nullable @Getter String authenticationMethod;
+    private @Nullable @Getter byte[] authenticationData;
+
+    private @Getter long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+    private @Getter int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
+    private @Getter int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
+    private @Getter int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
+    private @Getter boolean requestResponseInformation = false;
+    private @Getter boolean requestProblemInformation = false;
+
     private @Getter int keepAlive;
     private @Getter int willQos;
-
     private @Getter boolean willRetain;
     private @Getter boolean cleanStart;
 
@@ -291,16 +304,70 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     @Override
     protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
-        super.applyProperty(property, value);
+        switch (property) {
+            case AUTHENTICATION_DATA:
+                authenticationData = value;
+                break;
+            default:
+                unexpectedProperty(property);
+                return;
+        }
     }
 
     @Override
     protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
-        super.applyProperty(property, value);
+        switch (property) {
+            case AUTHENTICATION_METHOD:
+                authenticationMethod = value;
+                break;
+            default:
+                unexpectedProperty(property);
+        }
     }
 
     @Override
     protected void applyProperty(@NotNull PacketProperty property, int value) {
-        super.applyProperty(property, value);
+        switch (property) {
+            case RECEIVE_MAXIMUM:
+                receiveMax = NumberUtils.validate(
+                    value,
+                    MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
+                    MqttPropertyConstants.RECEIVE_MAXIMUM_MAX
+                );
+                break;
+            case TOPIC_ALIAS_MAXIMUM:
+                topicAliasMaximum = value;
+                break;
+            case REQUEST_RESPONSE_INFORMATION:
+                requestResponseInformation = value == 1;
+                break;
+            case REQUEST_PROBLEM_INFORMATION:
+                requestProblemInformation = value == 1;
+                break;
+            default:
+                unexpectedProperty(property);
+        }
+    }
+
+    @Override
+    protected void applyProperty(@NotNull PacketProperty property, long value) {
+        switch (property) {
+            case SESSION_EXPIRY_INTERVAL:
+                sessionExpiryInterval = NumberUtils.validate(
+                    value,
+                    0,
+                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY
+                );
+                break;
+            case MAXIMUM_PACKET_SIZE:
+                maximumPacketSize = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MIN,
+                    MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
+                );
+                break;
+            default:
+                unexpectedProperty(property);
+        }
     }
 }

@@ -17,7 +17,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
     private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER =
         ThreadLocal.withInitial(() -> ByteBuffer.allocate(1024 * 1024));
 
-    private final MqttClient client;
+    protected final MqttClient client;
 
     public final int getPacketTypeAndFlags() {
 
@@ -35,34 +35,64 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         return 0;
     }
 
-    protected int getExpectedPropertiesLength() {
-        return 0;
+    protected @NotNull ByteBuffer getPropertiesBuffer() {
+        return LOCAL_BUFFER.get().clear();
     }
 
     protected void writeProperties(@NotNull ByteBuffer buffer, @NotNull ByteBuffer propertiesBuffer) {
-        MqttDataUtils.writeMbi(propertiesBuffer.limit(), buffer);
-        buffer.put(propertiesBuffer);
+
+        if (propertiesBuffer.position() < 1) {
+            buffer.put((byte) 0);
+            return;
+        }
+
+        propertiesBuffer.flip();
+
+        MqttDataUtils.writeMbi(propertiesBuffer.limit(), buffer)
+            .put(propertiesBuffer);
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, byte value) {
-        buffer
-            .put(property.getId())
-            .put(value);
+    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value, long def) {
+        if (value != def) {
+            writeProperty(buffer, property, value);
+        }
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, short value) {
-        buffer
-            .put(property.getId())
-            .putShort(value);
+    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value) {
+
+        buffer.put(property.getId());
+
+        switch (property.getDataType()) {
+            case BYTE:
+                buffer.put((byte) value);
+                break;
+            case SHORT:
+                buffer.putShort((short) value);
+                break;
+            case INTEGER:
+                buffer.putInt((int) value);
+                break;
+            case MULTI_BYTE_INTEGER:
+                MqttDataUtils.writeMbi(value, buffer);
+                break;
+            default:
+                throw new IllegalArgumentException("Incorrect property type: " + property);
+        }
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, int value) {
-        buffer
-            .put(property.getId())
-            .putInt(value);
+    protected void writeProperty(
+        @NotNull ByteBuffer buffer,
+        @NotNull PacketProperty property,
+        @NotNull String value,
+        @NotNull String def
+    ) {
+
+        if(!def.equals(value)) {
+            writeProperty(buffer, property, value);
+        }
     }
 
-    protected void writeString(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
+    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
 
         var stringData = value.getBytes(StandardCharsets.UTF_8);
 
@@ -70,9 +100,5 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
             .put(property.getId())
             .putShort((short) stringData.length)
             .put(stringData);
-    }
-
-    protected void writeMbiProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, int value) {
-        MqttDataUtils.writeMbi(value, buffer.put(property.getId()));
     }
 }

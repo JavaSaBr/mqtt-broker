@@ -9,7 +9,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
 
-    protected SubscribeInPacket(byte info) {
+    public SubscribeInPacket(byte info) {
         super(info);
     }
 

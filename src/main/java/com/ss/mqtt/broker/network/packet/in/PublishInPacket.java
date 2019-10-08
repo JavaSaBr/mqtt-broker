@@ -1,6 +1,10 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.rlib.network.Connection;
+import org.jetbrains.annotations.NotNull;
+
+import java.nio.ByteBuffer;
 
 /**
  * Publish message.
@@ -19,5 +23,10 @@ public class PublishInPacket extends MqttReadablePacket {
     @Override
     public byte getPacketType() {
         return PACKET_TYPE;
+    }
+
+    @Override
+    public boolean read(@NotNull Connection<?, ?> connection, @NotNull ByteBuffer buffer, int length) {
+        return super.read(connection, buffer, length);
     }
 }

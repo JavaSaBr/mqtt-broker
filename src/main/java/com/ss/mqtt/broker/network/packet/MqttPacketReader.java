@@ -1,8 +1,7 @@
 package com.ss.mqtt.broker.network.packet;
 
 import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
-import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
+import com.ss.mqtt.broker.network.packet.in.*;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.function.ByteFunction;
 import com.ss.rlib.common.util.NumberUtils;
@@ -22,7 +21,21 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
 
     private static final ByteFunction<MqttReadablePacket>[] PACKET_FACTORIES = ArrayFactory.toArray(
         null,
-        ConnectInPacket::new
+        ConnectInPacket::new,
+        null,
+        PublishInPacket::new,
+        PublishAckInPacket::new,
+        PublishReceivedInPacket::new,
+        PublishReleaseInPacket::new,
+        PublishCompleteInPacket::new,
+        SubscribeInPacket::new,
+        null,
+        UnsubscribeInPacket::new,
+        null,
+        PingInPacket::new,
+        null,
+        DisconnectInPacket::new,
+        AuthenticateInPacket::new
     );
 
     public MqttPacketReader(
@@ -81,7 +94,7 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
     ) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901021
-        var startByte = buffer.get(startPacketPosition);
+        var startByte = Byte.toUnsignedInt(buffer.get(startPacketPosition));
         var type = NumberUtils.getHighByteBits(startByte);
         var info = NumberUtils.getLowByteBits(startByte);
 

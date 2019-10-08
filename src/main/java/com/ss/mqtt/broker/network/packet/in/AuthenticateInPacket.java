@@ -9,7 +9,7 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
 
-    protected AuthenticateInPacket(byte info) {
+    public AuthenticateInPacket(byte info) {
         super(info);
     }
 

@@ -48,16 +48,16 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
             switch (property.getDataType()) {
                 case BYTE:
-                    applyProperty(property, readByte(buffer));
+                    applyProperty(property, readUnsignedByte(buffer));
                     break;
                 case SHORT:
-                    applyProperty(property, readShort(buffer));
+                    applyProperty(property, readUnsignedShort(buffer));
                     break;
                 case INTEGER:
-                    applyProperty(property, readInt(buffer));
+                    applyProperty(property, readUnsignedInt(buffer));
                     break;
                 case MULTI_BYTE_INTEGER:
-                    applyProperty(property, (int) MqttDataUtils.readMbi(buffer));
+                    applyProperty(property, MqttDataUtils.readMbi(buffer));
                     break;
                 case UTF_8_STRING:
                     applyProperty(property, readString(buffer));
@@ -78,6 +78,9 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     protected void applyProperty(@NotNull PacketProperty property, int value) {
     }
 
+    protected void applyProperty(@NotNull PacketProperty property, long value) {
+    }
+
     protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
     }
 
@@ -85,7 +88,15 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     }
 
     protected int readUnsignedByte(@NotNull ByteBuffer buffer) {
-        return NumberUtils.toUnsignedByte(buffer.get());
+        return Byte.toUnsignedInt(buffer.get());
+    }
+
+    protected int readUnsignedShort(@NotNull ByteBuffer buffer) {
+        return Short.toUnsignedInt(buffer.getShort());
+    }
+
+    protected long readUnsignedInt(@NotNull ByteBuffer buffer) {
+        return Integer.toUnsignedLong(buffer.get());
     }
 
     protected int readMsbLsbInt(@NotNull ByteBuffer buffer) {
@@ -138,5 +149,9 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         var data = new byte[readShort(buffer) & 0xFFFF];
         buffer.get(data);
         return data;
+    }
+
+    protected void unexpectedProperty(@NotNull PacketProperty property) {
+        throw new IllegalArgumentException("Unsupported property: " + property);
     }
 }

@@ -9,7 +9,7 @@ public class PublishCompleteInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_COMPLETED.ordinal();
 
-    protected PublishCompleteInPacket(byte info) {
+    public PublishCompleteInPacket(byte info) {
         super(info);
     }
 

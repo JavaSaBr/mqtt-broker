@@ -1,7 +1,10 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.rlib.common.util.ClassUtils;
+import com.ss.rlib.common.util.ObjectUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Stream;
 
@@ -61,9 +64,19 @@ public enum PacketProperty {
 
     private final @Getter byte id;
     private final @Getter PacketDataType dataType;
+    private final Object defaultValue;
 
     PacketProperty(int id, @NotNull PacketDataType dataType) {
+        this(id, dataType, null);
+    }
+
+    PacketProperty(int id, @NotNull PacketDataType dataType, @Nullable Object defaultValue) {
         this.id = (byte) id;
         this.dataType = dataType;
+        this.defaultValue = defaultValue;
+    }
+
+    public <T> @NotNull T getDefaultValue() {
+        return ClassUtils.unsafeNNCast(ObjectUtils.notNull(defaultValue));
     }
 }

@@ -9,7 +9,7 @@ public class PublishReleaseInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RELEASED.ordinal();
 
-    protected PublishReleaseInPacket(byte info) {
+    public PublishReleaseInPacket(byte info) {
         super(info);
     }
 

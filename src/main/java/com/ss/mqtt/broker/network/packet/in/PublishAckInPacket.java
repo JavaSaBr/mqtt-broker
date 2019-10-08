@@ -9,7 +9,7 @@ public class PublishAckInPacket extends MqttReadablePacket {
 
     private static final int PACKET_TYPE = PacketType.PUBLISH_ACK.ordinal();
 
-    protected PublishAckInPacket(byte info) {
+    public PublishAckInPacket(byte info) {
         super(info);
     }
 

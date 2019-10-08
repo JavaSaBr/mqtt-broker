@@ -9,7 +9,7 @@ public class PublishReceivedInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RECEIVED.ordinal();
 
-    protected PublishReceivedInPacket(byte info) {
+    public PublishReceivedInPacket(byte info) {
         super(info);
     }
 

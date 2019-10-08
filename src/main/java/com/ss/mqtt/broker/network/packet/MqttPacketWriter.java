@@ -33,10 +33,41 @@ public class MqttPacketWriter extends AbstractPacketWriter<MqttWritablePacket, M
         @NotNull MqttWritablePacket packet,
         int expectedLength,
         int totalSize,
-        @NotNull ByteBuffer buffer
+        @NotNull ByteBuffer firstBuffer,
+        @NotNull ByteBuffer secondBuffer
     ) {
-        buffer.put((byte) packet.getPacketTypeAndFlags());
-        MqttDataUtils.writeMbi(expectedLength, buffer);
+        firstBuffer.clear();
+        secondBuffer.clear();
+        return true;
+    }
+
+    @Override
+    protected boolean onWrite(
+        @NotNull MqttWritablePacket packet,
+        int expectedLength,
+        int totalSize,
+        @NotNull ByteBuffer firstBuffer,
+        @NotNull ByteBuffer secondBuffer
+    ) {
+        if (!packet.write(secondBuffer)) {
+            return false;
+        } else {
+            secondBuffer.flip();
+            return true;
+        }
+    }
+
+    @Override
+    protected boolean onAfterWrite(
+        @NotNull MqttWritablePacket packet,
+        int expectedLength,
+        int totalSize,
+        @NotNull ByteBuffer firstBuffer,
+        @NotNull ByteBuffer secondBuffer
+    ) {
+        firstBuffer.put((byte) packet.getPacketTypeAndFlags());
+        MqttDataUtils.writeMbi(secondBuffer.remaining(), firstBuffer);
+        firstBuffer.put(secondBuffer).flip();
         return true;
     }
 }

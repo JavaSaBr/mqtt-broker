@@ -9,7 +9,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.UNSUBSCRIBE.ordinal();
 
-    protected UnsubscribeInPacket(byte info) {
+    public UnsubscribeInPacket(byte info) {
         super(info);
     }
 

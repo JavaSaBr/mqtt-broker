@@ -9,7 +9,7 @@ public class PingInPacket extends MqttReadablePacket {
 
     public static final byte PACKET_TYPE = (byte) PacketType.PING_REQUEST.ordinal();
 
-    protected PingInPacket(byte info) {
+    public PingInPacket(byte info) {
         super(info);
     }
 

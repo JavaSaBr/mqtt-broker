@@ -16,5 +16,5 @@ public enum PacketType {
     PING_REQUEST,
     PING_RESPONSE,
     DISCONNECT,
-    AUTHENTICATE;
+    AUTHENTICATE
 }
