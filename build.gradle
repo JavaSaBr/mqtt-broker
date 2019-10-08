@@ -18,6 +18,7 @@ allprojects {
 
     apply plugin: "java"
     apply plugin: "groovy"
+    apply plugin: "org.springframework.boot"
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -51,7 +52,7 @@ allprojects {
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         
         // FIXME to remove
-        testCompile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+        testCompile "com.hivemq:hivemq-mqtt-client:1.1.2"
         testCompile "io.moquette:moquette-broker:0.12.1"
     
         testCompile "org.springframework:spring-test:$springVersion"
