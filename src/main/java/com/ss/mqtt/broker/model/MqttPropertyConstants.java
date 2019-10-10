@@ -16,4 +16,10 @@ public interface MqttPropertyConstants {
     int MAXIMUM_PACKET_SIZE_MAX = MAXIMUM_PROTOCOL_PACKET_SIZE;
 
     int TOPIC_ALIAS_MAXIMUM_DEFAULT = 0;
+
+    boolean PAYLOAD_FORMAT_INDICATOR_DEFAULT = false;
+
+    long MESSAGE_EXPIRY_INTERVAL_DEFAULT = 0;
+
+    int TOPIC_ALIAS_DEFAULT = 0;
 }
