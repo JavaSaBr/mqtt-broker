@@ -1,9 +1,10 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.util.MqttDataUtils;
-import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.network.packet.impl.AbstractReadablePacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,6 +63,9 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
                 case UTF_8_STRING:
                     applyProperty(property, readString(buffer));
                     break;
+                case UTF_8_STRING_PAIR:
+                    applyProperty(property, new StringPair(readString(buffer), readString(buffer)));
+                    break;
                 case BINARY:
                     applyProperty(property, readBytes(buffer));
                     break;
@@ -85,6 +89,9 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     }
 
     protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
+    }
+
+    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
     }
 
     protected int readUnsignedByte(@NotNull ByteBuffer buffer) {
@@ -147,6 +154,19 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
     protected @NotNull byte[] readBytes(@NotNull ByteBuffer buffer) {
         var data = new byte[readShort(buffer) & 0xFFFF];
+        buffer.get(data);
+        return data;
+    }
+
+    protected @NotNull byte[] readPayload(@NotNull ByteBuffer buffer) {
+
+        var payloadSize = buffer.limit() - buffer.position();
+
+        if (payloadSize < 1) {
+            return ArrayUtils.EMPTY_BYTE_ARRAY;
+        }
+
+        var data = new byte[payloadSize];
         buffer.get(data);
         return data;
     }

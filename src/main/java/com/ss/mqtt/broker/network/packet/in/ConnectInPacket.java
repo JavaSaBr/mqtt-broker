@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.ConnectReasonCode;
+import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
@@ -229,7 +229,7 @@ public class ConnectInPacket extends MqttReadablePacket {
         mqttVersion = MqttVersion.of(protocolName, protocolLevel);
 
         if (mqttVersion == MqttVersion.UNKNOWN) {
-            client.reject(ConnectReasonCode.UNSUPPORTED_PROTOCOL_VERSION);
+            client.reject(ConnectAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION);
             return;
         }
 

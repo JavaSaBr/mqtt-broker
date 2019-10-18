@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 
 public class MqttDataUtils {
 
+    public static int MAX_MBI = 268_435_455;
+
     /**
      * Write a MQTT multi-byte integer to byte buffer.
      * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011

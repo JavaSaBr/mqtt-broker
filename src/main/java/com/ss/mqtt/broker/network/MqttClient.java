@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.network;
 
-import com.ss.mqtt.broker.model.ConnectReasonCode;
+import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
@@ -27,7 +27,7 @@ public class MqttClient {
         this.mqttVersion = MqttVersion.MQTT_5;
     }
 
-    public void reject(@NotNull ConnectReasonCode returnCode) {
+    public void reject(@NotNull ConnectAckReasonCode returnCode) {
         connection.send(getPacketOutFactory().newConnectAck(this, returnCode, false));
     }
 
@@ -40,7 +40,7 @@ public class MqttClient {
         serverClientId = connect.getClientId();
         topicAliasMaximum = connect.getTopicAliasMaximum();
 
-        connection.send(getPacketOutFactory().newConnectAck(this, ConnectReasonCode.SUCCESSFUL, false));
+        connection.send(getPacketOutFactory().newConnectAck(this, ConnectAckReasonCode.SUCCESSFUL, false));
     }
 
     private @NotNull MqttPacketOutFactory getPacketOutFactory() {

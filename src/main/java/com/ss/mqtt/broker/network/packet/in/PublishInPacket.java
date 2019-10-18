@@ -3,13 +3,18 @@ package com.ss.mqtt.broker.network.packet.in;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.array.ArrayFactory;
+import com.ss.rlib.common.util.array.IntegerArray;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -224,6 +229,16 @@ public class PublishInPacket extends MqttReadablePacket {
     private final boolean retained;
 
     /**
+     * The list of user properties.
+     */
+    private List<StringPair> userProperties;
+
+    /**
+     * The list of subscription ids.
+     */
+    private IntegerArray subscriptionIds;
+
+    /**
      * The Topic Name identifies the information channel to which Payload data is published.
      * <p>
      * The Topic Name MUST be present as the first field in the PUBLISH packet Variable Header. It MUST be
@@ -241,6 +256,26 @@ public class PublishInPacket extends MqttReadablePacket {
      * in section 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
      */
     private String topicName;
+
+    /**
+     * The response topic.
+     */
+    private String responseTopic;
+
+    /**
+     * The content type.
+     */
+    private String contentType;
+
+    /**
+     * The correlation data.
+     */
+    private byte[] correlationData;
+
+    /**
+     * The payload data.
+     */
+    private byte[] payload;
 
     /**
      * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section
@@ -282,6 +317,8 @@ public class PublishInPacket extends MqttReadablePacket {
         if (client.getMqttVersion().ordinal() >= MqttVersion.MQTT_5.ordinal()) {
             readProperties(buffer);
         }
+
+        payload = readPayload(buffer);
     }
 
     @Override
@@ -303,6 +340,52 @@ public class PublishInPacket extends MqttReadablePacket {
         switch (property) {
             case MESSAGE_EXPIRY_INTERVAL:
                 messageExpiryInterval = value;
+                break;
+            case SUBSCRIPTION_IDENTIFIER:
+                if (subscriptionIds == null) {
+                    subscriptionIds = ArrayFactory.newIntegerArray();
+                }
+                subscriptionIds.add((int) value);
+                break;
+            default:
+                unexpectedProperty(property);
+        }
+    }
+
+    @Override
+    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+        switch (property) {
+            case RESPONSE_TOPIC:
+                // TODO should be validated
+                responseTopic = value;
+                break;
+            case CONTENT_TYPE:
+                contentType = value;
+                break;
+            default:
+                unexpectedProperty(property);
+        }
+    }
+
+    @Override
+    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
+        switch (property) {
+            case CORRELATION_DATA:
+                correlationData = value;
+                break;
+            default:
+                unexpectedProperty(property);
+        }
+    }
+
+    @Override
+    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
+        switch (property) {
+            case USER_PROPERTY:
+                if (userProperties == null) {
+                    userProperties = new ArrayList<>();
+                }
+                userProperties.add(value);
                 break;
             default:
                 unexpectedProperty(property);

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum ConnectReasonCode {
+public enum ConnectAckReasonCode {
 
     /**
      * The Connection is accepted.

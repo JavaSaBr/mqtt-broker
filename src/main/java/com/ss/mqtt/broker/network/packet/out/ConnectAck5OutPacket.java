@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.model.ConnectReasonCode;
+import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttClient;
@@ -219,10 +219,15 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
     public ConnectAck5OutPacket(
         @NotNull MqttClient client,
-        @NotNull ConnectReasonCode reasonCode,
+        @NotNull ConnectAckReasonCode reasonCode,
         boolean sessionPresent
     ) {
         super(client, reasonCode, sessionPresent);
+    }
+
+    @Override
+    public int getExpectedLength() {
+        return -1;
     }
 
     @Override

@@ -1,12 +1,14 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.network.packet.impl.AbstractWritablePacket;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +94,17 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
+    protected void writeNullableProperty(
+        @NotNull ByteBuffer buffer,
+        @NotNull PacketProperty property,
+        @Nullable String value
+    ) {
+
+        if (value != null) {
+            writeProperty(buffer, property, value);
+        }
+    }
+
     protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
 
         var stringData = value.getBytes(StandardCharsets.UTF_8);
@@ -100,5 +113,22 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
             .put(property.getId())
             .putShort((short) stringData.length)
             .put(stringData);
+    }
+
+    protected void writeProperty(
+        @NotNull ByteBuffer buffer,
+        @NotNull PacketProperty property,
+        @NotNull StringPair value
+    ) {
+
+        var nameData = value.getName().getBytes(StandardCharsets.UTF_8);
+        var valueData = value.getValue().getBytes(StandardCharsets.UTF_8);
+
+        buffer
+            .put(property.getId())
+            .putShort((short) nameData.length)
+            .put(nameData)
+            .putShort((short) valueData.length)
+            .put(valueData);
     }
 }

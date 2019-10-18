@@ -15,7 +15,7 @@ class MqttDataUtilsTest extends Specification {
         then:
             buffer.position() == expectedBytes
         where:
-            value << [10, 1000, 40_000, 500_000, 1_000_000, 250_000_000]
+            value << [10, 1000, 40_000, 500_000, 1_000_000, MqttDataUtils.MAX_MBI]
             expectedBytes << [1, 2, 3, 3, 3, 4]
     }
     
@@ -39,7 +39,7 @@ class MqttDataUtilsTest extends Specification {
         then:
             read == value
         where:
-            value << [10, 1000, 40_000, 500_000, 1_000_000, 250_000_000]
+            value << [10, 1000, 40_000, 500_000, 1_000_000, MqttDataUtils.MAX_MBI]
     }
     
     def "should failed reading integer from MQTT multi byte integer"(long value, int position) {
@@ -56,7 +56,7 @@ class MqttDataUtilsTest extends Specification {
         then:
             read == -1
         where:
-            value << [10, 1000, 40_000, 500_000, 1_000_000, 250_000_000]
+            value << [10, 1000, 40_000, 500_000, 1_000_000, MqttDataUtils.MAX_MBI]
             position << [0, 0, 1, 1, 2, 2]
     }
 }

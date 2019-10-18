@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.model.ConnectReasonCode;
+import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
      * packet containing the appropriate Connect Reason code from this table. If a Server sends a CONNACK
      * packet containing a Reason code of 128 or greater it MUST then close the Network Connection
      */
-    private final ConnectReasonCode reasonCode;
+    private final @NotNull ConnectAckReasonCode reasonCode;
 
     /**
      * The Session Present flag informs the Client whether the Server is using Session State from a
@@ -33,7 +33,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
 
     public ConnectAck311OutPacket(
         @NotNull MqttClient client,
-        @NotNull ConnectReasonCode reasonCode,
+        @NotNull ConnectAckReasonCode reasonCode,
         boolean sessionPresent
     ) {
         super(client);
