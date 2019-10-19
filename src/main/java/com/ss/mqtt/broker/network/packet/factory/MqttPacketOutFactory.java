@@ -26,4 +26,12 @@ public abstract class MqttPacketOutFactory {
         @Nullable String reason,
         @Nullable Array<StringPair> userProperties
     );
+
+    public abstract @NotNull MqttWritablePacket newSubscribeAck(
+            @NotNull MqttClient client,
+            @NotNull PublishAckReasonCode reasonCode,
+            int packetId,
+            @Nullable String reason,
+            @Nullable Array<StringPair> userProperties
+    );
 }

@@ -5,22 +5,31 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
+import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 public class MqttClient {
 
-    private final @Getter MqttConnection connection;
+    private final @Getter
+    MqttConnection connection;
 
-    private volatile @Getter String clientId;
-    private volatile @Getter String serverClientId;
+    private volatile @Getter
+    String clientId;
+    private volatile @Getter
+    String serverClientId;
 
-    private volatile @Getter long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
-    private volatile @Getter int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
-    private volatile @Getter int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
-    private volatile @Getter int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
+    private volatile @Getter
+    long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+    private volatile @Getter
+    int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
+    private volatile @Getter
+    int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
+    private volatile @Getter
+    int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
 
-    private volatile @Getter  MqttVersion mqttVersion;
+    private volatile @Getter
+    MqttVersion mqttVersion;
 
     public MqttClient(@NotNull MqttConnection connection) {
         this.connection = connection;
@@ -39,6 +48,11 @@ public class MqttClient {
         clientId = connect.getClientId();
         serverClientId = connect.getClientId();
         topicAliasMaximum = connect.getTopicAliasMaximum();
+
+        connection.send(getPacketOutFactory().newConnectAck(this, ConnectAckReasonCode.SUCCESSFUL, false));
+    }
+
+    public void onSubscribe(@NotNull SubscribeInPacket subscribe) {
 
         connection.send(getPacketOutFactory().newConnectAck(this, ConnectAckReasonCode.SUCCESSFUL, false));
     }

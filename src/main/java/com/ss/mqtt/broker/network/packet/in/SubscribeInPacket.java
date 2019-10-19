@@ -33,13 +33,12 @@ public class SubscribeInPacket extends MqttReadablePacket {
           SUBSCRIBE packet. If there is a Subscription Identifier, it is stored with the subscription. If this property is
           not specified, then the absence of a Subscription Identifier is stored with the subscription.
          */
-        PacketProperty.SUBSCRIPTION_IDENTIFIER,
+            PacketProperty.SUBSCRIPTION_IDENTIFIER,
         /*
           The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
           name is allowed to appear more than once.
          */
-        PacketProperty.USER_PROPERTY
-    );
+            PacketProperty.USER_PROPERTY);
 
     private @Nullable Array<StringPair> userProperties;
     private @NotNull Array<SubscribeTopicFilter> topicFilters;
@@ -65,7 +64,8 @@ public class SubscribeInPacket extends MqttReadablePacket {
 
         var client = connection.getClient();
 
-        if (client.getMqttVersion().ordinal() >= MqttVersion.MQTT_5.ordinal()) {
+        if (client.getMqttVersion()
+                .ordinal() >= MqttVersion.MQTT_5.ordinal()) {
             readProperties(buffer);
         }
 
@@ -105,5 +105,10 @@ public class SubscribeInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 }
