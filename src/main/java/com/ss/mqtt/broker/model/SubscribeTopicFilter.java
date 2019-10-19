@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class TopicFilter {
+public class SubscribeTopicFilter {
 
+    /**
+     * The subscriber's topic filter.
+     */
     private final String topicFilter;
 
     /**
