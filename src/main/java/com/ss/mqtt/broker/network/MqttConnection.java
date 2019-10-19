@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
@@ -30,7 +31,8 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull AsynchronousSocketChannel channel,
         @NotNull NetworkCryptor crypt,
         @NotNull BufferAllocator bufferAllocator,
-        int maxPacketsByRead
+        int maxPacketsByRead,
+        SubscriptionService subscriptionService
     ) {
         super(
             network,
@@ -41,7 +43,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         );
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
-        this.client = new MqttClient(this);
+        this.client = new MqttClient(this, subscriptionService);
     }
 
     private @NotNull PacketReader createPacketReader() {

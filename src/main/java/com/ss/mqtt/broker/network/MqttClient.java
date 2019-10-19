@@ -6,6 +6,7 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket;
+import com.ss.mqtt.broker.service.SubscriptionService;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,10 +15,14 @@ public class MqttClient {
     private final @Getter
     MqttConnection connection;
 
+    private final @Getter SubscriptionService subscriptionService;
+
     private volatile @Getter
     String clientId;
     private volatile @Getter
     String serverClientId;
+
+
 
     private volatile @Getter
     long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
@@ -31,9 +36,10 @@ public class MqttClient {
     private volatile @Getter
     MqttVersion mqttVersion;
 
-    public MqttClient(@NotNull MqttConnection connection) {
+    public MqttClient(@NotNull MqttConnection connection, @NotNull SubscriptionService subscriptionService) {
         this.connection = connection;
         this.mqttVersion = MqttVersion.MQTT_5;
+        this.subscriptionService = subscriptionService;
     }
 
     public void reject(@NotNull ConnectAckReasonCode returnCode) {
@@ -54,6 +60,7 @@ public class MqttClient {
 
     public void onSubscribe(@NotNull SubscribeInPacket subscribe) {
 
+        subscriptionService.subscribe(connection.getClient(), subscribe.getTopicFilters());
         connection.send(getPacketOutFactory().newConnectAck(this, ConnectAckReasonCode.SUCCESSFUL, false));
     }
 
