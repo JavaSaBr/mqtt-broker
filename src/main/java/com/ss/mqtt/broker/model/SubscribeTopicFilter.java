@@ -36,6 +36,5 @@ public class SubscribeTopicFilter {
      * If false, Application Messages forwarded using this subscription have the RETAIN flag set to 0.
      * Retained messages sent when the subscription is established have the RETAIN flag set to 1.
      */
-    private final boolean retain;
-
+    private final boolean retainAsPublished;
 }

@@ -1,14 +1,13 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.MqttVersion;
-import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.model.StringPair;
-import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.ObjectUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +18,7 @@ import java.util.Set;
 /**
  * Subscribe request.
  */
+@Getter
 public class SubscribeInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
@@ -78,7 +78,17 @@ public class SubscribeInPacket extends MqttReadablePacket {
             var topicFilter = readString(buffer);
             var options = readUnsignedByte(buffer);
 
-            var noLocal = NumberUtils.isSetBit(options, 3);
+            var qos = QoS.of(options & 0x03);
+            var retainHandling = SubscribeRetainHandling.of((options >> 4) & 0x03);
+
+            if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
+                throw new IllegalStateException("Unsupported qos or retain handling");
+            }
+
+            var noLocal = NumberUtils.isSetBit(options, 2);
+            var rap = NumberUtils.isSetBit(options, 3);
+
+            topicFilters.add(new SubscribeTopicFilter(topicFilter, qos, retainHandling, noLocal, rap));
         }
     }
 
@@ -105,5 +115,9 @@ public class SubscribeInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    public @NotNull Array<StringPair> getUserProperties() {
+        return ObjectUtils.ifNull(userProperties, Array.empty());
     }
 }
