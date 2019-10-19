@@ -7,19 +7,23 @@ import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.ObjectUtils;
+import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.common.util.array.IntegerArray;
+import com.ss.rlib.common.util.array.MutableIntegerArray;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * Publish message.
  */
+@Getter
 public class PublishInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
@@ -231,12 +235,12 @@ public class PublishInPacket extends MqttReadablePacket {
     /**
      * The list of user properties.
      */
-    private List<StringPair> userProperties;
+    private @Nullable Array<StringPair> userProperties;
 
     /**
      * The list of subscription ids.
      */
-    private IntegerArray subscriptionIds;
+    private @Nullable MutableIntegerArray subscriptionIds;
 
     /**
      * The Topic Name identifies the information channel to which Payload data is published.
@@ -255,27 +259,27 @@ public class PublishInPacket extends MqttReadablePacket {
      * To reduce the size of the PUBLISH packet the sender can use a Topic Alias. The Topic Alias is described
      * in section 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
      */
-    private String topicName;
+    private @NotNull String topicName;
 
     /**
      * The response topic.
      */
-    private String responseTopic;
+    private @Nullable String responseTopic;
 
     /**
      * The content type.
      */
-    private String contentType;
+    private @Nullable String contentType;
 
     /**
      * The correlation data.
      */
-    private byte[] correlationData;
+    private @Nullable byte[] correlationData;
 
     /**
      * The payload data.
      */
-    private byte[] payload;
+    private @NotNull byte[] payload;
 
     /**
      * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section
@@ -322,28 +326,20 @@ public class PublishInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, int value) {
-        switch (property) {
-            case PAYLOAD_FORMAT_INDICATOR:
-                payloadFormatIndicator = NumberUtils.toBoolean(value);
-                break;
-            case TOPIC_ALIAS:
-                topicAlias = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
     protected void applyProperty(@NotNull PacketProperty property, long value) {
         switch (property) {
+            case PAYLOAD_FORMAT_INDICATOR:
+                payloadFormatIndicator = NumberUtils.toBoolean((int) value);
+                break;
+            case TOPIC_ALIAS:
+                topicAlias = (int) value;
+                break;
             case MESSAGE_EXPIRY_INTERVAL:
                 messageExpiryInterval = value;
                 break;
             case SUBSCRIPTION_IDENTIFIER:
                 if (subscriptionIds == null) {
-                    subscriptionIds = ArrayFactory.newIntegerArray();
+                    subscriptionIds = ArrayFactory.newMutableIntegerArray();
                 }
                 subscriptionIds.add((int) value);
                 break;
@@ -383,12 +379,20 @@ public class PublishInPacket extends MqttReadablePacket {
         switch (property) {
             case USER_PROPERTY:
                 if (userProperties == null) {
-                    userProperties = new ArrayList<>();
+                    userProperties = ArrayFactory.newArray(StringPair.class);
                 }
                 userProperties.add(value);
                 break;
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    public @NotNull Array<StringPair> getUserProperties() {
+        return ObjectUtils.ifNull(userProperties, Array.empty());
+    }
+
+    public @NotNull IntegerArray getSubscriptionIds() {
+        return ObjectUtils.ifNull(subscriptionIds, IntegerArray.EMPTY);
     }
 }
