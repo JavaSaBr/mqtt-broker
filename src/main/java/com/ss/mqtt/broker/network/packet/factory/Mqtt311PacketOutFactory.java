@@ -1,14 +1,8 @@
 package com.ss.mqtt.broker.network.packet.factory;
 
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
-import com.ss.mqtt.broker.model.PublishAckReasonCode;
-import com.ss.mqtt.broker.model.StringPair;
-import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttClient;
-import com.ss.mqtt.broker.network.packet.out.ConnectAck311OutPacket;
-import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
-import com.ss.mqtt.broker.network.packet.out.PublishAck311OutPacket;
-import com.ss.mqtt.broker.network.packet.out.SubscribeAck311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.*;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,5 +38,16 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @Nullable Array<StringPair> userProperties
     ) {
         return new SubscribeAck311OutPacket(client, packetId, reasonCodes);
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newUnsubscribeAck(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
+        @Nullable Array<StringPair> userProperties,
+        @Nullable String reason
+    ) {
+        return new UnsubscribeAck311OutPacket(client, packetId);
     }
 }
