@@ -18,6 +18,11 @@ public class UnsubscribeAck311OutPacket extends MqttWritablePacket {
     }
 
     @Override
+    public int getExpectedLength() {
+        return 2;
+    }
+
+    @Override
     protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718074
         writeShort(buffer, packetId);
