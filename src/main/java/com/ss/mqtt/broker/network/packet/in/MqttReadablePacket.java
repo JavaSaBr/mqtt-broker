@@ -79,9 +79,6 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         return Collections.emptySet();
     }
 
-    protected void applyProperty(@NotNull PacketProperty property, int value) {
-    }
-
     protected void applyProperty(@NotNull PacketProperty property, long value) {
     }
 

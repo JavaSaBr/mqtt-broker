@@ -12,6 +12,9 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * Publish acknowledgement.
+ */
 public class PublishAck5OutPacket extends PublishAck311OutPacket {
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(

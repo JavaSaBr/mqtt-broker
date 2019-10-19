@@ -5,11 +5,11 @@ import com.ss.mqtt.broker.network.packet.PacketType;
 /**
  * PING request.
  */
-public class PingInPacket extends MqttReadablePacket {
+public class PingRequestInPacket extends MqttReadablePacket {
 
     public static final byte PACKET_TYPE = (byte) PacketType.PING_REQUEST.ordinal();
 
-    public PingInPacket(byte info) {
+    public PingRequestInPacket(byte info) {
         super(info);
     }
 

@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Publish acknowledgement.
+ */
 public class PublishAck311OutPacket extends MqttWritablePacket {
 
     private final @NotNull PublishAckReasonCode reasonCode;
