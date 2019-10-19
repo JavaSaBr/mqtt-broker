@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ConnectAckReasonCode {
-
     /**
      * The Connection is accepted.
      */

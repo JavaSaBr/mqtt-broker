@@ -120,4 +120,9 @@ public class SubscribeInPacket extends MqttReadablePacket {
     public @NotNull Array<StringPair> getUserProperties() {
         return ObjectUtils.ifNull(userProperties, Array.empty());
     }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
+    }
 }

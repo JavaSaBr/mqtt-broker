@@ -41,15 +41,17 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
 
     private final @Nullable Array<StringPair> userProperties;
     private final @Nullable String reason;
+    private final @NotNull PublishAckReasonCode reasonCode;
 
     public PublishAck5OutPacket(
         @NotNull MqttClient client,
-        @NotNull PublishAckReasonCode reasonCode,
         int packetId,
+        @NotNull PublishAckReasonCode reasonCode,
         @Nullable Array<StringPair> userProperties,
         @Nullable String reason
     ) {
-        super(client, reasonCode, packetId);
+        super(client, packetId);
+        this.reasonCode = reasonCode;
         this.userProperties = userProperties;
         this.reason = reason;
     }
@@ -60,9 +62,21 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
     }
 
     @Override
-    protected void writeImpl(@NotNull ByteBuffer buffer) {
-        super.writeImpl(buffer);
+    protected boolean isPropertiesSupported() {
+        return true;
+    }
 
+    @Override
+    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+        super.writeVariableHeader(buffer);
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
+        writeByte(buffer, reasonCode.getValue());
+    }
+
+    @Override
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
+
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901125\
         var propertiesBuffer = getPropertiesBuffer();
 
         writeNullableProperty(
@@ -76,7 +90,5 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
                 writeProperty(propertiesBuffer, PacketProperty.USER_PROPERTY, property);
             }
         }
-
-        writeProperties(buffer, propertiesBuffer);
     }
 }

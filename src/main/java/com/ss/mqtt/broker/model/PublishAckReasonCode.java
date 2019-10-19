@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum PublishAckReasonCode {
-
     /**
      * The message is accepted. Publication of the QoS 1
      * message proceeds.
@@ -19,6 +18,9 @@ public enum PublishAckReasonCode {
      * (Success).
      */
     NO_MATCHING_SUBSCRIBERS((byte) 0x10),
+
+    // ERRORS
+
     /**
      * The receiver does not accept the publish but either
      * does not want to reveal the reason, or it does not
