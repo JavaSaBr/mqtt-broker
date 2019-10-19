@@ -1,7 +1,9 @@
 package com.ss.mqtt.broker.network.packet.in;
 
+import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
+import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.util.ArrayUtils;
@@ -23,8 +25,29 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
     public abstract byte getPacketType();
 
+    @Override
+    protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        readVariableHeader(connection, buffer);
+
+        if (isPropertiesSupported(connection)) {
+            readProperties(buffer);
+        }
+
+        readPayload(connection, buffer);
+    }
+
+    protected boolean isPropertiesSupported(@NotNull MqttConnection connection) {
+        return connection.getClient().getMqttVersion().ordinal() >= MqttVersion.MQTT_5.ordinal();
+    }
+
+    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    }
+
     protected void readProperties(@NotNull ByteBuffer buffer) {
         readProperties(buffer, getAvailableProperties());
+    }
+
+    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
     }
 
     protected void readProperties(@NotNull ByteBuffer buffer, @NotNull Set<PacketProperty> availableProperties) {
@@ -101,10 +124,6 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
     protected long readUnsignedInt(@NotNull ByteBuffer buffer) {
         return Integer.toUnsignedLong(buffer.get());
-    }
-
-    protected int readMsbLsbInt(@NotNull ByteBuffer buffer) {
-        return readMsbLsbInt(buffer, 0, MAX_MSB_LSB);
     }
 
     protected int readMsbLsbInt(@NotNull ByteBuffer buffer, int min, int max) {

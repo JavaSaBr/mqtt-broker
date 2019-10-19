@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.ObjectUtils;
@@ -46,16 +47,12 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        super.readImpl(connection, buffer);
-
+    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         packetId = readUnsignedShort(buffer);
+    }
 
-        var client = connection.getClient();
-
-        if (client.getMqttVersion().ordinal() >= MqttVersion.MQTT_5.ordinal()) {
-            readProperties(buffer);
-        }
+    @Override
+    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
 
         if (buffer.remaining() < 1) {
             throw new IllegalStateException("No any topic filters.");
@@ -64,6 +61,11 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
         while (buffer.hasRemaining()) {
             topicFilters.add(readString(buffer));
         }
+    }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 
     @Override
@@ -82,10 +84,5 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
 
     public @NotNull Array<StringPair> getUserProperties() {
         return ObjectUtils.ifNull(userProperties, Array.empty());
-    }
-
-    @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
     }
 }

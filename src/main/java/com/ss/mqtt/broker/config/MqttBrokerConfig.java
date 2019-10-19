@@ -58,8 +58,9 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull Consumer<MqttConnection> mqttConnectionConsumer(@NotNull ClientService clientService) {
         return mqttConnection -> {
-            log.info("Connection: {}", mqttConnection);
-            mqttConnection.onReceive((connection, packet) -> log.info("Receive packet: {}", packet));
+            log.info("Accepted connection: {}", mqttConnection);
+            var client = mqttConnection.getClient();
+            mqttConnection.onReceive((conn, packet) -> client.handle(packet));
         };
     }
 
