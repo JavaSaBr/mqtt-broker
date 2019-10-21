@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 @Log4j2
 @Getter
 public class MqttClient {
@@ -39,6 +41,19 @@ public class MqttClient {
         this.subscriptionService = subscriptionService;
         this.clientId = "";
         this.serverClientId = "";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MqttClient that = (MqttClient) o;
+        return clientId.equals(that.clientId) && serverClientId.equals(that.serverClientId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, serverClientId);
     }
 
     public void handle(@NotNull MqttReadablePacket packet) {
