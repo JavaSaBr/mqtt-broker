@@ -1,9 +1,6 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.MqttVersion;
-import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.model.StringPair;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
@@ -169,7 +166,7 @@ public class PublishInPacket extends MqttReadablePacket {
      * a PUBLISH packet which has both QoS bits set to 1 it is a Malformed Packet. Use DISCONNECT with
      * Reason Code 0x81 (Malformed Packet) as described in
      */
-    private final int qos;
+    private final QoS qos;
 
     /**
      * If the DUP flag is set to 0, it indicates that this is the first occasion that the Client or Server has attempted
@@ -294,7 +291,7 @@ public class PublishInPacket extends MqttReadablePacket {
 
     public PublishInPacket(byte info) {
         super(info);
-        qos = (info >> 1) & 0x03;
+        qos = QoS.of((info >> 1) & 0x03);
         retained = NumberUtils.isSetBit(info, 0);
         duplicate = NumberUtils.isSetBit(info, 3);
     }
@@ -305,24 +302,19 @@ public class PublishInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
+    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        topicName = readString(buffer);
+        packetId = qos != QoS.AT_MOST_ONCE_DELIVERY ? readUnsignedShort(buffer) : 0;
     }
 
     @Override
-    protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        super.readImpl(connection, buffer);
-
-        var client = connection.getClient();
-
-        topicName = readString(buffer);
-        packetId = qos > 0 ? readUnsignedShort(buffer) : 0;
-
-        if (client.getMqttVersion().ordinal() >= MqttVersion.MQTT_5.ordinal()) {
-            readProperties(buffer);
-        }
-
+    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         payload = readPayload(buffer);
+    }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 
     @Override

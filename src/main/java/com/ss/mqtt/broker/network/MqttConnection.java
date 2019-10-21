@@ -14,10 +14,12 @@ import com.ss.rlib.network.packet.PacketReader;
 import com.ss.rlib.network.packet.PacketWriter;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.channels.AsynchronousSocketChannel;
 
+@Log4j2
 @Getter(AccessLevel.PROTECTED)
 public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttWritablePacket> {
 
@@ -65,5 +67,10 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
             this::updateLastActivity,
             this::nextPacketToWrite
         );
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return getRemoteAddress();
     }
 }

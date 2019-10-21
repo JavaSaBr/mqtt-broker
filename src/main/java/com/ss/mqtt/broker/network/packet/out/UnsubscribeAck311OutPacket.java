@@ -6,16 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.ByteBuffer;
 
 /**
- * Publish acknowledgement.
+ * Unsubscribe acknowledgement.
  */
-public class PublishAck311OutPacket extends MqttWritablePacket {
+public class UnsubscribeAck311OutPacket extends MqttWritablePacket {
 
-    /**
-     * Packet Identifier from the PUBLISH packet that is being acknowledged.
-     */
     private final int packetId;
 
-    public PublishAck311OutPacket(@NotNull MqttClient client, int packetId) {
+    public UnsubscribeAck311OutPacket(@NotNull MqttClient client, int packetId) {
         super(client);
         this.packetId = packetId;
     }
@@ -27,7 +24,7 @@ public class PublishAck311OutPacket extends MqttWritablePacket {
 
     @Override
     protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
-        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718045
-        buffer.putShort((short) packetId);
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718074
+        writeShort(buffer, packetId);
     }
 }

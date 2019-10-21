@@ -52,10 +52,8 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writeImpl(@NotNull ByteBuffer buffer) {
-        super.writeImpl(buffer);
-
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901077
+    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
         buffer.put((byte) (sessionPresent ? 0x01 : 0x00));
         buffer.put(reasonCode.getValue());
     }

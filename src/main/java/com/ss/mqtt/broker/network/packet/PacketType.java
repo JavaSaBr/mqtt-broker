@@ -16,5 +16,11 @@ public enum PacketType {
     PING_REQUEST,
     PING_RESPONSE,
     DISCONNECT,
-    AUTHENTICATE
+    AUTHENTICATE;
+
+    private static final PacketType[] VALUES = values();
+
+    public static PacketType fromByte(byte packetType) {
+        return VALUES[packetType];
+    }
 }

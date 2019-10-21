@@ -21,7 +21,7 @@ import java.util.Set;
 @Getter
 public class SubscribeInPacket extends MqttReadablePacket {
 
-    private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
+    public static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -58,16 +58,12 @@ public class SubscribeInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        super.readImpl(connection, buffer);
-
+    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         packetId = readUnsignedShort(buffer);
+    }
 
-        var client = connection.getClient();
-
-        if (client.getMqttVersion().ordinal() >= MqttVersion.MQTT_5.ordinal()) {
-            readProperties(buffer);
-        }
+    @Override
+    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
 
         if (buffer.remaining() < 1) {
             throw new IllegalStateException("No any topic filters.");
@@ -90,7 +86,11 @@ public class SubscribeInPacket extends MqttReadablePacket {
 
             topicFilters.add(new SubscribeTopicFilter(topicFilter, qos, retainHandling, noLocal, rap));
         }
-        client.onSubscribe(this);
+    }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 
     @Override
@@ -122,8 +122,4 @@ public class SubscribeInPacket extends MqttReadablePacket {
         return ObjectUtils.ifNull(userProperties, Array.empty());
     }
 
-    @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
-    }
 }

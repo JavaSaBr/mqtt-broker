@@ -231,46 +231,47 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     }
 
     @Override
-    protected void writeImpl(@NotNull ByteBuffer buffer) {
-        super.writeImpl(buffer);
+    protected boolean isPropertiesSupported() {
+        return true;
+    }
 
-        var propertiesBuffer = getPropertiesBuffer();
+    @Override
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
 
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
         writeProperty(
-            propertiesBuffer,
+            buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
             client.getSessionExpiryInterval(),
             MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
         );
         writeProperty(
-            propertiesBuffer,
+            buffer,
             PacketProperty.RECEIVE_MAXIMUM,
             client.getReceiveMax(),
             MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
         );
 
-        writeProperty(propertiesBuffer, PacketProperty.MAXIMUM_QOS, 0);
-        writeProperty(propertiesBuffer, PacketProperty.RETAIN_AVAILABLE, 0);
+        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, 0);
+        writeProperty(buffer, PacketProperty.RETAIN_AVAILABLE, 0);
 
         writeProperty(
-            propertiesBuffer,
+            buffer,
             PacketProperty.MAXIMUM_PACKET_SIZE,
             client.getMaximumPacketSize(),
             MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
         );
         writeProperty(
-            propertiesBuffer,
+            buffer,
             PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
             client.getClientId(),
             client.getServerClientId()
         );
         writeProperty(
-            propertiesBuffer,
+            buffer,
             PacketProperty.TOPIC_ALIAS,
             client.getTopicAliasMaximum(),
             MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
         );
-
-        writeProperties(buffer, propertiesBuffer);
     }
 }

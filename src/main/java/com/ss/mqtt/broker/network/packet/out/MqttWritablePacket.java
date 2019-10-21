@@ -21,6 +21,30 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
 
     protected final MqttClient client;
 
+    @Override
+    protected void writeImpl(@NotNull ByteBuffer buffer) {
+        writeVariableHeader(buffer);
+
+        if (isPropertiesSupported()) {
+            appendProperties(buffer);
+        }
+
+        writePayload(buffer);
+    }
+
+    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    }
+
+    protected void writePayload(@NotNull ByteBuffer buffer) {
+    }
+
+    protected boolean isPropertiesSupported() {
+        return false;
+    }
+
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    }
+
     public final int getPacketTypeAndFlags() {
 
         var type = getPacketType();
@@ -41,7 +65,11 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         return LOCAL_BUFFER.get().clear();
     }
 
-    protected void writeProperties(@NotNull ByteBuffer buffer, @NotNull ByteBuffer propertiesBuffer) {
+    private void appendProperties(@NotNull ByteBuffer buffer) {
+
+        var propertiesBuffer = getPropertiesBuffer();
+
+        writeProperties(propertiesBuffer);
 
         if (propertiesBuffer.position() < 1) {
             buffer.put((byte) 0);
