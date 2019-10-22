@@ -4,12 +4,10 @@ import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.ObjectUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -21,7 +19,7 @@ import java.util.Set;
 @Getter
 public class SubscribeInPacket extends MqttReadablePacket {
 
-    public static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
+    private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -41,7 +39,6 @@ public class SubscribeInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @Nullable Array<StringPair> userProperties;
     private @NotNull Array<SubscribeTopicFilter> topicFilters;
 
     private int packetId;

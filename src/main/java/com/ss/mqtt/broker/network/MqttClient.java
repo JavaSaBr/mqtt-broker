@@ -43,6 +43,14 @@ public class MqttClient {
         this.serverClientId = "";
     }
 
+    public boolean isSupportedMqtt5() {
+        return isSupported(MqttVersion.MQTT_5);
+    }
+
+    public boolean isSupported(@NotNull MqttVersion mqttVersion) {
+        return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

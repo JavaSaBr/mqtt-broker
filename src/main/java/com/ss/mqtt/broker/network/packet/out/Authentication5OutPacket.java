@@ -1,12 +1,11 @@
-package com.ss.mqtt.broker.network.packet.in;
+package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.model.StringPair;
+import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
-import lombok.Getter;
+import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -16,8 +15,7 @@ import java.util.Set;
 /**
  * Authentication exchange.
  */
-@Getter
-public class AuthenticateInPacket extends MqttReadablePacket {
+public class Authentication5OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
 
@@ -53,6 +51,8 @@ public class AuthenticateInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
+    private @NotNull Array<StringPair> userProperties;
+
     private @NotNull AuthenticateReasonCode reasonCode;
 
     private @NotNull String reason;
@@ -60,51 +60,56 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     private @NotNull byte[] authenticateData;
 
-    public AuthenticateInPacket(byte info) {
-        super(info);
-        this.reasonCode = AuthenticateReasonCode.SUCCESS;
-        this.reason = StringUtils.EMPTY;
-        this.authenticateMethod = StringUtils.EMPTY;
-        this.authenticateData = ArrayUtils.EMPTY_BYTE_ARRAY;
+    public Authentication5OutPacket(
+        @NotNull MqttClient client,
+        @NotNull AuthenticateReasonCode reasonCode,
+        @NotNull String authenticateMethod,
+        @NotNull byte[] authenticateData,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    ) {
+        super(client);
+        this.userProperties = userProperties;
+        this.reasonCode = reasonCode;
+        this.reason = reason;
+        this.authenticateMethod = authenticateMethod;
+        this.authenticateData = authenticateData;
     }
 
     @Override
-    public byte getPacketType() {
+    protected byte getPacketType() {
         return PACKET_TYPE;
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        reasonCode = AuthenticateReasonCode.of(readUnsignedByte(buffer));
+    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
+        writeByte(buffer, reasonCode.getValue());
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
-    }
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
 
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
-        switch (property) {
-            case AUTHENTICATION_DATA:
-                authenticateData = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
-        switch (property) {
-            case REASON_STRING:
-                reason = value;
-                break;
-            case AUTHENTICATION_METHOD:
-                authenticateMethod = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901221
+        writeStringPairProperties(
+            buffer,
+            PacketProperty.USER_PROPERTY,
+            userProperties
+        );
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.REASON_STRING,
+            reason
+        );
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.AUTHENTICATION_METHOD,
+            authenticateMethod
+        );
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.AUTHENTICATION_DATA,
+            authenticateData
+        );
     }
 }

@@ -6,7 +6,6 @@ import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -39,16 +38,16 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @Nullable Array<StringPair> userProperties;
-    private final @Nullable String reason;
+    private final @NotNull Array<StringPair> userProperties;
+    private final @NotNull String reason;
     private final @NotNull PublishAckReasonCode reasonCode;
 
     public PublishAck5OutPacket(
         @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
-        @Nullable Array<StringPair> userProperties,
-        @Nullable String reason
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
     ) {
         super(client, packetId);
         this.reasonCode = reasonCode;
@@ -77,18 +76,11 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901125\
-        var propertiesBuffer = getPropertiesBuffer();
-
-        writeNullableProperty(
-            propertiesBuffer,
+        writeUserProperties(buffer, userProperties);
+        writeNotEmptyProperty(
+            buffer,
             PacketProperty.REASON_STRING,
             reason
         );
-
-        if (userProperties != null) {
-            for (var property : userProperties) {
-                writeProperty(propertiesBuffer, PacketProperty.USER_PROPERTY, property);
-            }
-        }
     }
 }

@@ -23,8 +23,8 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
-        @Nullable String reason,
-        @Nullable Array<StringPair> userProperties
+        @NotNull String reason,
+        @NotNull Array<StringPair> userProperties
     ) {
         return new PublishAck311OutPacket(client, packetId);
     }
@@ -34,8 +34,8 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes,
-        @Nullable String reason,
-        @Nullable Array<StringPair> userProperties
+        @NotNull String reason,
+        @NotNull Array<StringPair> userProperties
     ) {
         return new SubscribeAck311OutPacket(client, packetId, reasonCodes);
     }
@@ -45,9 +45,32 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
-        @Nullable Array<StringPair> userProperties,
-        @Nullable String reason
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
     ) {
         return new UnsubscribeAck311OutPacket(client, packetId);
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newDisconnect(
+        @NotNull MqttClient client,
+        @NotNull DisconnectReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason,
+        @NotNull String serverReference
+    ) {
+        return new Disconnect311OutPacket(client);
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newAuthenticate(
+        @NotNull MqttClient client,
+        @NotNull AuthenticateReasonCode reasonCode,
+        @NotNull String authenticateMethod,
+        @NotNull byte[] authenticateData,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    ) {
+        throw new UnsupportedOperationException();
     }
 }

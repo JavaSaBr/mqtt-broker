@@ -14,7 +14,7 @@ public class MqttDataUtils {
      *
      * @throws IllegalArgumentException if number is too big.
      */
-    public static @NotNull ByteBuffer writeMbi(long number, @NotNull ByteBuffer buffer) {
+    public static @NotNull ByteBuffer writeMbi(int number, @NotNull ByteBuffer buffer) {
 
         var sizeInBytes = 0;
         var valueToWrite = number;
@@ -45,11 +45,11 @@ public class MqttDataUtils {
      *
      * @return -1 if buffer's data isn't enough to read integer.
      */
-    public static long readMbi(@NotNull ByteBuffer buffer) {
+    public static int readMbi(@NotNull ByteBuffer buffer) {
 
         var originalPos = buffer.position();
 
-        long result = 0;
+        int result = 0;
         int multiplier = 1;
 
         byte readValue;
@@ -72,7 +72,7 @@ public class MqttDataUtils {
     /**
      * Get byte count of MQTT multi-byte integer.
      */
-    public static int sizeOfMbi(long number) {
+    public static int sizeOfMbi(int number) {
 
         var sizeInBytes = 0;
         var valueToWrite = number;

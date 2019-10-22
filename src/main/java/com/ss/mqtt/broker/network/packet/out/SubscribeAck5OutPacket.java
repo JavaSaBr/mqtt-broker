@@ -6,7 +6,6 @@ import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -38,15 +37,15 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @Nullable Array<StringPair> userProperties;
-    private final @Nullable String reason;
+    private final @NotNull Array<StringPair> userProperties;
+    private final @NotNull String reason;
 
     public SubscribeAck5OutPacket(
         @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes,
-        @Nullable Array<StringPair> userProperties,
-        @Nullable String reason
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
     ) {
         super(client, packetId, reasonCodes);
         this.userProperties = userProperties;
@@ -67,16 +66,11 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901174
-        writeNullableProperty(
+        writeUserProperties(buffer, userProperties);
+        writeNotEmptyProperty(
             buffer,
             PacketProperty.REASON_STRING,
             reason
         );
-
-        if (userProperties != null) {
-            for (var property : userProperties) {
-                writeProperty(buffer, PacketProperty.USER_PROPERTY, property);
-            }
-        }
     }
 }

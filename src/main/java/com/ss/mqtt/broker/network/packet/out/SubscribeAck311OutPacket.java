@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +12,8 @@ import java.nio.ByteBuffer;
  * Subscribe acknowledgement.
  */
 public class SubscribeAck311OutPacket extends MqttWritablePacket {
+
+    private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE_ACK.ordinal();
 
     /**
      * The order of Reason Codes in the SUBACK packet MUST match the order of Topic Filters in the SUBSCRIBE packet.
@@ -35,6 +38,11 @@ public class SubscribeAck311OutPacket extends MqttWritablePacket {
     @Override
     public int getExpectedLength() {
         return 2 + reasonCodes.size();
+    }
+
+    @Override
+    protected byte getPacketType() {
+        return PACKET_TYPE;
     }
 
     @Override

@@ -1,15 +1,11 @@
-package com.ss.mqtt.broker.network.packet.in;
+package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.DisconnectReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
-import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.StringUtils;
+import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -19,10 +15,7 @@ import java.util.Set;
 /**
  * Disconnect notification.
  */
-@Getter
-public class DisconnectInPacket extends MqttReadablePacket {
-
-    public static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
+public class Disconnect5OutPacket extends Disconnect311OutPacket {
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -57,68 +50,61 @@ public class DisconnectInPacket extends MqttReadablePacket {
         PacketProperty.SERVER_REFERENCE
     );
 
-    private @NotNull DisconnectReasonCode reasonCode;
+    private final @NotNull DisconnectReasonCode reasonCode;
+    private final @NotNull Array<StringPair> userProperties;
 
-    private @NotNull String reason;
-    private @NotNull String serverReference;
+    private final @NotNull String reason;
+    private final @NotNull String serverReference;
 
-    private long sessionExpiryInterval;
-
-    public DisconnectInPacket(byte info) {
-        super(info);
-        this.reasonCode = DisconnectReasonCode.NORMAL_DISCONNECTION;
-        this.reason = StringUtils.EMPTY;
-        this.serverReference = StringUtils.EMPTY;
-        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+    public Disconnect5OutPacket(
+        @NotNull MqttClient client,
+        @NotNull DisconnectReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason,
+        @NotNull String serverReference
+    ) {
+        super(client);
+        this.reasonCode = reasonCode;
+        this.userProperties = userProperties;
+        this.reason = reason;
+        this.serverReference = serverReference;
     }
 
     @Override
-    protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        this.sessionExpiryInterval = connection.getClient().getSessionExpiryInterval();
-        super.readImpl(connection, buffer);
+    public int getExpectedLength() {
+        return -1;
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        super.readVariableHeader(connection, buffer);
-
-        if (connection.getClient().isSupportedMqtt5()) {
-            reasonCode = DisconnectReasonCode.of(readUnsignedByte(buffer));
-        }
+    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+       writeByte(buffer, reasonCode.getValue());
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
+    protected boolean isPropertiesSupported() {
+        return true;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
-        switch (property) {
-            case SESSION_EXPIRY_INTERVAL:
-                sessionExpiryInterval = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
 
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
-        switch (property) {
-            case REASON_STRING:
-                reason = value;
-                break;
-            case SERVER_REFERENCE:
-                serverReference = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
-    public byte getPacketType() {
-        return PACKET_TYPE;
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901209
+        writeUserProperties(buffer, userProperties);
+        writeProperty(
+            buffer,
+            PacketProperty.SESSION_EXPIRY_INTERVAL,
+            client.getSessionExpiryInterval(),
+            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
+        );
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.REASON_STRING,
+            reason
+        );
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.SERVER_REFERENCE,
+            serverReference
+        );
     }
 }
