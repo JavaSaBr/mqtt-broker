@@ -1,17 +1,18 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.MqttPropertyConstants;
+import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.ObjectUtils;
-import com.ss.rlib.common.util.array.Array;
+import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.common.util.array.IntegerArray;
 import com.ss.rlib.common.util.array.MutableIntegerArray;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -230,14 +231,9 @@ public class PublishInPacket extends MqttReadablePacket {
     private final boolean retained;
 
     /**
-     * The list of user properties.
-     */
-    private @Nullable Array<StringPair> userProperties;
-
-    /**
      * The list of subscription ids.
      */
-    private @Nullable MutableIntegerArray subscriptionIds;
+    private @NotNull IntegerArray subscriptionIds;
 
     /**
      * The Topic Name identifies the information channel to which Payload data is published.
@@ -261,17 +257,17 @@ public class PublishInPacket extends MqttReadablePacket {
     /**
      * The response topic.
      */
-    private @Nullable String responseTopic;
+    private @NotNull String responseTopic;
 
     /**
      * The content type.
      */
-    private @Nullable String contentType;
+    private @NotNull String contentType;
 
     /**
      * The correlation data.
      */
-    private @Nullable byte[] correlationData;
+    private @NotNull byte[] correlationData;
 
     /**
      * The payload data.
@@ -291,9 +287,15 @@ public class PublishInPacket extends MqttReadablePacket {
 
     public PublishInPacket(byte info) {
         super(info);
-        qos = QoS.of((info >> 1) & 0x03);
-        retained = NumberUtils.isSetBit(info, 0);
-        duplicate = NumberUtils.isSetBit(info, 3);
+        this.qos = QoS.of((info >> 1) & 0x03);
+        this.retained = NumberUtils.isSetBit(info, 0);
+        this.duplicate = NumberUtils.isSetBit(info, 3);
+        this.topicName = StringUtils.EMPTY;
+        this.responseTopic = StringUtils.EMPTY;
+        this.contentType = StringUtils.EMPTY;
+        this.correlationData = ArrayUtils.EMPTY_BYTE_ARRAY;
+        this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
+        this.subscriptionIds = IntegerArray.EMPTY;
     }
 
     @Override
@@ -330,10 +332,12 @@ public class PublishInPacket extends MqttReadablePacket {
                 messageExpiryInterval = value;
                 break;
             case SUBSCRIPTION_IDENTIFIER:
-                if (subscriptionIds == null) {
+                if (subscriptionIds == IntegerArray.EMPTY) {
                     subscriptionIds = ArrayFactory.newMutableIntegerArray();
                 }
-                subscriptionIds.add((int) value);
+                if (subscriptionIds instanceof MutableIntegerArray) {
+                    ((MutableIntegerArray) subscriptionIds).add((int) value);
+                }
                 break;
             default:
                 unexpectedProperty(property);
@@ -364,27 +368,5 @@ public class PublishInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
-        switch (property) {
-            case USER_PROPERTY:
-                if (userProperties == null) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
-                }
-                userProperties.add(value);
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    public @NotNull Array<StringPair> getUserProperties() {
-        return ObjectUtils.ifNull(userProperties, Array.empty());
-    }
-
-    public @NotNull IntegerArray getSubscriptionIds() {
-        return ObjectUtils.ifNull(subscriptionIds, IntegerArray.EMPTY);
     }
 }

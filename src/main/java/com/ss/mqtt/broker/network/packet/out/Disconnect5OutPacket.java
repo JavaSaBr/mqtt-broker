@@ -7,7 +7,6 @@ import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -54,15 +53,15 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
     private final @NotNull DisconnectReasonCode reasonCode;
     private final @NotNull Array<StringPair> userProperties;
 
-    private final @Nullable String reason;
-    private final @Nullable String serverReference;
+    private final @NotNull String reason;
+    private final @NotNull String serverReference;
 
     public Disconnect5OutPacket(
         @NotNull MqttClient client,
         @NotNull DisconnectReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
-        @Nullable String reason,
-        @Nullable String serverReference
+        @NotNull String reason,
+        @NotNull String serverReference
     ) {
         super(client);
         this.reasonCode = reasonCode;
@@ -89,29 +88,23 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
     @Override
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901209
+        writeUserProperties(buffer, userProperties);
         writeProperty(
             buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
             client.getSessionExpiryInterval(),
             MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
         );
-
-        writeNullableProperty(
+        writeNotEmptyProperty(
             buffer,
             PacketProperty.REASON_STRING,
             reason
         );
-
-        writeNullableProperty(
+        writeNotEmptyProperty(
             buffer,
             PacketProperty.SERVER_REFERENCE,
             serverReference
-        );
-
-        writeStringPairProperties(
-            buffer,
-            PacketProperty.USER_PROPERTY,
-            userProperties
         );
     }
 }

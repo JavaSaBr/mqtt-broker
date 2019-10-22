@@ -134,18 +134,6 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         writeString(buffer, value.getValue());
     }
 
-    @Deprecated
-    protected void writeNullableProperty(
-        @NotNull ByteBuffer buffer,
-        @NotNull PacketProperty property,
-        @Nullable String value
-    ) {
-
-        if (value != null) {
-            writeProperty(buffer, property, value);
-        }
-    }
-
     protected void writeNotEmptyProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
@@ -176,6 +164,22 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
     protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull byte[] value) {
         buffer.put(property.getId());
         writeBytes(buffer, value);
+    }
+
+    protected void writeUserProperties(
+        @NotNull ByteBuffer buffer,
+        @NotNull Array<StringPair> userProperties
+    ) {
+
+        if (userProperties.isEmpty()) {
+            return;
+        }
+
+        buffer.put(PacketProperty.USER_PROPERTY.getId());
+
+        for (var pair : userProperties) {
+            writeStringPair(buffer, pair);
+        }
     }
 
     protected void writeStringPairProperties(

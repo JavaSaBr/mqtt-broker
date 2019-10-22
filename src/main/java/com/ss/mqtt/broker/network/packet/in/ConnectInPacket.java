@@ -1,17 +1,16 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
-import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.MqttVersion;
-import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.StringUtils;
+import com.ss.rlib.common.util.array.Array;
+import com.ss.rlib.common.util.array.ArrayFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -101,7 +100,6 @@ public class ConnectInPacket extends MqttReadablePacket {
           The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
           name is allowed to appear more than once
          */
-        // FIXME to do supporting
         PacketProperty.USER_PROPERTY,
         /*
           Followed by a UTF-8 Encoded String containing the name of the authentication method used for
@@ -190,22 +188,22 @@ public class ConnectInPacket extends MqttReadablePacket {
     private @NotNull MqttVersion mqttVersion;
 
     private @NotNull String clientId;
-    private @Nullable String willTopic;
-    private @Nullable String username;
-    private @Nullable String password;
+    private @NotNull String willTopic;
+    private @NotNull String username;
+    private @NotNull String password;
 
-    private @Nullable byte[] willPayload;
+    private @NotNull byte[] willPayload;
 
     // properties
-    private @Nullable String authenticationMethod;
-    private @Nullable byte[] authenticationData;
+    private @NotNull String authenticationMethod;
+    private @NotNull byte[] authenticationData;
 
-    private long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
-    private int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
-    private int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
-    private int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
-    private boolean requestResponseInformation = false;
-    private boolean requestProblemInformation = false;
+    private long sessionExpiryInterval;
+    private int receiveMax;
+    private int maximumPacketSize;
+    private int topicAliasMaximum;
+    private boolean requestResponseInformation;
+    private boolean requestProblemInformation;
 
     private int keepAlive;
     private int willQos;
@@ -218,6 +216,21 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     public ConnectInPacket(byte info) {
         super(info);
+        this.userProperties = Array.empty();
+        this.mqttVersion = MqttVersion.MQTT_5;
+        this.clientId = StringUtils.EMPTY;
+        this.willTopic = StringUtils.EMPTY;
+        this.username = StringUtils.EMPTY;
+        this.password = StringUtils.EMPTY;
+        this.authenticationMethod = StringUtils.EMPTY;
+        this.willPayload = ArrayUtils.EMPTY_BYTE_ARRAY;
+        this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
+        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
+        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
+        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
+        this.requestResponseInformation = false;
+        this.requestProblemInformation = false;
     }
 
     @Override
@@ -293,10 +306,21 @@ public class ConnectInPacket extends MqttReadablePacket {
             readProperties(buffer, WILL_PROPERTIES);
         }
 
-        willTopic = willFlag ? readString(buffer, 0, Short.MAX_VALUE) : null;
-        willPayload = willFlag ? readBytes(buffer) : null;
-        username = hasUserName ? readString(buffer) : null;
-        password = hasPassword ? readString(buffer) : null;
+        if (willFlag) {
+            willTopic = readString(buffer);
+        }
+
+        if (willFlag) {
+            willPayload = readBytes(buffer);
+        }
+
+        if (hasPassword) {
+            password = readString(buffer);
+        }
+
+        if (hasUserName) {
+            username = readString(buffer);
+        }
     }
 
     @Override
@@ -317,7 +341,6 @@ public class ConnectInPacket extends MqttReadablePacket {
                 break;
             default:
                 unexpectedProperty(property);
-                return;
         }
     }
 

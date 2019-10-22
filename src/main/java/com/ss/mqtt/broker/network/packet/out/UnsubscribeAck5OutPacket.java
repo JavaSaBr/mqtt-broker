@@ -40,15 +40,15 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
     );
 
     private final @NotNull Array<UnsubscribeAckReasonCode> reasonCodes;
-    private final @Nullable Array<StringPair> userProperties;
-    private final @Nullable String reason;
+    private final @NotNull Array<StringPair> userProperties;
+    private final @NotNull String reason;
 
     public UnsubscribeAck5OutPacket(
         @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
-        @Nullable Array<StringPair> userProperties,
-        @Nullable String reason
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
     ) {
         super(client, packetId);
         this.reasonCodes = reasonCodes;
@@ -70,17 +70,12 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901182
-        writeNullableProperty(
+        writeUserProperties(buffer, userProperties);
+        writeNotEmptyProperty(
             buffer,
             PacketProperty.REASON_STRING,
             reason
         );
-
-        if (userProperties != null) {
-            for (var property : userProperties) {
-                writeProperty(buffer, PacketProperty.USER_PROPERTY, property);
-            }
-        }
     }
 
     @Override

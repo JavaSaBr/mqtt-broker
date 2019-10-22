@@ -1,16 +1,16 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.model.DisconnectReasonCode;
+import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ObjectUtils;
+import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -57,18 +57,19 @@ public class DisconnectInPacket extends MqttReadablePacket {
         PacketProperty.SERVER_REFERENCE
     );
 
-    private @Nullable Array<StringPair> userProperties;
-
     private @NotNull DisconnectReasonCode reasonCode;
 
-    private @Nullable String reason;
-    private @Nullable String serverReference;
+    private @NotNull String reason;
+    private @NotNull String serverReference;
 
     private long sessionExpiryInterval;
 
     public DisconnectInPacket(byte info) {
         super(info);
         this.reasonCode = DisconnectReasonCode.NORMAL_DISCONNECTION;
+        this.reason = StringUtils.EMPTY;
+        this.serverReference = StringUtils.EMPTY;
+        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
     }
 
     @Override
@@ -84,6 +85,11 @@ public class DisconnectInPacket extends MqttReadablePacket {
         if (connection.getClient().isSupportedMqtt5()) {
             reasonCode = DisconnectReasonCode.of(readUnsignedByte(buffer));
         }
+    }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 
     @Override
@@ -112,30 +118,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
-        switch (property) {
-            case USER_PROPERTY:
-                if (userProperties == null) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
-                }
-                userProperties.add(value);
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
     public byte getPacketType() {
         return PACKET_TYPE;
-    }
-
-    @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
-    }
-
-    public @NotNull Array<StringPair> getUserProperties() {
-        return ObjectUtils.ifNull(userProperties, Array.empty());
     }
 }

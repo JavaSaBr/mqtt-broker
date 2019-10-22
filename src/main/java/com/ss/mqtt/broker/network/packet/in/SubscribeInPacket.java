@@ -4,12 +4,10 @@ import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.ObjectUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -41,7 +39,6 @@ public class SubscribeInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @Nullable Array<StringPair> userProperties;
     private @NotNull Array<SubscribeTopicFilter> topicFilters;
 
     private int packetId;
@@ -102,23 +99,5 @@ public class SubscribeInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
-        switch (property) {
-            case USER_PROPERTY:
-                if (userProperties == null) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
-                }
-                userProperties.add(value);
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    public @NotNull Array<StringPair> getUserProperties() {
-        return ObjectUtils.ifNull(userProperties, Array.empty());
     }
 }

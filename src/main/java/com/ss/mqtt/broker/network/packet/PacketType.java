@@ -13,6 +13,18 @@ public enum PacketType {
     SUBSCRIBE_ACK,
     UNSUBSCRIBE,
     UNSUBSCRIBE_ACK,
+    /**
+     * The PINGREQ packet is sent from a Client to the Server. It can be used to:
+     * <p>
+     * • Indicate to the Server that the Client is alive in the absence of any other MQTT Control Packets being
+     * sent from the Client to the Server.
+     * <p>
+     * • Request that the Server responds to confirm that it is alive.
+     * <p>
+     * • Exercise the network to indicate that the Network Connection is active.
+     * <p>
+     * This packet is used in Keep Alive processing. Refer to section 3.1.2.10 for more details
+     */
     PING_REQUEST,
     PING_RESPONSE,
     /**

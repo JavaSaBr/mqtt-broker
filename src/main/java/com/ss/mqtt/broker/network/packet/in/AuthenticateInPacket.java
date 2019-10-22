@@ -2,13 +2,10 @@ package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.model.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,8 +53,6 @@ public class AuthenticateInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull Array<StringPair> userProperties;
-
     private @NotNull AuthenticateReasonCode reasonCode;
 
     private @NotNull String reason;
@@ -67,7 +62,6 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     public AuthenticateInPacket(byte info) {
         super(info);
-        this.userProperties = Array.empty();
         this.reasonCode = AuthenticateReasonCode.SUCCESS;
         this.reason = StringUtils.EMPTY;
         this.authenticateMethod = StringUtils.EMPTY;
@@ -82,6 +76,11 @@ public class AuthenticateInPacket extends MqttReadablePacket {
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         reasonCode = AuthenticateReasonCode.of(readUnsignedByte(buffer));
+    }
+
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 
     @Override
@@ -107,24 +106,5 @@ public class AuthenticateInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
-        switch (property) {
-            case USER_PROPERTY:
-                if (userProperties == Array.<StringPair>empty()) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
-                }
-                userProperties.add(value);
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
     }
 }

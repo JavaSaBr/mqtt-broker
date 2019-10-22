@@ -23,8 +23,8 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
-        @Nullable String reason,
-        @Nullable Array<StringPair> userProperties
+        @NotNull String reason,
+        @NotNull Array<StringPair> userProperties
     ) {
         return new PublishAck5OutPacket(client, packetId, reasonCode, userProperties, reason);
     }
@@ -34,8 +34,8 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes,
-        @Nullable String reason,
-        @Nullable Array<StringPair> userProperties
+        @NotNull String reason,
+        @NotNull Array<StringPair> userProperties
     ) {
         return new SubscribeAck5OutPacket(client, packetId, reasonCodes, userProperties, reason);
     }
@@ -45,8 +45,8 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
-        @Nullable Array<StringPair> userProperties,
-        @Nullable String reason
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
     ) {
         return new UnsubscribeAck5OutPacket(client, packetId, reasonCodes, userProperties, reason);
     }
@@ -56,8 +56,8 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull MqttClient client,
         @NotNull DisconnectReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
-        @Nullable String reason,
-        @Nullable String serverReference
+        @NotNull String reason,
+        @NotNull String serverReference
     ) {
         return new Disconnect5OutPacket(client, reasonCode, userProperties, reason, serverReference);
     }
@@ -65,19 +65,19 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
     @Override
     public @NotNull MqttWritablePacket newAuthenticate(
         @NotNull MqttClient client,
-        @NotNull Array<StringPair> userProperties,
         @NotNull AuthenticateReasonCode reasonCode,
-        @NotNull String reason,
         @NotNull String authenticateMethod,
-        @NotNull byte[] authenticateData
+        @NotNull byte[] authenticateData,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
     ) {
         return new Authentication5OutPacket(
             client,
-            userProperties,
             reasonCode,
-            reason,
             authenticateMethod,
-            authenticateData
+            authenticateData,
+            userProperties,
+            reason
         );
     }
 }
