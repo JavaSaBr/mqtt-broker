@@ -33,6 +33,14 @@ public class MqttClient {
         this.serverClientId = "";
     }
 
+    public boolean isSupportedMqtt5() {
+        return isSupported(MqttVersion.MQTT_5);
+    }
+
+    public boolean isSupported(@NotNull MqttVersion mqttVersion) {
+        return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
+    }
+
     public void handle(@NotNull MqttReadablePacket packet) {
         log.info("Handle received packet: {}", packet);
         switch (packet.getPacketType()) {

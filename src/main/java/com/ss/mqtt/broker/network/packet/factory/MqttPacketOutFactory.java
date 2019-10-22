@@ -40,4 +40,12 @@ public abstract class MqttPacketOutFactory {
         @Nullable Array<StringPair> userProperties,
         @Nullable String reason
     );
+
+    public abstract @NotNull MqttWritablePacket newDisconnect(
+        @NotNull MqttClient client,
+        @NotNull DisconnectReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @Nullable String reason,
+        @Nullable String serverReference
+    );
 }

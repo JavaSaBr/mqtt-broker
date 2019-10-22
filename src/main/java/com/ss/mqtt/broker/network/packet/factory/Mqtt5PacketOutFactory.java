@@ -50,4 +50,15 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
     ) {
         return new UnsubscribeAck5OutPacket(client, packetId, reasonCodes, userProperties, reason);
     }
+
+    @Override
+    public @NotNull MqttWritablePacket newDisconnect(
+        @NotNull MqttClient client,
+        @NotNull DisconnectReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @Nullable String reason,
+        @Nullable String serverReference
+    ) {
+        return new Disconnect5OutPacket(client, reasonCode, userProperties, reason, serverReference);
+    }
 }

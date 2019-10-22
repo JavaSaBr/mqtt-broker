@@ -25,7 +25,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     private final PacketReader packetReader;
     private final PacketWriter packetWriter;
 
-    private final @Getter MqttClient client;
+    private final @Getter @NotNull MqttClient client;
 
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,

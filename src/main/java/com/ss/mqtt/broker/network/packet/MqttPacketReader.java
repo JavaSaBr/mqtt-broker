@@ -82,7 +82,7 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
 
         var readBytes = buffer.position() - prevPos;
 
-        return ((int) dataSize) + readBytes;
+        return dataSize + readBytes;
     }
 
     @Override

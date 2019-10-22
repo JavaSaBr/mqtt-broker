@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.network.packet.impl.AbstractWritablePacket;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -94,16 +95,16 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
 
         switch (property.getDataType()) {
             case BYTE:
-                buffer.put((byte) value);
+                writeByte(buffer, (int) value);
                 break;
             case SHORT:
-                buffer.putShort((short) value);
+                writeShort(buffer, (int) value);
                 break;
             case INTEGER:
-                buffer.putInt((int) value);
+                writeInt(buffer, (int) value);
                 break;
             case MULTI_BYTE_INTEGER:
-                MqttDataUtils.writeMbi(value, buffer);
+                writeMbi(buffer, (int) value);
                 break;
             default:
                 throw new IllegalArgumentException("Incorrect property type: " + property);
@@ -122,6 +123,17 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
+    protected void writeProperty(
+        @NotNull ByteBuffer buffer,
+        @NotNull PacketProperty property,
+        @NotNull StringPair value
+    ) {
+
+        buffer.put(property.getId());
+        writeString(buffer, value.getName());
+        writeString(buffer, value.getValue());
+    }
+
     protected void writeNullableProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
@@ -134,29 +146,34 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
     }
 
     protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
-
-        var stringData = value.getBytes(StandardCharsets.UTF_8);
-
-        buffer
-            .put(property.getId())
-            .putShort((short) stringData.length)
-            .put(stringData);
+        buffer.put(property.getId());
+        writeString(buffer, value);
     }
 
-    protected void writeProperty(
+    protected void writeStringPairProperties(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
-        @NotNull StringPair value
+        @NotNull Array<StringPair> pairs
     ) {
+        buffer.put(property.getId());
+        for (var pair : pairs) {
+            writeStringPair(buffer, pair);
+        }
+    }
 
-        var nameData = value.getName().getBytes(StandardCharsets.UTF_8);
-        var valueData = value.getValue().getBytes(StandardCharsets.UTF_8);
+    @Override
+    public void writeString(@NotNull ByteBuffer buffer, @NotNull String string) {
+        var bytes = string.getBytes(StandardCharsets.UTF_8);
+        buffer.putShort((short) bytes.length);
+        buffer.put(bytes);
+    }
 
-        buffer
-            .put(property.getId())
-            .putShort((short) nameData.length)
-            .put(nameData)
-            .putShort((short) valueData.length)
-            .put(valueData);
+    public void writeStringPair(@NotNull ByteBuffer buffer, @NotNull StringPair pair) {
+        writeString(buffer, pair.getName());
+        writeString(buffer, pair.getValue());
+    }
+
+    public void writeMbi(@NotNull ByteBuffer buffer, int value) {
+        MqttDataUtils.writeMbi(value, buffer);
     }
 }
