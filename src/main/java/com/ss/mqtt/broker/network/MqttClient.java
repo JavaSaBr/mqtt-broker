@@ -44,7 +44,7 @@ public class MqttClient {
     public void handle(@NotNull MqttReadablePacket packet) {
         log.info("Handle received packet: {}", packet);
         switch (packet.getPacketType()) {
-            case ConnectInPacket.PACKET_TYPE:
+            case 1:
                 onConnected((ConnectInPacket) packet);
                 break;
         }

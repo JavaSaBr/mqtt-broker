@@ -130,6 +130,11 @@ public class DisconnectInPacket extends MqttReadablePacket {
         return PACKET_TYPE;
     }
 
+    @Override
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
+    }
+
     public @NotNull Array<StringPair> getUserProperties() {
         return ObjectUtils.ifNull(userProperties, Array.empty());
     }

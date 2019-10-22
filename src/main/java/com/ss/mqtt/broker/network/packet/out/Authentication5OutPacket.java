@@ -1,15 +1,10 @@
-package com.ss.mqtt.broker.network.packet.in;
+package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
-import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
+import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -19,10 +14,7 @@ import java.util.Set;
 /**
  * Authentication exchange.
  */
-@Getter
-public class AuthenticateInPacket extends MqttReadablePacket {
-
-    private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
+public class Authentication5OutPacket extends MqttWritablePacket {
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -65,66 +57,52 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     private @NotNull byte[] authenticateData;
 
-    public AuthenticateInPacket(byte info) {
-        super(info);
-        this.userProperties = Array.empty();
-        this.reasonCode = AuthenticateReasonCode.SUCCESS;
-        this.reason = StringUtils.EMPTY;
-        this.authenticateMethod = StringUtils.EMPTY;
-        this.authenticateData = ArrayUtils.EMPTY_BYTE_ARRAY;
+    public Authentication5OutPacket(
+        @NotNull MqttClient client,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull AuthenticateReasonCode reasonCode,
+        @NotNull String reason,
+        @NotNull String authenticateMethod,
+        @NotNull byte[] authenticateData
+    ) {
+        super(client);
+        this.userProperties = userProperties;
+        this.reasonCode = reasonCode;
+        this.reason = reason;
+        this.authenticateMethod = authenticateMethod;
+        this.authenticateData = authenticateData;
     }
 
     @Override
-    public byte getPacketType() {
-        return PACKET_TYPE;
+    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+        writeByte(buffer, reasonCode.getValue());
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        reasonCode = AuthenticateReasonCode.of(readUnsignedByte(buffer));
-    }
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
 
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
-        switch (property) {
-            case AUTHENTICATION_DATA:
-                authenticateData = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
+        writeStringPairProperties(
+            buffer,
+            PacketProperty.USER_PROPERTY,
+            userProperties
+        );
 
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
-        switch (property) {
-            case REASON_STRING:
-                reason = value;
-                break;
-            case AUTHENTICATION_METHOD:
-                authenticateMethod = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.REASON_STRING,
+            reason
+        );
 
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
-        switch (property) {
-            case USER_PROPERTY:
-                if (userProperties == Array.<StringPair>empty()) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
-                }
-                userProperties.add(value);
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.AUTHENTICATION_METHOD,
+            authenticateMethod
+        );
 
-    @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
+        writeNotEmptyProperty(
+            buffer,
+            PacketProperty.AUTHENTICATION_DATA,
+            authenticateData
+        );
     }
 }

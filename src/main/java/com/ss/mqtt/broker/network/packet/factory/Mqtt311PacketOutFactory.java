@@ -61,4 +61,16 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
     ) {
         return new Disconnect311OutPacket(client);
     }
+
+    @Override
+    public @NotNull MqttWritablePacket newAuthenticate(
+        @NotNull MqttClient client,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull AuthenticateReasonCode reasonCode,
+        @NotNull String reason,
+        @NotNull String authenticateMethod,
+        @NotNull byte[] authenticateData
+    ) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -23,7 +23,7 @@ import java.util.Set;
 @Getter
 public class ConnectInPacket extends MqttReadablePacket {
 
-    public static final byte PACKET_TYPE = 1;
+    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_REQUEST.ordinal();
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*

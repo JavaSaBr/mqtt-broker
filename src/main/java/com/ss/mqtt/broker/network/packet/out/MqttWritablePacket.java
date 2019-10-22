@@ -134,6 +134,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         writeString(buffer, value.getValue());
     }
 
+    @Deprecated
     protected void writeNullableProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
@@ -145,9 +146,36 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
+    protected void writeNotEmptyProperty(
+        @NotNull ByteBuffer buffer,
+        @NotNull PacketProperty property,
+        @NotNull String value
+    ) {
+
+        if (!value.isEmpty()) {
+            writeProperty(buffer, property, value);
+        }
+    }
+
+    protected void writeNotEmptyProperty(
+        @NotNull ByteBuffer buffer,
+        @NotNull PacketProperty property,
+        @NotNull byte[] value
+    ) {
+
+        if (value.length > 0) {
+            writeProperty(buffer, property, value);
+        }
+    }
+
     protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
         buffer.put(property.getId());
         writeString(buffer, value);
+    }
+
+    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull byte[] value) {
+        buffer.put(property.getId());
+        writeBytes(buffer, value);
     }
 
     protected void writeStringPairProperties(
@@ -155,7 +183,13 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         @NotNull PacketProperty property,
         @NotNull Array<StringPair> pairs
     ) {
+
+        if (pairs.isEmpty()) {
+            return;
+        }
+
         buffer.put(property.getId());
+
         for (var pair : pairs) {
             writeStringPair(buffer, pair);
         }
@@ -175,5 +209,10 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
 
     public void writeMbi(@NotNull ByteBuffer buffer, int value) {
         MqttDataUtils.writeMbi(value, buffer);
+    }
+
+    public void writeBytes(@NotNull ByteBuffer buffer, @NotNull byte[] bytes) {
+        buffer.putShort((short) bytes.length);
+        buffer.put(bytes);
     }
 }

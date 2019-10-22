@@ -61,4 +61,23 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
     ) {
         return new Disconnect5OutPacket(client, reasonCode, userProperties, reason, serverReference);
     }
+
+    @Override
+    public @NotNull MqttWritablePacket newAuthenticate(
+        @NotNull MqttClient client,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull AuthenticateReasonCode reasonCode,
+        @NotNull String reason,
+        @NotNull String authenticateMethod,
+        @NotNull byte[] authenticateData
+    ) {
+        return new Authentication5OutPacket(
+            client,
+            userProperties,
+            reasonCode,
+            reason,
+            authenticateMethod,
+            authenticateData
+        );
+    }
 }

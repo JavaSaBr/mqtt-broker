@@ -126,25 +126,6 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         return Integer.toUnsignedLong(buffer.get());
     }
 
-    protected int readMsbLsbInt(@NotNull ByteBuffer buffer, int min, int max) {
-
-        var msbSize = readUnsignedByte(buffer);
-        var lsbSize = readUnsignedByte(buffer);
-        var result = msbSize << 8 | lsbSize;
-
-        if (result < min || result > max) {
-            result = -1;
-        }
-
-        return result;
-    }
-
-    protected @NotNull byte[] readBinary(@NotNull ByteBuffer buffer) {
-        var data = new byte[readShort(buffer) & 0xFFFF];
-        buffer.get(data);
-        return data;
-    }
-
     @Override
     protected @NotNull String readString(@NotNull ByteBuffer buffer) {
         var stringData = new byte[readShort(buffer) & 0xFFFF];

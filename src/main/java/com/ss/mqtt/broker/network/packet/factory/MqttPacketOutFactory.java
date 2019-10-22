@@ -48,4 +48,13 @@ public abstract class MqttPacketOutFactory {
         @Nullable String reason,
         @Nullable String serverReference
     );
+
+    public abstract @NotNull MqttWritablePacket newAuthenticate(
+        @NotNull MqttClient client,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull AuthenticateReasonCode reasonCode,
+        @NotNull String reason,
+        @NotNull String authenticateMethod,
+        @NotNull byte[] authenticateData
+    );
 }

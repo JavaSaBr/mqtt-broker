@@ -24,5 +24,10 @@ public enum PacketType {
      * further details.
      */
     DISCONNECT,
+    /**
+     * An AUTH packet is sent from Client to Server or Server to Client as part of an extended authentication
+     * exchange, such as challenge / response authentication. It is a Protocol Error for the Client or Server to
+     * send an AUTH packet if the CONNECT packet did not contain the same Authentication Method.
+     */
     AUTHENTICATE
 }
