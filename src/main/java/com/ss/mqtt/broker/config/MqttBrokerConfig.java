@@ -7,6 +7,7 @@ import com.ss.mqtt.broker.service.ClientService;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.mqtt.broker.service.impl.DefaultClientService;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService;
+import com.ss.mqtt.broker.service.impl.SimpleSubscriptions;
 import com.ss.rlib.network.*;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
 import com.ss.rlib.network.server.ServerNetwork;
@@ -46,8 +47,7 @@ public class MqttBrokerConfig {
         @NotNull Consumer<MqttConnection> mqttConnectionConsumer
     ) {
 
-        ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(
-            networkConfig,
+        ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(networkConfig,
             networkChannelFactory(bufferAllocator)
         );
 
@@ -60,7 +60,7 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull SubscriptionService subscriptionService() {
 
-        return new SimpleSubscriptionService();
+        return new SimpleSubscriptionService(new SimpleSubscriptions());
     }
 
     @Bean
@@ -80,7 +80,7 @@ public class MqttBrokerConfig {
             NetworkCryptor.NULL,
             bufferAllocator,
             100,
-                subscriptionService()
+            subscriptionService()
         );
     }
 }

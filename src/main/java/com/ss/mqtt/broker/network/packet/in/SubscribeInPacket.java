@@ -102,22 +102,4 @@ public class SubscribeInPacket extends MqttReadablePacket {
         }
     }
 
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
-        switch (property) {
-            case USER_PROPERTY:
-                if (userProperties == null) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
-                }
-                userProperties.add(value);
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    public @NotNull Array<StringPair> getUserProperties() {
-        return ObjectUtils.ifNull(userProperties, Array.empty());
-    }
-
 }

@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 
 class MqttDataUtilsTest extends Specification {
     
-    def "should write integer to MQTT multi byte integer successful"(long value, int expectedBytes) {
+    def "should write integer to MQTT multi byte integer successful"(int value, int expectedBytes) {
         given:
             def buffer = ByteBuffer.allocate(4)
         when:
@@ -19,7 +19,7 @@ class MqttDataUtilsTest extends Specification {
             expectedBytes << [1, 2, 3, 3, 3, 4]
     }
     
-    def "should failed writing too big integer to MQTT multi byte integer"(long value) {
+    def "should failed writing too big integer to MQTT multi byte integer"(int value) {
         given:
             def buffer = ByteBuffer.allocate(10)
         when:
@@ -30,7 +30,7 @@ class MqttDataUtilsTest extends Specification {
             value << [1_000_000_000, 2_000_000_000, 5_000_000_000]
     }
     
-    def "should read integer from MQTT multi byte integer successful"(long value) {
+    def "should read integer from MQTT multi byte integer successful"(int value) {
         given:
             def buffer = ByteBuffer.allocate(5)
             MqttDataUtils.writeMbi(value, buffer).flip()
@@ -42,7 +42,7 @@ class MqttDataUtilsTest extends Specification {
             value << [10, 1000, 40_000, 500_000, 1_000_000, MqttDataUtils.MAX_MBI]
     }
     
-    def "should failed reading integer from MQTT multi byte integer"(long value, int position) {
+    def "should failed reading integer from MQTT multi byte integer"(int value, int position) {
         given:
             
             def buffer = ByteBuffer.allocate(10)

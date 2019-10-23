@@ -1,15 +1,16 @@
 package com.ss.mqtt.broker.network;
 
-import static com.ss.mqtt.broker.network.packet.PacketType.CONNECT_REQUEST;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.MqttVersion;
+import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket;
-import com.ss.mqtt.broker.service.SubscriptionService;
+import com.ss.mqtt.broker.network.packet.in.UnsubscribeInPacket;
+import com.ss.rlib.common.util.array.Array;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +20,6 @@ import java.util.Objects;
 @Log4j2
 @Getter
 public class MqttClient {
-
-    private final SubscriptionService subscriptionService;
 
     private final @NotNull MqttConnection connection;
 
@@ -33,21 +32,10 @@ public class MqttClient {
     private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
 
 
-
-    public MqttClient(@NotNull MqttConnection connection, @NotNull SubscriptionService subscriptionService) {
+    public MqttClient(@NotNull MqttConnection connection) {
         this.connection = connection;
-        this.mqttVersion = MqttVersion.MQTT_5;
-        this.subscriptionService = subscriptionService;
         this.clientId = "";
         this.serverClientId = "";
-    }
-
-    public boolean isSupportedMqtt5() {
-        return isSupported(MqttVersion.MQTT_5);
-    }
-
-    public boolean isSupported(@NotNull MqttVersion mqttVersion) {
-        return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
     }
 
     @Override
@@ -55,12 +43,12 @@ public class MqttClient {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MqttClient that = (MqttClient) o;
-        return clientId.equals(that.clientId) && serverClientId.equals(that.serverClientId);
+        return serverClientId.equals(that.serverClientId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clientId, serverClientId);
+        return Objects.hash(serverClientId);
     }
 
     public void handle(@NotNull MqttReadablePacket packet) {
@@ -71,6 +59,9 @@ public class MqttClient {
                 break;
             case SUBSCRIBE:
                 onSubscribe((SubscribeInPacket) packet);
+                break;
+            case UNSUBSCRIBE:
+                onUnsubscribe((UnsubscribeInPacket) packet);
                 break;
         }
     }
@@ -91,13 +82,24 @@ public class MqttClient {
     }
 
     public void onSubscribe(@NotNull SubscribeInPacket subscribe) {
+        Array<SubscribeAckReasonCode> ackReasonCodes = connection.getSubscriptionService()
+            .subscribe(connection.getClient(), subscribe.getTopicFilters());
+        connection.send(getPacketOutFactory().newSubscribeAck(connection.getClient(),
+            subscribe.getPacketId(),
+            ackReasonCodes
+        ));
+    }
 
-        subscriptionService.subscribe(connection.getClient(), subscribe.getTopicFilters());
-        connection.send(getPacketOutFactory().newConnectAck(this, ConnectAckReasonCode.SUCCESSFUL, false));
+    public void onUnsubscribe(@NotNull UnsubscribeInPacket subscribe) {
+        Array<UnsubscribeAckReasonCode> ackReasonCodes = connection.getSubscriptionService()
+            .unsubscribe(connection.getClient(), subscribe.getTopicFilters());
+        connection.send(getPacketOutFactory().newUnsubscribeAck(connection.getClient(),
+            subscribe.getPacketId(),
+            ackReasonCodes
+        ));
     }
 
     private @NotNull MqttPacketOutFactory getPacketOutFactory() {
-        return connection.getMqttVersion()
-            .getPacketOutFactory();
+        return connection.getMqttVersion().getPacketOutFactory();
     }
 }

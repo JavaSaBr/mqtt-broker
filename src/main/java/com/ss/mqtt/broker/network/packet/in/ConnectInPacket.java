@@ -324,11 +324,6 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection) {
-        return mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal();
-    }
-
-    @Override
     protected @NotNull Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
