@@ -2,7 +2,6 @@ package com.ss.mqtt.broker.network;
 
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
@@ -24,21 +23,11 @@ public class MqttClient {
     private volatile int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
     private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
 
-    private volatile MqttVersion mqttVersion;
 
     public MqttClient(@NotNull MqttConnection connection) {
         this.connection = connection;
-        this.mqttVersion = MqttVersion.MQTT_5;
         this.clientId = "";
         this.serverClientId = "";
-    }
-
-    public boolean isSupportedMqtt5() {
-        return isSupported(MqttVersion.MQTT_5);
-    }
-
-    public boolean isSupported(@NotNull MqttVersion mqttVersion) {
-        return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
     }
 
     public void handle(@NotNull MqttReadablePacket packet) {
@@ -55,7 +44,7 @@ public class MqttClient {
     }
 
     public void onConnected(@NotNull ConnectInPacket connect) {
-        mqttVersion = connect.getMqttVersion();
+        connection.setMqttVersion(connect.getMqttVersion());
         sessionExpiryInterval = connect.getSessionExpiryInterval();
         receiveMax = connect.getReceiveMax();
         maximumPacketSize = connect.getMaximumPacketSize();
@@ -66,6 +55,7 @@ public class MqttClient {
     }
 
     private @NotNull MqttPacketOutFactory getPacketOutFactory() {
-        return mqttVersion.getPacketOutFactory();
+        return connection.getMqttVersion()
+            .getPacketOutFactory();
     }
 }

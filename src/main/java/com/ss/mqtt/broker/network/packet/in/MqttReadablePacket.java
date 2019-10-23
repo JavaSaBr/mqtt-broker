@@ -34,15 +34,15 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         readVariableHeader(connection, buffer);
 
-        if (isPropertiesSupported(connection)) {
+        if (isPropertiesSupported(connection, buffer)) {
             readProperties(buffer);
         }
 
         readPayload(connection, buffer);
     }
 
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection) {
-        return connection.getClient().isSupported(MqttVersion.MQTT_5);
+    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        return connection.isSupported(MqttVersion.MQTT_5);
     }
 
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
@@ -65,7 +65,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
             return;
         }
 
-        var lastPositionInBuffer = buffer.position() + (int) propertiesLength;
+        var lastPositionInBuffer = buffer.position() + propertiesLength;
 
         while (buffer.position() < lastPositionInBuffer) {
 

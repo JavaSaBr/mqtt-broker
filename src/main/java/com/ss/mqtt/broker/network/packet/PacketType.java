@@ -7,6 +7,9 @@ public enum PacketType {
     PUBLISH,
     PUBLISH_ACK,
     PUBLISH_RECEIVED,
+    /**
+     * A PUBREL Packet is the response to a PUBREC Packet. It is the third packet of the QoS 2 protocol exchange.
+     */
     PUBLISH_RELEASED,
     PUBLISH_COMPLETED,
     SUBSCRIBE,
@@ -26,6 +29,10 @@ public enum PacketType {
      * This packet is used in Keep Alive processing. Refer to section 3.1.2.10 for more details
      */
     PING_REQUEST,
+    /**
+     * A PINGRESP Packet is sent by the Server to the Client in response to a PINGREQ packet. It indicates
+     * that the Server is alive.
+     */
     PING_RESPONSE,
     /**
      * The DISCONNECT packet is the final MQTT Control Packet sent from the Client or the Server. It
