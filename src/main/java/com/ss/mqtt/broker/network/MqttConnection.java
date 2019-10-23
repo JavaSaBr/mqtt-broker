@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network;
 
+import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
@@ -14,6 +15,7 @@ import com.ss.rlib.network.packet.PacketReader;
 import com.ss.rlib.network.packet.PacketWriter;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +29,8 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     private final PacketWriter packetWriter;
 
     private final @Getter @NotNull MqttClient client;
+
+    private volatile @Setter @NotNull MqttVersion mqttVersion;
 
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
@@ -43,9 +47,14 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
             bufferAllocator,
             maxPacketsByRead
         );
+        this.mqttVersion = MqttVersion.MQTT_5;
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
         this.client = new MqttClient(this, subscriptionService);
+    }
+
+    public boolean isSupported(@NotNull MqttVersion mqttVersion) {
+        return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
     }
 
     private @NotNull PacketReader createPacketReader() {

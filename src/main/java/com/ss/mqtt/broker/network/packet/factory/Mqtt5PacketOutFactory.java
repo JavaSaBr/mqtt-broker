@@ -5,7 +5,6 @@ import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.out.*;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
 
@@ -79,5 +78,16 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
             userProperties,
             reason
         );
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newPublishRelease(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReleaseReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    ) {
+        return new PublishRelease5OutPacket(client, packetId, reasonCode, userProperties, reason);
     }
 }

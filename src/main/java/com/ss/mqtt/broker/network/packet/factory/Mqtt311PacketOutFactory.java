@@ -73,4 +73,25 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
     ) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public @NotNull MqttWritablePacket newPingRequest(@NotNull MqttClient client) {
+        return new PingRequest311OutPacket(client);
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newPingResponse(@NotNull MqttClient client) {
+        return new PingResponse311OutPacket(client);
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newPublishRelease(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReleaseReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    ) {
+        return new PublishRelease311OutPacket(client, packetId);
+    }
 }

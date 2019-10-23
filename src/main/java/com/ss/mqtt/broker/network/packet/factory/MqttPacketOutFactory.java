@@ -102,4 +102,24 @@ public abstract class MqttPacketOutFactory {
             StringUtils.EMPTY
         );
     }
+
+    public abstract @NotNull MqttWritablePacket newPingRequest(@NotNull MqttClient client);
+
+    public abstract @NotNull MqttWritablePacket newPingResponse(@NotNull MqttClient client);
+
+    public abstract @NotNull MqttWritablePacket newPublishRelease(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReleaseReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    );
+
+    public @NotNull MqttWritablePacket newPublishRelease(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReleaseReasonCode reasonCode
+    ) {
+        return newPublishRelease(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+    }
 }

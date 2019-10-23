@@ -32,7 +32,6 @@ public class MqttClient {
     private volatile int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
     private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
 
-    private volatile MqttVersion mqttVersion;
 
 
     public MqttClient(@NotNull MqttConnection connection, @NotNull SubscriptionService subscriptionService) {
@@ -81,7 +80,7 @@ public class MqttClient {
     }
 
     public void onConnected(@NotNull ConnectInPacket connect) {
-        mqttVersion = connect.getMqttVersion();
+        connection.setMqttVersion(connect.getMqttVersion());
         sessionExpiryInterval = connect.getSessionExpiryInterval();
         receiveMax = connect.getReceiveMax();
         maximumPacketSize = connect.getMaximumPacketSize();
@@ -98,6 +97,7 @@ public class MqttClient {
     }
 
     private @NotNull MqttPacketOutFactory getPacketOutFactory() {
-        return mqttVersion.getPacketOutFactory();
+        return connection.getMqttVersion()
+            .getPacketOutFactory();
     }
 }
