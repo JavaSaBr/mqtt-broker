@@ -324,7 +324,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection) {
+    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         return mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal();
     }
 
