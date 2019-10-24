@@ -24,7 +24,7 @@ import java.util.Set;
 @Getter
 public class ConnectInPacket extends MqttReadablePacket {
 
-    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_REQUEST.ordinal();
+    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -243,6 +243,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
 
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718030
         var protocolName = readString(buffer);
         var protocolLevel = buffer.get();
 

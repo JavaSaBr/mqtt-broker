@@ -75,6 +75,7 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
         reasonCode = AuthenticateReasonCode.of(readUnsignedByte(buffer));
     }
 

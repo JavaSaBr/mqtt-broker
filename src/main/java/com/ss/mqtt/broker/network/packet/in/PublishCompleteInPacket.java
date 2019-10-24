@@ -55,6 +55,11 @@ public class PublishCompleteInPacket extends MqttReadablePacket {
     }
 
     @Override
+    public byte getPacketType() {
+        return PACKET_TYPE;
+    }
+
+    @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         super.readVariableHeader(connection, buffer);
 
@@ -71,11 +76,6 @@ public class PublishCompleteInPacket extends MqttReadablePacket {
     protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
         return super.isPropertiesSupported(connection, buffer) && buffer.hasRemaining();
-    }
-
-    @Override
-    public byte getPacketType() {
-        return PACKET_TYPE;
     }
 
     @Override

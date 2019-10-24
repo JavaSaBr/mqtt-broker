@@ -71,6 +71,11 @@ public class DisconnectInPacket extends MqttReadablePacket {
     }
 
     @Override
+    public byte getPacketType() {
+        return PACKET_TYPE;
+    }
+
+    @Override
     protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         this.sessionExpiryInterval = connection.getClient().getSessionExpiryInterval();
         super.readImpl(connection, buffer);
@@ -78,8 +83,8 @@ public class DisconnectInPacket extends MqttReadablePacket {
 
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        super.readVariableHeader(connection, buffer);
 
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
         if (connection.isSupported(MqttVersion.MQTT_5)) {
             reasonCode = DisconnectReasonCode.of(readUnsignedByte(buffer));
         }
@@ -113,10 +118,5 @@ public class DisconnectInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public byte getPacketType() {
-        return PACKET_TYPE;
     }
 }
