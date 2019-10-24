@@ -15,6 +15,10 @@ public enum PacketType {
      * A PUBREL Packet is the response to a PUBREC Packet. It is the third packet of the QoS 2 protocol exchange.
      */
     PUBLISH_RELEASED,
+    /**
+     * The PUBCOMP packet is the response to a PUBREL packet. It is the fourth and final packet of
+     * the QoS 2 protocol exchange.
+     */
     PUBLISH_COMPLETED,
     SUBSCRIBE,
     SUBSCRIBE_ACK,

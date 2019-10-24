@@ -90,4 +90,26 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
     ) {
         return new PublishRelease5OutPacket(client, packetId, reasonCode, userProperties, reason);
     }
+
+    @Override
+    public @NotNull MqttWritablePacket newPublishReceived(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReceivedReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    ) {
+        return new PublishReceived5OutPacket(client, packetId, reasonCode, userProperties, reason);
+    }
+
+    @Override
+    public @NotNull MqttWritablePacket newPublishCompleted(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishCompletedReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    ) {
+        return new PublishComplete5OutPacket(client, packetId, reasonCode, userProperties, reason);
+    }
 }
