@@ -4,7 +4,6 @@ import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.network.MqttClient
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
 import com.ss.rlib.common.util.array.ArrayFactory
-import org.jetbrains.annotations.NotNull
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -26,7 +25,7 @@ class InPacketTest extends Specification {
     MqttWritablePacket writer = new MqttWritablePacket(Stub(MqttClient)) {
        
         @Override
-        protected void writeImpl(@NotNull ByteBuffer buffer) {
+        protected void writeImpl(ByteBuffer buffer) {
         }
     }
 }
