@@ -77,7 +77,8 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
 
     @Override
     protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
-       writeByte(buffer, reasonCode.getValue());
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
+        writeByte(buffer, reasonCode.getValue());
     }
 
     @Override

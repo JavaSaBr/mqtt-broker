@@ -239,6 +239,8 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
+        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, 0);
+        writeProperty(buffer, PacketProperty.RETAIN_AVAILABLE, 0);
         writeProperty(
             buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
@@ -251,10 +253,6 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
             client.getReceiveMax(),
             MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
         );
-
-        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, 0);
-        writeProperty(buffer, PacketProperty.RETAIN_AVAILABLE, 0);
-
         writeProperty(
             buffer,
             PacketProperty.MAXIMUM_PACKET_SIZE,

@@ -83,13 +83,13 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
             .put(propertiesBuffer);
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value, long def) {
+    public void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value, long def) {
         if (value != def) {
             writeProperty(buffer, property, value);
         }
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value) {
+    public void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value) {
 
         buffer.put(property.getId());
 
@@ -111,7 +111,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
-    protected void writeProperty(
+    public void writeProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
         @NotNull String value,
@@ -123,7 +123,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
-    protected void writeProperty(
+    public void writeProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
         @NotNull StringPair value
@@ -134,7 +134,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         writeString(buffer, value.getValue());
     }
 
-    protected void writeNotEmptyProperty(
+    public void writeNotEmptyProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
         @NotNull String value
@@ -145,7 +145,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
-    protected void writeNotEmptyProperty(
+    public void writeNotEmptyProperty(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
         @NotNull byte[] value
@@ -156,17 +156,17 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         }
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
+    public void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull String value) {
         buffer.put(property.getId());
         writeString(buffer, value);
     }
 
-    protected void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull byte[] value) {
+    public void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, @NotNull byte[] value) {
         buffer.put(property.getId());
         writeBytes(buffer, value);
     }
 
-    protected void writeUserProperties(
+    public void writeUserProperties(
         @NotNull ByteBuffer buffer,
         @NotNull Array<StringPair> userProperties
     ) {
@@ -175,14 +175,13 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
             return;
         }
 
-        buffer.put(PacketProperty.USER_PROPERTY.getId());
-
         for (var pair : userProperties) {
+            buffer.put(PacketProperty.USER_PROPERTY.getId());
             writeStringPair(buffer, pair);
         }
     }
 
-    protected void writeStringPairProperties(
+    public void writeStringPairProperties(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
         @NotNull Array<StringPair> pairs
