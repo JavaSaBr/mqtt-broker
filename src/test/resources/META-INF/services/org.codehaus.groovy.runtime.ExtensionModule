@@ -1,0 +1,3 @@
+moduleName = test-specification
+moduleVersion = 1.0
+extensionClasses =com.ss.mqtt.broker.test.extension.SpecificationExtensions

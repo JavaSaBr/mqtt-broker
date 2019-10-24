@@ -1,0 +1,53 @@
+package com.ss.mqtt.broker.test.extension
+
+import com.ss.mqtt.broker.model.PacketProperty
+import com.ss.mqtt.broker.model.StringPair
+import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
+import com.ss.mqtt.broker.util.MqttDataUtils
+import com.ss.rlib.common.util.array.Array
+import spock.lang.Specification
+
+import java.nio.ByteBuffer
+
+class SpecificationExtensions extends Specification {
+    
+    static final writer = new MqttWritablePacket(null) {
+    
+        @Override
+        protected void writeImpl(ByteBuffer buffer) {
+        }
+    }
+    
+    static ByteBuffer putMbi(ByteBuffer self, int value) {
+        MqttDataUtils.writeMbi(value, self)
+        return self
+    }
+    
+    static ByteBuffer put(ByteBuffer self, PacketProperty property, long value) {
+        writer.writeProperty(self, property, value)
+        return self
+    }
+    
+    static ByteBuffer put(ByteBuffer self, PacketProperty property, byte[] value) {
+        writer.writeProperty(self, property, value)
+        return self
+    }
+    
+    static ByteBuffer put(ByteBuffer self, PacketProperty property, String value) {
+        writer.writeProperty(self, property, value)
+        return self
+    }
+    
+    static ByteBuffer put(ByteBuffer self, PacketProperty property, Array<?> value) {
+       
+        switch (property) {
+            case PacketProperty.USER_PROPERTY:
+                writer.writeUserProperties(self, value as Array<StringPair>)
+                break
+            default:
+                throw new IllegalStateException()
+        }
+        
+        return self
+    }
+}
