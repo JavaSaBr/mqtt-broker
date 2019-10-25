@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.8.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.2.0.RELEASE"
     }
 }
 
@@ -34,7 +34,7 @@ allprojects {
         annotationVersion = "17.0.0"
         rlibVersion = "9.5.0"
         lombokVersion = '1.18.4'
-        springbootVersion = '2.1.8.RELEASE'
+        springbootVersion = '2.2.0.RELEASE'
         springVersion = '5.1.6.RELEASE'
         junitJupiterVersion = "5.5.2"
         testcontainersVersion = "1.12.1"
@@ -104,7 +104,7 @@ task buildSingleArtifactWithoutTests(type: GradleBuild) {
 }
 
 wrapper {
-    gradleVersion = '5.5.1'
+    gradleVersion = '5.6.1'
     distributionType = Wrapper.DistributionType.ALL
 }
 
