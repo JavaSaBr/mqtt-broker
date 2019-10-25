@@ -49,6 +49,7 @@ allprojects {
         implementation "com.spaceshift:rlib.network:$rlibVersion"
         implementation "com.spaceshift:rlib.logger.slf4j:$rlibVersion"
         implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
+        implementation "org.springframework.boot:spring-boot-starter-logging:$springbootVersion"
         
         compileOnly "org.jetbrains:annotations:$annotationVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
@@ -105,4 +106,8 @@ task buildSingleArtifactWithoutTests(type: GradleBuild) {
 wrapper {
     gradleVersion = '5.5.1'
     distributionType = Wrapper.DistributionType.ALL
+}
+
+configurations.each {
+    it.exclude group: "org.slf4j", module: "slf4j-log4j12"
 }

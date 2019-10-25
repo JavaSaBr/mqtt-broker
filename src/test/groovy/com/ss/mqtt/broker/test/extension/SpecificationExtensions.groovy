@@ -23,22 +23,27 @@ class SpecificationExtensions extends Specification {
         return self
     }
     
-    static ByteBuffer put(ByteBuffer self, PacketProperty property, long value) {
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, long value) {
         writer.writeProperty(self, property, value)
         return self
     }
     
-    static ByteBuffer put(ByteBuffer self, PacketProperty property, byte[] value) {
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, byte[] value) {
         writer.writeProperty(self, property, value)
         return self
     }
     
-    static ByteBuffer put(ByteBuffer self, PacketProperty property, String value) {
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, String value) {
         writer.writeProperty(self, property, value)
         return self
     }
     
-    static ByteBuffer put(ByteBuffer self, PacketProperty property, Array<?> value) {
+    static ByteBuffer putString(ByteBuffer self, String value) {
+        writer.writeString(self, value)
+        return self
+    }
+    
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> value) {
        
         switch (property) {
             case PacketProperty.USER_PROPERTY:

@@ -26,13 +26,14 @@ public enum PublishCompletedReasonCode {
 
         var maxId = Stream.of(values())
             .mapToInt(PublishCompletedReasonCode::getValue)
+            .map(value -> Byte.toUnsignedInt((byte) value))
             .max()
             .orElse(0);
 
         var values = new PublishCompletedReasonCode[maxId + 1];
 
         for (var value : values()) {
-            values[value.value] = value;
+            values[Byte.toUnsignedInt(value.value)] = value;
         }
 
         VALUES = values;

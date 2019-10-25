@@ -136,7 +136,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     }
 
     protected long readUnsignedInt(@NotNull ByteBuffer buffer) {
-        return Integer.toUnsignedLong(buffer.get());
+        return Integer.toUnsignedLong(buffer.getInt());
     }
 
     @Override
