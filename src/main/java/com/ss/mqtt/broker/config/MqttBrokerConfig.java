@@ -46,20 +46,17 @@ public class MqttBrokerConfig {
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Consumer<MqttConnection> mqttConnectionConsumer
     ) {
-
-        ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(networkConfig,
+        ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(
+            networkConfig,
             networkChannelFactory(bufferAllocator)
         );
-
         serverNetwork.start(new InetSocketAddress("localhost", 1883));
         serverNetwork.onAccept(mqttConnectionConsumer);
-
         return serverNetwork;
     }
 
     @Bean
     @NotNull SubscriptionService subscriptionService() {
-
         return new SimpleSubscriptionService(new SimpleSubscriptions());
     }
 

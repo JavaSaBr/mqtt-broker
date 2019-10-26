@@ -21,5 +21,5 @@ public interface SubscriptionService {
         @NotNull Array<String> topicFilter
     );
 
-    List<MqttClient> getSubscribers(@NotNull String topic);
+    Array<MqttClient> getSubscribers(@NotNull String topic);
 }

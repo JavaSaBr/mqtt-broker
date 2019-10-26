@@ -82,7 +82,7 @@ public class MqttClient {
     }
 
     public void onSubscribe(@NotNull SubscribeInPacket subscribe) {
-        Array<SubscribeAckReasonCode> ackReasonCodes = connection.getSubscriptionService()
+        var ackReasonCodes = connection.getSubscriptionService()
             .subscribe(connection.getClient(), subscribe.getTopicFilters());
         connection.send(getPacketOutFactory().newSubscribeAck(connection.getClient(),
             subscribe.getPacketId(),
@@ -91,7 +91,7 @@ public class MqttClient {
     }
 
     public void onUnsubscribe(@NotNull UnsubscribeInPacket subscribe) {
-        Array<UnsubscribeAckReasonCode> ackReasonCodes = connection.getSubscriptionService()
+        var ackReasonCodes = connection.getSubscriptionService()
             .unsubscribe(connection.getClient(), subscribe.getTopicFilters());
         connection.send(getPacketOutFactory().newUnsubscribeAck(connection.getClient(),
             subscribe.getPacketId(),

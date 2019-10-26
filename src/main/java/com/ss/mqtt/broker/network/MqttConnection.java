@@ -30,11 +30,9 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
 
     private final SubscriptionService subscriptionService;
 
-    private final @Getter
-    @NotNull MqttClient client;
+    private final @Getter @NotNull MqttClient client;
 
-    private volatile @Setter
-    @NotNull MqttVersion mqttVersion;
+    private volatile @Setter @NotNull MqttVersion mqttVersion;
 
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
@@ -57,7 +55,8 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     }
 
     private @NotNull PacketReader createPacketReader() {
-        return new MqttPacketReader(this,
+        return new MqttPacketReader(
+            this,
             channel,
             bufferAllocator,
             this::updateLastActivity,
@@ -67,7 +66,13 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     }
 
     private @NotNull PacketWriter createPacketWriter() {
-        return new MqttPacketWriter(this, channel, bufferAllocator, this::updateLastActivity, this::nextPacketToWrite);
+        return new MqttPacketWriter(
+            this,
+            channel,
+            bufferAllocator,
+            this::updateLastActivity,
+            this::nextPacketToWrite
+        );
     }
 
     @Override
