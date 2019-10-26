@@ -12,12 +12,12 @@ public interface Subscriptions {
     /**
      * Return full subscribers list
      */
-    Array<MqttClient> getSubscribers(@NotNull String topic);
+    @NotNull Array<MqttClient> getSubscribers(@NotNull String topic);
 
     /**
      * Return true if subscription is added
      */
-    SubscribeAckReasonCode addSubscription(
+    @NotNull SubscribeAckReasonCode addSubscription(
         @NotNull SubscribeTopicFilter topicFilter,
         @NotNull MqttClient mqttClient
     );
@@ -25,7 +25,7 @@ public interface Subscriptions {
     /**
      * Return true if subscription is removed
      */
-    UnsubscribeAckReasonCode removeSubscription(
+    @NotNull UnsubscribeAckReasonCode removeSubscription(
         @NotNull String topicFilter,
         @NotNull MqttClient mqttClient
     );

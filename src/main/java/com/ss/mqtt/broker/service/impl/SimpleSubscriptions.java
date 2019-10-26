@@ -21,7 +21,7 @@ public class SimpleSubscriptions implements Subscriptions {
     /**
      * Return full subscribers list
      */
-    public Array<MqttClient> getSubscribers(@NotNull String topic) {
+    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topic) {
         return subscriptions.get(topic)
             .stream()
             .map(Subscriber::getMqttClient)
@@ -31,7 +31,7 @@ public class SimpleSubscriptions implements Subscriptions {
     /**
      * Return true if subscription is added
      */
-    public SubscribeAckReasonCode addSubscription(
+    public @NotNull SubscribeAckReasonCode addSubscription(
         @NotNull SubscribeTopicFilter topicFilter,
         @NotNull MqttClient mqttClient
     ) {
@@ -47,9 +47,9 @@ public class SimpleSubscriptions implements Subscriptions {
     /**
      * Return true if subscription is removed
      */
-    public UnsubscribeAckReasonCode removeSubscription(@NotNull String topicFilter, @NotNull MqttClient mqttClient) {
-        var subscribers = subscriptions.get(topicFilter);
-        if (subscribers != null && subscribers.removeIf(subscriber -> mqttClient.equals(subscriber.getMqttClient()))) {
+    public @NotNull UnsubscribeAckReasonCode removeSubscription(@NotNull String topicFilter, @NotNull MqttClient mqttClient) {
+        var subscribers = subscriptions.getOrDefault(topicFilter, Array.empty());
+        if (subscribers.removeIf(subscriber -> mqttClient.equals(subscriber.getMqttClient()))) {
             return UnsubscribeAckReasonCode.SUCCESS;
         }
         return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;

@@ -11,15 +11,15 @@ import java.util.List;
 
 public interface SubscriptionService {
 
-    Array<SubscribeAckReasonCode> subscribe(
+    @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
         @NotNull Array<SubscribeTopicFilter> topicFilter
     );
 
-    Array<UnsubscribeAckReasonCode> unsubscribe(
+    @NotNull Array<UnsubscribeAckReasonCode> unsubscribe(
         @NotNull MqttClient mqttClient,
         @NotNull Array<String> topicFilter
     );
 
-    Array<MqttClient> getSubscribers(@NotNull String topic);
+    @NotNull Array<MqttClient> getSubscribers(@NotNull String topic);
 }

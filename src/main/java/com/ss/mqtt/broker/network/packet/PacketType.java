@@ -52,11 +52,20 @@ public enum PacketType {
      * exchange, such as challenge / response authentication. It is a Protocol Error for the Client or Server to
      * send an AUTH packet if the CONNECT packet did not contain the same Authentication Method.
      */
-    AUTHENTICATE;
+    AUTHENTICATE,
+
+    /**
+     * Not supported
+     */
+    INVALID;
 
     private static final PacketType[] VALUES = values();
 
     public static PacketType fromByte(byte packetType) {
-        return VALUES[packetType];
+        if (packetType < 0 || packetType > AUTHENTICATE.ordinal()) {
+            return INVALID;
+        } else {
+            return VALUES[packetType];
+        }
     }
 }
