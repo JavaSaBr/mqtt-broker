@@ -26,7 +26,7 @@ class DisconnectInPacketTest extends InPacketTest {
             }
     
         when:
-            def packet = new DisconnectInPacket(0b11100000 as byte)
+            def packet = new DisconnectInPacket(0b1110_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -48,7 +48,7 @@ class DisconnectInPacketTest extends InPacketTest {
                 it.put(propertiesBuffer)
             }
         
-            packet = new DisconnectInPacket(0b11100000 as byte)
+            packet = new DisconnectInPacket(0b1110_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result

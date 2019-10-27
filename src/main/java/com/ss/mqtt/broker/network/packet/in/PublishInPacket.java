@@ -328,7 +328,11 @@ public class PublishInPacket extends MqttReadablePacket {
                 payloadFormatIndicator = NumberUtils.toBoolean((int) value);
                 break;
             case TOPIC_ALIAS:
-                topicAlias = (int) value;
+                topicAlias = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.TOPIC_ALIAS_MIN,
+                    MqttPropertyConstants.TOPIC_ALIAS_MAX)
+                ;
                 break;
             case MESSAGE_EXPIRY_INTERVAL:
                 messageExpiryInterval = value;

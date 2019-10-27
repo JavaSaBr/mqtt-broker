@@ -17,7 +17,7 @@ class PublishCompleteInPacketTest extends InPacketTest {
             }
         
         when:
-            def packet = new PublishCompleteInPacket(0b011110000 as byte)
+            def packet = new PublishCompleteInPacket(0b0111_0000 as byte)
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -44,7 +44,7 @@ class PublishCompleteInPacketTest extends InPacketTest {
             }
     
         when:
-            def packet = new PublishCompleteInPacket(0b011110000 as byte)
+            def packet = new PublishCompleteInPacket(0b0111_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -60,7 +60,7 @@ class PublishCompleteInPacketTest extends InPacketTest {
                 it.putMbi(0)
             }
         
-            packet = new PublishCompleteInPacket(0b011110000 as byte)
+            packet = new PublishCompleteInPacket(0b0111_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result

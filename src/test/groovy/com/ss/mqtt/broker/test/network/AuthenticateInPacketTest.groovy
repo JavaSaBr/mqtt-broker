@@ -26,7 +26,7 @@ class AuthenticateInPacketTest extends InPacketTest {
             }
     
         when:
-            def packet = new AuthenticateInPacket(0b11110000 as byte)
+            def packet = new AuthenticateInPacket(0b1111_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -50,7 +50,7 @@ class AuthenticateInPacketTest extends InPacketTest {
                 it.put(propertiesBuffer)
             }
         
-            packet = new AuthenticateInPacket(0b11110000 as byte)
+            packet = new AuthenticateInPacket(0b1111_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         
         then:
@@ -73,7 +73,7 @@ class AuthenticateInPacketTest extends InPacketTest {
                 it.put(propertiesBuffer)
             }
             
-            packet = new AuthenticateInPacket(0b11110000 as byte)
+            packet = new AuthenticateInPacket(0b1111_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result

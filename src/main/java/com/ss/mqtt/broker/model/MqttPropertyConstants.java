@@ -22,4 +22,8 @@ public interface MqttPropertyConstants {
     long MESSAGE_EXPIRY_INTERVAL_DEFAULT = 0;
 
     int TOPIC_ALIAS_DEFAULT = 0;
+    int TOPIC_ALIAS_MIN = 0;
+    int TOPIC_ALIAS_MAX = 0xFFFF;
+
+    int SUBSCRIPTION_ID_NOT_DEFINED = 0;
 }

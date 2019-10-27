@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
 import com.ss.mqtt.broker.util.MqttDataUtils
 import com.ss.rlib.common.util.array.Array
+import com.ss.rlib.common.util.array.IntegerArray
 import spock.lang.Specification
 
 import java.nio.ByteBuffer
@@ -43,16 +44,21 @@ class SpecificationExtensions extends Specification {
         return self
     }
     
-    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> value) {
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> values) {
        
         switch (property) {
             case PacketProperty.USER_PROPERTY:
-                writer.writeUserProperties(self, value as Array<StringPair>)
+                writer.writeUserProperties(self, values as Array<StringPair>)
                 break
             default:
                 throw new IllegalStateException()
         }
         
+        return self
+    }
+    
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, IntegerArray values) {
+        values.each { writer.writeProperty(self, property, it) }
         return self
     }
 }

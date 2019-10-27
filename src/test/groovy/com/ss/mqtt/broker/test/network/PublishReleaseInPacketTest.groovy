@@ -1,12 +1,12 @@
 package com.ss.mqtt.broker.test.network
 
 import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.PublishReceivedReasonCode
-import com.ss.mqtt.broker.network.packet.in.PublishReceivedInPacket
+import com.ss.mqtt.broker.model.PublishReleaseReasonCode
+import com.ss.mqtt.broker.network.packet.in.PublishReleaseInPacket
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
 
-class PublishReceivedInPacketTest extends InPacketTest {
+class PublishReleaseInPacketTest extends InPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         
@@ -17,13 +17,13 @@ class PublishReceivedInPacketTest extends InPacketTest {
             }
         
         when:
-            def packet = new PublishReceivedInPacket(0b0101_0000 as byte)
+            def packet = new PublishReleaseInPacket(0b0110_0000 as byte)
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
             packet.getReason() == ""
             packet.getPacketId() == packetId
-            packet.getReasonCode() == PublishReceivedReasonCode.SUCCESS
+            packet.getReasonCode() == PublishReleaseReasonCode.SUCCESS
             packet.getUserProperties() == Array.empty()
     }
     
@@ -38,35 +38,35 @@ class PublishReceivedInPacketTest extends InPacketTest {
     
             def dataBuffer = BufferUtils.prepareBuffer(512) {
                 it.putShort(packetId)
-                it.put(PublishReceivedReasonCode.QUOTA_EXCEEDED.value)
+                it.put(PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
                 it.putMbi(propertiesBuffer.limit())
                 it.put(propertiesBuffer)
             }
     
         when:
-            def packet = new PublishReceivedInPacket(0b0101_0000 as byte)
+            def packet = new PublishReleaseInPacket(0b0110_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
             packet.getReason() == reasonString
             packet.getPacketId() == packetId
-            packet.getReasonCode() == PublishReceivedReasonCode.QUOTA_EXCEEDED
+            packet.getReasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
             packet.getUserProperties() == userProperties
         when:
     
             dataBuffer = BufferUtils.prepareBuffer(512) {
                 it.putShort(packetId)
-                it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value)
+                it.put(PublishReleaseReasonCode.SUCCESS.value)
                 it.putMbi(0)
             }
         
-            packet = new PublishReceivedInPacket(0b0101_0000 as byte)
+            packet = new PublishReleaseInPacket(0b0110_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
             packet.getReason() == ""
             packet.getPacketId() == packetId
-            packet.getReasonCode() == PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
+            packet.getReasonCode() == PublishReleaseReasonCode.SUCCESS
             packet.getUserProperties() == Array.empty()
     }
 }

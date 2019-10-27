@@ -47,6 +47,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
     public SubscribeInPacket(byte info) {
         super(info);
         this.topicFilters = ArrayFactory.newArray(SubscribeTopicFilter.class);
+        this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED;
     }
 
     @Override

@@ -23,7 +23,7 @@ class ConnectInPacketTest extends InPacketTest {
             }
         
         when:
-            def packet = new ConnectInPacket(0b00010000 as byte)
+            def packet = new ConnectInPacket(0b0001_0000 as byte)
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -65,7 +65,7 @@ class ConnectInPacketTest extends InPacketTest {
             }
     
         when:
-            def packet = new ConnectInPacket(0b00010000 as byte)
+            def packet = new ConnectInPacket(0b0001_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
