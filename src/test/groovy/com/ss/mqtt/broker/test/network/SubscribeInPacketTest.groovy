@@ -4,12 +4,9 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.model.SubscribeRetainHandling
-import com.ss.mqtt.broker.network.packet.in.PublishInPacket
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket
-import com.ss.rlib.common.util.ArrayUtils
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
-import com.ss.rlib.common.util.array.IntegerArray
 
 class SubscribeInPacketTest extends InPacketTest {
     
@@ -26,7 +23,7 @@ class SubscribeInPacketTest extends InPacketTest {
             }
         
         when:
-            def packet = new SubscribeInPacket(0b1000_0011 as byte)
+            def packet = new SubscribeInPacket(0b1000_0000 as byte)
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -66,7 +63,7 @@ class SubscribeInPacketTest extends InPacketTest {
             }
     
         when:
-            def packet = new SubscribeInPacket(0b0110_0011 as byte)
+            def packet = new SubscribeInPacket(0b0110_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -95,7 +92,7 @@ class SubscribeInPacketTest extends InPacketTest {
                 it.put(0b0000_0010 as byte)
             }
         
-            packet = new SubscribeInPacket(0b0110_0011 as byte)
+            packet = new SubscribeInPacket(0b0110_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
