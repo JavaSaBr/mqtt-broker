@@ -35,7 +35,7 @@ public class SimpleSubscriptions implements Subscriptions {
         @NotNull SubscribeTopicFilter topicFilter,
         @NotNull MqttClient mqttClient
     ) {
-        Subscriber subscriber = new Subscriber(mqttClient, topicFilter);
+        var subscriber = new Subscriber(mqttClient, topicFilter);
         var subscribers = subscriptions.computeIfAbsent(
             topicFilter.getTopicFilter(),
             key -> new FastArraySet<>(Subscriber.class)

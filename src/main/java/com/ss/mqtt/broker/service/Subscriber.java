@@ -30,7 +30,7 @@ public class Subscriber {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Subscriber that = (Subscriber) o;
+        var that = (Subscriber) o;
         return Objects.equals(mqttClient, that.mqttClient);
     }
 

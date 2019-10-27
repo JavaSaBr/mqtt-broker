@@ -14,8 +14,6 @@ public enum QoS {
 
     private static final QoS[] VALUES = values();
 
-    private final SubscribeAckReasonCode subscribeAckReasonCode;
-
     public static @NotNull QoS of(int level) {
         if (level < 0 || level > EXACTLY_ONCE_DELIVERY.ordinal()) {
             return INVALID;
@@ -23,4 +21,6 @@ public enum QoS {
             return VALUES[level];
         }
     }
+
+    private final SubscribeAckReasonCode subscribeAckReasonCode;
 }

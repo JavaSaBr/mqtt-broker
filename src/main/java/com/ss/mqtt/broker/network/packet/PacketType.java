@@ -1,5 +1,7 @@
 package com.ss.mqtt.broker.network.packet;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum PacketType {
     RESERVED,
     CONNECT_REQUEST,
@@ -61,7 +63,7 @@ public enum PacketType {
 
     private static final PacketType[] VALUES = values();
 
-    public static PacketType fromByte(byte packetType) {
+    public static @NotNull PacketType fromByte(byte packetType) {
         if (packetType < 0 || packetType > AUTHENTICATE.ordinal()) {
             return INVALID;
         } else {

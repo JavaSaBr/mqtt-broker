@@ -42,7 +42,7 @@ public class MqttClient {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MqttClient that = (MqttClient) o;
+        var that = (MqttClient) o;
         return serverClientId.equals(that.serverClientId);
     }
 
