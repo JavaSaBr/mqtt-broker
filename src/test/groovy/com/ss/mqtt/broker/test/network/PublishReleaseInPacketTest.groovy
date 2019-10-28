@@ -21,10 +21,10 @@ class PublishReleaseInPacketTest extends InPacketTest {
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReason() == ""
-            packet.getPacketId() == packetId
-            packet.getReasonCode() == PublishReleaseReasonCode.SUCCESS
-            packet.getUserProperties() == Array.empty()
+            packet.reason == ""
+            packet.packetId == packetId
+            packet.reasonCode == PublishReleaseReasonCode.SUCCESS
+            packet.userProperties == Array.empty()
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -48,10 +48,10 @@ class PublishReleaseInPacketTest extends InPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReason() == reasonString
-            packet.getPacketId() == packetId
-            packet.getReasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
-            packet.getUserProperties() == userProperties
+            packet.reason == reasonString
+            packet.packetId == packetId
+            packet.reasonCode == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
+            packet.userProperties == userProperties
         when:
     
             dataBuffer = BufferUtils.prepareBuffer(512) {
@@ -64,9 +64,9 @@ class PublishReleaseInPacketTest extends InPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReason() == ""
-            packet.getPacketId() == packetId
-            packet.getReasonCode() == PublishReleaseReasonCode.SUCCESS
-            packet.getUserProperties() == Array.empty()
+            packet.reason == ""
+            packet.packetId == packetId
+            packet.reasonCode == PublishReleaseReasonCode.SUCCESS
+            packet.userProperties == Array.empty()
     }
 }

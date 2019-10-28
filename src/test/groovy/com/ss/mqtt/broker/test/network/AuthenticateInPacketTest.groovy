@@ -30,11 +30,11 @@ class AuthenticateInPacketTest extends InPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReasonCode() == AuthenticateReasonCode.SUCCESS
-            packet.getAuthenticationMethod() == authMethod
-            packet.getAuthenticationData() == authData
-            packet.getReason() == reasonString
-            packet.getUserProperties() == userProperties
+            packet.reasonCode == AuthenticateReasonCode.SUCCESS
+            packet.authenticationMethod == authMethod
+            packet.authenticationData == authData
+            packet.reason == reasonString
+            packet.userProperties == userProperties
         when:
     
             propertiesBuffer = BufferUtils.prepareBuffer(512) {
@@ -55,11 +55,11 @@ class AuthenticateInPacketTest extends InPacketTest {
         
         then:
             result
-            packet.getReasonCode() == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
-            packet.getAuthenticationMethod() == authMethod
-            packet.getAuthenticationData() == authData
-            packet.getReason() == reasonString
-            packet.getUserProperties() == userProperties
+            packet.reasonCode == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
+            packet.authenticationMethod == authMethod
+            packet.authenticationData == authData
+            packet.reason == reasonString
+            packet.userProperties == userProperties
         when:
             
             propertiesBuffer = BufferUtils.prepareBuffer(512) {
@@ -77,10 +77,10 @@ class AuthenticateInPacketTest extends InPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReasonCode() == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
-            packet.getAuthenticationMethod() == authMethod
-            packet.getAuthenticationData() == authData
-            packet.getReason() == ""
-            packet.getUserProperties() == Array.empty()
+            packet.reasonCode == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
+            packet.authenticationMethod == authMethod
+            packet.authenticationData == authData
+            packet.reason == ""
+            packet.userProperties == Array.empty()
     }
 }

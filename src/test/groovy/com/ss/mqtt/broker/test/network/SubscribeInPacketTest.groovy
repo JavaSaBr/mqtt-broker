@@ -27,20 +27,20 @@ class SubscribeInPacketTest extends InPacketTest {
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getTopicFilters().size() == 2
-            packet.getTopicFilters().get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
-            packet.getTopicFilters().get(0).getTopicFilter() == topicFilter
-            packet.getTopicFilters().get(0).isNoLocal()
-            !packet.getTopicFilters().get(0).isRetainAsPublished()
-            packet.getTopicFilters().get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
-            packet.getTopicFilters().get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
-            packet.getTopicFilters().get(1).getTopicFilter() == topicFilter2
-            packet.getTopicFilters().get(1).isNoLocal()
-            !packet.getTopicFilters().get(1).isRetainAsPublished()
-            packet.getTopicFilters().get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
-            packet.getPacketId() == packetId
-            packet.getUserProperties() == Array.empty()
-            packet.getSubscriptionId() == MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED
+            packet.topicFilters.size() == 2
+            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.topicFilters.get(0).getTopicFilter() == topicFilter
+            packet.topicFilters.get(0).isNoLocal()
+            !packet.topicFilters.get(0).isRetainAsPublished()
+            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
+            packet.topicFilters.get(1).getTopicFilter() == topicFilter2
+            packet.topicFilters.get(1).isNoLocal()
+            !packet.topicFilters.get(1).isRetainAsPublished()
+            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.packetId == packetId
+            packet.userProperties == Array.empty()
+            packet.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -67,20 +67,20 @@ class SubscribeInPacketTest extends InPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getTopicFilters().size() == 2
-            packet.getTopicFilters().get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
-            packet.getTopicFilters().get(0).getTopicFilter() == topicFilter
-            !packet.getTopicFilters().get(0).isNoLocal()
-            packet.getTopicFilters().get(0).isRetainAsPublished()
-            packet.getTopicFilters().get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
-            packet.getTopicFilters().get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
-            packet.getTopicFilters().get(1).getTopicFilter() == topicFilter2
-            packet.getTopicFilters().get(1).isNoLocal()
-            !packet.getTopicFilters().get(1).isRetainAsPublished()
-            packet.getTopicFilters().get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_SUBSCRIBE_ONLY_IF_THE_SUBSCRIPTION_DOES_NOT_CURRENTLY_EXIST
-            packet.getPacketId() == packetId
-            packet.getUserProperties() == userProperties
-            packet.getSubscriptionId() == subscriptionId
+            packet.topicFilters.size() == 2
+            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.topicFilters.get(0).getTopicFilter() == topicFilter
+            !packet.topicFilters.get(0).isNoLocal()
+            packet.topicFilters.get(0).isRetainAsPublished()
+            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
+            packet.topicFilters.get(1).getTopicFilter() == topicFilter2
+            packet.topicFilters.get(1).isNoLocal()
+            !packet.topicFilters.get(1).isRetainAsPublished()
+            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_SUBSCRIBE_ONLY_IF_THE_SUBSCRIPTION_DOES_NOT_CURRENTLY_EXIST
+            packet.packetId == packetId
+            packet.userProperties == userProperties
+            packet.subscriptionId == subscriptionId
         when:
     
             dataBuffer = BufferUtils.prepareBuffer(512) {
@@ -96,19 +96,19 @@ class SubscribeInPacketTest extends InPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getTopicFilters().size() == 2
-            packet.getTopicFilters().get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
-            packet.getTopicFilters().get(0).getTopicFilter() == topicFilter
-            !packet.getTopicFilters().get(0).isNoLocal()
-            !packet.getTopicFilters().get(0).isRetainAsPublished()
-            packet.getTopicFilters().get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
-            packet.getTopicFilters().get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
-            packet.getTopicFilters().get(1).getTopicFilter() == topicFilter2
-            !packet.getTopicFilters().get(1).isNoLocal()
-            !packet.getTopicFilters().get(1).isRetainAsPublished()
-            packet.getTopicFilters().get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
-            packet.getPacketId() == packetId
-            packet.getUserProperties() == Array.empty()
-            packet.getSubscriptionId() == MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED
+            packet.topicFilters.size() == 2
+            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.topicFilters.get(0).getTopicFilter() == topicFilter
+            !packet.topicFilters.get(0).isNoLocal()
+            !packet.topicFilters.get(0).isRetainAsPublished()
+            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
+            packet.topicFilters.get(1).getTopicFilter() == topicFilter2
+            !packet.topicFilters.get(1).isNoLocal()
+            !packet.topicFilters.get(1).isRetainAsPublished()
+            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.packetId == packetId
+            packet.userProperties == Array.empty()
+            packet.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED
     }
 }
