@@ -29,7 +29,7 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         PublishReleaseInPacket::new,
         PublishCompleteInPacket::new,
         SubscribeInPacket::new,
-        null,
+        SubscribeAckInPacket::new,
         UnsubscribeInPacket::new,
         null,
         PingRequestInPacket::new,

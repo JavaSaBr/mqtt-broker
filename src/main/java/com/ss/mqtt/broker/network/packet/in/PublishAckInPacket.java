@@ -44,9 +44,10 @@ public class PublishAckInPacket extends MqttReadablePacket {
     );
 
     private @NotNull PublishAckReasonCode reasonCode;
-    private @NotNull String reason;
-
     private int packetId;
+
+    // properties
+    private @NotNull String reason;
 
     public PublishAckInPacket(byte info) {
         super(info);
@@ -61,8 +62,11 @@ public class PublishAckInPacket extends MqttReadablePacket {
 
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718045
         packetId = readUnsignedShort(buffer);
 
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
         if (connection.isSupported(MqttVersion.MQTT_5)) {
             reasonCode = PublishAckReasonCode.of(readUnsignedByte(buffer));
         }
