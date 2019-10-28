@@ -1,11 +1,13 @@
 package com.ss.mqtt.broker.test.extension
 
+import com.ss.mqtt.broker.model.PacketDataType
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
 import com.ss.mqtt.broker.util.MqttDataUtils
 import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.IntegerArray
+import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
 
 import java.nio.ByteBuffer
@@ -15,7 +17,7 @@ class SpecificationExtensions extends Specification {
     static final writer = new MqttWritablePacket(null) {
     
         @Override
-        protected void writeImpl(ByteBuffer buffer) {
+        protected void writeImpl(@NotNull ByteBuffer buffer) {
         }
     }
     
@@ -50,9 +52,9 @@ class SpecificationExtensions extends Specification {
     
     static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> values) {
        
-        switch (property) {
-            case PacketProperty.USER_PROPERTY:
-                writer.writeUserProperties(self, values as Array<StringPair>)
+        switch (property.getDataType()) {
+            case PacketDataType.UTF_8_STRING_PAIR:
+                writer.writeStringPairProperties(self, property, values as Array<StringPair>)
                 break
             default:
                 throw new IllegalStateException()

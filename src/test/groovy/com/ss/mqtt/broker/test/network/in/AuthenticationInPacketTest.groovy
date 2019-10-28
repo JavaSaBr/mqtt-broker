@@ -1,12 +1,12 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.AuthenticateReasonCode
 import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.network.packet.in.AuthenticateInPacket
+import com.ss.mqtt.broker.network.packet.in.AuthenticationInPacket
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
 
-class AuthenticateInPacketTest extends InPacketTest {
+class AuthenticationInPacketTest extends BaseInPacketTest {
 
     def "should read packet correctly as mqtt 5.0"() {
         
@@ -26,7 +26,7 @@ class AuthenticateInPacketTest extends InPacketTest {
             }
     
         when:
-            def packet = new AuthenticateInPacket(0b1111_0000 as byte)
+            def packet = new AuthenticationInPacket(0b1111_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
@@ -50,7 +50,7 @@ class AuthenticateInPacketTest extends InPacketTest {
                 it.put(propertiesBuffer)
             }
         
-            packet = new AuthenticateInPacket(0b1111_0000 as byte)
+            packet = new AuthenticationInPacket(0b1111_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         
         then:
@@ -73,7 +73,7 @@ class AuthenticateInPacketTest extends InPacketTest {
                 it.put(propertiesBuffer)
             }
             
-            packet = new AuthenticateInPacket(0b1111_0000 as byte)
+            packet = new AuthenticationInPacket(0b1111_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result

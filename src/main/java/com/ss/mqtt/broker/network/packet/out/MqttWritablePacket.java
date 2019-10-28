@@ -169,21 +169,6 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
         writeBytes(buffer, value);
     }
 
-    public void writeUserProperties(
-        @NotNull ByteBuffer buffer,
-        @NotNull Array<StringPair> userProperties
-    ) {
-
-        if (userProperties.isEmpty()) {
-            return;
-        }
-
-        for (var pair : userProperties) {
-            buffer.put(PacketProperty.USER_PROPERTY.getId());
-            writeStringPair(buffer, pair);
-        }
-    }
-
     public void writeStringPairProperties(
         @NotNull ByteBuffer buffer,
         @NotNull PacketProperty property,
@@ -194,9 +179,8 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
             return;
         }
 
-        buffer.put(property.getId());
-
         for (var pair : pairs) {
+            buffer.put(property.getId());
             writeStringPair(buffer, pair);
         }
     }

@@ -1,12 +1,12 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.PublishAckReasonCode
-import com.ss.mqtt.broker.network.packet.in.PublishAckInPacket
+import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode
+import com.ss.mqtt.broker.network.packet.in.UnsubscribeAckInPacket
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
 
-class PublishAckInPacketTest extends InPacketTest {
+class UnsubscribeAckInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         
@@ -17,14 +17,13 @@ class PublishAckInPacketTest extends InPacketTest {
             }
         
         when:
-            def packet = new PublishAckInPacket(0b0100_0000 as byte)
+            def packet = new UnsubscribeAckInPacket(0b1011_0000 as byte)
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
             packet.reason == ""
             packet.packetId == packetId
-            packet.reasonCode == PublishAckReasonCode.SUCCESSFUL
-            packet.userProperties == Array.empty()
+            packet.reasonCodes == Array.empty()
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -38,35 +37,45 @@ class PublishAckInPacketTest extends InPacketTest {
     
             def dataBuffer = BufferUtils.prepareBuffer(512) {
                 it.putShort(packetId)
-                it.put(PublishAckReasonCode.PAYLOAD_FORMAT_INVALID.value)
                 it.putMbi(propertiesBuffer.limit())
                 it.put(propertiesBuffer)
+                it.put(UnsubscribeAckReasonCode.SUCCESS.value)
+                it.put(UnsubscribeAckReasonCode.SUCCESS.value)
+                it.put(UnsubscribeAckReasonCode.NOT_AUTHORIZED.value)
+                it.put(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
             }
     
         when:
-            def packet = new PublishAckInPacket(0b0100_0000 as byte)
+            def packet = new UnsubscribeAckInPacket(0b1011_0000 as byte)
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
             packet.reason == reasonString
             packet.packetId == packetId
-            packet.reasonCode == PublishAckReasonCode.PAYLOAD_FORMAT_INVALID
+            packet.reasonCodes.size() == 4
+            packet.reasonCodes.get(0) == UnsubscribeAckReasonCode.SUCCESS
+            packet.reasonCodes.get(1) == UnsubscribeAckReasonCode.SUCCESS
+            packet.reasonCodes.get(2) == UnsubscribeAckReasonCode.NOT_AUTHORIZED
+            packet.reasonCodes.get(3) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
             packet.userProperties == userProperties
         when:
     
             dataBuffer = BufferUtils.prepareBuffer(512) {
                 it.putShort(packetId)
-                it.put(PublishAckReasonCode.UNSPECIFIED_ERROR.value)
                 it.putMbi(0)
+                it.put(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
+                it.put(UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value)
             }
         
-            packet = new PublishAckInPacket(0b0100_0000 as byte)
+            packet = new UnsubscribeAckInPacket(0b1011_0000 as byte)
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
             packet.reason == ""
             packet.packetId == packetId
-            packet.reasonCode == PublishAckReasonCode.UNSPECIFIED_ERROR
+            packet.reasonCodes.size() == 2
+            packet.reasonCodes.get(0) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
+            packet.reasonCodes.get(1) == UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
             packet.userProperties == Array.empty()
     }
 }

@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.PacketProperty
@@ -6,7 +6,7 @@ import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
 import com.ss.rlib.common.util.ArrayUtils
 import com.ss.rlib.common.util.BufferUtils
 
-class ConnectInPacketTest extends InPacketTest {
+class ConnectInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         

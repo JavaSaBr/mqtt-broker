@@ -90,7 +90,7 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901209
-        writeUserProperties(buffer, userProperties);
+        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
         writeProperty(
             buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
