@@ -18,6 +18,23 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
     }
 
     @Override
+    public @NotNull MqttWritablePacket newPublish(
+        @NotNull MqttClient client,
+        int packetId,
+        int qos,
+        boolean retained,
+        boolean duplicate,
+        @NotNull String topicName,
+        @NotNull byte[] payload,
+        boolean stringPayload,
+        @NotNull String responseTopic,
+        @NotNull byte[] correlationData,
+        @NotNull Array<StringPair> userProperties
+    ) {
+        return new Publish311OutPacket(client, packetId, qos, retained, duplicate, topicName, payload);
+    }
+
+    @Override
     public @NotNull MqttWritablePacket newPublishAck(
         @NotNull MqttClient client,
         int packetId,

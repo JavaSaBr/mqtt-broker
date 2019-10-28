@@ -4,8 +4,10 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.service.ClientService;
+import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.mqtt.broker.service.impl.DefaultClientService;
+import com.ss.mqtt.broker.service.impl.SimplePublishingService;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptions;
 import com.ss.rlib.network.*;
@@ -61,6 +63,11 @@ public class MqttBrokerConfig {
     }
 
     @Bean
+    @NotNull PublishingService publishingService() {
+        return new SimplePublishingService(subscriptionService());
+    }
+
+    @Bean
     @NotNull Consumer<MqttConnection> mqttConnectionConsumer(@NotNull ClientService clientService) {
         return mqttConnection -> {
             log.info("Accepted connection: {}", mqttConnection);
@@ -77,7 +84,8 @@ public class MqttBrokerConfig {
             NetworkCryptor.NULL,
             bufferAllocator,
             100,
-            subscriptionService()
+            subscriptionService(),
+            publishingService()
         );
     }
 }

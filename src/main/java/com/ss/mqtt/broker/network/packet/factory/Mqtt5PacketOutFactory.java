@@ -17,6 +17,34 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         return new ConnectAck5OutPacket(client, reasonCode, sessionPresent);
     }
 
+    public @NotNull MqttWritablePacket newPublish(
+        @NotNull MqttClient client,
+        int packetId,
+        int qos,
+        boolean retained,
+        boolean duplicate,
+        @NotNull String topicName,
+        @NotNull byte[] payload,
+        boolean stringPayload,
+        @NotNull String responseTopic,
+        @NotNull byte[] correlationData,
+        @NotNull Array<StringPair> userProperties
+    ) {
+        return new Publish5OutPacket(
+            client,
+            packetId,
+            qos,
+            retained,
+            duplicate,
+            topicName,
+            payload,
+            stringPayload,
+            responseTopic,
+            correlationData,
+            userProperties
+        );
+    }
+
     @Override
     public @NotNull MqttWritablePacket newPublishAck(
         @NotNull MqttClient client,

@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
@@ -29,6 +30,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     private final PacketWriter packetWriter;
 
     private final SubscriptionService subscriptionService;
+    private final PublishingService publishingService;
 
     private final @Getter @NotNull MqttClient client;
 
@@ -40,7 +42,8 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull NetworkCryptor crypt,
         @NotNull BufferAllocator bufferAllocator,
         int maxPacketsByRead,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishingService publishingService
     ) {
         super(network, channel, crypt, bufferAllocator, maxPacketsByRead);
         this.mqttVersion = MqttVersion.MQTT_5;
@@ -48,6 +51,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         this.packetWriter = createPacketWriter();
         this.client = new MqttClient(this);
         this.subscriptionService = subscriptionService;
+        this.publishingService = publishingService;
     }
 
     public boolean isSupported(@NotNull MqttVersion mqttVersion) {

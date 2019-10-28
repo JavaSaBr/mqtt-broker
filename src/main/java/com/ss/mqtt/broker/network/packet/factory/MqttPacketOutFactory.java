@@ -15,6 +15,44 @@ public abstract class MqttPacketOutFactory {
         boolean sessionPresent
     );
 
+    public @NotNull MqttWritablePacket newPublish(
+        @NotNull MqttClient client,
+        int packetId,
+        int qos,
+        boolean retained,
+        boolean duplicate,
+        @NotNull String topicName,
+        @NotNull byte[] payload
+    ) {
+        return newPublish(
+            client,
+            packetId,
+            qos,
+            retained,
+            duplicate,
+            topicName,
+            payload,
+            false,
+            StringUtils.EMPTY,
+            new byte[0],
+            Array.empty()
+        );
+    }
+
+    public abstract @NotNull MqttWritablePacket newPublish(
+        @NotNull MqttClient client,
+        int packetId,
+        int qos,
+        boolean retained,
+        boolean duplicate,
+        @NotNull String topicName,
+        @NotNull byte[] payload,
+        boolean stringPayload,
+        @NotNull String responseTopic,
+        @NotNull byte[] correlationData,
+        @NotNull Array<StringPair> userProperties
+    );
+
     public abstract @NotNull MqttWritablePacket newPublishAck(
         @NotNull MqttClient client,
         int packetId,
@@ -93,8 +131,7 @@ public abstract class MqttPacketOutFactory {
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData
     ) {
-        return newAuthenticate(
-            client,
+        return newAuthenticate(client,
             reasonCode,
             authenticateMethod,
             authenticateData,
