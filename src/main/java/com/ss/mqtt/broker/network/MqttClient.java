@@ -53,7 +53,7 @@ public class MqttClient {
     public void handle(@NotNull MqttReadablePacket packet) {
         log.info("Handle received packet: {}", packet);
         switch (PacketType.fromByte(packet.getPacketType())) {
-            case CONNECT_REQUEST:
+            case CONNECT:
                 onConnected((ConnectInPacket) packet);
                 break;
             case SUBSCRIBE:
