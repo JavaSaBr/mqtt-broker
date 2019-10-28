@@ -107,4 +107,5 @@ public class SubscribeInPacket extends MqttReadablePacket {
                 unexpectedProperty(property);
         }
     }
+
 }
