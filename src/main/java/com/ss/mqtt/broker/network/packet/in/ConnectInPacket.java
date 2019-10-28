@@ -1,14 +1,16 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.MqttPropertyConstants;
+import com.ss.mqtt.broker.model.MqttVersion;
+import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +24,7 @@ import java.util.Set;
 @Getter
 public class ConnectInPacket extends MqttReadablePacket {
 
-    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_REQUEST.ordinal();
+    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -241,6 +243,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
 
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718030
         var protocolName = readString(buffer);
         var protocolLevel = buffer.get();
 
@@ -324,6 +327,11 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
+    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        return mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal();
+    }
+
+    @Override
     protected @NotNull Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
@@ -353,26 +361,30 @@ public class ConnectInPacket extends MqttReadablePacket {
     @Override
     protected void applyProperty(@NotNull PacketProperty property, long value) {
         switch (property) {
+            case REQUEST_RESPONSE_INFORMATION:
+                requestResponseInformation = NumberUtils.toBoolean(value);
+                break;
+            case REQUEST_PROBLEM_INFORMATION:
+                requestProblemInformation = NumberUtils.toBoolean(value);
+                break;
             case RECEIVE_MAXIMUM:
-                receiveMax = (int) NumberUtils.validate(
-                    value,
+                receiveMax = NumberUtils.validate(
+                    (int) value,
                     MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
                     MqttPropertyConstants.RECEIVE_MAXIMUM_MAX
                 );
                 break;
             case TOPIC_ALIAS_MAXIMUM:
-                topicAliasMaximum = (int) value;
-                break;
-            case REQUEST_RESPONSE_INFORMATION:
-                requestResponseInformation = value == 1;
-                break;
-            case REQUEST_PROBLEM_INFORMATION:
-                requestProblemInformation = value == 1;
+                topicAliasMaximum = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.TOPIC_ALIAS_MIN,
+                    MqttPropertyConstants.TOPIC_ALIAS_MAX
+                );
                 break;
             case SESSION_EXPIRY_INTERVAL:
                 sessionExpiryInterval = NumberUtils.validate(
                     value,
-                    0,
+                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_MIN,
                     MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY
                 );
                 break;

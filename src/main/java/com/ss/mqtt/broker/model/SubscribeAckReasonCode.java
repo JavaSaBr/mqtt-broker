@@ -1,7 +1,11 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.rlib.common.util.ObjectUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum SubscribeAckReasonCode {
@@ -63,6 +67,33 @@ public enum SubscribeAckReasonCode {
      * subscription is not accepted.
      */
     WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED((byte) 0xA2);
+
+    private static final SubscribeAckReasonCode[] VALUES;
+
+    static {
+
+        var maxId = Stream.of(values())
+            .mapToInt(SubscribeAckReasonCode::getValue)
+            .map(value -> Byte.toUnsignedInt((byte) value))
+            .max()
+            .orElse(0);
+
+        var values = new SubscribeAckReasonCode[maxId + 1];
+
+        for (var value : values()) {
+            values[Byte.toUnsignedInt(value.value)] = value;
+        }
+
+        VALUES = values;
+    }
+
+    public static @NotNull SubscribeAckReasonCode of(int index) {
+        return ObjectUtils.notNull(
+            VALUES[index],
+            index,
+            arg -> new IndexOutOfBoundsException("Doesn't support reason code: " + arg)
+        );
+    }
 
     private @Getter final byte value;
 }

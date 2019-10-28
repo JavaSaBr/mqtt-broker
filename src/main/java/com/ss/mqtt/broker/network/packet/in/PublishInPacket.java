@@ -305,12 +305,14 @@ public class PublishInPacket extends MqttReadablePacket {
 
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
         topicName = readString(buffer);
         packetId = qos != QoS.AT_MOST_ONCE_DELIVERY ? readUnsignedShort(buffer) : 0;
     }
 
     @Override
     protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718040
         payload = readPayload(buffer);
     }
 
@@ -323,10 +325,14 @@ public class PublishInPacket extends MqttReadablePacket {
     protected void applyProperty(@NotNull PacketProperty property, long value) {
         switch (property) {
             case PAYLOAD_FORMAT_INDICATOR:
-                payloadFormatIndicator = NumberUtils.toBoolean((int) value);
+                payloadFormatIndicator = NumberUtils.toBoolean(value);
                 break;
             case TOPIC_ALIAS:
-                topicAlias = (int) value;
+                topicAlias = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.TOPIC_ALIAS_MIN,
+                    MqttPropertyConstants.TOPIC_ALIAS_MAX)
+                ;
                 break;
             case MESSAGE_EXPIRY_INTERVAL:
                 messageExpiryInterval = value;

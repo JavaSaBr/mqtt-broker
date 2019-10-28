@@ -1,7 +1,11 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.rlib.common.util.ObjectUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum PublishAckReasonCode {
@@ -57,6 +61,33 @@ public enum PublishAckReasonCode {
      * Payload Format Indicator.
      */
     PAYLOAD_FORMAT_INVALID((byte) 0x99);
+
+    private static final PublishAckReasonCode[] VALUES;
+
+    static {
+
+        var maxId = Stream.of(values())
+            .mapToInt(PublishAckReasonCode::getValue)
+            .map(value -> Byte.toUnsignedInt((byte) value))
+            .max()
+            .orElse(0);
+
+        var values = new PublishAckReasonCode[maxId + 1];
+
+        for (var value : values()) {
+            values[Byte.toUnsignedInt(value.value)] = value;
+        }
+
+        VALUES = values;
+    }
+
+    public static @NotNull PublishAckReasonCode of(int index) {
+        return ObjectUtils.notNull(
+            VALUES[index],
+            index,
+            arg -> new IndexOutOfBoundsException("Doesn't support reason code: " + arg)
+        );
+    }
 
     private @Getter final byte value;
 }

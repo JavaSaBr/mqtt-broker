@@ -4,9 +4,24 @@ import org.jetbrains.annotations.NotNull;
 
 public enum PacketType {
     RESERVED,
-    CONNECT_REQUEST,
+    /**
+     * After a Network Connection is established by a Client to a Server, the first Packet sent from
+     * the Client to the Server MUST be a CONNECT Packet
+     */
+    CONNECT,
+    /**
+     * The CONNACK Packet is the packet sent by the Server in response to a CONNECT Packet received from a Client.
+     * The first packet sent from the Server to the Client MUST be a CONNACK Packet [MQTT-3.2.0-1].
+     */
     CONNECT_ACK,
+    /**
+     * A PUBLISH Control Packet is sent from a Client to a Server or from Server to a Client to
+     * transport an Application Message.
+     */
     PUBLISH,
+    /**
+     * A PUBACK Packet is the response to a PUBLISH Packet with QoS level 1.
+     */
     PUBLISH_ACK,
     /**
      * A PUBREC Packet is the response to a PUBLISH Packet with QoS 2. It is the second packet of the QoS 2
@@ -17,10 +32,30 @@ public enum PacketType {
      * A PUBREL Packet is the response to a PUBREC Packet. It is the third packet of the QoS 2 protocol exchange.
      */
     PUBLISH_RELEASED,
+    /**
+     * The PUBCOMP packet is the response to a PUBREL packet. It is the fourth and final packet of
+     * the QoS 2 protocol exchange.
+     */
     PUBLISH_COMPLETED,
+    /**
+     * The SUBSCRIBE Packet is sent from the Client to the Server to create one or more Subscriptions.
+     * Each Subscription registers a Client’s interest in one or more Topics. The Server sends PUBLISH Packets
+     * to the Client in order to forward Application Messages that were published to Topics that match
+     * these Subscriptions. The SUBSCRIBE Packet also specifies (for each Subscription) the maximum QoS with
+     * which the Server can send Application Messages to the Client.
+     */
     SUBSCRIBE,
+    /**
+     * A SUBACK Packet is sent by the Server to the Client to confirm receipt and processing of a SUBSCRIBE Packet.
+     */
     SUBSCRIBE_ACK,
+    /**
+     * An UNSUBSCRIBE Packet is sent by the Client to the Server, to unsubscribe from topics.
+     */
     UNSUBSCRIBE,
+    /**
+     * The UNSUBACK Packet is sent by the Server to the Client to confirm receipt of an UNSUBSCRIBE Packet.
+     */
     UNSUBSCRIBE_ACK,
     /**
      * The PINGREQ packet is sent from a Client to the Server. It can be used to:

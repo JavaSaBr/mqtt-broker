@@ -20,7 +20,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
      * packet containing the appropriate Connect Reason code from this table. If a Server sends a CONNACK
      * packet containing a Reason code of 128 or greater it MUST then close the Network Connection
      */
-    private final @NotNull ConnectAckReasonCode reasonCode;
+    protected final @NotNull ConnectAckReasonCode reasonCode;
 
     /**
      * The Session Present flag informs the Client whether the Server is using Session State from a
@@ -55,6 +55,10 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
     protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
         buffer.put((byte) (sessionPresent ? 0x01 : 0x00));
-        buffer.put(reasonCode.getValue());
+        buffer.put(getReasonCodeValue());
+    }
+
+    protected byte getReasonCodeValue() {
+        return reasonCode.getMqtt311();
     }
 }

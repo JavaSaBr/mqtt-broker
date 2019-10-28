@@ -50,6 +50,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
     public SubscribeInPacket(byte info) {
         super(info);
         this.topicFilters = ArrayFactory.newArray(SubscribeTopicFilter.class);
+        this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED;
     }
 
     @Override
@@ -59,6 +60,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
 
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
         packetId = readUnsignedShort(buffer);
     }
 
@@ -69,20 +71,25 @@ public class SubscribeInPacket extends MqttReadablePacket {
             throw new IllegalStateException("No any topic filters.");
         }
 
+        boolean isMqtt5 = connection.isSupported(MqttVersion.MQTT_5);
+
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901168
         while (buffer.hasRemaining()) {
 
             var topicFilter = readString(buffer);
             var options = readUnsignedByte(buffer);
 
             var qos = QoS.of(options & 0x03);
-            var retainHandling = SubscribeRetainHandling.of((options >> 4) & 0x03);
+            var retainHandling = isMqtt5 ? SubscribeRetainHandling.of((options >> 4) & 0x03) :
+                SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE;
 
             if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
                 throw new IllegalStateException("Unsupported qos or retain handling");
             }
 
-            var noLocal = NumberUtils.isSetBit(options, 2);
-            var rap = NumberUtils.isSetBit(options, 3);
+            var noLocal = !isMqtt5 || NumberUtils.isSetBit(options, 2);
+            var rap = isMqtt5 && NumberUtils.isSetBit(options, 3);
 
             topicFilters.add(new SubscribeTopicFilter(topicFilter, qos, retainHandling, noLocal, rap));
         }

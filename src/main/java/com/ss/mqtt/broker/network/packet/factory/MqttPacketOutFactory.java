@@ -122,4 +122,36 @@ public abstract class MqttPacketOutFactory {
     ) {
         return newPublishRelease(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
     }
+
+    public abstract @NotNull MqttWritablePacket newPublishReceived(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReceivedReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    );
+
+    public @NotNull MqttWritablePacket newPublishReceived(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishReceivedReasonCode reasonCode
+    ) {
+        return newPublishReceived(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+    }
+
+    public abstract @NotNull MqttWritablePacket newPublishCompleted(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishCompletedReasonCode reasonCode,
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String reason
+    );
+
+    public @NotNull MqttWritablePacket newPublishCompleted(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull PublishCompletedReasonCode reasonCode
+    ) {
+        return newPublishCompleted(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+    }
 }

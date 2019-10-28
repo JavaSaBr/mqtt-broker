@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.8.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.2.0.RELEASE"
     }
 }
 
@@ -34,19 +34,23 @@ allprojects {
         annotationVersion = "17.0.0"
         rlibVersion = "9.5.0"
         lombokVersion = '1.18.4'
-        springbootVersion = '2.1.8.RELEASE'
+        springbootVersion = '2.2.0.RELEASE'
         springVersion = '5.1.6.RELEASE'
         junitJupiterVersion = "5.5.2"
         testcontainersVersion = "1.12.1"
         groovyVersion = "2.5.8"
         spockVersion = "1.2-groovy-2.5"
         projectReactorVersion = "3.3.0.RELEASE"
+        byteBuddyVersion = "1.10.2"
+        objenesisVersion = "3.1"
     }
 
     dependencies {
         implementation "com.spaceshift:rlib.network:$rlibVersion"
         implementation "com.spaceshift:rlib.logger.slf4j:$rlibVersion"
         implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
+        implementation "org.springframework.boot:spring-boot-starter-logging:$springbootVersion"
+        
         compileOnly "org.jetbrains:annotations:$annotationVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
@@ -59,6 +63,8 @@ allprojects {
         testCompile "org.spockframework:spock-core:$spockVersion"
         testCompile "org.spockframework:spock-spring:$spockVersion"
         testCompile "org.codehaus.groovy:groovy-all:$groovyVersion"
+        testCompile "net.bytebuddy:byte-buddy-dep:$byteBuddyVersion"
+        testCompile "org.objenesis:objenesis:$objenesisVersion"
     }
 
     sourceSets {
@@ -98,6 +104,10 @@ task buildSingleArtifactWithoutTests(type: GradleBuild) {
 }
 
 wrapper {
-    gradleVersion = '5.5.1'
+    gradleVersion = '5.6.1'
     distributionType = Wrapper.DistributionType.ALL
+}
+
+configurations.each {
+    it.exclude group: "org.slf4j", module: "slf4j-log4j12"
 }

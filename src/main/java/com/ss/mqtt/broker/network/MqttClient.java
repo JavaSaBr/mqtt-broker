@@ -31,7 +31,6 @@ public class MqttClient {
     private volatile int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
     private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
 
-
     public MqttClient(@NotNull MqttConnection connection) {
         this.connection = connection;
         this.clientId = "";

@@ -56,16 +56,16 @@ public class AuthenticateInPacket extends MqttReadablePacket {
     private @NotNull AuthenticateReasonCode reasonCode;
 
     private @NotNull String reason;
-    private @NotNull String authenticateMethod;
+    private @NotNull String authenticationMethod;
 
-    private @NotNull byte[] authenticateData;
+    private @NotNull byte[] authenticationData;
 
     public AuthenticateInPacket(byte info) {
         super(info);
         this.reasonCode = AuthenticateReasonCode.SUCCESS;
         this.reason = StringUtils.EMPTY;
-        this.authenticateMethod = StringUtils.EMPTY;
-        this.authenticateData = ArrayUtils.EMPTY_BYTE_ARRAY;
+        this.authenticationMethod = StringUtils.EMPTY;
+        this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
     }
 
     @Override
@@ -75,6 +75,7 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
         reasonCode = AuthenticateReasonCode.of(readUnsignedByte(buffer));
     }
 
@@ -87,7 +88,7 @@ public class AuthenticateInPacket extends MqttReadablePacket {
     protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
         switch (property) {
             case AUTHENTICATION_DATA:
-                authenticateData = value;
+                authenticationData = value;
                 break;
             default:
                 unexpectedProperty(property);
@@ -101,7 +102,7 @@ public class AuthenticateInPacket extends MqttReadablePacket {
                 reason = value;
                 break;
             case AUTHENTICATION_METHOD:
-                authenticateMethod = value;
+                authenticationMethod = value;
                 break;
             default:
                 unexpectedProperty(property);
