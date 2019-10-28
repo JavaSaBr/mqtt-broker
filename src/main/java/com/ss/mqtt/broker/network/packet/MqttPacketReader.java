@@ -22,7 +22,7 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
     private static final ByteFunction<MqttReadablePacket>[] PACKET_FACTORIES = ArrayFactory.toArray(
         null,
         ConnectInPacket::new,
-        null,
+        ConnectAckInPacket::new,
         PublishInPacket::new,
         PublishAckInPacket::new,
         PublishReceivedInPacket::new,

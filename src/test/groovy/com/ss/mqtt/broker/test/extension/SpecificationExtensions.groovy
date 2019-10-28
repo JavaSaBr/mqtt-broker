@@ -24,6 +24,10 @@ class SpecificationExtensions extends Specification {
         return self
     }
     
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, boolean value) {
+        return putProperty(self, property, value ? 1 : 0)
+    }
+    
     static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, long value) {
         writer.writeProperty(self, property, value)
         return self
@@ -59,6 +63,11 @@ class SpecificationExtensions extends Specification {
     
     static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, IntegerArray values) {
         values.each { writer.writeProperty(self, property, it) }
+        return self
+    }
+    
+    static ByteBuffer putBoolean(ByteBuffer self, boolean value) {
+        self.put((value ? 1 : 0) as byte)
         return self
     }
 }

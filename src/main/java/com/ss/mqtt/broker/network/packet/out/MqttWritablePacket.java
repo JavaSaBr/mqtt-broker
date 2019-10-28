@@ -9,7 +9,6 @@ import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.network.packet.impl.AbstractWritablePacket;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -81,6 +80,10 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
 
         MqttDataUtils.writeMbi(propertiesBuffer.limit(), buffer)
             .put(propertiesBuffer);
+    }
+
+    public void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, boolean value) {
+        writeProperty(buffer, property, value ? 1 : 0);
     }
 
     public void writeProperty(@NotNull ByteBuffer buffer, @NotNull PacketProperty property, long value, long def) {

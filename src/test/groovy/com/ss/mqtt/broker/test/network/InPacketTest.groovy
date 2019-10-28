@@ -13,6 +13,12 @@ import java.nio.charset.StandardCharsets
 
 class InPacketTest extends Specification {
     
+    public static final retainAvailable = true
+    public static final sharedSubscriptionAvailable = true
+    public static final wildcardSubscriptionAvailable = true
+    public static final subscriptionIdAvailable = true
+    
+    public static final sessionPresent = true
     public static final clientId = "testClientId"
     public static final packetId = 1234 as short
     public static final userName = "testUser"
@@ -26,8 +32,10 @@ class InPacketTest extends Specification {
     public static final topicAliasMaximum = 32
     public static final subscriptionId = 637
     public static final subscriptionId2 = 623
+    public static final serverKeepAlive = 1200
     public static final requestResponseInformation = true
     public static final requestProblemInformation = true
+    public static final responseInformation = "responseInformation"
     public static final authMethod = "testAuthMethod"
     public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
     public static final reasonString = "reasonString"

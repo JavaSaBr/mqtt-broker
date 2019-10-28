@@ -325,7 +325,7 @@ public class PublishInPacket extends MqttReadablePacket {
     protected void applyProperty(@NotNull PacketProperty property, long value) {
         switch (property) {
             case PAYLOAD_FORMAT_INDICATOR:
-                payloadFormatIndicator = NumberUtils.toBoolean((int) value);
+                payloadFormatIndicator = NumberUtils.toBoolean(value);
                 break;
             case TOPIC_ALIAS:
                 topicAlias = NumberUtils.validate(

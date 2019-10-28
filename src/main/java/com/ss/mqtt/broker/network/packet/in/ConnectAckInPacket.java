@@ -1,9 +1,13 @@
-package com.ss.mqtt.broker.network.packet.out;
+package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
-import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.rlib.common.util.ArrayUtils;
+import com.ss.rlib.common.util.NumberUtils;
+import com.ss.rlib.common.util.StringUtils;
+import com.ss.rlib.common.util.array.Array;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -11,9 +15,12 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Connect acknowledgment.
+ * Acknowledge connection request.
  */
-public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
+@Getter
+public class ConnectAckInPacket extends MqttReadablePacket {
+
+    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_ACK.ordinal();
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -219,64 +226,173 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         PacketProperty.AUTHENTICATION_DATA
     );
 
-    public ConnectAck5OutPacket(
-        @NotNull MqttClient client,
-        @NotNull ConnectAckReasonCode reasonCode,
-        boolean sessionPresent
-    ) {
-        super(client, reasonCode, sessionPresent);
+    /**
+     * The values the Connect Reason Code are shown below. If a well formed CONNECT packet is received
+     * by the Server, but the Server is unable to complete the Connection the Server MAY send a CONNACK
+     * packet containing the appropriate Connect Reason code from this table. If a Server sends a CONNACK
+     * packet containing a Reason code of 128 or greater it MUST then close the Network Connection
+     */
+    private @NotNull ConnectAckReasonCode reasonCode;
+    private @NotNull QoS maximumQos;
+
+    /**
+     * The Session Present flag informs the Client whether the Server is using Session State from a
+     * previous connection for this ClientID.
+     * This allows the Client and Server to have a consistent view of the Session State.
+     * If the Server accepts a connection with Clean Start set to 1, the Server MUST set Session
+     * Present to 0 in the CONNACK packet in addition to setting a 0x00 (Success) Reason Code in the CONNACK packet
+     */
+    private boolean sessionPresent;
+
+    // properties
+    private @NotNull String assignedClientId;
+    private @NotNull String reason;
+    private @NotNull String responseInformation;
+    private @NotNull String authenticationMethod;
+    private @NotNull String serverReference;
+    private @NotNull byte[] authenticationData;
+
+    private long sessionExpiryInterval;
+
+    private int receiveMax;
+    private int maximumPacketSize;
+    private int topicAliasMaximum;
+    private int serverKeepAlive;
+
+    private boolean retainAvailable;
+    private boolean wildcardSubscriptionAvailable;
+    private boolean sharedSubscriptionAvailable;
+    private boolean subscriptionIdAvailable;
+
+    public ConnectAckInPacket(byte info) {
+        super(info);
+        this.userProperties = Array.empty();
+        this.reasonCode = ConnectAckReasonCode.SUCCESSFUL;
+        this.maximumQos = QoS.EXACTLY_ONCE_DELIVERY;
+        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
+        this.retainAvailable = MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT;
+        this.assignedClientId = StringUtils.EMPTY;
+        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
+        this.reason = StringUtils.EMPTY;
+        this.sharedSubscriptionAvailable = MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT;
+        this.wildcardSubscriptionAvailable = MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT;
+        this.subscriptionIdAvailable = MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE;
+        this.serverKeepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED;
+        this.responseInformation = StringUtils.EMPTY;
+        this.serverReference = StringUtils.EMPTY;
+        this.authenticationMethod = StringUtils.EMPTY;
+        this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
+        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
     }
 
     @Override
-    public int getExpectedLength() {
-        return -1;
+    public byte getPacketType() {
+        return PACKET_TYPE;
     }
 
     @Override
-    protected byte getReasonCodeValue() {
-        return reasonCode.getMqtt5();
+    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
+        sessionPresent = readUnsignedByte(buffer) == 1;
+        reasonCode = ConnectAckReasonCode.of(connection.isSupported(MqttVersion.MQTT_5), readUnsignedByte(buffer));
     }
 
     @Override
-    protected boolean isPropertiesSupported() {
-        return true;
+    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+        return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
+        switch (property) {
+            case AUTHENTICATION_DATA:
+                authenticationData = value;
+                break;
+            default:
+                unexpectedProperty(property);
+        }
+    }
 
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
-        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, 0);
-        writeProperty(buffer, PacketProperty.RETAIN_AVAILABLE, MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT);
-        writeProperty(
-            buffer,
-            PacketProperty.SESSION_EXPIRY_INTERVAL,
-            client.getSessionExpiryInterval(),
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.RECEIVE_MAXIMUM,
-            client.getReceiveMax(),
-            MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.MAXIMUM_PACKET_SIZE,
-            client.getMaximumPacketSize(),
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
-            client.getClientId(),
-            client.getServerClientId()
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.TOPIC_ALIAS,
-            client.getTopicAliasMaximum(),
-            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
-        );
+    @Override
+    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+        switch (property) {
+            case REASON_STRING:
+                reason = value;
+                break;
+            case ASSIGNED_CLIENT_IDENTIFIER:
+                assignedClientId = value;
+                break;
+            case RESPONSE_INFORMATION:
+                responseInformation = value;
+                break;
+            case AUTHENTICATION_METHOD:
+                authenticationMethod = value;
+                break;
+            case SERVER_REFERENCE:
+                serverReference = value;
+                break;
+            default:
+                unexpectedProperty(property);
+        }
+    }
+
+    @Override
+    protected void applyProperty(@NotNull PacketProperty property, long value) {
+        switch (property) {
+            case WILDCARD_SUBSCRIPTION_AVAILABLE:
+                wildcardSubscriptionAvailable = NumberUtils.toBoolean(value);
+                break;
+            case SHARED_SUBSCRIPTION_AVAILABLE:
+                sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
+                break;
+            case SUBSCRIPTION_IDENTIFIER_AVAILABLE:
+                subscriptionIdAvailable = NumberUtils.toBoolean(value);
+                break;
+            case RETAIN_AVAILABLE:
+                retainAvailable = NumberUtils.toBoolean(value);
+                break;
+            case RECEIVE_MAXIMUM:
+                receiveMax = (int) NumberUtils.validate(
+                    value,
+                    MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
+                    MqttPropertyConstants.RECEIVE_MAXIMUM_MAX
+                );
+                break;
+            case MAXIMUM_QOS:
+                maximumQos = QoS.of((int) value);
+                break;
+            case SERVER_KEEP_ALIVE:
+                serverKeepAlive = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.SERVER_KEEP_ALIVE_MIN,
+                    MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX
+                );
+                break;
+            case TOPIC_ALIAS:
+                topicAliasMaximum = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.TOPIC_ALIAS_MIN,
+                    MqttPropertyConstants.TOPIC_ALIAS_MAX
+                );
+                break;
+            case SESSION_EXPIRY_INTERVAL:
+                sessionExpiryInterval = NumberUtils.validate(
+                    value,
+                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_MIN,
+                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY
+                );
+                break;
+            case MAXIMUM_PACKET_SIZE:
+                maximumPacketSize = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MIN,
+                    MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
+                );
+                break;
+            default:
+                unexpectedProperty(property);
+        }
     }
 }

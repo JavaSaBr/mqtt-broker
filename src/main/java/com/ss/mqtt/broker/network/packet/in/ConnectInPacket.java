@@ -361,26 +361,30 @@ public class ConnectInPacket extends MqttReadablePacket {
     @Override
     protected void applyProperty(@NotNull PacketProperty property, long value) {
         switch (property) {
+            case REQUEST_RESPONSE_INFORMATION:
+                requestResponseInformation = NumberUtils.toBoolean(value);
+                break;
+            case REQUEST_PROBLEM_INFORMATION:
+                requestProblemInformation = NumberUtils.toBoolean(value);
+                break;
             case RECEIVE_MAXIMUM:
-                receiveMax = (int) NumberUtils.validate(
-                    value,
+                receiveMax = NumberUtils.validate(
+                    (int) value,
                     MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
                     MqttPropertyConstants.RECEIVE_MAXIMUM_MAX
                 );
                 break;
             case TOPIC_ALIAS_MAXIMUM:
-                topicAliasMaximum = (int) value;
-                break;
-            case REQUEST_RESPONSE_INFORMATION:
-                requestResponseInformation = value == 1;
-                break;
-            case REQUEST_PROBLEM_INFORMATION:
-                requestProblemInformation = value == 1;
+                topicAliasMaximum = NumberUtils.validate(
+                    (int) value,
+                    MqttPropertyConstants.TOPIC_ALIAS_MIN,
+                    MqttPropertyConstants.TOPIC_ALIAS_MAX
+                );
                 break;
             case SESSION_EXPIRY_INTERVAL:
                 sessionExpiryInterval = NumberUtils.validate(
                     value,
-                    0,
+                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_MIN,
                     MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY
                 );
                 break;
