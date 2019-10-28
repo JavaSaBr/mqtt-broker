@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -219,6 +220,20 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         PacketProperty.AUTHENTICATION_DATA
     );
 
+    private @NotNull QoS maxQos;
+    private @NotNull String reason;
+    private @NotNull String serverReference;
+    private @NotNull String responseInformation;
+    private @NotNull String authenticationMethod;
+    private @NotNull byte[] authenticationData;
+
+    private int serverKeepAlive;
+    private int topicAlias;
+
+    private boolean sharedSubscriptionAvailable;
+    private boolean subscriptionIdAvailable;
+    private boolean wildcardSubscriptionAvailable;
+
     public ConnectAck5OutPacket(
         @NotNull MqttClient client,
         @NotNull ConnectAckReasonCode reasonCode,
@@ -246,7 +261,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
-        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, 0);
+        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, maxQos.ordinal());
         writeProperty(buffer, PacketProperty.RETAIN_AVAILABLE, MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT);
         writeProperty(
             buffer,
@@ -269,8 +284,8 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         writeProperty(
             buffer,
             PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
-            client.getClientId(),
-            client.getServerClientId()
+            client.getServerClientId(),
+            client.getClientId()
         );
         writeProperty(
             buffer,

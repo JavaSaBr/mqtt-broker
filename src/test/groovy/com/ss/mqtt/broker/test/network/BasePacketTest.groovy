@@ -2,7 +2,6 @@ package com.ss.mqtt.broker.test.network
 
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.StringPair
-import com.ss.mqtt.broker.network.MqttClient
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.ArrayFactory
@@ -65,13 +64,5 @@ class BasePacketTest extends Specification {
     MqttConnection mqtt311Connection = Stub(MqttConnection) {
         isSupported(MqttVersion.MQTT_3_1_1) >> true
         isSupported(MqttVersion.MQTT_5) >> false
-    }
-    
-    @Shared
-    MqttClient mqttClient5 = Stub(MqttClient) {
-    }
-    
-    @Shared
-    MqttClient mqttClient311 = Stub(MqttClient) {
     }
 }
