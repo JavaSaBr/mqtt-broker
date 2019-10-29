@@ -1,11 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.AuthenticateReasonCode
 import com.ss.mqtt.broker.model.ConnectAckReasonCode
 import com.ss.mqtt.broker.model.MqttPropertyConstants
-import com.ss.mqtt.broker.network.packet.in.AuthenticationInPacket
 import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
-import com.ss.mqtt.broker.network.packet.out.Authentication5OutPacket
 import com.ss.mqtt.broker.network.packet.out.ConnectAck5OutPacket
 import com.ss.rlib.common.util.BufferUtils
 
@@ -18,7 +15,16 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
             def packet = new ConnectAck5OutPacket(
                 mqttClient5,
                 ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
-                sessionPresent
+                sessionPresent,
+                clientId,
+                sessionExpiryInterval,
+                keepAlive,
+                reasonString,
+                serverReference,
+                responseInformation,
+                authMethod,
+                authData,
+                userProperties
             )
         
         when:
@@ -40,10 +46,15 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
             reader.maximumPacketSize == maximumPacketSize
             reader.assignedClientId == clientId
             reader.topicAliasMaximum == topicAliasMaximum
-        
-            reader.authenticationMethod == authMethod
-            reader.authenticationData == authData
             reader.reason == reasonString
             reader.userProperties == userProperties
+            reader.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
+            reader.subscriptionIdAvailable == subscriptionIdAvailable
+            reader.sharedSubscriptionAvailable == sharedSubscriptionAvailable
+            reader.serverKeepAlive == keepAlive
+            reader.responseInformation == responseInformation
+            reader.serverReference == serverReference
+            reader.authenticationData == authData
+            reader.authenticationMethod == authMethod
     }
 }

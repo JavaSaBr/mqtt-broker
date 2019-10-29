@@ -3,8 +3,9 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.model.QoS;
+import com.ss.mqtt.broker.model.StringPair;
 import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -220,26 +221,42 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         PacketProperty.AUTHENTICATION_DATA
     );
 
-    private @NotNull QoS maxQos;
-    private @NotNull String reason;
-    private @NotNull String serverReference;
-    private @NotNull String responseInformation;
-    private @NotNull String authenticationMethod;
-    private @NotNull byte[] authenticationData;
+    private final @NotNull Array<StringPair> userProperties;
 
-    private int serverKeepAlive;
-    private int topicAlias;
+    private final @NotNull String requestedClientId;
+    private final @NotNull String reason;
+    private final @NotNull String serverReference;
+    private final @NotNull String responseInformation;
+    private final @NotNull String authenticationMethod;
+    private final @NotNull byte[] authenticationData;
 
-    private boolean sharedSubscriptionAvailable;
-    private boolean subscriptionIdAvailable;
-    private boolean wildcardSubscriptionAvailable;
+    private final long requestedSessionExpiryInterval;
+    private final int requestedKeepAlive;
 
     public ConnectAck5OutPacket(
         @NotNull MqttClient client,
         @NotNull ConnectAckReasonCode reasonCode,
-        boolean sessionPresent
+        boolean sessionPresent,
+        @NotNull String requestedClientId,
+        long requestedSessionExpiryInterval,
+        int requestedKeepAlive,
+        @NotNull String reason,
+        @NotNull String serverReference,
+        @NotNull String responseInformation,
+        @NotNull String authenticationMethod,
+        @NotNull byte[] authenticationData,
+        @NotNull Array<StringPair> userProperties
     ) {
         super(client, reasonCode, sessionPresent);
+        this.requestedClientId = requestedClientId;
+        this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
+        this.requestedKeepAlive = requestedKeepAlive;
+        this.reason = reason;
+        this.serverReference = serverReference;
+        this.responseInformation = responseInformation;
+        this.authenticationMethod = authenticationMethod;
+        this.authenticationData = authenticationData;
+        this.userProperties = userProperties;
     }
 
     @Override
@@ -260,14 +277,39 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     @Override
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
+        var connection = client.getConnection();
+        var config = connection.getConfig();
+
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
-        writeProperty(buffer, PacketProperty.MAXIMUM_QOS, maxQos.ordinal());
-        writeProperty(buffer, PacketProperty.RETAIN_AVAILABLE, MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT);
+        writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
+        writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_INFORMATION, responseInformation);
+        writeNotEmptyProperty(buffer, PacketProperty.SERVER_REFERENCE, serverReference);
+        writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
+        writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
+        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+        writeProperty(
+            buffer,
+            PacketProperty.MAXIMUM_QOS,
+            config.getMaxQos().ordinal(),
+            MqttPropertyConstants.MAXIMUM_QOS_DEFAULT.ordinal()
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.RETAIN_AVAILABLE,
+            config.isRetainAvailable(),
+            MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
+        );
         writeProperty(
             buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
-            client.getSessionExpiryInterval(),
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
+            requestedSessionExpiryInterval,
+            client.getSessionExpiryInterval()
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
+            requestedClientId,
+            client.getClientId()
         );
         writeProperty(
             buffer,
@@ -283,15 +325,33 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         );
         writeProperty(
             buffer,
-            PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
-            client.getServerClientId(),
-            client.getClientId()
-        );
-        writeProperty(
-            buffer,
             PacketProperty.TOPIC_ALIAS,
             client.getTopicAliasMaximum(),
             MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
+            config.isWildcardSubscriptionAvailable(),
+            MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+            config.isSubscriptionIdAvailable(),
+            MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
+            config.isSharedSubscriptionAvailable(),
+            MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.SERVER_KEEP_ALIVE,
+            requestedKeepAlive,
+            client.getKeepAlive()
         );
     }
 }

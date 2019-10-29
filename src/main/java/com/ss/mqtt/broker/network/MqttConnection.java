@@ -1,6 +1,8 @@
 package com.ss.mqtt.broker.network;
 
+import com.ss.mqtt.broker.config.MqttConnectionConfig;
 import com.ss.mqtt.broker.model.MqttVersion;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
@@ -31,6 +33,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     private final SubscriptionService subscriptionService;
 
     private final @Getter @NotNull MqttClient client;
+    private final @Getter @NotNull MqttConnectionConfig config;
 
     private volatile @Setter @NotNull MqttVersion mqttVersion;
 
@@ -40,10 +43,12 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull NetworkCryptor crypt,
         @NotNull BufferAllocator bufferAllocator,
         int maxPacketsByRead,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull MqttConnectionConfig config
     ) {
         super(network, channel, crypt, bufferAllocator, maxPacketsByRead);
-        this.mqttVersion = MqttVersion.MQTT_5;
+        this.config = config;
+        this.mqttVersion = MqttVersion.MQTT_3_1_1;
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
         this.client = new MqttClient(this);

@@ -2,6 +2,8 @@ package com.ss.mqtt.broker.model;
 
 public interface MqttPropertyConstants {
 
+    QoS MAXIMUM_QOS_DEFAULT = QoS.EXACTLY_ONCE_DELIVERY;
+
     int MAXIMUM_PROTOCOL_PACKET_SIZE = 256 * 1024 * 1024;
 
     long SESSION_EXPIRY_INTERVAL_DEFAULT = 0;

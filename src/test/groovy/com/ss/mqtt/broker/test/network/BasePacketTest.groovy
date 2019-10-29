@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.test.network
 
+import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.network.MqttConnection
@@ -56,13 +57,23 @@ class BasePacketTest extends Specification {
     public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
     
     @Shared
+    MqttConnectionConfig mqttConnectionConfig = Stub(MqttConnectionConfig) {
+        isRetainAvailable() >> retainAvailable
+        isSharedSubscriptionAvailable() >> sharedSubscriptionAvailable
+        isWildcardSubscriptionAvailable() >> wildcardSubscriptionAvailable
+        isSubscriptionIdAvailable() >> subscriptionIdAvailable
+    }
+    
+    @Shared
     MqttConnection mqtt5Connection = Stub(MqttConnection) {
         isSupported(MqttVersion.MQTT_5) >> true
+        getConfig() >> mqttConnectionConfig
     }
     
     @Shared
     MqttConnection mqtt311Connection = Stub(MqttConnection) {
         isSupported(MqttVersion.MQTT_3_1_1) >> true
         isSupported(MqttVersion.MQTT_5) >> false
+        getConfig() >> mqttConnectionConfig
     }
 }

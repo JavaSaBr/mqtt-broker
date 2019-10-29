@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network.packet.factory;
 import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
@@ -12,8 +13,62 @@ public abstract class MqttPacketOutFactory {
     public abstract @NotNull MqttWritablePacket newConnectAck(
         @NotNull MqttClient client,
         @NotNull ConnectAckReasonCode reasonCode,
-        boolean sessionPresent
+        boolean sessionPresent,
+        @NotNull String requestedClientId,
+        long requestedSessionExpiryInterval,
+        int requestedKeepAlive,
+        @NotNull String reason,
+        @NotNull String serverReference,
+        @NotNull String responseInformation,
+        @NotNull String authenticationMethod,
+        @NotNull byte[] authenticationData,
+        @NotNull Array<StringPair> userProperties
     );
+
+    public @NotNull MqttWritablePacket newConnectAck(
+        @NotNull MqttClient client,
+        @NotNull ConnectAckReasonCode reasonCode,
+        boolean sessionPresent,
+        @NotNull String requestedClientId,
+        long requestedSessionExpiryInterval,
+        int requestedKeepAlive
+    ) {
+        return newConnectAck(
+            client,
+            reasonCode,
+            sessionPresent,
+            requestedClientId,
+            requestedSessionExpiryInterval,
+            requestedKeepAlive,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            Array.empty()
+        );
+    }
+
+    public @NotNull MqttWritablePacket newConnectAck(
+        @NotNull MqttClient client,
+        @NotNull ConnectAckReasonCode reasonCode
+    ) {
+        return newConnectAck(
+            client,
+            reasonCode,
+            false,
+            StringUtils.EMPTY,
+            client.getSessionExpiryInterval(),
+            client.getKeepAlive(),
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            Array.empty()
+        );
+    }
+
 
     public abstract @NotNull MqttWritablePacket newPublishAck(
         @NotNull MqttClient client,
