@@ -13,7 +13,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new ConnectAck5OutPacket(
-                mqttClient5,
+                mqtt5Client,
                 ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
                 sessionPresent,
                 clientId,
