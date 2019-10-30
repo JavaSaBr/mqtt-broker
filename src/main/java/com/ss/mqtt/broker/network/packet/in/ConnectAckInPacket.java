@@ -121,7 +121,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
           on this connection. If Topic Alias Maximum is absent or 0, the Client MUST NOT send any Topic Aliases on
           to the Server
          */
-        PacketProperty.TOPIC_ALIAS,
+        PacketProperty.TOPIC_ALIAS_MAXIMUM,
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
           Reason String is a human readable string designed for diagnostics and SHOULD NOT be parsed by the

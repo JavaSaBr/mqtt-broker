@@ -325,7 +325,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         );
         writeProperty(
             buffer,
-            PacketProperty.TOPIC_ALIAS,
+            PacketProperty.TOPIC_ALIAS_MAXIMUM,
             client.getTopicAliasMaximum(),
             MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
         );
