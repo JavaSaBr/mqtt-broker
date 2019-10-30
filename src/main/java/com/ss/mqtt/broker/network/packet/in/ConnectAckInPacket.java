@@ -370,7 +370,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
                     MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX
                 );
                 break;
-            case TOPIC_ALIAS:
+            case TOPIC_ALIAS_MAXIMUM:
                 topicAliasMaximum = NumberUtils.validate(
                     (int) value,
                     MqttPropertyConstants.TOPIC_ALIAS_MIN,
