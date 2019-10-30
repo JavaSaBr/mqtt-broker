@@ -231,11 +231,6 @@ public class PublishInPacket extends MqttReadablePacket {
     private final boolean retained;
 
     /**
-     * The list of subscription ids.
-     */
-    private @NotNull IntegerArray subscriptionIds;
-
-    /**
      * The Topic Name identifies the information channel to which Payload data is published.
      * <p>
      * The Topic Name MUST be present as the first field in the PUBLISH packet Variable Header. It MUST be
@@ -255,34 +250,23 @@ public class PublishInPacket extends MqttReadablePacket {
     private @NotNull String topicName;
 
     /**
-     * The response topic.
-     */
-    private @NotNull String responseTopic;
-
-    /**
-     * The content type.
-     */
-    private @NotNull String contentType;
-
-    /**
-     * The correlation data.
-     */
-    private @NotNull byte[] correlationData;
-
-    /**
-     * The payload data.
-     */
-    private @NotNull byte[] payload;
-
-    /**
      * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section
      * 2.2.1 provides more information about Packet Identifiers.
      */
     private int packetId;
 
+    private @NotNull byte[] payload;
+
+    // properties
+    private @NotNull String responseTopic;
+    private @NotNull String contentType;
+
+    private @NotNull IntegerArray subscriptionIds;
+
+    private @NotNull byte[] correlationData;
+
     private long messageExpiryInterval = MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT;
     private int topicAlias = MqttPropertyConstants.TOPIC_ALIAS_DEFAULT;
-
     private boolean payloadFormatIndicator = MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT;
 
     public PublishInPacket(byte info) {

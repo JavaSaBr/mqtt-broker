@@ -13,8 +13,6 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 @Log4j2
 @Getter
 @EqualsAndHashCode(of = "clientId")
@@ -65,7 +63,7 @@ public class MqttClient {
 
         connection.send(getPacketOutFactory().newConnectAck(
             this,
-            ConnectAckReasonCode.SUCCESSFUL,
+            ConnectAckReasonCode.SUCCESS,
             false,
             clientId,
             sessionExpiryInterval,

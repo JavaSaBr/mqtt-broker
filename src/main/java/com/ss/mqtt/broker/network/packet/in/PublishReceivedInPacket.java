@@ -44,9 +44,10 @@ public class PublishReceivedInPacket extends MqttReadablePacket {
     );
 
     private @NotNull PublishReceivedReasonCode reasonCode;
-    private @NotNull String reason;
-
     private int packetId;
+
+    // properties
+    private @NotNull String reason;
 
     public PublishReceivedInPacket(byte info) {
         super(info);

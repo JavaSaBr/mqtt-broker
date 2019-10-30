@@ -12,7 +12,7 @@ public enum ConnectAckReasonCode {
     /**
      * The Connection is accepted.
      */
-    SUCCESSFUL((byte) 0x00, (byte) 0x00),
+    SUCCESS((byte) 0x00, (byte) 0x00),
 
     // WITH REASONS BELOW SERVER MUST CLOSE CONNECTION
 
@@ -141,7 +141,7 @@ public enum ConnectAckReasonCode {
     public static @NotNull ConnectAckReasonCode ofMqtt311(int reasonCode) {
         switch (reasonCode) {
             case 0x00:
-                return SUCCESSFUL;
+                return SUCCESS;
             case 0x01:
                 return UNSUPPORTED_PROTOCOL_VERSION;
             case 0x02:

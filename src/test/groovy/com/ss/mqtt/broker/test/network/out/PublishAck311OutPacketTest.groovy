@@ -23,7 +23,7 @@ class PublishAck311OutPacketTest extends BaseOutPacketTest {
         
         then:
             result
-            reader.reasonCode == PublishAckReasonCode.SUCCESSFUL
+            reader.reasonCode == PublishAckReasonCode.SUCCESS
             reader.packetId == packetId
             reader.userProperties == Array.empty()
             reader.reason == ""

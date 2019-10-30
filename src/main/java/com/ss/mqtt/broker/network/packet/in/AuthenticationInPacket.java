@@ -55,6 +55,7 @@ public class AuthenticationInPacket extends MqttReadablePacket {
 
     private @NotNull AuthenticateReasonCode reasonCode;
 
+    // properties
     private @NotNull String reason;
     private @NotNull String authenticationMethod;
 

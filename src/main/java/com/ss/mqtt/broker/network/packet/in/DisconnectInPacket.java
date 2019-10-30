@@ -57,6 +57,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
 
     private @NotNull DisconnectReasonCode reasonCode;
 
+    // properties
     private @NotNull String reason;
     private @NotNull String serverReference;
 

@@ -44,9 +44,10 @@ public class PublishReleaseInPacket extends MqttReadablePacket {
     );
 
     private @NotNull PublishReleaseReasonCode reasonCode;
-    private @NotNull String reason;
-
     private int packetId;
+
+    // properties
+    private @NotNull String reason;
 
     public PublishReleaseInPacket(byte info) {
         super(info);

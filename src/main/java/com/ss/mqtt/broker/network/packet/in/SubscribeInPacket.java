@@ -40,8 +40,9 @@ public class SubscribeInPacket extends MqttReadablePacket {
     );
 
     private @NotNull Array<SubscribeTopicFilter> topicFilters;
-
     private int packetId;
+
+    // properties
     private int subscriptionId;
 
     public SubscribeInPacket(byte info) {

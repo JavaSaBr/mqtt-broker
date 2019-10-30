@@ -23,7 +23,7 @@ class PublishAckInPacketTest extends BaseInPacketTest {
             result
             packet.reason == ""
             packet.packetId == packetId
-            packet.reasonCode == PublishAckReasonCode.SUCCESSFUL
+            packet.reasonCode == PublishAckReasonCode.SUCCESS
             packet.userProperties == Array.empty()
     }
     

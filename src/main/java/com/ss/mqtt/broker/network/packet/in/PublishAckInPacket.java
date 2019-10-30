@@ -51,7 +51,7 @@ public class PublishAckInPacket extends MqttReadablePacket {
 
     public PublishAckInPacket(byte info) {
         super(info);
-        this.reasonCode = PublishAckReasonCode.SUCCESSFUL;
+        this.reasonCode = PublishAckReasonCode.SUCCESS;
         this.reason = StringUtils.EMPTY;
     }
 
