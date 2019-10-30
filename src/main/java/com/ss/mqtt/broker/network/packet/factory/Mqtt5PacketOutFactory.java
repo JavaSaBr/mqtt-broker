@@ -12,9 +12,31 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
     public @NotNull MqttWritablePacket newConnectAck(
         @NotNull MqttClient client,
         @NotNull ConnectAckReasonCode reasonCode,
-        boolean sessionPresent
+        boolean sessionPresent,
+        @NotNull String requestedClientId,
+        long requestedSessionExpiryInterval,
+        int requestedKeepAlive,
+        @NotNull String reason,
+        @NotNull String serverReference,
+        @NotNull String responseInformation,
+        @NotNull String authenticationMethod,
+        @NotNull byte[] authenticationData,
+        @NotNull Array<StringPair> userProperties
     ) {
-        return new ConnectAck5OutPacket(client, reasonCode, sessionPresent);
+        return new ConnectAck5OutPacket(
+            client,
+            reasonCode,
+            sessionPresent,
+            requestedClientId,
+            requestedSessionExpiryInterval,
+            requestedKeepAlive,
+            reason,
+            serverReference,
+            responseInformation,
+            authenticationMethod,
+            authenticationData,
+            userProperties
+        );
     }
 
     @Override

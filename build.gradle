@@ -59,12 +59,13 @@ allprojects {
         testCompile "com.hivemq:hivemq-mqtt-client:1.1.2"
         testCompile "io.moquette:moquette-broker:0.12.1"
     
-        testCompile "org.springframework:spring-test:$springVersion"
-        testCompile "org.spockframework:spock-core:$spockVersion"
-        testCompile "org.spockframework:spock-spring:$spockVersion"
-        testCompile "org.codehaus.groovy:groovy-all:$groovyVersion"
-        testCompile "net.bytebuddy:byte-buddy-dep:$byteBuddyVersion"
-        testCompile "org.objenesis:objenesis:$objenesisVersion"
+        testCompileOnly "org.jetbrains:annotations:$annotationVersion"
+        testImplementation "org.springframework:spring-test:$springVersion"
+        testImplementation "org.spockframework:spock-core:$spockVersion"
+        testImplementation "org.spockframework:spock-spring:$spockVersion"
+        testImplementation "org.codehaus.groovy:groovy-all:$groovyVersion"
+        testImplementation "net.bytebuddy:byte-buddy-dep:$byteBuddyVersion"
+        testImplementation "org.objenesis:objenesis:$objenesisVersion"
     }
 
     sourceSets {

@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.test.integration
 
-class PublishTest extends MqttBrokerSpecification {
+class PublishTest extends MqttBrokerTest {
     
     def "publisher should publish message to broker"() {
         when:

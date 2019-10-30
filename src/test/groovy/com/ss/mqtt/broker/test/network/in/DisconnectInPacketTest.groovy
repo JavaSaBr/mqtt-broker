@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.DisconnectReasonCode
 import com.ss.mqtt.broker.model.PacketProperty
@@ -6,7 +6,7 @@ import com.ss.mqtt.broker.network.packet.in.DisconnectInPacket
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
 
-class DisconnectInPacketTest extends InPacketTest {
+class DisconnectInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 5.0"() {
         
@@ -30,11 +30,11 @@ class DisconnectInPacketTest extends InPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReason() == reasonString
-            packet.getServerReference() == serverReference
-            packet.getReasonCode() == DisconnectReasonCode.QUOTA_EXCEEDED
-            packet.getSessionExpiryInterval() == sessionExpiryInterval
-            packet.getUserProperties() == userProperties
+            packet.reason == reasonString
+            packet.serverReference == serverReference
+            packet.reasonCode == DisconnectReasonCode.QUOTA_EXCEEDED
+            packet.sessionExpiryInterval == sessionExpiryInterval
+            packet.userProperties == userProperties
         when:
     
             propertiesBuffer = BufferUtils.prepareBuffer(512) {
@@ -52,10 +52,10 @@ class DisconnectInPacketTest extends InPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getReason() == ""
-            packet.getServerReference() == serverReference
-            packet.getReasonCode() == DisconnectReasonCode.PACKET_TOO_LARGE
-            packet.getSessionExpiryInterval() == sessionExpiryInterval
-            packet.getUserProperties() == Array.empty()
+            packet.reason == ""
+            packet.serverReference == serverReference
+            packet.reasonCode == DisconnectReasonCode.PACKET_TOO_LARGE
+            packet.sessionExpiryInterval == sessionExpiryInterval
+            packet.userProperties == Array.empty()
     }
 }

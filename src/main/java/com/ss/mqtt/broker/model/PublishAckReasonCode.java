@@ -13,7 +13,7 @@ public enum PublishAckReasonCode {
      * The message is accepted. Publication of the QoS 1
      * message proceeds.
      */
-    SUCCESSFUL((byte) 0x00),
+    SUCCESS((byte) 0x00),
     /**
      * The message is accepted but there are no
      * subscribers. This is sent only by the Server. If the

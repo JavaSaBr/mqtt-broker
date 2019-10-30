@@ -35,7 +35,7 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         PingRequestInPacket::new,
         PingResponseInPacket::new,
         DisconnectInPacket::new,
-        AuthenticateInPacket::new
+        AuthenticationInPacket::new
     );
 
     public MqttPacketReader(

@@ -17,7 +17,7 @@ import java.util.Set;
  * Authentication exchange.
  */
 @Getter
-public class AuthenticateInPacket extends MqttReadablePacket {
+public class AuthenticationInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
 
@@ -55,12 +55,13 @@ public class AuthenticateInPacket extends MqttReadablePacket {
 
     private @NotNull AuthenticateReasonCode reasonCode;
 
+    // properties
     private @NotNull String reason;
     private @NotNull String authenticationMethod;
 
     private @NotNull byte[] authenticationData;
 
-    public AuthenticateInPacket(byte info) {
+    public AuthenticationInPacket(byte info) {
         super(info);
         this.reasonCode = AuthenticateReasonCode.SUCCESS;
         this.reason = StringUtils.EMPTY;

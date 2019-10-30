@@ -90,13 +90,7 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901209
-        writeUserProperties(buffer, userProperties);
-        writeProperty(
-            buffer,
-            PacketProperty.SESSION_EXPIRY_INTERVAL,
-            client.getSessionExpiryInterval(),
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
-        );
+        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
         writeNotEmptyProperty(
             buffer,
             PacketProperty.REASON_STRING,
@@ -107,5 +101,14 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
             PacketProperty.SERVER_REFERENCE,
             serverReference
         );
+
+        if (client.getSessionExpiryInterval() != MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+            writeProperty(
+                buffer,
+                PacketProperty.SESSION_EXPIRY_INTERVAL,
+                client.getSessionExpiryInterval(),
+                MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
+            );
+        }
     }
 }

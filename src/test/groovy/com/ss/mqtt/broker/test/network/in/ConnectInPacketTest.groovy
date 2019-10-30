@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.PacketProperty
@@ -6,7 +6,7 @@ import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
 import com.ss.rlib.common.util.ArrayUtils
 import com.ss.rlib.common.util.BufferUtils
 
-class ConnectInPacketTest extends InPacketTest {
+class ConnectInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         
@@ -27,13 +27,13 @@ class ConnectInPacketTest extends InPacketTest {
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getClientId() == clientId
-            packet.getMqttVersion() == MqttVersion.MQTT_3_1_1
-            packet.getPassword() == userPassword
-            packet.getUsername() == userName
-            packet.getWillTopic() == ""
-            packet.getWillQos() == 0
-            packet.getWillPayload() == ArrayUtils.EMPTY_BYTE_ARRAY
+            packet.clientId == clientId
+            packet.mqttVersion == MqttVersion.MQTT_3_1_1
+            packet.password == userPassword
+            packet.username == userName
+            packet.willTopic == ""
+            packet.willQos == 0
+            packet.willPayload == ArrayUtils.EMPTY_BYTE_ARRAY
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -69,20 +69,20 @@ class ConnectInPacketTest extends InPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getKeepAlive() == keepAlive
-            packet.getAuthenticationMethod() == authMethod
-            packet.getAuthenticationData() == authData
-            packet.getClientId() == clientId
-            packet.getMqttVersion() == MqttVersion.MQTT_5
-            packet.getMaximumPacketSize() == maximumPacketSize
-            packet.getPassword() == userPassword
-            packet.getUsername() == userName
-            packet.getTopicAliasMaximum() == topicAliasMaximum
-            packet.getSessionExpiryInterval() == sessionExpiryInterval
-            packet.getReceiveMax() == receiveMaximum
-            packet.getWillTopic() == ""
-            packet.getWillQos() == 0
-            packet.getWillPayload() == ArrayUtils.EMPTY_BYTE_ARRAY
-            packet.getUserProperties() == userProperties
+            packet.keepAlive == keepAlive
+            packet.authenticationMethod == authMethod
+            packet.authenticationData == authData
+            packet.clientId == clientId
+            packet.mqttVersion == MqttVersion.MQTT_5
+            packet.maximumPacketSize == maximumPacketSize
+            packet.password == userPassword
+            packet.username == userName
+            packet.topicAliasMaximum == topicAliasMaximum
+            packet.sessionExpiryInterval == sessionExpiryInterval
+            packet.receiveMax == receiveMaximum
+            packet.willTopic == ""
+            packet.willQos == 0
+            packet.willPayload == ArrayUtils.EMPTY_BYTE_ARRAY
+            packet.userProperties == userProperties
     }
 }

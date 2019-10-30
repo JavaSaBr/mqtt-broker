@@ -44,9 +44,10 @@ public class PublishCompleteInPacket extends MqttReadablePacket {
     );
 
     private @NotNull PublishCompletedReasonCode reasonCode;
-    private @NotNull String reason;
-
     private int packetId;
+
+    // properties
+    private @NotNull String reason;
 
     public PublishCompleteInPacket(byte info) {
         super(info);

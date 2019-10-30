@@ -29,7 +29,6 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
     );
 
     private @NotNull Array<String> topicFilters;
-
     private int packetId;
 
     public UnsubscribeInPacket(byte info) {

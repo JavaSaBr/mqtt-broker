@@ -70,7 +70,7 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901182
-        writeUserProperties(buffer, userProperties);
+        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
         writeNotEmptyProperty(
             buffer,
             PacketProperty.REASON_STRING,

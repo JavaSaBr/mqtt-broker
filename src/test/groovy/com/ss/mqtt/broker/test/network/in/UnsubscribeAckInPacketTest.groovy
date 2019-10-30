@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode
@@ -6,7 +6,7 @@ import com.ss.mqtt.broker.network.packet.in.UnsubscribeAckInPacket
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
 
-class UnsubscribeAckInPacketTest extends InPacketTest {
+class UnsubscribeAckInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         

@@ -13,8 +13,62 @@ public abstract class MqttPacketOutFactory {
     public abstract @NotNull MqttWritablePacket newConnectAck(
         @NotNull MqttClient client,
         @NotNull ConnectAckReasonCode reasonCode,
-        boolean sessionPresent
+        boolean sessionPresent,
+        @NotNull String requestedClientId,
+        long requestedSessionExpiryInterval,
+        int requestedKeepAlive,
+        @NotNull String reason,
+        @NotNull String serverReference,
+        @NotNull String responseInformation,
+        @NotNull String authenticationMethod,
+        @NotNull byte[] authenticationData,
+        @NotNull Array<StringPair> userProperties
     );
+
+    public @NotNull MqttWritablePacket newConnectAck(
+        @NotNull MqttClient client,
+        @NotNull ConnectAckReasonCode reasonCode,
+        boolean sessionPresent,
+        @NotNull String requestedClientId,
+        long requestedSessionExpiryInterval,
+        int requestedKeepAlive
+    ) {
+        return newConnectAck(
+            client,
+            reasonCode,
+            sessionPresent,
+            requestedClientId,
+            requestedSessionExpiryInterval,
+            requestedKeepAlive,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            Array.empty()
+        );
+    }
+
+    public @NotNull MqttWritablePacket newConnectAck(
+        @NotNull MqttClient client,
+        @NotNull ConnectAckReasonCode reasonCode
+    ) {
+        return newConnectAck(
+            client,
+            reasonCode,
+            false,
+            StringUtils.EMPTY,
+            client.getSessionExpiryInterval(),
+            client.getKeepAlive(),
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            Array.empty()
+        );
+    }
+
 
     public @NotNull MqttWritablePacket newPublish(
         @NotNull MqttClient client,

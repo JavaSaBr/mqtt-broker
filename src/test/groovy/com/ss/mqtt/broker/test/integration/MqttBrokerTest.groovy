@@ -7,7 +7,7 @@ import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
 @ContextConfiguration(classes = MqttBrokerTestConfig)
-class MqttBrokerSpecification extends Specification {
+class MqttBrokerTest extends Specification {
     
     @Autowired
     protected Mqtt5AsyncClient mqttSubscriber

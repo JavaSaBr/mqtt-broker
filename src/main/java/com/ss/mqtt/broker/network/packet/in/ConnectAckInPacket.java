@@ -121,7 +121,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
           on this connection. If Topic Alias Maximum is absent or 0, the Client MUST NOT send any Topic Aliases on
           to the Server
          */
-        PacketProperty.TOPIC_ALIAS,
+        PacketProperty.TOPIC_ALIAS_MAXIMUM,
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
           Reason String is a human readable string designed for diagnostics and SHOULD NOT be parsed by the
@@ -267,7 +267,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
     public ConnectAckInPacket(byte info) {
         super(info);
         this.userProperties = Array.empty();
-        this.reasonCode = ConnectAckReasonCode.SUCCESSFUL;
+        this.reasonCode = ConnectAckReasonCode.SUCCESS;
         this.maximumQos = QoS.EXACTLY_ONCE_DELIVERY;
         this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
         this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
@@ -370,7 +370,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
                     MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX
                 );
                 break;
-            case TOPIC_ALIAS:
+            case TOPIC_ALIAS_MAXIMUM:
                 topicAliasMaximum = NumberUtils.validate(
                     (int) value,
                     MqttPropertyConstants.TOPIC_ALIAS_MIN,

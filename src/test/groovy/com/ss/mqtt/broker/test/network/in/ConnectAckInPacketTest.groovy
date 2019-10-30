@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.ConnectAckReasonCode
 import com.ss.mqtt.broker.model.MqttPropertyConstants
@@ -8,7 +8,7 @@ import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
 import com.ss.rlib.common.util.ArrayUtils
 import com.ss.rlib.common.util.BufferUtils
 
-class ConnectAckInPacketTest extends InPacketTest {
+class ConnectAckInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         

@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.test.network
+package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.model.PacketProperty
@@ -9,7 +9,7 @@ import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.IntegerArray
 
-class PublishInPacketTest extends InPacketTest {
+class PublishInPacketTest extends BaseInPacketTest {
     
     def "should read packet correctly as mqtt 3.1.1"() {
         
@@ -26,19 +26,19 @@ class PublishInPacketTest extends InPacketTest {
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getQos() == QoS.AT_LEAST_ONCE_DELIVERY
-            !packet.isDuplicate()
-            packet.isRetained()
-            packet.getResponseTopic() == ""
-            packet.getSubscriptionIds() == IntegerArray.EMPTY
-            packet.getContentType() == ""
-            packet.getCorrelationData() == ArrayUtils.EMPTY_BYTE_ARRAY
-            packet.getPayload() == publishPayload
-            packet.getPacketId() == packetId
-            packet.getUserProperties() == Array.empty()
-            packet.getMessageExpiryInterval() == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
-            packet.getTopicAlias() == MqttPropertyConstants.TOPIC_ALIAS_DEFAULT
-            packet.isPayloadFormatIndicator() == MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT
+            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            !packet.duplicate
+            packet.retained
+            packet.responseTopic == ""
+            packet.subscriptionIds == IntegerArray.EMPTY
+            packet.contentType == ""
+            packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
+            packet.payload == publishPayload
+            packet.packetId == packetId
+            packet.userProperties == Array.empty()
+            packet.messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
+            packet.topicAlias == MqttPropertyConstants.TOPIC_ALIAS_DEFAULT
+            packet.payloadFormatIndicator == MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -69,19 +69,19 @@ class PublishInPacketTest extends InPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getQos() == QoS.AT_LEAST_ONCE_DELIVERY
-            !packet.isDuplicate()
-            packet.isRetained()
-            packet.getResponseTopic() == responseTopic
-            packet.getSubscriptionIds() == subscriptionIds
-            packet.getContentType() == contentType
-            packet.getCorrelationData() == correlationData
-            packet.getPayload() == publishPayload
-            packet.getPacketId() == packetId
-            packet.getUserProperties() == userProperties
-            packet.getMessageExpiryInterval() == messageExpiryInterval
-            packet.getTopicAlias() == topicAlias
-            packet.isPayloadFormatIndicator()
+            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            !packet.duplicate
+            packet.retained
+            packet.responseTopic == responseTopic
+            packet.subscriptionIds == subscriptionIds
+            packet.contentType == contentType
+            packet.correlationData == correlationData
+            packet.payload == publishPayload
+            packet.packetId == packetId
+            packet.userProperties == userProperties
+            packet.messageExpiryInterval == messageExpiryInterval
+            packet.topicAlias == topicAlias
+            packet.payloadFormatIndicator
         when:
     
             dataBuffer = BufferUtils.prepareBuffer(512) {
@@ -95,18 +95,18 @@ class PublishInPacketTest extends InPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.getQos() == QoS.AT_LEAST_ONCE_DELIVERY
-            !packet.isDuplicate()
-            packet.isRetained()
-            packet.getResponseTopic() == ""
-            packet.getSubscriptionIds() == IntegerArray.EMPTY
-            packet.getContentType() == ""
-            packet.getCorrelationData() == ArrayUtils.EMPTY_BYTE_ARRAY
-            packet.getPayload() == publishPayload
-            packet.getPacketId() == packetId
-            packet.getUserProperties() == Array.empty()
-            packet.getMessageExpiryInterval() == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
-            packet.getTopicAlias() == MqttPropertyConstants.TOPIC_ALIAS_DEFAULT
-            packet.isPayloadFormatIndicator() == MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT
+            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            !packet.duplicate
+            packet.retained
+            packet.responseTopic == ""
+            packet.subscriptionIds == IntegerArray.EMPTY
+            packet.contentType == ""
+            packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
+            packet.payload == publishPayload
+            packet.packetId == packetId
+            packet.userProperties == Array.empty()
+            packet.messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
+            packet.topicAlias == MqttPropertyConstants.TOPIC_ALIAS_DEFAULT
+            packet.payloadFormatIndicator == MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT
     }
 }
