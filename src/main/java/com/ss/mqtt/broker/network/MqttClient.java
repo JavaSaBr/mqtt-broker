@@ -99,11 +99,7 @@ public class MqttClient {
     }
 
     public void onPublish(@NotNull PublishInPacket publish) {
-        var ackReasonCodes = connection.getPublishingService().publish(connection.getClient(), publish);
-        ackReasonCodes.forEach(ackReasonCode -> sendPublishAck(publish, ackReasonCode));
-    }
-
-    private void sendPublishAck(@NotNull PublishInPacket publish, @NotNull PublishAckReasonCode ackReasonCode) {
+        var ackReasonCode = connection.getPublishingService().publish(connection.getClient(), publish);
         connection.send(getPacketOutFactory().newPublishAck(
             connection.getClient(),
             publish.getPacketId(),

@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network.packet.factory;
 import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public abstract class MqttPacketOutFactory {
     public @NotNull MqttWritablePacket newPublish(
         @NotNull MqttClient client,
         int packetId,
-        int qos,
+        @NotNull QoS qos,
         boolean retained,
         boolean duplicate,
         @NotNull String topicName,
@@ -31,10 +32,11 @@ public abstract class MqttPacketOutFactory {
             retained,
             duplicate,
             topicName,
+            0,
             payload,
             false,
             StringUtils.EMPTY,
-            new byte[0],
+            ArrayUtils.EMPTY_BYTE_ARRAY,
             Array.empty()
         );
     }
@@ -42,10 +44,11 @@ public abstract class MqttPacketOutFactory {
     public abstract @NotNull MqttWritablePacket newPublish(
         @NotNull MqttClient client,
         int packetId,
-        int qos,
+        @NotNull QoS qos,
         boolean retained,
         boolean duplicate,
         @NotNull String topicName,
+        int topicAlias,
         @NotNull byte[] payload,
         boolean stringPayload,
         @NotNull String responseTopic,
@@ -131,7 +134,8 @@ public abstract class MqttPacketOutFactory {
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData
     ) {
-        return newAuthenticate(client,
+        return newAuthenticate(
+            client,
             reasonCode,
             authenticateMethod,
             authenticateData,

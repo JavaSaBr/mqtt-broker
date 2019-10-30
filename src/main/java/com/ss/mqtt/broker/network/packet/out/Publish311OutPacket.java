@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network.packet.out;
 
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import org.jetbrains.annotations.NotNull;
@@ -11,16 +12,16 @@ public class Publish311OutPacket extends MqttWritablePacket {
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
 
     private final int packetId;
-    private final int qos;
     private final boolean retained;
     private final boolean duplicate;
-    private final byte[] payload;
-    private final String topicName;
+    private final @NotNull QoS qos;
+    private final @NotNull byte[] payload;
+    private final @NotNull String topicName;
 
     public Publish311OutPacket(
         @NotNull MqttClient client,
         int packetId,
-        int qos,
+        @NotNull QoS qos,
         boolean retained,
         boolean duplicate,
         @NotNull String topicName,
@@ -43,7 +44,7 @@ public class Publish311OutPacket extends MqttWritablePacket {
     @Override
     protected byte getPacketFlags() {
 
-        byte info = (byte) (qos << 1);
+        byte info = (byte) (qos.ordinal() << 1);
 
         if (retained) {
             info |= 0x01;

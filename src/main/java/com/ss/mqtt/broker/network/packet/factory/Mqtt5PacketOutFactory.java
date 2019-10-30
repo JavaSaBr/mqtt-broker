@@ -17,13 +17,15 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         return new ConnectAck5OutPacket(client, reasonCode, sessionPresent);
     }
 
+    @Override
     public @NotNull MqttWritablePacket newPublish(
         @NotNull MqttClient client,
         int packetId,
-        int qos,
+        @NotNull QoS qos,
         boolean retained,
         boolean duplicate,
         @NotNull String topicName,
+        int topicAlias,
         @NotNull byte[] payload,
         boolean stringPayload,
         @NotNull String responseTopic,
@@ -37,6 +39,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
             retained,
             duplicate,
             topicName,
+            topicAlias,
             payload,
             stringPayload,
             responseTopic,

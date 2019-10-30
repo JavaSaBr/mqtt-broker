@@ -8,6 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface PublishingService {
 
-    @NotNull Array<PublishAckReasonCode> publish(@NotNull MqttClient mqttClient, @NotNull PublishInPacket publish);
+    @NotNull PublishAckReasonCode publish(@NotNull MqttClient mqttClient, @NotNull PublishInPacket publish);
 
 }
