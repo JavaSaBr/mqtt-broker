@@ -79,7 +79,9 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
             channel,
             bufferAllocator,
             this::updateLastActivity,
-            this::nextPacketToWrite
+            this::nextPacketToWrite,
+            this::onWrittenPacket,
+            this::onSentPacket
         );
     }
 

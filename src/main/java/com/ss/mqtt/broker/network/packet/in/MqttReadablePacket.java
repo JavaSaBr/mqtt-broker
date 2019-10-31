@@ -1,5 +1,8 @@
 package com.ss.mqtt.broker.network.packet.in;
 
+import com.ss.mqtt.broker.exception.ConnectionRejectException;
+import com.ss.mqtt.broker.exception.MqttException;
+import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
@@ -11,6 +14,7 @@ import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.network.packet.impl.AbstractReadablePacket;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +27,11 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
      * The list of user properties.
      */
     protected @Getter @NotNull Array<StringPair> userProperties;
+
+    /**
+     * The happened exception during parsing this packet.
+     */
+    protected @Getter @Nullable Exception exception;
 
     protected MqttReadablePacket(byte info) {
         this.userProperties = Array.empty();
@@ -39,6 +48,17 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         }
 
         readPayload(connection, buffer);
+    }
+
+    @Override
+    protected void handleException(@NotNull ByteBuffer buffer, @NotNull Exception exception) {
+        super.handleException(buffer, exception);
+
+        if (!(exception instanceof MqttException)) {
+            exception = new ConnectionRejectException(exception, ConnectAckReasonCode.PROTOCOL_ERROR);
+        }
+
+        this.exception = exception;
     }
 
     protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
