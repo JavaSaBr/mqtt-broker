@@ -179,14 +179,21 @@ public class Publish5OutPacket extends Publish311OutPacket {
             0,
             MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
         );
-        writeProperty(
-            buffer,
-            PacketProperty.TOPIC_ALIAS,
-            topciAlias,
-            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
-        );
-        writeProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
-        writeProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
+        if (topciAlias > MqttPropertyConstants.TOPIC_ALIAS_MIN && topciAlias < MqttPropertyConstants.TOPIC_ALIAS_MAX) {
+            writeProperty(
+                buffer,
+                PacketProperty.TOPIC_ALIAS,
+                topciAlias,
+                MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
+            );
+        }
+        if (responseTopic != null) {
+            writeProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
+        }
+        if (correlationData != null) {
+            writeProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
+        }
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
     }
+
 }

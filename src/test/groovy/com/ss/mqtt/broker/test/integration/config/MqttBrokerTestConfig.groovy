@@ -11,11 +11,15 @@ import org.springframework.context.annotation.Import
 @Import(MqttBrokerConfig)
 class MqttBrokerTestConfig {
     
+    private static final String BROKER_HOST = "mqtt.eclipse.org";
+    //private static final String BROKER_HOST = "localhost";
+    
     @Bean
     Mqtt5AsyncClient mqttSubscriber() {
-       return MqttClient.builder()
+        return MqttClient.builder()
             .identifier(UUID.randomUUID().toString())
-            .serverHost("localhost")
+            .serverHost(BROKER_HOST)
+            .serverPort(1883)
             .useMqttVersion5()
             .build()
             .toAsync()
@@ -25,7 +29,8 @@ class MqttBrokerTestConfig {
     Mqtt5AsyncClient mqttPublisher() {
         return MqttClient.builder()
             .identifier(UUID.randomUUID().toString())
-            .serverHost("localhost")
+            .serverHost(BROKER_HOST)
+            .serverPort(1883)
             .useMqttVersion5()
             .build()
             .toAsync()

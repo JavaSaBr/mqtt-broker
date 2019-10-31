@@ -64,7 +64,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
                 it.putProperty(PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
                 it.putProperty(PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, wildcardSubscriptionAvailable)
                 it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, subscriptionIdAvailable)
-                it.putProperty(PacketProperty.TOPIC_ALIAS, topicAliasMaximum)
+                it.putProperty(PacketProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaximum)
             }
     
             def dataBuffer = BufferUtils.prepareBuffer(512) {

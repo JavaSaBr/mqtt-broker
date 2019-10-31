@@ -2,7 +2,6 @@ package com.ss.mqtt.broker.network;
 
 import com.ss.mqtt.broker.config.MqttConnectionConfig;
 import com.ss.mqtt.broker.model.MqttVersion;
-import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
@@ -46,7 +45,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull BufferAllocator bufferAllocator,
         int maxPacketsByRead,
         @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishingService publishingService
+        @NotNull PublishingService publishingService,
         @NotNull MqttConnectionConfig config
     ) {
         super(network, channel, crypt, bufferAllocator, maxPacketsByRead);

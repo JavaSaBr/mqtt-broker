@@ -29,11 +29,11 @@ public class SimplePublishingService implements PublishingService {
             publish.getTopicAlias(),
             publish.getPayload(),
             publish.isPayloadFormatIndicator(),
-            publish.getResponseTopic(),
-            publish.getCorrelationData(),
+            null, //publish.getResponseTopic(),
+            null,
             publish.getUserProperties()
         ));
-        return PublishAckReasonCode.SUCCESSFUL;
+        return PublishAckReasonCode.SUCCESS;
     }
 
     @Override

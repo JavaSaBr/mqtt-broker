@@ -58,14 +58,16 @@ public class MqttBrokerConfig {
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Consumer<MqttConnection> mqttConnectionConsumer,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishingService publishingService
     ) {
         ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(
             networkConfig,
             networkChannelFactory(
                 bufferAllocator,
                 connectionConfig,
-                subscriptionService
+                subscriptionService,
+                publishingService
             )
         );
 
@@ -129,7 +131,8 @@ public class MqttBrokerConfig {
     private @NotNull ChannelFactory networkChannelFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishingService publishingService
     ) {
         return (network, channel) -> new MqttConnection(
             network,
@@ -138,6 +141,7 @@ public class MqttBrokerConfig {
             bufferAllocator,
             100,
             subscriptionService,
+            publishingService,
             connectionConfig
         );
     }
