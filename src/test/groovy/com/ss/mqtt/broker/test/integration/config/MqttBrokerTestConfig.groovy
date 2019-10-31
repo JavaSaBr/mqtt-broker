@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Import
 @Import(MqttBrokerConfig)
 class MqttBrokerTestConfig {
     
-    private static final String BROKER_HOST = "mqtt.eclipse.org";
-    //private static final String BROKER_HOST = "localhost";
+    //private static final String BROKER_HOST = "mqtt.eclipse.org";
+    private static final String BROKER_HOST = "localhost";
     
     @Bean
     Mqtt5AsyncClient mqttSubscriber() {

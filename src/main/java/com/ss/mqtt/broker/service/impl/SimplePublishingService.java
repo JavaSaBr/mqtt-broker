@@ -5,6 +5,8 @@ import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
+import com.ss.rlib.common.util.ArrayUtils;
+import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,8 +31,8 @@ public class SimplePublishingService implements PublishingService {
             publish.getTopicAlias(),
             publish.getPayload(),
             publish.isPayloadFormatIndicator(),
-            null, //publish.getResponseTopic(),
-            null,
+            StringUtils.EMPTY, //publish.getResponseTopic(),
+            ArrayUtils.EMPTY_BYTE_ARRAY,
             publish.getUserProperties()
         ));
         return PublishAckReasonCode.SUCCESS;
@@ -41,7 +43,7 @@ public class SimplePublishingService implements PublishingService {
         var subscribers = subscriptionService.getSubscribers(publish.getTopicName());
         // TODO choose correct PublishAckReasonCode
         return subscribers.stream()
-            .map(targetMqttClient -> send(mqttClient, publish))
+            .map(targetMqttClient -> send(targetMqttClient, publish))
             .findFirst()
             .orElse(PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS);
     }
