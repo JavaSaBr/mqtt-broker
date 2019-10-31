@@ -219,7 +219,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     public ConnectInPacket(byte info) {
         super(info);
         this.userProperties = Array.empty();
-        this.mqttVersion = MqttVersion.MQTT_5;
+        this.mqttVersion = MqttVersion.MQTT_3_1_1;
         this.clientId = StringUtils.EMPTY;
         this.willTopic = StringUtils.EMPTY;
         this.username = StringUtils.EMPTY;
@@ -270,7 +270,7 @@ public class ConnectInPacket extends MqttReadablePacket {
                  the reserved flag is not 0 it is a Malformed Packet. Refer to section 4.13 for information about handling
                  errors.
                 */
-                throw new IllegalStateException("non-zero reserved flag");
+                throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
             }
         }
 

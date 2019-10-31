@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network;
 
+import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.network.packet.PacketType;
@@ -54,6 +55,19 @@ public class MqttClient {
 
     private void onConnected(@NotNull ConnectInPacket connect) {
         connection.setMqttVersion(connect.getMqttVersion());
+
+        var exception = connect.getException();
+
+        if (exception instanceof ConnectionRejectException) {
+
+            var reasonCode = ((ConnectionRejectException) exception).getReasonCode();
+
+            connection
+                .sendWithFeedback(getPacketOutFactory().newConnectAck(this, reasonCode))
+                .thenAccept(sent -> connection.close());
+
+            return;
+        }
 
         sessionExpiryInterval = connect.getSessionExpiryInterval();
         receiveMax = connect.getReceiveMax();

@@ -1,11 +1,19 @@
 package com.ss.mqtt.broker.exception;
 
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
-public class ConnectionRejectException extends RuntimeException {
+public class ConnectionRejectException extends MqttException {
 
-    private final @NotNull ConnectAckReasonCode reasonCode;
+    private final @Getter @NotNull ConnectAckReasonCode reasonCode;
+
+    public ConnectionRejectException(@NotNull ConnectAckReasonCode reasonCode) {
+        this.reasonCode = reasonCode;
+    }
+
+    public ConnectionRejectException(@NotNull Throwable cause, @NotNull ConnectAckReasonCode reasonCode) {
+        super(cause);
+        this.reasonCode = reasonCode;
+    }
 }
