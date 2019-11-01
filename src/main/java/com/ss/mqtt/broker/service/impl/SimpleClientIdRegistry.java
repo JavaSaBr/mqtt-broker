@@ -29,8 +29,8 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
 
     private final @NotNull ConcurrentObjectDictionary<String, Object> clientIdRegistry;
 
-    private SimpleClientIdRegistry() {
-        this.clientIdRegistry = DictionaryFactory.newConcurrentAtomicObjectDictionary();
+    public SimpleClientIdRegistry() {
+        this.clientIdRegistry = DictionaryFactory.newConcurrentStampedLockObjectDictionary();
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import org.jetbrains.annotations.NotNull;
 

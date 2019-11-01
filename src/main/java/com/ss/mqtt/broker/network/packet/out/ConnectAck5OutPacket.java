@@ -4,7 +4,7 @@ import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -277,8 +277,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     @Override
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
-        var connection = client.getConnection();
-        var config = connection.getConfig();
+        var config = client.getConnectionConfig();
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
         writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);

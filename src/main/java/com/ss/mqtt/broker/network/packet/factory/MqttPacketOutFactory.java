@@ -1,7 +1,8 @@
 package com.ss.mqtt.broker.network.packet.factory;
 
 import com.ss.mqtt.broker.model.*;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
@@ -79,7 +80,7 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newPublishAck(
-        @NotNull MqttClient client,
+        @NotNull DeviceMqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode
     ) {
@@ -95,7 +96,7 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newSubscribeAck(
-        @NotNull MqttClient client,
+        @NotNull DeviceMqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes
     ) {
@@ -127,7 +128,7 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newDisconnect(
-        @NotNull MqttClient client,
+        @NotNull DeviceMqttClient client,
         @NotNull DisconnectReasonCode reasonCode
     ) {
         return newDisconnect(client, reasonCode, Array.empty(), StringUtils.EMPTY, StringUtils.EMPTY);
@@ -143,7 +144,7 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull MqttClient client,
+        @NotNull DeviceMqttClient client,
         @NotNull AuthenticateReasonCode reasonCode,
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData

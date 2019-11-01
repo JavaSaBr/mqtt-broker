@@ -5,7 +5,7 @@ import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode
-import com.ss.mqtt.broker.network.MqttClient
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.ArrayFactory
@@ -81,7 +81,7 @@ class BasePacketTest extends Specification {
     MqttConnection mqtt5Connection = Stub(MqttConnection) {
         isSupported(MqttVersion.MQTT_5) >> true
         getConfig() >> mqttConnectionConfig
-        getClient() >> Stub(MqttClient) {
+        getClient() >> Stub(DeviceMqttClient) {
             getConnection() >> mqtt5Connection
             getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
             getReceiveMax() >> BasePacketTest.receiveMaximum
@@ -97,7 +97,7 @@ class BasePacketTest extends Specification {
         isSupported(MqttVersion.MQTT_3_1_1) >> true
         isSupported(MqttVersion.MQTT_5) >> false
         getConfig() >> mqttConnectionConfig
-        getClient() >> Stub(MqttClient) {
+        getClient() >> Stub(DeviceMqttClient) {
             getConnection() >> mqtt311Connection
             getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
             getReceiveMax() >> BasePacketTest.receiveMaximum

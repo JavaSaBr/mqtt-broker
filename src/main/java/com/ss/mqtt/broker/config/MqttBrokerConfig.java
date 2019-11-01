@@ -3,16 +3,22 @@ package com.ss.mqtt.broker.config;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
+import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
+import com.ss.mqtt.broker.network.packet.in.handler.ConnectInPacketHandler;
+import com.ss.mqtt.broker.network.packet.in.handler.PacketInHandler;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.ClientService;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.mqtt.broker.service.impl.DefaultClientService;
+import com.ss.mqtt.broker.service.impl.SimpleClientIdRegistry;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptions;
 import com.ss.rlib.network.*;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
-import com.ss.rlib.network.server.ServerNetwork;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -50,23 +56,40 @@ public class MqttBrokerConfig {
         return new DefaultClientService();
     }
 
+    @NotNull
+    @Bean ClientIdRegistry clientIdRegistry() {
+        return new SimpleClientIdRegistry();
+    }
+
     @Bean
-    @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network(
+    PacketInHandler @NotNull [] devicePacketHandlers(
+        @NotNull ClientIdRegistry clientIdRegistry
+    ) {
+
+        var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry);
+
+        return handlers;
+    }
+    @Bean
+    @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> deviceNetwork(
         @NotNull ServerNetworkConfig networkConfig,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Consumer<MqttConnection> mqttConnectionConsumer,
-        @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull MqttConnectionConfig deviceConnectionConfig,
+        @NotNull SubscriptionService subscriptionService,
+        PacketInHandler @NotNull [] devicePacketHandlers
     ) {
-        ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(
+
+        var serverNetwork = NetworkFactory.newServerNetwork(
             networkConfig,
-            networkChannelFactory(
+            deviceConnectionFactory(
                 bufferAllocator,
-                connectionConfig,
-                subscriptionService
+                deviceConnectionConfig,
+                subscriptionService,
+                devicePacketHandlers
             )
         );
-
         serverNetwork.start(new InetSocketAddress("localhost", 1883));
         serverNetwork.onAccept(mqttConnectionConsumer);
 
@@ -79,16 +102,16 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull Consumer<MqttConnection> mqttConnectionConsumer(@NotNull ClientService clientService) {
+    @NotNull Consumer<MqttConnection> mqttConnectionConsumer() {
         return mqttConnection -> {
             log.info("Accepted connection: {}", mqttConnection);
-            var client = mqttConnection.getClient();
+            var client = (UnsafeMqttClient) mqttConnection.getClient();
             mqttConnection.onReceive((conn, packet) -> client.handle(packet));
         };
     }
 
     @Bean
-    @NotNull MqttConnectionConfig mqttConnectionConfig() {
+    @NotNull MqttConnectionConfig deviceConnectionConfig() {
         return new MqttConnectionConfig(
             QoS.of(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
             env.getProperty(
@@ -119,19 +142,21 @@ public class MqttBrokerConfig {
         );
     }
 
-    private @NotNull ChannelFactory networkChannelFactory(
+    private @NotNull ChannelFactory deviceConnectionFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        PacketInHandler @NotNull [] packetHandlers
     ) {
         return (network, channel) -> new MqttConnection(
             network,
             channel,
-            NetworkCryptor.NULL,
             bufferAllocator,
             100,
+            packetHandlers,
             subscriptionService,
-            connectionConfig
+            connectionConfig,
+            DeviceMqttClient::new
         );
     }
 }

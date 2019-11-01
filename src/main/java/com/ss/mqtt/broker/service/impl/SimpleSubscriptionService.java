@@ -3,16 +3,13 @@ package com.ss.mqtt.broker.service.impl;
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.mqtt.broker.service.Subscriptions;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayCollectors;
-import com.ss.rlib.common.util.array.impl.FastArray;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class SimpleSubscriptionService implements SubscriptionService {
@@ -21,7 +18,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
 
     @Override
     public Array<SubscribeAckReasonCode> subscribe(
-        @NotNull MqttClient mqttClient,
+        @NotNull DeviceMqttClient mqttClient,
         @NotNull Array<SubscribeTopicFilter> topicFilter
     ) {
         return topicFilter.stream()
@@ -31,7 +28,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
 
     @Override
     public Array<UnsubscribeAckReasonCode> unsubscribe(
-        @NotNull MqttClient mqttClient,
+        @NotNull DeviceMqttClient mqttClient,
         @NotNull Array<String> topicFilter
     ) {
         return topicFilter.stream()
@@ -40,7 +37,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
     }
 
     @Override
-    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topic) {
+    public @NotNull Array<DeviceMqttClient> getSubscribers(@NotNull String topic) {
         return subscriptions.getSubscribers(topic);
     }
 }
