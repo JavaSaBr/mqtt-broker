@@ -115,7 +115,7 @@ public class MqttClient {
     }
 
     public void onPublish(@NotNull PublishInPacket publish) {
-        var ackReasonCode = connection.getPublishingService().publish(connection.getClient(), publish);
+        var ackReasonCode = connection.getPublishingService().publish(publish);
         connection.send(getPacketOutFactory().newPublishAck(
             connection.getClient(),
             publish.getPacketId(),

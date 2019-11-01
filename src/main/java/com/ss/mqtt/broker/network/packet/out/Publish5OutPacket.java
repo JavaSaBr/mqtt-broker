@@ -173,26 +173,14 @@ public class Publish5OutPacket extends Publish311OutPacket {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
         writeProperty(buffer, PacketProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);
-        writeProperty(
-            buffer,
+        writeProperty(buffer,
             PacketProperty.MESSAGE_EXPIRY_INTERVAL,
             0,
             MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
         );
-        if (topciAlias > MqttPropertyConstants.TOPIC_ALIAS_MIN && topciAlias < MqttPropertyConstants.TOPIC_ALIAS_MAX) {
-            writeProperty(
-                buffer,
-                PacketProperty.TOPIC_ALIAS,
-                topciAlias,
-                MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
-            );
-        }
-        if (responseTopic != null) {
-            writeProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
-        }
-        if (correlationData != null) {
-            writeProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
-        }
+        writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topciAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
+        writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
+        writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
     }
 

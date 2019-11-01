@@ -1,31 +1,28 @@
 package com.ss.mqtt.broker.test.integration
 
-import com.hivemq.client.internal.mqtt.datatypes.MqttTopicImplBuilder
-import com.hivemq.client.internal.mqtt.message.connect.MqttConnect
-import com.hivemq.client.mqtt.MqttGlobalPublishFilter
 import com.hivemq.client.mqtt.datatypes.MqttQos
-import com.hivemq.client.mqtt.datatypes.MqttTopic
-import com.hivemq.client.mqtt.mqtt5.message.connect.Mqtt5Connect
-import com.hivemq.client.mqtt.mqtt5.message.connect.Mqtt5ConnectRestrictions
+import com.hivemq.client.mqtt.mqtt5.message.Mqtt5MessageType
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PayloadFormatIndicator
+import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
 
 class ConnectSubscribePublishTest extends MqttBrokerTest {
     
     def "publisher should publish message to broker"() {
+        given:
+            def topic = 'test/out'
+            def connectResult = null
+            def publishResult = null
         when:
-            
-            def subAck = mqttSubscriber.connect()
-                .thenCompose({
+            def subscribeResult = mqttSubscriber.connect()
+                .thenCompose({ connect ->
+                    connectResult = connect
                     mqttSubscriber.subscribeWith()
-                        .topicFilter("test/out")
+                        .topicFilter(topic)
                         .qos(MqttQos.AT_MOST_ONCE)
-                        .callback(System.out.&println)
+                        .callback({ publish -> publishResult = publish })
                         .send()
                 })
                 .join()
-            println subAck
-            System.out.println("111111")
-            //mqttSubscriber.publishes(MqttGlobalPublishFilter.ALL, System.out.&println);
             
             mqttPublisher.connect()
                 .thenCompose({
@@ -41,5 +38,14 @@ class ConnectSubscribePublishTest extends MqttBrokerTest {
             Thread.sleep(500)
         then:
             noExceptionThrown()
+            
+            subscribeResult != null
+            subscribeResult.getReasonCodes().contains(Mqtt5SubAckReasonCode.GRANTED_QOS_0)
+            subscribeResult.getType() == Mqtt5MessageType.SUBACK
+            
+            publishResult != null
+            publishResult.getQos() == MqttQos.AT_MOST_ONCE
+            publishResult.getType() == Mqtt5MessageType.PUBLISH
+            publishResult.getTopic().getLevels().join("/") == topic
     }
 }

@@ -14,33 +14,36 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Simple subscription service
+ */
 @RequiredArgsConstructor
 public class SimpleSubscriptionService implements SubscriptionService {
 
-    private final Subscriptions subscriptions;
+    private final @NotNull Subscriptions subscriptions;
 
     @Override
-    public Array<SubscribeAckReasonCode> subscribe(
+    public @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicFilter
+        @NotNull Array<SubscribeTopicFilter> topicFilters
     ) {
-        return topicFilter.stream()
+        return topicFilters.stream()
             .map(subscribeTopicFilter -> subscriptions.addSubscription(subscribeTopicFilter, mqttClient))
             .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     }
 
     @Override
-    public Array<UnsubscribeAckReasonCode> unsubscribe(
+    public @NotNull Array<UnsubscribeAckReasonCode> unsubscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<String> topicFilter
+        @NotNull Array<String> topicNames
     ) {
-        return topicFilter.stream()
+        return topicNames.stream()
             .map(subscribeTopicFilter -> subscriptions.removeSubscription(subscribeTopicFilter, mqttClient))
             .collect(ArrayCollectors.toArray(UnsubscribeAckReasonCode.class));
     }
 
     @Override
-    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topic) {
-        return subscriptions.getSubscribers(topic);
+    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topicName) {
+        return subscriptions.getSubscribers(topicName);
     }
 }

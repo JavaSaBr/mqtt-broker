@@ -83,8 +83,8 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull PublishingService publishingService() {
-        return new SimplePublishingService(subscriptionService());
+    @NotNull PublishingService publishingService(@NotNull SubscriptionService subscriptionService) {
+        return new SimplePublishingService(subscriptionService);
     }
 
     @Bean

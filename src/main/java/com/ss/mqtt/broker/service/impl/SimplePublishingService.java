@@ -5,11 +5,12 @@ import com.ss.mqtt.broker.network.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Simple publishing service
+ */
 @RequiredArgsConstructor
 public class SimplePublishingService implements PublishingService {
 
@@ -31,20 +32,23 @@ public class SimplePublishingService implements PublishingService {
             publish.getTopicAlias(),
             publish.getPayload(),
             publish.isPayloadFormatIndicator(),
-            StringUtils.EMPTY, //publish.getResponseTopic(),
-            ArrayUtils.EMPTY_BYTE_ARRAY,
+            publish.getResponseTopic(),
+            publish.getCorrelationData(),
             publish.getUserProperties()
         ));
+        // TODO this reason code only for QoS 0
         return PublishAckReasonCode.SUCCESS;
     }
 
     @Override
-    public @NotNull PublishAckReasonCode publish(@NotNull MqttClient mqttClient, @NotNull PublishInPacket publish) {
+    public @NotNull PublishAckReasonCode publish(@NotNull PublishInPacket publish) {
         var subscribers = subscriptionService.getSubscribers(publish.getTopicName());
-        // TODO choose correct PublishAckReasonCode
-        return subscribers.stream()
+        if (subscribers.isEmpty()) {
+            return PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
+        }
+        var success = subscribers.stream()
             .map(targetMqttClient -> send(targetMqttClient, publish))
-            .findFirst()
-            .orElse(PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS);
+            .allMatch(ackReasonCode -> ackReasonCode.equals(PublishAckReasonCode.SUCCESS));
+        return success ? PublishAckReasonCode.SUCCESS : PublishAckReasonCode.UNSPECIFIED_ERROR;
     }
 }
