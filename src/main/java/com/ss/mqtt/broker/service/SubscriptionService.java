@@ -16,12 +16,12 @@ public interface SubscriptionService {
      * Adds MQTT client to topic filter subscribers
      *
      * @param mqttClient MQTT client to be added
-     * @param topicFilters topic filters
+     * @param topicNames topic names
      * @return array of subscribe ack reason codes
      */
     @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicFilters
+        @NotNull Array<SubscribeTopicFilter> topicNames
     );
 
     /**

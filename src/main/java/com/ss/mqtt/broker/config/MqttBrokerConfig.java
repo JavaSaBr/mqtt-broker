@@ -55,7 +55,13 @@ public class MqttBrokerConfig {
 
     @NotNull
     @Bean ClientIdRegistry clientIdRegistry() {
-        return new SimpleClientIdRegistry();
+        return new SimpleClientIdRegistry(
+            env.getProperty(
+                "client.id.available.chars",
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
+            ),
+            env.getProperty("client.id.max.length", int.class, 36)
+        );
     }
 
     @Bean

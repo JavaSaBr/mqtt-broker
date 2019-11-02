@@ -12,25 +12,21 @@ import java.util.UUID;
 
 public class SimpleClientIdRegistry implements ClientIdRegistry {
 
-    private static final String AVAILABLE_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
-    private static final BitSet AVAILABLE_CHAR_SET;
     private static final Object CLIENT_ID_VALUE = new Object();
 
-    static {
-
-        var bitSet = new BitSet();
-
-        for (char ch : AVAILABLE_CHARS.toCharArray()) {
-            bitSet.set(ch, true);
-        }
-
-        AVAILABLE_CHAR_SET = bitSet;
-    }
-
     private final @NotNull ConcurrentObjectDictionary<String, Object> clientIdRegistry;
+    private final @NotNull BitSet availableCharSet;
 
-    public SimpleClientIdRegistry() {
+    private final int maxClientIdLength;
+
+    public SimpleClientIdRegistry(@NotNull String availableChars, int maxClientIdLength) {
+        this.maxClientIdLength = maxClientIdLength;
         this.clientIdRegistry = DictionaryFactory.newConcurrentStampedLockObjectDictionary();
+        this.availableCharSet = new BitSet();
+
+        for (char ch : availableChars.toCharArray()) {
+            availableCharSet.set(ch, true);
+        }
     }
 
     @Override
@@ -62,15 +58,18 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
 
     @Override
     public @NotNull Mono<Boolean> unregister(@NotNull String clientId) {
-        var value = clientIdRegistry.getInWriteLock(clientId, ObjectDictionary::remove);
-        return Mono.just(value != null);
+        return Mono.just(clientIdRegistry.getInWriteLock(clientId, ObjectDictionary::remove) != null);
     }
 
     @Override
     public boolean validate(@NotNull String clientId) {
 
+        if (clientId.length() > maxClientIdLength) {
+            return false;
+        }
+
         for (int i = 0, length = clientId.length(); i < length; i++) {
-            if (!AVAILABLE_CHAR_SET.get(clientId.charAt(i))) {
+            if (!availableCharSet.get(clientId.charAt(i))) {
                 return false;
             }
         }

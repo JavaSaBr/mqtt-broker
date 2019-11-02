@@ -22,9 +22,9 @@ public class SimpleSubscriptionService implements SubscriptionService {
     @Override
     public @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicFilters
+        @NotNull Array<SubscribeTopicFilter> topicNames
     ) {
-        return topicFilters.stream()
+        return topicNames.stream()
             .map(subscribeTopicFilter -> subscriptions.addSubscription(subscribeTopicFilter, mqttClient))
             .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     }
