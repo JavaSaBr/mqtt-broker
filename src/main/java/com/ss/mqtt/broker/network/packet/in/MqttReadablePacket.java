@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
+import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.exception.MqttException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttVersion;
@@ -41,7 +42,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-        return new Utf8Decoder(decoder, ByteBuffer.allocate(10240), CharBuffer.allocate(10240));
+        return new Utf8Decoder(decoder, ByteBuffer.allocate(1024), CharBuffer.allocate(1024));
     });
 
 
@@ -190,7 +191,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         var stringLength = readShort(buffer) & 0xFFFF;
 
         if (stringLength > inBuffer.capacity()) {
-            throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
+            throw new MalformedPacketMqttException();
         }
 
         var decoder = utf8Decoder.getDecoder();
@@ -203,7 +204,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
         var result = decoder.decode(inBuffer.position(stringLength).flip(), outBuffer.clear(), true);
 
         if (result.isError()) {
-            throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
+            throw new MalformedPacketMqttException();
         }
 
         return new String(inBuffer.array(), 0, stringLength, StandardCharsets.UTF_8);

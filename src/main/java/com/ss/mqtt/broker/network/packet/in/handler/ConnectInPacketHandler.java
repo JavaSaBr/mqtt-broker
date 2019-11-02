@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.network.packet.in.handler;
 
 import static reactor.core.publisher.Mono.fromRunnable;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
+import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
@@ -80,6 +81,9 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
         if (exception instanceof ConnectionRejectException) {
             client.reject(((ConnectionRejectException) exception).getReasonCode());
+            return true;
+        } else if (exception instanceof MalformedPacketMqttException) {
+            client.reject(ConnectAckReasonCode.MALFORMED_PACKET);
             return true;
         }
 
