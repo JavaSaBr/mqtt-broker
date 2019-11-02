@@ -13,7 +13,6 @@ import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.mqtt.broker.service.impl.*;
 import com.ss.rlib.network.*;
-import com.ss.mqtt.broker.service.impl.SimplePublishingService;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
 import com.ss.rlib.network.server.ServerNetwork;
 import lombok.RequiredArgsConstructor;
@@ -81,11 +80,10 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull ServerNetwork<MqttConnection> deviceNetwork(
+    @NotNull ServerNetwork<@NotNull MqttConnection> deviceNetwork(
         @NotNull ServerNetworkConfig networkConfig,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig deviceConnectionConfig,
-        @NotNull SubscriptionService subscriptionService,
         PacketInHandler @NotNull [] devicePacketHandlers
     ) {
         return NetworkFactory.newServerNetwork(
@@ -93,7 +91,6 @@ public class MqttBrokerConfig {
             deviceConnectionFactory(
                 bufferAllocator,
                 deviceConnectionConfig,
-                subscriptionService,
                 devicePacketHandlers
             )
         );
@@ -101,8 +98,8 @@ public class MqttBrokerConfig {
 
     @Bean
     @NotNull InetSocketAddress deviceNetworkAddress(
-        @NotNull ServerNetwork<MqttConnection> deviceNetwork,
-        @NotNull Consumer<MqttConnection> mqttConnectionConsumer
+        @NotNull ServerNetwork<@NotNull MqttConnection> deviceNetwork,
+        @NotNull Consumer<@NotNull MqttConnection> mqttConnectionConsumer
     ) {
 
         var address = new InetSocketAddress("localhost", 1883);
@@ -124,7 +121,7 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull Consumer<MqttConnection> mqttConnectionConsumer() {
+    @NotNull Consumer<@NotNull MqttConnection> mqttConnectionConsumer() {
         return mqttConnection -> {
             log.info("Accepted connection: {}", mqttConnection);
             var client = (UnsafeMqttClient) mqttConnection.getClient();
@@ -167,7 +164,6 @@ public class MqttBrokerConfig {
     private @NotNull ChannelFactory deviceConnectionFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService,
         PacketInHandler @NotNull [] packetHandlers
     ) {
         return (network, channel) -> new MqttConnection(
@@ -176,7 +172,6 @@ public class MqttBrokerConfig {
             bufferAllocator,
             100,
             packetHandlers,
-            subscriptionService,
             connectionConfig,
             DeviceMqttClient::new
         );

@@ -32,23 +32,22 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
     @Override
     public @NotNull Mono<Boolean> register(@NotNull String clientId) {
 
-        var value = clientIdRegistry.getInReadLock(clientId, ObjectDictionary::get);
+        if (!validate(clientId)) {
+            return Mono.just(Boolean.FALSE);
+        }
 
+        var value = clientIdRegistry.getInReadLock(clientId, ObjectDictionary::get);
         if (value != null) {
             return Mono.just(Boolean.FALSE);
         }
 
         var stamp = clientIdRegistry.writeLock();
         try {
-
             value = clientIdRegistry.get(clientId);
-
             if (value != null) {
                 return Mono.just(Boolean.FALSE);
             }
-
             clientIdRegistry.put(clientId, CLIENT_ID_VALUE);
-
         } finally {
             clientIdRegistry.writeUnlock(stamp);
         }

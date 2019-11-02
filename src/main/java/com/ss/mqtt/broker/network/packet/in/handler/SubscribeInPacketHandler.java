@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class SubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, SubscribeInPacket> {
 
-    private final SubscriptionService subscriptionService;
+    private final @NotNull SubscriptionService subscriptionService;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull SubscribeInPacket packet) {

@@ -58,6 +58,6 @@ class ConnectionTest extends MqttBrokerTest {
             def cause = ex.cause as Mqtt5ConnAckException
             cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID
         where:
-            clientId << ["!@#!@*()^&", "_+_+_+_+"]
+            clientId << ["!@#!@*()^&", "_+_+_+_+", "Ä°nanÃ§"]
     }
 }

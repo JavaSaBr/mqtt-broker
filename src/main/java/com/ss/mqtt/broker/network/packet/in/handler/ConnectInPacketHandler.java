@@ -9,7 +9,6 @@ import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
@@ -38,12 +37,6 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
                 .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)))
                 .subscribe();
         } else {
-
-            if (!clientIdRegistry.validate(requestedClientId)) {
-                client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID);
-                return;
-            }
-
             clientIdRegistry.register(requestedClientId)
                 .subscribe(result -> {
                     if(!result) {

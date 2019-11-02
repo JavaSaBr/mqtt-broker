@@ -9,7 +9,6 @@ import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.in.handler.PacketInHandler;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
-import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
@@ -17,6 +16,7 @@ import com.ss.rlib.network.NetworkCryptor;
 import com.ss.rlib.network.impl.AbstractConnection;
 import com.ss.rlib.network.packet.PacketReader;
 import com.ss.rlib.network.packet.PacketWriter;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -26,19 +26,20 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.Function;
 
 @Log4j2
-@Getter
 public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttWritablePacket> {
 
+    @Getter(AccessLevel.PROTECTED)
     private final @NotNull PacketReader packetReader;
+
+    @Getter(AccessLevel.PROTECTED)
     private final @NotNull PacketWriter packetWriter;
 
-    private final PacketInHandler @NotNull [] packetHandlers;
-    private final @NotNull SubscriptionService subscriptionService;
+    private final @Getter PacketInHandler @NotNull [] packetHandlers;
 
     private final @Getter @NotNull MqttClient client;
     private final @Getter @NotNull MqttConnectionConfig config;
 
-    private volatile @Setter @NotNull MqttVersion mqttVersion;
+    private volatile @Getter @Setter @NotNull MqttVersion mqttVersion;
 
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
@@ -46,7 +47,6 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull BufferAllocator bufferAllocator,
         int maxPacketsByRead,
         PacketInHandler @NotNull [] packetHandlers,
-        @NotNull SubscriptionService subscriptionService,
         @NotNull MqttConnectionConfig config,
         @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory
     ) {
@@ -56,7 +56,6 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         this.mqttVersion = MqttVersion.MQTT_3_1_1;
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
-        this.subscriptionService = subscriptionService;
         this.client = clientFactory.apply(this);
     }
 

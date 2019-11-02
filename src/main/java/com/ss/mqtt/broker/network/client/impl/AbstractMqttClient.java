@@ -15,19 +15,20 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 @Log4j2
 @EqualsAndHashCode(of = "clientId")
 public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
-    protected final @Getter@NotNull MqttConnection connection;
+    protected final @NotNull MqttConnection connection;
 
-    private volatile @Setter @Getter @NotNull String clientId;
+    private volatile @Setter @NotNull String clientId;
 
-    private volatile @Getter long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
-    private volatile @Getter int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
-    private volatile @Getter int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
-    private volatile @Getter int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
-    private volatile @Getter int keepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX;
+    private volatile long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+    private volatile int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
+    private volatile int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
+    private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
+    private volatile int keepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX;
 
     public AbstractMqttClient(@NotNull MqttConnection connection) {
         this.connection = connection;

@@ -48,14 +48,11 @@ public class SimpleSubscriptions implements Subscriptions {
         @NotNull String topicFilter,
         @NotNull MqttClient mqttClient
     ) {
-
         var subscribers = subscriptions.getOrDefault(topicFilter, Array.empty());
-
         if (subscribers.removeIf(subscriber -> mqttClient.equals(subscriber.getMqttClient()))) {
             return UnsubscribeAckReasonCode.SUCCESS;
+        } else {
+            return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
         }
-
-        return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
     }
-
 }
