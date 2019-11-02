@@ -1,5 +1,8 @@
 package com.ss.mqtt.broker.test.integration
 
+import org.junit.Ignore
+
+@Ignore
 class PublishTest extends MqttBrokerTest {
     
     def "publisher should publish message to broker"() {

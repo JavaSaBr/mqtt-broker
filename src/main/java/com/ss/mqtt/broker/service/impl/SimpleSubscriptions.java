@@ -14,23 +14,20 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Simple container of subscriptions
+ */
 public class SimpleSubscriptions implements Subscriptions {
 
-    private final Map<String, Array<Subscriber>> subscriptions = new HashMap<>();
+    private final @NotNull Map<String, Array<Subscriber>> subscriptions = new HashMap<>();
 
-    /**
-     * Return full subscribers list
-     */
-    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topic) {
-        return subscriptions.get(topic)
+    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topicName) {
+        return subscriptions.get(topicName)
             .stream()
             .map(Subscriber::getMqttClient)
             .collect(ArrayCollectors.toArray(MqttClient.class));
     }
 
-    /**
-     * Return true if subscription is added
-     */
     public @NotNull SubscribeAckReasonCode addSubscription(
         @NotNull SubscribeTopicFilter topicFilter,
         @NotNull MqttClient mqttClient
@@ -44,11 +41,11 @@ public class SimpleSubscriptions implements Subscriptions {
         return topicFilter.getQos().getSubscribeAckReasonCode();
     }
 
-    /**
-     * Return true if subscription is removed
-     */
-    public @NotNull UnsubscribeAckReasonCode removeSubscription(@NotNull String topicFilter, @NotNull MqttClient mqttClient) {
-        var subscribers = subscriptions.getOrDefault(topicFilter, Array.empty());
+    public @NotNull UnsubscribeAckReasonCode removeSubscription(
+        @NotNull String topicName,
+        @NotNull MqttClient mqttClient
+    ) {
+        var subscribers = subscriptions.getOrDefault(topicName, Array.empty());
         if (subscribers.removeIf(subscriber -> mqttClient.equals(subscriber.getMqttClient()))) {
             return UnsubscribeAckReasonCode.SUCCESS;
         }

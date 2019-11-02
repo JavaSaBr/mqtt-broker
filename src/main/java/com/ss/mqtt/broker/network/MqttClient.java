@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
+import com.ss.mqtt.broker.model.PublishAckReasonCode;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
@@ -10,6 +11,7 @@ import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket;
 import com.ss.mqtt.broker.network.packet.in.UnsubscribeInPacket;
 import lombok.EqualsAndHashCode;
+import com.ss.mqtt.broker.network.packet.in.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +47,9 @@ public class MqttClient {
                 break;
             case UNSUBSCRIBE:
                 onUnsubscribe((UnsubscribeInPacket) packet);
+                break;
+            case PUBLISH:
+                onPublish((PublishInPacket) packet);
                 break;
         }
     }
@@ -90,7 +95,8 @@ public class MqttClient {
         var ackReasonCodes = connection.getSubscriptionService()
             .subscribe(connection.getClient(), subscribe.getTopicFilters());
 
-        connection.send(getPacketOutFactory().newSubscribeAck(connection.getClient(),
+        connection.send(getPacketOutFactory().newSubscribeAck(
+            connection.getClient(),
             subscribe.getPacketId(),
             ackReasonCodes
         ));
@@ -101,13 +107,23 @@ public class MqttClient {
         var ackReasonCodes = connection.getSubscriptionService()
             .unsubscribe(connection.getClient(), subscribe.getTopicFilters());
 
-        connection.send(getPacketOutFactory().newUnsubscribeAck(connection.getClient(),
+        connection.send(getPacketOutFactory().newUnsubscribeAck(
+            connection.getClient(),
             subscribe.getPacketId(),
             ackReasonCodes
         ));
     }
 
-    private @NotNull MqttPacketOutFactory getPacketOutFactory() {
+    public void onPublish(@NotNull PublishInPacket publish) {
+        var ackReasonCode = connection.getPublishingService().publish(publish);
+        connection.send(getPacketOutFactory().newPublishAck(
+            connection.getClient(),
+            publish.getPacketId(),
+            ackReasonCode
+        ));
+    }
+
+    public @NotNull MqttPacketOutFactory getPacketOutFactory() {
         return connection.getMqttVersion().getPacketOutFactory();
     }
 }

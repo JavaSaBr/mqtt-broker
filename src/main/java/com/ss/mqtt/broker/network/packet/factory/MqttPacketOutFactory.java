@@ -70,6 +70,46 @@ public abstract class MqttPacketOutFactory {
     }
 
 
+    public @NotNull MqttWritablePacket newPublish(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull QoS qos,
+        boolean retained,
+        boolean duplicate,
+        @NotNull String topicName,
+        @NotNull byte[] payload
+    ) {
+        return newPublish(
+            client,
+            packetId,
+            qos,
+            retained,
+            duplicate,
+            topicName,
+            0,
+            payload,
+            false,
+            StringUtils.EMPTY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            Array.empty()
+        );
+    }
+
+    public abstract @NotNull MqttWritablePacket newPublish(
+        @NotNull MqttClient client,
+        int packetId,
+        @NotNull QoS qos,
+        boolean retained,
+        boolean duplicate,
+        @NotNull String topicName,
+        int topicAlias,
+        @NotNull byte[] payload,
+        boolean stringPayload,
+        @NotNull String responseTopic,
+        @NotNull byte[] correlationData,
+        @NotNull Array<StringPair> userProperties
+    );
+
     public abstract @NotNull MqttWritablePacket newPublishAck(
         @NotNull MqttClient client,
         int packetId,

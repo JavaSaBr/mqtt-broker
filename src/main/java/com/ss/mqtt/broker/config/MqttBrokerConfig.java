@@ -6,8 +6,10 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.service.ClientService;
+import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.mqtt.broker.service.impl.DefaultClientService;
+import com.ss.mqtt.broker.service.impl.SimplePublishingService;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService;
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptions;
 import com.ss.rlib.network.*;
@@ -56,14 +58,16 @@ public class MqttBrokerConfig {
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Consumer<MqttConnection> mqttConnectionConsumer,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishingService publishingService
     ) {
         ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(
             networkConfig,
             networkChannelFactory(
                 bufferAllocator,
                 connectionConfig,
-                subscriptionService
+                subscriptionService,
+                publishingService
             )
         );
 
@@ -76,6 +80,11 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull SubscriptionService subscriptionService() {
         return new SimpleSubscriptionService(new SimpleSubscriptions());
+    }
+
+    @Bean
+    @NotNull PublishingService publishingService(@NotNull SubscriptionService subscriptionService) {
+        return new SimplePublishingService(subscriptionService);
     }
 
     @Bean
@@ -122,7 +131,8 @@ public class MqttBrokerConfig {
     private @NotNull ChannelFactory networkChannelFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishingService publishingService
     ) {
         return (network, channel) -> new MqttConnection(
             network,
@@ -131,6 +141,7 @@ public class MqttBrokerConfig {
             bufferAllocator,
             100,
             subscriptionService,
+            publishingService,
             connectionConfig
         );
     }
