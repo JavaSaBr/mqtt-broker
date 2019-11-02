@@ -29,26 +29,26 @@ public class SimpleSubscriptions implements Subscriptions {
     }
 
     public @NotNull SubscribeAckReasonCode addSubscription(
-        @NotNull SubscribeTopicFilter topicFilter,
+        @NotNull SubscribeTopicFilter topicName,
         @NotNull MqttClient mqttClient
     ) {
-        var subscriber = new Subscriber(mqttClient, topicFilter);
+        var subscriber = new Subscriber(mqttClient, topicName);
         var subscribers = subscriptions.computeIfAbsent(
-            topicFilter.getTopicFilter(),
+            topicName.getTopicFilter(),
             key -> new FastArraySet<>(Subscriber.class)
         );
         subscribers.add(subscriber);
-        return topicFilter.getQos().getSubscribeAckReasonCode();
+        return topicName.getQos().getSubscribeAckReasonCode();
     }
 
     /**
      * Return true if subscription is removed
      */
     public @NotNull UnsubscribeAckReasonCode removeSubscription(
-        @NotNull String topicFilter,
+        @NotNull String topicName,
         @NotNull MqttClient mqttClient
     ) {
-        var subscribers = subscriptions.getOrDefault(topicFilter, Array.empty());
+        var subscribers = subscriptions.getOrDefault(topicName, Array.empty());
         if (subscribers.removeIf(subscriber -> mqttClient.equals(subscriber.getMqttClient()))) {
             return UnsubscribeAckReasonCode.SUCCESS;
         } else {
