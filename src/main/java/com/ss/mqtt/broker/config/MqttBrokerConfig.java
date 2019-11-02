@@ -6,18 +6,14 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.mqtt.broker.network.packet.in.handler.ConnectInPacketHandler;
-import com.ss.mqtt.broker.network.packet.in.handler.PacketInHandler;
-import com.ss.mqtt.broker.network.packet.in.handler.SubscribeInPacketHandler;
-import com.ss.mqtt.broker.network.packet.in.handler.UnsubscribeInPacketHandler;
+import com.ss.mqtt.broker.network.packet.in.handler.*;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.ClientService;
+import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.mqtt.broker.service.impl.DefaultClientService;
-import com.ss.mqtt.broker.service.impl.SimpleClientIdRegistry;
-import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService;
-import com.ss.mqtt.broker.service.impl.SimpleSubscriptions;
+import com.ss.mqtt.broker.service.impl.*;
 import com.ss.rlib.network.*;
+import com.ss.mqtt.broker.service.impl.SimplePublishingService;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
 import com.ss.rlib.network.server.ServerNetwork;
 import lombok.RequiredArgsConstructor;
@@ -65,13 +61,15 @@ public class MqttBrokerConfig {
     @Bean
     PacketInHandler @NotNull [] devicePacketHandlers(
         @NotNull ClientIdRegistry clientIdRegistry,
-        @NotNull SubscriptionService subscriptionService
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishingService publishingService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
         handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry);
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
+        handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
 
         return handlers;
     }
@@ -112,6 +110,11 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull SubscriptionService subscriptionService() {
         return new SimpleSubscriptionService(new SimpleSubscriptions());
+    }
+
+    @Bean
+    @NotNull PublishingService publishingService(@NotNull SubscriptionService subscriptionService) {
+        return new SimplePublishingService(subscriptionService);
     }
 
     @Bean

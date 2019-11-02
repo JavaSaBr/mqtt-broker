@@ -16,9 +16,9 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
                 mqtt5Client,
                 ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
                 sessionPresent,
-                clientId,
-                sessionExpiryInterval,
-                keepAlive,
+                "-1",
+                -1,
+                -1,
                 reasonString,
                 serverReference,
                 responseInformation,
@@ -51,7 +51,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
             reader.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
             reader.subscriptionIdAvailable == subscriptionIdAvailable
             reader.sharedSubscriptionAvailable == sharedSubscriptionAvailable
-            reader.serverKeepAlive == keepAlive
+            reader.serverKeepAlive == serverKeepAlive
             reader.responseInformation == responseInformation
             reader.serverReference == serverReference
             reader.authenticationData == authData

@@ -16,13 +16,13 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             def clientId1 = "testClientId1"
             def clientId2 = "testClientId2"
         when:
-            def result1 = clientIdRegistry.register(clientId1).join()
-            def result2 = clientIdRegistry.register(clientId2).join()
+            def result1 = clientIdRegistry.register(clientId1).block()
+            def result2 = clientIdRegistry.register(clientId2).block()
         then:
             result1 && result2
         cleanup:
-            clientIdRegistry.unregister(clientId1).join()
-            clientIdRegistry.unregister(clientId2).join()
+            clientIdRegistry.unregister(clientId1).block()
+            clientIdRegistry.unregister(clientId2).block()
     }
     
     def "should not register duplicated client ids"() {
@@ -32,17 +32,17 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             def clientId1 = "testClientId3"
             def clientId2 = "testClientId4"
     
-            clientIdRegistry.register(clientId1).join()
-            clientIdRegistry.register(clientId2).join()
+            clientIdRegistry.register(clientId1).block()
+            clientIdRegistry.register(clientId2).block()
         
         when:
-            def result1 = clientIdRegistry.register(clientId1).join()
-            def result2 = clientIdRegistry.register(clientId2).join()
+            def result1 = clientIdRegistry.register(clientId1).block()
+            def result2 = clientIdRegistry.register(clientId2).block()
         then:
             !result1 && !result2
         cleanup:
-            clientIdRegistry.unregister(clientId1).join()
-            clientIdRegistry.unregister(clientId2).join()
+            clientIdRegistry.unregister(clientId1).block()
+            clientIdRegistry.unregister(clientId2).block()
     }
     
     def "should unregister exist client ids"() {
@@ -52,12 +52,12 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             def clientId1 = "testClientId5"
             def clientId2 = "testClientId6"
         
-            clientIdRegistry.register(clientId1).join()
-            clientIdRegistry.register(clientId2).join()
+            clientIdRegistry.register(clientId1).block()
+            clientIdRegistry.register(clientId2).block()
         
         when:
-            def result1 = clientIdRegistry.unregister(clientId1).join()
-            def result2 = clientIdRegistry.unregister(clientId2).join()
+            def result1 = clientIdRegistry.unregister(clientId1).block()
+            def result2 = clientIdRegistry.unregister(clientId2).block()
         then:
             result1 && result2
     }
@@ -68,8 +68,8 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             def clientId1 = "testClientId7"
             def clientId2 = "testClientId8"
         when:
-            def result1 = clientIdRegistry.unregister(clientId1).join()
-            def result2 = clientIdRegistry.unregister(clientId2).join()
+            def result1 = clientIdRegistry.unregister(clientId1).block()
+            def result2 = clientIdRegistry.unregister(clientId2).block()
         then:
             !result1 && !result2
     }
@@ -77,18 +77,18 @@ class ClientIdRegistryTest extends MqttBrokerTest {
     def "should generate and register new client ids"() {
         
         given:
-            def clientId1 = clientIdRegistry.generate().join()
-            def clientId2 = clientIdRegistry.generate().join()
+            def clientId1 = clientIdRegistry.generate().block()
+            def clientId2 = clientIdRegistry.generate().block()
         when:
-            def result1 = clientIdRegistry.register(clientId1).join()
-            def result2 = clientIdRegistry.register(clientId2).join()
+            def result1 = clientIdRegistry.register(clientId1).block()
+            def result2 = clientIdRegistry.register(clientId2).block()
         then:
             result1 && result2
             StringUtils.isNotEmpty(clientId1)
             StringUtils.isNotEmpty(clientId2)
         cleanup:
-            clientIdRegistry.unregister(clientId1).join()
-            clientIdRegistry.unregister(clientId2).join()
+            clientIdRegistry.unregister(clientId1).block()
+            clientIdRegistry.unregister(clientId2).block()
     }
     
     def "should generate invalid client ids"() {

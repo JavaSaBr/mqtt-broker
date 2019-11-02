@@ -19,6 +19,12 @@ public class Subscriber {
     private final boolean noLocal;
     private final boolean retainAsPublished;
 
+    /**
+     * Creates subscriber
+     *
+     * @param mqttClient  MQTT client which will become a subscriber
+     * @param topicFilter topic filter that MQTT client subscribes to
+     */
     public Subscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter topicFilter) {
         this.mqttClient = mqttClient;
         this.qos = topicFilter.getQos();

@@ -87,8 +87,8 @@ class BasePacketTest extends Specification {
             getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
             getReceiveMax() >> BasePacketTest.receiveMaximum
             getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
-            getClientId() >> "any"
-            getKeepAlive() >> -1
+            getClientId() >> clientId
+            getKeepAlive() >> serverKeepAlive
             getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
         }
     }
@@ -103,8 +103,8 @@ class BasePacketTest extends Specification {
             getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
             getReceiveMax() >> BasePacketTest.receiveMaximum
             getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
-            getClientId() >> "any"
-            getKeepAlive() >> -1
+            getClientId() >> clientId
+            getKeepAlive() >> serverKeepAlive
             getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
         }
     }

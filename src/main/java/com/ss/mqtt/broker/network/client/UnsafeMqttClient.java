@@ -2,7 +2,6 @@ package com.ss.mqtt.broker.network.client;
 
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +22,4 @@ public interface UnsafeMqttClient extends MqttClient {
     void setClientId(@NotNull String clientId);
 
     void reject(@NotNull ConnectAckReasonCode reasonCode);
-
-    @NotNull MqttPacketOutFactory getPacketOutFactory();
 }
