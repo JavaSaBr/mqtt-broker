@@ -29,16 +29,16 @@ public class SimpleSubscriptions implements Subscriptions {
     }
 
     public @NotNull SubscribeAckReasonCode addSubscription(
-        @NotNull SubscribeTopicFilter topicName,
+        @NotNull SubscribeTopicFilter topicFilter,
         @NotNull MqttClient mqttClient
     ) {
-        var subscriber = new Subscriber(mqttClient, topicName);
+        var subscriber = new Subscriber(mqttClient, topicFilter);
         var subscribers = subscriptions.computeIfAbsent(
-            topicName.getTopicFilter(),
+            topicFilter.getTopicFilter(),
             key -> new FastArraySet<>(Subscriber.class)
         );
         subscribers.add(subscriber);
-        return topicName.getQos().getSubscribeAckReasonCode();
+        return topicFilter.getQos().getSubscribeAckReasonCode();
     }
 
     /**
