@@ -10,8 +10,8 @@ import spock.lang.Specification
 class MqttBrokerTest extends Specification {
     
     @Autowired
-    protected Mqtt5AsyncClient mqttSubscriber
+    Mqtt5AsyncClient mqttSubscriber
     
     @Autowired
-    protected Mqtt5AsyncClient mqttPublisher
+    Mqtt5AsyncClient mqttPublisher
 }

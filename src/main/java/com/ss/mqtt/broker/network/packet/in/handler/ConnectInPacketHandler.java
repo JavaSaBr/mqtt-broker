@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network.packet.in.handler;
 
+import static reactor.core.publisher.Mono.fromRunnable;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
@@ -8,6 +9,7 @@ import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
@@ -29,20 +31,21 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         // if we should assign our client id
         if (StringUtils.isEmpty(requestedClientId)) {
             clientIdRegistry.generate()
-                .thenCompose(newClientId -> {
-                    client.setClientId(newClientId);
-                    return clientIdRegistry.register(newClientId);
-                })
-                .thenAccept(result -> {
-                    if(!result) {
-                        client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID);
-                    } else {
-                        onConnected(client, packet, requestedClientId);
-                    }
-                });
+                .doOnNext(client::setClientId)
+                .flatMap(clientIdRegistry::register)
+                .filter(Boolean::booleanValue)
+                .then(fromRunnable(() -> onConnected(client, packet, requestedClientId)))
+                .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)))
+                .subscribe();
         } else {
+
+            if (!clientIdRegistry.validate(requestedClientId)) {
+                client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID);
+                return;
+            }
+
             clientIdRegistry.register(requestedClientId)
-                .thenAccept(result -> {
+                .subscribe(result -> {
                     if(!result) {
                         client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID);
                     } else {

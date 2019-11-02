@@ -5,10 +5,10 @@ import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
 import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
 
 import java.util.BitSet;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class SimpleClientIdRegistry implements ClientIdRegistry {
 
@@ -34,12 +34,12 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
     }
 
     @Override
-    public @NotNull CompletableFuture<Boolean> register(@NotNull String clientId) {
+    public @NotNull Mono<Boolean> register(@NotNull String clientId) {
 
         var value = clientIdRegistry.getInReadLock(clientId, ObjectDictionary::get);
 
         if (value != null) {
-            return CompletableFuture.completedFuture(Boolean.FALSE);
+            return Mono.just(Boolean.FALSE);
         }
 
         var stamp = clientIdRegistry.writeLock();
@@ -48,7 +48,7 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
             value = clientIdRegistry.get(clientId);
 
             if (value != null) {
-                return CompletableFuture.completedFuture(Boolean.FALSE);
+                return Mono.just(Boolean.FALSE);
             }
 
             clientIdRegistry.put(clientId, CLIENT_ID_VALUE);
@@ -57,13 +57,13 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
             clientIdRegistry.writeUnlock(stamp);
         }
 
-        return CompletableFuture.completedFuture(Boolean.TRUE);
+        return Mono.just(Boolean.TRUE);
     }
 
     @Override
-    public @NotNull CompletableFuture<Boolean> unregister(@NotNull String clientId) {
+    public @NotNull Mono<Boolean> unregister(@NotNull String clientId) {
         var value = clientIdRegistry.getInWriteLock(clientId, ObjectDictionary::remove);
-        return CompletableFuture.completedFuture(value != null);
+        return Mono.just(value != null);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
     }
 
     @Override
-    public @NotNull CompletableFuture<String> generate() {
+    public @NotNull Mono<String> generate() {
         long stamp = clientIdRegistry.readLock();
         try {
 
@@ -89,7 +89,7 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
                 var value = clientIdRegistry.get(clientId);
 
                 if (value == null) {
-                    return CompletableFuture.completedFuture(clientId);
+                    return Mono.just(clientId);
                 }
             }
 

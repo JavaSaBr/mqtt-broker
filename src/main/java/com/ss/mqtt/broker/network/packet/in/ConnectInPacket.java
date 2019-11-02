@@ -303,8 +303,6 @@ public class ConnectInPacket extends MqttReadablePacket {
          */
         clientId = readString(buffer);
 
-        // FIXME validate client id here
-
         if (willFlag && mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal()) {
             readProperties(buffer, WILL_PROPERTIES);
         }

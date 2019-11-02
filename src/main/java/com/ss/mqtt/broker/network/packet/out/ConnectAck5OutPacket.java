@@ -301,14 +301,14 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         writeProperty(
             buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
-            requestedSessionExpiryInterval,
-            client.getSessionExpiryInterval()
+            client.getSessionExpiryInterval(),
+            requestedSessionExpiryInterval
         );
         writeProperty(
             buffer,
             PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
-            requestedClientId,
-            client.getClientId()
+            client.getClientId(),
+            requestedClientId
         );
         writeProperty(
             buffer,
@@ -349,8 +349,8 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         writeProperty(
             buffer,
             PacketProperty.SERVER_KEEP_ALIVE,
-            requestedKeepAlive,
-            client.getKeepAlive()
+            client.getKeepAlive(),
+            requestedKeepAlive
         );
     }
 }
