@@ -4,7 +4,7 @@ import com.ss.mqtt.broker.model.DisconnectReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.StringPair;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 

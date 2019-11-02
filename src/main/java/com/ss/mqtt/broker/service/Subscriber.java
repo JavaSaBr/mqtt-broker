@@ -3,7 +3,7 @@ package com.ss.mqtt.broker.service;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.SubscribeRetainHandling;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +15,7 @@ public class Subscriber {
     private final @NotNull MqttClient mqttClient;
     private final @NotNull QoS qos;
     private final @NotNull SubscribeRetainHandling retainHandling;
+
     private final boolean noLocal;
     private final boolean retainAsPublished;
 
@@ -31,5 +32,4 @@ public class Subscriber {
         this.retainAsPublished = topicFilter.isRetainAsPublished();
         this.noLocal = topicFilter.isNoLocal();
     }
-
 }

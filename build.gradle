@@ -46,10 +46,12 @@ allprojects {
     }
 
     dependencies {
+    
         implementation "com.spaceshift:rlib.network:$rlibVersion"
         implementation "com.spaceshift:rlib.logger.slf4j:$rlibVersion"
         implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
         implementation "org.springframework.boot:spring-boot-starter-logging:$springbootVersion"
+        implementation "io.projectreactor:reactor-core:$projectReactorVersion"
         
         compileOnly "org.jetbrains:annotations:$annotationVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"

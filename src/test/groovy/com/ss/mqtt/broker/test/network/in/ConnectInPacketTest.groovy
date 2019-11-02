@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.test.network.in
 
+import com.ss.mqtt.broker.exception.MalformedPacketMqttException
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
@@ -84,5 +85,37 @@ class ConnectInPacketTest extends BaseInPacketTest {
             packet.willQos == 0
             packet.willPayload == ArrayUtils.EMPTY_BYTE_ARRAY
             packet.userProperties == userProperties
+    }
+    
+    def "should not read packet correctly with invalid UTF8 strings"(byte[] stringBytes) {
+        
+        given:
+            
+            def dataBuffer = BufferUtils.prepareBuffer(512) {
+                it.putString("MQTT")
+                it.put(5 as byte)
+                it.put(0b11000010 as byte)
+                it.putShort(keepAlive as short)
+                it.putMbi(0)
+                it.putShort(stringBytes.length as short)
+                it.put(stringBytes)
+                it.putString(userPassword)
+                it.putString(userName)
+            }
+        
+        when:
+            def packet = new ConnectInPacket(0b0001_0000 as byte)
+            def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
+        then:
+            !result
+            packet.exception instanceof MalformedPacketMqttException
+        where:
+            stringBytes << [
+                // https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
+                [0xF4, 0x90, 0x80, 0x80] as byte[],
+                [0xFE, 0xFE, 0xFF, 0xFF] as byte[],
+                [0xFC, 0x80, 0x80, 0x80, 0x80, 0xAF] as byte[],
+                [0xED, 0xAF, 0xBF, 0xED, 0xBF, 0xBF] as byte[],
+            ]
     }
 }

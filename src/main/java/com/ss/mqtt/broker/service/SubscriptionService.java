@@ -3,11 +3,9 @@ package com.ss.mqtt.broker.service;
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
-import com.ss.mqtt.broker.network.MqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 /**
  * Subscription service
@@ -18,12 +16,12 @@ public interface SubscriptionService {
      * Adds MQTT client to topic filter subscribers
      *
      * @param mqttClient MQTT client to be added
-     * @param topicFilters topic filters
+     * @param topicNames topic names
      * @return array of subscribe ack reason codes
      */
     @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicFilters
+        @NotNull Array<SubscribeTopicFilter> topicNames
     );
 
     /**

@@ -2,12 +2,13 @@ package com.ss.mqtt.broker.network;
 
 import com.ss.mqtt.broker.config.MqttConnectionConfig;
 import com.ss.mqtt.broker.model.MqttVersion;
+import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
+import com.ss.mqtt.broker.network.packet.in.handler.PacketInHandler;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
-import com.ss.mqtt.broker.service.PublishingService;
-import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
@@ -22,40 +23,40 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.channels.AsynchronousSocketChannel;
+import java.util.function.Function;
 
 @Log4j2
-@Getter(AccessLevel.PROTECTED)
 public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttWritablePacket> {
 
-    private final PacketReader packetReader;
-    private final PacketWriter packetWriter;
+    @Getter(AccessLevel.PROTECTED)
+    private final @NotNull PacketReader packetReader;
 
-    private final SubscriptionService subscriptionService;
-    private final PublishingService publishingService;
+    @Getter(AccessLevel.PROTECTED)
+    private final @NotNull PacketWriter packetWriter;
+
+    private final @Getter PacketInHandler @NotNull [] packetHandlers;
 
     private final @Getter @NotNull MqttClient client;
     private final @Getter @NotNull MqttConnectionConfig config;
 
-    private volatile @Setter @NotNull MqttVersion mqttVersion;
+    private volatile @Getter @Setter @NotNull MqttVersion mqttVersion;
 
     public MqttConnection(
         @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
         @NotNull AsynchronousSocketChannel channel,
-        @NotNull NetworkCryptor crypt,
         @NotNull BufferAllocator bufferAllocator,
         int maxPacketsByRead,
-        @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishingService publishingService,
-        @NotNull MqttConnectionConfig config
+        PacketInHandler @NotNull [] packetHandlers,
+        @NotNull MqttConnectionConfig config,
+        @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory
     ) {
-        super(network, channel, crypt, bufferAllocator, maxPacketsByRead);
+        super(network, channel, NetworkCryptor.NULL, bufferAllocator, maxPacketsByRead);
+        this.packetHandlers = packetHandlers;
         this.config = config;
         this.mqttVersion = MqttVersion.MQTT_3_1_1;
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
-        this.client = new MqttClient(this);
-        this.subscriptionService = subscriptionService;
-        this.publishingService = publishingService;
+        this.client = clientFactory.apply(this);
     }
 
     public boolean isSupported(@NotNull MqttVersion mqttVersion) {

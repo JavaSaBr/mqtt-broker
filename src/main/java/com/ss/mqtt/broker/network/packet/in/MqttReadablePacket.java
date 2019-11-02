@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
+import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.exception.MqttException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttVersion;
@@ -13,15 +14,37 @@ import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.network.packet.impl.AbstractReadablePacket;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 
 public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConnection> {
+
+    @Getter
+    @RequiredArgsConstructor
+    private static class Utf8Decoder {
+        private final CharsetDecoder decoder;
+        private final ByteBuffer inBuffer;
+        private final CharBuffer outBuffer;
+    }
+
+    private static final ThreadLocal<Utf8Decoder> LOCAL_DECODER = ThreadLocal.withInitial(() -> {
+
+        var decoder = StandardCharsets.UTF_8.newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        return new Utf8Decoder(decoder, ByteBuffer.allocate(1024), CharBuffer.allocate(1024));
+    });
+
 
     /**
      * The list of user properties.
@@ -161,9 +184,30 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
     @Override
     protected @NotNull String readString(@NotNull ByteBuffer buffer) {
-        var stringData = new byte[readShort(buffer) & 0xFFFF];
-        buffer.get(stringData);
-        return new String(stringData, StandardCharsets.UTF_8);
+
+        var utf8Decoder = LOCAL_DECODER.get();
+        var inBuffer = utf8Decoder.getInBuffer();
+
+        var stringLength = readShort(buffer) & 0xFFFF;
+
+        if (stringLength > inBuffer.capacity()) {
+            throw new MalformedPacketMqttException();
+        }
+
+        var decoder = utf8Decoder.getDecoder();
+        var outBuffer = utf8Decoder.getOutBuffer();
+
+        buffer.get(inBuffer.clear().array(), 0, stringLength);
+
+        decoder.reset();
+
+        var result = decoder.decode(inBuffer.position(stringLength).flip(), outBuffer.clear(), true);
+
+        if (result.isError()) {
+            throw new MalformedPacketMqttException();
+        }
+
+        return new String(inBuffer.array(), 0, stringLength, StandardCharsets.UTF_8);
     }
 
     protected @NotNull byte[] readBytes(@NotNull ByteBuffer buffer) {

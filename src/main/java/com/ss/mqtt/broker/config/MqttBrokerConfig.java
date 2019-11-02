@@ -3,15 +3,15 @@ package com.ss.mqtt.broker.config;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
-import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
+import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.network.packet.in.handler.*;
+import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.ClientService;
 import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.mqtt.broker.service.impl.DefaultClientService;
-import com.ss.mqtt.broker.service.impl.SimplePublishingService;
-import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService;
-import com.ss.mqtt.broker.service.impl.SimpleSubscriptions;
+import com.ss.mqtt.broker.service.impl.*;
 import com.ss.rlib.network.*;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
 import com.ss.rlib.network.server.ServerNetwork;
@@ -52,29 +52,62 @@ public class MqttBrokerConfig {
         return new DefaultClientService();
     }
 
+    @NotNull
+    @Bean ClientIdRegistry clientIdRegistry() {
+        return new SimpleClientIdRegistry(
+            env.getProperty(
+                "client.id.available.chars",
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
+            ),
+            env.getProperty("client.id.max.length", int.class, 36)
+        );
+    }
+
     @Bean
-    @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network(
-        @NotNull ServerNetworkConfig networkConfig,
-        @NotNull BufferAllocator bufferAllocator,
-        @NotNull Consumer<MqttConnection> mqttConnectionConsumer,
-        @NotNull MqttConnectionConfig connectionConfig,
+    PacketInHandler @NotNull [] devicePacketHandlers(
+        @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService
     ) {
-        ServerNetwork<MqttConnection> serverNetwork = NetworkFactory.newServerNetwork(
+
+        var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry);
+        handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
+        handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
+        handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
+
+        return handlers;
+    }
+
+    @Bean
+    @NotNull ServerNetwork<@NotNull MqttConnection> deviceNetwork(
+        @NotNull ServerNetworkConfig networkConfig,
+        @NotNull BufferAllocator bufferAllocator,
+        @NotNull MqttConnectionConfig deviceConnectionConfig,
+        PacketInHandler @NotNull [] devicePacketHandlers
+    ) {
+        return NetworkFactory.newServerNetwork(
             networkConfig,
-            networkChannelFactory(
+            deviceConnectionFactory(
                 bufferAllocator,
-                connectionConfig,
-                subscriptionService,
-                publishingService
+                deviceConnectionConfig,
+                devicePacketHandlers
             )
         );
+    }
 
-        serverNetwork.start(new InetSocketAddress("localhost", 1883));
-        serverNetwork.onAccept(mqttConnectionConsumer);
+    @Bean
+    @NotNull InetSocketAddress deviceNetworkAddress(
+        @NotNull ServerNetwork<@NotNull MqttConnection> deviceNetwork,
+        @NotNull Consumer<@NotNull MqttConnection> mqttConnectionConsumer
+    ) {
 
-        return serverNetwork;
+        var address = new InetSocketAddress("localhost", 1883);
+
+        deviceNetwork.start(address);
+        deviceNetwork.onAccept(mqttConnectionConsumer);
+
+        return address;
     }
 
     @Bean
@@ -88,16 +121,16 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull Consumer<MqttConnection> mqttConnectionConsumer(@NotNull ClientService clientService) {
+    @NotNull Consumer<@NotNull MqttConnection> mqttConnectionConsumer() {
         return mqttConnection -> {
             log.info("Accepted connection: {}", mqttConnection);
-            var client = mqttConnection.getClient();
+            var client = (UnsafeMqttClient) mqttConnection.getClient();
             mqttConnection.onReceive((conn, packet) -> client.handle(packet));
         };
     }
 
     @Bean
-    @NotNull MqttConnectionConfig mqttConnectionConfig() {
+    @NotNull MqttConnectionConfig deviceConnectionConfig() {
         return new MqttConnectionConfig(
             QoS.of(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
             env.getProperty(
@@ -128,21 +161,19 @@ public class MqttBrokerConfig {
         );
     }
 
-    private @NotNull ChannelFactory networkChannelFactory(
+    private @NotNull ChannelFactory deviceConnectionFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishingService publishingService
+        PacketInHandler @NotNull [] packetHandlers
     ) {
         return (network, channel) -> new MqttConnection(
             network,
             channel,
-            NetworkCryptor.NULL,
             bufferAllocator,
             100,
-            subscriptionService,
-            publishingService,
-            connectionConfig
+            packetHandlers,
+            connectionConfig,
+            DeviceMqttClient::new
         );
     }
 }

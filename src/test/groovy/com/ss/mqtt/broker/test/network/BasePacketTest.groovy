@@ -5,7 +5,8 @@ import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode
-import com.ss.mqtt.broker.network.MqttClient
+import com.ss.mqtt.broker.network.client.MqttClient
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.ArrayFactory
@@ -82,12 +83,12 @@ class BasePacketTest extends Specification {
         isSupported(MqttVersion.MQTT_5) >> true
         getConfig() >> mqttConnectionConfig
         getClient() >> Stub(MqttClient) {
-            getConnection() >> mqtt5Connection
+            getConnectionConfig() >> mqttConnectionConfig
             getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
             getReceiveMax() >> BasePacketTest.receiveMaximum
             getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
-            getClientId() >> "any"
-            getKeepAlive() >> -1
+            getClientId() >> clientId
+            getKeepAlive() >> serverKeepAlive
             getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
         }
     }
@@ -98,12 +99,12 @@ class BasePacketTest extends Specification {
         isSupported(MqttVersion.MQTT_5) >> false
         getConfig() >> mqttConnectionConfig
         getClient() >> Stub(MqttClient) {
-            getConnection() >> mqtt311Connection
+            getConnectionConfig() >> mqttConnectionConfig
             getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
             getReceiveMax() >> BasePacketTest.receiveMaximum
             getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
-            getClientId() >> "any"
-            getKeepAlive() >> -1
+            getClientId() >> clientId
+            getKeepAlive() >> serverKeepAlive
             getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
         }
     }
