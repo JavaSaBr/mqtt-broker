@@ -96,7 +96,7 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newSubscribeAck(
-        @NotNull DeviceMqttClient client,
+        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes
     ) {
@@ -144,7 +144,7 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull DeviceMqttClient client,
+        @NotNull MqttClient client,
         @NotNull AuthenticateReasonCode reasonCode,
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData

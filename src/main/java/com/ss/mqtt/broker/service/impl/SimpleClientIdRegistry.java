@@ -7,12 +7,12 @@ import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class SimpleClientIdRegistry implements ClientIdRegistry {
 
-    private static final String AVAILABLE_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String AVAILABLE_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
     private static final BitSet AVAILABLE_CHAR_SET;
     private static final Object CLIENT_ID_VALUE = new Object();
 
@@ -80,16 +80,12 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
 
     @Override
     public @NotNull CompletableFuture<String> generate() {
-
-        var threadId = Thread.currentThread().getId();
-        var random = ThreadLocalRandom.current();
-
         long stamp = clientIdRegistry.readLock();
         try {
 
             while (true) {
 
-                var clientId = threadId + "-" + random.nextInt(Short.MAX_VALUE) + "-" + System.currentTimeMillis();
+                var clientId = UUID.randomUUID().toString();
                 var value = clientIdRegistry.get(clientId);
 
                 if (value == null) {
