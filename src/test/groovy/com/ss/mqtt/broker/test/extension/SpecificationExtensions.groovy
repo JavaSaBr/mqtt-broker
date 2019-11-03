@@ -50,6 +50,11 @@ class SpecificationExtensions extends Specification {
         return self
     }
     
+    static ByteBuffer putBytes(ByteBuffer self, byte[] value) {
+        writer.writeBytes(self, value)
+        return self
+    }
+    
     static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> values) {
        
         switch (property.getDataType()) {

@@ -6,15 +6,14 @@ import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
-import com.ss.mqtt.broker.service.ClientIdRegistry;
-import com.ss.rlib.common.util.StringUtils;
+import com.ss.mqtt.broker.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
 
-    private final ClientIdRegistry clientIdRegistry;
+    private final AuthenticationService authenticationService;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
@@ -28,26 +27,11 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
         var requestedClientId = packet.getClientId();
 
-        // if we should assign our client id
-        if (StringUtils.isEmpty(requestedClientId)) {
-            clientIdRegistry.generate()
-                .doOnNext(client::setClientId)
-                .flatMap(clientIdRegistry::register)
-                .filter(Boolean::booleanValue)
-                .then(fromRunnable(() -> onConnected(client, packet, requestedClientId)))
-                .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)))
-                .subscribe();
-        } else {
-            clientIdRegistry.register(requestedClientId)
-                .subscribe(result -> {
-                    if(!result) {
-                        client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID);
-                    } else {
-                        client.setClientId(requestedClientId);
-                        onConnected(client, packet, requestedClientId);
-                    }
-                });
-        }
+        authenticationService.auth(packet)
+            .doOnNext(client::setClientId)
+            .then(fromRunnable(() -> onConnected(client, packet, requestedClientId)))
+            .doOnError(ConnectionRejectException.class, error -> client.reject(error.getReasonCode()))
+            .subscribe();
     }
 
     private void onConnected(

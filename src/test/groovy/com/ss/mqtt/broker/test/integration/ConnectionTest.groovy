@@ -12,9 +12,51 @@ class ConnectionTest extends MqttBrokerTest {
     @Autowired
     InetSocketAddress deviceNetworkAddress
     
-    def "subscriber should connect to broker"() {
+    def "subscriber should not connect to broker with wrong pass"() {
+        when:
+            mqttSubscriber.connectWith()
+                .simpleAuth()
+                .username('user')
+                .password('wrongPassword'.getBytes(ENCODING))
+                .applySimpleAuth()
+                .send()
+                .join()
+        then:
+            def ex = thrown CompletionException
+            def cause = ex.cause as Mqtt5ConnAckException
+            cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+    }
+    
+    def "subscriber should connect to broker without user and pass"() {
         when:
             def result = mqttSubscriber.connect().join()
+        then:
+            result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+            !result.serverReference.present
+            !result.responseInformation.present
+            !result.serverKeepAlive.present
+            !result.sessionExpiryInterval.present
+            !result.assignedClientIdentifier.present
+            !result.sessionPresent
+    }
+    
+    def "subscriber should connect to broker with user and pass"() {
+        given:
+            def client = MqttClient.builder()
+                .identifier("1")
+                .serverHost(deviceNetworkAddress.getHostName())
+                .serverPort(deviceNetworkAddress.getPort())
+                .useMqttVersion5()
+                .build()
+                .toAsync()
+        when:
+            def result = client.connectWith()
+                .simpleAuth()
+                .username('user1')
+                .password('password'.getBytes(ENCODING))
+                .applySimpleAuth()
+                .send()
+                .join()
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             !result.serverReference.present
@@ -35,7 +77,13 @@ class ConnectionTest extends MqttBrokerTest {
                 .build()
                 .toAsync()
         when:
-            def result = client.connect().join()
+            def result = client.connectWith()
+                .simpleAuth()
+                .username('user')
+                .password('password'.getBytes(ENCODING))
+                .applySimpleAuth()
+                .send()
+                .join()
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             result.assignedClientIdentifier.present
@@ -52,7 +100,13 @@ class ConnectionTest extends MqttBrokerTest {
                 .build()
                 .toAsync()
         when:
-            client.connect().join()
+            client.connectWith()
+                .simpleAuth()
+                .username('user')
+                .password('password'.getBytes(ENCODING))
+                .applySimpleAuth()
+                .send()
+                .join()
         then:
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException

@@ -11,8 +11,9 @@ import java.nio.charset.StandardCharsets
 @ContextConfiguration(classes = MqttBrokerTestConfig)
 class MqttBrokerTest extends Specification {
     
+    public static final ENCODING = StandardCharsets.UTF_8
     public static final topicFilter = "topic/Filter"
-    public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
+    public static final publishPayload = "publishPayload".getBytes(ENCODING)
     
     @Autowired
     Mqtt5AsyncClient mqttSubscriber
