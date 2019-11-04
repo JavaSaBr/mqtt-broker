@@ -77,7 +77,6 @@ public class MqttBrokerConfig {
     ) {
         return new SimpleAuthenticationService(
             credentialSource,
-            clientIdRegistry,
             env.getProperty("credentials.allow.anonymous.auth", boolean.class, false)
         );
     }
@@ -85,12 +84,13 @@ public class MqttBrokerConfig {
     @Bean
     PacketInHandler @NotNull [] devicePacketHandlers(
         @NotNull AuthenticationService authenticationService,
+        @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
-        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(authenticationService);
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry, authenticationService);
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);

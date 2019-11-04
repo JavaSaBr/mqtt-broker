@@ -1,6 +1,5 @@
 package com.ss.mqtt.broker.test.integration.service
 
-import com.ss.mqtt.broker.exception.ConnectionRejectException
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.test.integration.MqttBrokerTest
 import com.ss.rlib.common.util.StringUtils
@@ -40,7 +39,6 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             def result1 = clientIdRegistry.register(clientId1).block()
             def result2 = clientIdRegistry.register(clientId2).block()
         then:
-            thrown(ConnectionRejectException)
             !result1 && !result2
         cleanup:
             clientIdRegistry.unregister(clientId1).block()
@@ -53,7 +51,7 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             
             def clientId1 = "testClientId5"
             def clientId2 = "testClientId6"
-
+        
             clientIdRegistry.register(clientId1).block()
             clientIdRegistry.register(clientId2).block()
         

@@ -1,11 +1,10 @@
 package com.ss.mqtt.broker.service;
 
-import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 public interface AuthenticationService {
 
-    @NotNull Mono<String> auth(@NotNull ConnectInPacket packet);
+    @NotNull Mono<Boolean> auth(@NotNull String userName, @NotNull byte[] password);
 
 }

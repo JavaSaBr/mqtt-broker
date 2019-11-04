@@ -1,7 +1,5 @@
 package com.ss.mqtt.broker.service.impl;
 
-import com.ss.mqtt.broker.exception.ConnectionRejectException;
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
 import com.ss.rlib.common.util.dictionary.DictionaryFactory;
@@ -14,9 +12,9 @@ import java.util.UUID;
 
 public class SimpleClientIdRegistry implements ClientIdRegistry {
 
-    private static final String DEFAULT_USER_NAME = "default";
+    private static final Object CLIENT_ID_VALUE = new Object();
 
-    private final @NotNull ConcurrentObjectDictionary<String, String> clientIdRegistry;
+    private final @NotNull ConcurrentObjectDictionary<String, Object> clientIdRegistry;
     private final @NotNull BitSet availableCharSet;
 
     private final int maxClientIdLength;
@@ -32,33 +30,29 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
     }
 
     @Override
-    public @NotNull Mono<String> register(@NotNull String clientId, @NotNull String userName) {
+    public @NotNull Mono<Boolean> register(@NotNull String clientId) {
+
         if (!validate(clientId)) {
-            return Mono.error(new ConnectionRejectException(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID));
+            return Mono.just(Boolean.FALSE);
         }
 
         var value = clientIdRegistry.getInReadLock(clientId, ObjectDictionary::get);
         if (value != null) {
-            return Mono.error(new ConnectionRejectException(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID));
+            return Mono.just(Boolean.FALSE);
         }
 
         var stamp = clientIdRegistry.writeLock();
         try {
             value = clientIdRegistry.get(clientId);
             if (value != null) {
-                return Mono.error(new ConnectionRejectException(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID));
+                return Mono.just(Boolean.FALSE);
             }
-            clientIdRegistry.put(clientId, userName);
+            clientIdRegistry.put(clientId, CLIENT_ID_VALUE);
         } finally {
             clientIdRegistry.writeUnlock(stamp);
         }
 
-        return Mono.just(clientId);
-    }
-
-    @Override
-    public @NotNull Mono<String> register(@NotNull String clientId) {
-        return register(clientId, DEFAULT_USER_NAME);
+        return Mono.just(Boolean.TRUE);
     }
 
     @Override
