@@ -1,26 +1,16 @@
 package com.ss.mqtt.broker.test.integration
 
-import com.hivemq.client.mqtt.MqttClient
+
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5ConnAckException
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.CompletionException
 
 class ConnectionTest extends MqttBrokerTest {
     
-    @Autowired
-    InetSocketAddress deviceNetworkAddress
-    
     def "subscriber should not connect to broker with wrong pass"() {
         when:
-            mqttSubscriber.connectWith()
-                .simpleAuth()
-                .username('user')
-                .password('wrongPassword'.getBytes(ENCODING))
-                .applySimpleAuth()
-                .send()
-                .join()
+            connectWith(mqttSubscriber, 'user', 'wrongPassword')
         then:
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException
@@ -42,21 +32,9 @@ class ConnectionTest extends MqttBrokerTest {
     
     def "subscriber should connect to broker with user and pass"() {
         given:
-            def client = MqttClient.builder()
-                .identifier("1")
-                .serverHost(deviceNetworkAddress.getHostName())
-                .serverPort(deviceNetworkAddress.getPort())
-                .useMqttVersion5()
-                .build()
-                .toAsync()
+            def client = buildClient('1')
         when:
-            def result = client.connectWith()
-                .simpleAuth()
-                .username('user1')
-                .password('password'.getBytes(ENCODING))
-                .applySimpleAuth()
-                .send()
-                .join()
+            def result = connectWith(client, 'user1', 'password')
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             !result.serverReference.present
@@ -69,21 +47,9 @@ class ConnectionTest extends MqttBrokerTest {
     
     def "subscriber should connect to broker without providing a client id"() {
         given:
-            def client = MqttClient.builder()
-                .identifier("")
-                .serverHost(deviceNetworkAddress.getHostName())
-                .serverPort(deviceNetworkAddress.getPort())
-                .useMqttVersion5()
-                .build()
-                .toAsync()
+            def client = buildClient('')
         when:
-            def result = client.connectWith()
-                .simpleAuth()
-                .username('user')
-                .password('password'.getBytes(ENCODING))
-                .applySimpleAuth()
-                .send()
-                .join()
+            def result = connectWith(client, 'user', 'password')
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             result.assignedClientIdentifier.present
@@ -92,21 +58,9 @@ class ConnectionTest extends MqttBrokerTest {
     
     def "subscriber should not connect to broker with invalid client id"(String clientId) {
         given:
-            def client = MqttClient.builder()
-                .identifier(clientId)
-                .serverHost(deviceNetworkAddress.getHostName())
-                .serverPort(deviceNetworkAddress.getPort())
-                .useMqttVersion5()
-                .build()
-                .toAsync()
+            def client = buildClient(clientId)
         when:
-            client.connectWith()
-                .simpleAuth()
-                .username('user')
-                .password('password'.getBytes(ENCODING))
-                .applySimpleAuth()
-                .send()
-                .join()
+            connectWith(client, 'user', 'password')
         then:
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException

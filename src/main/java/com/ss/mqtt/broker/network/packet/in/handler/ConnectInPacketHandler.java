@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network.packet.in.handler;
 
+import static reactor.core.publisher.Mono.fromCallable;
 import static reactor.core.publisher.Mono.fromRunnable;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
@@ -29,16 +30,18 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             return;
         }
 
-        var requestedClientId = packet.getClientId();
-
         authenticationService.auth(packet.getUsername(), packet.getPassword())
             .filter(Boolean::booleanValue)
-            .flatMap(auth -> registerClient(client, packet, requestedClientId))
+            .flatMap(authenticated -> registerClient(client, packet))
             .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD)))
             .subscribe();
     }
 
-    private Mono<?> registerClient(UnsafeMqttClient client, ConnectInPacket packet, String requestedClientId) {
+    private @NotNull Mono<Boolean> registerClient(
+        @NotNull UnsafeMqttClient client,
+        @NotNull ConnectInPacket packet
+    ) {
+        var requestedClientId = packet.getClientId();
         if (StringUtils.isEmpty(requestedClientId)) {
             return processWithoutClientId(client, packet, requestedClientId);
         } else {
@@ -46,23 +49,34 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         }
     }
 
-    private Mono<?> processWithClientId(UnsafeMqttClient client, ConnectInPacket packet, String requestedClientId) {
-        return clientIdRegistry.register(requestedClientId).doOnNext(result -> {
-            if (!result) {
-                client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID);
-            } else {
+    private @NotNull Mono<Boolean> processWithClientId(
+        @NotNull UnsafeMqttClient client,
+        @NotNull ConnectInPacket packet,
+        @NotNull String requestedClientId
+    ) {
+        return clientIdRegistry.register(requestedClientId)
+            .filter(Boolean::booleanValue)
+            .flatMap(registered -> fromCallable(() -> {
                 client.setClientId(requestedClientId);
                 onConnected(client, packet, requestedClientId);
-            }
-        });
+                return true;
+            }))
+            .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)));
     }
 
-    private Mono<?> processWithoutClientId(UnsafeMqttClient client, ConnectInPacket packet, String requestedClientId) {
+    private @NotNull Mono<Boolean> processWithoutClientId(
+        @NotNull UnsafeMqttClient client,
+        @NotNull ConnectInPacket packet,
+        @NotNull String requestedClientId
+    ) {
         return clientIdRegistry.generate()
             .doOnNext(client::setClientId)
             .flatMap(clientIdRegistry::register)
             .filter(Boolean::booleanValue)
-            .then(fromRunnable(() -> onConnected(client, packet, requestedClientId)))
+            .flatMap(registered -> fromCallable(() -> {
+                onConnected(client, packet, requestedClientId);
+                return true;
+            }))
             .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)));
     }
 

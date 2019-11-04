@@ -13,21 +13,8 @@ class ConnectSubscribePublishTest extends MqttBrokerTest {
             Mqtt5Publish receivedMessage = null
         when:
             
-            mqttSubscriber.connectWith()
-                .simpleAuth()
-                .username('user')
-                .password('password'.getBytes(ENCODING))
-                .applySimpleAuth()
-                .send()
-                .join()
-    
-            mqttPublisher.connectWith()
-                .simpleAuth()
-                .username('user')
-                .password('password'.getBytes(ENCODING))
-                .applySimpleAuth()
-                .send()
-                .join()
+            mqttSubscriber.connect().join()
+            mqttPublisher.connect().join()
         
             def subscribeResult = mqttSubscriber.subscribeWith()
                 .topicFilter(topicFilter)

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 
 public class FileCredentialsSource extends AbstractCredentialSource {
@@ -19,15 +18,14 @@ public class FileCredentialsSource extends AbstractCredentialSource {
 
     @Override
     void init() {
-        URL credentialUrl = FileCredentialsSource.class.getClassLoader().getResource(fileName);
+        var credentialUrl = FileCredentialsSource.class.getClassLoader().getResource(fileName);
         if (credentialUrl == null) {
             throw new CredentialsSourceException("Credentials file could not be found");
         }
         try {
-            String credentialsPath = credentialUrl.getPath();
-            Properties credenrialsProperties = new Properties();
-            credenrialsProperties.load(new FileInputStream(credentialsPath));
-            credenrialsProperties.forEach(this::putCredentials);
+            var credentialsProperties = new Properties();
+            credentialsProperties.load(new FileInputStream(credentialUrl.getPath()));
+            credentialsProperties.forEach(this::putCredentials);
         } catch (IOException e) {
             throw new CredentialsSourceException(e);
         }

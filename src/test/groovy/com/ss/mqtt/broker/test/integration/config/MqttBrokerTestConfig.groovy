@@ -5,18 +5,20 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import com.ss.mqtt.broker.config.MqttBrokerConfig
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.rlib.network.server.ServerNetwork
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.*
 
 import java.util.function.Consumer
 
 @Configuration
 @Import(MqttBrokerConfig)
+@PropertySources([
+    @PropertySource("broker.properties"),
+    @PropertySource("broker-test.properties")
+])
 class MqttBrokerTestConfig {
     
     @Bean
-    Mqtt5AsyncClient mqttSubscriber(InetSocketAddress deviceNetworkAddress) {
+    static Mqtt5AsyncClient mqttSubscriber(InetSocketAddress deviceNetworkAddress) {
         return MqttClient.builder()
             .identifier(UUID.randomUUID().toString())
             .serverHost(deviceNetworkAddress.getHostName())
@@ -27,7 +29,7 @@ class MqttBrokerTestConfig {
     }
     
     @Bean
-    Mqtt5AsyncClient mqttPublisher(InetSocketAddress deviceNetworkAddress) {
+    static Mqtt5AsyncClient mqttPublisher(InetSocketAddress deviceNetworkAddress) {
         return MqttClient.builder()
             .identifier(UUID.randomUUID().toString())
             .serverHost(deviceNetworkAddress.getHostName())
@@ -38,15 +40,12 @@ class MqttBrokerTestConfig {
     }
     
     @Bean
-    InetSocketAddress deviceNetworkAddress(
+    static InetSocketAddress deviceNetworkAddress(
         ServerNetwork<MqttConnection> deviceNetwork,
         Consumer<MqttConnection> mqttConnectionConsumer
     ) {
-        
         def address = deviceNetwork.start()
-        
         deviceNetwork.onAccept(mqttConnectionConsumer)
-        
         return address
     }
 }

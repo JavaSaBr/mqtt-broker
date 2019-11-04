@@ -77,7 +77,7 @@ public class MqttBrokerConfig {
     ) {
         return new SimpleAuthenticationService(
             credentialSource,
-            env.getProperty("credentials.allow.anonymous.auth", boolean.class, false)
+            env.getProperty("authentication.allow.anonymous", boolean.class, false)
         );
     }
 
