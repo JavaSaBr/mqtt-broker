@@ -1,6 +1,5 @@
 package com.ss.mqtt.broker.test.integration
 
-
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5ConnAckException
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 
