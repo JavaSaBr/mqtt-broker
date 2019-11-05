@@ -49,5 +49,8 @@ class ConnectSubscribePublishTest extends MqttBrokerTest {
             receivedMessage.qos == MqttQos.AT_MOST_ONCE
             receivedMessage.type == Mqtt5MessageType.PUBLISH
             receivedMessage.topic.levels.join("/") == topicFilter
+        cleanup:
+            subscriber.disconnect()
+            publisher.disconnect()
     }
 }
