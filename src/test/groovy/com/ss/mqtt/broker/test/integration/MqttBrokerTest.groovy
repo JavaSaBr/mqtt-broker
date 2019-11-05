@@ -11,21 +11,19 @@ import java.nio.charset.StandardCharsets
 
 @ContextConfiguration(classes = MqttBrokerTestConfig)
 class MqttBrokerTest extends Specification {
-    
+
     @Autowired
     InetSocketAddress deviceNetworkAddress
-    
-    public static final ENCODING = StandardCharsets.UTF_8
+
+    public static final encoding = StandardCharsets.UTF_8
     public static final topicFilter = "topic/Filter"
-    public static final publishPayload = "publishPayload".getBytes(ENCODING)
-    
-    @Autowired
-    Mqtt5AsyncClient mqttSubscriber
-    
-    @Autowired
-    Mqtt5AsyncClient mqttPublisher
-    
-    protected buildClient(String clientId) {
+    public static final publishPayload = "publishPayload".getBytes(encoding)
+
+    def buildClient() {
+        return buildClient(UUID.randomUUID().toString())
+    }
+
+    def buildClient(String clientId) {
         return MqttClient.builder()
             .identifier(clientId)
             .serverHost(deviceNetworkAddress.getHostName())
@@ -34,12 +32,12 @@ class MqttBrokerTest extends Specification {
             .build()
             .toAsync()
     }
-    
-    protected static connectWith(Mqtt5AsyncClient client, String user, String pass){
+
+    def static connectWith(Mqtt5AsyncClient client, String user, String pass) {
         return client.connectWith()
             .simpleAuth()
             .username(user)
-            .password(pass.getBytes(ENCODING))
+            .password(pass.getBytes(encoding))
             .applySimpleAuth()
             .send()
             .join()

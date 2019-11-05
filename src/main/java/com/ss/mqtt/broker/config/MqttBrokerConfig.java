@@ -30,7 +30,6 @@ import java.util.function.Consumer;
 
 @Log4j2
 @Configuration
-@PropertySource("broker.properties")
 @RequiredArgsConstructor
 public class MqttBrokerConfig {
 

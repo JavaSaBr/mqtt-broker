@@ -9,7 +9,7 @@ class ConnectionTest extends MqttBrokerTest {
     
     def "subscriber should not connect to broker with wrong pass"() {
         when:
-            connectWith(mqttSubscriber, 'user', 'wrongPassword')
+            connectWith(buildClient(), 'user', 'wrongPassword')
         then:
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException
@@ -18,7 +18,7 @@ class ConnectionTest extends MqttBrokerTest {
     
     def "subscriber should connect to broker without user and pass"() {
         when:
-            def result = mqttSubscriber.connect().join()
+            def result = buildClient().connect().join()
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             !result.serverReference.present

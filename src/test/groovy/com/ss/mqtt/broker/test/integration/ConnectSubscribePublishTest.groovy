@@ -11,19 +11,20 @@ class ConnectSubscribePublishTest extends MqttBrokerTest {
     def "publisher should publish message to broker"() {
         given:
             Mqtt5Publish receivedMessage = null
+            def subscriber = buildClient()
+            def publisher = buildClient()
         when:
-           
-            mqttSubscriber.connect().join()
-            mqttPublisher.connect().join()
+            subscriber.connect().join()
+            publisher.connect().join()
             
-            def subscribeResult = mqttSubscriber.subscribeWith()
+            def subscribeResult = subscriber.subscribeWith()
                 .topicFilter(topicFilter)
                 .qos(MqttQos.AT_MOST_ONCE)
                 .callback({ publish -> receivedMessage = publish })
                 .send()
                 .join()
         
-            def publishResult = mqttPublisher.publishWith()
+            def publishResult = publisher.publishWith()
                 .topic(topicFilter)
                 .qos(MqttQos.AT_MOST_ONCE)
                 .payload(publishPayload)
