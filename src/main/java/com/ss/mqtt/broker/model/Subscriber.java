@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.service;
+package com.ss.mqtt.broker.model;
 
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.SubscribeRetainHandling;

@@ -7,12 +7,12 @@ import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.in.handler.*;
-import com.ss.mqtt.broker.service.ClientIdRegistry;
-import com.ss.mqtt.broker.service.ClientService;
-import com.ss.mqtt.broker.service.PublishingService;
-import com.ss.mqtt.broker.service.SubscriptionService;
+import com.ss.mqtt.broker.service.*;
 import com.ss.mqtt.broker.service.impl.*;
-import com.ss.rlib.network.*;
+import com.ss.rlib.network.BufferAllocator;
+import com.ss.rlib.network.Network;
+import com.ss.rlib.network.NetworkFactory;
+import com.ss.rlib.network.ServerNetworkConfig;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
 import com.ss.rlib.network.server.ServerNetwork;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 import java.net.InetSocketAddress;
@@ -52,8 +53,8 @@ public class MqttBrokerConfig {
         return new DefaultClientService();
     }
 
-    @NotNull
-    @Bean ClientIdRegistry clientIdRegistry() {
+    @Bean
+    @NotNull ClientIdRegistry clientIdRegistry() {
         return new SimpleClientIdRegistry(
             env.getProperty(
                 "client.id.available.chars",
@@ -64,14 +65,31 @@ public class MqttBrokerConfig {
     }
 
     @Bean
+    @NotNull CredentialSource credentialSource() {
+        return new FileCredentialsSource(env.getProperty("credentials.source.file.name", "credentials"));
+    }
+
+    @Bean
+    @NotNull AuthenticationService authenticationService(
+        @NotNull CredentialSource credentialSource,
+        @NotNull ClientIdRegistry clientIdRegistry
+    ) {
+        return new SimpleAuthenticationService(
+            credentialSource,
+            env.getProperty("authentication.allow.anonymous", boolean.class, false)
+        );
+    }
+
+    @Bean
     PacketInHandler @NotNull [] devicePacketHandlers(
+        @NotNull AuthenticationService authenticationService,
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
-        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry);
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry, authenticationService);
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
