@@ -31,17 +31,17 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
             packet.assignedClientId == ""
             packet.authenticationData == ArrayUtils.EMPTY_BYTE_ARRAY
             packet.authenticationMethod == ""
-            packet.maximumPacketSize == MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
             packet.maximumQos == QoS.EXACTLY_ONCE_DELIVERY
-            packet.receiveMax == MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
             packet.retainAvailable == MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
-            packet.responseInformation == ""
-            packet.serverKeepAlive == MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED
-            packet.sessionExpiryInterval == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
             packet.sharedSubscriptionAvailable == MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
             packet.wildcardSubscriptionAvailable == MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
-            packet.subscriptionIdAvailable == MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE
-            packet.topicAliasMaximum == MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
+            packet.subscriptionIdAvailable == MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
+            packet.responseInformation == ""
+            packet.maximumPacketSize == MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED
+            packet.serverKeepAlive == MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED
+            packet.sessionExpiryInterval == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED
+            packet.topicAliasMaximum == MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED
+            packet.receiveMax == MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -101,9 +101,9 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
         when:
         
             propertiesBuffer = BufferUtils.prepareBuffer(512) {
-                it.putProperty(PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE, !sharedSubscriptionAvailable)
-                it.putProperty(PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, !wildcardSubscriptionAvailable)
-                it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, !subscriptionIdAvailable)
+                it.putProperty(PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
+                it.putProperty(PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, wildcardSubscriptionAvailable)
+                it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, subscriptionIdAvailable)
             }
         
             dataBuffer = BufferUtils.prepareBuffer(512) {
@@ -118,9 +118,9 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.reasonCode == ConnectAckReasonCode.PACKET_TOO_LARGE
-            packet.sharedSubscriptionAvailable == !sharedSubscriptionAvailable
-            packet.wildcardSubscriptionAvailable == !wildcardSubscriptionAvailable
-            packet.subscriptionIdAvailable == !subscriptionIdAvailable
+            packet.sharedSubscriptionAvailable == sharedSubscriptionAvailable
+            packet.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
+            packet.subscriptionIdAvailable == subscriptionIdAvailable
         
     }
 }

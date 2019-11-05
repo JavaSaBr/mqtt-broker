@@ -139,6 +139,36 @@ public class MqttBrokerConfig {
                 MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
             ),
             env.getProperty(
+                "mqtt.connection.min.keep.alive",
+                int.class,
+                MqttPropertyConstants.SERVER_KEEP_ALIVE_DEFAULT
+            ),
+            env.getProperty(
+                "mqtt.connection.receive.maximum",
+                int.class,
+                MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
+            ),
+            env.getProperty(
+                "mqtt.connection.topic.alias.maximum",
+                int.class,
+                MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED
+            ),
+            env.getProperty(
+                "mqtt.connection.default.session.expiration.time",
+                long.class,
+                MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
+            ),
+            env.getProperty(
+                "mqtt.connection.keep.alive.enabled",
+                boolean.class,
+                MqttPropertyConstants.KEEP_ALIVE_ENABLED_DEFAULT
+            ),
+            env.getProperty(
+                "mqtt.connection.sessions.enabled",
+                boolean.class,
+                MqttPropertyConstants.SESSIONS_ENABLED_DEFAULT
+            ),
+            env.getProperty(
                 "mqtt.connection.retain.available",
                 boolean.class,
                 MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
@@ -151,7 +181,7 @@ public class MqttBrokerConfig {
             env.getProperty(
                 "mqtt.connection.subscription.id.available",
                 boolean.class,
-                MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE
+                MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
             ),
             env.getProperty(
                 "mqtt.connection.shared.subscription.available",

@@ -17,6 +17,7 @@ public abstract class MqttPacketOutFactory {
         @NotNull String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
+        int requestedReceiveMax,
         @NotNull String reason,
         @NotNull String serverReference,
         @NotNull String responseInformation,
@@ -31,7 +32,8 @@ public abstract class MqttPacketOutFactory {
         boolean sessionPresent,
         @NotNull String requestedClientId,
         long requestedSessionExpiryInterval,
-        int requestedKeepAlive
+        int requestedKeepAlive,
+        int requestedReceiveMax
     ) {
         return newConnectAck(
             client,
@@ -40,6 +42,7 @@ public abstract class MqttPacketOutFactory {
             requestedClientId,
             requestedSessionExpiryInterval,
             requestedKeepAlive,
+            requestedReceiveMax,
             StringUtils.EMPTY,
             StringUtils.EMPTY,
             StringUtils.EMPTY,
@@ -60,6 +63,7 @@ public abstract class MqttPacketOutFactory {
             StringUtils.EMPTY,
             client.getSessionExpiryInterval(),
             client.getKeepAlive(),
+            client.getReceiveMax(),
             StringUtils.EMPTY,
             StringUtils.EMPTY,
             StringUtils.EMPTY,

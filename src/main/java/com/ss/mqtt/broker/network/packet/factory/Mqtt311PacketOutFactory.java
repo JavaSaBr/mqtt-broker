@@ -16,6 +16,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
+        int requestedReceiveMax,
         @NotNull String reason,
         @NotNull String serverReference,
         @NotNull String responseInformation,
