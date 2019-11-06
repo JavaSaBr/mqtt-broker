@@ -7,10 +7,7 @@ import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.in.handler.*;
-import com.ss.mqtt.broker.service.ClientIdRegistry;
-import com.ss.mqtt.broker.service.ClientService;
-import com.ss.mqtt.broker.service.PublishingService;
-import com.ss.mqtt.broker.service.SubscriptionService;
+import com.ss.mqtt.broker.service.*;
 import com.ss.mqtt.broker.service.impl.*;
 import com.ss.rlib.network.*;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
@@ -54,12 +51,19 @@ public class MqttBrokerConfig {
 
     @NotNull
     @Bean ClientIdRegistry clientIdRegistry() {
-        return new SimpleClientIdRegistry(
+        return new InMemoryClientIdRegistry(
             env.getProperty(
                 "client.id.available.chars",
                 "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
             ),
             env.getProperty("client.id.max.length", int.class, 36)
+        );
+    }
+
+    @Bean
+    @NotNull MqttSessionService mqttSessionService() {
+        return new InMemoryMqttSessionService(
+            env.getProperty("sessions.clean.thread.interval", int.class, 60000)
         );
     }
 
@@ -84,14 +88,16 @@ public class MqttBrokerConfig {
         @NotNull ServerNetworkConfig networkConfig,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig deviceConnectionConfig,
-        PacketInHandler @NotNull [] devicePacketHandlers
+        PacketInHandler @NotNull [] devicePacketHandlers,
+        @NotNull MqttSessionService mqttSessionService
     ) {
         return NetworkFactory.newServerNetwork(
             networkConfig,
             deviceConnectionFactory(
                 bufferAllocator,
                 deviceConnectionConfig,
-                devicePacketHandlers
+                devicePacketHandlers,
+                mqttSessionService
             )
         );
     }
@@ -164,7 +170,8 @@ public class MqttBrokerConfig {
     private @NotNull ChannelFactory deviceConnectionFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        PacketInHandler @NotNull [] packetHandlers
+        PacketInHandler @NotNull [] packetHandlers,
+        @NotNull MqttSessionService mqttSessionService
     ) {
         return (network, channel) -> new MqttConnection(
             network,
@@ -173,7 +180,8 @@ public class MqttBrokerConfig {
             100,
             packetHandlers,
             connectionConfig,
-            DeviceMqttClient::new
+            DeviceMqttClient::new,
+            mqttSessionService
         );
     }
 }

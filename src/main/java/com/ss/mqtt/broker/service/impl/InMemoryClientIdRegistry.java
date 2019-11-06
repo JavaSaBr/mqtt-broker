@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import java.util.BitSet;
 import java.util.UUID;
 
-public class SimpleClientIdRegistry implements ClientIdRegistry {
+public class InMemoryClientIdRegistry implements ClientIdRegistry {
 
     private static final Object CLIENT_ID_VALUE = new Object();
 
@@ -19,7 +19,7 @@ public class SimpleClientIdRegistry implements ClientIdRegistry {
 
     private final int maxClientIdLength;
 
-    public SimpleClientIdRegistry(@NotNull String availableChars, int maxClientIdLength) {
+    public InMemoryClientIdRegistry(@NotNull String availableChars, int maxClientIdLength) {
         this.maxClientIdLength = maxClientIdLength;
         this.clientIdRegistry = DictionaryFactory.newConcurrentStampedLockObjectDictionary();
         this.availableCharSet = new BitSet();
