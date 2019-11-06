@@ -2,9 +2,9 @@ package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
-import com.ss.mqtt.broker.service.Subscriber;
 import com.ss.mqtt.broker.service.Subscriptions;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayCollectors;
@@ -41,9 +41,6 @@ public class SimpleSubscriptions implements Subscriptions {
         return topicFilter.getQos().getSubscribeAckReasonCode();
     }
 
-    /**
-     * Return true if subscription is removed
-     */
     public @NotNull UnsubscribeAckReasonCode removeSubscription(
         @NotNull String topicName,
         @NotNull MqttClient mqttClient

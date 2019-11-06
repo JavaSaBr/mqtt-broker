@@ -49,8 +49,8 @@ public class MqttBrokerConfig {
         return new DefaultClientService();
     }
 
-    @NotNull
-    @Bean ClientIdRegistry clientIdRegistry() {
+    @Bean
+    @NotNull ClientIdRegistry clientIdRegistry() {
         return new InMemoryClientIdRegistry(
             env.getProperty(
                 "client.id.available.chars",
@@ -68,14 +68,28 @@ public class MqttBrokerConfig {
     }
 
     @Bean
+    @NotNull CredentialSource credentialSource() {
+        return new FileCredentialsSource(env.getProperty("credentials.source.file.name", "credentials"));
+    }
+
+    @Bean
+    @NotNull AuthenticationService authenticationService(@NotNull CredentialSource credentialSource) {
+        return new SimpleAuthenticationService(
+            credentialSource,
+            env.getProperty("authentication.allow.anonymous", boolean.class, false)
+        );
+    }
+
+    @Bean
     PacketInHandler @NotNull [] devicePacketHandlers(
+        @NotNull AuthenticationService authenticationService,
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
-        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry);
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry, authenticationService);
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);

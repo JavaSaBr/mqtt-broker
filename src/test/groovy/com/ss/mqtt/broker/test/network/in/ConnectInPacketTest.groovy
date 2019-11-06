@@ -19,8 +19,8 @@ class ConnectInPacketTest extends BaseInPacketTest {
                 it.put(0b11000010 as byte)
                 it.putShort(keepAlive as short)
                 it.putString(clientId)
-                it.putString(userPassword)
                 it.putString(userName)
+                it.putBytes(userPassword)
             }
         
         when:
@@ -61,8 +61,8 @@ class ConnectInPacketTest extends BaseInPacketTest {
                 it.putMbi(propertiesBuffer.limit())
                 it.put(propertiesBuffer)
                 it.putString(clientId)
-                it.putString(userPassword)
                 it.putString(userName)
+                it.putBytes(userPassword)
             }
     
         when:
@@ -97,10 +97,9 @@ class ConnectInPacketTest extends BaseInPacketTest {
                 it.put(0b11000010 as byte)
                 it.putShort(keepAlive as short)
                 it.putMbi(0)
-                it.putShort(stringBytes.length as short)
-                it.put(stringBytes)
-                it.putString(userPassword)
+                it.putBytes(stringBytes)
                 it.putString(userName)
+                it.putBytes(userPassword)
             }
         
         when:
