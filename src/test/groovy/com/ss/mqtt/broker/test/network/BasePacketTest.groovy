@@ -31,7 +31,7 @@ class BasePacketTest extends Specification {
     public static final clientId = "testClientId"
     public static final packetId = 1234 as short
     public static final userName = "testUser"
-    public static final userPassword = "testPassword"
+    public static final userPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
     public static final keepAlive = 120
     public static final sessionExpiryInterval = 300
     public static final messageExpiryInterval = 60

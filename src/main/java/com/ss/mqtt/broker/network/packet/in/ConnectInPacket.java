@@ -192,7 +192,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     private @NotNull String clientId;
     private @NotNull String willTopic;
     private @NotNull String username;
-    private @NotNull String password;
+    private @NotNull byte[] password;
 
     private @NotNull byte[] willPayload;
 
@@ -223,7 +223,7 @@ public class ConnectInPacket extends MqttReadablePacket {
         this.clientId = StringUtils.EMPTY;
         this.willTopic = StringUtils.EMPTY;
         this.username = StringUtils.EMPTY;
-        this.password = StringUtils.EMPTY;
+        this.password = ArrayUtils.EMPTY_BYTE_ARRAY;
         this.authenticationMethod = StringUtils.EMPTY;
         this.willPayload = ArrayUtils.EMPTY_BYTE_ARRAY;
         this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
@@ -315,13 +315,14 @@ public class ConnectInPacket extends MqttReadablePacket {
             willPayload = readBytes(buffer);
         }
 
-        if (hasPassword) {
-            password = readString(buffer);
-        }
-
         if (hasUserName) {
             username = readString(buffer);
         }
+
+        if (hasPassword) {
+            password = readBytes(buffer);
+        }
+
     }
 
     @Override
