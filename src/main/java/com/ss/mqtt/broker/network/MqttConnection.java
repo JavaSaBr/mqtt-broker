@@ -104,7 +104,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         var session = getSession();
 
         if (session != null) {
-            sessionService.store(getClient().getClientId(), session)
+            sessionService.store(client.getClientId(), session)
                 .subscribe(result -> setSession(null));
         }
 

@@ -9,7 +9,10 @@ import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.in.handler.*;
 import com.ss.mqtt.broker.service.*;
 import com.ss.mqtt.broker.service.impl.*;
-import com.ss.rlib.network.*;
+import com.ss.rlib.network.BufferAllocator;
+import com.ss.rlib.network.Network;
+import com.ss.rlib.network.NetworkFactory;
+import com.ss.rlib.network.ServerNetworkConfig;
 import com.ss.rlib.network.impl.DefaultBufferAllocator;
 import com.ss.rlib.network.server.ServerNetwork;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +45,6 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull BufferAllocator bufferAllocator(@NotNull ServerNetworkConfig networkConfig) {
         return new DefaultBufferAllocator(networkConfig);
-    }
-
-    @Bean
-    @NotNull ClientService clientService() {
-        return new DefaultClientService();
     }
 
     @Bean
@@ -85,11 +83,16 @@ public class MqttBrokerConfig {
         @NotNull AuthenticationService authenticationService,
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishingService publishingService
+        @NotNull PublishingService publishingService,
+        @NotNull MqttSessionService mqttSessionService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
-        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry, authenticationService);
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
+            clientIdRegistry,
+            authenticationService,
+            mqttSessionService
+        );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);

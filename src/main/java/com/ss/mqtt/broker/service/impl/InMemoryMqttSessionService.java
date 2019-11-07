@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.impl.DefaultMqttSession;
 import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.rlib.common.concurrent.util.ThreadUtils;
+import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
 import com.ss.rlib.common.util.dictionary.DictionaryFactory;
@@ -31,75 +32,73 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
         this.cleanThread.start();
     }
 
-    private void cleanup() {
-
-        var toCheck = ArrayFactory.newArray(MqttSession.class);
-        var toRemove = ArrayFactory.newArray(MqttSession.class);
-
-        while (true) {
-
-            toCheck.clear();
-            toRemove.clear();
-
-            ThreadUtils.sleep(cleanInterval);
-
-            if (closed) {
-                return;
-            }
-
-            var stamp = storedSession.readLock();
-            try {
-                storedSession.values(toCheck);
-            } finally {
-                storedSession.readUnlock(stamp);
-            }
-
-            var currentTime = System.currentTimeMillis();
-
-            for (var session : toCheck) {
-                if (session.getExpirationTime() > currentTime) {
-                    toRemove.add(session);
-                }
-            }
-
-            if (toRemove.isEmpty()) {
-                continue;
-            }
-
-            stamp = storedSession.writeLock();
-            try {
-                for (var session : toRemove) {
-                    if (session.getExpirationTime() > currentTime) {
-                        storedSession.remove(session.getClientId());
-                    }
-                }
-            } finally {
-                storedSession.writeUnlock(stamp);
-            }
-        }
-    }
-
     @Override
-    public @NotNull Mono<MqttSession> getOrCreate(@NotNull String clientId) {
-
+    public @NotNull Mono<MqttSession> restore(@NotNull String clientId) {
         var session = storedSession.getInWriteLock(clientId, ObjectDictionary::remove);
-
-        if (session != null) {
-            return Mono.just(session);
-        }
-
-        return Mono.just(new DefaultMqttSession());
+        return Mono.justOrEmpty(session);
     }
 
     @Override
-    public @NotNull Mono<MqttSession> createNew(@NotNull String clientId) {
-        return Mono.just(new DefaultMqttSession());
+    public @NotNull Mono<MqttSession> create(@NotNull String clientId) {
+        return Mono.just(new DefaultMqttSession(clientId));
     }
 
     @Override
     public @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session) {
         storedSession.runInWriteLock(clientId, session, ObjectDictionary::put);
         return Mono.just(Boolean.TRUE);
+    }
+
+    private void cleanup() {
+
+        var toCheck = ArrayFactory.newArray(MqttSession.class);
+        var toRemove = ArrayFactory.newArray(MqttSession.class);
+
+        while (!closed) {
+
+            toCheck.clear();
+            toRemove.clear();
+
+            ThreadUtils.sleep(cleanInterval);
+
+            storedSession.runInReadLock(toCheck, ObjectDictionary::values);
+
+            if (findToRemove(toCheck, toRemove)) {
+                continue;
+            }
+
+            storedSession.runInWriteLock(toRemove, (dictionary, array) -> {
+
+                var time = System.currentTimeMillis();
+
+                for (var session : array) {
+
+                    if (session.getExpirationTime() <= time) {
+                        continue;
+                    }
+
+                    var removed = dictionary.remove(session.getClientId());
+
+                    // if we already have new session under the same client id
+                    if (removed != null && removed != session) {
+                        dictionary.put(session.getClientId(), removed);
+                    }
+                }
+            });
+        }
+    }
+
+    private boolean findToRemove(@NotNull Array<MqttSession> toCheck, @NotNull Array<MqttSession> toRemove) {
+
+        var currentTime = System.currentTimeMillis();
+
+        for (var session : toCheck) {
+            if (session.getExpirationTime() > currentTime) {
+                toRemove.add(session);
+            }
+        }
+
+        return toRemove.isEmpty();
     }
 
     @Override

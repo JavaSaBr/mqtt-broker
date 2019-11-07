@@ -4,6 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 public interface MqttSession {
 
+    interface UnsafeMqttSession extends MqttSession {
+
+        void setExpirationTime(long expirationTime);
+    }
+
     @NotNull String getClientId();
 
     /**

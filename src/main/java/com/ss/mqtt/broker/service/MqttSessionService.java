@@ -6,9 +6,9 @@ import reactor.core.publisher.Mono;
 
 public interface MqttSessionService {
 
-    @NotNull Mono<MqttSession> getOrCreate(@NotNull String clientId);
+    @NotNull Mono<MqttSession> restore(@NotNull String clientId);
 
-    @NotNull Mono<MqttSession> createNew(@NotNull String clientId);
+    @NotNull Mono<MqttSession> create(@NotNull String clientId);
 
     @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session);
 }

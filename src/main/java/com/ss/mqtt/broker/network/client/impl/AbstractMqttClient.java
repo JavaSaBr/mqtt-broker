@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network.client.impl;
 import com.ss.mqtt.broker.config.MqttConnectionConfig;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
+import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Log4j2
@@ -23,6 +25,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     protected final @NotNull MqttConnection connection;
 
     private volatile @Setter @NotNull String clientId;
+    private volatile @Setter @Getter @Nullable MqttSession session;
 
     private volatile long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
     private volatile int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
