@@ -6,26 +6,34 @@ import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.service.Subscriptions;
+import com.ss.rlib.common.function.NotNullSupplier;
 import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayCollectors;
-import com.ss.rlib.common.util.array.impl.FastArraySet;
+import com.ss.rlib.common.util.array.ConcurrentArray;
+import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
+import com.ss.rlib.common.util.dictionary.DictionaryFactory;
+import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Simple container of subscriptions
  */
 public class SimpleSubscriptions implements Subscriptions {
 
-    private final @NotNull Map<String, Array<Subscriber>> subscriptions = new HashMap<>();
+    private final static @NotNull NotNullSupplier<ConcurrentArray<Subscriber>> SUBSCRIBER_ARRAY_SUPPLIER =
+        ConcurrentArray.supplier(Subscriber.class);
 
-    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topicName) {
-        return subscriptions.get(topicName)
-            .stream()
-            .map(Subscriber::getMqttClient)
-            .collect(ArrayCollectors.toArray(MqttClient.class));
+    private final @NotNull ConcurrentObjectDictionary<String, ConcurrentArray<Subscriber>> subscriptions =
+        DictionaryFactory.newConcurrentStampedLockObjectDictionary();
+
+    public @NotNull Array<Subscriber> getSubscribers(@NotNull String topicName) {
+
+        var subscribers = subscriptions.getInReadLock(topicName, ObjectDictionary::get);
+        if (subscribers == null) {
+            return Array.empty();
+        }
+
+        //noinspection ConstantConditions
+        return subscribers.getInReadLock(Array::of);
     }
 
     public @NotNull SubscribeAckReasonCode addSubscription(
@@ -33,11 +41,19 @@ public class SimpleSubscriptions implements Subscriptions {
         @NotNull MqttClient mqttClient
     ) {
         var subscriber = new Subscriber(mqttClient, topicFilter);
-        var subscribers = subscriptions.computeIfAbsent(
-            topicFilter.getTopicFilter(),
-            key -> new FastArraySet<>(Subscriber.class)
-        );
-        subscribers.add(subscriber);
+        var subscribers = subscriptions.getInReadLock(topicFilter.getTopicName(), ObjectDictionary::get);
+
+        if (subscribers == null) {
+            subscribers = subscriptions.getInWriteLock(
+                topicFilter.getTopicName(),
+                SUBSCRIBER_ARRAY_SUPPLIER,
+                ObjectDictionary::getOrCompute
+            );
+        }
+
+        //noinspection ConstantConditions
+        subscribers.runInWriteLock(subscriber, Array::add);
+
         return topicFilter.getQos().getSubscribeAckReasonCode();
     }
 
@@ -45,11 +61,18 @@ public class SimpleSubscriptions implements Subscriptions {
         @NotNull String topicName,
         @NotNull MqttClient mqttClient
     ) {
-        var subscribers = subscriptions.getOrDefault(topicName, Array.empty());
-        if (subscribers.removeIf(subscriber -> mqttClient.equals(subscriber.getMqttClient()))) {
-            return UnsubscribeAckReasonCode.SUCCESS;
-        } else {
+        var subscribers = subscriptions.getInReadLock(topicName, ObjectDictionary::get);
+
+        if (subscribers == null) {
             return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
+        } else {
+            //noinspection ConstantConditions
+            boolean removed = subscribers.getInWriteLock(
+                mqttClient,
+                (subs, client) -> subs.removeIf(subscriber -> client.equals(subscriber.getMqttClient()))
+            );
+
+            return removed ? UnsubscribeAckReasonCode.SUCCESS : UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
         }
     }
 }

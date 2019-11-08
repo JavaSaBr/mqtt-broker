@@ -1,22 +1,28 @@
 package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.service.CredentialSource;
+import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
+import com.ss.rlib.common.util.dictionary.Dictionary;
+import com.ss.rlib.common.util.dictionary.DictionaryFactory;
+import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class AbstractCredentialSource implements CredentialSource {
 
-    private final Map<String, byte[]> credentials = new HashMap<>();
+    private final ConcurrentObjectDictionary<String, byte[]> credentials =
+        DictionaryFactory.newConcurrentStampedLockObjectDictionary();
 
     abstract void init();
 
-    void putCredentials(@NotNull Object user, @NotNull Object pass) {
-        credentials.put(user.toString(), pass.toString().getBytes(StandardCharsets.UTF_8));
+    void putAll(@NotNull Dictionary<String, byte[]> creds) {
+        credentials.runInWriteLock(creds, Dictionary::put);
+    }
+
+    void put(@NotNull String user, @NotNull byte[] pass) {
+        credentials.runInWriteLock(user, pass, ObjectDictionary::put);
     }
 
     @Override
