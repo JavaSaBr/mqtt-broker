@@ -2,7 +2,6 @@ package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
-import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -21,7 +20,7 @@ public class InMemoryClientIdRegistry implements ClientIdRegistry {
 
     public InMemoryClientIdRegistry(@NotNull String availableChars, int maxClientIdLength) {
         this.maxClientIdLength = maxClientIdLength;
-        this.clientIdRegistry = DictionaryFactory.newConcurrentStampedLockObjectDictionary();
+        this.clientIdRegistry = ConcurrentObjectDictionary.ofType(String.class, Object.class);
         this.availableCharSet = new BitSet();
 
         for (char ch : availableChars.toCharArray()) {
@@ -33,26 +32,22 @@ public class InMemoryClientIdRegistry implements ClientIdRegistry {
     public @NotNull Mono<Boolean> register(@NotNull String clientId) {
 
         if (!validate(clientId)) {
-            return Mono.just(Boolean.FALSE);
+            return Mono.just(false);
         }
 
-        var value = clientIdRegistry.getInReadLock(clientId, ObjectDictionary::get);
-        if (value != null) {
-            return Mono.just(Boolean.FALSE);
-        }
+        var result = clientIdRegistry.getInWriteLock(clientId, (dictionary, id) -> {
 
-        var stamp = clientIdRegistry.writeLock();
-        try {
-            value = clientIdRegistry.get(clientId);
-            if (value != null) {
-                return Mono.just(Boolean.FALSE);
+            if (dictionary.containsKey(id)) {
+                return false;
+            } else {
+                dictionary.put(id, CLIENT_ID_VALUE);
             }
-            clientIdRegistry.put(clientId, CLIENT_ID_VALUE);
-        } finally {
-            clientIdRegistry.writeUnlock(stamp);
-        }
 
-        return Mono.just(Boolean.TRUE);
+            return true;
+        });
+
+        //noinspection ConstantConditions
+        return Mono.just(result);
     }
 
     @Override
@@ -78,21 +73,14 @@ public class InMemoryClientIdRegistry implements ClientIdRegistry {
 
     @Override
     public @NotNull Mono<String> generate() {
-        long stamp = clientIdRegistry.readLock();
-        try {
+        while (true) {
 
-            while (true) {
+            var clientId = UUID.randomUUID().toString();
+            var contains = clientIdRegistry.getInReadLock(clientId, ObjectDictionary::containsKey);
 
-                var clientId = UUID.randomUUID().toString();
-                var value = clientIdRegistry.get(clientId);
-
-                if (value == null) {
-                    return Mono.just(clientId);
-                }
+            if (contains == Boolean.FALSE) {
+                return Mono.just(clientId);
             }
-
-        } finally {
-            clientIdRegistry.readUnlock(stamp);
         }
     }
 }

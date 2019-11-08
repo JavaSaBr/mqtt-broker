@@ -3,8 +3,10 @@ package com.ss.mqtt.broker.config;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.client.MqttClientReleaseHandler;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClientReleaseHandler;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.in.handler.*;
 import com.ss.mqtt.broker.service.*;
@@ -96,8 +98,17 @@ public class MqttBrokerConfig {
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
+        handlers[PacketType.DISCONNECT.ordinal()] = new DisconnetInPacketHandler();
 
         return handlers;
+    }
+
+    @Bean
+    @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler(
+        @NotNull ClientIdRegistry clientIdRegistry,
+        @NotNull MqttSessionService mqttSessionService
+    ) {
+        return new DeviceMqttClientReleaseHandler(clientIdRegistry, mqttSessionService);
     }
 
     @Bean
@@ -106,7 +117,7 @@ public class MqttBrokerConfig {
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig deviceConnectionConfig,
         PacketInHandler @NotNull [] devicePacketHandlers,
-        @NotNull MqttSessionService mqttSessionService
+        @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler
     ) {
         return NetworkFactory.newServerNetwork(
             networkConfig,
@@ -114,7 +125,7 @@ public class MqttBrokerConfig {
                 bufferAllocator,
                 deviceConnectionConfig,
                 devicePacketHandlers,
-                mqttSessionService
+                deviceMqttClientReleaseHandler
             )
         );
     }
@@ -188,7 +199,7 @@ public class MqttBrokerConfig {
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
         PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttSessionService mqttSessionService
+        @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler
     ) {
         return (network, channel) -> new MqttConnection(
             network,
@@ -197,8 +208,7 @@ public class MqttBrokerConfig {
             100,
             packetHandlers,
             connectionConfig,
-            DeviceMqttClient::new,
-            mqttSessionService
+            mqttConnection -> new DeviceMqttClient(mqttConnection, deviceMqttClientReleaseHandler)
         );
     }
 }

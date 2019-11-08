@@ -3,14 +3,12 @@ package com.ss.mqtt.broker.network;
 import com.ss.mqtt.broker.config.MqttConnectionConfig;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.MqttVersion;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.in.handler.PacketInHandler;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
-import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
@@ -36,11 +34,10 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
 
     @Getter(AccessLevel.PROTECTED)
     private final @NotNull PacketWriter packetWriter;
-    private final @NotNull MqttSessionService sessionService;
 
     private final @Getter PacketInHandler @NotNull [] packetHandlers;
 
-    private final @Getter @NotNull MqttClient client;
+    private final @Getter @NotNull UnsafeMqttClient client;
     private final @Getter @NotNull MqttConnectionConfig config;
 
     private volatile @Getter @Setter @NotNull MqttVersion mqttVersion;
@@ -53,13 +50,11 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         int maxPacketsByRead,
         PacketInHandler @NotNull [] packetHandlers,
         @NotNull MqttConnectionConfig config,
-        @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory,
-        @NotNull MqttSessionService mqttSessionService
+        @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory
     ) {
         super(network, channel, NetworkCryptor.NULL, bufferAllocator, maxPacketsByRead);
         this.packetHandlers = packetHandlers;
         this.config = config;
-        this.sessionService = mqttSessionService;
         this.mqttVersion = MqttVersion.MQTT_3_1_1;
         this.packetReader = createPacketReader();
         this.packetWriter = createPacketWriter();
@@ -100,14 +95,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
 
     @Override
     protected void doClose() {
-
-        var session = getSession();
-
-        if (session != null) {
-            sessionService.store(client.getClientId(), session)
-                .subscribe(result -> setSession(null));
-        }
-
+        client.release().subscribe();
         super.doClose();
     }
 }

@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.client.MqttClientReleaseHandler;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
@@ -13,16 +14,23 @@ import com.ss.rlib.common.util.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Log4j2
+@ToString(of = "clientId")
 @EqualsAndHashCode(of = "clientId")
 public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
     protected final @NotNull MqttConnection connection;
+    protected final MqttClientReleaseHandler releaseHandler;
+    protected final AtomicBoolean released;
 
     private volatile @Setter @NotNull String clientId;
     private volatile @Setter @Getter @Nullable MqttSession session;
@@ -33,8 +41,10 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
     private volatile int keepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX;
 
-    public AbstractMqttClient(@NotNull MqttConnection connection) {
+    public AbstractMqttClient(@NotNull MqttConnection connection, @NotNull MqttClientReleaseHandler releaseHandler) {
         this.connection = connection;
+        this.releaseHandler = releaseHandler;
+        this.released = new AtomicBoolean(false);
         this.clientId = StringUtils.EMPTY;
     }
 
@@ -85,5 +95,14 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     @Override
     public @NotNull MqttConnectionConfig getConnectionConfig() {
         return connection.getConfig();
+    }
+
+    @Override
+    public @NotNull Mono<?> release() {
+        if (released.compareAndSet(false, true)) {
+            return releaseHandler.release(this);
+        } else {
+            return Mono.empty();
+        }
     }
 }

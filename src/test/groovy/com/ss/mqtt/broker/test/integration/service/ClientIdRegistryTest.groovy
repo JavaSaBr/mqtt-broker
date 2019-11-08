@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.test.integration.service
 
+import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.test.integration.MqttBrokerTest
 import com.ss.rlib.common.util.StringUtils
@@ -103,5 +104,29 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             def result3 = clientIdRegistry.validate(clientId3)
         then:
             !result1 && !result2 && result3
+    }
+    
+    def "subscriber should register its client id on connect and unregister on disconnect"() {
+        given:
+            def clientId = clientIdRegistry.generate().block()
+            def client = buildClient(clientId)
+        when:
+            def result = client.connect().join()
+        then:
+            result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+            !clientIdRegistry.register(clientId).block()
+        when:
+            client.disconnect().join()
+            Thread.sleep(50)
+        then:
+            clientIdRegistry.register(clientId).block()
+            clientIdRegistry.unregister(clientId).block()
+        when:
+            result = client.connect().join()
+        then:
+            result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+            !clientIdRegistry.register(clientId).block()
+        cleanup:
+            client.disconnect().join()
     }
 }

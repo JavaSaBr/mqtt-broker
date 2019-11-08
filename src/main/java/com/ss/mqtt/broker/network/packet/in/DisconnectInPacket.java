@@ -8,6 +8,7 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -18,6 +19,7 @@ import java.util.Set;
  * Disconnect notification.
  */
 @Getter
+@ToString
 public class DisconnectInPacket extends MqttReadablePacket {
 
     public static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
@@ -86,7 +88,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
-        if (connection.isSupported(MqttVersion.MQTT_5)) {
+        if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
             reasonCode = DisconnectReasonCode.of(readUnsignedByte(buffer));
         }
     }
