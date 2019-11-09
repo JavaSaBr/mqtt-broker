@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.service.SubscriptionService;
@@ -40,7 +41,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
     }
 
     @Override
-    public @NotNull Array<MqttClient> getSubscribers(@NotNull String topicName) {
+    public @NotNull Array<Subscriber> getSubscribers(@NotNull String topicName) {
         return subscriptions.getSubscribers(topicName);
     }
 }
