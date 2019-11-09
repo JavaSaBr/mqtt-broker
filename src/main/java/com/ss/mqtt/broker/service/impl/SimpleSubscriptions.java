@@ -10,7 +10,6 @@ import com.ss.rlib.common.function.NotNullSupplier;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
-import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +22,7 @@ public class SimpleSubscriptions implements Subscriptions {
         ConcurrentArray.supplier(Subscriber.class);
 
     private final @NotNull ConcurrentObjectDictionary<String, ConcurrentArray<Subscriber>> subscriptions =
-        DictionaryFactory.newConcurrentStampedLockObjectDictionary();
+        ConcurrentObjectDictionary.ofType(String.class, ConcurrentArray.class);
 
     public @NotNull Array<Subscriber> getSubscribers(@NotNull String topicName) {
 
@@ -66,10 +65,9 @@ public class SimpleSubscriptions implements Subscriptions {
         if (subscribers == null) {
             return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
         } else {
-            //noinspection ConstantConditions
-            boolean removed = subscribers.getInWriteLock(
+            boolean removed = subscribers.removeIfInWriteLock(
                 mqttClient,
-                (subs, client) -> subs.removeIf(subscriber -> client.equals(subscriber.getMqttClient()))
+                (client, subscriber) -> client.equals(subscriber.getMqttClient())
             );
 
             return removed ? UnsubscribeAckReasonCode.SUCCESS : UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;

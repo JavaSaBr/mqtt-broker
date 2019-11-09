@@ -3,7 +3,6 @@ package com.ss.mqtt.broker.service.impl;
 import com.ss.mqtt.broker.service.CredentialSource;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
 import com.ss.rlib.common.util.dictionary.Dictionary;
-import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -13,7 +12,7 @@ import java.util.Arrays;
 public abstract class AbstractCredentialSource implements CredentialSource {
 
     private final ConcurrentObjectDictionary<String, byte[]> credentials =
-        DictionaryFactory.newConcurrentStampedLockObjectDictionary();
+        ConcurrentObjectDictionary.ofType(String.class, byte[].class);
 
     abstract void init();
 
