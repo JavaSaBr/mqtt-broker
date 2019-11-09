@@ -18,7 +18,9 @@ public interface UnsafeMqttClient extends MqttClient {
         int receiveMax,
         int maximumPacketSize,
         int topicAliasMaximum,
-        int keepAlive
+        int keepAlive,
+        boolean requestResponseInformation,
+        boolean requestProblemInformation
     );
 
     void setClientId(@NotNull String clientId);

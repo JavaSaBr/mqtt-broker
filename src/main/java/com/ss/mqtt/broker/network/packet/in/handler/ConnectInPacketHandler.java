@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.network.packet.in.handler;
 
 import static com.ss.mqtt.broker.model.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static com.ss.mqtt.broker.model.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
 import static com.ss.mqtt.broker.util.ReactorUtils.ifTrue;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
@@ -88,13 +89,40 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             return mqttSessionService.store(client.getClientId(), session);
         }
 
-        client.setSession(session);
+        var config = connection.getConfig();
+
+        // select result keep alive time
+        var minimalKeepAliveTime = Math.max(config.getMinKeepAliveTime(), packet.getKeepAlive());
+        var keepAlive = config.isKeepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
+
+        // select result session expiry interval
+        var sessionExpiryInterval = config.isSessionsEnabled() ?
+            packet.getSessionExpiryInterval() : SESSION_EXPIRY_INTERVAL_DISABLED;
+
+        if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+            sessionExpiryInterval = config.getDefaultSessionExpiryInterval();
+        }
+
+        // select result receive max
+        var receiveMax = packet.getReceiveMax() == RECEIVE_MAXIMUM_UNDEFINED ?
+            config.getReceiveMaximum() : Math.min(packet.getReceiveMax(), config.getReceiveMaximum());
+
+        // select result maximum packet size
+        var maximumPacketSize = packet.getMaximumPacketSize() == MAXIMUM_PACKET_SIZE_UNDEFINED ?
+            config.getMaximumPacketSize() : Math.min(packet.getMaximumPacketSize(), config.getMaximumPacketSize());
+
+        // select result topic alias maximum
+        var topicAliasMaximum = packet.getTopicAliasMaximum() == TOPIC_ALIAS_MAXIMUM_UNDEFINED ?
+            TOPIC_ALIAS_MAXIMUM_DISABLED : Math.min(packet.getTopicAliasMaximum(), config.getTopicAliasMaximum());
+
         client.configure(
-            packet.getSessionExpiryInterval(),
-            packet.getReceiveMax(),
-            packet.getMaximumPacketSize(),
-            packet.getTopicAliasMaximum(),
-            packet.getKeepAlive()
+            sessionExpiryInterval,
+            receiveMax,
+            maximumPacketSize,
+            topicAliasMaximum,
+            keepAlive,
+            packet.isRequestResponseInformation(),
+            packet.isRequestProblemInformation()
         );
 
         client.send(client.getPacketOutFactory().newConnectAck(
@@ -103,7 +131,8 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             sessionRestored,
             packet.getClientId(),
             packet.getSessionExpiryInterval(),
-            packet.getKeepAlive()
+            packet.getKeepAlive(),
+            packet.getReceiveMax()
         ));
 
         return Mono.just(Boolean.TRUE);

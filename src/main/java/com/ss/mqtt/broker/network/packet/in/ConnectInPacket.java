@@ -227,10 +227,10 @@ public class ConnectInPacket extends MqttReadablePacket {
         this.authenticationMethod = StringUtils.EMPTY;
         this.willPayload = ArrayUtils.EMPTY_BYTE_ARRAY;
         this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
-        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
-        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
-        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
+        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
+        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
+        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
         this.requestResponseInformation = false;
         this.requestProblemInformation = false;
     }
@@ -277,7 +277,7 @@ public class ConnectInPacket extends MqttReadablePacket {
         hasUserName = NumberUtils.isSetBit(flags, 7);
         hasPassword = NumberUtils.isSetBit(flags, 6);
         willFlag = NumberUtils.isSetBit(flags, 2);
-        keepAlive = readShort(buffer);
+        keepAlive = readUnsignedShort(buffer);
     }
 
     @Override

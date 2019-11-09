@@ -33,21 +33,21 @@ class ConnectAck311OutPacketTest extends BaseOutPacketTest {
             result
             reader.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
             reader.sessionPresent == sessionPresent
-            reader.retainAvailable == MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
-            reader.sessionExpiryInterval == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
-            reader.receiveMax == MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
-            reader.maximumPacketSize == MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
             reader.assignedClientId == ""
-            reader.topicAliasMaximum == MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
             reader.reason == ""
             reader.userProperties == Array.empty()
+            reader.retainAvailable == MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
             reader.wildcardSubscriptionAvailable == MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
-            reader.subscriptionIdAvailable == MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE
+            reader.subscriptionIdAvailable == MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
             reader.sharedSubscriptionAvailable == MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
-            reader.serverKeepAlive == MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED
             reader.responseInformation == ""
             reader.serverReference == ""
             reader.authenticationData == ArrayUtils.EMPTY_BYTE_ARRAY
             reader.authenticationMethod == ""
+            reader.topicAliasMaximum == MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED
+            reader.serverKeepAlive == MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED
+            reader.receiveMax == MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED
+            reader.sessionExpiryInterval == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED
+            reader.maximumPacketSize == MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED
     }
 }

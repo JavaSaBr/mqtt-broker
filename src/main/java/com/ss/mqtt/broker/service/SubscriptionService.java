@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.service;
 
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
@@ -42,5 +43,5 @@ public interface SubscriptionService {
      * @param topicName topic name
      * @return array of topic subscribers
      */
-    @NotNull Array<MqttClient> getSubscribers(@NotNull String topicName);
+    @NotNull Array<Subscriber> getSubscribers(@NotNull String topicName);
 }

@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 public class SubscribeTopicFilter {
 
     /**
-     * The subscriber's topic filter.
+     * The subscriber's topic name.
      */
-    private final String topicFilter;
+    private final String topicName;
 
     /**
      * Maximum QoS field. This gives the maximum QoS level at which the Server

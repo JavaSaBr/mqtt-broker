@@ -232,6 +232,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
     private final long requestedSessionExpiryInterval;
     private final int requestedKeepAlive;
+    private final int requestedReceiveMax;
 
     public ConnectAck5OutPacket(
         @NotNull MqttClient client,
@@ -240,6 +241,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         @NotNull String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
+        int requestedReceiveMax,
         @NotNull String reason,
         @NotNull String serverReference,
         @NotNull String responseInformation,
@@ -251,6 +253,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         this.requestedClientId = requestedClientId;
         this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
         this.requestedKeepAlive = requestedKeepAlive;
+        this.requestedReceiveMax = requestedReceiveMax;
         this.reason = reason;
         this.serverReference = serverReference;
         this.responseInformation = responseInformation;
@@ -314,19 +317,19 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
             buffer,
             PacketProperty.RECEIVE_MAXIMUM,
             client.getReceiveMax(),
-            MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT
+            requestedReceiveMax
         );
         writeProperty(
             buffer,
             PacketProperty.MAXIMUM_PACKET_SIZE,
             client.getMaximumPacketSize(),
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
+            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
         );
         writeProperty(
             buffer,
             PacketProperty.TOPIC_ALIAS_MAXIMUM,
             client.getTopicAliasMaximum(),
-            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT
+            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED
         );
         writeProperty(
             buffer,
@@ -338,7 +341,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
             buffer,
             PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
             config.isSubscriptionIdAvailable(),
-            MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE
+            MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
         );
         writeProperty(
             buffer,

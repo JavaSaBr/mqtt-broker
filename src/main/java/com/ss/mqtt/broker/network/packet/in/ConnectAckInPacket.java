@@ -269,21 +269,21 @@ public class ConnectAckInPacket extends MqttReadablePacket {
         this.userProperties = Array.empty();
         this.reasonCode = ConnectAckReasonCode.SUCCESS;
         this.maximumQos = QoS.EXACTLY_ONCE_DELIVERY;
-        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
-        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
         this.retainAvailable = MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT;
         this.assignedClientId = StringUtils.EMPTY;
-        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
         this.reason = StringUtils.EMPTY;
         this.sharedSubscriptionAvailable = MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT;
         this.wildcardSubscriptionAvailable = MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT;
-        this.subscriptionIdAvailable = MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE;
-        this.serverKeepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED;
+        this.subscriptionIdAvailable = MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT;
         this.responseInformation = StringUtils.EMPTY;
         this.serverReference = StringUtils.EMPTY;
         this.authenticationMethod = StringUtils.EMPTY;
         this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
+        this.serverKeepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED;
+        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
+        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
     }
 
     @Override

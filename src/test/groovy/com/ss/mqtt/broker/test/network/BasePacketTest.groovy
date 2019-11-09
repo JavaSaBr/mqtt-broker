@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.test.network
 
 import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.model.MqttVersion
+import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.model.StringPair
 import com.ss.mqtt.broker.model.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.UnsubscribeAckReasonCode
@@ -19,11 +20,14 @@ import java.nio.charset.StandardCharsets
 
 class BasePacketTest extends Specification {
     
+    public static final keepAliveEnabled = true
+    public static final sessionsEnabled = true
     public static final retainAvailable = true
     public static final sharedSubscriptionAvailable = true
     public static final wildcardSubscriptionAvailable = true
     public static final subscriptionIdAvailable = true
     
+    public static final maxQos = QoS.AT_MOST_ONCE_DELIVERY
     public static final sessionPresent = true
     public static final clientId = "testClientId"
     public static final packetId = 1234 as short
@@ -33,7 +37,7 @@ class BasePacketTest extends Specification {
     public static final sessionExpiryInterval = 300
     public static final messageExpiryInterval = 60
     public static final topicAlias = 252
-    public static final receiveMaximum = 4096
+    public static final receiveMaximum = 10
     public static final maximumPacketSize = 1024
     public static final topicAliasMaximum = 32
     public static final subscriptionId = 637
@@ -72,12 +76,20 @@ class BasePacketTest extends Specification {
     public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
     
     @Shared
-    MqttConnectionConfig mqttConnectionConfig = Stub(MqttConnectionConfig) {
-        isRetainAvailable() >> retainAvailable
-        isSharedSubscriptionAvailable() >> sharedSubscriptionAvailable
-        isWildcardSubscriptionAvailable() >> wildcardSubscriptionAvailable
-        isSubscriptionIdAvailable() >> subscriptionIdAvailable
-    }
+    MqttConnectionConfig mqttConnectionConfig = new MqttConnectionConfig(
+        maxQos,
+        maximumPacketSize,
+        serverKeepAlive,
+        receiveMaximum,
+        topicAliasMaximum,
+        sessionExpiryInterval,
+        keepAliveEnabled,
+        sessionsEnabled,
+        retainAvailable,
+        wildcardSubscriptionAvailable,
+        subscriptionIdAvailable,
+        sharedSubscriptionAvailable
+    )
     
     @Shared
     MqttConnection mqtt5Connection = Stub(MqttConnection) {

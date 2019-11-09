@@ -17,8 +17,9 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
                 ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
                 sessionPresent,
                 "-1",
-                -1,
-                -1,
+                MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED,
+                MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED,
+                MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED,
                 reasonString,
                 serverReference,
                 responseInformation,
@@ -40,7 +41,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
             result
             reader.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
             reader.sessionPresent == sessionPresent
-            reader.retainAvailable == MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
+            reader.retainAvailable == retainAvailable
             reader.sessionExpiryInterval == sessionExpiryInterval
             reader.receiveMax == receiveMaximum
             reader.maximumPacketSize == maximumPacketSize

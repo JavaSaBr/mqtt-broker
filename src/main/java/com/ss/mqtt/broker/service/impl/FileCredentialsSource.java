@@ -1,10 +1,13 @@
 package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.exception.CredentialsSourceException;
+import com.ss.rlib.common.util.dictionary.Dictionary;
+import com.ss.rlib.common.util.dictionary.DictionaryCollectors;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class FileCredentialsSource extends AbstractCredentialSource {
@@ -25,7 +28,16 @@ public class FileCredentialsSource extends AbstractCredentialSource {
         try {
             var credentialsProperties = new Properties();
             credentialsProperties.load(new FileInputStream(credentialUrl.getPath()));
-            credentialsProperties.forEach(this::putCredentials);
+
+            Dictionary<String, byte[]> creds = credentialsProperties.entrySet()
+                .stream()
+                .collect(DictionaryCollectors.toObjectDictionary(
+                    entry -> entry.getKey().toString(),
+                    entry -> entry.getValue().toString().getBytes(StandardCharsets.UTF_8)
+                ));
+
+            putAll(creds);
+
         } catch (IOException e) {
             throw new CredentialsSourceException(e);
         }
