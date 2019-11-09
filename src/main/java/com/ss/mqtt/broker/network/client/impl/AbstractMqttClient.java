@@ -24,15 +24,24 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
     private volatile @Setter @NotNull String clientId;
 
-    private volatile long sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
-    private volatile int receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT;
-    private volatile int maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT;
-    private volatile int topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DEFAULT;
-    private volatile int keepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX;
+    private volatile long sessionExpiryInterval;
+    private volatile int receiveMax;
+    private volatile int maximumPacketSize;
+    private volatile int topicAliasMaximum;
+    private volatile int keepAlive;
+
+    private volatile boolean requestResponseInformation = false;
+    private volatile boolean requestProblemInformation = false;
 
     public AbstractMqttClient(@NotNull MqttConnection connection) {
         this.connection = connection;
         this.clientId = StringUtils.EMPTY;
+        var config = connection.getConfig();
+        this.sessionExpiryInterval = config.getDefaultSessionExpiryInterval();
+        this.receiveMax = config.getReceiveMaximum();
+        this.maximumPacketSize = config.getMaximumPacketSize();
+        this.topicAliasMaximum = config.getTopicAliasMaximum();
+        this.keepAlive = config.getMinKeepAliveTime();
     }
 
     @Override
@@ -54,13 +63,17 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
         int receiveMax,
         int maximumPacketSize,
         int topicAliasMaximum,
-        int keepAlive
+        int keepAlive,
+        boolean requestResponseInformation,
+        boolean requestProblemInformation
     ) {
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.receiveMax = receiveMax;
         this.maximumPacketSize = maximumPacketSize;
         this.topicAliasMaximum = topicAliasMaximum;
         this.keepAlive = keepAlive;
+        this.requestProblemInformation = requestProblemInformation;
+        this.requestResponseInformation = requestResponseInformation;
     }
 
     @Override
