@@ -70,7 +70,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             return mqttSessionService.restore(client.getClientId())
                 .flatMap(session -> onConnected(client, packet, session, true))
                 .switchIfEmpty(Mono.defer(() -> mqttSessionService.create(client.getClientId())
-                    .flatMap(session -> onConnected(client, packet, session,false))));
+                    .flatMap(session -> onConnected(client, packet, session, false))));
         }
     }
 
