@@ -82,14 +82,13 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     ) {
 
         var connection = client.getConnection();
+        var config = connection.getConfig();
 
         // if it was closed in parallel
-        if (connection.isClosed()) {
+        if (connection.isClosed() && config.isSessionsEnabled()) {
             // store the session again
-            return mqttSessionService.store(client.getClientId(), session);
+            return mqttSessionService.store(client.getClientId(), session, config.getDefaultSessionExpiryInterval());
         }
-
-        var config = connection.getConfig();
 
         // select result keep alive time
         var minimalKeepAliveTime = Math.max(config.getMinKeepAliveTime(), packet.getKeepAlive());
@@ -115,6 +114,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         var topicAliasMaximum = packet.getTopicAliasMaximum() == TOPIC_ALIAS_MAXIMUM_UNDEFINED ?
             TOPIC_ALIAS_MAXIMUM_DISABLED : Math.min(packet.getTopicAliasMaximum(), config.getTopicAliasMaximum());
 
+        client.setSession(session);
         client.configure(
             sessionExpiryInterval,
             receiveMax,

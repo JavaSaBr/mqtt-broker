@@ -9,11 +9,13 @@ import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
 import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
+import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import java.io.Closeable;
 
+@Log4j2
 public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
 
     private final @NotNull ConcurrentObjectDictionary<String, MqttSession> storedSession;
@@ -34,18 +36,42 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
     @Override
     public @NotNull Mono<MqttSession> restore(@NotNull String clientId) {
+
         var session = storedSession.getInWriteLock(clientId, ObjectDictionary::remove);
+
+        if (session != null) {
+            log.debug("Restored session for client {}", clientId);
+        } else {
+            log.debug("No stored session for client {}", clientId);
+        }
+
         return Mono.justOrEmpty(session);
     }
 
     @Override
     public @NotNull Mono<MqttSession> create(@NotNull String clientId) {
+
+        var session = storedSession.getInWriteLock(clientId, ObjectDictionary::remove);
+
+        if (session != null) {
+            log.debug("Removed old session for client {}", clientId);
+        }
+
+        log.debug("Created new session for client {}", clientId);
+
         return Mono.just(new DefaultMqttSession(clientId));
     }
 
     @Override
-    public @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session) {
+    public @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session, long expiryInterval) {
+
+        var unsafe = (MqttSession.UnsafeMqttSession) session;
+        unsafe.setExpirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
+
         storedSession.runInWriteLock(clientId, session, ObjectDictionary::put);
+
+        log.debug("Stored session for client {}", clientId);
+
         return Mono.just(Boolean.TRUE);
     }
 
@@ -78,6 +104,8 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
                     }
 
                     var removed = dictionary.remove(session.getClientId());
+
+                    log.debug("Removed expired session for client {}", session.getClientId());
 
                     // if we already have new session under the same client id
                     if (removed != null && removed != session) {

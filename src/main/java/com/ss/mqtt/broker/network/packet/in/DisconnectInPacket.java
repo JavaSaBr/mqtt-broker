@@ -94,6 +94,11 @@ public class DisconnectInPacket extends MqttReadablePacket {
     }
 
     @Override
+    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+        return connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining();
+    }
+
+    @Override
     protected @NotNull Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }

@@ -38,8 +38,8 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
 
         Mono<?> asyncActions = null;
 
-        if (session != null) {
-            asyncActions = sessionService.store(clientId, session);
+        if (session != null && client.getConnectionConfig().isSessionsEnabled()) {
+            asyncActions = sessionService.store(clientId, session, client.getSessionExpiryInterval());
             client.setSession(null);
         }
 

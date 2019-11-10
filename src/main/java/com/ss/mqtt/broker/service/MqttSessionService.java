@@ -10,5 +10,5 @@ public interface MqttSessionService {
 
     @NotNull Mono<MqttSession> create(@NotNull String clientId);
 
-    @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session);
+    @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session, long expiryInterval);
 }

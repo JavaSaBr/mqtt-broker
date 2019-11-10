@@ -117,7 +117,7 @@ class ClientIdRegistryTest extends MqttBrokerTest {
             !clientIdRegistry.register(clientId).block()
         when:
             client.disconnect().join()
-            Thread.sleep(50)
+            Thread.sleep(100)
         then:
             clientIdRegistry.register(clientId).block()
             clientIdRegistry.unregister(clientId).block()

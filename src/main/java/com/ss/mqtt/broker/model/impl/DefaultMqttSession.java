@@ -4,8 +4,10 @@ import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
+@ToString
 @RequiredArgsConstructor
 public class DefaultMqttSession implements UnsafeMqttSession {
 
