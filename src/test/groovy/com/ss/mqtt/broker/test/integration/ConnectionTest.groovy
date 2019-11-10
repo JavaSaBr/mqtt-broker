@@ -21,7 +21,7 @@ class ConnectionTest extends MqttBrokerTest {
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             result.sessionExpiryInterval.present
-            result.sessionExpiryInterval.getAsLong() == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED
+            result.sessionExpiryInterval.getAsLong() == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
             result.serverKeepAlive.present
             result.serverKeepAlive.getAsInt() == MqttPropertyConstants.SERVER_KEEP_ALIVE_DISABLED
             !result.serverReference.present
@@ -40,7 +40,7 @@ class ConnectionTest extends MqttBrokerTest {
         then:
             result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
             result.sessionExpiryInterval.present
-            result.sessionExpiryInterval.getAsLong() == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED
+            result.sessionExpiryInterval.getAsLong() == MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
             result.serverKeepAlive.present
             result.serverKeepAlive.getAsInt() == MqttPropertyConstants.SERVER_KEEP_ALIVE_DISABLED
             !result.serverReference.present
