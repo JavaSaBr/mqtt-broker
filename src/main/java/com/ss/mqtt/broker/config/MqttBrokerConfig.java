@@ -130,7 +130,7 @@ public class MqttBrokerConfig {
 
     @Bean
     @NotNull SubscriptionService subscriptionService() {
-        return new SimpleSubscriptionService(new SimpleSubscriptions());
+        return new SimpleSubscriptionService();
     }
 
     @Bean

@@ -23,4 +23,13 @@ public enum QoS {
     }
 
     private final SubscribeAckReasonCode subscribeAckReasonCode;
+
+    public QoS nextQos() {
+        int nextLevel = ordinal() + 1;
+        if (nextLevel < INVALID.ordinal()) {
+            return VALUES[nextLevel];
+        } else {
+            return EXACTLY_ONCE_DELIVERY;
+        }
+    }
 }
