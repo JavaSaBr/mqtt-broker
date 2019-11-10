@@ -41,9 +41,8 @@ public class InMemoryClientIdRegistry implements ClientIdRegistry {
                 return false;
             } else {
                 dictionary.put(id, CLIENT_ID_VALUE);
+                return true;
             }
-
-            return true;
         });
 
         //noinspection ConstantConditions
