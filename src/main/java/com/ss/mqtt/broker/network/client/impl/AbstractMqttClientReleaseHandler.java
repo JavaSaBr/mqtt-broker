@@ -49,10 +49,6 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
             asyncActions = clientIdRegistry.unregister(clientId);
         }
 
-        if (asyncActions != null) {
-            return asyncActions;
-        }
-
-        return Mono.empty();
+        return asyncActions;
     }
 }
