@@ -41,7 +41,7 @@ public interface MqttPropertyConstants {
 
     int SUBSCRIPTION_ID_NOT_DEFINED = 0;
 
-    boolean SESSIONS_ENABLED_DEFAULT = false;
+    boolean SESSIONS_ENABLED_DEFAULT = true;
     boolean KEEP_ALIVE_ENABLED_DEFAULT = false;
     boolean RETAIN_AVAILABLE_DEFAULT = false;
     boolean WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT = false;

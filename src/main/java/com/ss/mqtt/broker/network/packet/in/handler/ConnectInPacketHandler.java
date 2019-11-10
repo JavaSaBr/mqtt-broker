@@ -1,15 +1,18 @@
 package com.ss.mqtt.broker.network.packet.in.handler;
 
-import static reactor.core.publisher.Mono.fromCallable;
+import static com.ss.mqtt.broker.model.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
+import static com.ss.mqtt.broker.model.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
-import static reactor.core.publisher.Mono.fromRunnable;
+import static com.ss.mqtt.broker.util.ReactorUtils.ifTrue;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.service.AuthenticationService;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
+import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +23,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
     private final ClientIdRegistry clientIdRegistry;
     private final AuthenticationService authenticationService;
+    private final MqttSessionService mqttSessionService;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
@@ -32,9 +36,8 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         }
 
         authenticationService.auth(packet.getUsername(), packet.getPassword())
-            .filter(Boolean::booleanValue)
-            .flatMap(authenticated -> registerClient(client, packet))
-            .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD)))
+            .flatMap(ifTrue(client, packet, this::registerClient, BAD_USER_NAME_OR_PASSWORD, client::reject))
+            .flatMap(ifTrue(client, packet, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, client::reject))
             .subscribe();
     }
 
@@ -42,53 +45,50 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         @NotNull UnsafeMqttClient client,
         @NotNull ConnectInPacket packet
     ) {
+
         var requestedClientId = packet.getClientId();
-        if (StringUtils.isEmpty(requestedClientId)) {
-            return processWithoutClientId(client, packet, requestedClientId);
+
+        if (StringUtils.isNotEmpty(requestedClientId)) {
+            return clientIdRegistry.register(requestedClientId)
+                .map(ifTrue(requestedClientId, client::setClientId));
         } else {
-            return processWithClientId(client, packet, requestedClientId);
+            return clientIdRegistry.generate()
+                .flatMap(newClientId -> clientIdRegistry.register(newClientId)
+                    .map(ifTrue(newClientId, client::setClientId)));
         }
     }
 
-    private @NotNull Mono<Boolean> processWithClientId(
+    private @NotNull Mono<Boolean> restoreSession(
         @NotNull UnsafeMqttClient client,
-        @NotNull ConnectInPacket packet,
-        @NotNull String requestedClientId
+        @NotNull ConnectInPacket packet
     ) {
-        return clientIdRegistry.register(requestedClientId)
-            .filter(Boolean::booleanValue)
-            .flatMap(registered -> fromCallable(() -> {
-                client.setClientId(requestedClientId);
-                onConnected(client, packet, requestedClientId);
-                return true;
-            }))
-            .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)));
+
+        if (packet.isCleanStart()) {
+            return mqttSessionService.create(client.getClientId())
+                .flatMap(session -> onConnected(client, packet, session, false));
+        } else {
+            return mqttSessionService.restore(client.getClientId())
+                .flatMap(session -> onConnected(client, packet, session, true))
+                .switchIfEmpty(Mono.defer(() -> mqttSessionService.create(client.getClientId())
+                    .flatMap(session -> onConnected(client, packet, session, false))));
+        }
     }
 
-    private @NotNull Mono<Boolean> processWithoutClientId(
+    private Mono<Boolean> onConnected(
         @NotNull UnsafeMqttClient client,
         @NotNull ConnectInPacket packet,
-        @NotNull String requestedClientId
-    ) {
-        return clientIdRegistry.generate()
-            .doOnNext(client::setClientId)
-            .flatMap(clientIdRegistry::register)
-            .filter(Boolean::booleanValue)
-            .flatMap(registered -> fromCallable(() -> {
-                onConnected(client, packet, requestedClientId);
-                return true;
-            }))
-            .switchIfEmpty(fromRunnable(() -> client.reject(ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID)));
-    }
-
-    private void onConnected(
-        @NotNull UnsafeMqttClient client,
-        @NotNull ConnectInPacket packet,
-        @NotNull String requestedClientId
+        @NotNull MqttSession session,
+        boolean sessionRestored
     ) {
 
         var connection = client.getConnection();
         var config = connection.getConfig();
+
+        // if it was closed in parallel
+        if (connection.isClosed() && config.isSessionsEnabled()) {
+            // store the session again
+            return mqttSessionService.store(client.getClientId(), session, config.getDefaultSessionExpiryInterval());
+        }
 
         // select result keep alive time
         var minimalKeepAliveTime = Math.max(config.getMinKeepAliveTime(), packet.getKeepAlive());
@@ -114,6 +114,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         var topicAliasMaximum = packet.getTopicAliasMaximum() == TOPIC_ALIAS_MAXIMUM_UNDEFINED ?
             TOPIC_ALIAS_MAXIMUM_DISABLED : Math.min(packet.getTopicAliasMaximum(), config.getTopicAliasMaximum());
 
+        client.setSession(session);
         client.configure(
             sessionExpiryInterval,
             receiveMax,
@@ -127,14 +128,15 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         client.send(client.getPacketOutFactory().newConnectAck(
             client,
             ConnectAckReasonCode.SUCCESS,
-            false,
-            requestedClientId,
+            sessionRestored,
+            packet.getClientId(),
             packet.getSessionExpiryInterval(),
             packet.getKeepAlive(),
             packet.getReceiveMax()
         ));
-    }
 
+        return Mono.just(Boolean.TRUE);
+    }
 
     private boolean checkPacketException(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
 

@@ -3,8 +3,10 @@ package com.ss.mqtt.broker.config;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.client.MqttClientReleaseHandler;
 import com.ss.mqtt.broker.network.client.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.impl.DeviceMqttClient;
+import com.ss.mqtt.broker.network.client.impl.DeviceMqttClientReleaseHandler;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.network.packet.in.handler.*;
 import com.ss.mqtt.broker.service.*;
@@ -20,7 +22,6 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 import java.net.InetSocketAddress;
@@ -49,13 +50,8 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull ClientService clientService() {
-        return new DefaultClientService();
-    }
-
-    @Bean
     @NotNull ClientIdRegistry clientIdRegistry() {
-        return new SimpleClientIdRegistry(
+        return new InMemoryClientIdRegistry(
             env.getProperty(
                 "client.id.available.chars",
                 "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
@@ -65,15 +61,19 @@ public class MqttBrokerConfig {
     }
 
     @Bean
+    @NotNull MqttSessionService mqttSessionService() {
+        return new InMemoryMqttSessionService(
+            env.getProperty("sessions.clean.thread.interval", int.class, 60000)
+        );
+    }
+
+    @Bean
     @NotNull CredentialSource credentialSource() {
         return new FileCredentialsSource(env.getProperty("credentials.source.file.name", "credentials"));
     }
 
     @Bean
-    @NotNull AuthenticationService authenticationService(
-        @NotNull CredentialSource credentialSource,
-        @NotNull ClientIdRegistry clientIdRegistry
-    ) {
+    @NotNull AuthenticationService authenticationService(@NotNull CredentialSource credentialSource) {
         return new SimpleAuthenticationService(
             credentialSource,
             env.getProperty("authentication.allow.anonymous", boolean.class, false)
@@ -85,16 +85,30 @@ public class MqttBrokerConfig {
         @NotNull AuthenticationService authenticationService,
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishingService publishingService
+        @NotNull PublishingService publishingService,
+        @NotNull MqttSessionService mqttSessionService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
-        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(clientIdRegistry, authenticationService);
+        handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
+            clientIdRegistry,
+            authenticationService,
+            mqttSessionService
+        );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
+        handlers[PacketType.DISCONNECT.ordinal()] = new DisconnetInPacketHandler();
 
         return handlers;
+    }
+
+    @Bean
+    @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler(
+        @NotNull ClientIdRegistry clientIdRegistry,
+        @NotNull MqttSessionService mqttSessionService
+    ) {
+        return new DeviceMqttClientReleaseHandler(clientIdRegistry, mqttSessionService);
     }
 
     @Bean
@@ -102,14 +116,16 @@ public class MqttBrokerConfig {
         @NotNull ServerNetworkConfig networkConfig,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig deviceConnectionConfig,
-        PacketInHandler @NotNull [] devicePacketHandlers
+        PacketInHandler @NotNull [] devicePacketHandlers,
+        @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler
     ) {
         return NetworkFactory.newServerNetwork(
             networkConfig,
             deviceConnectionFactory(
                 bufferAllocator,
                 deviceConnectionConfig,
-                devicePacketHandlers
+                devicePacketHandlers,
+                deviceMqttClientReleaseHandler
             )
         );
     }
@@ -212,7 +228,8 @@ public class MqttBrokerConfig {
     private @NotNull ChannelFactory deviceConnectionFactory(
         @NotNull BufferAllocator bufferAllocator,
         @NotNull MqttConnectionConfig connectionConfig,
-        PacketInHandler @NotNull [] packetHandlers
+        PacketInHandler @NotNull [] packetHandlers,
+        @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler
     ) {
         return (network, channel) -> new MqttConnection(
             network,
@@ -221,7 +238,7 @@ public class MqttBrokerConfig {
             100,
             packetHandlers,
             connectionConfig,
-            DeviceMqttClient::new
+            mqttConnection -> new DeviceMqttClient(mqttConnection, deviceMqttClientReleaseHandler)
         );
     }
 }

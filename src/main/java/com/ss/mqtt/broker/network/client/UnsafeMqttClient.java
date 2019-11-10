@@ -1,9 +1,11 @@
 package com.ss.mqtt.broker.network.client;
 
 import com.ss.mqtt.broker.model.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
 
 public interface UnsafeMqttClient extends MqttClient {
 
@@ -23,5 +25,9 @@ public interface UnsafeMqttClient extends MqttClient {
 
     void setClientId(@NotNull String clientId);
 
+    void setSession(@NotNull MqttSession session);
+
     void reject(@NotNull ConnectAckReasonCode reasonCode);
+
+    @NotNull Mono<?> release();
 }
