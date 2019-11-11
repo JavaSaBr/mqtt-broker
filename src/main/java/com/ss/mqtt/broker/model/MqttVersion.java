@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.model;
 
-import com.ss.mqtt.broker.network.packet.factory.Mqtt311PacketOutFactory;
-import com.ss.mqtt.broker.network.packet.factory.Mqtt5PacketOutFactory;
-import com.ss.mqtt.broker.network.packet.factory.MqttPacketOutFactory;
+import com.ss.mqtt.broker.factory.packet.out.Mqtt311PacketOutFactory;
+import com.ss.mqtt.broker.factory.packet.out.Mqtt5PacketOutFactory;
+import com.ss.mqtt.broker.factory.packet.out.MqttPacketOutFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 

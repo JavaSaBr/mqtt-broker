@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;

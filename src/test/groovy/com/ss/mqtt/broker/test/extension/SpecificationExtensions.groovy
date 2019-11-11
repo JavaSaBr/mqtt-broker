@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.extension
 
-import com.ss.mqtt.broker.model.PacketDataType
+import com.ss.mqtt.broker.model.data.type.PacketDataType
 import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.StringPair
+import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
 import com.ss.mqtt.broker.util.MqttDataUtils
 import com.ss.rlib.common.util.array.Array

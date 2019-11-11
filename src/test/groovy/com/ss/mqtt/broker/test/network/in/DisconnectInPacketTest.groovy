@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.test.network.in
 
-import com.ss.mqtt.broker.model.DisconnectReasonCode
+import com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.network.packet.in.DisconnectInPacket
 import com.ss.rlib.common.util.BufferUtils

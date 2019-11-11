@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.model.SubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.array.Array;

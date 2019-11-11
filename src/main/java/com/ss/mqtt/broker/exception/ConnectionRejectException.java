@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.exception;
 
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
