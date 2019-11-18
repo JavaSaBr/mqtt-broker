@@ -89,7 +89,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
             var noLocal = !isMqtt5 || NumberUtils.isSetBit(options, 2);
             var rap = isMqtt5 && NumberUtils.isSetBit(options, 3);
 
-            topicFilters.add(new SubscribeTopicFilter(topicFilter, qos, retainHandling, noLocal, rap));
+            topicFilters.add(new SubscribeTopicFilter(new TopicFilter(topicFilter), qos, retainHandling, noLocal, rap));
         }
     }
 

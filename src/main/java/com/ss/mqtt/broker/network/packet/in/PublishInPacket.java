@@ -1,8 +1,10 @@
 package com.ss.mqtt.broker.network.packet.in;
 
+import static com.ss.mqtt.broker.model.TopicName.EMPTY_TOPIC_NAME;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
+import com.ss.mqtt.broker.model.TopicName;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.ArrayUtils;
@@ -247,7 +249,7 @@ public class PublishInPacket extends MqttReadablePacket {
      * To reduce the size of the PUBLISH packet the sender can use a Topic Alias. The Topic Alias is described
      * in section 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
      */
-    private @NotNull String topicName;
+    private @NotNull TopicName topicName;
 
     /**
      * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section
@@ -274,7 +276,7 @@ public class PublishInPacket extends MqttReadablePacket {
         this.qos = QoS.of((info >> 1) & 0x03);
         this.retained = NumberUtils.isSetBit(info, 0);
         this.duplicate = NumberUtils.isSetBit(info, 3);
-        this.topicName = StringUtils.EMPTY;
+        this.topicName = EMPTY_TOPIC_NAME;
         this.responseTopic = StringUtils.EMPTY;
         this.contentType = StringUtils.EMPTY;
         this.correlationData = ArrayUtils.EMPTY_BYTE_ARRAY;
@@ -290,7 +292,7 @@ public class PublishInPacket extends MqttReadablePacket {
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
-        topicName = readString(buffer);
+        topicName = new TopicName(readString(buffer));
         packetId = qos != QoS.AT_MOST_ONCE_DELIVERY ? readUnsignedShort(buffer) : 0;
     }
 

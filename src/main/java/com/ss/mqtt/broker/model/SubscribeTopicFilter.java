@@ -10,7 +10,7 @@ public class SubscribeTopicFilter {
     /**
      * The subscriber's topic name.
      */
-    private final String topicName;
+    private final TopicFilter topicFilter;
 
     /**
      * Maximum QoS field. This gives the maximum QoS level at which the Server

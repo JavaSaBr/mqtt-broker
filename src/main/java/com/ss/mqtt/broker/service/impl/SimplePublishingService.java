@@ -2,12 +2,11 @@ package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.model.PublishAckReasonCode;
 import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.PublishingService;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.rlib.common.util.array.ConcurrentArray;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +38,7 @@ public class SimplePublishingService implements PublishingService {
             publish.getQos(),
             publish.isRetained(),
             publish.isDuplicate(),
-            publish.getTopicName(),
+            publish.getTopicName().toString(),
             publish.getTopicAlias(),
             publish.getPayload(),
             publish.isPayloadFormatIndicator(),
@@ -65,19 +64,10 @@ public class SimplePublishingService implements PublishingService {
     }
 
     private static boolean publishPacket(
-        @NotNull ConcurrentArray<SubscribeTopicFilter> subscriptions,
-        @NotNull MqttClient client,
+        @NotNull Subscriber subscriber,
         @NotNull PublishInPacket packet
     ) {
-        QoS requiredQos = QoS.AT_MOST_ONCE_DELIVERY;
-        for (var subscriber : subscriptions) {
-            if (requiredQos == QoS.EXACTLY_ONCE_DELIVERY) {
-                break;
-            } else if (requiredQos.compareTo(subscriber.getQos()) < 0) {
-                requiredQos = requiredQos.nextQos();
-            }
-        }
-        return SEND_BY_QOS.get(requiredQos).apply(client, packet);
+        return SEND_BY_QOS.get(subscriber.getQos()).apply(subscriber.getMqttClient(), packet);
     }
 
     private final @NotNull SubscriptionService subscriptionService;
