@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.service.impl;
 
-import com.ss.mqtt.broker.model.PublishAckReasonCode;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.Subscriber;
+import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.PublishingService;

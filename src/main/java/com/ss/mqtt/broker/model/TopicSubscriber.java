@@ -10,15 +10,15 @@ import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-
 public class TopicSubscriber {
 
-    private static boolean filterSubscriber(@NotNull Array<Subscriber> resultArray, @NotNull Subscriber subscriber) {
-        var found = resultArray.findAny(subscriber, Subscriber::equals);
-        if (found != null && found.getQos().ordinal() < subscriber.getQos().ordinal()) {
-            resultArray.remove(found);
+    private static boolean filterByQos(@NotNull Array<Subscriber> subscribers, @NotNull Subscriber candidate) {
+        var existed = subscribers.findAny(candidate, Subscriber::equals);
+        if (existed == null) {
             return true;
+        }
+        if (existed.getQos().ordinal() < candidate.getQos().ordinal()) {
+            return subscribers.remove(existed);
         } else {
             return false;
         }
@@ -33,7 +33,7 @@ public class TopicSubscriber {
         if (ts != null) {
             long stamp = ts.subscribers.readLock();
             try {
-                ts.subscribers.forEachFiltered(resultSubscribers, TopicSubscriber::filterSubscriber, Collection::add);
+                ts.subscribers.forEachFiltered(resultSubscribers, TopicSubscriber::filterByQos, Array::add);
             } finally {
                 ts.subscribers.readUnlock(stamp);
             }
@@ -50,7 +50,7 @@ public class TopicSubscriber {
     }
 
     private void addSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
-        if (level == topicFilter.levels.length - 1) {
+        if (level == topicFilter.levels.length) {
             subscribers.runInWriteLock(subscriber, ConcurrentArray::add);
         } else {
             var topicSubscriber = topicSubscribers.getInWriteLock(
@@ -67,7 +67,7 @@ public class TopicSubscriber {
     }
 
     private boolean removeSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
-        if (level == topicFilter.levels.length - 1) {
+        if (level == topicFilter.levels.length) {
             return subscribers.removeIfInWriteLock(mqttClient, (client, subscriber) -> client.equals(subscriber.getMqttClient()));
         } else {
             var topicSubscriber = topicSubscribers.getInReadLock(topicFilter.levels[level], ObjectDictionary::get);
