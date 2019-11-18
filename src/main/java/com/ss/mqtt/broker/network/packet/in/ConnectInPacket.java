@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;

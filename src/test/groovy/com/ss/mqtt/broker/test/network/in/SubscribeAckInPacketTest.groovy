@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.test.network.in
 
 import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.SubscribeAckReasonCode
+import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
 import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket
 import com.ss.rlib.common.util.BufferUtils
 import com.ss.rlib.common.util.array.Array

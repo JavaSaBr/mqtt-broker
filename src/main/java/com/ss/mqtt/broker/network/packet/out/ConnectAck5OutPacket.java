@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.model.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.model.StringPair;
+import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
