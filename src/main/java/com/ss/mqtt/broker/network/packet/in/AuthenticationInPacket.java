@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import com.ss.mqtt.broker.model.AuthenticateReasonCode;
+import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;

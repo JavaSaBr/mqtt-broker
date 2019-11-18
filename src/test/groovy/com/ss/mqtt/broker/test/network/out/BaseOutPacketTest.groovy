@@ -7,7 +7,7 @@ import spock.lang.Shared
 class BaseOutPacketTest extends BasePacketTest {
     
     @Shared
-    MqttClient mqtt5Client = Stub(MqttClient) {
+    MqttClient mqtt5Client = Stub(MqttClient.UnsafeMqttClient) {
         getConnectionConfig() >> mqttConnectionConfig
         getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
         getReceiveMax() >> BasePacketTest.receiveMaximum
@@ -18,7 +18,7 @@ class BaseOutPacketTest extends BasePacketTest {
     }
     
     @Shared
-    MqttClient mqtt311Client = Stub(MqttClient) {
+    MqttClient mqtt311Client = Stub(MqttClient.UnsafeMqttClient) {
         getConnectionConfig() >> mqttConnectionConfig
         getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
         getReceiveMax() >> BasePacketTest.receiveMaximum

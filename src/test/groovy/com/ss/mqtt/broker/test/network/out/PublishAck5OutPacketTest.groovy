@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.PublishAckReasonCode
+import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode
 import com.ss.mqtt.broker.network.packet.in.PublishAckInPacket
 import com.ss.mqtt.broker.network.packet.out.PublishAck5OutPacket
 import com.ss.rlib.common.util.BufferUtils
