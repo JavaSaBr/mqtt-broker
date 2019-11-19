@@ -27,6 +27,8 @@ public interface MqttSession {
 
     @NotNull String getClientId();
 
+    int nextPacketId();
+
     /**
      * @return the expiration time in ms or -1 if it should not be expired now.
      */

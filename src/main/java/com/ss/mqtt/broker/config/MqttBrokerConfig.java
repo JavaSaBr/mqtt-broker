@@ -89,11 +89,6 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull PacketIdGenerator packetIdGenerator() {
-        return new DefaultPacketIdGenerator();
-    }
-
-    @Bean
     PacketInHandler @NotNull [] devicePacketHandlers(
         @NotNull AuthenticationService authenticationService,
         @NotNull ClientIdRegistry clientIdRegistry,
@@ -164,10 +159,10 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull PublishOutHandler[] publishOutHandlers(@NotNull PacketIdGenerator packetIdGenerator) {
+    @NotNull PublishOutHandler[] publishOutHandlers() {
         return new PublishOutHandler[] {
             new Qos0PublishOutHandler(),
-            new Qos1PublishOutHandler(packetIdGenerator),
+            new Qos1PublishOutHandler(),
             new Qos2PublishOutHandler(),
         };
     }

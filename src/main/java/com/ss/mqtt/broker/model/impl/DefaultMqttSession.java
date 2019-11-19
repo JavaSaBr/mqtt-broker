@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.model.impl;
 
+import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
@@ -16,6 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 @ToString(of = "clientId")
@@ -30,12 +32,27 @@ public class DefaultMqttSession implements UnsafeMqttSession {
 
     private final @NotNull String clientId;
     private final @NotNull ConcurrentArray<PendingPublish<?>> pendingPublishes;
+    private final @NotNull AtomicInteger packetIdGenerator;
 
     private volatile @Getter @Setter long expirationTime = -1;
 
     public DefaultMqttSession(@NotNull String clientId) {
         this.clientId = clientId;
         this.pendingPublishes = ConcurrentArray.ofType(PendingPublish.class);
+        this.packetIdGenerator = new AtomicInteger(0);
+    }
+
+    @Override
+    public int nextPacketId() {
+
+        var nextId = packetIdGenerator.incrementAndGet();
+
+        if (nextId >= MqttPropertyConstants.MAXIMUM_PACKET_ID) {
+            packetIdGenerator.compareAndSet(nextId, 0);
+            return nextPacketId();
+        }
+
+        return nextId;
     }
 
     @Override
@@ -54,13 +71,10 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         @NotNull PublishOutPacket publish,
         @NotNull PendingCallback<T> callback
     ) {
-        // FIXME add new method to array
-        var stamp = pendingPublishes.writeLock();
-        try {
-            pendingPublishes.add(new PendingPublish<>(publish, callback, System.currentTimeMillis()));
-        } finally {
-            pendingPublishes.writeUnlock(stamp);
-        }
+        pendingPublishes.runInWriteLock(
+            new PendingPublish<>(publish, callback, System.currentTimeMillis()),
+            Array::add
+        );
     }
 
     @Override
@@ -70,11 +84,10 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     ) {
 
         var packetId = feedback.getPacketId();
-
-        // FIXME add new method to array
-        var pendingPublish = pendingPublishes.findAnyInReadLock(
+        var pendingPublish = pendingPublishes.findAnyConvertedToIntInReadLock(
             packetId,
-            (id, pending) -> id == pending.publish.getPacketId()
+            pending -> pending.publish.getPacketId(),
+            (id, targetId) -> id == targetId
         );
 
         if (pendingPublish == null) {
