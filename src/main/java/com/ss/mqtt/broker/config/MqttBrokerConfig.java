@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.config;
 
-import com.ss.mqtt.broker.handler.client.DeviceMqttClientReleaseHandler;
+import com.ss.mqtt.broker.handler.client.DefaultMqttClientReleaseHandler;
 import com.ss.mqtt.broker.handler.client.MqttClientReleaseHandler;
 import com.ss.mqtt.broker.handler.packet.in.*;
 import com.ss.mqtt.broker.handler.publish.in.PublishInHandler;
@@ -94,14 +94,16 @@ public class MqttBrokerConfig {
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService,
-        @NotNull MqttSessionService mqttSessionService
+        @NotNull MqttSessionService mqttSessionService,
+        @NotNull PublishRetryService publishRetryService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
         handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
             clientIdRegistry,
             authenticationService,
-            mqttSessionService
+            mqttSessionService,
+            publishRetryService
         );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
@@ -113,11 +115,12 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull MqttClientReleaseHandler deviceMqttClientReleaseHandler(
+    @NotNull MqttClientReleaseHandler defaultMqttClientReleaseHandler(
         @NotNull ClientIdRegistry clientIdRegistry,
-        @NotNull MqttSessionService mqttSessionService
+        @NotNull MqttSessionService mqttSessionService,
+        @NotNull PublishRetryService publishRetryService
     ) {
-        return new DeviceMqttClientReleaseHandler(clientIdRegistry, mqttSessionService);
+        return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, publishRetryService);
     }
 
     @Bean
@@ -136,6 +139,14 @@ public class MqttBrokerConfig {
                 devicePacketHandlers,
                 deviceMqttClientReleaseHandler
             )
+        );
+    }
+
+    @Bean
+    @NotNull PublishRetryService publishRetryService() {
+        return new DefaultPublishRetryService(
+            env.getProperty("publish.pending.check.interval", int.class, 60 * 1000),
+            env.getProperty("publish.retry.interval", int.class, 60 * 1000)
         );
     }
 

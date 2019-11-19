@@ -19,7 +19,7 @@ public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
             MqttPropertyConstants.PACKET_ID_FOR_QOS_0,
             QoS.AT_MOST_ONCE_DELIVERY,
             packet.isRetained(),
-            packet.isDuplicate(),
+            false,
             packet.getTopicName(),
             MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
             packet.getPayload(),

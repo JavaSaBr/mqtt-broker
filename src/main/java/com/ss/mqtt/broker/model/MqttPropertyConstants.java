@@ -26,6 +26,7 @@ public interface MqttPropertyConstants {
     boolean PAYLOAD_FORMAT_INDICATOR_DEFAULT = false;
 
     long MESSAGE_EXPIRY_INTERVAL_DEFAULT = 0;
+    long MESSAGE_EXPIRY_INTERVAL_UNDEFINED = -1;
 
     int TOPIC_ALIAS_MAXIMUM_UNDEFINED = -1;
     int TOPIC_ALIAS_MAXIMUM_DISABLED = 0;

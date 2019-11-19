@@ -8,6 +8,7 @@ import com.ss.mqtt.broker.factory.packet.out.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 public interface MqttClient {
@@ -30,7 +31,7 @@ public interface MqttClient {
 
         void setClientId(@NotNull String clientId);
 
-        void setSession(@NotNull MqttSession session);
+        void setSession(@Nullable MqttSession session);
 
         void reject(@NotNull ConnectAckReasonCode reasonCode);
 
@@ -41,7 +42,7 @@ public interface MqttClient {
     @NotNull MqttConnectionConfig getConnectionConfig();
 
     @NotNull String getClientId();
-    @NotNull MqttSession getSession();
+    @Nullable MqttSession getSession();
 
     int getKeepAlive();
     int getMaximumPacketSize();

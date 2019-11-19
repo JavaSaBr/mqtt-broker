@@ -2,8 +2,7 @@ package com.ss.mqtt.broker.model;
 
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
-import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
-import com.ss.mqtt.broker.network.packet.out.PublishOutPacket;
+import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import org.jetbrains.annotations.NotNull;
 
 public interface MqttSession {
@@ -15,14 +14,14 @@ public interface MqttSession {
         void clear();
     }
 
-    interface PendingCallback<T extends HasPacketId> {
-
-        @NotNull PendingCallback<?> EMPTY = (client, feedback) -> true;
+    interface PendingPacketHandler {
 
         /**
-         * @return true of pending packet can be removed.
+         * @return true if pending packet can be removed.
          */
-        boolean handle(@NotNull MqttClient client, @NotNull T feedback);
+        boolean handleResponse(@NotNull MqttClient client, @NotNull HasPacketId response);
+
+        void retryAsync(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId);
     }
 
     @NotNull String getClientId();
@@ -34,15 +33,9 @@ public interface MqttSession {
      */
     long getExpirationTime();
 
-    void registerPendingPublish(@NotNull PublishOutPacket publish);
+    void removeExpiredPackets();
+    void resendPendingPacketsAsync(@NotNull MqttClient client, int retryInterval);
 
-    <T extends MqttReadablePacket & HasPacketId> void registerPendingPublish(
-        @NotNull PublishOutPacket publish,
-        @NotNull MqttSession.PendingCallback<T> callback
-    );
-
-    <T extends MqttReadablePacket & HasPacketId> void unregisterPendingPacket(
-        @NotNull MqttClient client,
-        @NotNull T feedback
-    );
+    void registerPendingPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
+    void unregisterPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
 }
