@@ -2,16 +2,12 @@ package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.client.MqttClient;
-import com.ss.mqtt.broker.network.packet.PacketType;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
-public class Publish311OutPacket extends MqttWritablePacket {
+public class Publish311OutPacket extends PublishOutPacket {
 
-    private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
-
-    private final int packetId;
     private final boolean retained;
     private final boolean duplicate;
     private final @NotNull QoS qos;
@@ -27,11 +23,10 @@ public class Publish311OutPacket extends MqttWritablePacket {
         @NotNull String topicName,
         @NotNull byte[] payload
     ) {
-        super(client);
+        super(client, packetId);
         this.qos = qos;
         this.retained = retained;
         this.duplicate = duplicate;
-        this.packetId = packetId;
         this.payload = payload;
         this.topicName = topicName;
     }
@@ -55,11 +50,6 @@ public class Publish311OutPacket extends MqttWritablePacket {
         }
 
         return info;
-    }
-
-    @Override
-    protected byte getPacketType() {
-        return PACKET_TYPE;
     }
 
     @Override

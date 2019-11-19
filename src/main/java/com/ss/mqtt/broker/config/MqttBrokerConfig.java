@@ -1,13 +1,21 @@
 package com.ss.mqtt.broker.config;
 
+import com.ss.mqtt.broker.handler.client.DeviceMqttClientReleaseHandler;
+import com.ss.mqtt.broker.handler.client.MqttClientReleaseHandler;
 import com.ss.mqtt.broker.handler.packet.in.*;
+import com.ss.mqtt.broker.handler.publish.in.PublishInHandler;
+import com.ss.mqtt.broker.handler.publish.in.Qos0PublishInHandler;
+import com.ss.mqtt.broker.handler.publish.in.Qos1PublishInHandler;
+import com.ss.mqtt.broker.handler.publish.in.Qos2PublishInHandler;
+import com.ss.mqtt.broker.handler.publish.out.PublishOutHandler;
+import com.ss.mqtt.broker.handler.publish.out.Qos0PublishOutHandler;
+import com.ss.mqtt.broker.handler.publish.out.Qos1PublishOutHandler;
+import com.ss.mqtt.broker.handler.publish.out.Qos2PublishOutHandler;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.handler.client.MqttClientReleaseHandler;
-import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.DeviceMqttClient;
-import com.ss.mqtt.broker.handler.client.DeviceMqttClientReleaseHandler;
+import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.service.*;
 import com.ss.mqtt.broker.service.impl.*;
@@ -81,6 +89,11 @@ public class MqttBrokerConfig {
     }
 
     @Bean
+    @NotNull PacketIdGenerator packetIdGenerator() {
+        return new DefaultPacketIdGenerator();
+    }
+
+    @Bean
     PacketInHandler @NotNull [] devicePacketHandlers(
         @NotNull AuthenticationService authenticationService,
         @NotNull ClientIdRegistry clientIdRegistry,
@@ -99,6 +112,7 @@ public class MqttBrokerConfig {
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
         handlers[PacketType.DISCONNECT.ordinal()] = new DisconnetInPacketHandler();
+        handlers[PacketType.PUBLISH_ACK.ordinal()] = new PublishAckInPacketHandler();
 
         return handlers;
     }
@@ -150,8 +164,29 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull PublishingService publishingService(@NotNull SubscriptionService subscriptionService) {
-        return new SimplePublishingService(subscriptionService);
+    @NotNull PublishOutHandler[] publishOutHandlers(@NotNull PacketIdGenerator packetIdGenerator) {
+        return new PublishOutHandler[] {
+            new Qos0PublishOutHandler(),
+            new Qos1PublishOutHandler(packetIdGenerator),
+            new Qos2PublishOutHandler(),
+        };
+    }
+
+    @Bean
+    @NotNull PublishInHandler[] publishInHandlers(
+        @NotNull SubscriptionService subscriptionService,
+        @NotNull PublishOutHandler[] publishOutHandlers
+    ) {
+        return new PublishInHandler[] {
+          new Qos0PublishInHandler(subscriptionService, publishOutHandlers),
+          new Qos1PublishInHandler(subscriptionService, publishOutHandlers),
+          new Qos2PublishInHandler(subscriptionService, publishOutHandlers),
+        };
+    }
+
+    @Bean
+    @NotNull PublishingService publishingService(@NotNull PublishInHandler[] publishInHandlers) {
+        return new DefaultPublishingService(publishInHandlers);
     }
 
     @Bean

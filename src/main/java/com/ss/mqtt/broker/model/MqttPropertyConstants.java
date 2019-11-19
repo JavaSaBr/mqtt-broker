@@ -38,6 +38,7 @@ public interface MqttPropertyConstants {
     int TOPIC_ALIAS_DEFAULT = 0;
     int TOPIC_ALIAS_MIN = 0;
     int TOPIC_ALIAS_MAX = 0xFFFF;
+    int TOPIC_ALIAS_NOT_SET = 0;
 
     int SUBSCRIPTION_ID_NOT_DEFINED = 0;
 
@@ -47,4 +48,7 @@ public interface MqttPropertyConstants {
     boolean WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT = false;
     boolean SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT = false;
     boolean SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT = false;
+
+    int PACKET_ID_FOR_QOS_0 = 0;
+    int PACKET_ID_MAX = 0xFFFF;
 }

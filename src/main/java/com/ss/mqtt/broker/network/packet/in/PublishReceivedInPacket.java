@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import java.util.Set;
  * Publish received (QoS 2 delivery part 1).
  */
 @Getter
-public class PublishReceivedInPacket extends MqttReadablePacket {
+public class PublishReceivedInPacket extends MqttReadablePacket implements HasPacketId {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RECEIVED.ordinal();
 
