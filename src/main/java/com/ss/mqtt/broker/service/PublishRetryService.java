@@ -8,4 +8,6 @@ public interface PublishRetryService {
     void register(@NotNull MqttClient client);
 
     void unregister(@NotNull MqttClient client);
+
+    boolean exist(@NotNull String clientId);
 }

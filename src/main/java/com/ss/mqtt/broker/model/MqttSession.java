@@ -36,6 +36,8 @@ public interface MqttSession {
     void removeExpiredPackets();
     void resendPendingPacketsAsync(@NotNull MqttClient client, int retryInterval);
 
+    boolean hasPendingPackets();
+
     void registerPendingPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
-    void unregisterPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
+    void updatePendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
 }

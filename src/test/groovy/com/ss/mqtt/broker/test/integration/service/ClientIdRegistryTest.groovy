@@ -2,11 +2,11 @@ package com.ss.mqtt.broker.test.integration.service
 
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import com.ss.mqtt.broker.service.ClientIdRegistry
-import com.ss.mqtt.broker.test.integration.MqttBrokerTest
+import com.ss.mqtt.broker.test.integration.IntegrationSpecification
 import com.ss.rlib.common.util.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 
-class ClientIdRegistryTest extends MqttBrokerTest {
+class ClientIdRegistryTest extends IntegrationSpecification {
     
     @Autowired
     ClientIdRegistry clientIdRegistry

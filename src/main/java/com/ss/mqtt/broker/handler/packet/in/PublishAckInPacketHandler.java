@@ -10,6 +10,6 @@ public class PublishAckInPacketHandler extends AbstractPacketHandler<UnsafeMqttC
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull PublishAckInPacket packet) {
-        client.getSession().unregisterPendingPacket(client, packet);
+        client.getSession().updatePendingPacket(client, packet);
     }
 }

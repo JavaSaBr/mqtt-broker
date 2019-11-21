@@ -75,6 +75,11 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     }
 
     @Override
+    public boolean hasPendingPackets() {
+        return !pendingPublishes.isEmpty();
+    }
+
+    @Override
     public void removeExpiredPackets() {
 
         if (pendingPublishes.isEmpty()) {
@@ -93,13 +98,15 @@ public class DefaultMqttSession implements UnsafeMqttSession {
                 var publish = pendingPublish.publish;
                 var messageExpiryInterval = publish.getMessageExpiryInterval();
 
-                if (messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED) {
+                if (messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED ||
+                    messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_INFINITY) {
                     continue;
                 }
 
                 var expiredTime = pendingPublish.registeredTime + (messageExpiryInterval * 1000);
 
                 if (expiredTime < currentTime) {
+                    log.debug("Remove pending publish {} by expiration reason", publish);
                     publishes.fastRemove(i);
                     i--;
                     length--;
@@ -113,19 +120,26 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         var currentTime = System.currentTimeMillis();
         var stamp = pendingPublishes.readLock();
         try {
+
             for (var pendingPublish : pendingPublishes) {
-                if (currentTime - pendingPublish.lastAttemptTime > retryInterval) {
-                    pendingPublish.lastAttemptTime = currentTime;
-                    pendingPublish.handler.retryAsync(client, pendingPublish.publish, pendingPublish.packetId);
+
+                if (currentTime - pendingPublish.lastAttemptTime <= retryInterval) {
+                    continue;
                 }
+
+                log.debug("Re-try to send publish {}", pendingPublish.publish);
+
+                pendingPublish.lastAttemptTime = currentTime;
+                pendingPublish.handler.retryAsync(client, pendingPublish.publish, pendingPublish.packetId);
             }
+
         } finally {
             pendingPublishes.readUnlock(stamp);
         }
     }
 
     @Override
-    public void unregisterPendingPacket(
+    public void updatePendingPacket(
         @NotNull MqttClient client,
         @NotNull HasPacketId response
     ) {

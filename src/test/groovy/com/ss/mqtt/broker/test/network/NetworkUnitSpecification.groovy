@@ -9,6 +9,7 @@ import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
 
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.client.MqttClient
+import com.ss.mqtt.broker.test.UnitSpecification
 import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.ArrayFactory
 import com.ss.rlib.common.util.array.IntegerArray
@@ -17,7 +18,7 @@ import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 
-class BasePacketTest extends Specification {
+class NetworkUnitSpecification extends UnitSpecification {
     
     public static final keepAliveEnabled = true
     public static final sessionsEnabled = true
@@ -96,12 +97,12 @@ class BasePacketTest extends Specification {
         getConfig() >> mqttConnectionConfig
         getClient() >> Stub(MqttClient.UnsafeMqttClient) {
             getConnectionConfig() >> mqttConnectionConfig
-            getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
-            getReceiveMax() >> BasePacketTest.receiveMaximum
-            getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
+            getSessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
+            getReceiveMax() >> NetworkUnitSpecification.receiveMaximum
+            getMaximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
             getClientId() >> clientId
             getKeepAlive() >> serverKeepAlive
-            getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
+            getTopicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
         }
     }
     
@@ -112,12 +113,12 @@ class BasePacketTest extends Specification {
         getConfig() >> mqttConnectionConfig
         getClient() >> Stub(MqttClient.UnsafeMqttClient) {
             getConnectionConfig() >> mqttConnectionConfig
-            getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
-            getReceiveMax() >> BasePacketTest.receiveMaximum
-            getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
+            getSessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
+            getReceiveMax() >> NetworkUnitSpecification.receiveMaximum
+            getMaximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
             getClientId() >> clientId
             getKeepAlive() >> serverKeepAlive
-            getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
+            getTopicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
         }
     }
 }

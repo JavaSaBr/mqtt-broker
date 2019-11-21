@@ -10,7 +10,7 @@ import spock.lang.Specification
 import java.nio.charset.StandardCharsets
 
 @ContextConfiguration(classes = MqttBrokerTestConfig)
-class MqttBrokerTest extends Specification {
+class IntegrationSpecification extends Specification {
 
     @Autowired
     InetSocketAddress deviceNetworkAddress

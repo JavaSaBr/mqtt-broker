@@ -6,10 +6,12 @@ import com.ss.rlib.common.concurrent.util.ThreadUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.common.util.array.ConcurrentArray;
+import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 
+@Log4j2
 public class DefaultPublishRetryService implements PublishRetryService, Closeable {
 
     private final @NotNull ConcurrentArray<MqttClient> registeredClients;
@@ -39,6 +41,11 @@ public class DefaultPublishRetryService implements PublishRetryService, Closeabl
         registeredClients.runInWriteLock(client, Array::fastRemove);
     }
 
+    @Override
+    public boolean exist(@NotNull String clientId) {
+        return registeredClients.anyMatchInReadLock(clientId, (id, client) -> id.equals(client.getClientId()));
+    }
+
     private void checkPendingPackets() {
 
         var toCheck = ArrayFactory.newArray(MqttClient.class);
@@ -52,6 +59,8 @@ public class DefaultPublishRetryService implements PublishRetryService, Closeabl
             ThreadUtils.sleep(checkInterval);
 
             registeredClients.runInReadLock(toCheck, Array::copyTo);
+
+            log.debug("Check pending packets in {} client(s)", toCheck.size());
 
             for (var client : toCheck) {
 
@@ -68,7 +77,7 @@ public class DefaultPublishRetryService implements PublishRetryService, Closeabl
             }
 
             if (toUnregister.isEmpty()) {
-                return;
+                continue;
             }
 
             // unregister closed clients

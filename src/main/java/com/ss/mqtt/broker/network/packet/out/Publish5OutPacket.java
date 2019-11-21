@@ -176,7 +176,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
         writeProperty(buffer,
             PacketProperty.MESSAGE_EXPIRY_INTERVAL,
             0,
-            MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
+            MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
         );
         writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
         writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);

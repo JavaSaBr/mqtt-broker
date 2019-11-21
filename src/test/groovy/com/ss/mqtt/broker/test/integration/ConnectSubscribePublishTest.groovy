@@ -8,7 +8,7 @@ import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCo
 
 import java.util.concurrent.atomic.AtomicReference
 
-class ConnectSubscribePublishTest extends MqttBrokerTest {
+class ConnectSubscribePublishTest extends IntegrationSpecification {
     
     def "publisher should publish message QoS 0"() {
         given:
