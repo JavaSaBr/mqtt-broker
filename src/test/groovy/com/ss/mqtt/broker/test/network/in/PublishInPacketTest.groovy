@@ -105,7 +105,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             packet.payload == publishPayload
             packet.packetId == packetId
             packet.userProperties == Array.empty()
-            packet.messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
+            packet.messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
             packet.topicAlias == MqttPropertyConstants.TOPIC_ALIAS_DEFAULT
             packet.payloadFormatIndicator == MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT
     }
