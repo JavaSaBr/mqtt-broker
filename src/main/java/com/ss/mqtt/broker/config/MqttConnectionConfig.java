@@ -26,7 +26,4 @@ public class MqttConnectionConfig {
     private final boolean wildcardSubscriptionAvailable;
     private final boolean subscriptionIdAvailable;
     private final boolean sharedSubscriptionAvailable;
-
-
-    @NoArgsConstructor @Data class MyClass { final String field = "";}
 }
