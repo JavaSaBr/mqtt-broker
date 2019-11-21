@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.model;
+package com.ss.mqtt.broker.model.topic;
 
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
@@ -11,8 +11,8 @@ abstract class AbstractTopic {
     static final String MULTI_LEVEL_WILDCARD = "#";
     static final String SINGLE_LEVEL_WILDCARD = "+";
 
-    protected final int length;
-    protected final String[] levels;
+    private final int length;
+    private final String[] levels;
     private final String string;
 
     AbstractTopic() {
@@ -38,6 +38,18 @@ abstract class AbstractTopic {
     @Override
     public String toString() {
         return string;
+    }
+
+    String getSegment(int level) {
+        return levels[level];
+    }
+
+    int size() {
+        return levels.length;
+    }
+
+    int lastLevel() {
+        return levels.length - 1;
     }
 
 }

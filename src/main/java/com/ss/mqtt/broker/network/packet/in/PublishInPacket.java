@@ -1,10 +1,10 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import static com.ss.mqtt.broker.model.TopicName.EMPTY_TOPIC_NAME;
+import static com.ss.mqtt.broker.model.topic.TopicName.EMPTY_TOPIC_NAME;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.TopicName;
+import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.ArrayUtils;

@@ -1,4 +1,4 @@
-package com.ss.mqtt.broker.model;
+package com.ss.mqtt.broker.model.topic;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -2,9 +2,14 @@ package com.ss.mqtt.broker.service.impl;
 
 import static com.ss.mqtt.broker.model.ActionResult.FAILED;
 import static com.ss.mqtt.broker.model.ActionResult.SUCCESS;
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.ActionResult;
+import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.topic.TopicSubscribers;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
+import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.common.function.NotNullNullableBiFunction;
@@ -19,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class SimpleSubscriptionService implements SubscriptionService {
 
-    private final TopicSubscriber topicSubscribers = new TopicSubscriber();
+    private final TopicSubscribers topicSubscribers = new TopicSubscribers();
 
     @Override
     public <A> @NotNull ActionResult forEachTopicSubscriber(
@@ -27,22 +32,20 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull A argument,
         @NotNull NotNullNullableBiFunction<Subscriber, A, Boolean> action
     ) {
-
         boolean result = true;
-        for (var subscriber : topicSubscribers.matches(topicName))  {
+        for (var subscriber : topicSubscribers.matches(topicName)) {
             //noinspection ConstantConditions
             result = result && action.apply(subscriber, argument);
         }
-
         return result ? SUCCESS : FAILED;
     }
 
     @Override
     public @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicNames
+        @NotNull Array<SubscribeTopicFilter> topicFilters
     ) {
-        return topicNames.stream()
+        return topicFilters.stream()
             .map(subscribeTopicFilter -> addSubscription(subscribeTopicFilter, mqttClient))
             .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     }

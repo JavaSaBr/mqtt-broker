@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.mqtt.broker.model.topic.TopicFilter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -8,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 public class SubscribeTopicFilter {
 
     /**
-     * The subscriber's topic name.
+     * The subscriber's topic filter.
      */
     private final TopicFilter topicFilter;
 

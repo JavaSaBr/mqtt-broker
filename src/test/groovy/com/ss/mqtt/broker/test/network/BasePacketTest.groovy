@@ -17,7 +17,7 @@ import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 
-class BasePacketTest extends Specification {
+class BasePacketTest extends UnitSpecification {
     
     public static final keepAliveEnabled = true
     public static final sessionsEnabled = true
@@ -75,7 +75,7 @@ class BasePacketTest extends Specification {
     public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
     
     @Shared
-    MqttConnectionConfig mqttConnectionConfig = new MqttConnectionConfig(
+    MqttConnectionConfig mqttConnectionConfig = mqttConnectionConfig(
         maxQos,
         maximumPacketSize,
         serverKeepAlive,
@@ -91,33 +91,39 @@ class BasePacketTest extends Specification {
     )
     
     @Shared
-    MqttConnection mqtt5Connection = Stub(MqttConnection) {
-        isSupported(MqttVersion.MQTT_5) >> true
-        getConfig() >> mqttConnectionConfig
-        getClient() >> Stub(MqttClient.UnsafeMqttClient) {
-            getConnectionConfig() >> mqttConnectionConfig
-            getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
-            getReceiveMax() >> BasePacketTest.receiveMaximum
-            getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
-            getClientId() >> clientId
-            getKeepAlive() >> serverKeepAlive
-            getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
-        }
-    }
+    MqttConnection mqtt5Connection = mqttConnection(
+        MqttVersion.MQTT_5,
+        mqttConnectionConfig,
+        sessionExpiryInterval,
+        receiveMaximum,
+        maximumPacketSize,
+        clientId,
+        serverKeepAlive,
+        topicAliasMaximum
+    )
     
     @Shared
-    MqttConnection mqtt311Connection = Stub(MqttConnection) {
-        isSupported(MqttVersion.MQTT_3_1_1) >> true
-        isSupported(MqttVersion.MQTT_5) >> false
-        getConfig() >> mqttConnectionConfig
-        getClient() >> Stub(MqttClient.UnsafeMqttClient) {
-            getConnectionConfig() >> mqttConnectionConfig
-            getSessionExpiryInterval() >> BasePacketTest.sessionExpiryInterval
-            getReceiveMax() >> BasePacketTest.receiveMaximum
-            getMaximumPacketSize() >> BasePacketTest.maximumPacketSize
-            getClientId() >> clientId
-            getKeepAlive() >> serverKeepAlive
-            getTopicAliasMaximum() >> BasePacketTest.topicAliasMaximum
-        }
+    MqttConnection mqtt311Connection = mqttConnection(
+        MqttVersion.MQTT_3_1_1,
+        mqttConnectionConfig,
+        sessionExpiryInterval,
+        receiveMaximum,
+        maximumPacketSize,
+        clientId,
+        serverKeepAlive,
+        topicAliasMaximum
+    )
+    
+    MqttClient defaultMqttClient()  {
+        return mqttClient(
+            mqttConnectionConfig,
+            sessionExpiryInterval,
+            receiveMaximum,
+            maximumPacketSize,
+            clientId,
+            serverKeepAlive,
+            topicAliasMaximum
+        )
     }
+        
 }

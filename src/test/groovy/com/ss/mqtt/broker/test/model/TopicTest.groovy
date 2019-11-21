@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.test.model
 
-import com.ss.mqtt.broker.model.TopicFilter
-import com.ss.mqtt.broker.model.TopicName
+import com.ss.mqtt.broker.model.topic.TopicFilter
+import com.ss.mqtt.broker.model.topic.TopicName
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -3,6 +3,8 @@ package com.ss.mqtt.broker.service;
 import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
+import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.function.NotNullNullableBiFunction;
 import com.ss.rlib.common.util.array.Array;
@@ -31,19 +33,19 @@ public interface SubscriptionService {
      * Adds MQTT client to topic filter subscribers
      *
      * @param mqttClient MQTT client to be added
-     * @param topicNames topic names
+     * @param topicFilters topic filters
      * @return array of subscribe ack reason codes
      */
     @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicNames
+        @NotNull Array<SubscribeTopicFilter> topicFilters
     );
 
     /**
      * Removes MQTT client from subscribers by array of topic names
      *
      * @param mqttClient MQTT client to be removed
-     * @param topicFilters topic names
+     * @param topicFilters topic filters
      * @return array of unsubscribe ack reason codes
      */
     @NotNull Array<UnsubscribeAckReasonCode> unsubscribe(
