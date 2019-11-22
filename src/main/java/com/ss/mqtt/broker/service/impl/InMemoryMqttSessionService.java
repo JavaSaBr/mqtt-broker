@@ -64,7 +64,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     }
 
     @Override
-    public @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session, long expiryInterval) {
+    public @NotNull Mono<Boolean> store(
+        @NotNull String clientId,
+        @NotNull MqttSession session,
+        long expiryInterval
+    ) {
 
         var unsafe = (UnsafeMqttSession) session;
         unsafe.setExpirationTime(System.currentTimeMillis() + (expiryInterval * 1000));

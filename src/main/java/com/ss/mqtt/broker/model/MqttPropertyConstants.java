@@ -52,5 +52,4 @@ public interface MqttPropertyConstants {
     boolean SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT = false;
 
     int PACKET_ID_FOR_QOS_0 = 0;
-    int PACKET_ID_MAX = 0xFFFF;
 }
