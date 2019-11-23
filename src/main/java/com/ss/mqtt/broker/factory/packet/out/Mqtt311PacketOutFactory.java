@@ -30,7 +30,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPublish(
+    public @NotNull PublishOutPacket newPublish(
         @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,

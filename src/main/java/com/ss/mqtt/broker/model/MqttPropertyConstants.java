@@ -5,6 +5,7 @@ public interface MqttPropertyConstants {
     QoS MAXIMUM_QOS_DEFAULT = QoS.EXACTLY_ONCE_DELIVERY;
 
     int MAXIMUM_PROTOCOL_PACKET_SIZE = 256 * 1024 * 1024;
+    int MAXIMUM_PACKET_ID = 0xFFFF;
 
     long SESSION_EXPIRY_INTERVAL_DISABLED = 0;
     long SESSION_EXPIRY_INTERVAL_DEFAULT = 120;
@@ -24,7 +25,8 @@ public interface MqttPropertyConstants {
 
     boolean PAYLOAD_FORMAT_INDICATOR_DEFAULT = false;
 
-    long MESSAGE_EXPIRY_INTERVAL_DEFAULT = 0;
+    long MESSAGE_EXPIRY_INTERVAL_UNDEFINED = -1;
+    long MESSAGE_EXPIRY_INTERVAL_INFINITY = 0;
 
     int TOPIC_ALIAS_MAXIMUM_UNDEFINED = -1;
     int TOPIC_ALIAS_MAXIMUM_DISABLED = 0;
@@ -38,6 +40,7 @@ public interface MqttPropertyConstants {
     int TOPIC_ALIAS_DEFAULT = 0;
     int TOPIC_ALIAS_MIN = 0;
     int TOPIC_ALIAS_MAX = 0xFFFF;
+    int TOPIC_ALIAS_NOT_SET = 0;
 
     int SUBSCRIPTION_ID_NOT_DEFINED = 0;
 
@@ -47,4 +50,6 @@ public interface MqttPropertyConstants {
     boolean WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT = false;
     boolean SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT = false;
     boolean SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT = false;
+
+    int PACKET_ID_FOR_QOS_0 = 0;
 }

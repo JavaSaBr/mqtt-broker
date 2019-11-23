@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Getter
 @Log4j2
 @ToString(of = "clientId")
-@EqualsAndHashCode(of = "clientId")
 public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
     protected final @NotNull MqttConnection connection;

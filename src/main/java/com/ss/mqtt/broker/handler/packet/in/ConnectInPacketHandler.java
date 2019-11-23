@@ -13,6 +13,7 @@ import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.service.AuthenticationService;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.MqttSessionService;
+import com.ss.mqtt.broker.service.PublishRetryService;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -21,9 +22,10 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
 
-    private final ClientIdRegistry clientIdRegistry;
-    private final AuthenticationService authenticationService;
-    private final MqttSessionService mqttSessionService;
+    private final @NotNull ClientIdRegistry clientIdRegistry;
+    private final @NotNull AuthenticationService authenticationService;
+    private final @NotNull MqttSessionService mqttSessionService;
+    private final @NotNull PublishRetryService publishRetryService;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
@@ -134,6 +136,8 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             packet.getKeepAlive(),
             packet.getReceiveMax()
         ));
+
+        publishRetryService.register(client);
 
         return Mono.just(Boolean.TRUE);
     }

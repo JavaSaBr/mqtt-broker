@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.*;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.network.packet.out.PublishOutPacket;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
@@ -76,7 +77,7 @@ public abstract class MqttPacketOutFactory {
     }
 
 
-    public @NotNull MqttWritablePacket newPublish(
+    public @NotNull PublishOutPacket newPublish(
         @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
@@ -101,7 +102,7 @@ public abstract class MqttPacketOutFactory {
         );
     }
 
-    public abstract @NotNull MqttWritablePacket newPublish(
+    public abstract @NotNull PublishOutPacket newPublish(
         @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,

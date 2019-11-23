@@ -4,10 +4,10 @@ import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCo
 import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.service.MqttSessionService
-import com.ss.mqtt.broker.test.integration.MqttBrokerTest
+import com.ss.mqtt.broker.test.integration.IntegrationSpecification
 import org.springframework.beans.factory.annotation.Autowired
 
-class MqttSessionServiceTest extends MqttBrokerTest {
+class MqttSessionServiceTest extends IntegrationSpecification {
     
     @Autowired
     ClientIdRegistry clientIdRegistry

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.CompletionException
 
-class ConnectionTest extends MqttBrokerTest {
+class ConnectionTest extends IntegrationSpecification {
     
     @Autowired
     InetSocketAddress deviceNetworkAddress

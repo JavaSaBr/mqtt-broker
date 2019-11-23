@@ -267,7 +267,7 @@ public class PublishInPacket extends MqttReadablePacket {
 
     private @NotNull byte[] correlationData;
 
-    private long messageExpiryInterval = MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT;
+    private long messageExpiryInterval = MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
     private int topicAlias = MqttPropertyConstants.TOPIC_ALIAS_DEFAULT;
     private boolean payloadFormatIndicator = MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT;
 
@@ -317,8 +317,8 @@ public class PublishInPacket extends MqttReadablePacket {
                 topicAlias = NumberUtils.validate(
                     (int) value,
                     MqttPropertyConstants.TOPIC_ALIAS_MIN,
-                    MqttPropertyConstants.TOPIC_ALIAS_MAX)
-                ;
+                    MqttPropertyConstants.TOPIC_ALIAS_MAX
+                );
                 break;
             case MESSAGE_EXPIRY_INTERVAL:
                 messageExpiryInterval = value;

@@ -17,7 +17,7 @@ import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 
-class BasePacketTest extends UnitSpecification {
+class NetworkUnitSpecification extends UnitSpecification {
     
     public static final keepAliveEnabled = true
     public static final sessionsEnabled = true
@@ -125,5 +125,4 @@ class BasePacketTest extends UnitSpecification {
             topicAliasMaximum
         )
     }
-        
 }

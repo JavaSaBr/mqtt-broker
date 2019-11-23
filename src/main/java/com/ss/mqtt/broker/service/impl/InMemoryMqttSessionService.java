@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.model.MqttSession;
+import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
 import com.ss.mqtt.broker.model.impl.DefaultMqttSession;
 import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.rlib.common.concurrent.util.ThreadUtils;
@@ -18,7 +19,7 @@ import java.io.Closeable;
 @Log4j2
 public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
 
-    private final @NotNull ConcurrentObjectDictionary<String, MqttSession> storedSession;
+    private final @NotNull ConcurrentObjectDictionary<String, UnsafeMqttSession> storedSession;
     private final @NotNull Thread cleanThread;
 
     private final int cleanInterval;
@@ -63,12 +64,16 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     }
 
     @Override
-    public @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session, long expiryInterval) {
+    public @NotNull Mono<Boolean> store(
+        @NotNull String clientId,
+        @NotNull MqttSession session,
+        long expiryInterval
+    ) {
 
-        var unsafe = (MqttSession.UnsafeMqttSession) session;
+        var unsafe = (UnsafeMqttSession) session;
         unsafe.setExpirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
 
-        storedSession.runInWriteLock(clientId, session, ObjectDictionary::put);
+        storedSession.runInWriteLock(clientId, unsafe, ObjectDictionary::put);
 
         log.debug("Stored session for client {}", clientId);
 
@@ -77,8 +82,8 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
     private void cleanup() {
 
-        var toCheck = ArrayFactory.newArray(MqttSession.class);
-        var toRemove = ArrayFactory.newArray(MqttSession.class);
+        var toCheck = ArrayFactory.newArray(UnsafeMqttSession.class);
+        var toRemove = ArrayFactory.newArray(UnsafeMqttSession.class);
 
         while (!closed) {
 
@@ -110,13 +115,18 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
                     // if we already have new session under the same client id
                     if (removed != null && removed != session) {
                         dictionary.put(session.getClientId(), removed);
+                    } else if (removed != null) {
+                        removed.clear();
                     }
                 }
             });
         }
     }
 
-    private boolean findToRemove(@NotNull Array<MqttSession> toCheck, @NotNull Array<MqttSession> toRemove) {
+    private boolean findToRemove(
+        @NotNull Array<UnsafeMqttSession> toCheck,
+        @NotNull Array<UnsafeMqttSession> toRemove
+    ) {
 
         var currentTime = System.currentTimeMillis();
 

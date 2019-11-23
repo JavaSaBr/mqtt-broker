@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import java.util.Set;
  * Publish complete (QoS 2 delivery part 3).
  */
 @Getter
-public class PublishCompleteInPacket extends MqttReadablePacket {
+public class PublishCompleteInPacket extends MqttReadablePacket implements HasPacketId {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_COMPLETED.ordinal();
 
