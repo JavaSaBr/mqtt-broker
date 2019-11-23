@@ -1,11 +1,11 @@
 package com.ss.mqtt.broker.test.util
 
+import com.ss.mqtt.broker.test.UnitSpecification
 import com.ss.mqtt.broker.util.MqttDataUtils
-import spock.lang.Specification
 
 import java.nio.ByteBuffer
 
-class MqttDataUtilsTest extends Specification {
+class MqttDataUtilsTest extends UnitSpecification {
     
     def "should write integer to MQTT multi byte integer successful"(int value, int expectedBytes) {
         given:

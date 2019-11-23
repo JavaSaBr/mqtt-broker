@@ -13,13 +13,6 @@ public class PublishInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull PublishInPacket packet) {
-
-        var ackReasonCode = publishingService.publish(packet);
-
-        client.send(client.getPacketOutFactory().newPublishAck(
-            client,
-            packet.getPacketId(),
-            ackReasonCode
-        ));
+        publishingService.publish(client, packet);
     }
 }

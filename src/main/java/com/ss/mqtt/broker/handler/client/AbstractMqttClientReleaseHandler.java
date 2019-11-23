@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.AbstractMqttClient;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.MqttSessionService;
+import com.ss.mqtt.broker.service.PublishRetryService;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,6 +18,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
 
     private final @NotNull ClientIdRegistry clientIdRegistry;
     private final @NotNull MqttSessionService sessionService;
+    private final @NotNull PublishRetryService publishRetryService;
 
     @Override
     public @NotNull Mono<?> release(@NotNull UnsafeMqttClient client) {
@@ -25,6 +27,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
     }
 
     protected @NotNull Mono<?> releaseImpl(@NotNull T client) {
+        publishRetryService.unregister(client);
 
         var clientId = client.getClientId();
         client.setClientId(StringUtils.EMPTY);

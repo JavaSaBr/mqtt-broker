@@ -135,7 +135,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
     );
 
 
-    private final int topciAlias;
+    private final int topicAlias;
     private final boolean stringPayload;
     private final @NotNull String responseTopic;
     private final @NotNull byte[] correlationData;
@@ -148,7 +148,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
         boolean retained,
         boolean duplicate,
         @NotNull String topicName,
-        int topciAlias,
+        int topicAlias,
         @NotNull byte[] payload,
         boolean stringPayload,
         @NotNull String responseTopic,
@@ -156,7 +156,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
         @NotNull Array<StringPair> userProperties
     ) {
         super(client, packetId, qos, retained, duplicate, topicName, payload);
-        this.topciAlias = topciAlias;
+        this.topicAlias = topicAlias;
         this.stringPayload = stringPayload;
         this.responseTopic = responseTopic;
         this.correlationData = correlationData;
@@ -176,9 +176,9 @@ public class Publish5OutPacket extends Publish311OutPacket {
         writeProperty(buffer,
             PacketProperty.MESSAGE_EXPIRY_INTERVAL,
             0,
-            MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_DEFAULT
+            MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
         );
-        writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topciAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
+        writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
         writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
         writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);

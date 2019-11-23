@@ -1,8 +1,5 @@
 package com.ss.mqtt.broker.model;
 
-import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.SubscribeRetainHandling;
-import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
