@@ -31,6 +31,34 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         private volatile long lastAttemptTime;
     }
 
+    private static void removeExpiredPackets(@NotNull Array<PendingPublish> publishes) {
+
+        var currentTime = System.currentTimeMillis();
+        var array = publishes.array();
+
+        for (int i = 0, length = publishes.size(); i < length; i++) {
+
+            var pendingPublish = array[i];
+
+            var publish = pendingPublish.publish;
+            var messageExpiryInterval = publish.getMessageExpiryInterval();
+
+            if (messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED ||
+                messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_INFINITY) {
+                continue;
+            }
+
+            var expiredTime = pendingPublish.registeredTime + (messageExpiryInterval * 1000);
+
+            if (expiredTime < currentTime) {
+                log.debug("Remove pending publish {} by expiration reason", publish);
+                publishes.fastRemove(i);
+                i--;
+                length--;
+            }
+        }
+    }
+    
     private final @NotNull String clientId;
     private final @NotNull ConcurrentArray<PendingPublish> pendingPublishes;
     private final @NotNull AtomicInteger packetIdGenerator;
@@ -82,7 +110,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void removeExpiredPackets() {
         if (!pendingPublishes.isEmpty()) {
-            pendingPublishes.runInWriteLock(this::removeExpiredPackets);
+            pendingPublishes.runInWriteLock(DefaultMqttSession::removeExpiredPackets);
         }
     }
 
@@ -137,33 +165,5 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void clear() {
         pendingPublishes.runInWriteLock(Collection::clear);
-    }
-
-    private void removeExpiredPackets(@NotNull Array<PendingPublish> publishes) {
-
-        var currentTime = System.currentTimeMillis();
-        var array = publishes.array();
-
-        for (int i = 0, length = publishes.size(); i < length; i++) {
-
-            var pendingPublish = array[i];
-
-            var publish = pendingPublish.publish;
-            var messageExpiryInterval = publish.getMessageExpiryInterval();
-
-            if (messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED ||
-                messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_INFINITY) {
-                continue;
-            }
-
-            var expiredTime = pendingPublish.registeredTime + (messageExpiryInterval * 1000);
-
-            if (expiredTime < currentTime) {
-                log.debug("Remove pending publish {} by expiration reason", publish);
-                publishes.fastRemove(i);
-                i--;
-                length--;
-            }
-        }
     }
 }
