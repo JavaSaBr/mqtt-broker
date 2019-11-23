@@ -8,7 +8,6 @@ import com.ss.rlib.common.function.NotNullSupplier;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
-import com.ss.rlib.common.util.dictionary.DictionaryFactory;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,31 +16,39 @@ public class TopicSubscribers {
 
     private final static NotNullSupplier<TopicSubscribers> TOPIC_SUBSCRIBER_SUPPLIER = TopicSubscribers::new;
 
-    private static boolean filterByQos(@NotNull Array<Subscriber> subscribers, @NotNull Subscriber candidate) {
-        var existed = subscribers.findAny(candidate, Subscriber::equals);
-        if (existed == null) {
+    private static boolean removeDuplicateWithLowerQoS(@NotNull Array<Subscriber> subscribers, @NotNull Subscriber candidate) {
+        var found = subscribers.indexOf(candidate);
+        if (found == -1) {
             return true;
         }
+        var existed = subscribers.get(found);
         if (existed.getQos().ordinal() < candidate.getQos().ordinal()) {
-            return subscribers.remove(existed);
+            subscribers.fastRemove(found);
+            return true;
         } else {
             return false;
         }
     }
 
-    private static TopicSubscribers collectSubscribers(
+    private static @NotNull TopicSubscribers collectSubscribers(
         @NotNull ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers,
         @NotNull String topicName,
         @NotNull Array<Subscriber> resultSubscribers
     ) {
         var ts = topicSubscribers.get(topicName);
-        if (ts != null) {
-            long stamp = ts.getSubscribers().readLock();
-            try {
-                ts.getSubscribers().forEachFiltered(resultSubscribers, TopicSubscribers::filterByQos, Array::add);
-            } finally {
-                ts.getSubscribers().readUnlock(stamp);
-            }
+        if (ts == null) {
+            return null;
+        }
+        var subscribers = ts.getSubscribers();
+        long stamp = subscribers.readLock();
+        try {
+            subscribers.forEachFiltered(
+                resultSubscribers,
+                TopicSubscribers::removeDuplicateWithLowerQoS,
+                Array::add
+            );
+        } finally {
+            subscribers.readUnlock(stamp);
         }
         return ts;
     }
@@ -54,8 +61,8 @@ public class TopicSubscribers {
     }
 
     private void addSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
-        if (level == topicFilter.size()) {
-            getSubscribers().runInWriteLock(subscriber, ConcurrentArray::add);
+        if (level == topicFilter.levelsCount()) {
+            getSubscribers().runInWriteLock(subscriber, Array::add);
         } else {
             var topicSubscriber = getTopicSubscribers().getInWriteLock(
                 topicFilter.getSegment(level),
@@ -72,8 +79,12 @@ public class TopicSubscribers {
     }
 
     private boolean removeSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
-        if (level == topicFilter.size()) {
-            return getSubscribers().removeConvertedIfInWriteLock(mqttClient, Subscriber::getMqttClient, Object::equals);
+        if (level == topicFilter.levelsCount()) {
+            return getSubscribers().removeConvertedIfInWriteLock(
+                mqttClient,
+                Subscriber::getMqttClient,
+                Object::equals
+            );
         } else {
             var topicSubscriber = getTopicSubscribers().getInReadLock(
                 topicFilter.getSegment(level),
@@ -116,7 +127,7 @@ public class TopicSubscribers {
             resultSubscribers,
             TopicSubscribers::collectSubscribers
         );
-        if (topicSubscriber != null && nextLevel < topicName.size()) {
+        if (topicSubscriber != null && nextLevel < topicName.levelsCount()) {
             var nextSegment = topicName.getSegment(nextLevel);
             topicSubscriber.processLevel(nextLevel, nextSegment, topicName, resultSubscribers);
         }
@@ -126,7 +137,7 @@ public class TopicSubscribers {
         if (topicSubscribers == null) {
             synchronized (this) {
                 if (topicSubscribers == null) {
-                    topicSubscribers = DictionaryFactory.newConcurrentStampedLockObjectDictionary();
+                    topicSubscribers = ConcurrentObjectDictionary.ofType(String.class, TopicSubscribers.class);
                 }
             }
         }

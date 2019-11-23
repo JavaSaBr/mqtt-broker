@@ -46,7 +46,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull Array<SubscribeTopicFilter> topicFilters
     ) {
         return topicFilters.stream()
-            .map(subscribeTopicFilter -> addSubscription(subscribeTopicFilter, mqttClient))
+            .map(topicFilter -> addSubscription(topicFilter, mqttClient))
             .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     }
 
@@ -64,7 +64,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull Array<TopicFilter> topicFilters
     ) {
         return topicFilters.stream()
-            .map(subscribeTopicFilter -> removeSubscription(subscribeTopicFilter, mqttClient))
+            .map(topicFilter -> removeSubscription(topicFilter, mqttClient))
             .collect(ArrayCollectors.toArray(UnsubscribeAckReasonCode.class));
     }
 

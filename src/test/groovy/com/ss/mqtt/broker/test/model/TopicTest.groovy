@@ -8,49 +8,62 @@ import spock.lang.Unroll
 class TopicTest extends Specification {
     
     @Unroll
-    def "should not match #stringTopicFilter to #stringTopicName"(String stringTopicFilter, String stringTopicName) {
-        given:
-            def topicFilter = new TopicFilter(stringTopicFilter)
-            def topicName = new TopicName(stringTopicName)
+    def "should create topic name: #stringTopicName"(String stringTopicName, int levelsCount) {
         when:
-            def result = topicFilter.matches(topicName)
+            def topicName = TopicName.from(stringTopicName)
         then:
-            !result
+            topicName.segments.size() == levelsCount
+            topicName.rawTopic == stringTopicName
+            topicName.length == stringTopicName.length()
         where:
-            stringTopicFilter | stringTopicName
-            "topic/second/in" | "topic/first/in"
-            "topic/second"    | "topic/first/in"
+            stringTopicName   | levelsCount
+            "topic/second/in" | 3
+            "topic/second"    | 2
     }
     
     @Unroll
-    def "should match #stringTopicFilter to #stringTopicName"(String stringTopicFilter, String stringTopicName) {
-        given:
-            def topicFilter = new TopicFilter(stringTopicFilter)
-            def topicName = new TopicName(stringTopicName)
+    def "should fail create topic name: #stringTopicName"(String stringTopicName, String errorMessage) {
         when:
-            def result = topicFilter.matches(topicName)
+            TopicName.from(stringTopicName)
         then:
-            result
+            def ex = thrown IllegalArgumentException
+            ex.message == errorMessage
         where:
-            stringTopicFilter | stringTopicName
-            "topic/in"        | "topic/in"
-            "topic/+"         | "topic/in"
-            "topic/#"         | "topic/first/in"
-            "topic/+/in"      | "topic/first/in"
+            stringTopicName | errorMessage
+            ""              | "Topic has zero length."
+            "topic/+"       | "Single level wildcard is incorrectly used: topic/+"
+            "topic/#"       | "Multi level wildcard is incorrectly used: topic/#"
+    }
+    
+    @Unroll
+    def "should create topic filter: #stringTopicFilter"(String stringTopicFilter, int levelsCount) {
+        when:
+            def topicFilter = TopicFilter.from(stringTopicFilter)
+        then:
+            topicFilter.segments.size() == levelsCount
+            topicFilter.rawTopic == stringTopicFilter
+            topicFilter.length == stringTopicFilter.length()
+        where:
+            stringTopicFilter | levelsCount
+            "topic/in"        | 2
+            "topic/+"         | 2
+            "topic/#"         | 2
+            "topic/+/in"      | 3
     }
     
     @Unroll
     def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter, String errorMessage) {
         when:
-            new TopicFilter(stringTopicFilter)
+            TopicFilter.from(stringTopicFilter)
         then:
             def ex = thrown IllegalArgumentException
             ex.message == errorMessage
         where:
             stringTopicFilter | errorMessage
-            "topic/in/"       | "Topic name has zero length level: topic/in/"
-            "/topic/in"       | "Topic name has zero length level: /topic/in"
-            "topic//in"       | "Topic name has zero length level: topic//in"
+            ""                | "Topic has zero length."
+            "topic/in/"       | "Topic has zero length level: topic/in/"
+            "/topic/in"       | "Topic has zero length level: /topic/in"
+            "topic//in"       | "Topic has zero length level: topic//in"
             "topic/++/in"     | "Single level wildcard is incorrectly used: topic/++/in"
             "topic/#/in"      | "Multi level wildcard is incorrectly used: topic/#/in"
             "topic/##"        | "Multi level wildcard is incorrectly used: topic/##"

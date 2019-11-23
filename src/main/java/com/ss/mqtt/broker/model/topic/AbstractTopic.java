@@ -1,55 +1,53 @@
 package com.ss.mqtt.broker.model.topic;
 
+import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
+import com.ss.rlib.common.util.array.Array;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-abstract class AbstractTopic {
+public abstract class AbstractTopic {
 
     static final String DELIMITER = "/";
     static final String MULTI_LEVEL_WILDCARD = "#";
     static final String SINGLE_LEVEL_WILDCARD = "+";
 
+    static void checkTopic(@NotNull String topic) {
+        if (topic.length() == 0) {
+            throw new IllegalArgumentException("Topic has zero length.");
+        } else if (topic.contains("//") || topic.startsWith("/") || topic.endsWith("/")) {
+            throw new IllegalArgumentException("Topic has zero length level: " + topic);
+        }
+    }
+
     private final int length;
-    private final String[] levels;
-    private final String string;
+    private final String[] segments;
+    private final String rawTopic;
 
     AbstractTopic() {
         length = 0;
-        levels = new String[0];
-        string = StringUtils.EMPTY;
+        segments = ArrayUtils.EMPTY_STRING_ARRAY;
+        rawTopic = StringUtils.EMPTY;
     }
 
     AbstractTopic(@NotNull String topicName) {
 
         length = topicName.length();
-        if (length == 0) {
-            throw new IllegalArgumentException("Topic name has zero length.");
-        }
-        if (topicName.contains("//") || topicName.startsWith("/") || topicName.endsWith("/")) {
-            throw new IllegalArgumentException("Topic name has zero length level: " + topicName);
-        }
-
-        levels = topicName.split(DELIMITER);
-        string = topicName;
+        segments = topicName.split(DELIMITER);
+        rawTopic = topicName;
     }
 
     @Override
-    public String toString() {
-        return string;
+    public @NotNull String toString() {
+        return rawTopic;
     }
 
-    String getSegment(int level) {
-        return levels[level];
+    @NotNull String getSegment(int level) {
+        return segments[level];
     }
 
-    int size() {
-        return levels.length;
+    int levelsCount() {
+        return segments.length;
     }
-
-    int lastLevel() {
-        return levels.length - 1;
-    }
-
 }
