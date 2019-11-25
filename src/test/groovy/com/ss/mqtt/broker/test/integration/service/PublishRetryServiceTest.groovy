@@ -82,23 +82,23 @@ class PublishRetryServiceTest extends IntegrationSpecification {
                 getMessageExpiryInterval() >> 1L
             }
         
-            session.registerPendingPublish(publish, handler, 1)
+            session.registerOutPublish(publish, handler, 1)
         
             Thread.sleep(1000 + checkInterval)
         then:
             retryAttempts.get() == 0
-            !session.hasPendingPackets()
+            !session.hasOutPending()
         when:
             publish = Stub(PublishInPacket) {
                 getMessageExpiryInterval() >> 1000L
             }
         
-            session.registerPendingPublish(publish, handler, 2)
+            session.registerOutPublish(publish, handler, 2)
     
             Thread.sleep(retryInterval + checkInterval)
         then:
             retryAttempts.get() == 1
-            session.hasPendingPackets()
+            session.hasOutPending()
         cleanup:
             publishRetryService.unregister(client)
     }

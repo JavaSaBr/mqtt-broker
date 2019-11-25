@@ -5,7 +5,7 @@ import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
-import com.ss.rlib.common.util.ClassUtils;
+import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
 import lombok.*;
@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @EqualsAndHashCode(of = "clientId")
 public class DefaultMqttSession implements UnsafeMqttSession {
 
+    @Getter
     @AllArgsConstructor
     private static class PendingPublish {
 
@@ -58,16 +59,58 @@ public class DefaultMqttSession implements UnsafeMqttSession {
             }
         }
     }
+
+    private static void registerPublish(
+        @NotNull PublishInPacket publish,
+        @NotNull PendingPacketHandler handler,
+        int packetId,
+        @NotNull ConcurrentArray<PendingPublish> pendingPublishes
+    ) {
+
+        var currentTime = System.currentTimeMillis();
+        var pendingPublish = new PendingPublish(publish, handler, currentTime, packetId, currentTime);
+
+        pendingPublishes.runInWriteLock(pendingPublish, Array::add);
+    }
+
+    private void updatePendingPacket(
+        @NotNull MqttClient client,
+        @NotNull HasPacketId response,
+        @NotNull ConcurrentArray<PendingPublish> pendingPublishes,
+        @NotNull String clientId
+    ) {
+
+        var packetId = response.getPacketId();
+        var pendingPublish = pendingPublishes.findAnyConvertedToIntInReadLock(
+            packetId,
+            PendingPublish::getPublish,
+            PublishInPacket::getPacketId,
+            NumberUtils::equals
+        );
+
+        if (pendingPublish == null) {
+            log.warn("Not found pending publish for client {} by received packet {}", clientId, response);
+            return;
+        }
+
+        var shouldBeRemoved = pendingPublish.handler.handleResponse(client, response);
+
+        if (shouldBeRemoved) {
+            pendingPublishes.runInWriteLock(pendingPublish, Array::fastRemove);
+        }
+    }
     
     private final @NotNull String clientId;
-    private final @NotNull ConcurrentArray<PendingPublish> pendingPublishes;
+    private final @NotNull ConcurrentArray<PendingPublish> pendingOutPublishes;
+    private final @NotNull ConcurrentArray<PendingPublish> pendingInPublishes;
     private final @NotNull AtomicInteger packetIdGenerator;
 
     private volatile @Getter @Setter long expirationTime = -1;
 
     public DefaultMqttSession(@NotNull String clientId) {
         this.clientId = clientId;
-        this.pendingPublishes = ConcurrentArray.ofType(PendingPublish.class);
+        this.pendingOutPublishes = ConcurrentArray.ofType(PendingPublish.class);
+        this.pendingInPublishes = ConcurrentArray.ofType(PendingPublish.class);
         this.packetIdGenerator = new AtomicInteger(0);
     }
 
@@ -90,37 +133,66 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     }
 
     @Override
-    public void registerPendingPublish(
+    public void registerOutPublish(@NotNull PublishInPacket publish,
+        @NotNull PendingPacketHandler handler,
+        int packetId
+    ) {
+        registerPublish(publish, handler, packetId, pendingOutPublishes);
+    }
+
+    @Override
+    public void registerInPublish(
         @NotNull PublishInPacket publish,
         @NotNull PendingPacketHandler handler,
         int packetId
     ) {
-
-        var currentTime = System.currentTimeMillis();
-        var pendingPublish = new PendingPublish(publish, handler, currentTime, packetId, currentTime);
-
-        pendingPublishes.runInWriteLock(pendingPublish, Array::add);
+        registerPublish(publish, handler, packetId, pendingInPublishes);
     }
 
     @Override
-    public boolean hasPendingPackets() {
-        return !pendingPublishes.isEmpty();
+    public boolean hasOutPending() {
+        return !pendingOutPublishes.isEmpty();
+    }
+
+    @Override
+    public boolean hasInPending() {
+        return !pendingInPublishes.isEmpty();
+    }
+
+    @Override
+    public boolean hasOutPending(int packetId) {
+        return pendingOutPublishes.findAnyConvertedToIntInReadLock(
+            packetId,
+            PendingPublish::getPublish,
+            PublishInPacket::getPacketId,
+            NumberUtils::equals
+        ) != null;
+    }
+
+    @Override
+    public boolean hasInPending(int packetId) {
+        return pendingInPublishes.findAnyConvertedToIntInReadLock(
+            packetId,
+            PendingPublish::getPublish,
+            PublishInPacket::getPacketId,
+            NumberUtils::equals
+        ) != null;
     }
 
     @Override
     public void removeExpiredPackets() {
-        if (!pendingPublishes.isEmpty()) {
-            pendingPublishes.runInWriteLock(DefaultMqttSession::removeExpiredPackets);
+        if (!pendingOutPublishes.isEmpty()) {
+            pendingOutPublishes.runInWriteLock(DefaultMqttSession::removeExpiredPackets);
         }
     }
 
     @Override
     public void resendPendingPacketsAsync(@NotNull MqttClient client, int retryInterval) {
         var currentTime = System.currentTimeMillis();
-        var stamp = pendingPublishes.readLock();
+        var stamp = pendingOutPublishes.readLock();
         try {
 
-            for (var pendingPublish : pendingPublishes) {
+            for (var pendingPublish : pendingOutPublishes) {
 
                 if (currentTime - pendingPublish.lastAttemptTime <= retryInterval) {
                     continue;
@@ -133,37 +205,22 @@ public class DefaultMqttSession implements UnsafeMqttSession {
             }
 
         } finally {
-            pendingPublishes.readUnlock(stamp);
+            pendingOutPublishes.readUnlock(stamp);
         }
     }
 
     @Override
-    public void updatePendingPacket(
-        @NotNull MqttClient client,
-        @NotNull HasPacketId response
-    ) {
+    public void updateOutPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response) {
+        updatePendingPacket(client, response, pendingOutPublishes, clientId);
+    }
 
-        var packetId = response.getPacketId();
-        var pendingPublish = pendingPublishes.findAnyConvertedToIntInReadLock(
-            packetId,
-            pending -> pending.publish.getPacketId(),
-            (id, targetId) -> id == targetId
-        );
-
-        if (pendingPublish == null) {
-            log.warn("Not found pending publish for client {} by received packet {}", clientId, response);
-            return;
-        }
-
-        var shouldBeRemoved = pendingPublish.handler.handleResponse(client, ClassUtils.unsafeNNCast(response));
-
-        if (shouldBeRemoved) {
-            pendingPublishes.runInWriteLock(pendingPublish, Array::fastRemove);
-        }
+    @Override
+    public void updateInPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response) {
+        updatePendingPacket(client, response, pendingInPublishes, clientId);
     }
 
     @Override
     public void clear() {
-        pendingPublishes.runInWriteLock(Collection::clear);
+        pendingOutPublishes.runInWriteLock(Collection::clear);
     }
 }

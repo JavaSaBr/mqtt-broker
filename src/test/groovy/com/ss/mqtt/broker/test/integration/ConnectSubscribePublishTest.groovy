@@ -102,4 +102,51 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             subscriber.disconnect()
             publisher.disconnect()
     }
+    
+    def "publisher should publish message QoS 2"() {
+        given:
+            def received = new AtomicReference<Mqtt5Publish>()
+            def subscriber = buildClient()
+            def publisher = buildClient()
+        when:
+            
+            subscriber.connect().join()
+            publisher.connect().join()
+            
+            def subscribeResult = subscriber.subscribeWith()
+                .topicFilter(topicFilter)
+                .qos(MqttQos.EXACTLY_ONCE)
+                .callback({ publish -> received.set(publish) })
+                .send()
+                .join()
+            
+            def publishResult = publisher.publishWith()
+                .topic(topicFilter)
+                .qos(MqttQos.EXACTLY_ONCE)
+                .payload(publishPayload)
+                .payloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
+                .send()
+                .join()
+            
+            Thread.sleep(500)
+        then:
+            noExceptionThrown()
+            
+            subscribeResult != null
+            subscribeResult.reasonCodes.contains(Mqtt5SubAckReasonCode.GRANTED_QOS_2)
+            subscribeResult.type == Mqtt5MessageType.SUBACK
+            
+            publishResult != null
+            publishResult.publish.qos == MqttQos.EXACTLY_ONCE
+            publishResult.publish.type == Mqtt5MessageType.PUBLISH
+            publishResult.publish.topic.levels.join("/") == topicFilter
+            
+            received.get() != null
+            received.get().qos == MqttQos.EXACTLY_ONCE
+            received.get().type == Mqtt5MessageType.PUBLISH
+            received.get().topic.levels.join("/") == topicFilter
+        cleanup:
+            subscriber.disconnect()
+            publisher.disconnect()
+    }
 }

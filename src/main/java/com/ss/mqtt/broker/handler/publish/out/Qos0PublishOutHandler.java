@@ -1,32 +1,26 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants;
+import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.Subscriber;
+import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import org.jetbrains.annotations.NotNull;
 
 public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
 
     @Override
-    public void handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    protected @NotNull QoS getQoS() {
+        return QoS.AT_MOST_ONCE_DELIVERY;
+    }
 
-        var client = subscriber.getMqttClient();
-        var packetOutFactory = client.getPacketOutFactory();
-
-        client.send(packetOutFactory.newPublish(
-            client,
-            MqttPropertyConstants.PACKET_ID_FOR_QOS_0,
-            QoS.AT_MOST_ONCE_DELIVERY,
-            packet.isRetained(),
-            false,
-            packet.getTopicName(),
-            MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
-            packet.getPayload(),
-            packet.isPayloadFormatIndicator(),
-            packet.getResponseTopic(),
-            packet.getCorrelationData(),
-            packet.getUserProperties()
-        ));
+    @Override
+    protected void handleImpl(
+        @NotNull PublishInPacket packet,
+        @NotNull Subscriber subscriber,
+        @NotNull MqttClient client,
+        @NotNull MqttSession session
+    ) {
+        sendPublish(client, packet, 0, false);
     }
 }
