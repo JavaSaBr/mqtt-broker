@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
@@ -90,6 +91,11 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     @Override
     public void send(@NotNull MqttWritablePacket packet) {
         connection.send(packet);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Boolean> sendWithFeedback(@NotNull MqttWritablePacket packet) {
+        return connection.sendWithFeedback(packet);
     }
 
     public void reject(@NotNull ConnectAckReasonCode reasonCode) {

@@ -1,29 +1,19 @@
-package com.ss.mqtt.broker.test.integration.service
+package com.ss.mqtt.broker.test.integration
 
 import com.ss.mqtt.broker.model.MqttSession
 import com.ss.mqtt.broker.network.client.MqttClient
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket
 import com.ss.mqtt.broker.service.MqttSessionService
-
 import com.ss.mqtt.broker.test.integration.IntegrationSpecification
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
 import java.util.concurrent.atomic.AtomicInteger
 
-class PublishRetryServiceTest extends IntegrationSpecification {
-    
-    @Autowired
-    PublishRetryService publishRetryService
+class PublishRetryTest extends IntegrationSpecification {
     
     @Autowired
     MqttSessionService mqttSessionService
-    
-    @Value('${publish.pending.check.interval}')
-    int checkInterval
-    
-    @Value('${publish.retry.interval}')
-    int retryInterval
     
     def "client should be presented in re-try service after connecting"() {
         given:

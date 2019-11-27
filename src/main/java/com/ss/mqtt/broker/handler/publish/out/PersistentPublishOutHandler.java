@@ -27,7 +27,7 @@ public abstract class PersistentPublishOutHandler extends AbstractPublishOutHand
     }
 
     @Override
-    public void retryAsync(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId) {
+    public void resend(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId) {
         sendPublish(client, packet, packetId, true);
     }
 }

@@ -12,6 +12,10 @@ public interface MqttSession {
         void setExpirationTime(long expirationTime);
 
         void clear();
+
+        void onPersisted();
+
+        void onRestored();
     }
 
     interface PendingPacketHandler {
@@ -21,7 +25,7 @@ public interface MqttSession {
          */
         boolean handleResponse(@NotNull MqttClient client, @NotNull HasPacketId response);
 
-        default void retryAsync(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId) {}
+        default void resend(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId) {}
     }
 
     @NotNull String getClientId();
@@ -33,11 +37,11 @@ public interface MqttSession {
      */
     long getExpirationTime();
 
-    void removeExpiredPackets();
-    void resendPendingPacketsAsync(@NotNull MqttClient client, int retryInterval);
+    void resendPendingPackets(@NotNull MqttClient client);
 
     boolean hasOutPending();
     boolean hasInPending();
+
     boolean hasInPending(int packetId);
     boolean hasOutPending(int packetId);
 

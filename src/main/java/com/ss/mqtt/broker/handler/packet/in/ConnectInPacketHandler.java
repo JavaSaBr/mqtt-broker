@@ -1,31 +1,31 @@
 package com.ss.mqtt.broker.handler.packet.in;
 
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
 import static com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
-import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
 import static com.ss.mqtt.broker.util.ReactorUtils.ifTrue;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttSession;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.service.AuthenticationService;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.MqttSessionService;
-import com.ss.mqtt.broker.service.PublishRetryService;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
+@Log4j2
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
 
     private final @NotNull ClientIdRegistry clientIdRegistry;
     private final @NotNull AuthenticationService authenticationService;
     private final @NotNull MqttSessionService mqttSessionService;
-    private final @NotNull PublishRetryService publishRetryService;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
@@ -127,7 +127,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             packet.isRequestProblemInformation()
         );
 
-        client.send(client.getPacketOutFactory().newConnectAck(
+        var response = client.getPacketOutFactory().newConnectAck(
             client,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
@@ -135,11 +135,19 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             packet.getSessionExpiryInterval(),
             packet.getKeepAlive(),
             packet.getReceiveMax()
-        ));
+        );
 
-        publishRetryService.register(client);
+        return Mono.fromFuture(client.sendWithFeedback(response)
+            .thenApply(result -> {
 
-        return Mono.just(Boolean.TRUE);
+                if (!result) {
+                    log.warn("Was issue with sending conn ack packet to client {}", client.getClientId());
+                    return false;
+                }
+
+                session.resendPendingPackets(client);
+                return true;
+            }));
     }
 
     private boolean checkPacketException(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {

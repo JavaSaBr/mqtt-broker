@@ -94,16 +94,14 @@ public class MqttBrokerConfig {
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService,
-        @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService
+        @NotNull MqttSessionService mqttSessionService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
         handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
             clientIdRegistry,
             authenticationService,
-            mqttSessionService,
-            publishRetryService
+            mqttSessionService
         );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
@@ -120,10 +118,9 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull MqttClientReleaseHandler defaultMqttClientReleaseHandler(
         @NotNull ClientIdRegistry clientIdRegistry,
-        @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService
+        @NotNull MqttSessionService mqttSessionService
     ) {
-        return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, publishRetryService);
+        return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService);
     }
 
     @Bean
@@ -142,14 +139,6 @@ public class MqttBrokerConfig {
                 devicePacketHandlers,
                 deviceMqttClientReleaseHandler
             )
-        );
-    }
-
-    @Bean
-    @NotNull PublishRetryService publishRetryService() {
-        return new DefaultPublishRetryService(
-            env.getProperty("publish.pending.check.interval", int.class, 60 * 1000),
-            env.getProperty("publish.retry.interval", int.class, 60 * 1000)
         );
     }
 
