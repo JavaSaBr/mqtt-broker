@@ -2,21 +2,16 @@ package com.ss.mqtt.broker.test.model
 
 import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.model.SubscribeTopicFilter
-import com.ss.mqtt.broker.model.Subscriber
 import com.ss.mqtt.broker.model.topic.TopicFilter
 import com.ss.mqtt.broker.model.topic.TopicName
 import com.ss.mqtt.broker.model.topic.TopicSubscribers
 import com.ss.mqtt.broker.network.client.MqttClient
-import com.ss.mqtt.broker.test.network.BasePacketTest
-import spock.lang.Shared
+import com.ss.mqtt.broker.test.network.NetworkUnitSpecification
 import spock.lang.Unroll
 
 import static com.ss.mqtt.broker.model.QoS.*
 
-class TopicSubscriberTest extends BasePacketTest {
-    
-    @Shared
-    def defaultMqttClient = defaultMqttClient()
+class TopicSubscriberTest extends NetworkUnitSpecification {
     
     @Unroll
     def "should choose #matchedQos from #subscriberQos"(
@@ -27,21 +22,19 @@ class TopicSubscriberTest extends BasePacketTest {
         MqttClient[] mqttClients
     ) {
         given:
-            def topicName = new TopicName(stringTopicName)
-            def topicFilter1 = new TopicFilter(stringTopicFilter[0])
-            def topicFilter2 = new TopicFilter(stringTopicFilter[1])
-            def topicFilter3 = new TopicFilter(stringTopicFilter[2])
+            def topicName = TopicName.from(stringTopicName)
+            def topicFilter1 = TopicFilter.from(stringTopicFilter[0])
+            def topicFilter2 = TopicFilter.from(stringTopicFilter[1])
+            def topicFilter3 = TopicFilter.from(stringTopicFilter[2])
             def subscribeTopicFilter = Mock(SubscribeTopicFilter) {
                 getQos() >>> subscriberQos
+                getTopicFilter() >>> [topicFilter1, topicFilter2, topicFilter3]
             }
-            def subscriber1 = new Subscriber(mqttClients[0], subscribeTopicFilter)
-            def subscriber2 = new Subscriber(mqttClients[1], subscribeTopicFilter)
-            def subscriber3 = new Subscriber(mqttClients[2], subscribeTopicFilter)
             def topicSubscriber = new TopicSubscribers()
         when:
-            topicSubscriber.addSubscriber(topicFilter1, subscriber1)
-            topicSubscriber.addSubscriber(topicFilter2, subscriber2)
-            topicSubscriber.addSubscriber(topicFilter3, subscriber3)
+            topicSubscriber.addSubscriber(mqttClients[0], subscribeTopicFilter)
+            topicSubscriber.addSubscriber(mqttClients[1], subscribeTopicFilter)
+            topicSubscriber.addSubscriber(mqttClients[2], subscribeTopicFilter)
         then:
             def subscribers = topicSubscriber.matches(topicName)
             subscribers.size() == matchedQos.size()

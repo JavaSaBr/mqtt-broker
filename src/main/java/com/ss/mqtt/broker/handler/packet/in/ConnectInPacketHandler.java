@@ -8,12 +8,10 @@ import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttSession;
+import com.ss.mqtt.broker.model.topic.TopicSubscribers;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
-import com.ss.mqtt.broker.service.AuthenticationService;
-import com.ss.mqtt.broker.service.ClientIdRegistry;
-import com.ss.mqtt.broker.service.MqttSessionService;
-import com.ss.mqtt.broker.service.PublishRetryService;
+import com.ss.mqtt.broker.service.*;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +24,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     private final @NotNull AuthenticationService authenticationService;
     private final @NotNull MqttSessionService mqttSessionService;
     private final @NotNull PublishRetryService publishRetryService;
+    private final @NotNull TopicSubscribers topicSubscribers;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
@@ -138,6 +137,8 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         ));
 
         publishRetryService.register(client);
+
+        topicSubscribers.restoreSubscribers(client, session.getTopicFilters());
 
         return Mono.just(Boolean.TRUE);
     }

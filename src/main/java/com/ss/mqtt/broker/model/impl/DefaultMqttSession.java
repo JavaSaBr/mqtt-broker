@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.model.impl;
 
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
+import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
@@ -62,6 +63,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     private final @NotNull String clientId;
     private final @NotNull ConcurrentArray<PendingPublish> pendingPublishes;
     private final @NotNull AtomicInteger packetIdGenerator;
+    private final @Getter @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters;
 
     private volatile @Getter @Setter long expirationTime = -1;
 
@@ -69,6 +71,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         this.clientId = clientId;
         this.pendingPublishes = ConcurrentArray.ofType(PendingPublish.class);
         this.packetIdGenerator = new AtomicInteger(0);
+        this.topicFilters = ConcurrentArray.ofType(SubscribeTopicFilter.class);
     }
 
     @Override

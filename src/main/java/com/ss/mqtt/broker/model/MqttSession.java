@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.model;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
+import com.ss.rlib.common.util.array.ConcurrentArray;
 import org.jetbrains.annotations.NotNull;
 
 public interface MqttSession {
@@ -40,4 +41,5 @@ public interface MqttSession {
 
     void registerPendingPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
     void updatePendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
+    @NotNull ConcurrentArray<SubscribeTopicFilter> getTopicFilters();
 }

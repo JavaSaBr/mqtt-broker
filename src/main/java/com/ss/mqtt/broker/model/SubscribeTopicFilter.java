@@ -3,9 +3,11 @@ package com.ss.mqtt.broker.model;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
+@ToString
 @RequiredArgsConstructor
 public class SubscribeTopicFilter {
 

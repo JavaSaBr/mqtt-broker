@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
 
     @Override
-    public void handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public boolean handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var packetOutFactory = client.getPacketOutFactory();
@@ -20,7 +20,7 @@ public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
             QoS.AT_MOST_ONCE_DELIVERY,
             packet.isRetained(),
             false,
-            packet.getTopicName(),
+            packet.getTopicName().toString(),
             MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
             packet.getPayload(),
             packet.isPayloadFormatIndicator(),
@@ -28,5 +28,6 @@ public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
             packet.getCorrelationData(),
             packet.getUserProperties()
         ));
+        return true;
     }
 }

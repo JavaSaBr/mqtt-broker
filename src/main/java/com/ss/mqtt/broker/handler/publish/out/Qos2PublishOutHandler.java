@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class Qos2PublishOutHandler extends AbstractPublishOutHandler {
 
     @Override
-    public void handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public boolean handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
         throw new UnsupportedOperationException();
     }
 }

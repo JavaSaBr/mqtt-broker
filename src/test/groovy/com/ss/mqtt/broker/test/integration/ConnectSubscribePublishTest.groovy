@@ -103,6 +103,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().topic.levels.join("/") == topicFilter
         cleanup:
             subscriber.disconnect().join()
-            //publisher.disconnect().join()
+            publisher.disconnect().join()
     }
 }

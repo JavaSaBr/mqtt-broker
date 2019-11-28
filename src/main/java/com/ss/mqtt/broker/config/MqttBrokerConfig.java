@@ -13,6 +13,7 @@ import com.ss.mqtt.broker.handler.publish.out.Qos1PublishOutHandler;
 import com.ss.mqtt.broker.handler.publish.out.Qos2PublishOutHandler;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
+import com.ss.mqtt.broker.model.topic.TopicSubscribers;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.client.DeviceMqttClient;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
@@ -69,6 +70,11 @@ public class MqttBrokerConfig {
     }
 
     @Bean
+    @NotNull TopicSubscribers topicSubscribers() {
+        return new TopicSubscribers();
+    }
+
+    @Bean
     @NotNull MqttSessionService mqttSessionService() {
         return new InMemoryMqttSessionService(
             env.getProperty("sessions.clean.thread.interval", int.class, 60000)
@@ -95,7 +101,8 @@ public class MqttBrokerConfig {
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService,
         @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService
+        @NotNull PublishRetryService publishRetryService,
+        @NotNull TopicSubscribers topicSubscribers
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
@@ -103,7 +110,8 @@ public class MqttBrokerConfig {
             clientIdRegistry,
             authenticationService,
             mqttSessionService,
-            publishRetryService
+            publishRetryService,
+            topicSubscribers
         );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
@@ -118,9 +126,15 @@ public class MqttBrokerConfig {
     @NotNull MqttClientReleaseHandler defaultMqttClientReleaseHandler(
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService
+        @NotNull PublishRetryService publishRetryService,
+        @NotNull TopicSubscribers topicSubscribers
     ) {
-        return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, publishRetryService);
+        return new DefaultMqttClientReleaseHandler(
+            clientIdRegistry,
+            mqttSessionService,
+            publishRetryService,
+            topicSubscribers
+        );
     }
 
     @Bean
@@ -165,8 +179,8 @@ public class MqttBrokerConfig {
     }
 
     @Bean
-    @NotNull SubscriptionService subscriptionService() {
-        return new SimpleSubscriptionService();
+    @NotNull SubscriptionService subscriptionService(@NotNull TopicSubscribers topicSubscribers) {
+        return new SimpleSubscriptionService(topicSubscribers);
     }
 
     @Bean

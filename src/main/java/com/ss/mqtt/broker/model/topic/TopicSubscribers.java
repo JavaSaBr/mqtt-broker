@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.model.topic;
 
 import static com.ss.mqtt.broker.model.topic.AbstractTopic.MULTI_LEVEL_WILDCARD;
 import static com.ss.mqtt.broker.model.topic.AbstractTopic.SINGLE_LEVEL_WILDCARD;
+import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.function.NotNullSupplier;
@@ -16,7 +17,10 @@ public class TopicSubscribers {
 
     private final static NotNullSupplier<TopicSubscribers> TOPIC_SUBSCRIBER_SUPPLIER = TopicSubscribers::new;
 
-    private static boolean removeDuplicateWithLowerQoS(@NotNull Array<Subscriber> subscribers, @NotNull Subscriber candidate) {
+    private static boolean removeDuplicateWithLowerQoS(
+        @NotNull Array<Subscriber> subscribers,
+        @NotNull Subscriber candidate
+    ) {
         var found = subscribers.indexOf(candidate);
         if (found == -1) {
             return true;
@@ -30,41 +34,55 @@ public class TopicSubscribers {
         }
     }
 
-    private static @NotNull TopicSubscribers collectSubscribers(
-        @NotNull ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers,
-        @NotNull String topicName,
+    private static @Nullable TopicSubscribers collectSubscribers(
+        @NotNull ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribersMap,
+        @NotNull String segment,
         @NotNull Array<Subscriber> resultSubscribers
     ) {
-        var ts = topicSubscribers.get(topicName);
-        if (ts == null) {
+
+        var topicSubscribers = topicSubscribersMap.get(segment);
+        if (topicSubscribers == null) {
             return null;
         }
-        var subscribers = ts.getSubscribers();
-        long stamp = subscribers.readLock();
-        try {
-            subscribers.forEachFiltered(
-                resultSubscribers,
-                TopicSubscribers::removeDuplicateWithLowerQoS,
-                Array::add
-            );
-        } finally {
-            subscribers.readUnlock(stamp);
+        var subscribers = topicSubscribers.getSubscribers();
+        if (subscribers != null) {
+            long stamp = subscribers.readLock();
+            try {
+                subscribers.forEachFiltered(
+                    resultSubscribers,
+                    TopicSubscribers::removeDuplicateWithLowerQoS,
+                    Array::add
+                );
+            } finally {
+                subscribers.readUnlock(stamp);
+            }
         }
-        return ts;
+        return topicSubscribers;
     }
 
     private @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers;
     private @Nullable ConcurrentArray<Subscriber> subscribers;
 
-    public void addSubscriber(@NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
-        addSubscriber(0, topicFilter, subscriber);
+    public void restoreSubscribers(
+        @NotNull MqttClient mqttClient,
+        @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters
+    ) {
+        topicFilters.forEachInReadLock(
+            this,
+            mqttClient,
+            TopicSubscribers::addSubscriber
+        );
+    }
+
+    public void addSubscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter subscribe) {
+        addSubscriber(0, subscribe.getTopicFilter(), new Subscriber(mqttClient, subscribe));
     }
 
     private void addSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
         if (level == topicFilter.levelsCount()) {
-            getSubscribers().runInWriteLock(subscriber, Array::add);
+            getOrCreateSubscribers().runInWriteLock(subscriber, Array::add);
         } else {
-            var topicSubscriber = getTopicSubscribers().getInWriteLock(
+            var topicSubscriber = getOrCreateTopicSubscribers().getInWriteLock(
                 topicFilter.getSegment(level),
                 TOPIC_SUBSCRIBER_SUPPLIER,
                 ObjectDictionary::getOrCompute
@@ -74,19 +92,33 @@ public class TopicSubscribers {
         }
     }
 
-    public boolean removeSubscriber(@NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
+    public void cleanSubscribers(
+        @NotNull MqttClient mqttClient,
+        @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters
+    ) {
+        topicFilters.forEachConvertedInReadLock(
+            this,
+            mqttClient,
+            SubscribeTopicFilter::getTopicFilter,
+            TopicSubscribers::removeSubscriber
+        );
+    }
+
+    public boolean removeSubscriber(@NotNull MqttClient mqttClient, @NotNull TopicFilter topicFilter) {
         return removeSubscriber(0, topicFilter, mqttClient);
     }
 
     private boolean removeSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
-        if (level == topicFilter.levelsCount()) {
-            return getSubscribers().removeConvertedIfInWriteLock(
+        var topicSubscribers = getTopicSubscribers();
+        var subscribers = getSubscribers();
+        if (subscribers != null && level == topicFilter.levelsCount()) {
+            return subscribers.removeIfConvertedInWriteLock(
                 mqttClient,
                 Subscriber::getMqttClient,
                 Object::equals
             );
-        } else {
-            var topicSubscriber = getTopicSubscribers().getInReadLock(
+        } else if (topicSubscribers != null) {
+            var topicSubscriber = topicSubscribers.getInReadLock(
                 topicFilter.getSegment(level),
                 ObjectDictionary::get
             );
@@ -95,6 +127,8 @@ public class TopicSubscribers {
             } else {
                 return topicSubscriber.removeSubscriber(level + 1, topicFilter, mqttClient);
             }
+        } else {
+            return false;
         }
     }
 
@@ -122,7 +156,11 @@ public class TopicSubscribers {
         @NotNull TopicName topicName,
         @NotNull Array<Subscriber> resultSubscribers
     ) {
-        var topicSubscriber = getTopicSubscribers().getInReadLock(
+        var topicSubscribers = getTopicSubscribers();
+        if (topicSubscribers == null) {
+            return;
+        }
+        var topicSubscriber = topicSubscribers.getInReadLock(
             segment,
             resultSubscribers,
             TopicSubscribers::collectSubscribers
@@ -133,7 +171,7 @@ public class TopicSubscribers {
         }
     }
 
-    private @NotNull ConcurrentObjectDictionary<String, TopicSubscribers> getTopicSubscribers() {
+    private @NotNull ConcurrentObjectDictionary<String, TopicSubscribers> getOrCreateTopicSubscribers() {
         if (topicSubscribers == null) {
             synchronized (this) {
                 if (topicSubscribers == null) {
@@ -144,7 +182,7 @@ public class TopicSubscribers {
         return topicSubscribers;
     }
 
-    private @NotNull ConcurrentArray<Subscriber> getSubscribers() {
+    private @NotNull ConcurrentArray<Subscriber> getOrCreateSubscribers() {
         if (subscribers == null) {
             synchronized (this) {
                 if (subscribers == null) {
@@ -152,6 +190,14 @@ public class TopicSubscribers {
                 }
             }
         }
+        return subscribers;
+    }
+
+    private synchronized @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> getTopicSubscribers() {
+        return topicSubscribers;
+    }
+
+    private synchronized @Nullable ConcurrentArray<Subscriber> getSubscribers() {
         return subscribers;
     }
 }

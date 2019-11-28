@@ -9,5 +9,5 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface PublishOutHandler {
 
-    void handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber);
+    boolean handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber);
 }
