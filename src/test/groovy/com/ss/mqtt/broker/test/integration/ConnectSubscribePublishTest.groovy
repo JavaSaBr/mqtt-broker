@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.test.integration
 
+
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.message.Mqtt5MessageType
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PayloadFormatIndicator
@@ -33,7 +34,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
                 .payloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
                 .send()
                 .join()
-            
+    
             Thread.sleep(500)
         then:
             noExceptionThrown()
@@ -99,8 +100,8 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().type == Mqtt5MessageType.PUBLISH
             received.get().topic.levels.join("/") == topicFilter
         cleanup:
-            subscriber.disconnect()
-            publisher.disconnect()
+            subscriber.disconnect().join()
+            publisher.disconnect().join()
     }
     
     def "publisher should publish message QoS 2"() {

@@ -2,9 +2,13 @@ package com.ss.mqtt.broker.model.impl;
 
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
+import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
+import com.ss.rlib.common.function.NotNullTripleConsumer;
+import com.ss.rlib.common.util.ClassUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
@@ -99,11 +103,12 @@ public class DefaultMqttSession implements UnsafeMqttSession {
             pendingPublishes.runInWriteLock(pendingPublish, Array::fastRemove);
         }
     }
-    
+
     private final @NotNull String clientId;
     private final @NotNull ConcurrentArray<PendingPublish> pendingOutPublishes;
     private final @NotNull ConcurrentArray<PendingPublish> pendingInPublishes;
     private final @NotNull AtomicInteger packetIdGenerator;
+    private final @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters;
 
     private volatile @Getter @Setter long expirationTime = -1;
 
@@ -112,6 +117,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         this.pendingOutPublishes = ConcurrentArray.ofType(PendingPublish.class);
         this.pendingInPublishes = ConcurrentArray.ofType(PendingPublish.class);
         this.packetIdGenerator = new AtomicInteger(0);
+        this.topicFilters = ConcurrentArray.ofType(SubscribeTopicFilter.class);
     }
 
     @Override
@@ -217,6 +223,29 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void updateInPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response) {
         updatePendingPacket(client, response, pendingInPublishes, clientId);
+    }
+
+    @Override
+    public <F, S> void forEachTopicFilter(
+        @NotNull F first,
+        @NotNull S second,
+        @NotNull NotNullTripleConsumer<F, S, SubscribeTopicFilter> consumer
+    ) {
+        topicFilters.forEachInReadLock(first, second, consumer);
+    }
+
+    @Override
+    public void addSubscriber(@NotNull SubscribeTopicFilter subscribe) {
+        topicFilters.runInWriteLock(subscribe, Collection::add);
+    }
+
+    @Override
+    public void removeSubscriber(@NotNull TopicFilter topicFilter) {
+        topicFilters.removeIfConvertedInWriteLock(
+            topicFilter,
+            SubscribeTopicFilter::getTopicFilter,
+            Object::equals
+        );
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.handler.publish.in;
 
 import com.ss.mqtt.broker.handler.publish.out.PublishOutHandler;
+import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode;
@@ -38,20 +39,23 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
             }
         }
 
-        var subscribers = subscriptionService.getSubscribers(packet.getTopicName());
+        super.handle(client, packet);
+    }
 
-        for (var subscriber : subscribers) {
-            publishOutHandler(subscriber.getQos()).handle(packet, subscriber);
-        }
+    @Override
+    protected void handleResult(
+        @NotNull MqttClient client,
+        @NotNull PublishInPacket packet,
+        @NotNull ActionResult result
+    ) {
 
-        var reasonCode = subscribers.isEmpty() ?
-            PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS : PublishReceivedReasonCode.SUCCESS;
+        var reasonCode = switch (result) {
+            case EMPTY -> PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
+            case SUCCESS -> PublishReceivedReasonCode.SUCCESS;
+            default -> PublishReceivedReasonCode.UNSPECIFIED_ERROR;
+        };
 
-        var packetId = packet.getPacketId();
-        session.registerInPublish(packet, this, packetId);
-
-        var packetOutFactory = client.getPacketOutFactory();
-        client.send(packetOutFactory.newPublishReceived(
+        client.send(client.getPacketOutFactory().newPublishReceived(
             client,
             packet.getPacketId(),
             reasonCode

@@ -1,8 +1,10 @@
 package com.ss.mqtt.broker.model;
 
+import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
+import com.ss.rlib.common.function.NotNullTripleConsumer;
 import org.jetbrains.annotations.NotNull;
 
 public interface MqttSession {
@@ -46,4 +48,12 @@ public interface MqttSession {
 
     void updateOutPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
     void updateInPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
+
+    <F, S> void forEachTopicFilter(
+        @NotNull F first,
+        @NotNull S second,
+        @NotNull NotNullTripleConsumer<F, S, SubscribeTopicFilter> consumer
+    );
+    void addSubscriber(@NotNull SubscribeTopicFilter subscribe);
+    void removeSubscriber(@NotNull TopicFilter subscribe);
 }

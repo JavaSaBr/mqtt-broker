@@ -1,9 +1,6 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.MqttSession;
-import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.Subscriber;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import org.jetbrains.annotations.NotNull;
@@ -11,18 +8,20 @@ import org.jetbrains.annotations.NotNull;
 abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
     @Override
-    public void handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var session = client.getSession();
 
         // if session is null it means this client was already closed
         if (session != null) {
-            handleImpl(packet, subscriber, client, session);
+            return handleImpl(packet, subscriber, client, session);
+        } else {
+            return ActionResult.EMPTY;
         }
     }
 
-    protected abstract void handleImpl(
+    protected abstract @NotNull ActionResult handleImpl(
         @NotNull PublishInPacket packet,
         @NotNull Subscriber subscriber,
         @NotNull MqttClient client,
@@ -45,7 +44,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
             getQoS(),
             packet.isRetained(),
             duplicate,
-            packet.getTopicName(),
+            packet.getTopicName().toString(),
             MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
             packet.getPayload(),
             packet.isPayloadFormatIndicator(),
