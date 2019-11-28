@@ -1,5 +1,7 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
+import static com.ss.mqtt.broker.model.ActionResult.SUCCESS;
+import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.Subscriber;
@@ -9,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
 
     @Override
-    public boolean handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var packetOutFactory = client.getPacketOutFactory();
@@ -28,6 +30,6 @@ public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
             packet.getCorrelationData(),
             packet.getUserProperties()
         ));
-        return true;
+        return SUCCESS;
     }
 }

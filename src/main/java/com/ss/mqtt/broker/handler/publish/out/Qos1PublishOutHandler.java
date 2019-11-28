@@ -1,5 +1,7 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
+import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
+import static com.ss.mqtt.broker.model.ActionResult.SUCCESS;
 import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
@@ -11,14 +13,14 @@ import org.jetbrains.annotations.NotNull;
 public class Qos1PublishOutHandler extends AbstractPublishOutHandler implements MqttSession.PendingPacketHandler {
 
     @Override
-    public boolean handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var session = client.getSession();
 
         // it means this client was already closed
         if (session == null) {
-            return false;
+            return EMPTY;
         }
 
         var packetId = session.nextPacketId();
@@ -39,7 +41,7 @@ public class Qos1PublishOutHandler extends AbstractPublishOutHandler implements 
             packet.getCorrelationData(),
             packet.getUserProperties()
         ));
-        return true;
+        return SUCCESS;
     }
 
     @Override

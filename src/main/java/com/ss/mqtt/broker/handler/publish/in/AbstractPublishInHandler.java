@@ -25,7 +25,7 @@ abstract class AbstractPublishInHandler implements PublishInHandler {
         handleResult(client, packet, result);
     }
 
-    private boolean publish(
+    private @NotNull ActionResult publish(
         @NotNull Subscriber subscriber,
         @NotNull PublishInPacket packet
     ) {

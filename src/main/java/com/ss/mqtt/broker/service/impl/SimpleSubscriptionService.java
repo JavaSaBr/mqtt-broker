@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.service.impl;
 
-import static com.ss.mqtt.broker.model.ActionResult.*;
+import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
 import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
@@ -12,7 +12,7 @@ import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.model.topic.TopicSubscribers;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.rlib.common.function.NotNullNullableBiFunction;
+import com.ss.rlib.common.function.NotNullBiFunction;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayCollectors;
 import org.jetbrains.annotations.NotNull;
@@ -29,18 +29,17 @@ public class SimpleSubscriptionService implements SubscriptionService {
     public <A> @NotNull ActionResult forEachTopicSubscriber(
         @NotNull TopicName topicName,
         @NotNull A argument,
-        @NotNull NotNullNullableBiFunction<Subscriber, A, Boolean> action
+        @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
     ) {
         var subscribers = topicSubscribers.matches(topicName);
         if (subscribers.isEmpty()) {
             return EMPTY;
         }
-        boolean result = true;
+        ActionResult result = EMPTY;
         for (var subscriber : subscribers) {
-            //noinspection ConstantConditions
-            result = result && action.apply(subscriber, argument);
+            result = result.and(action.apply(subscriber, argument));
         }
-        return result ? SUCCESS : FAILED;
+        return result;
     }
 
     @Override
