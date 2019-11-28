@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -193,7 +194,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
         @NotNull String clientId,
         @NotNull byte[] password,
         @NotNull byte[] willPayload,
-        int willQos,
+        @NotNull QoS willQos,
         int keepAlive,
         boolean willRetain,
         boolean cleanStart,
@@ -219,6 +220,11 @@ public class Connect5OutPacket extends Connect311OutPacket {
 
     protected @NotNull MqttVersion getMqttVersion() {
         return MqttVersion.MQTT_5;
+    }
+
+    @Override
+    protected boolean isPropertiesSupported() {
+        return true;
     }
 
     @Override
@@ -278,7 +284,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
             buffer,
             PacketProperty.MAXIMUM_PACKET_SIZE,
             maximumPacketSize,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
+            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED
         );
     }
 

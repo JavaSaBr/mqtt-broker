@@ -29,6 +29,8 @@ class NetworkUnitSpecification extends UnitSpecification {
     
     public static final maxQos = QoS.AT_MOST_ONCE_DELIVERY
     public static final sessionPresent = true
+    public static final cleanStart = false
+    public static final willRetain = false
     public static final clientId = "testClientId"
     public static final packetId = 1234 as short
     public static final userName = "testUser"

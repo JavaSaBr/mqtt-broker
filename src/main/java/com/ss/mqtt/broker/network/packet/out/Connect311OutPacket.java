@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.MqttVersion;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
@@ -24,7 +25,8 @@ public class Connect311OutPacket extends MqttWritablePacket {
     private final @NotNull byte[] password;
     private final @NotNull byte[] willPayload;
 
-    private final int willQos;
+    private final @NotNull QoS willQos;
+
     private final int keepAlive;
 
     private final boolean willRetain;
@@ -58,7 +60,9 @@ public class Connect311OutPacket extends MqttWritablePacket {
         writeString(buffer, clientId);
 
         // for MQTT 5
-        appendWillProperties(buffer);
+        if (StringUtils.isNotEmpty(willTopic)) {
+            appendWillProperties(buffer);
+        }
 
         if (StringUtils.isNotEmpty(willTopic)) {
             writeString(buffer, willTopic);
@@ -88,7 +92,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
 
         if (StringUtils.isNotEmpty(willTopic)) {
             connectFlags |= 0b0000_0100;
-            connectFlags |= (willQos << 3);
+            connectFlags |= (willQos.ordinal() << 3);
             if (willRetain) {
                 connectFlags |= 0b0010_0000;
             }
