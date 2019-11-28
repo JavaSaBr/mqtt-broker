@@ -23,8 +23,8 @@ class UnsubscribeInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.topicFilters.size() == 2
-            packet.topicFilters.get(0) == topicFilter
-            packet.topicFilters.get(1) == topicFilter2
+            packet.topicFilters.get(0).toString() == topicFilter
+            packet.topicFilters.get(1).toString() == topicFilter2
             packet.packetId == packetId
             packet.userProperties == Array.empty()
     }
@@ -51,8 +51,8 @@ class UnsubscribeInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.topicFilters.size() == 2
-            packet.topicFilters.get(0) == topicFilter
-            packet.topicFilters.get(1) == topicFilter2
+            packet.topicFilters.get(0).toString() == topicFilter
+            packet.topicFilters.get(1).toString() == topicFilter2
             packet.packetId == packetId
             packet.userProperties == userProperties
         when:
@@ -69,8 +69,8 @@ class UnsubscribeInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.topicFilters.size() == 2
-            packet.topicFilters.get(0) == topicFilter
-            packet.topicFilters.get(1) == topicFilter2
+            packet.topicFilters.get(0).toString() == topicFilter
+            packet.topicFilters.get(1).toString() == topicFilter2
             packet.packetId == packetId
             packet.userProperties == Array.empty()
     }

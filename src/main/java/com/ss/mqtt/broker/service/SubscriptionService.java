@@ -1,10 +1,13 @@
 package com.ss.mqtt.broker.service;
 
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
-import com.ss.mqtt.broker.model.SubscribeTopicFilter;
-import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
+import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.rlib.common.function.NotNullBiFunction;
+import com.ss.rlib.common.function.NotNullNullableBiFunction;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,34 +17,44 @@ import org.jetbrains.annotations.NotNull;
 public interface SubscriptionService {
 
     /**
+     * Runs function for each topic subscriber
+     *
+     * @param topicName topic name
+     * @param argument additional argument
+     * @param action function to run
+     * @return {@link ActionResult} of function
+     */
+    @NotNull <A> ActionResult forEachTopicSubscriber(
+        @NotNull TopicName topicName,
+        @NotNull A argument,
+        @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
+    );
+
+    /**
      * Adds MQTT client to topic filter subscribers
      *
      * @param mqttClient MQTT client to be added
-     * @param topicNames topic names
+     * @param topicFilters topic filters
      * @return array of subscribe ack reason codes
      */
     @NotNull Array<SubscribeAckReasonCode> subscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<SubscribeTopicFilter> topicNames
+        @NotNull Array<SubscribeTopicFilter> topicFilters
     );
 
     /**
      * Removes MQTT client from subscribers by array of topic names
      *
      * @param mqttClient MQTT client to be removed
-     * @param topicNames topic names
+     * @param topicFilters topic filters
      * @return array of unsubscribe ack reason codes
      */
     @NotNull Array<UnsubscribeAckReasonCode> unsubscribe(
         @NotNull MqttClient mqttClient,
-        @NotNull Array<String> topicNames
+        @NotNull Array<TopicFilter> topicFilters
     );
 
-    /**
-     * Returns subscribers by topic name
-     *
-     * @param topicName topic name
-     * @return array of topic subscribers
-     */
-    @NotNull Array<Subscriber> getSubscribers(@NotNull String topicName);
+    void cleanSubscriptions(@NotNull MqttClient mqttClient, @NotNull MqttSession mqttSession);
+
+    void restoreSubscriptions(@NotNull MqttClient mqttClient, @NotNull MqttSession mqttSession);
 }

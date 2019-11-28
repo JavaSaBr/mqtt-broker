@@ -103,7 +103,8 @@ public class MqttBrokerConfig {
             clientIdRegistry,
             authenticationService,
             mqttSessionService,
-            publishRetryService
+            publishRetryService,
+            subscriptionService
         );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
@@ -118,9 +119,15 @@ public class MqttBrokerConfig {
     @NotNull MqttClientReleaseHandler defaultMqttClientReleaseHandler(
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService
+        @NotNull PublishRetryService publishRetryService,
+        @NotNull SubscriptionService subscriptionService
     ) {
-        return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, publishRetryService);
+        return new DefaultMqttClientReleaseHandler(
+            clientIdRegistry,
+            mqttSessionService,
+            publishRetryService,
+            subscriptionService
+        );
     }
 
     @Bean
@@ -166,7 +173,7 @@ public class MqttBrokerConfig {
 
     @Bean
     @NotNull SubscriptionService subscriptionService() {
-        return new SimpleSubscriptionService(new SimpleSubscriptions());
+        return new SimpleSubscriptionService();
     }
 
     @Bean

@@ -1,9 +1,8 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants;
-import com.ss.mqtt.broker.model.MqttSession;
-import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.Subscriber;
+import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
+import static com.ss.mqtt.broker.model.ActionResult.SUCCESS;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
@@ -14,14 +13,14 @@ import org.jetbrains.annotations.NotNull;
 public class Qos1PublishOutHandler extends AbstractPublishOutHandler implements MqttSession.PendingPacketHandler {
 
     @Override
-    public void handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var session = client.getSession();
 
         // it means this client was already closed
         if (session == null) {
-            return;
+            return EMPTY;
         }
 
         var packetId = session.nextPacketId();
@@ -34,7 +33,7 @@ public class Qos1PublishOutHandler extends AbstractPublishOutHandler implements 
             QoS.AT_LEAST_ONCE_DELIVERY,
             packet.isRetained(),
             false,
-            packet.getTopicName(),
+            packet.getTopicName().toString(),
             MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
             packet.getPayload(),
             packet.isPayloadFormatIndicator(),
@@ -42,6 +41,7 @@ public class Qos1PublishOutHandler extends AbstractPublishOutHandler implements 
             packet.getCorrelationData(),
             packet.getUserProperties()
         ));
+        return SUCCESS;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class Qos1PublishOutHandler extends AbstractPublishOutHandler implements 
             QoS.AT_LEAST_ONCE_DELIVERY,
             packet.isRetained(),
             true,
-            packet.getTopicName(),
+            packet.getTopicName().toString(),
             MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
             packet.getPayload(),
             packet.isPayloadFormatIndicator(),
