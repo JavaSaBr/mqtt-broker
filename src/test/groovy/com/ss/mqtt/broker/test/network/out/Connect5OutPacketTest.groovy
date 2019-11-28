@@ -23,6 +23,7 @@ class Connect5OutPacketTest extends BaseOutPacketTest {
                 keepAlive,
                 willRetain,
                 cleanStart,
+                userProperties,
                 authMethod,
                 authData,
                 sessionExpiryInterval,
@@ -48,7 +49,7 @@ class Connect5OutPacketTest extends BaseOutPacketTest {
             reader.clientId == clientId
             reader.password == userPassword
             reader.keepAlive == keepAlive
-            reader.userProperties == Array.empty()
+            reader.userProperties == userProperties
             reader.cleanStart == cleanStart
             reader.willRetain == willRetain
             reader.authenticationMethod == authMethod

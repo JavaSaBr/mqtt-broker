@@ -1,9 +1,14 @@
 package com.ss.mqtt.broker.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class SubscribeTopicFilter {
 
@@ -37,4 +42,8 @@ public class SubscribeTopicFilter {
      * Retained messages sent when the subscription is established have the RETAIN flag set to 1.
      */
     private final boolean retainAsPublished;
+
+    public SubscribeTopicFilter(@NotNull String topicName, @NotNull QoS qos) {
+        this(topicName, qos, SubscribeRetainHandling.SEND, true, true);
+    }
 }

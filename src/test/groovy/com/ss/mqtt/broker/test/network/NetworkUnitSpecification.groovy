@@ -3,6 +3,8 @@ package com.ss.mqtt.broker.test.network
 import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.QoS
+import com.ss.mqtt.broker.model.SubscribeRetainHandling
+import com.ss.mqtt.broker.model.SubscribeTopicFilter
 import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
@@ -54,7 +56,23 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final publishTopic = "publish/Topic"
     public static final responseTopic = "response/Topic"
     public static final topicFilter = "topic/Filter"
+    public static final topicFilter1Obj311 = new SubscribeTopicFilter(topicFilter, QoS.AT_LEAST_ONCE_DELIVERY)
+    public static final topicFilter1Obj5 = new SubscribeTopicFilter(
+        topicFilter,
+        QoS.AT_LEAST_ONCE_DELIVERY,
+        SubscribeRetainHandling.DO_NOT_SEND,
+        true,
+        false,
+    )
     public static final topicFilter2 = "topic/Filter2"
+    public static final topicFilter2Obj311 = new SubscribeTopicFilter(topicFilter2, QoS.EXACTLY_ONCE_DELIVERY)
+    public static final topicFilter2Obj5 = new SubscribeTopicFilter(
+        topicFilter2,
+        QoS.EXACTLY_ONCE_DELIVERY,
+        SubscribeRetainHandling.DO_NOT_SEND,
+        true,
+        false,
+    )
     public static final serverReference = "serverReference"
     public static final contentType = "application/json"
     public static final subscribeAckReasonCodes = ArrayFactory.asArray(
@@ -74,6 +92,8 @@ class NetworkUnitSpecification extends UnitSpecification {
     )
     public static final subscriptionIds = IntegerArray.of(subscriptionId, subscriptionId2)
     public static final topicFilters = Array.of(topicFilter, topicFilter2)
+    public static final topicFiltersObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
+    public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
     public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
     public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
     

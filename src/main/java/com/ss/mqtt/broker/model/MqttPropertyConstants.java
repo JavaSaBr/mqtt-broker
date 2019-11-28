@@ -42,7 +42,7 @@ public interface MqttPropertyConstants {
     int TOPIC_ALIAS_MAX = 0xFFFF;
     int TOPIC_ALIAS_NOT_SET = 0;
 
-    int SUBSCRIPTION_ID_NOT_DEFINED = 0;
+    int SUBSCRIPTION_ID_UNDEFINED = 0;
 
     boolean SESSIONS_ENABLED_DEFAULT = true;
     boolean KEEP_ALIVE_ENABLED_DEFAULT = false;

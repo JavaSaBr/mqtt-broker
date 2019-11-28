@@ -31,16 +31,16 @@ class SubscribeInPacketTest extends BaseInPacketTest {
             packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
             packet.topicFilters.get(0).getTopicName() == topicFilter
             packet.topicFilters.get(0).isNoLocal()
-            !packet.topicFilters.get(0).isRetainAsPublished()
-            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(0).isRetainAsPublished()
+            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND
             packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
             packet.topicFilters.get(1).getTopicName() == topicFilter2
             packet.topicFilters.get(1).isNoLocal()
-            !packet.topicFilters.get(1).isRetainAsPublished()
-            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(1).isRetainAsPublished()
+            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND
             packet.packetId == packetId
             packet.userProperties == Array.empty()
-            packet.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED
+            packet.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED
     }
     
     def "should read packet correctly as mqtt 5.0"() {
@@ -72,12 +72,12 @@ class SubscribeInPacketTest extends BaseInPacketTest {
             packet.topicFilters.get(0).getTopicName() == topicFilter
             !packet.topicFilters.get(0).isNoLocal()
             packet.topicFilters.get(0).isRetainAsPublished()
-            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND
             packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
             packet.topicFilters.get(1).getTopicName() == topicFilter2
             packet.topicFilters.get(1).isNoLocal()
             !packet.topicFilters.get(1).isRetainAsPublished()
-            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_SUBSCRIBE_ONLY_IF_THE_SUBSCRIPTION_DOES_NOT_CURRENTLY_EXIST
+            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
             packet.packetId == packetId
             packet.userProperties == userProperties
             packet.subscriptionId == subscriptionId
@@ -101,14 +101,14 @@ class SubscribeInPacketTest extends BaseInPacketTest {
             packet.topicFilters.get(0).getTopicName() == topicFilter
             !packet.topicFilters.get(0).isNoLocal()
             !packet.topicFilters.get(0).isRetainAsPublished()
-            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND
             packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
             packet.topicFilters.get(1).getTopicName() == topicFilter2
             !packet.topicFilters.get(1).isNoLocal()
             !packet.topicFilters.get(1).isRetainAsPublished()
-            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE
+            packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND
             packet.packetId == packetId
             packet.userProperties == Array.empty()
-            packet.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED
+            packet.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED
     }
 }

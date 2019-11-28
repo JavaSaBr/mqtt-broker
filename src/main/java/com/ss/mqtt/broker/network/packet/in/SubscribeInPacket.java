@@ -48,7 +48,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
     public SubscribeInPacket(byte info) {
         super(info);
         this.topicFilters = ArrayFactory.newArray(SubscribeTopicFilter.class);
-        this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED;
+        this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED;
     }
 
     @Override
@@ -79,15 +79,15 @@ public class SubscribeInPacket extends MqttReadablePacket {
             var options = readUnsignedByte(buffer);
 
             var qos = QoS.of(options & 0x03);
-            var retainHandling = isMqtt5 ? SubscribeRetainHandling.of((options >> 4) & 0x03) :
-                SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE;
+            var retainHandling = isMqtt5 ?
+                SubscribeRetainHandling.of((options >> 4) & 0x03) : SubscribeRetainHandling.SEND;
 
             if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
                 throw new IllegalStateException("Unsupported qos or retain handling");
             }
 
             var noLocal = !isMqtt5 || NumberUtils.isSetBit(options, 2);
-            var rap = isMqtt5 && NumberUtils.isSetBit(options, 3);
+            var rap = !isMqtt5 || NumberUtils.isSetBit(options, 3);
 
             topicFilters.add(new SubscribeTopicFilter(topicFilter, qos, retainHandling, noLocal, rap));
         }

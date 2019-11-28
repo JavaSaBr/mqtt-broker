@@ -4,7 +4,9 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
+import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.util.MqttDataUtils;
+import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -178,6 +180,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
     );
 
     // properties
+    private final @NotNull Array<StringPair> userProperties;
     private final @NotNull String authenticationMethod;
     private final @NotNull byte[] authenticationData;
 
@@ -198,6 +201,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
         int keepAlive,
         boolean willRetain,
         boolean cleanStart,
+        @NotNull Array<StringPair> userProperties,
         @NotNull String authenticationMethod,
         @NotNull byte[] authenticationData,
         long sessionExpiryInterval,
@@ -208,6 +212,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
         boolean requestProblemInformation
     ) {
         super(username, willTopic, clientId, password, willPayload, willQos, keepAlive, willRetain, cleanStart);
+        this.userProperties = userProperties;
         this.authenticationMethod = authenticationMethod;
         this.authenticationData = authenticationData;
         this.sessionExpiryInterval = sessionExpiryInterval;
@@ -248,6 +253,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
     @Override
     protected void writeProperties(@NotNull ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901046
+        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
         writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
         writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
         writeProperty(
