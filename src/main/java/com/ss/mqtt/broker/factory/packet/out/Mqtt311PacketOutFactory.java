@@ -43,7 +43,14 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull byte[] correlationData,
         @NotNull Array<StringPair> userProperties
     ) {
-        return newPublish(packetId, qos, retained, duplicate, topicName, payload);
+        return new Publish311OutPacket(
+            packetId,
+            qos,
+            retained,
+            duplicate,
+            topicName,
+            payload
+        );
     }
 
     @Override

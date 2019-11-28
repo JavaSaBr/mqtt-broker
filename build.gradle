@@ -50,7 +50,7 @@ allprojects {
         implementation "com.spaceshift:rlib.network:$rlibVersion"
         implementation "com.spaceshift:rlib.logger.slf4j:$rlibVersion"
         implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
-        implementation "org.springframework.boot:spring-boot-starter-logging:$springbootVersion"
+        implementation "org.springframework.boot:spring-boot-starter-log4j2:$springbootVersion"
         implementation "io.projectreactor:reactor-core:$projectReactorVersion"
         
         compileOnly "org.jetbrains:annotations:$annotationVersion"
@@ -113,4 +113,5 @@ wrapper {
 
 configurations.each {
     it.exclude group: "org.slf4j", module: "slf4j-log4j12"
+    it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
 }

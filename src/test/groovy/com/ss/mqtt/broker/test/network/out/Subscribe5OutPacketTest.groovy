@@ -24,7 +24,7 @@ class Subscribe5OutPacketTest extends BaseOutPacketTest {
                 packet.write(it)
             }
             
-            def reader = new SubscribeInPacket(0b0001_0000 as byte)
+            def reader = new SubscribeInPacket(0b1000_0000 as byte)
             def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         
         then:

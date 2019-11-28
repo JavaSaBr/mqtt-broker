@@ -20,8 +20,10 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
 
     @Override
     public @NotNull Mono<?> release(@NotNull UnsafeMqttClient client) {
+        var clientId = client.getClientId();
         //noinspection unchecked
-        return releaseImpl((T) client);
+        return releaseImpl((T) client)
+            .doOnNext(aVoid -> log.info("Client {} was released.", clientId));
     }
 
     protected @NotNull Mono<?> releaseImpl(@NotNull T client) {
