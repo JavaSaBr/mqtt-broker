@@ -32,6 +32,20 @@ public class Connect311OutPacket extends MqttWritablePacket {
     private final boolean willRetain;
     private final boolean cleanStart;
 
+    public Connect311OutPacket(@NotNull String clientId, int keepAlive) {
+        this(
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            clientId,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            QoS.AT_MOST_ONCE_DELIVERY,
+            keepAlive,
+            false,
+            false
+        );
+    }
+
     protected @NotNull MqttVersion getMqttVersion() {
         return MqttVersion.MQTT_3_1_1;
     }

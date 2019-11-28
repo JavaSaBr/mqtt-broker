@@ -19,6 +19,7 @@ class IntegrationSpecification extends Specification {
     public static final topicFilter = "topic/Filter"
     public static final publishPayload = "publishPayload".getBytes(encoding)
     public static final clientId = "testClientId"
+    public static final keepAlive = 120
     
     @Autowired
     InetSocketAddress deviceNetworkAddress
@@ -33,9 +34,9 @@ class IntegrationSpecification extends Specification {
     MqttConnection mqtt311MockedConnection
     
     def buildClient() {
-        return buildClient(UUID.randomUUID().toString())
+        return buildClient(generateClientId())
     }
-
+    
     def buildClient(String clientId) {
         return MqttClient.builder()
             .identifier(clientId)
@@ -45,8 +46,12 @@ class IntegrationSpecification extends Specification {
             .build()
             .toAsync()
     }
-
-    def static connectWith(Mqtt5AsyncClient client, String user, String pass) {
+    
+    def generateClientId() {
+        UUID.randomUUID().toString()
+    }
+    
+    def connectWith(Mqtt5AsyncClient client, String user, String pass) {
         return client.connectWith()
             .simpleAuth()
             .username(user)
