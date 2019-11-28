@@ -18,12 +18,12 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
     }
 
     @Override
-    protected void handleImpl(
+    protected void handleResult(
         @NotNull MqttClient client,
         @NotNull PublishInPacket packet,
         @NotNull ActionResult result
     ) {
-        PublishAckReasonCode reasonCode = switch (result) {
+        var reasonCode = switch (result) {
             case EMPTY -> PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
             case SUCCESS -> PublishAckReasonCode.SUCCESS;
             default -> PublishAckReasonCode.UNSPECIFIED_ERROR;

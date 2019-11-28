@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.test.integration
 
-import com.hivemq.client.mqtt.MqttGlobalPublishFilter
+
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.message.Mqtt5MessageType
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PayloadFormatIndicator
@@ -35,8 +35,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
                 .send()
                 .join()
     
-            publisher.publishes(MqttGlobalPublishFilter.ALL, { publish -> println publish })
-            
             Thread.sleep(500)
         then:
             noExceptionThrown()

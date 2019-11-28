@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class TopicFilter extends AbstractTopic {
 
-    public static TopicFilter from(@NotNull String topicFilter) {
+    public static @NotNull TopicFilter from(@NotNull String topicFilter) {
         checkTopic(topicFilter);
         int multiPos = topicFilter.indexOf(MULTI_LEVEL_WILDCARD);
         if (multiPos != -1 && multiPos != topicFilter.length() - 1) {

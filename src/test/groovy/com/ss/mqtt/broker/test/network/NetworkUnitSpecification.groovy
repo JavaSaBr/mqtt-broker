@@ -171,7 +171,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         int topicAliasMaximum
     ) {
         return Stub(MqttConnection) {
-            isSupported(_ as MqttVersion) >> { MqttVersion version -> version == mqttVersion }
+            isSupported(_ as MqttVersion) >> { MqttVersion version -> mqttVersion >= version }
             getConfig() >> mqttConnectionConfig
             getClient() >> mqttClient(
                 mqttConnectionConfig,

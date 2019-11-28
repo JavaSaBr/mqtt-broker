@@ -32,7 +32,6 @@ public abstract class AbstractTopic {
     }
 
     AbstractTopic(@NotNull String topicName) {
-
         length = topicName.length();
         segments = topicName.split(DELIMITER);
         rawTopic = topicName;

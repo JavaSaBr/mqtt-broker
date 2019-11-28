@@ -1,14 +1,13 @@
 package com.ss.mqtt.broker.handler.packet.in;
 
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
 import static com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
-import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
 import static com.ss.mqtt.broker.util.ReactorUtils.ifTrue;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttSession;
-import com.ss.mqtt.broker.model.topic.TopicSubscribers;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.service.*;
@@ -24,7 +23,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     private final @NotNull AuthenticationService authenticationService;
     private final @NotNull MqttSessionService mqttSessionService;
     private final @NotNull PublishRetryService publishRetryService;
-    private final @NotNull TopicSubscribers topicSubscribers;
+    private final @NotNull SubscriptionService subscriptionService;
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
@@ -138,7 +137,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
         publishRetryService.register(client);
 
-        topicSubscribers.restoreSubscribers(client, session.getTopicFilters());
+        subscriptionService.restoreSubscriptions(client, session);
 
         return Mono.just(Boolean.TRUE);
     }

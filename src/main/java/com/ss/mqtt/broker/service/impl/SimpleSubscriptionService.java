@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.service.impl;
 
 import static com.ss.mqtt.broker.model.ActionResult.*;
 import com.ss.mqtt.broker.model.ActionResult;
+import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
@@ -14,18 +15,15 @@ import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.common.function.NotNullNullableBiFunction;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayCollectors;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Simple subscription service
  */
-@RequiredArgsConstructor
 public class SimpleSubscriptionService implements SubscriptionService {
 
-    private final TopicSubscribers topicSubscribers;
+    private final TopicSubscribers topicSubscribers = new TopicSubscribers();
 
     @Override
     public <A> @NotNull ActionResult forEachTopicSubscriber(
@@ -55,14 +53,15 @@ public class SimpleSubscriptionService implements SubscriptionService {
             .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     }
 
-    private @NotNull SubscribeAckReasonCode addSubscription(
+    private @Nullable SubscribeAckReasonCode addSubscription(
         @NotNull SubscribeTopicFilter subscribe,
         @NotNull MqttClient mqttClient
     ) {
         var session = mqttClient.getSession();
-        if (session != null) {
-            session.getTopicFilters().runInWriteLock(subscribe, Collection::add);
+        if (session == null) {
+            return null;
         }
+        session.addSubscriber(subscribe);
         topicSubscribers.addSubscriber(mqttClient, subscribe);
         return subscribe.getQos().getSubscribeAckReasonCode();
     }
@@ -77,24 +76,35 @@ public class SimpleSubscriptionService implements SubscriptionService {
             .collect(ArrayCollectors.toArray(UnsubscribeAckReasonCode.class));
     }
 
-    private @NotNull UnsubscribeAckReasonCode removeSubscription(
+    private @Nullable UnsubscribeAckReasonCode removeSubscription(
         @NotNull TopicFilter topicFilter,
         @NotNull MqttClient mqttClient
     ) {
         var session = mqttClient.getSession();
-        if (session != null) {
-            session.getTopicFilters()
-                .removeIfConvertedInWriteLock(
-                    topicFilter,
-                    SubscribeTopicFilter::getTopicFilter,
-                    Object::equals
-                );
+        if (session == null) {
+            return null;
         }
         if (topicSubscribers.removeSubscriber(mqttClient, topicFilter)) {
+            session.removeSubscriber(topicFilter);
             return UnsubscribeAckReasonCode.SUCCESS;
         } else {
             return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
         }
     }
 
+    public void cleanSubscriptions(@NotNull MqttClient mqttClient, @NotNull MqttSession mqttSession){
+        mqttSession.forEachTopicFilter(
+            topicSubscribers,
+            mqttClient,
+            TopicSubscribers::removeSubscriber
+        );
+    }
+
+    public void restoreSubscriptions(@NotNull MqttClient mqttClient, @NotNull MqttSession mqttSession){
+        mqttSession.forEachTopicFilter(
+            topicSubscribers,
+            mqttClient,
+            TopicSubscribers::addSubscriber
+        );
+    }
 }

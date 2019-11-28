@@ -22,7 +22,7 @@ abstract class AbstractPublishInHandler implements PublishInHandler {
             packet,
             this::publish
         );
-        handleImpl(client, packet, result);
+        handleResult(client, packet, result);
     }
 
     private boolean publish(
@@ -36,7 +36,7 @@ abstract class AbstractPublishInHandler implements PublishInHandler {
         return publishOutHandlers[qos.ordinal()];
     }
 
-    protected void handleImpl(
+    protected void handleResult(
         @NotNull MqttClient client,
         @NotNull PublishInPacket packet,
         @NotNull ActionResult result

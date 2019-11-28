@@ -6,6 +6,7 @@ import com.ss.mqtt.broker.model.topic.TopicName
 import com.ss.mqtt.broker.model.topic.TopicSubscribers
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.service.MqttSessionService
+import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService
 import com.ss.mqtt.broker.test.integration.IntegrationSpecification
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -18,7 +19,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     MqttSessionService mqttSessionService
     
     @Autowired
-    TopicSubscribers topicSubscribers
+    SimpleSubscriptionService subscriptionService
     
     def "should clear/restore topic subscribers after disconnect/reconnect"() {
         given:
@@ -26,7 +27,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             def subscriber = buildClient(clientId)
         when:
             connectAndSubscribe(subscriber, true, topicFilter)
-            def matches = topicSubscribers.matches(TopicName.from(topicFilter))
+            def matches = subscriptionService.topicSubscribers.matches(TopicName.from(topicFilter))
         then:
             matches.size() == 1
             matches.get(0).mqttClient.clientId == clientId
@@ -34,18 +35,24 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             subscriber.disconnect().join()
             Thread.sleep(100)
             def session = mqttSessionService.restore(clientId).block()
-            matches = topicSubscribers.matches(TopicName.from(topicFilter))
+            def topicCount = 0
+            def rawTopic
+            session.forEachTopicFilter(null, null, { f, s, topic ->
+                rawTopic = topic.getTopicFilter().rawTopic
+                topicCount++
+            })
+            matches = subscriptionService.topicSubscribers.matches(TopicName.from(topicFilter))
         then:
-            session.getTopicFilters().size() == 1
-            session.getTopicFilters().get(0).topicFilter.rawTopic == topicFilter
+            topicCount == 1
+            rawTopic == topicFilter
             matches.size() == 0
         when:
             mqttSessionService.store(clientId, session, 5).block()
             connectAndSubscribe(subscriber, false, "topic/#")
             Thread.sleep(100)
-            matches = topicSubscribers.matches(TopicName.from(topicFilter))
+            matches = subscriptionService.topicSubscribers.matches(TopicName.from(topicFilter))
         then:
-            TopicSubscribers firstLevelTs = topicSubscribers.topicSubscribers.get("topic")
+            TopicSubscribers firstLevelTs = subscriptionService.topicSubscribers.topicSubscribers.get("topic")
             firstLevelTs != null
             TopicSubscribers secondLevelTs = firstLevelTs.topicSubscribers.get("Filter")
             secondLevelTs != null

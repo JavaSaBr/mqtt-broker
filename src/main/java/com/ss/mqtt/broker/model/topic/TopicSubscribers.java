@@ -10,6 +10,7 @@ import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
 import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
 import com.ss.rlib.common.util.dictionary.ObjectDictionary;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,19 +61,8 @@ public class TopicSubscribers {
         return topicSubscribers;
     }
 
-    private @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers;
-    private @Nullable ConcurrentArray<Subscriber> subscribers;
-
-    public void restoreSubscribers(
-        @NotNull MqttClient mqttClient,
-        @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters
-    ) {
-        topicFilters.forEachInReadLock(
-            this,
-            mqttClient,
-            TopicSubscribers::addSubscriber
-        );
-    }
+    private volatile @Getter @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers;
+    private volatile @Getter @Nullable ConcurrentArray<Subscriber> subscribers;
 
     public void addSubscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter subscribe) {
         addSubscriber(0, subscribe.getTopicFilter(), new Subscriber(mqttClient, subscribe));
@@ -92,16 +82,8 @@ public class TopicSubscribers {
         }
     }
 
-    public void cleanSubscribers(
-        @NotNull MqttClient mqttClient,
-        @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters
-    ) {
-        topicFilters.forEachConvertedInReadLock(
-            this,
-            mqttClient,
-            SubscribeTopicFilter::getTopicFilter,
-            TopicSubscribers::removeSubscriber
-        );
+    public boolean removeSubscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter subscribe) {
+        return removeSubscriber(mqttClient, subscribe.getTopicFilter());
     }
 
     public boolean removeSubscriber(@NotNull MqttClient mqttClient, @NotNull TopicFilter topicFilter) {
@@ -190,14 +172,6 @@ public class TopicSubscribers {
                 }
             }
         }
-        return subscribers;
-    }
-
-    private synchronized @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> getTopicSubscribers() {
-        return topicSubscribers;
-    }
-
-    private synchronized @Nullable ConcurrentArray<Subscriber> getSubscribers() {
         return subscribers;
     }
 }

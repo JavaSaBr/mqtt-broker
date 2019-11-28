@@ -3,9 +3,11 @@ package com.ss.mqtt.broker.model.impl;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
+import com.ss.rlib.common.function.NotNullTripleConsumer;
 import com.ss.rlib.common.util.ClassUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
@@ -63,7 +65,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     private final @NotNull String clientId;
     private final @NotNull ConcurrentArray<PendingPublish> pendingPublishes;
     private final @NotNull AtomicInteger packetIdGenerator;
-    private final @Getter @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters;
+    private final @NotNull ConcurrentArray<SubscribeTopicFilter> topicFilters;
 
     private volatile @Getter @Setter long expirationTime = -1;
 
@@ -163,6 +165,29 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         if (shouldBeRemoved) {
             pendingPublishes.runInWriteLock(pendingPublish, Array::fastRemove);
         }
+    }
+
+    @Override
+    public <F, S> void forEachTopicFilter(
+        @NotNull F first,
+        @NotNull S second,
+        @NotNull NotNullTripleConsumer<F, S, SubscribeTopicFilter> consumer
+    ) {
+        topicFilters.forEachInReadLock(first, second, consumer);
+    }
+
+    @Override
+    public void addSubscriber(@NotNull SubscribeTopicFilter subscribe) {
+        topicFilters.runInWriteLock(subscribe, Collection::add);
+    }
+
+    @Override
+    public void removeSubscriber(@NotNull TopicFilter topicFilter) {
+        topicFilters.removeIfConvertedInWriteLock(
+            topicFilter,
+            SubscribeTopicFilter::getTopicFilter,
+            Object::equals
+        );
     }
 
     @Override

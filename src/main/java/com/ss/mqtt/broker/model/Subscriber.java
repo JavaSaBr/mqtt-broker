@@ -25,11 +25,11 @@ public class Subscriber {
         this.subscribeTopicFilter = topicFilter;
     }
 
-    public QoS getQos() {
+    public @NotNull QoS getQos() {
         return subscribeTopicFilter.getQos();
     }
 
-    public TopicFilter getTopicFilter() {
+    public @NotNull TopicFilter getTopicFilter() {
         return subscribeTopicFilter.getTopicFilter();
     }
 

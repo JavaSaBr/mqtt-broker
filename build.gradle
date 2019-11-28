@@ -94,11 +94,7 @@ allprojects {
     }
     
     tasks.withType(GroovyCompile) {
-        options.forkOptions.jvmArgs << "--enable-preview"
-    }
-    
-    tasks.withType(JavaCompile) {
-        options.compilerArgs.add("--enable-preview")
+        options.forkOptions.jvmArgs += "--enable-preview"
     }
     
     processResources {

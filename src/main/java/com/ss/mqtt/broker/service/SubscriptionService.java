@@ -52,4 +52,8 @@ public interface SubscriptionService {
         @NotNull MqttClient mqttClient,
         @NotNull Array<TopicFilter> topicFilters
     );
+
+    void cleanSubscriptions(@NotNull MqttClient mqttClient, @NotNull MqttSession mqttSession);
+
+    void restoreSubscriptions(@NotNull MqttClient mqttClient, @NotNull MqttSession mqttSession);
 }
