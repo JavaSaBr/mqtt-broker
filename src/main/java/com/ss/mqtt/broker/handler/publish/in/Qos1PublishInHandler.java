@@ -37,11 +37,19 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
         @NotNull ActionResult result
     ) {
 
-        var reasonCode = switch (result) {
-            case EMPTY -> PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
-            case SUCCESS -> PublishAckReasonCode.SUCCESS;
-            default -> PublishAckReasonCode.UNSPECIFIED_ERROR;
-        };
+        PublishAckReasonCode reasonCode;
+
+        switch (result) {
+            case EMPTY:
+                reasonCode = PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
+                break;
+            case SUCCESS:
+                reasonCode = PublishAckReasonCode.SUCCESS;
+                break;
+            default:
+                reasonCode = PublishAckReasonCode.UNSPECIFIED_ERROR;
+                break;
+        }
 
         client.send(client.getPacketOutFactory().newPublishAck(
             client,

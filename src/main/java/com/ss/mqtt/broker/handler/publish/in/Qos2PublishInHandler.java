@@ -49,11 +49,29 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
         @NotNull ActionResult result
     ) {
 
-        var reasonCode = switch (result) {
-            case EMPTY -> PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
-            case SUCCESS -> PublishReceivedReasonCode.SUCCESS;
-            default -> PublishReceivedReasonCode.UNSPECIFIED_ERROR;
-        };
+        // because it was checked
+        final MqttSession session = client.getSession();
+
+        // it means this client was already closed
+        if (session == null) {
+            return;
+        }
+
+        PublishReceivedReasonCode reasonCode;
+
+        switch (result) {
+            case EMPTY:
+                reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
+                break;
+            case SUCCESS:
+                reasonCode = PublishReceivedReasonCode.SUCCESS;
+                break;
+            default:
+                reasonCode = PublishReceivedReasonCode.UNSPECIFIED_ERROR;
+                break;
+        }
+
+        session.registerInPublish(packet, this, packet.getPacketId());
 
         client.send(client.getPacketOutFactory().newPublishReceived(
             client,

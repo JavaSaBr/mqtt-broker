@@ -8,7 +8,6 @@ import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.rlib.common.function.NotNullTripleConsumer;
-import com.ss.rlib.common.util.ClassUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
@@ -139,9 +138,9 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     }
 
     @Override
-    public void registerOutPublish(@NotNull PublishInPacket publish,
-        @NotNull PendingPacketHandler handler,
-        int packetId
+    public void registerOutPublish(
+        @NotNull PublishInPacket publish,
+        @NotNull PendingPacketHandler handler, int packetId
     ) {
         registerPublish(publish, handler, packetId, pendingOutPublishes);
     }
@@ -149,8 +148,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void registerInPublish(
         @NotNull PublishInPacket publish,
-        @NotNull PendingPacketHandler handler,
-        int packetId
+        @NotNull PendingPacketHandler handler, int packetId
     ) {
         registerPublish(publish, handler, packetId, pendingInPublishes);
     }
