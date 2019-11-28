@@ -134,15 +134,15 @@ public class Publish5OutPacket extends Publish311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-
-    private final int topicAlias;
-    private final boolean stringPayload;
     private final @NotNull String responseTopic;
     private final @NotNull byte[] correlationData;
     private final @NotNull Array<StringPair> userProperties;
 
+    private final int topicAlias;
+
+    private final boolean stringPayload;
+
     public Publish5OutPacket(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
@@ -155,7 +155,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
         @NotNull byte[] correlationData,
         @NotNull Array<StringPair> userProperties
     ) {
-        super(client, packetId, qos, retained, duplicate, topicName, payload);
+        super(packetId, qos, retained, duplicate, topicName, payload);
         this.topicAlias = topicAlias;
         this.stringPayload = stringPayload;
         this.responseTopic = responseTopic;
@@ -183,5 +183,4 @@ public class Publish5OutPacket extends Publish311OutPacket {
         writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
     }
-
 }

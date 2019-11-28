@@ -1,8 +1,6 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * PING response.
@@ -10,10 +8,6 @@ import org.jetbrains.annotations.NotNull;
 public class PingResponse311OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PING_RESPONSE.ordinal();
-
-    public PingResponse311OutPacket(@NotNull MqttClient client) {
-        super(client);
-    }
 
     @Override
     protected byte getPacketType() {

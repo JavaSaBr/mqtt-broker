@@ -3,7 +3,6 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,13 +42,12 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
     private final @NotNull PublishAckReasonCode reasonCode;
 
     public PublishAck5OutPacket(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        super(client, packetId);
+        super(packetId);
         this.reasonCode = reasonCode;
         this.userProperties = userProperties;
         this.reason = reason;

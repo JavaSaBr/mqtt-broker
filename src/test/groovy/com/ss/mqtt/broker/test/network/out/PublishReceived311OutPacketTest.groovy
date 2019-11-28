@@ -11,7 +11,7 @@ class PublishReceived311OutPacketTest extends BaseOutPacketTest {
     def "should write packet correctly"() {
         
         given:
-            def packet = new PublishReceived311OutPacket(mqtt311Client, packetId)
+            def packet = new PublishReceived311OutPacket(packetId)
         when:
             
             def dataBuffer = BufferUtils.prepareBuffer(512) {

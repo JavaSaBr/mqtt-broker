@@ -4,8 +4,8 @@ import com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -15,6 +15,7 @@ import java.util.Set;
 /**
  * Disconnect notification.
  */
+@RequiredArgsConstructor
 public class Disconnect5OutPacket extends Disconnect311OutPacket {
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -56,19 +57,7 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
     private final @NotNull String reason;
     private final @NotNull String serverReference;
 
-    public Disconnect5OutPacket(
-        @NotNull MqttClient client,
-        @NotNull DisconnectReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason,
-        @NotNull String serverReference
-    ) {
-        super(client);
-        this.reasonCode = reasonCode;
-        this.userProperties = userProperties;
-        this.reason = reason;
-        this.serverReference = serverReference;
-    }
+    private final long sessionExpiryInterval;
 
     @Override
     public int getExpectedLength() {
@@ -102,11 +91,11 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
             serverReference
         );
 
-        if (client.getSessionExpiryInterval() != MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+        if (sessionExpiryInterval != MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED) {
             writeProperty(
                 buffer,
                 PacketProperty.SESSION_EXPIRY_INTERVAL,
-                client.getSessionExpiryInterval(),
+                sessionExpiryInterval,
                 MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT
             );
         }

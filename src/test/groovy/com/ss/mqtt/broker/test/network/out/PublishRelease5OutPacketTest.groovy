@@ -12,7 +12,6 @@ class PublishRelease5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new PublishRelease5OutPacket(
-                mqtt5Client,
                 packetId,
                 PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
                 userProperties,

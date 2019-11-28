@@ -13,12 +13,7 @@ public class SubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttCl
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull SubscribeInPacket packet) {
-
         var ackReasonCodes = subscriptionService.subscribe(client, packet.getTopicFilters());
-
-        client.send(client.getPacketOutFactory().newSubscribeAck(client,
-            packet.getPacketId(),
-            ackReasonCodes
-        ));
+        client.send(client.getPacketOutFactory().newSubscribeAck(packet.getPacketId(), ackReasonCodes));
     }
 }

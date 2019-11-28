@@ -2,7 +2,10 @@ package com.ss.mqtt.broker.test.integration
 
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
+import com.ss.mqtt.broker.config.MqttConnectionConfig
+import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.test.integration.config.MqttBrokerTestConfig
+import com.ss.mqtt.broker.test.mock.MqttMockClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
@@ -11,14 +14,24 @@ import java.nio.charset.StandardCharsets
 
 @ContextConfiguration(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {
-
-    @Autowired
-    InetSocketAddress deviceNetworkAddress
-
+    
     public static final encoding = StandardCharsets.UTF_8
     public static final topicFilter = "topic/Filter"
     public static final publishPayload = "publishPayload".getBytes(encoding)
-
+    public static final clientId = "testClientId"
+    
+    @Autowired
+    InetSocketAddress deviceNetworkAddress
+    
+    @Autowired
+    MqttConnectionConfig deviceConnectionConfig
+    
+    @Autowired
+    MqttConnection mqtt5MockedConnection
+    
+    @Autowired
+    MqttConnection mqtt311MockedConnection
+    
     def buildClient() {
         return buildClient(UUID.randomUUID().toString())
     }
@@ -41,5 +54,21 @@ class IntegrationSpecification extends Specification {
             .applySimpleAuth()
             .send()
             .join()
+    }
+    
+    def buildMqtt5MockClient() {
+        return new MqttMockClient(
+            deviceNetworkAddress.getHostName(),
+            deviceNetworkAddress.getPort(),
+            mqtt5MockedConnection
+        )
+    }
+    
+    def buildMqtt311MockClient() {
+        return new MqttMockClient(
+            deviceNetworkAddress.getHostName(),
+            deviceNetworkAddress.getPort(),
+            mqtt311MockedConnection
+        )
     }
 }

@@ -26,8 +26,8 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull byte[] authenticationData,
         @NotNull Array<StringPair> userProperties
     ) {
+        var config = client.getConnectionConfig();
         return new ConnectAck5OutPacket(
-            client,
             reasonCode,
             sessionPresent,
             requestedClientId,
@@ -39,13 +39,23 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
             responseInformation,
             authenticationMethod,
             authenticationData,
-            userProperties
+            userProperties,
+            client.getClientId(),
+            config.getMaxQos(),
+            client.getSessionExpiryInterval(),
+            client.getMaximumPacketSize(),
+            client.getReceiveMax(),
+            client.getTopicAliasMaximum(),
+            client.getKeepAlive(),
+            config.isRetainAvailable(),
+            config.isWildcardSubscriptionAvailable(),
+            config.isSubscriptionIdAvailable(),
+            config.isSharedSubscriptionAvailable()
         );
     }
 
     @Override
     public @NotNull PublishOutPacket newPublish(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
@@ -59,7 +69,6 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull Array<StringPair> userProperties
     ) {
         return new Publish5OutPacket(
-            client,
             packetId,
             qos,
             retained,
@@ -76,35 +85,32 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
 
     @Override
     public @NotNull MqttWritablePacket newPublishAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
         @NotNull String reason,
         @NotNull Array<StringPair> userProperties
     ) {
-        return new PublishAck5OutPacket(client, packetId, reasonCode, userProperties, reason);
+        return new PublishAck5OutPacket(packetId, reasonCode, userProperties, reason);
     }
 
     @Override
     public @NotNull MqttWritablePacket newSubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes,
         @NotNull String reason,
         @NotNull Array<StringPair> userProperties
     ) {
-        return new SubscribeAck5OutPacket(client, packetId, reasonCodes, userProperties, reason);
+        return new SubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
     }
 
     @Override
     public @NotNull MqttWritablePacket newUnsubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new UnsubscribeAck5OutPacket(client, packetId, reasonCodes, userProperties, reason);
+        return new UnsubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
     }
 
     @Override
@@ -115,12 +121,17 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull String reason,
         @NotNull String serverReference
     ) {
-        return new Disconnect5OutPacket(client, reasonCode, userProperties, reason, serverReference);
+        return new Disconnect5OutPacket(
+            reasonCode,
+            userProperties,
+            reason,
+            serverReference,
+            client.getSessionExpiryInterval()
+        );
     }
 
     @Override
     public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull MqttClient client,
         @NotNull AuthenticateReasonCode reasonCode,
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData,
@@ -128,45 +139,41 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         @NotNull String reason
     ) {
         return new Authentication5OutPacket(
-            client,
-            reasonCode,
-            authenticateMethod,
-            authenticateData,
             userProperties,
-            reason
+            reasonCode,
+            reason,
+            authenticateMethod,
+            authenticateData
         );
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishRelease(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReleaseReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new PublishRelease5OutPacket(client, packetId, reasonCode, userProperties, reason);
+        return new PublishRelease5OutPacket(packetId, reasonCode, userProperties, reason);
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishReceived(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReceivedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new PublishReceived5OutPacket(client, packetId, reasonCode, userProperties, reason);
+        return new PublishReceived5OutPacket(packetId, reasonCode, userProperties, reason);
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishCompleted(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishCompletedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new PublishComplete5OutPacket(client, packetId, reasonCode, userProperties, reason);
+        return new PublishComplete5OutPacket(packetId, reasonCode, userProperties, reason);
     }
 }

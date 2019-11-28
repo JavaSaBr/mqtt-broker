@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -9,16 +9,12 @@ import java.nio.ByteBuffer;
 /**
  * Publish release (QoS 2 delivery part 2).
  */
+@RequiredArgsConstructor
 public class PublishRelease311OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RELEASED.ordinal();
 
     private final int packetId;
-
-    public PublishRelease311OutPacket(@NotNull MqttClient client, int packetId) {
-        super(client);
-        this.packetId = packetId;
-    }
 
     @Override
     protected byte getPacketType() {

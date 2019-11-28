@@ -13,12 +13,7 @@ public class UnsubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqtt
 
     @Override
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull UnsubscribeInPacket packet) {
-
         var ackReasonCodes = subscriptionService.unsubscribe(client, packet.getTopicFilters());
-
-        client.send(client.getPacketOutFactory().newUnsubscribeAck(client,
-            packet.getPacketId(),
-            ackReasonCodes
-        ));
+        client.send(client.getPacketOutFactory().newUnsubscribeAck(packet.getPacketId(), ackReasonCodes));
     }
 }

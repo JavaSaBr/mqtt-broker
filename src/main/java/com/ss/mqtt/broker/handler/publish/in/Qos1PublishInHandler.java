@@ -29,7 +29,6 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
             PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS : PublishAckReasonCode.SUCCESS;
 
         var ackPacket = client.getPacketOutFactory().newPublishAck(
-            client,
             packet.getPacketId(),
             reasonCode
         );

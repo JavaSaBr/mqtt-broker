@@ -1,21 +1,20 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
 public class Publish311OutPacket extends PublishOutPacket {
 
-    private final boolean retained;
-    private final boolean duplicate;
     private final @NotNull QoS qos;
     private final @NotNull byte[] payload;
     private final @NotNull String topicName;
 
+    private final boolean retained;
+    private final boolean duplicate;
+
     public Publish311OutPacket(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
@@ -23,7 +22,7 @@ public class Publish311OutPacket extends PublishOutPacket {
         @NotNull String topicName,
         @NotNull byte[] payload
     ) {
-        super(client, packetId);
+        super(packetId);
         this.qos = qos;
         this.retained = retained;
         this.duplicate = duplicate;

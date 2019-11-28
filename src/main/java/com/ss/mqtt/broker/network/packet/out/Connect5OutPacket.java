@@ -1,17 +1,9 @@
-package com.ss.mqtt.broker.network.packet.in;
+package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.exception.ConnectionRejectException;
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.network.MqttConnection;
-import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
-import lombok.Getter;
+import com.ss.mqtt.broker.util.MqttDataUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -19,12 +11,9 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Connection request.
+ * Connect request.
  */
-@Getter
-public class ConnectInPacket extends MqttReadablePacket {
-
-    private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
+public class Connect5OutPacket extends Connect311OutPacket {
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -187,214 +176,112 @@ public class ConnectInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull MqttVersion mqttVersion;
-
-    private @NotNull String clientId;
-    private @NotNull String willTopic;
-    private @NotNull String username;
-    private @NotNull byte[] password;
-
-    private @NotNull byte[] willPayload;
-
-    private int keepAlive;
-    private int willQos;
-    private boolean willRetain;
-    private boolean cleanStart;
-
-    private boolean hasUserName;
-    private boolean hasPassword;
-    private boolean willFlag;
-
     // properties
-    private @NotNull String authenticationMethod;
-    private @NotNull byte[] authenticationData;
+    private final @NotNull String authenticationMethod;
+    private final @NotNull byte[] authenticationData;
 
-    private long sessionExpiryInterval;
-    private int receiveMax;
-    private int maximumPacketSize;
-    private int topicAliasMaximum;
-    private boolean requestResponseInformation;
-    private boolean requestProblemInformation;
+    private final long sessionExpiryInterval;
+    private final int receiveMax;
+    private final int maximumPacketSize;
+    private final int topicAliasMaximum;
+    private final boolean requestResponseInformation;
+    private final boolean requestProblemInformation;
 
-    public ConnectInPacket(byte info) {
-        super(info);
-        this.userProperties = Array.empty();
-        this.mqttVersion = MqttVersion.MQTT_3_1_1;
-        this.clientId = StringUtils.EMPTY;
-        this.willTopic = StringUtils.EMPTY;
-        this.username = StringUtils.EMPTY;
-        this.password = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.authenticationMethod = StringUtils.EMPTY;
-        this.willPayload = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-        this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
-        this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
-        this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
-        this.requestResponseInformation = false;
-        this.requestProblemInformation = false;
+    public Connect5OutPacket(
+        @NotNull String username,
+        @NotNull String willTopic,
+        @NotNull String clientId,
+        @NotNull byte[] password,
+        @NotNull byte[] willPayload,
+        int willQos,
+        int keepAlive,
+        boolean willRetain,
+        boolean cleanStart,
+        @NotNull String authenticationMethod,
+        @NotNull byte[] authenticationData,
+        long sessionExpiryInterval,
+        int receiveMax,
+        int maximumPacketSize,
+        int topicAliasMaximum,
+        boolean requestResponseInformation,
+        boolean requestProblemInformation
+    ) {
+        super(username, willTopic, clientId, password, willPayload, willQos, keepAlive, willRetain, cleanStart);
+        this.authenticationMethod = authenticationMethod;
+        this.authenticationData = authenticationData;
+        this.sessionExpiryInterval = sessionExpiryInterval;
+        this.receiveMax = receiveMax;
+        this.maximumPacketSize = maximumPacketSize;
+        this.topicAliasMaximum = topicAliasMaximum;
+        this.requestResponseInformation = requestResponseInformation;
+        this.requestProblemInformation = requestProblemInformation;
+    }
+
+    protected @NotNull MqttVersion getMqttVersion() {
+        return MqttVersion.MQTT_5;
     }
 
     @Override
-    public byte getPacketType() {
-        return PACKET_TYPE;
+    protected void appendWillProperties(@NotNull ByteBuffer buffer) {
+
+        var propertiesBuffer = getPropertiesBuffer();
+
+        writeWillProperties(propertiesBuffer);
+
+        if (propertiesBuffer.position() < 1) {
+            buffer.put((byte) 0);
+            return;
+        }
+
+        propertiesBuffer.flip();
+
+        MqttDataUtils.writeMbi(propertiesBuffer.limit(), buffer)
+            .put(propertiesBuffer);
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-
-        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718030
-        var protocolName = readString(buffer);
-        var protocolLevel = buffer.get();
-
-        mqttVersion = MqttVersion.of(protocolName, protocolLevel);
-
-        if (mqttVersion == MqttVersion.UNKNOWN) {
-            throw new ConnectionRejectException(ConnectAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION);
-        }
-
-        var flags = readUnsignedByte(buffer);
-
-        willRetain = NumberUtils.isSetBit(flags, 5);
-        willQos = (flags & 0x18) >> 3;
-        cleanStart = NumberUtils.isSetBit(flags, 1);
-
-        // for mqtt 3.1.1+
-        if (mqttVersion.ordinal() >= MqttVersion.MQTT_3_1_1.ordinal()) {
-
-            var zeroReservedFlag = NumberUtils.isNotSetBit(flags, 0);
-
-            if (!zeroReservedFlag) {
-                /*
-                 The Server MUST validate that the reserved flag in the CONNECT packet is set to 0 [MQTT-3.1.2-3]. If
-                 the reserved flag is not 0 it is a Malformed Packet. Refer to section 4.13 for information about handling
-                 errors.
-                */
-                throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
-            }
-        }
-
-        hasUserName = NumberUtils.isSetBit(flags, 7);
-        hasPassword = NumberUtils.isSetBit(flags, 6);
-        willFlag = NumberUtils.isSetBit(flags, 2);
-        keepAlive = readUnsignedShort(buffer);
+    protected void writeProperties(@NotNull ByteBuffer buffer) {
+        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901046
+        writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
+        writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
+        writeProperty(
+            buffer,
+            PacketProperty.REQUEST_RESPONSE_INFORMATION,
+            requestResponseInformation,
+            false
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.REQUEST_PROBLEM_INFORMATION,
+            requestProblemInformation,
+            false
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.RECEIVE_MAXIMUM,
+            receiveMax,
+            MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.TOPIC_ALIAS_MAXIMUM,
+            topicAliasMaximum,
+            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.SESSION_EXPIRY_INTERVAL,
+            sessionExpiryInterval,
+            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED
+        );
+        writeProperty(
+            buffer,
+            PacketProperty.MAXIMUM_PACKET_SIZE,
+            maximumPacketSize,
+            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT
+        );
     }
 
-    @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-
-        /*
-          The ClientID MUST be present and is the first field in the CONNECT packet Payload
-          The ClientID MUST be a UTF-8 Encoded String as defined in
-
-          The Server MUST allow ClientID’s which are between 1 and 23 UTF-8 encoded bytes in length, and that
-          contain only the characters 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-          The Server MAY allow ClientID’s that contain more than 23 encoded bytes. The Server MAY allow
-          ClientID’s that contain characters not included in the list given above.
-
-          A Server MAY allow a Client to supply a ClientID that has a length of zero bytes, however if it does so the
-          Server MUST treat this as a special case and assign a unique ClientID to that Client. It
-          MUST then process the CONNECT packet as if the Client had provided that unique ClientID, and MUST
-          return the Assigned Client Identifier in the CONNACK packet
-
-          If the Server rejects the ClientID it MAY respond to the CONNECT packet with a CONNACK using
-          Reason Code 0x85 (Client Identifier not valid) and then it MUST close the Network Connection
-         */
-        clientId = readString(buffer);
-
-        if (willFlag && mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal()) {
-            readProperties(buffer, WILL_PROPERTIES);
-        }
-
-        if (willFlag) {
-            willTopic = readString(buffer);
-        }
-
-        if (willFlag) {
-            willPayload = readBytes(buffer);
-        }
-
-        if (hasUserName) {
-            username = readString(buffer);
-        }
-
-        if (hasPassword) {
-            password = readBytes(buffer);
-        }
-    }
-
-    @Override
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
-        return mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal();
-    }
-
-    @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
-        return AVAILABLE_PROPERTIES;
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
-        switch (property) {
-            case AUTHENTICATION_DATA:
-                authenticationData = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
-        switch (property) {
-            case AUTHENTICATION_METHOD:
-                authenticationMethod = value;
-                break;
-            default:
-                unexpectedProperty(property);
-        }
-    }
-
-    @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
-        switch (property) {
-            case REQUEST_RESPONSE_INFORMATION:
-                requestResponseInformation = NumberUtils.toBoolean(value);
-                break;
-            case REQUEST_PROBLEM_INFORMATION:
-                requestProblemInformation = NumberUtils.toBoolean(value);
-                break;
-            case RECEIVE_MAXIMUM:
-                receiveMax = NumberUtils.validate(
-                    (int) value,
-                    MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
-                    MqttPropertyConstants.RECEIVE_MAXIMUM_MAX
-                );
-                break;
-            case TOPIC_ALIAS_MAXIMUM:
-                topicAliasMaximum = NumberUtils.validate(
-                    (int) value,
-                    MqttPropertyConstants.TOPIC_ALIAS_MIN,
-                    MqttPropertyConstants.TOPIC_ALIAS_MAX
-                );
-                break;
-            case SESSION_EXPIRY_INTERVAL:
-                sessionExpiryInterval = NumberUtils.validate(
-                    value,
-                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_MIN,
-                    MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY
-                );
-                break;
-            case MAXIMUM_PACKET_SIZE:
-                maximumPacketSize = NumberUtils.validate(
-                    (int) value,
-                    MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MIN,
-                    MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
-                );
-                break;
-            default:
-                unexpectedProperty(property);
-        }
+    protected void writeWillProperties(@NotNull ByteBuffer buffer) {
     }
 }

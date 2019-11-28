@@ -11,7 +11,6 @@ class UnsubscribeAck5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new UnsubscribeAck5OutPacket(
-                mqtt5Client,
                 packetId,
                 unsubscribeAckReasonCodes,
                 userProperties,

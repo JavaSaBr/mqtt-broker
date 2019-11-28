@@ -1,10 +1,10 @@
 package com.ss.mqtt.broker.network.packet.out;
 
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -223,19 +223,31 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
     private final @NotNull Array<StringPair> userProperties;
 
+    private final @NotNull String clientId;
     private final @NotNull String requestedClientId;
     private final @NotNull String reason;
     private final @NotNull String serverReference;
     private final @NotNull String responseInformation;
     private final @NotNull String authenticationMethod;
     private final @NotNull byte[] authenticationData;
+    private final @NotNull QoS maxQos;
 
     private final long requestedSessionExpiryInterval;
+    private final long sessionExpiryInterval;
+
     private final int requestedKeepAlive;
     private final int requestedReceiveMax;
+    private final int maximumPacketSize;
+    private final int receiveMax;
+    private final int topicAliasMaximum;
+    private final int keepAlive;
+
+    private final boolean retainAvailable;
+    private final boolean wildcardSubscriptionAvailable;
+    private final boolean subscriptionIdAvailable;
+    private final boolean sharedSubscriptionAvailable;
 
     public ConnectAck5OutPacket(
-        @NotNull MqttClient client,
         @NotNull ConnectAckReasonCode reasonCode,
         boolean sessionPresent,
         @NotNull String requestedClientId,
@@ -247,9 +259,20 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         @NotNull String responseInformation,
         @NotNull String authenticationMethod,
         @NotNull byte[] authenticationData,
-        @NotNull Array<StringPair> userProperties
+        @NotNull Array<StringPair> userProperties,
+        @NotNull String clientId,
+        @NotNull QoS maxQos,
+        long sessionExpiryInterval,
+        int maximumPacketSize,
+        int receiveMax,
+        int topicAliasMaximum,
+        int keepAlive,
+        boolean retainAvailable,
+        boolean wildcardSubscriptionAvailable,
+        boolean subscriptionIdAvailable,
+        boolean sharedSubscriptionAvailable
     ) {
-        super(client, reasonCode, sessionPresent);
+        super(reasonCode, sessionPresent);
         this.requestedClientId = requestedClientId;
         this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
         this.requestedKeepAlive = requestedKeepAlive;
@@ -260,6 +283,17 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         this.authenticationMethod = authenticationMethod;
         this.authenticationData = authenticationData;
         this.userProperties = userProperties;
+        this.clientId = clientId;
+        this.maxQos = maxQos;
+        this.sessionExpiryInterval = sessionExpiryInterval;
+        this.maximumPacketSize = maximumPacketSize;
+        this.receiveMax = receiveMax;
+        this.topicAliasMaximum = topicAliasMaximum;
+        this.keepAlive = keepAlive;
+        this.retainAvailable = retainAvailable;
+        this.wildcardSubscriptionAvailable = wildcardSubscriptionAvailable;
+        this.subscriptionIdAvailable = subscriptionIdAvailable;
+        this.sharedSubscriptionAvailable = sharedSubscriptionAvailable;
     }
 
     @Override
@@ -280,8 +314,6 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     @Override
     protected void writeProperties(@NotNull ByteBuffer buffer) {
 
-        var config = client.getConnectionConfig();
-
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
         writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
         writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_INFORMATION, responseInformation);
@@ -292,67 +324,67 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         writeProperty(
             buffer,
             PacketProperty.MAXIMUM_QOS,
-            config.getMaxQos().ordinal(),
+            maxQos.ordinal(),
             MqttPropertyConstants.MAXIMUM_QOS_DEFAULT.ordinal()
         );
         writeProperty(
             buffer,
             PacketProperty.RETAIN_AVAILABLE,
-            config.isRetainAvailable(),
+            retainAvailable,
             MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
         );
         writeProperty(
             buffer,
             PacketProperty.SESSION_EXPIRY_INTERVAL,
-            client.getSessionExpiryInterval(),
+            sessionExpiryInterval,
             requestedSessionExpiryInterval
         );
         writeProperty(
             buffer,
             PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
-            client.getClientId(),
+            clientId,
             requestedClientId
         );
         writeProperty(
             buffer,
             PacketProperty.RECEIVE_MAXIMUM,
-            client.getReceiveMax(),
+            receiveMax,
             requestedReceiveMax
         );
         writeProperty(
             buffer,
             PacketProperty.MAXIMUM_PACKET_SIZE,
-            client.getMaximumPacketSize(),
+            maximumPacketSize,
             MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
         );
         writeProperty(
             buffer,
             PacketProperty.TOPIC_ALIAS_MAXIMUM,
-            client.getTopicAliasMaximum(),
+            topicAliasMaximum,
             MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED
         );
         writeProperty(
             buffer,
             PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
-            config.isWildcardSubscriptionAvailable(),
+            wildcardSubscriptionAvailable,
             MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
         );
         writeProperty(
             buffer,
             PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
-            config.isSubscriptionIdAvailable(),
+            subscriptionIdAvailable,
             MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
         );
         writeProperty(
             buffer,
             PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
-            config.isSharedSubscriptionAvailable(),
+            sharedSubscriptionAvailable,
             MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
         );
         writeProperty(
             buffer,
             PacketProperty.SERVER_KEEP_ALIVE,
-            client.getKeepAlive(),
+            keepAlive,
             requestedKeepAlive
         );
     }

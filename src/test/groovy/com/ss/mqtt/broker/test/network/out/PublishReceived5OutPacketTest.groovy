@@ -12,7 +12,6 @@ class PublishReceived5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new PublishReceived5OutPacket(
-                mqtt5Client,
                 packetId,
                 PublishReceivedReasonCode.UNSPECIFIED_ERROR,
                 userProperties,

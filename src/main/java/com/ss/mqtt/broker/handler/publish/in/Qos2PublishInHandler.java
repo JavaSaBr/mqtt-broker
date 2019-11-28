@@ -52,7 +52,6 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
 
         var packetOutFactory = client.getPacketOutFactory();
         client.send(packetOutFactory.newPublishReceived(
-            client,
             packet.getPacketId(),
             reasonCode
         ));
@@ -67,7 +66,6 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
 
         var packetOutFactory = client.getPacketOutFactory();
         client.send(packetOutFactory.newPublishCompleted(
-            client,
             response.getPacketId(),
             PublishCompletedReasonCode.SUCCESS
         ));

@@ -19,8 +19,6 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
     private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER =
         ThreadLocal.withInitial(() -> ByteBuffer.allocate(1024 * 1024));
 
-    protected final MqttClient client;
-
     @Override
     protected void writeImpl(@NotNull ByteBuffer buffer) {
         writeVariableHeader(buffer);

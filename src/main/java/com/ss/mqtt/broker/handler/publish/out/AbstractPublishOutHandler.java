@@ -40,7 +40,6 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
         var packetOutFactory = client.getPacketOutFactory();
         client.send(packetOutFactory.newPublish(
-            client,
             packetId,
             getQoS(),
             packet.isRetained(),

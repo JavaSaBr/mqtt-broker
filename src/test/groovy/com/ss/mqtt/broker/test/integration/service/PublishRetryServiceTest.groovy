@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class PublishRetryServiceTest extends IntegrationSpecification {
     
-    @Autowired
+    /*@Autowired
     PublishRetryService publishRetryService
     
     @Autowired
@@ -101,5 +101,5 @@ class PublishRetryServiceTest extends IntegrationSpecification {
             session.hasOutPending()
         cleanup:
             publishRetryService.unregister(client)
-    }
+    }*/
 }
