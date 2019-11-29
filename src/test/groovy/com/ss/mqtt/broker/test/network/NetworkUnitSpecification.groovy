@@ -8,7 +8,8 @@ import com.ss.mqtt.broker.model.SubscribeTopicFilter
 import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
-
+import com.ss.mqtt.broker.model.topic.TopicFilter
+import com.ss.mqtt.broker.model.topic.TopicName
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.client.MqttClient
 import com.ss.mqtt.broker.test.UnitSpecification
@@ -16,7 +17,6 @@ import com.ss.rlib.common.util.array.Array
 import com.ss.rlib.common.util.array.ArrayFactory
 import com.ss.rlib.common.util.array.IntegerArray
 import spock.lang.Shared
-import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 
@@ -53,21 +53,21 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final authMethod = "testAuthMethod"
     public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
     public static final reasonString = "reasonString"
-    public static final publishTopic = "publish/Topic"
+    public static final publishTopic = TopicName.from("publish/Topic")
     public static final responseTopic = "response/Topic"
     public static final topicFilter = "topic/Filter"
-    public static final topicFilter1Obj311 = new SubscribeTopicFilter(topicFilter, QoS.AT_LEAST_ONCE_DELIVERY)
+    public static final topicFilter1Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter), QoS.AT_LEAST_ONCE_DELIVERY)
     public static final topicFilter1Obj5 = new SubscribeTopicFilter(
-        topicFilter,
+        TopicFilter.from(topicFilter),
         QoS.AT_LEAST_ONCE_DELIVERY,
         SubscribeRetainHandling.DO_NOT_SEND,
         true,
         false,
     )
     public static final topicFilter2 = "topic/Filter2"
-    public static final topicFilter2Obj311 = new SubscribeTopicFilter(topicFilter2, QoS.EXACTLY_ONCE_DELIVERY)
+    public static final topicFilter2Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter2), QoS.EXACTLY_ONCE_DELIVERY)
     public static final topicFilter2Obj5 = new SubscribeTopicFilter(
-        topicFilter2,
+        TopicFilter.from(topicFilter2),
         QoS.EXACTLY_ONCE_DELIVERY,
         SubscribeRetainHandling.DO_NOT_SEND,
         true,
@@ -98,49 +98,134 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
     
     @Shared
-    MqttConnectionConfig mqttConnectionConfig = new MqttConnectionConfig(
-        maxQos,
-        maximumPacketSize,
-        serverKeepAlive,
-        receiveMaximum,
-        topicAliasMaximum,
-        sessionExpiryInterval,
-        keepAliveEnabled,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable
-    )
+    MqttClient defaultMqttClient = defaultMqttClient()
     
     @Shared
-    MqttConnection mqtt5Connection = Stub(MqttConnection) {
-        isSupported(MqttVersion.MQTT_5) >> true
-        getConfig() >> mqttConnectionConfig
-        getClient() >> Stub(MqttClient.UnsafeMqttClient) {
-            getConnectionConfig() >> mqttConnectionConfig
-            getSessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
-            getReceiveMax() >> NetworkUnitSpecification.receiveMaximum
-            getMaximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
-            getClientId() >> clientId
-            getKeepAlive() >> serverKeepAlive
-            getTopicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
+    MqttConnectionConfig mqttConnectionConfig = defaultMqttConnectionConfig()
+    
+    @Shared
+    MqttConnection mqtt5Connection = defaultMqttConnection(MqttVersion.MQTT_5)
+    
+    @Shared
+    MqttConnection mqtt311Connection = defaultMqttConnection(MqttVersion.MQTT_3_1_1)
+    
+    MqttClient defaultMqttClient()  {
+        return mqttClient(
+            mqttConnectionConfig,
+            sessionExpiryInterval,
+            receiveMaximum,
+            maximumPacketSize,
+            clientId,
+            serverKeepAlive,
+            topicAliasMaximum
+        )
+    }
+    
+    MqttConnectionConfig defaultMqttConnectionConfig() {
+        return mqttConnectionConfig(
+            maxQos,
+            maximumPacketSize,
+            serverKeepAlive,
+            receiveMaximum,
+            topicAliasMaximum,
+            sessionExpiryInterval,
+            keepAliveEnabled,
+            sessionsEnabled,
+            retainAvailable,
+            wildcardSubscriptionAvailable,
+            subscriptionIdAvailable,
+            sharedSubscriptionAvailable
+        )
+    }
+    
+    
+    MqttConnection defaultMqttConnection(MqttVersion mqttVersion)  {
+      return mqttConnection(
+          mqttVersion,
+          mqttConnectionConfig,
+          sessionExpiryInterval,
+          receiveMaximum,
+          maximumPacketSize,
+          clientId,
+          serverKeepAlive,
+          topicAliasMaximum
+      )
+    }
+    
+    
+    static MqttConnectionConfig mqttConnectionConfig(
+        QoS maxQos,
+        int maximumPacketSize,
+        int serverKeepAlive,
+        int receiveMaximum,
+        int topicAliasMaximum,
+        long sessionExpiryInterval,
+        boolean keepAliveEnabled,
+        boolean sessionsEnabled,
+        boolean retainAvailable,
+        boolean wildcardSubscriptionAvailable,
+        boolean subscriptionIdAvailable,
+        boolean sharedSubscriptionAvailable
+    
+    ) {
+        return new MqttConnectionConfig(
+            maxQos,
+            maximumPacketSize,
+            serverKeepAlive,
+            receiveMaximum,
+            topicAliasMaximum,
+            sessionExpiryInterval,
+            keepAliveEnabled,
+            sessionsEnabled,
+            retainAvailable,
+            wildcardSubscriptionAvailable,
+            subscriptionIdAvailable,
+            sharedSubscriptionAvailable
+        )
+    }
+    
+    MqttConnection mqttConnection(
+        MqttVersion mqttVersion,
+        MqttConnectionConfig mqttConnectionConfig,
+        long sessionExpiryInterval,
+        int receiveMaximum,
+        int maximumPacketSize,
+        String clientId,
+        int serverKeepAlive,
+        int topicAliasMaximum
+    ) {
+        return Stub(MqttConnection) {
+            isSupported(_ as MqttVersion) >> { MqttVersion version -> mqttVersion >= version }
+            getConfig() >> mqttConnectionConfig
+            getClient() >> mqttClient(
+                mqttConnectionConfig,
+                sessionExpiryInterval,
+                receiveMaximum,
+                maximumPacketSize,
+                clientId,
+                serverKeepAlive,
+                topicAliasMaximum
+            )
         }
     }
     
-    @Shared
-    MqttConnection mqtt311Connection = Stub(MqttConnection) {
-        isSupported(MqttVersion.MQTT_3_1_1) >> true
-        isSupported(MqttVersion.MQTT_5) >> false
-        getConfig() >> mqttConnectionConfig
-        getClient() >> Stub(MqttClient.UnsafeMqttClient) {
+    MqttClient mqttClient(
+        MqttConnectionConfig mqttConnectionConfig,
+        long sessionExpiryInterval,
+        int receiveMaximum,
+        int maximumPacketSize,
+        String clientId,
+        int serverKeepAlive,
+        int topicAliasMaximum
+    ) {
+        return Stub(MqttClient.UnsafeMqttClient) {
             getConnectionConfig() >> mqttConnectionConfig
-            getSessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
-            getReceiveMax() >> NetworkUnitSpecification.receiveMaximum
-            getMaximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
+            getSessionExpiryInterval() >> sessionExpiryInterval
+            getReceiveMax() >> receiveMaximum
+            getMaximumPacketSize() >> maximumPacketSize
             getClientId() >> clientId
             getKeepAlive() >> serverKeepAlive
-            getTopicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
+            getTopicAliasMaximum() >> topicAliasMaximum
         }
     }
 }

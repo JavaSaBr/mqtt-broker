@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.NumberUtils;
@@ -89,7 +90,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
             var noLocal = !isMqtt5 || NumberUtils.isSetBit(options, 2);
             var rap = !isMqtt5 || NumberUtils.isSetBit(options, 3);
 
-            topicFilters.add(new SubscribeTopicFilter(topicFilter, qos, retainHandling, noLocal, rap));
+            topicFilters.add(new SubscribeTopicFilter(TopicFilter.from(topicFilter), qos, retainHandling, noLocal, rap));
         }
     }
 

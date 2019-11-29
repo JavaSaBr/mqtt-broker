@@ -34,7 +34,7 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
     protected void writePayload(@NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
         for (var topicFilter : topicFilters) {
-            writeString(buffer, topicFilter.getTopicName());
+            writeString(buffer, topicFilter.getTopicFilter().toString());
             writeByte(buffer, buildSubscriptionOptions(topicFilter));
         }
     }

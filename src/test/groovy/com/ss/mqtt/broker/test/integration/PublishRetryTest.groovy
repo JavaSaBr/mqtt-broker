@@ -38,7 +38,7 @@ class PublishRetryTest extends IntegrationSpecification {
         when:
            
             subscriber.send(new Subscribe311OutPacket(
-                Array.of(new SubscribeTopicFilter("/test/retry/$subscriberId", QoS.AT_LEAST_ONCE_DELIVERY)),
+                Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.AT_LEAST_ONCE_DELIVERY)),
                 1
             ))
         
@@ -50,7 +50,7 @@ class PublishRetryTest extends IntegrationSpecification {
         when:
            
             publisher.publishWith()
-                .topic("/test/retry/$subscriberId")
+                .topic("test/retry/$subscriberId")
                 .qos(MqttQos.AT_MOST_ONCE)
                 .payload(publishPayload)
                 .send()

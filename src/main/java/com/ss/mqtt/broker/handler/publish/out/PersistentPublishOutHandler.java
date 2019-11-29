@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
+import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.network.client.MqttClient;
@@ -10,7 +11,7 @@ public abstract class PersistentPublishOutHandler extends AbstractPublishOutHand
     MqttSession.PendingPacketHandler {
 
     @Override
-    protected void handleImpl(
+    protected @NotNull ActionResult handleImpl(
         @NotNull PublishInPacket packet,
         @NotNull Subscriber subscriber,
         @NotNull MqttClient client,
@@ -24,6 +25,8 @@ public abstract class PersistentPublishOutHandler extends AbstractPublishOutHand
 
         // send publish
         sendPublish(client, packet, packetId, false);
+
+        return ActionResult.SUCCESS;
     }
 
     @Override

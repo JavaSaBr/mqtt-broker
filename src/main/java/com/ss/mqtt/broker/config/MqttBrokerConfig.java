@@ -101,7 +101,8 @@ public class MqttBrokerConfig {
         handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
             clientIdRegistry,
             authenticationService,
-            mqttSessionService
+            mqttSessionService,
+            subscriptionService
         );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
         handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
@@ -118,9 +119,14 @@ public class MqttBrokerConfig {
     @Bean
     @NotNull MqttClientReleaseHandler defaultMqttClientReleaseHandler(
         @NotNull ClientIdRegistry clientIdRegistry,
-        @NotNull MqttSessionService mqttSessionService
+        @NotNull MqttSessionService mqttSessionService,
+        @NotNull SubscriptionService subscriptionService
     ) {
-        return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService);
+        return new DefaultMqttClientReleaseHandler(
+            clientIdRegistry,
+            mqttSessionService,
+            subscriptionService
+        );
     }
 
     @Bean
@@ -158,7 +164,7 @@ public class MqttBrokerConfig {
 
     @Bean
     @NotNull SubscriptionService subscriptionService() {
-        return new SimpleSubscriptionService(new SimpleSubscriptions());
+        return new SimpleSubscriptionService();
     }
 
     @Bean

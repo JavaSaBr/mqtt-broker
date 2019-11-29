@@ -16,7 +16,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
                 QoS.EXACTLY_ONCE_DELIVERY,
                 true,
                 true,
-                publishTopic,
+                publishTopic.toString(),
                 publishPayload
             )
         when:
@@ -44,7 +44,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
                 QoS.AT_MOST_ONCE_DELIVERY,
                 false,
                 false,
-                publishTopic,
+                publishTopic.toString(),
                 publishPayload
             )
         

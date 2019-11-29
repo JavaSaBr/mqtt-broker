@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.handler.publish.in;
 
 import com.ss.mqtt.broker.handler.publish.out.PublishOutHandler;
+import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode;
@@ -38,20 +39,41 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
             }
         }
 
-        var subscribers = subscriptionService.getSubscribers(packet.getTopicName());
+        super.handle(client, packet);
+    }
 
-        for (var subscriber : subscribers) {
-            publishOutHandler(subscriber.getQos()).handle(packet, subscriber);
+    @Override
+    protected void handleResult(
+        @NotNull MqttClient client,
+        @NotNull PublishInPacket packet,
+        @NotNull ActionResult result
+    ) {
+
+        // because it was checked
+        final MqttSession session = client.getSession();
+
+        // it means this client was already closed
+        if (session == null) {
+            return;
         }
 
-        var reasonCode = subscribers.isEmpty() ?
-            PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS : PublishReceivedReasonCode.SUCCESS;
+        PublishReceivedReasonCode reasonCode;
 
-        var packetId = packet.getPacketId();
-        session.registerInPublish(packet, this, packetId);
+        switch (result) {
+            case EMPTY:
+                reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
+                break;
+            case SUCCESS:
+                reasonCode = PublishReceivedReasonCode.SUCCESS;
+                break;
+            default:
+                reasonCode = PublishReceivedReasonCode.UNSPECIFIED_ERROR;
+                break;
+        }
 
-        var packetOutFactory = client.getPacketOutFactory();
-        client.send(packetOutFactory.newPublishReceived(
+        session.registerInPublish(packet, this, packet.getPacketId());
+
+        client.send(client.getPacketOutFactory().newPublishReceived(
             packet.getPacketId(),
             reasonCode
         ));

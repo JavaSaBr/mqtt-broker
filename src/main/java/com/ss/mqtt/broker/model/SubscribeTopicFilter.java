@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.model;
 
 import lombok.EqualsAndHashCode;
+import com.ss.mqtt.broker.model.topic.TopicFilter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -13,22 +14,22 @@ import org.jetbrains.annotations.NotNull;
 public class SubscribeTopicFilter {
 
     /**
-     * The subscriber's topic name.
+     * The subscriber's topic filter.
      */
-    private final String topicName;
+    private final @NotNull TopicFilter topicFilter;
 
     /**
      * Maximum QoS field. This gives the maximum QoS level at which the Server
      * can send Application Messages to the Client.
      */
-    private final QoS qos;
+    private final @NotNull QoS qos;
 
     /**
      * This option specifies whether retained messages are sent when the subscription is established.
      * This does not affect the sending of retained messages at any point after the subscribe.
      * If there are no retained messages matching the Topic Filter, all of these values act the same.
      */
-    private final SubscribeRetainHandling retainHandling;
+    private final @NotNull SubscribeRetainHandling retainHandling;
 
     /**
      * If the value is true, Application Messages MUST NOT be forwarded to a connection with a ClientID equal
@@ -43,7 +44,11 @@ public class SubscribeTopicFilter {
      */
     private final boolean retainAsPublished;
 
-    public SubscribeTopicFilter(@NotNull String topicName, @NotNull QoS qos) {
-        this(topicName, qos, SubscribeRetainHandling.SEND, true, true);
+    public SubscribeTopicFilter(@NotNull String topicFilter, @NotNull QoS qos) {
+        this(TopicFilter.from(topicFilter), qos, SubscribeRetainHandling.SEND, true, true);
+    }
+
+    public SubscribeTopicFilter(@NotNull TopicFilter topicFilter, @NotNull QoS qos) {
+        this(topicFilter, qos, SubscribeRetainHandling.SEND, true, true);
     }
 }

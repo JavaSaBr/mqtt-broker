@@ -29,7 +29,7 @@ class ConnectionTest extends IntegrationSpecification {
             !result.assignedClientIdentifier.present
             !result.sessionPresent
         cleanup:
-            client.disconnect()
+            client.disconnect().join()
     }
     
     def "subscriber should connect to broker with user and pass"() {
@@ -48,7 +48,7 @@ class ConnectionTest extends IntegrationSpecification {
             !result.assignedClientIdentifier.present
             !result.sessionPresent
         cleanup:
-            client.disconnect()
+            client.disconnect().join()
     }
     
     def "subscriber should connect to broker without providing a client id"() {
@@ -61,7 +61,7 @@ class ConnectionTest extends IntegrationSpecification {
             result.assignedClientIdentifier.present
             result.assignedClientIdentifier.get().toString() != ""
         cleanup:
-            client.disconnect()
+            client.disconnect().join()
     }
     
     def "subscriber should not connect to broker with invalid client id"(String clientId) {
@@ -79,8 +79,6 @@ class ConnectionTest extends IntegrationSpecification {
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException
             cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID
-        cleanup:
-            client.disconnect()
         where:
             clientId << ["!@#!@*()^&"]
     }
@@ -94,7 +92,5 @@ class ConnectionTest extends IntegrationSpecification {
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException
             cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
-        cleanup:
-            client.disconnect()
     }
 }

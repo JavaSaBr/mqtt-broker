@@ -86,6 +86,15 @@ allprojects {
     tasks.withType(Test) {
         maxParallelForks = 2
         forkEvery = 100
+        jvmArgs += "--enable-preview"
+    }
+    
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += "--enable-preview"
+    }
+    
+    tasks.withType(GroovyCompile) {
+        options.forkOptions.jvmArgs += "--enable-preview"
     }
     
     processResources {
