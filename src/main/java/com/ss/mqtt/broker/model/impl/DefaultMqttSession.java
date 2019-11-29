@@ -140,7 +140,8 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void registerOutPublish(
         @NotNull PublishInPacket publish,
-        @NotNull PendingPacketHandler handler, int packetId
+        @NotNull PendingPacketHandler handler,
+        int packetId
     ) {
         registerPublish(publish, handler, packetId, pendingOutPublishes);
     }
@@ -148,7 +149,8 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void registerInPublish(
         @NotNull PublishInPacket publish,
-        @NotNull PendingPacketHandler handler, int packetId
+        @NotNull PendingPacketHandler handler,
+        int packetId
     ) {
         registerPublish(publish, handler, packetId, pendingInPublishes);
     }
