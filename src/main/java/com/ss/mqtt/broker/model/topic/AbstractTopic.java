@@ -41,11 +41,6 @@ public abstract class AbstractTopic {
         rawTopic = topicName;
     }
 
-    @Override
-    public @NotNull String toString() {
-        return rawTopic;
-    }
-
     @NotNull String getSegment(int level) {
         return segments[level];
     }
