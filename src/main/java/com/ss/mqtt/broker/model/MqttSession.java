@@ -23,7 +23,7 @@ public interface MqttSession {
          */
         boolean handleResponse(@NotNull MqttClient client, @NotNull HasPacketId response);
 
-        void retryAsync(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId);
+        default void retryAsync(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId) {}
     }
 
     @NotNull String getClientId();
@@ -38,10 +38,16 @@ public interface MqttSession {
     void removeExpiredPackets();
     void resendPendingPacketsAsync(@NotNull MqttClient client, int retryInterval);
 
-    boolean hasPendingPackets();
+    boolean hasOutPending();
+    boolean hasInPending();
+    boolean hasInPending(int packetId);
+    boolean hasOutPending(int packetId);
 
-    void registerPendingPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
-    void updatePendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
+    void registerOutPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
+    void registerInPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
+
+    void updateOutPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
+    void updateInPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
 
     <F, S> void forEachTopicFilter(
         @NotNull F first,

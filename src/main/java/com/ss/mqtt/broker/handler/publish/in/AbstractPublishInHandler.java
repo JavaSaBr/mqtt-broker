@@ -17,15 +17,14 @@ abstract class AbstractPublishInHandler implements PublishInHandler {
     protected final @NotNull PublishOutHandler[] publishOutHandlers;
 
     public void handle(@NotNull MqttClient client, @NotNull PublishInPacket packet) {
-        var result = subscriptionService.forEachTopicSubscriber(
+        handleResult(client, packet, subscriptionService.forEachTopicSubscriber(
             packet.getTopicName(),
             packet,
-            this::publish
-        );
-        handleResult(client, packet, result);
+            this::sendToSubscriber
+        ));
     }
 
-    private @NotNull ActionResult publish(
+    private @NotNull ActionResult sendToSubscriber(
         @NotNull Subscriber subscriber,
         @NotNull PublishInPacket packet
     ) {

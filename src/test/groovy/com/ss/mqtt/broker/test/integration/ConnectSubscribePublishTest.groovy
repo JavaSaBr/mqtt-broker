@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.test.integration
 
-
 import com.hivemq.client.mqtt.datatypes.MqttQos
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import com.hivemq.client.mqtt.mqtt5.message.Mqtt5MessageType
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PayloadFormatIndicator
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
@@ -15,27 +15,16 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildClient()
+            def subscriberId = subscriber.getConfig().clientIdentifier.toString()
             def publisher = buildClient()
         when:
             subscriber.connect().join()
             publisher.connect().join()
-            
-            def subscribeResult = subscriber.subscribeWith()
-                .topicFilter(topicFilter)
-                .qos(MqttQos.AT_MOST_ONCE)
-                .callback({ publish -> received.set(publish) })
-                .send()
-                .join()
-        
-            def publishResult = publisher.publishWith()
-                .topic(topicFilter)
-                .qos(MqttQos.AT_MOST_ONCE)
-                .payload(publishPayload)
-                .payloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
-                .send()
-                .join()
     
-            Thread.sleep(500)
+            def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_MOST_ONCE, received)
+            def publishResult = publish(publisher, subscriberId, MqttQos.AT_MOST_ONCE)
+
+            Thread.sleep(100)
         then:
             noExceptionThrown()
             
@@ -46,12 +35,10 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             publishResult != null
             publishResult.publish.qos == MqttQos.AT_MOST_ONCE
             publishResult.publish.type == Mqtt5MessageType.PUBLISH
-            publishResult.publish.topic.levels.join("/") == topicFilter
         
             received.get() != null
             received.get().qos == MqttQos.AT_MOST_ONCE
             received.get().type == Mqtt5MessageType.PUBLISH
-            received.get().topic.levels.join("/") == topicFilter
         cleanup:
             subscriber.disconnect()
             publisher.disconnect()
@@ -61,28 +48,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildClient()
+            def subscriberId = subscriber.getConfig().clientIdentifier.toString()
             def publisher = buildClient()
         when:
            
             subscriber.connect().join()
             publisher.connect().join()
-            
-            def subscribeResult = subscriber.subscribeWith()
-                .topicFilter(topicFilter)
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .callback({ publish -> received.set(publish) })
-                .send()
-                .join()
-            
-            def publishResult = publisher.publishWith()
-                .topic(topicFilter)
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(publishPayload)
-                .payloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
-                .send()
-                .join()
-            
-            Thread.sleep(500)
+    
+            def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_LEAST_ONCE, received)
+            def publishResult = publish(publisher, subscriberId, MqttQos.AT_LEAST_ONCE)
+        
+            Thread.sleep(100)
         then:
             noExceptionThrown()
             
@@ -93,14 +69,71 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             publishResult != null
             publishResult.publish.qos == MqttQos.AT_LEAST_ONCE
             publishResult.publish.type == Mqtt5MessageType.PUBLISH
-            publishResult.publish.topic.levels.join("/") == topicFilter
     
             received.get() != null
             received.get().qos == MqttQos.AT_LEAST_ONCE
             received.get().type == Mqtt5MessageType.PUBLISH
-            received.get().topic.levels.join("/") == topicFilter
         cleanup:
             subscriber.disconnect().join()
             publisher.disconnect().join()
     }
+    
+    def "publisher should publish message QoS 2"() {
+        given:
+            def received = new AtomicReference<Mqtt5Publish>()
+            def subscriber = buildClient()
+            def subscriberId = subscriber.getConfig().clientIdentifier.toString()
+            def publisher = buildClient()
+        when:
+            
+            subscriber.connect().join()
+            publisher.connect().join()
+    
+            def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.EXACTLY_ONCE, received)
+            def publishResult = publish(publisher, subscriberId, MqttQos.EXACTLY_ONCE)
+            
+            Thread.sleep(100)
+        then:
+            noExceptionThrown()
+            
+            subscribeResult != null
+            subscribeResult.reasonCodes.contains(Mqtt5SubAckReasonCode.GRANTED_QOS_2)
+            subscribeResult.type == Mqtt5MessageType.SUBACK
+            
+            publishResult != null
+            publishResult.publish.qos == MqttQos.EXACTLY_ONCE
+            publishResult.publish.type == Mqtt5MessageType.PUBLISH
+            
+            received.get() != null
+            received.get().qos == MqttQos.EXACTLY_ONCE
+            received.get().type == Mqtt5MessageType.PUBLISH
+        cleanup:
+            subscriber.disconnect()
+            publisher.disconnect()
+    }
+    
+    def publish(Mqtt5AsyncClient publisher, String subscriberId, MqttQos qos) {
+        return publisher.publishWith()
+            .topic("test/$subscriberId")
+            .qos(qos)
+            .payload(publishPayload)
+            .payloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
+            .send()
+            .join()
+    }
+    
+    def subscribe(
+        Mqtt5AsyncClient subscriber,
+        String subscriberId,
+        MqttQos qos,
+        AtomicReference<Mqtt5Publish> received
+    ) {
+        return subscriber.subscribeWith()
+            .topicFilter("test/$subscriberId")
+            .qos(qos)
+            .callback({ publish -> received.set(publish) })
+            .send()
+            .join()
+    }
+    
 }

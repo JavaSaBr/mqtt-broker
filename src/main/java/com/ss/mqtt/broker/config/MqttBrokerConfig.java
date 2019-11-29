@@ -111,6 +111,9 @@ public class MqttBrokerConfig {
         handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
         handlers[PacketType.DISCONNECT.ordinal()] = new DisconnetInPacketHandler();
         handlers[PacketType.PUBLISH_ACK.ordinal()] = new PublishAckInPacketHandler();
+        handlers[PacketType.PUBLISH_RECEIVED.ordinal()] = new PublishReceiveInPacketHandler();
+        handlers[PacketType.PUBLISH_RELEASED.ordinal()] = new PublishReleaseInPacketHandler();
+        handlers[PacketType.PUBLISH_COMPLETED.ordinal()] = new PublishCompleteInPacketHandler();
 
         return handlers;
     }

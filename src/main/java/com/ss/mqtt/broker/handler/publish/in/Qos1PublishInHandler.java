@@ -18,21 +18,43 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
     }
 
     @Override
+    public void handle(@NotNull MqttClient client, @NotNull PublishInPacket packet) {
+
+        var session = client.getSession();
+
+        // it means this client was already closed
+        if (session == null) {
+            return;
+        }
+
+        super.handle(client, packet);
+    }
+
+    @Override
     protected void handleResult(
         @NotNull MqttClient client,
         @NotNull PublishInPacket packet,
         @NotNull ActionResult result
     ) {
-        var reasonCode = switch (result) {
-            case EMPTY -> PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
-            case SUCCESS -> PublishAckReasonCode.SUCCESS;
-            default -> PublishAckReasonCode.UNSPECIFIED_ERROR;
-        };
-        var ackPacket = client.getPacketOutFactory().newPublishAck(
+
+        PublishAckReasonCode reasonCode;
+
+        switch (result) {
+            case EMPTY:
+                reasonCode = PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
+                break;
+            case SUCCESS:
+                reasonCode = PublishAckReasonCode.SUCCESS;
+                break;
+            default:
+                reasonCode = PublishAckReasonCode.UNSPECIFIED_ERROR;
+                break;
+        }
+
+        client.send(client.getPacketOutFactory().newPublishAck(
             client,
             packet.getPacketId(),
             reasonCode
-        );
-        client.send(ackPacket);
+        ));
     }
 }
