@@ -55,16 +55,16 @@ class TopicSubscriberTest extends NetworkUnitSpecification {
                 "topic/second/in"
             ]
             subscriberQos << [
-                [AT_LEAST_ONCE_DELIVERY, AT_MOST_ONCE_DELIVERY, EXACTLY_ONCE_DELIVERY],
-                [AT_LEAST_ONCE_DELIVERY, AT_MOST_ONCE_DELIVERY, EXACTLY_ONCE_DELIVERY],
-                [AT_LEAST_ONCE_DELIVERY, AT_MOST_ONCE_DELIVERY, EXACTLY_ONCE_DELIVERY],
-                [AT_LEAST_ONCE_DELIVERY, AT_MOST_ONCE_DELIVERY, EXACTLY_ONCE_DELIVERY]
+                [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE],
+                [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE],
+                [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE],
+                [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE]
             ]
             matchedQos << [
-                [EXACTLY_ONCE_DELIVERY],
-                [AT_MOST_ONCE_DELIVERY],
-                [AT_LEAST_ONCE_DELIVERY],
-                [AT_LEAST_ONCE_DELIVERY, AT_MOST_ONCE_DELIVERY, EXACTLY_ONCE_DELIVERY]
+                [EXACTLY_ONCE],
+                [AT_MOST_ONCE],
+                [AT_LEAST_ONCE],
+                [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE]
             ]
             mqttClients << [
                 [defaultMqttClient, defaultMqttClient, defaultMqttClient],

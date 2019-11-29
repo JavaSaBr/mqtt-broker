@@ -29,7 +29,7 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final wildcardSubscriptionAvailable = true
     public static final subscriptionIdAvailable = true
     
-    public static final maxQos = QoS.AT_MOST_ONCE_DELIVERY
+    public static final maxQos = QoS.AT_MOST_ONCE
     public static final sessionPresent = true
     public static final cleanStart = false
     public static final willRetain = false
@@ -56,19 +56,19 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final publishTopic = TopicName.from("publish/Topic")
     public static final responseTopic = "response/Topic"
     public static final topicFilter = "topic/Filter"
-    public static final topicFilter1Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter), QoS.AT_LEAST_ONCE_DELIVERY)
+    public static final topicFilter1Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter), QoS.AT_LEAST_ONCE)
     public static final topicFilter1Obj5 = new SubscribeTopicFilter(
         TopicFilter.from(topicFilter),
-        QoS.AT_LEAST_ONCE_DELIVERY,
+        QoS.AT_LEAST_ONCE,
         SubscribeRetainHandling.DO_NOT_SEND,
         true,
         false,
     )
     public static final topicFilter2 = "topic/Filter2"
-    public static final topicFilter2Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter2), QoS.EXACTLY_ONCE_DELIVERY)
+    public static final topicFilter2Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter2), QoS.EXACTLY_ONCE)
     public static final topicFilter2Obj5 = new SubscribeTopicFilter(
         TopicFilter.from(topicFilter2),
-        QoS.EXACTLY_ONCE_DELIVERY,
+        QoS.EXACTLY_ONCE,
         SubscribeRetainHandling.DO_NOT_SEND,
         true,
         false,

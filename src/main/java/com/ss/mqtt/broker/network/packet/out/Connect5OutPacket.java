@@ -6,6 +6,8 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.util.MqttDataUtils;
+import com.ss.rlib.common.util.ArrayUtils;
+import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -190,6 +192,29 @@ public class Connect5OutPacket extends Connect311OutPacket {
     private final int topicAliasMaximum;
     private final boolean requestResponseInformation;
     private final boolean requestProblemInformation;
+
+    public Connect5OutPacket(@NotNull String clientId, int keepAlive) {
+        this(
+            StringUtils.EMPTY,
+            StringUtils.EMPTY,
+            clientId,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            QoS.AT_MOST_ONCE,
+            keepAlive,
+            false,
+            false,
+            Array.empty(),
+            StringUtils.EMPTY,
+            ArrayUtils.EMPTY_BYTE_ARRAY,
+            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED,
+            MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED,
+            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED,
+            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED,
+            false,
+            false
+        );
+    }
 
     public Connect5OutPacket(
         @NotNull String username,

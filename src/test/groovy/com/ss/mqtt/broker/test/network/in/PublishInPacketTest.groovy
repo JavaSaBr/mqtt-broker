@@ -26,7 +26,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.qos == QoS.AT_LEAST_ONCE
             !packet.duplicate
             packet.retained
             packet.responseTopic == ""
@@ -69,7 +69,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.qos == QoS.AT_LEAST_ONCE
             !packet.duplicate
             packet.retained
             packet.responseTopic == responseTopic
@@ -95,7 +95,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.qos == QoS.AT_LEAST_ONCE
             !packet.duplicate
             packet.retained
             packet.responseTopic == ""

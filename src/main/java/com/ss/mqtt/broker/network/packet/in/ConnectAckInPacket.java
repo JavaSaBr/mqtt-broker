@@ -269,7 +269,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
         super(info);
         this.userProperties = Array.empty();
         this.reasonCode = ConnectAckReasonCode.SUCCESS;
-        this.maximumQos = QoS.EXACTLY_ONCE_DELIVERY;
+        this.maximumQos = QoS.EXACTLY_ONCE;
         this.retainAvailable = MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT;
         this.assignedClientId = StringUtils.EMPTY;
         this.reason = StringUtils.EMPTY;

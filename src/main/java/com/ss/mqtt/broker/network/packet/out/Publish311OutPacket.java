@@ -55,7 +55,7 @@ public class Publish311OutPacket extends PublishOutPacket {
     protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc384800412
         writeString(buffer, topicName);
-        if (qos.ordinal() > QoS.AT_MOST_ONCE_DELIVERY.ordinal()) {
+        if (qos.ordinal() > QoS.AT_MOST_ONCE.ordinal()) {
             writeShort(buffer, packetId);
         }
     }

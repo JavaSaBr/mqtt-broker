@@ -28,12 +28,12 @@ class SubscribeInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.topicFilters.size() == 2
-            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE
             packet.topicFilters.get(0).getTopicFilter().toString() == topicFilter
             packet.topicFilters.get(0).isNoLocal()
             packet.topicFilters.get(0).isRetainAsPublished()
             packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND
-            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
+            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE
             packet.topicFilters.get(1).getTopicFilter().toString() == topicFilter2
             packet.topicFilters.get(1).isNoLocal()
             packet.topicFilters.get(1).isRetainAsPublished()
@@ -68,12 +68,12 @@ class SubscribeInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.topicFilters.size() == 2
-            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE
             packet.topicFilters.get(0).getTopicFilter().toString() == topicFilter
             !packet.topicFilters.get(0).isNoLocal()
             packet.topicFilters.get(0).isRetainAsPublished()
             packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND
-            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
+            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE
             packet.topicFilters.get(1).getTopicFilter().toString() == topicFilter2
             packet.topicFilters.get(1).isNoLocal()
             !packet.topicFilters.get(1).isRetainAsPublished()
@@ -97,12 +97,12 @@ class SubscribeInPacketTest extends BaseInPacketTest {
         then:
             result
             packet.topicFilters.size() == 2
-            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.topicFilters.get(0).getQos() == QoS.AT_LEAST_ONCE
             packet.topicFilters.get(0).getTopicFilter().toString() == topicFilter
             !packet.topicFilters.get(0).isNoLocal()
             !packet.topicFilters.get(0).isRetainAsPublished()
             packet.topicFilters.get(0).getRetainHandling() == SubscribeRetainHandling.SEND
-            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE_DELIVERY
+            packet.topicFilters.get(1).getQos() == QoS.EXACTLY_ONCE
             packet.topicFilters.get(1).getTopicFilter().toString() == topicFilter2
             !packet.topicFilters.get(1).isNoLocal()
             !packet.topicFilters.get(1).isRetainAsPublished()

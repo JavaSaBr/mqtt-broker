@@ -11,7 +11,7 @@ public class Qos0PublishOutHandler extends AbstractPublishOutHandler {
 
     @Override
     protected @NotNull QoS getQoS() {
-        return QoS.AT_MOST_ONCE_DELIVERY;
+        return QoS.AT_MOST_ONCE;
     }
 
     @Override

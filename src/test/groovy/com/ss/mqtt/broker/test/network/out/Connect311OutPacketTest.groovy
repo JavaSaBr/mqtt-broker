@@ -19,7 +19,7 @@ class Connect311OutPacketTest extends BaseOutPacketTest {
                 clientId,
                 userPassword,
                 ArrayUtils.EMPTY_BYTE_ARRAY,
-                QoS.AT_MOST_ONCE_DELIVERY,
+                QoS.AT_MOST_ONCE,
                 keepAlive,
                 willRetain,
                 cleanStart,

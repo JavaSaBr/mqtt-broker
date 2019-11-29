@@ -58,7 +58,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
     @Override
     public void handle(@NotNull MqttReadablePacket packet) {
-        log.info("Handle received packet: {}", packet);
+        log.info("Handle received packet: {} : {}", packet.getName(), packet);
 
         var packetHandler = connection.getPacketHandlers()[packet.getPacketType()];
 

@@ -14,7 +14,7 @@ public final class Qos2PublishOutHandler extends PersistentPublishOutHandler {
 
     @Override
     protected @NotNull QoS getQoS() {
-        return QoS.EXACTLY_ONCE_DELIVERY;
+        return QoS.EXACTLY_ONCE;
     }
 
     @Override

@@ -39,7 +39,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
             clientId,
             ArrayUtils.EMPTY_BYTE_ARRAY,
             ArrayUtils.EMPTY_BYTE_ARRAY,
-            QoS.AT_MOST_ONCE_DELIVERY,
+            QoS.AT_MOST_ONCE,
             keepAlive,
             false,
             false

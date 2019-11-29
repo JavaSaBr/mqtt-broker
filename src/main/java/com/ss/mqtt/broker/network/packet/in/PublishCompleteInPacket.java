@@ -6,6 +6,7 @@ import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -94,5 +95,10 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }

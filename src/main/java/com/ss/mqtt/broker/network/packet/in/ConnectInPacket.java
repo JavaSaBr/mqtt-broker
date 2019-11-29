@@ -7,6 +7,7 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.StringUtils;
@@ -396,5 +397,10 @@ public class ConnectInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }

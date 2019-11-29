@@ -43,6 +43,7 @@ allprojects {
         projectReactorVersion = "3.3.0.RELEASE"
         byteBuddyVersion = "1.10.2"
         objenesisVersion = "3.1"
+        gsonVersion = "2.8.6"
     }
 
     dependencies {
@@ -52,6 +53,7 @@ allprojects {
         implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
         implementation "org.springframework.boot:spring-boot-starter-log4j2:$springbootVersion"
         implementation "io.projectreactor:reactor-core:$projectReactorVersion"
+        implementation "com.google.code.gson:gson:$gsonVersion"
         
         compileOnly "org.jetbrains:annotations:$annotationVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"

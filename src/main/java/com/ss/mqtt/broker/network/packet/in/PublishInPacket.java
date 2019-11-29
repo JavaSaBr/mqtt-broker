@@ -7,6 +7,7 @@ import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.StringUtils;
@@ -293,7 +294,7 @@ public class PublishInPacket extends MqttReadablePacket {
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
         topicName = TopicName.from(readString(buffer));
-        packetId = qos != QoS.AT_MOST_ONCE_DELIVERY ? readUnsignedShort(buffer) : 0;
+        packetId = qos != QoS.AT_MOST_ONCE ? readUnsignedShort(buffer) : 0;
     }
 
     @Override
@@ -360,5 +361,10 @@ public class PublishInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }

@@ -5,7 +5,6 @@ import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
 import com.ss.mqtt.broker.network.packet.out.Connect5OutPacket
 import com.ss.rlib.common.util.ArrayUtils
 import com.ss.rlib.common.util.BufferUtils
-import com.ss.rlib.common.util.array.Array
 
 class Connect5OutPacketTest extends BaseOutPacketTest {
     
@@ -19,7 +18,7 @@ class Connect5OutPacketTest extends BaseOutPacketTest {
                 clientId,
                 userPassword,
                 ArrayUtils.EMPTY_BYTE_ARRAY,
-                QoS.AT_MOST_ONCE_DELIVERY,
+                QoS.AT_MOST_ONCE,
                 keepAlive,
                 willRetain,
                 cleanStart,

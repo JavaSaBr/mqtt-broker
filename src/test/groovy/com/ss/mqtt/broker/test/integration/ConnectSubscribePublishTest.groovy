@@ -135,5 +135,4 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             .send()
             .join()
     }
-    
 }

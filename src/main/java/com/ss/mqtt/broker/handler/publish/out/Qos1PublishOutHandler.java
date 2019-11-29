@@ -12,7 +12,7 @@ public class Qos1PublishOutHandler extends PersistentPublishOutHandler {
 
     @Override
     protected @NotNull QoS getQoS() {
-        return QoS.AT_LEAST_ONCE_DELIVERY;
+        return QoS.AT_LEAST_ONCE;
     }
 
     @Override

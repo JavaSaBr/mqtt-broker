@@ -6,9 +6,9 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -19,7 +19,6 @@ import java.util.Set;
  * Disconnect notification.
  */
 @Getter
-@ToString
 public class DisconnectInPacket extends MqttReadablePacket {
 
     public static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
@@ -126,5 +125,10 @@ public class DisconnectInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }

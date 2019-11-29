@@ -4,11 +4,9 @@ import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-@ToString(of = "rawTopic")
 @EqualsAndHashCode(of = "rawTopic")
 public abstract class AbstractTopic {
 
@@ -47,5 +45,10 @@ public abstract class AbstractTopic {
 
     int levelsCount() {
         return segments.length;
+    }
+
+    @Override
+    public String toString() {
+        return rawTopic;
     }
 }

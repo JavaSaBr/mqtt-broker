@@ -13,7 +13,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
         given:
             def packet = new Publish311OutPacket(
                 packetId,
-                QoS.EXACTLY_ONCE_DELIVERY,
+                QoS.EXACTLY_ONCE,
                 true,
                 true,
                 publishTopic.toString(),
@@ -31,7 +31,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
         then:
             result
             reader.packetId == packetId
-            reader.qos == QoS.EXACTLY_ONCE_DELIVERY
+            reader.qos == QoS.EXACTLY_ONCE
             reader.retained
             reader.duplicate
             reader.payload == publishPayload
@@ -41,7 +41,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
     
             packet = new Publish311OutPacket(
                 packetId,
-                QoS.AT_MOST_ONCE_DELIVERY,
+                QoS.AT_MOST_ONCE,
                 false,
                 false,
                 publishTopic.toString(),
@@ -58,7 +58,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
         then:
             result
             reader.packetId == 0
-            reader.qos == QoS.AT_MOST_ONCE_DELIVERY
+            reader.qos == QoS.AT_MOST_ONCE
             !reader.retained
             !reader.duplicate
             reader.payload == publishPayload
