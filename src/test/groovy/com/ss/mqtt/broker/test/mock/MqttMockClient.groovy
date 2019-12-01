@@ -6,6 +6,7 @@ import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket
+import com.ss.mqtt.broker.network.packet.in.PublishReleaseInPacket
 import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
 import com.ss.mqtt.broker.util.MqttDataUtils
@@ -93,6 +94,9 @@ class MqttMockClient {
                 break
             case PacketType.PUBLISH:
                 packet = new PublishInPacket(info)
+                break
+            case PacketType.PUBLISH_RELEASED:
+                packet = new PublishReleaseInPacket(info)
                 break
             default:
                 throw new IllegalStateException("Unknown packet of type: $type")

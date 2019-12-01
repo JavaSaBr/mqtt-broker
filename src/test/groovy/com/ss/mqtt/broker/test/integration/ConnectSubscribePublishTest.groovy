@@ -15,7 +15,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildClient()
-            def subscriberId = subscriber.getConfig().clientIdentifier.toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
             def publisher = buildClient()
         when:
             subscriber.connect().join()
@@ -48,7 +48,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildClient()
-            def subscriberId = subscriber.getConfig().clientIdentifier.toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
             def publisher = buildClient()
         when:
            
@@ -82,7 +82,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildClient()
-            def subscriberId = subscriber.getConfig().clientIdentifier.toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
             def publisher = buildClient()
         when:
             

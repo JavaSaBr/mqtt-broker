@@ -74,8 +74,7 @@ public class DebugUtils {
             .getInstance(Option.RETAIN_CLASS_REFERENCE)
             .getCallerClass();
 
-        // FIXME use new method from 9.9.0
-        var allFields = ReflectionUtils.getAllFields(callerClass, Object.class, true);
+        var allFields = ReflectionUtils.getAllDeclaredFields(callerClass);
 
         for (var fieldName : fieldNames) {
             if (!allFields.anyMatchConverted(fieldName, Field::getName, String::equals)) {

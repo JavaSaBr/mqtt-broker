@@ -50,8 +50,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         var packetId = response.getPacketId();
         var pendingPublish = pendingPublishes.findAnyConvertedToIntInReadLock(
             packetId,
-            PendingPublish::getPublish,
-            PublishInPacket::getPacketId,
+            PendingPublish::getPacketId,
             NumberUtils::equals
         );
 
