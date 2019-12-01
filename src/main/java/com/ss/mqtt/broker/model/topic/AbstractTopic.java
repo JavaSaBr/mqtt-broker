@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.model.topic;
 
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.EqualsAndHashCode;
@@ -9,6 +10,10 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @EqualsAndHashCode(of = "rawTopic")
 public abstract class AbstractTopic {
+
+    static {
+        DebugUtils.registerIncludedFields("rawTopic");
+    }
 
     static final String DELIMITER = "/";
     static final String MULTI_LEVEL_WILDCARD = "#";

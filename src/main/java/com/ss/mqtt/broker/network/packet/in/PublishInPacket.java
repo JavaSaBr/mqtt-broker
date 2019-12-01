@@ -29,6 +29,10 @@ public class PublishInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("topicName", "qos", "duplicate", "packetId");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the value of the Payload Format Indicator, either of:
@@ -361,10 +365,5 @@ public class PublishInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }

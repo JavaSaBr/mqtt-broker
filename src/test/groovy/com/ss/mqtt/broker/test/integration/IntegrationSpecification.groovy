@@ -3,14 +3,18 @@ package com.ss.mqtt.broker.test.integration
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import com.ss.mqtt.broker.config.MqttConnectionConfig
+import com.ss.mqtt.broker.model.MqttPropertyConstants
+import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.test.integration.config.MqttBrokerTestConfig
 import com.ss.mqtt.broker.test.mock.MqttMockClient
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.atomic.AtomicInteger
 
 @ContextConfiguration(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {
@@ -21,18 +25,14 @@ class IntegrationSpecification extends Specification {
     public static final clientId = "testClientId"
     public static final keepAlive = 120
     
+    private static final idGenerator = new AtomicInteger(1)
+    
     @Autowired
     InetSocketAddress deviceNetworkAddress
     
     @Autowired
     MqttConnectionConfig deviceConnectionConfig
-    
-    @Autowired
-    MqttConnection mqtt5MockedConnection
-    
-    @Autowired
-    MqttConnection mqtt311MockedConnection
-    
+
     def buildClient() {
         return buildClient(generateClientId())
     }
@@ -48,7 +48,11 @@ class IntegrationSpecification extends Specification {
     }
     
     def generateClientId() {
-        UUID.randomUUID().toString()
+        return generateClientId("Default")
+    }
+    
+    def generateClientId(String prefix) {
+        return prefix + "_" + idGenerator.incrementAndGet()
     }
     
     def connectWith(Mqtt5AsyncClient client, String user, String pass) {
@@ -65,7 +69,7 @@ class IntegrationSpecification extends Specification {
         return new MqttMockClient(
             deviceNetworkAddress.getHostName(),
             deviceNetworkAddress.getPort(),
-            mqtt5MockedConnection
+            mqtt5MockedConnection(deviceConnectionConfig)
         )
     }
     
@@ -73,7 +77,42 @@ class IntegrationSpecification extends Specification {
         return new MqttMockClient(
             deviceNetworkAddress.getHostName(),
             deviceNetworkAddress.getPort(),
-            mqtt311MockedConnection
+            mqtt311MockedConnection(deviceConnectionConfig)
         )
+    }
+    
+    def mqtt5MockedConnection(MqttConnectionConfig deviceConnectionConfig) {
+
+        return Stub(MqttConnection) {
+            isSupported(MqttVersion.MQTT_5) >> true
+            isSupported(MqttVersion.MQTT_3_1_1) >> true
+            getConfig() >> deviceConnectionConfig
+            getClient() >> Stub(com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient) {
+                getConnectionConfig() >> deviceConnectionConfig
+                getSessionExpiryInterval() >> MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED
+                getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
+                getMaximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
+                getClientId() >> IntegrationSpecification.clientId
+                getKeepAlive() >> MqttPropertyConstants.SERVER_KEEP_ALIVE_DEFAULT
+                getTopicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+            }
+        }
+    }
+    
+    def mqtt311MockedConnection(MqttConnectionConfig deviceConnectionConfig) {
+        return Stub(MqttConnection) {
+            isSupported(MqttVersion.MQTT_5) >> false
+            isSupported(MqttVersion.MQTT_3_1_1) >> true
+            getConfig() >> deviceConnectionConfig
+            getClient() >> Stub(com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient) {
+                getConnectionConfig() >> deviceConnectionConfig
+                getSessionExpiryInterval() >> MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED
+                getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
+                getMaximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
+                getClientId() >> IntegrationSpecification.clientId
+                getKeepAlive() >> MqttPropertyConstants.SERVER_KEEP_ALIVE_DEFAULT
+                getTopicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+            }
+        }
     }
 }

@@ -23,6 +23,10 @@ public class SubscribeInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("packetId", "topicFilters");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by a Variable Byte Integer representing the identifier of the subscription. The Subscription
@@ -109,10 +113,5 @@ public class SubscribeInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }

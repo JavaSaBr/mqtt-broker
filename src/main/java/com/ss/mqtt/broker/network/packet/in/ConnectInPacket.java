@@ -27,6 +27,10 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           If the Session Expiry Interval is absent the value 0 is used. If it is set to 0,
@@ -397,10 +401,5 @@ public class ConnectInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }

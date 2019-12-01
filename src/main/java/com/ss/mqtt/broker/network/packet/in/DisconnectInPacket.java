@@ -23,6 +23,10 @@ public class DisconnectInPacket extends MqttReadablePacket {
 
     public static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("reasonCode");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           If the Session Expiry Interval is absent, the Session Expiry Interval in the CONNECT packet is used.
@@ -125,10 +129,5 @@ public class DisconnectInPacket extends MqttReadablePacket {
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }

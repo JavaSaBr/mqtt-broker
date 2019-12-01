@@ -23,6 +23,10 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
 
     private static final int PACKET_TYPE = PacketType.PUBLISH_ACK.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
@@ -93,10 +97,5 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }

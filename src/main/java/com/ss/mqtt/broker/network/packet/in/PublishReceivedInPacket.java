@@ -23,6 +23,10 @@ public class PublishReceivedInPacket extends MqttReadablePacket implements HasPa
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RECEIVED.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
@@ -95,10 +99,5 @@ public class PublishReceivedInPacket extends MqttReadablePacket implements HasPa
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }

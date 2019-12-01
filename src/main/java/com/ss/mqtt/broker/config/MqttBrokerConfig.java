@@ -62,7 +62,7 @@ public class MqttBrokerConfig {
         return new InMemoryClientIdRegistry(
             env.getProperty(
                 "client.id.available.chars",
-                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
             ),
             env.getProperty("client.id.max.length", int.class, 36)
         );

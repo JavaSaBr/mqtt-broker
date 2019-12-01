@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,10 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class Publish5OutPacket extends Publish311OutPacket {
+
+    static {
+        DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
+    }
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*

@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.array.Array;
@@ -213,5 +214,10 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
     public void writeBytes(@NotNull ByteBuffer buffer, @NotNull byte[] bytes) {
         buffer.putShort((short) bytes.length);
         buffer.put(bytes);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }

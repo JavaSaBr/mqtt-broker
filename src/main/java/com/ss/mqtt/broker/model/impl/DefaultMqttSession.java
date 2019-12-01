@@ -150,7 +150,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Override
     public void resendPendingPackets(@NotNull MqttClient mqttClient) {
         pendingOutPublishes.forEachInReadLock(mqttClient, (client, pending) -> {
-            log.info("Re-try to send publish {}", pending.publish);
+            log.debug("Re-try to send publish {}", pending.publish);
             pending.handler.resend(client, pending.publish, pending.packetId);
         });
     }

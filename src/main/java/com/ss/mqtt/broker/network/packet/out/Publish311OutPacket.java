@@ -1,11 +1,16 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.QoS;
+import com.ss.mqtt.broker.util.DebugUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
 public class Publish311OutPacket extends PublishOutPacket {
+
+    static {
+        DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
+    }
 
     private final @NotNull QoS qos;
     private final @NotNull byte[] payload;

@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.test.mock
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.packet.PacketType
 import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
+import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket
 import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket

@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,10 @@ import java.util.Set;
  * Connect acknowledgment.
  */
 public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
+
+    static {
+        DebugUtils.registerIncludedFields("reasonCode", "sessionPresent", "clientId");
+    }
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*

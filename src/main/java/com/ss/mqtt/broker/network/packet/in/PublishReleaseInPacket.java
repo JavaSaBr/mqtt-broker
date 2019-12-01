@@ -23,6 +23,10 @@ public class PublishReleaseInPacket extends MqttReadablePacket implements HasPac
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RELEASED.ordinal();
 
+    static {
+        DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    }
+
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
@@ -95,10 +99,5 @@ public class PublishReleaseInPacket extends MqttReadablePacket implements HasPac
             default:
                 unexpectedProperty(property);
         }
-    }
-
-    @Override
-    public @NotNull String toString() {
-        return DebugUtils.toJsonString(this);
     }
 }
