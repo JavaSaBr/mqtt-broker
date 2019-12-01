@@ -25,7 +25,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
         var clientId = client.getClientId();
         //noinspection unchecked
         return releaseImpl((T) client)
-            .doOnNext(aVoid -> log.info("Client {} was released.", clientId));
+            .doOnNext(aVoid -> log.info("Client {} was released", clientId));
     }
 
     protected @NotNull Mono<?> releaseImpl(@NotNull T client) {
@@ -34,7 +34,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
         client.setClientId(StringUtils.EMPTY);
 
         if (StringUtils.isEmpty(clientId)) {
-            log.warn("This client {} is already released.", client);
+            log.warn("This client {} is already released", client);
             return Mono.empty();
         }
 

@@ -53,7 +53,7 @@ public abstract class AbstractTopic {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return rawTopic;
     }
 }
