@@ -126,7 +126,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             packet.isRequestProblemInformation()
         );
 
-        var response = client.getPacketOutFactory().newConnectAck(
+        var connectAck = client.getPacketOutFactory().newConnectAck(
             client,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
@@ -138,17 +138,19 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
         subscriptionService.restoreSubscriptions(client, session);
 
-        return Mono.fromFuture(client.sendWithFeedback(response)
-            .thenApply(result -> {
+        return Mono.fromFuture(client.sendWithFeedback(connectAck)
+            .thenApply(result -> onSentConnAck(client, session, result)));
+    }
 
-                if (!result) {
-                    log.warn("Was issue with sending conn ack packet to client {}", client.getClientId());
-                    return false;
-                }
+    private boolean onSentConnAck(@NotNull UnsafeMqttClient client, @NotNull MqttSession session, boolean result) {
 
-                session.resendPendingPackets(client);
-                return true;
-            }));
+        if (!result) {
+            log.warn("Was issue with sending conn ack packet to client {}", client.getClientId());
+            return false;
+        }
+
+        session.resendPendingPackets(client);
+        return true;
     }
 
     private boolean checkPacketException(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
