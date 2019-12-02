@@ -1,21 +1,36 @@
 package com.ss.mqtt.broker.test.integration
 
-import com.hivemq.client.mqtt.MqttClient
+import com.hivemq.client.mqtt.mqtt3.exceptions.Mqtt3ConnAckException
+import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCode
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5ConnAckException
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import com.ss.mqtt.broker.model.MqttPropertyConstants
-import org.springframework.beans.factory.annotation.Autowired
+import com.ss.mqtt.broker.model.QoS
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode
+import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
+import com.ss.mqtt.broker.network.packet.out.Connect311OutPacket
+import com.ss.rlib.common.util.ArrayUtils
 
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
 
 class ConnectionTest extends IntegrationSpecification {
     
-    @Autowired
-    InetSocketAddress deviceNetworkAddress
-    
-    def "subscriber should connect to broker without user and pass"() {
+    def "client should connect to broker without user and pass using mqtt 3.1.1"() {
         given:
-            def client = buildClient()
+            def client = buildMqtt311Client()
+        when:
+            def result = client.connect().join()
+        then:
+            result.returnCode == Mqtt3ConnAckReturnCode.SUCCESS
+            !result.sessionPresent
+        cleanup:
+            client.disconnect().join()
+    }
+    
+    def "client should connect to broker without user and pass using mqtt 5"() {
+        given:
+            def client = buildMqtt5Client()
         when:
             def result = client.connect().join()
         then:
@@ -32,9 +47,21 @@ class ConnectionTest extends IntegrationSpecification {
             client.disconnect().join()
     }
     
-    def "subscriber should connect to broker with user and pass"() {
+    def "client should connect to broker with user and pass using mqtt 3.1.1"() {
         given:
-            def client = buildClient('1')
+            def client = buildMqtt311Client()
+        when:
+            def result = connectWith(client, 'user1', 'password')
+        then:
+            result.returnCode == Mqtt3ConnAckReturnCode.SUCCESS
+            !result.sessionPresent
+        cleanup:
+            client.disconnect().join()
+    }
+    
+    def "client should connect to broker with user and pass using mqtt 5"() {
+        given:
+            def client = buildMqtt5Client()
         when:
             def result = connectWith(client, 'user1', 'password')
         then:
@@ -51,9 +78,20 @@ class ConnectionTest extends IntegrationSpecification {
             client.disconnect().join()
     }
     
-    def "subscriber should connect to broker without providing a client id"() {
+    def "client should not connect to broker without providing a client id using mqtt 3.1.1"() {
         given:
-            def client = buildClient("")
+            def client = buildMqtt311Client("")
+        when:
+            client.connect().join()
+        then:
+            def ex = thrown CompletionException
+            def cause = ex.cause as Mqtt3ConnAckException
+            cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.IDENTIFIER_REJECTED
+    }
+    
+    def "client should connect to broker without providing a client id using mqtt 5"() {
+        given:
+            def client = buildMqtt5Client("")
         when:
             def result = client.connect().join()
         then:
@@ -64,15 +102,22 @@ class ConnectionTest extends IntegrationSpecification {
             client.disconnect().join()
     }
     
-    def "subscriber should not connect to broker with invalid client id"(String clientId) {
+    def "client should not connect to broker with invalid client id using mqtt 3.1.1"(String clientId) {
         given:
-            def client = MqttClient.builder()
-                .identifier(clientId)
-                .serverHost(deviceNetworkAddress.getHostName())
-                .serverPort(deviceNetworkAddress.getPort())
-                .useMqttVersion5()
-                .build()
-                .toAsync()
+            def client = buildMqtt311Client(clientId)
+        when:
+            client.connect().join()
+        then:
+            def ex = thrown CompletionException
+            def cause = ex.cause as Mqtt3ConnAckException
+            cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.IDENTIFIER_REJECTED
+        where:
+            clientId << ["!@#!@*()^&"]
+    }
+    
+    def "client should not connect to broker with invalid client id using mqtt 5"(String clientId) {
+        given:
+            def client = buildMqtt5Client(clientId)
         when:
             client.connect().join()
         then:
@@ -83,11 +128,47 @@ class ConnectionTest extends IntegrationSpecification {
             clientId << ["!@#!@*()^&"]
     }
     
-    def "subscriber should not connect to broker with wrong pass"() {
+    def "client should not connect to broker with wrong pass using mqtt 3.1.1"() {
         given:
-            def client = buildClient()
+            def client = buildMqtt311Client()
         when:
-            connectWith(client, 'user', 'wrongPassword')
+            connectWith(client, "user", "wrongPassword")
+        then:
+            def ex = thrown CompletionException
+            def cause = ex.cause as Mqtt3ConnAckException
+            cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
+    }
+    
+    def "client should not connect to broker without username and with pass using mqtt 3.1.1"() {
+        given:
+            def client = buildMqtt311MockClient()
+            def clientId = generateClientId()
+        when:
+    
+            client.connect()
+            client.send(new Connect311OutPacket(
+                "",
+                "",
+                clientId,
+                "wrongPassword".getBytes(StandardCharsets.UTF_8),
+                ArrayUtils.EMPTY_BYTE_ARRAY,
+                QoS.AT_MOST_ONCE,
+                keepAlive,
+                false,
+                false
+            ))
+    
+            def connectAck = client.readNext() as ConnectAckInPacket
+        
+        then:
+            connectAck.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+    }
+    
+    def "client should not connect to broker with wrong pass using mqtt 5"() {
+        given:
+            def client = buildMqtt5Client()
+        when:
+            connectWith(client, "user", "wrongPassword")
         then:
             def ex = thrown CompletionException
             def cause = ex.cause as Mqtt5ConnAckException

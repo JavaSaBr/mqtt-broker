@@ -1,10 +1,10 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
@@ -281,6 +281,15 @@ public class ConnectInPacket extends MqttReadablePacket {
 
         hasUserName = NumberUtils.isSetBit(flags, 7);
         hasPassword = NumberUtils.isSetBit(flags, 6);
+
+        if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal()) {
+
+            // for mqtt < 5 we cannot have password without user
+            if (!hasUserName && hasPassword) {
+                throw new ConnectionRejectException(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD);
+            }
+        }
+
         willFlag = NumberUtils.isSetBit(flags, 2);
         keepAlive = readUnsignedShort(buffer);
     }

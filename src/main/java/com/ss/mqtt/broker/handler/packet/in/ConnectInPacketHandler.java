@@ -7,10 +7,14 @@ import static com.ss.mqtt.broker.util.ReactorUtils.ifTrue;
 import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.exception.MalformedPacketMqttException;
 import com.ss.mqtt.broker.model.MqttSession;
+import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
-import com.ss.mqtt.broker.service.*;
+import com.ss.mqtt.broker.service.AuthenticationService;
+import com.ss.mqtt.broker.service.ClientIdRegistry;
+import com.ss.mqtt.broker.service.MqttSessionService;
+import com.ss.mqtt.broker.service.SubscriptionService;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -53,6 +57,16 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             return clientIdRegistry.register(requestedClientId)
                 .map(ifTrue(requestedClientId, client::setClientId));
         } else {
+
+            var mqttVersion = client
+                .getConnection()
+                .getMqttVersion();
+
+            // we can't assign generated client if for mqtt version less than 5
+            if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal()) {
+                return Mono.just(false);
+            }
+
             return clientIdRegistry.generate()
                 .flatMap(newClientId -> clientIdRegistry.register(newClientId)
                     .map(ifTrue(newClientId, client::setClientId)));

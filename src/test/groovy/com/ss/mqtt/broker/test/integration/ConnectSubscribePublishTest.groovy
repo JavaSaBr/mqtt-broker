@@ -14,9 +14,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 0"() {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
-            def subscriber = buildClient()
+            def subscriber = buildMqtt5Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
         when:
             subscriber.connect().join()
             publisher.connect().join()
@@ -47,9 +47,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 1"() {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
-            def subscriber = buildClient()
+            def subscriber = buildMqtt5Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
         when:
            
             subscriber.connect().join()
@@ -81,9 +81,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 2"() {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
-            def subscriber = buildClient()
+            def subscriber = buildMqtt5Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
         when:
             
             subscriber.connect().join()

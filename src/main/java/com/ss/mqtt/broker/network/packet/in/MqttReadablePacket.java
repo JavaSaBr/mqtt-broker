@@ -29,6 +29,10 @@ import java.util.Set;
 
 public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConnection> {
 
+    static {
+        DebugUtils.registerIncludedFields("userProperties");
+    }
+
     @Getter
     @RequiredArgsConstructor
     private static class Utf8Decoder {

@@ -30,7 +30,7 @@ class PublishRetryTest extends IntegrationSpecification {
     
     def "mqtt 3.1.1 client should be generate session with one pending QoS 1 packet"() {
         given:
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
             def subscriber = buildMqtt311MockClient()
             def subscriberId = generateClientId()
         when:
@@ -91,7 +91,7 @@ class PublishRetryTest extends IntegrationSpecification {
     
     def "mqtt 5 client should be generate session with one pending QoS 1 packet"() {
         given:
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
             def subscriber = buildMqtt5MockClient()
             def subscriberId = generateClientId()
         when:
@@ -152,7 +152,7 @@ class PublishRetryTest extends IntegrationSpecification {
     
     def "mqtt 3.1.1 client should be generate session with one pending QoS 2 packet"() {
         given:
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
             def subscriber = buildMqtt311MockClient()
             def subscriberId = generateClientId()
         when:
@@ -234,7 +234,7 @@ class PublishRetryTest extends IntegrationSpecification {
     
     def "mqtt 5 client should be generate session with one pending QoS 2 packet"() {
         given:
-            def publisher = buildClient()
+            def publisher = buildMqtt5Client()
             def subscriber = buildMqtt5MockClient()
             def subscriberId = generateClientId()
         when:
