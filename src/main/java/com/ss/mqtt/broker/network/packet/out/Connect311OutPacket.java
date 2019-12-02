@@ -72,13 +72,9 @@ public class Connect311OutPacket extends MqttWritablePacket {
 
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718031
         writeString(buffer, clientId);
-
-        // for MQTT 5
+       
         if (StringUtils.isNotEmpty(willTopic)) {
             appendWillProperties(buffer);
-        }
-
-        if (StringUtils.isNotEmpty(willTopic)) {
             writeString(buffer, willTopic);
             writeBytes(buffer, willPayload);
         }
