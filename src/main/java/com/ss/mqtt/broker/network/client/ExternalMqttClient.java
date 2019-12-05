@@ -5,13 +5,13 @@ import com.ss.mqtt.broker.handler.client.MqttClientReleaseHandler;
 import com.ss.mqtt.broker.util.DebugUtils;
 import org.jetbrains.annotations.NotNull;
 
-public class DeviceMqttClient extends AbstractMqttClient {
+public class ExternalMqttClient extends AbstractMqttClient {
 
     static {
         DebugUtils.registerIncludedFields("clientId");
     }
 
-    public DeviceMqttClient(@NotNull MqttConnection connection, @NotNull MqttClientReleaseHandler releaseHandler) {
+    public ExternalMqttClient(@NotNull MqttConnection connection, @NotNull MqttClientReleaseHandler releaseHandler) {
         super(connection, releaseHandler);
     }
 }

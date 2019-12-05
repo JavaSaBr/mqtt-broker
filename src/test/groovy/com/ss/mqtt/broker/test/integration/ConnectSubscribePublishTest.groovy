@@ -18,9 +18,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 0 using mqtt 3.1.1"() {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
-            def subscriber = buildMqtt311Client()
+            def subscriber = buildExternalMqtt311Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildMqtt311Client()
+            def publisher = buildExternalMqtt311Client()
         when:
             subscriber.connect().join()
             publisher.connect().join()
@@ -51,9 +51,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 0 using mqtt 5"() {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
-            def subscriber = buildMqtt5Client()
+            def subscriber = buildExternalMqtt5Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildMqtt5Client()
+            def publisher = buildExternalMqtt5Client()
         when:
             subscriber.connect().join()
             publisher.connect().join()
@@ -84,9 +84,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 1 using mqtt 3.1.1"() {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
-            def subscriber = buildMqtt311Client()
+            def subscriber = buildExternalMqtt311Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildMqtt311Client()
+            def publisher = buildExternalMqtt311Client()
         when:
             subscriber.connect().join()
             publisher.connect().join()
@@ -117,9 +117,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 1 using mqtt 5"() {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
-            def subscriber = buildMqtt5Client()
+            def subscriber = buildExternalMqtt5Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildMqtt5Client()
+            def publisher = buildExternalMqtt5Client()
         when:
            
             subscriber.connect().join()
@@ -151,9 +151,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 2 using mqtt 3.1.1"() {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
-            def subscriber = buildMqtt311Client()
+            def subscriber = buildExternalMqtt311Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildMqtt311Client()
+            def publisher = buildExternalMqtt311Client()
         when:
             subscriber.connect().join()
             publisher.connect().join()
@@ -184,9 +184,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
     def "publisher should publish message QoS 2 using mqtt 5"() {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
-            def subscriber = buildMqtt5Client()
+            def subscriber = buildExternalMqtt5Client()
             def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
-            def publisher = buildMqtt5Client()
+            def publisher = buildExternalMqtt5Client()
         when:
             
             subscriber.connect().join()
