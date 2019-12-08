@@ -19,7 +19,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
             def subscriber = buildMqtt311Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildMqtt311Client()
         when:
             subscriber.connect().join()
@@ -52,15 +52,15 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildMqtt5Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildMqtt5Client()
         when:
             subscriber.connect().join()
             publisher.connect().join()
-    
+            
             def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_MOST_ONCE, received)
             def publishResult = publish(publisher, subscriberId, MqttQos.AT_MOST_ONCE)
-
+            
             Thread.sleep(100)
         then:
             noExceptionThrown()
@@ -68,11 +68,11 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             subscribeResult != null
             subscribeResult.reasonCodes.contains(Mqtt5SubAckReasonCode.GRANTED_QOS_0)
             subscribeResult.type == Mqtt5MessageType.SUBACK
-    
+            
             publishResult != null
             publishResult.publish.qos == MqttQos.AT_MOST_ONCE
             publishResult.publish.type == Mqtt5MessageType.PUBLISH
-        
+            
             received.get() != null
             received.get().qos == MqttQos.AT_MOST_ONCE
             received.get().type == Mqtt5MessageType.PUBLISH
@@ -85,7 +85,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
             def subscriber = buildMqtt311Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildMqtt311Client()
         when:
             subscriber.connect().join()
@@ -118,16 +118,16 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildMqtt5Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildMqtt5Client()
         when:
-           
+            
             subscriber.connect().join()
             publisher.connect().join()
-    
+            
             def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_LEAST_ONCE, received)
             def publishResult = publish(publisher, subscriberId, MqttQos.AT_LEAST_ONCE)
-        
+            
             Thread.sleep(100)
         then:
             noExceptionThrown()
@@ -139,7 +139,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             publishResult != null
             publishResult.publish.qos == MqttQos.AT_LEAST_ONCE
             publishResult.publish.type == Mqtt5MessageType.PUBLISH
-    
+            
             received.get() != null
             received.get().qos == MqttQos.AT_LEAST_ONCE
             received.get().type == Mqtt5MessageType.PUBLISH
@@ -152,7 +152,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
             def subscriber = buildMqtt311Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildMqtt311Client()
         when:
             subscriber.connect().join()
@@ -185,13 +185,13 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildMqtt5Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildMqtt5Client()
         when:
             
             subscriber.connect().join()
             publisher.connect().join()
-    
+            
             def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.EXACTLY_ONCE, received)
             def publishResult = publish(publisher, subscriberId, MqttQos.EXACTLY_ONCE)
             
