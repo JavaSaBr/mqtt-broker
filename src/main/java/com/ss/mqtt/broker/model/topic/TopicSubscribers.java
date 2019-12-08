@@ -36,12 +36,12 @@ public class TopicSubscribers {
     }
 
     private static @Nullable TopicSubscribers collectSubscribers(
-        @NotNull ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribersMap,
+        @NotNull ObjectDictionary<String, TopicSubscribers> subscribersMap,
         @NotNull String segment,
-        @NotNull Array<Subscriber> resultSubscribers
+        @NotNull Array<Subscriber> result
     ) {
 
-        var topicSubscribers = topicSubscribersMap.get(segment);
+        var topicSubscribers = subscribersMap.get(segment);
         if (topicSubscribers == null) {
             return null;
         }
@@ -50,7 +50,7 @@ public class TopicSubscribers {
             long stamp = subscribers.readLock();
             try {
                 subscribers.forEachFiltered(
-                    resultSubscribers,
+                    result,
                     TopicSubscribers::removeDuplicateWithLowerQoS,
                     Array::add
                 );
@@ -64,8 +64,8 @@ public class TopicSubscribers {
     private volatile @Getter @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers;
     private volatile @Getter @Nullable ConcurrentArray<Subscriber> subscribers;
 
-    public void addSubscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter subscribe) {
-        addSubscriber(0, subscribe.getTopicFilter(), new Subscriber(mqttClient, subscribe));
+    public void addSubscriber(@NotNull MqttClient client, @NotNull SubscribeTopicFilter subscribe) {
+        addSubscriber(0, subscribe.getTopicFilter(), new Subscriber(client, subscribe));
     }
 
     private void addSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
@@ -82,8 +82,8 @@ public class TopicSubscribers {
         }
     }
 
-    public boolean removeSubscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter subscribe) {
-        return removeSubscriber(mqttClient, subscribe.getTopicFilter());
+    public boolean removeSubscriber(@NotNull MqttClient client, @NotNull SubscribeTopicFilter subscribe) {
+        return removeSubscriber(client, subscribe.getTopicFilter());
     }
 
     public boolean removeSubscriber(@NotNull MqttClient mqttClient, @NotNull TopicFilter topicFilter) {
@@ -136,7 +136,7 @@ public class TopicSubscribers {
         int nextLevel,
         @NotNull String segment,
         @NotNull TopicName topicName,
-        @NotNull Array<Subscriber> resultSubscribers
+        @NotNull Array<Subscriber> result
     ) {
         var topicSubscribers = getTopicSubscribers();
         if (topicSubscribers == null) {
@@ -144,12 +144,12 @@ public class TopicSubscribers {
         }
         var topicSubscriber = topicSubscribers.getInReadLock(
             segment,
-            resultSubscribers,
+            result,
             TopicSubscribers::collectSubscribers
         );
         if (topicSubscriber != null && nextLevel < topicName.levelsCount()) {
             var nextSegment = topicName.getSegment(nextLevel);
-            topicSubscriber.processLevel(nextLevel, nextSegment, topicName, resultSubscribers);
+            topicSubscriber.processLevel(nextLevel, nextSegment, topicName, result);
         }
     }
 
@@ -161,6 +161,7 @@ public class TopicSubscribers {
                 }
             }
         }
+        //noinspection ConstantConditions
         return topicSubscribers;
     }
 
@@ -172,6 +173,7 @@ public class TopicSubscribers {
                 }
             }
         }
+        //noinspection ConstantConditions
         return subscribers;
     }
 }

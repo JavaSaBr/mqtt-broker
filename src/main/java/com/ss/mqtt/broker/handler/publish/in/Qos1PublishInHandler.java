@@ -52,7 +52,6 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
         }
 
         client.send(client.getPacketOutFactory().newPublishAck(
-            client,
             packet.getPacketId(),
             reasonCode
         ));

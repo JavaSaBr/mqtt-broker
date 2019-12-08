@@ -15,7 +15,6 @@ class ConnectAck311OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new ConnectAck311OutPacket(
-                mqtt311Client,
                 ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
                 sessionPresent
             )

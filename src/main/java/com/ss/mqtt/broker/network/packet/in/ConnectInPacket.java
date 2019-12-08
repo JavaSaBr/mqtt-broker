@@ -7,6 +7,7 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.StringUtils;
@@ -25,6 +26,10 @@ import java.util.Set;
 public class ConnectInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
+
+    static {
+        DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart");
+    }
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -196,6 +201,15 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     private @NotNull byte[] willPayload;
 
+    private int keepAlive;
+    private int willQos;
+    private boolean willRetain;
+    private boolean cleanStart;
+
+    private boolean hasUserName;
+    private boolean hasPassword;
+    private boolean willFlag;
+
     // properties
     private @NotNull String authenticationMethod;
     private @NotNull byte[] authenticationData;
@@ -206,15 +220,6 @@ public class ConnectInPacket extends MqttReadablePacket {
     private int topicAliasMaximum;
     private boolean requestResponseInformation;
     private boolean requestProblemInformation;
-
-    private int keepAlive;
-    private int willQos;
-    private boolean willRetain;
-    private boolean cleanStart;
-
-    private boolean hasUserName;
-    private boolean hasPassword;
-    private boolean willFlag;
 
     public ConnectInPacket(byte info) {
         super(info);
@@ -322,7 +327,6 @@ public class ConnectInPacket extends MqttReadablePacket {
         if (hasPassword) {
             password = readBytes(buffer);
         }
-
     }
 
     @Override

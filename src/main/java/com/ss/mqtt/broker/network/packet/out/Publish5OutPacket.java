@@ -5,6 +5,7 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,10 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class Publish5OutPacket extends Publish311OutPacket {
+
+    static {
+        DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
+    }
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -134,28 +139,28 @@ public class Publish5OutPacket extends Publish311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-
-    private final int topicAlias;
-    private final boolean stringPayload;
     private final @NotNull String responseTopic;
     private final @NotNull byte[] correlationData;
     private final @NotNull Array<StringPair> userProperties;
 
+    private final int topicAlias;
+
+    private final boolean stringPayload;
+
     public Publish5OutPacket(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
         boolean duplicate,
         @NotNull String topicName,
-        int topicAlias,
         @NotNull byte[] payload,
+        int topicAlias,
         boolean stringPayload,
         @NotNull String responseTopic,
         @NotNull byte[] correlationData,
         @NotNull Array<StringPair> userProperties
     ) {
-        super(client, packetId, qos, retained, duplicate, topicName, payload);
+        super(packetId, qos, retained, duplicate, topicName, payload);
         this.topicAlias = topicAlias;
         this.stringPayload = stringPayload;
         this.responseTopic = responseTopic;
@@ -183,5 +188,4 @@ public class Publish5OutPacket extends Publish311OutPacket {
         writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
     }
-
 }

@@ -2,7 +2,7 @@ package com.ss.mqtt.broker.model;
 
 public interface MqttPropertyConstants {
 
-    QoS MAXIMUM_QOS_DEFAULT = QoS.EXACTLY_ONCE_DELIVERY;
+    QoS MAXIMUM_QOS_DEFAULT = QoS.EXACTLY_ONCE;
 
     int MAXIMUM_PROTOCOL_PACKET_SIZE = 256 * 1024 * 1024;
     int MAXIMUM_PACKET_ID = 0xFFFF;
@@ -42,7 +42,7 @@ public interface MqttPropertyConstants {
     int TOPIC_ALIAS_MAX = 0xFFFF;
     int TOPIC_ALIAS_NOT_SET = 0;
 
-    int SUBSCRIPTION_ID_NOT_DEFINED = 0;
+    int SUBSCRIPTION_ID_UNDEFINED = 0;
 
     boolean SESSIONS_ENABLED_DEFAULT = true;
     boolean KEEP_ALIVE_ENABLED_DEFAULT = false;

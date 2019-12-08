@@ -12,7 +12,6 @@ class PublishComplete5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new PublishComplete5OutPacket(
-                mqtt5Client,
                 packetId,
                 PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
                 userProperties,

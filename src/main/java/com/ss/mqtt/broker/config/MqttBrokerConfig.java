@@ -62,7 +62,7 @@ public class MqttBrokerConfig {
         return new InMemoryClientIdRegistry(
             env.getProperty(
                 "client.id.available.chars",
-                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
             ),
             env.getProperty("client.id.max.length", int.class, 36)
         );
@@ -94,8 +94,7 @@ public class MqttBrokerConfig {
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull SubscriptionService subscriptionService,
         @NotNull PublishingService publishingService,
-        @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService
+        @NotNull MqttSessionService mqttSessionService
     ) {
 
         var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
@@ -103,7 +102,6 @@ public class MqttBrokerConfig {
             clientIdRegistry,
             authenticationService,
             mqttSessionService,
-            publishRetryService,
             subscriptionService
         );
         handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
@@ -122,13 +120,11 @@ public class MqttBrokerConfig {
     @NotNull MqttClientReleaseHandler defaultMqttClientReleaseHandler(
         @NotNull ClientIdRegistry clientIdRegistry,
         @NotNull MqttSessionService mqttSessionService,
-        @NotNull PublishRetryService publishRetryService,
         @NotNull SubscriptionService subscriptionService
     ) {
         return new DefaultMqttClientReleaseHandler(
             clientIdRegistry,
             mqttSessionService,
-            publishRetryService,
             subscriptionService
         );
     }
@@ -149,14 +145,6 @@ public class MqttBrokerConfig {
                 devicePacketHandlers,
                 deviceMqttClientReleaseHandler
             )
-        );
-    }
-
-    @Bean
-    @NotNull PublishRetryService publishRetryService() {
-        return new DefaultPublishRetryService(
-            env.getProperty("publish.pending.check.interval", int.class, 60 * 1000),
-            env.getProperty("publish.retry.interval", int.class, 60 * 1000)
         );
     }
 

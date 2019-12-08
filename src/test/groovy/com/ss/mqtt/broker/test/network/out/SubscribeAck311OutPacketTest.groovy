@@ -10,13 +10,7 @@ class SubscribeAck311OutPacketTest extends BaseOutPacketTest {
     def "should write packet correctly"() {
         
         given:
-            
-            def packet = new SubscribeAck311OutPacket(
-                mqtt311Client,
-                packetId,
-                subscribeAckReasonCodes
-            )
-        
+            def packet = new SubscribeAck311OutPacket(subscribeAckReasonCodes, packetId)
         when:
             
             def dataBuffer = BufferUtils.prepareBuffer(512) {

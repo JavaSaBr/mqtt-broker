@@ -26,41 +26,9 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     @Getter
     @AllArgsConstructor
     private static class PendingPublish {
-
         private final @NotNull PublishInPacket publish;
         private final @NotNull PendingPacketHandler handler;
-        private final long registeredTime;
         private final int packetId;
-
-        private volatile long lastAttemptTime;
-    }
-
-    private static void removeExpiredPackets(@NotNull Array<PendingPublish> publishes) {
-
-        var currentTime = System.currentTimeMillis();
-        var array = publishes.array();
-
-        for (int i = 0, length = publishes.size(); i < length; i++) {
-
-            var pendingPublish = array[i];
-
-            var publish = pendingPublish.publish;
-            var messageExpiryInterval = publish.getMessageExpiryInterval();
-
-            if (messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED ||
-                messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_INFINITY) {
-                continue;
-            }
-
-            var expiredTime = pendingPublish.registeredTime + (messageExpiryInterval * 1000);
-
-            if (expiredTime < currentTime) {
-                log.debug("Remove pending publish {} by expiration reason", publish);
-                publishes.fastRemove(i);
-                i--;
-                length--;
-            }
-        }
     }
 
     private static void registerPublish(
@@ -69,11 +37,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         int packetId,
         @NotNull ConcurrentArray<PendingPublish> pendingPublishes
     ) {
-
-        var currentTime = System.currentTimeMillis();
-        var pendingPublish = new PendingPublish(publish, handler, currentTime, packetId, currentTime);
-
-        pendingPublishes.runInWriteLock(pendingPublish, Array::add);
+        pendingPublishes.runInWriteLock(new PendingPublish(publish, handler, packetId), Array::add);
     }
 
     private void updatePendingPacket(
@@ -86,8 +50,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
         var packetId = response.getPacketId();
         var pendingPublish = pendingPublishes.findAnyConvertedToIntInReadLock(
             packetId,
-            PendingPublish::getPublish,
-            PublishInPacket::getPacketId,
+            PendingPublish::getPacketId,
             NumberUtils::equals
         );
 
@@ -186,33 +149,11 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     }
 
     @Override
-    public void removeExpiredPackets() {
-        if (!pendingOutPublishes.isEmpty()) {
-            pendingOutPublishes.runInWriteLock(DefaultMqttSession::removeExpiredPackets);
-        }
-    }
-
-    @Override
-    public void resendPendingPacketsAsync(@NotNull MqttClient client, int retryInterval) {
-        var currentTime = System.currentTimeMillis();
-        var stamp = pendingOutPublishes.readLock();
-        try {
-
-            for (var pendingPublish : pendingOutPublishes) {
-
-                if (currentTime - pendingPublish.lastAttemptTime <= retryInterval) {
-                    continue;
-                }
-
-                log.debug("Re-try to send publish {}", pendingPublish.publish);
-
-                pendingPublish.lastAttemptTime = currentTime;
-                pendingPublish.handler.retryAsync(client, pendingPublish.publish, pendingPublish.packetId);
-            }
-
-        } finally {
-            pendingOutPublishes.readUnlock(stamp);
-        }
+    public void resendPendingPackets(@NotNull MqttClient mqttClient) {
+        pendingOutPublishes.forEachInReadLock(mqttClient, (client, pending) -> {
+            log.debug("Re-try to send publish {}", pending.publish);
+            pending.handler.resend(client, pending.publish, pending.packetId);
+        });
     }
 
     @Override
@@ -250,6 +191,15 @@ public class DefaultMqttSession implements UnsafeMqttSession {
 
     @Override
     public void clear() {
+        pendingInPublishes.runInWriteLock(Collection::clear);
         pendingOutPublishes.runInWriteLock(Collection::clear);
     }
+
+    @Override
+    public void onPersisted() {
+        pendingInPublishes.runInWriteLock(Collection::clear);
+    }
+
+    @Override
+    public void onRestored() { }
 }

@@ -32,7 +32,7 @@ allprojects {
 
     ext {
         annotationVersion = "17.0.0"
-        rlibVersion = "9.8.0"
+        rlibVersion = "9.9.0"
         lombokVersion = '1.18.4'
         springbootVersion = '2.2.0.RELEASE'
         springVersion = '5.1.6.RELEASE'
@@ -43,6 +43,7 @@ allprojects {
         projectReactorVersion = "3.3.0.RELEASE"
         byteBuddyVersion = "1.10.2"
         objenesisVersion = "3.1"
+        gsonVersion = "2.8.6"
     }
 
     dependencies {
@@ -50,8 +51,9 @@ allprojects {
         implementation "com.spaceshift:rlib.network:$rlibVersion"
         implementation "com.spaceshift:rlib.logger.slf4j:$rlibVersion"
         implementation "org.springframework.boot:spring-boot-starter:$springbootVersion"
-        implementation "org.springframework.boot:spring-boot-starter-logging:$springbootVersion"
+        implementation "org.springframework.boot:spring-boot-starter-log4j2:$springbootVersion"
         implementation "io.projectreactor:reactor-core:$projectReactorVersion"
+        implementation "com.google.code.gson:gson:$gsonVersion"
         
         compileOnly "org.jetbrains:annotations:$annotationVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
@@ -122,4 +124,5 @@ wrapper {
 
 configurations.each {
     it.exclude group: "org.slf4j", module: "slf4j-log4j12"
+    it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
 }

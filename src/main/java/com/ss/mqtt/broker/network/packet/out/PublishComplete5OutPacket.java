@@ -3,7 +3,7 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.rlib.common.util.StringUtils;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,14 +42,17 @@ public class PublishComplete5OutPacket extends PublishComplete311OutPacket {
     private final @NotNull PublishCompletedReasonCode reasonCode;
     private final @NotNull String reason;
 
+    public PublishComplete5OutPacket(int packetId, @NotNull PublishCompletedReasonCode reasonCode) {
+        this(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+    }
+
     public PublishComplete5OutPacket(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishCompletedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        super(client, packetId);
+        super(packetId);
         this.reasonCode = reasonCode;
         this.userProperties = userProperties;
         this.reason = reason;

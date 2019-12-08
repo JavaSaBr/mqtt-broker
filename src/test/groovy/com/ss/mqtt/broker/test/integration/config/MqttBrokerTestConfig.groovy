@@ -12,7 +12,7 @@ import java.util.function.Consumer
 
 @Configuration
 @Import(MqttBrokerConfig)
-@PropertySource("application-test.properties")
+@PropertySource("classpath:application-test.properties")
 class MqttBrokerTestConfig {
 
     @Bean

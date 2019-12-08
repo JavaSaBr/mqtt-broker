@@ -13,16 +13,17 @@ import com.ss.mqtt.broker.network.packet.in.ConnectInPacket;
 import com.ss.mqtt.broker.service.*;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
+@Log4j2
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
 
     private final @NotNull ClientIdRegistry clientIdRegistry;
     private final @NotNull AuthenticationService authenticationService;
     private final @NotNull MqttSessionService mqttSessionService;
-    private final @NotNull PublishRetryService publishRetryService;
     private final @NotNull SubscriptionService subscriptionService;
 
     @Override
@@ -125,7 +126,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             packet.isRequestProblemInformation()
         );
 
-        client.send(client.getPacketOutFactory().newConnectAck(
+        var connectAck = client.getPacketOutFactory().newConnectAck(
             client,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
@@ -133,13 +134,23 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             packet.getSessionExpiryInterval(),
             packet.getKeepAlive(),
             packet.getReceiveMax()
-        ));
-
-        publishRetryService.register(client);
+        );
 
         subscriptionService.restoreSubscriptions(client, session);
 
-        return Mono.just(Boolean.TRUE);
+        return Mono.fromFuture(client.sendWithFeedback(connectAck)
+            .thenApply(result -> onSentConnAck(client, session, result)));
+    }
+
+    private boolean onSentConnAck(@NotNull UnsafeMqttClient client, @NotNull MqttSession session, boolean result) {
+
+        if (!result) {
+            log.warn("Was issue with sending conn ack packet to client {}", client.getClientId());
+            return false;
+        }
+
+        session.resendPendingPackets(client);
+        return true;
     }
 
     private boolean checkPacketException(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {

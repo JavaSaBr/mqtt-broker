@@ -12,7 +12,6 @@ class PublishAck5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new PublishAck5OutPacket(
-                mqtt5Client,
                 packetId,
                 PublishAckReasonCode.NOT_AUTHORIZED,
                 userProperties,

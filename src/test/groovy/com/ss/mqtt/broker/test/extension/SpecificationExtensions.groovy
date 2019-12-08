@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 
 class SpecificationExtensions extends Specification {
     
-    static final writer = new MqttWritablePacket(null) {
+    static final writer = new MqttWritablePacket() {
     
         @Override
         protected void writeImpl(@NotNull ByteBuffer buffer) {

@@ -14,7 +14,7 @@ public final class Qos2PublishOutHandler extends PersistentPublishOutHandler {
 
     @Override
     protected @NotNull QoS getQoS() {
-        return QoS.EXACTLY_ONCE_DELIVERY;
+        return QoS.EXACTLY_ONCE;
     }
 
     @Override
@@ -23,7 +23,7 @@ public final class Qos2PublishOutHandler extends PersistentPublishOutHandler {
         var packetOutFactory = client.getPacketOutFactory();
 
         if (response instanceof PublishReceivedInPacket) {
-            client.send(packetOutFactory.newPublishRelease(client, response.getPacketId(), SUCCESS));
+            client.send(packetOutFactory.newPublishRelease(response.getPacketId(), SUCCESS));
             return false;
         } else if (response instanceof PublishCompleteInPacket) {
             return true;

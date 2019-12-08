@@ -26,12 +26,11 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull byte[] authenticationData,
         @NotNull Array<StringPair> userProperties
     ) {
-        return new ConnectAck311OutPacket(client, reasonCode, sessionPresent);
+        return new ConnectAck311OutPacket(reasonCode, sessionPresent);
     }
 
     @Override
     public @NotNull PublishOutPacket newPublish(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
@@ -44,40 +43,44 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull byte[] correlationData,
         @NotNull Array<StringPair> userProperties
     ) {
-        return newPublish(client, packetId, qos, retained, duplicate, topicName, payload);
+        return new Publish311OutPacket(
+            packetId,
+            qos,
+            retained,
+            duplicate,
+            topicName,
+            payload
+        );
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
         @NotNull String reason,
         @NotNull Array<StringPair> userProperties
     ) {
-        return new PublishAck311OutPacket(client, packetId);
+        return new PublishAck311OutPacket(packetId);
     }
 
     @Override
     public @NotNull MqttWritablePacket newSubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes,
         @NotNull String reason,
         @NotNull Array<StringPair> userProperties
     ) {
-        return new SubscribeAck311OutPacket(client, packetId, reasonCodes);
+        return new SubscribeAck311OutPacket(reasonCodes, packetId);
     }
 
     @Override
     public @NotNull MqttWritablePacket newUnsubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new UnsubscribeAck311OutPacket(client, packetId);
+        return new UnsubscribeAck311OutPacket(packetId);
     }
 
     @Override
@@ -88,12 +91,11 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
         @NotNull String reason,
         @NotNull String serverReference
     ) {
-        return new Disconnect311OutPacket(client);
+        return new Disconnect311OutPacket();
     }
 
     @Override
     public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull MqttClient client,
         @NotNull AuthenticateReasonCode reasonCode,
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData,
@@ -104,45 +106,42 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPingRequest(@NotNull MqttClient client) {
-        return new PingRequest311OutPacket(client);
+    public @NotNull MqttWritablePacket newPingRequest() {
+        return new PingRequest311OutPacket();
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPingResponse(@NotNull MqttClient client) {
-        return new PingResponse311OutPacket(client);
+    public @NotNull MqttWritablePacket newPingResponse() {
+        return new PingResponse311OutPacket();
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishRelease(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReleaseReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new PublishRelease311OutPacket(client, packetId);
+        return new PublishRelease311OutPacket(packetId);
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishReceived(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReceivedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new PublishReceived311OutPacket(client, packetId);
+        return new PublishReceived311OutPacket(packetId);
     }
 
     @Override
     public @NotNull MqttWritablePacket newPublishCompleted(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishCompletedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        return new PublishComplete311OutPacket(client, packetId);
+        return new PublishComplete311OutPacket(packetId);
     }
 }
