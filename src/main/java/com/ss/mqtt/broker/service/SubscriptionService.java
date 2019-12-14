@@ -7,7 +7,6 @@ import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.function.NotNullBiFunction;
-import com.ss.rlib.common.function.NotNullNullableBiFunction;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 

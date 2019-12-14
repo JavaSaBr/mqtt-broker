@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.model.topic;
 
 import static com.ss.mqtt.broker.model.topic.AbstractTopic.MULTI_LEVEL_WILDCARD;
 import static com.ss.mqtt.broker.model.topic.AbstractTopic.SINGLE_LEVEL_WILDCARD;
+import com.ss.mqtt.broker.model.SharedSubscriber;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.network.client.MqttClient;
@@ -45,7 +46,16 @@ public class TopicSubscribers {
         if (topicSubscribers == null) {
             return null;
         }
-        var subscribers = topicSubscribers.getSubscribers();
+        collectSingleSubscribers(topicSubscribers, resultSubscribers);
+        collectSharedSubscribers(topicSubscribers, resultSubscribers);
+        return topicSubscribers;
+    }
+
+    private static void collectSingleSubscribers(
+        @NotNull TopicSubscribers topicSubscribers,
+        @NotNull Array<Subscriber> resultSubscribers
+    ) {
+        var subscribers = topicSubscribers.getSingleSubscribers();
         if (subscribers != null) {
             long stamp = subscribers.readLock();
             try {
@@ -58,11 +68,29 @@ public class TopicSubscribers {
                 subscribers.readUnlock(stamp);
             }
         }
-        return topicSubscribers;
+    }
+
+    private static void collectSharedSubscribers(
+        @NotNull TopicSubscribers topicSubscribers,
+        @NotNull Array<Subscriber> resultSubscribers
+    ) {
+        var subscribers = topicSubscribers.getSharedSubscribers();
+        if (subscribers != null) {
+            long stamp = subscribers.readLock();
+            try {
+                subscribers.forEach(
+                    resultSubscribers,
+                    (result, group, shared) -> result.add(shared.getSubscriber())
+                );
+            } finally {
+                subscribers.readUnlock(stamp);
+            }
+        }
     }
 
     private volatile @Getter @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers;
-    private volatile @Getter @Nullable ConcurrentArray<Subscriber> subscribers;
+    private volatile @Getter @Nullable ConcurrentObjectDictionary<String, SharedSubscriber> sharedSubscribers;
+    private volatile @Getter @Nullable ConcurrentArray<Subscriber> singleSubscribers;
 
     public void addSubscriber(@NotNull MqttClient mqttClient, @NotNull SubscribeTopicFilter subscribe) {
         addSubscriber(0, subscribe.getTopicFilter(), new Subscriber(mqttClient, subscribe));
@@ -70,7 +98,7 @@ public class TopicSubscribers {
 
     private void addSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
         if (level == topicFilter.levelsCount()) {
-            getOrCreateSubscribers().runInWriteLock(subscriber, Array::add);
+            addSubscriber(subscriber);
         } else {
             var topicSubscriber = getOrCreateTopicSubscribers().getInWriteLock(
                 topicFilter.getSegment(level),
@@ -79,6 +107,23 @@ public class TopicSubscribers {
             );
             //noinspection ConstantConditions
             topicSubscriber.addSubscriber(level + 1, topicFilter, subscriber);
+        }
+    }
+
+    private void addSubscriber(@NotNull Subscriber subscriber) {
+        if (subscriber.isShared()) {
+            getOrCreateSharedSubscribers().runInReadLock(subscriber, (subscribers, singleSubscriber) -> {
+                var group = singleSubscriber.getGroup();
+                var sharedSubscriber = subscribers.get(group);
+                if (sharedSubscriber == null) {
+                    sharedSubscriber = new SharedSubscriber(singleSubscriber);
+                    subscribers.runInWriteLock(group, sharedSubscriber, ObjectDictionary::put);
+                } else {
+                    sharedSubscriber.addSubscriber(singleSubscriber);
+                }
+            });
+        } else {
+            getOrCreateSingleSubscribers().runInWriteLock(subscriber, Array::add);
         }
     }
 
@@ -91,27 +136,44 @@ public class TopicSubscribers {
     }
 
     private boolean removeSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
+        var removed = false;
         var topicSubscribers = getTopicSubscribers();
-        var subscribers = getSubscribers();
-        if (subscribers != null && level == topicFilter.levelsCount()) {
-            return subscribers.removeIfConvertedInWriteLock(
-                mqttClient,
-                Subscriber::getMqttClient,
-                Object::equals
-            );
+        if (level == topicFilter.levelsCount()) {
+            removed = removeSubscriber(topicFilter, mqttClient);
         } else if (topicSubscribers != null) {
             var topicSubscriber = topicSubscribers.getInReadLock(
                 topicFilter.getSegment(level),
                 ObjectDictionary::get
             );
-            if (topicSubscriber == null) {
-                return false;
-            } else {
-                return topicSubscriber.removeSubscriber(level + 1, topicFilter, mqttClient);
+            if (topicSubscriber != null) {
+                removed = topicSubscriber.removeSubscriber(level + 1, topicFilter, mqttClient);
+            }
+        }
+        return removed;
+    }
+
+    private boolean removeSubscriber(@NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
+        var removed = false;
+        if (TopicFilter.isShared(topicFilter)) {
+            var sharedSubscribers = getSharedSubscribers();
+            if (sharedSubscribers != null) {
+                var group = ((SharedTopicFilter) topicFilter).getGroup();
+                var subscribers = sharedSubscribers.getInReadLock(group, ObjectDictionary::get);
+                if (subscribers != null) {
+                    removed = subscribers.removeSubscriber(mqttClient);
+                }
             }
         } else {
-            return false;
+            var subscribers = getSingleSubscribers();
+            if (subscribers != null) {
+                removed = subscribers.removeIfConvertedInWriteLock(
+                    mqttClient,
+                    Subscriber::getMqttClient,
+                    Object::equals
+                );
+            }
         }
+        return removed;
     }
 
     public @NotNull Array<Subscriber> matches(@NotNull TopicName topicName) {
@@ -164,14 +226,25 @@ public class TopicSubscribers {
         return topicSubscribers;
     }
 
-    private @NotNull ConcurrentArray<Subscriber> getOrCreateSubscribers() {
-        if (subscribers == null) {
+    private @NotNull ConcurrentArray<Subscriber> getOrCreateSingleSubscribers() {
+        if (singleSubscribers == null) {
             synchronized (this) {
-                if (subscribers == null) {
-                    subscribers = ConcurrentArray.ofType(Subscriber.class);
+                if (singleSubscribers == null) {
+                    singleSubscribers = ConcurrentArray.ofType(Subscriber.class);
                 }
             }
         }
-        return subscribers;
+        return singleSubscribers;
+    }
+
+    private @NotNull ConcurrentObjectDictionary<String, SharedSubscriber> getOrCreateSharedSubscribers() {
+        if (sharedSubscribers == null) {
+            synchronized (this) {
+                if (sharedSubscribers == null) {
+                    sharedSubscribers = ConcurrentObjectDictionary.ofType(String.class, SharedSubscriber.class);
+                }
+            }
+        }
+        return sharedSubscribers;
     }
 }

@@ -56,12 +56,12 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             firstLevelTs != null
             TopicSubscribers secondLevelTs = firstLevelTs.topicSubscribers.get("Filter")
             secondLevelTs != null
-            secondLevelTs.subscribers != null
-            secondLevelTs.subscribers.size() == 1
+            secondLevelTs.singleSubscribers != null
+            secondLevelTs.singleSubscribers.size() == 1
             TopicSubscribers multiLevelTs = firstLevelTs.topicSubscribers.get("#")
             multiLevelTs != null
-            multiLevelTs.subscribers != null
-            multiLevelTs.subscribers.size() == 1
+            multiLevelTs.singleSubscribers != null
+            multiLevelTs.singleSubscribers.size() == 1
             matches.size() == 1
         cleanup:
             subscriber.disconnect().join()

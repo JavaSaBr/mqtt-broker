@@ -11,11 +11,22 @@ public class TopicFilter extends AbstractTopic {
             throw new IllegalArgumentException("Multi level wildcard is incorrectly used: " + topicFilter);
         } else if (topicFilter.contains("++")) {
             throw new IllegalArgumentException("Single level wildcard is incorrectly used: " + topicFilter);
+        } else if(topicFilter.startsWith("$shared")) {
+            int firstSlash = topicFilter.indexOf(DELIMITER);
+            int secondSlash = topicFilter.indexOf(DELIMITER, firstSlash);
+            var group = topicFilter.substring(firstSlash, secondSlash);
+            var realTopicFilter = topicFilter.substring(secondSlash);
+            return new SharedTopicFilter(realTopicFilter, group);
+        } else {
+            return new TopicFilter(topicFilter);
         }
-        return new TopicFilter(topicFilter);
     }
 
-    private TopicFilter(@NotNull String topicFilter) {
+    public static boolean isShared(@NotNull TopicFilter topicFilter) {
+        return topicFilter instanceof SharedTopicFilter;
+    }
+
+    TopicFilter(@NotNull String topicFilter) {
         super(topicFilter);
     }
 }
