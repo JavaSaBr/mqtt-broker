@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ArrayFactory;
@@ -21,6 +22,10 @@ import java.util.Set;
 public class SubscribeInPacket extends MqttReadablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
+
+    static {
+        DebugUtils.registerIncludedFields("packetId", "topicFilters");
+    }
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -49,7 +54,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
     public SubscribeInPacket(byte info) {
         super(info);
         this.topicFilters = ArrayFactory.newArray(SubscribeTopicFilter.class);
-        this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_NOT_DEFINED;
+        this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED;
     }
 
     @Override
@@ -80,15 +85,15 @@ public class SubscribeInPacket extends MqttReadablePacket {
             var options = readUnsignedByte(buffer);
 
             var qos = QoS.of(options & 0x03);
-            var retainHandling = isMqtt5 ? SubscribeRetainHandling.of((options >> 4) & 0x03) :
-                SubscribeRetainHandling.SEND_AT_THE_TIME_OF_SUBSCRIBE;
+            var retainHandling = isMqtt5 ?
+                SubscribeRetainHandling.of((options >> 4) & 0x03) : SubscribeRetainHandling.SEND;
 
             if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
                 throw new IllegalStateException("Unsupported qos or retain handling");
             }
 
             var noLocal = !isMqtt5 || NumberUtils.isSetBit(options, 2);
-            var rap = isMqtt5 && NumberUtils.isSetBit(options, 3);
+            var rap = !isMqtt5 || NumberUtils.isSetBit(options, 3);
 
             topicFilters.add(new SubscribeTopicFilter(TopicFilter.from(topicFilter), qos, retainHandling, noLocal, rap));
         }
@@ -109,5 +114,4 @@ public class SubscribeInPacket extends MqttReadablePacket {
                 unexpectedProperty(property);
         }
     }
-
 }

@@ -31,7 +31,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
             packet.assignedClientId == ""
             packet.authenticationData == ArrayUtils.EMPTY_BYTE_ARRAY
             packet.authenticationMethod == ""
-            packet.maximumQos == QoS.EXACTLY_ONCE_DELIVERY
+            packet.maximumQos == QoS.EXACTLY_ONCE
             packet.retainAvailable == MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
             packet.sharedSubscriptionAvailable == MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
             packet.wildcardSubscriptionAvailable == MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
@@ -55,7 +55,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
                 it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
                 it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
                 it.putProperty(PacketProperty.MAXIMUM_PACKET_SIZE, maximumPacketSize)
-                it.putProperty(PacketProperty.MAXIMUM_QOS, QoS.AT_LEAST_ONCE_DELIVERY.ordinal())
+                it.putProperty(PacketProperty.MAXIMUM_QOS, QoS.AT_LEAST_ONCE.ordinal())
                 it.putProperty(PacketProperty.RECEIVE_MAXIMUM, receiveMaximum)
                 it.putProperty(PacketProperty.RETAIN_AVAILABLE, retainAvailable)
                 it.putProperty(PacketProperty.RESPONSE_INFORMATION, responseInformation)
@@ -87,7 +87,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
             packet.authenticationData == authData
             packet.authenticationMethod == authMethod
             packet.maximumPacketSize == maximumPacketSize
-            packet.maximumQos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.maximumQos == QoS.AT_LEAST_ONCE
             packet.receiveMax == receiveMaximum
             packet.retainAvailable == retainAvailable
             packet.responseInformation == responseInformation

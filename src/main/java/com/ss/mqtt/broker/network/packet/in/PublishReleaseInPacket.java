@@ -6,6 +6,7 @@ import com.ss.mqtt.broker.model.reason.code.PublishReleaseReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.PacketType;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,10 @@ import java.util.Set;
 public class PublishReleaseInPacket extends MqttReadablePacket implements HasPacketId {
 
     private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RELEASED.ordinal();
+
+    static {
+        DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    }
 
     private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*

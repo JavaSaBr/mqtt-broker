@@ -9,6 +9,7 @@ import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.factory.packet.out.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -19,12 +20,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Log4j2
-@ToString(of = "clientId")
 public abstract class AbstractMqttClient implements UnsafeMqttClient {
+
+    static {
+        DebugUtils.registerIncludedFields("clientId");
+    }
 
     protected final @NotNull MqttConnection connection;
     protected final MqttClientReleaseHandler releaseHandler;
@@ -57,7 +62,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
     @Override
     public void handle(@NotNull MqttReadablePacket packet) {
-        log.info("Handle received packet: {}", packet);
+        log.debug("Client [{}] received packet: {} : {}", clientId, packet.getName(), packet);
 
         var packetHandler = connection.getPacketHandlers()[packet.getPacketType()];
 
@@ -89,7 +94,14 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
     @Override
     public void send(@NotNull MqttWritablePacket packet) {
+        log.debug("Send to client [{}] packet: {} : {}", clientId, packet.getName(), packet);
         connection.send(packet);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Boolean> sendWithFeedback(@NotNull MqttWritablePacket packet) {
+        log.debug("Send to client [{}] packet: {} : {}", clientId, packet.getName(), packet);
+        return connection.sendWithFeedback(packet);
     }
 
     public void reject(@NotNull ConnectAckReasonCode reasonCode) {
@@ -115,5 +127,10 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
         } else {
             return Mono.empty();
         }
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }

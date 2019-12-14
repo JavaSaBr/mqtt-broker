@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface MqttClient {
 
     interface UnsafeMqttClient extends MqttClient {
@@ -52,4 +54,5 @@ public interface MqttClient {
     long getSessionExpiryInterval();
 
     void send(@NotNull MqttWritablePacket packet);
+    @NotNull CompletableFuture<Boolean> sendWithFeedback(@NotNull MqttWritablePacket packet);
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <Console name="BrokerConsoleTest" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-mm-dd HH:mm:ss.SSS} %highlight{%-5level} --- %logger{1} : %msg%n%throwable"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Logger name="com.ss.mqtt.broker.network.client.AbstractMqttClient" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="com.ss.mqtt.broker.model.impl.DefaultMqttSession" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Root level="INFO">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Root>
+  </Loggers>
+</Configuration>

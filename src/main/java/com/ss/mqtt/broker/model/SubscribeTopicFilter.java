@@ -1,13 +1,13 @@
 package com.ss.mqtt.broker.model;
 
+import lombok.EqualsAndHashCode;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class SubscribeTopicFilter {
 
@@ -41,4 +41,18 @@ public class SubscribeTopicFilter {
      * Retained messages sent when the subscription is established have the RETAIN flag set to 1.
      */
     private final boolean retainAsPublished;
+
+    public SubscribeTopicFilter(@NotNull String topicFilter, @NotNull QoS qos) {
+        this(TopicFilter.from(topicFilter), qos, SubscribeRetainHandling.SEND, true, true);
+    }
+
+    public SubscribeTopicFilter(@NotNull TopicFilter topicFilter, @NotNull QoS qos) {
+        this(topicFilter, qos, SubscribeRetainHandling.SEND, true, true);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return "SubscribeTopicFilter(" + "topicFilter=" + topicFilter.getRawTopic() + ", qos=" + qos + ", retainHandling=" +
+            retainHandling + ", noLocal=" + noLocal + ", retainAsPublished=" + retainAsPublished + ')';
+    }
 }

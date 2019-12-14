@@ -3,9 +3,13 @@ package com.ss.mqtt.broker.test.network
 import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.QoS
+import com.ss.mqtt.broker.model.SubscribeRetainHandling
+import com.ss.mqtt.broker.model.SubscribeTopicFilter
 import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
+import com.ss.mqtt.broker.model.topic.TopicFilter
+import com.ss.mqtt.broker.model.topic.TopicName
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.client.MqttClient
 import com.ss.mqtt.broker.test.UnitSpecification
@@ -25,8 +29,10 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final wildcardSubscriptionAvailable = true
     public static final subscriptionIdAvailable = true
     
-    public static final maxQos = QoS.AT_MOST_ONCE_DELIVERY
+    public static final maxQos = QoS.AT_MOST_ONCE
     public static final sessionPresent = true
+    public static final cleanStart = false
+    public static final willRetain = false
     public static final clientId = "testClientId"
     public static final packetId = 1234 as short
     public static final userName = "testUser"
@@ -47,10 +53,26 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final authMethod = "testAuthMethod"
     public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
     public static final reasonString = "reasonString"
-    public static final publishTopic = "publish/Topic"
+    public static final publishTopic = TopicName.from("publish/Topic")
     public static final responseTopic = "response/Topic"
     public static final topicFilter = "topic/Filter"
+    public static final topicFilter1Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter), QoS.AT_LEAST_ONCE)
+    public static final topicFilter1Obj5 = new SubscribeTopicFilter(
+        TopicFilter.from(topicFilter),
+        QoS.AT_LEAST_ONCE,
+        SubscribeRetainHandling.DO_NOT_SEND,
+        true,
+        false,
+    )
     public static final topicFilter2 = "topic/Filter2"
+    public static final topicFilter2Obj311 = new SubscribeTopicFilter(TopicFilter.from(topicFilter2), QoS.EXACTLY_ONCE)
+    public static final topicFilter2Obj5 = new SubscribeTopicFilter(
+        TopicFilter.from(topicFilter2),
+        QoS.EXACTLY_ONCE,
+        SubscribeRetainHandling.DO_NOT_SEND,
+        true,
+        false,
+    )
     public static final serverReference = "serverReference"
     public static final contentType = "application/json"
     public static final subscribeAckReasonCodes = ArrayFactory.asArray(
@@ -70,6 +92,8 @@ class NetworkUnitSpecification extends UnitSpecification {
     )
     public static final subscriptionIds = IntegerArray.of(subscriptionId, subscriptionId2)
     public static final topicFilters = Array.of(topicFilter, topicFilter2)
+    public static final topicFiltersObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
+    public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
     public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
     public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
     

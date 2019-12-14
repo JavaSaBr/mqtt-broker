@@ -12,12 +12,11 @@ class Authentication5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new Authentication5OutPacket(
-                mqtt5Client,
+                userProperties,
                 AuthenticateReasonCode.CONTINUE_AUTHENTICATION,
+                reasonString,
                 authMethod,
                 authData,
-                userProperties,
-                reasonString
             )
         
         when:

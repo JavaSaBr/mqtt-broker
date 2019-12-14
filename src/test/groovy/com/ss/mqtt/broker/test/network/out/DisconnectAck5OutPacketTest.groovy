@@ -12,11 +12,11 @@ class DisconnectAck5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new Disconnect5OutPacket(
-                mqtt5Client,
                 DisconnectReasonCode.PACKET_TOO_LARGE,
                 userProperties,
                 reasonString,
-                serverReference
+                serverReference,
+                sessionExpiryInterval
             )
         
         when:

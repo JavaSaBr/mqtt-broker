@@ -41,6 +41,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
         var session = storedSession.getInWriteLock(clientId, ObjectDictionary::remove);
 
         if (session != null) {
+            session.onRestored();
             log.debug("Restored session for client {}", clientId);
         } else {
             log.debug("No stored session for client {}", clientId);
@@ -72,6 +73,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
         var unsafe = (UnsafeMqttSession) session;
         unsafe.setExpirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
+        unsafe.onPersisted();
 
         storedSession.runInWriteLock(clientId, unsafe, ObjectDictionary::put);
 

@@ -16,7 +16,7 @@ class PublishInPacketTest extends BaseInPacketTest {
         given:
             
             def dataBuffer = BufferUtils.prepareBuffer(512) {
-                it.putString(publishTopic)
+                it.putString(publishTopic.toString())
                 it.putShort(packetId)
                 it.put(publishPayload)
             }
@@ -26,7 +26,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.qos == QoS.AT_LEAST_ONCE
             !packet.duplicate
             packet.retained
             packet.responseTopic == ""
@@ -57,7 +57,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             }
     
             def dataBuffer = BufferUtils.prepareBuffer(512) {
-                it.putString(publishTopic)
+                it.putString(publishTopic.toString())
                 it.putShort(packetId)
                 it.putMbi(propertiesBuffer.limit())
                 it.put(propertiesBuffer)
@@ -69,7 +69,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.qos == QoS.AT_LEAST_ONCE
             !packet.duplicate
             packet.retained
             packet.responseTopic == responseTopic
@@ -85,7 +85,7 @@ class PublishInPacketTest extends BaseInPacketTest {
         when:
     
             dataBuffer = BufferUtils.prepareBuffer(512) {
-                it.putString(publishTopic)
+                it.putString(publishTopic.toString())
                 it.putShort(packetId)
                 it.putMbi(0)
                 it.put(publishPayload)
@@ -95,7 +95,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
         then:
             result
-            packet.qos == QoS.AT_LEAST_ONCE_DELIVERY
+            packet.qos == QoS.AT_LEAST_ONCE
             !packet.duplicate
             packet.retained
             packet.responseTopic == ""

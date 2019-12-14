@@ -1,13 +1,19 @@
 package com.ss.mqtt.broker.model.topic;
 
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
+@EqualsAndHashCode(of = "rawTopic")
 public abstract class AbstractTopic {
+
+    static {
+        DebugUtils.registerIncludedFields("rawTopic");
+    }
 
     static final String DELIMITER = "/";
     static final String MULTI_LEVEL_WILDCARD = "#";
@@ -21,9 +27,10 @@ public abstract class AbstractTopic {
         }
     }
 
+    private final @NotNull String[] segments;
+    private final @NotNull String rawTopic;
+
     private final int length;
-    private final String[] segments;
-    private final String rawTopic;
 
     AbstractTopic() {
         length = 0;
@@ -37,16 +44,16 @@ public abstract class AbstractTopic {
         rawTopic = topicName;
     }
 
-    @Override
-    public @NotNull String toString() {
-        return rawTopic;
-    }
-
     @NotNull String getSegment(int level) {
         return segments[level];
     }
 
     int levelsCount() {
         return segments.length;
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return rawTopic;
     }
 }

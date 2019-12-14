@@ -3,7 +3,6 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,13 +42,12 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
     private final @NotNull String reason;
 
     public UnsubscribeAck5OutPacket(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
         @NotNull Array<StringPair> userProperties,
         @NotNull String reason
     ) {
-        super(client, packetId);
+        super(packetId);
         this.reasonCodes = reasonCodes;
         this.userProperties = userProperties;
         this.reason = reason;

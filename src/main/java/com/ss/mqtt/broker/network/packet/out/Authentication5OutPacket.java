@@ -3,9 +3,9 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.rlib.common.util.array.Array;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -15,6 +15,7 @@ import java.util.Set;
 /**
  * Authentication exchange.
  */
+@RequiredArgsConstructor
 public class Authentication5OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
@@ -51,30 +52,14 @@ public class Authentication5OutPacket extends MqttWritablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull Array<StringPair> userProperties;
+    private final @NotNull Array<StringPair> userProperties;
 
-    private @NotNull AuthenticateReasonCode reasonCode;
+    private final @NotNull AuthenticateReasonCode reasonCode;
 
-    private @NotNull String reason;
-    private @NotNull String authenticateMethod;
+    private final @NotNull String reason;
+    private final @NotNull String authenticateMethod;
 
-    private @NotNull byte[] authenticateData;
-
-    public Authentication5OutPacket(
-        @NotNull MqttClient client,
-        @NotNull AuthenticateReasonCode reasonCode,
-        @NotNull String authenticateMethod,
-        @NotNull byte[] authenticateData,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
-    ) {
-        super(client);
-        this.userProperties = userProperties;
-        this.reasonCode = reasonCode;
-        this.reason = reason;
-        this.authenticateMethod = authenticateMethod;
-        this.authenticateData = authenticateData;
-    }
+    private final @NotNull byte[] authenticateData;
 
     @Override
     protected byte getPacketType() {

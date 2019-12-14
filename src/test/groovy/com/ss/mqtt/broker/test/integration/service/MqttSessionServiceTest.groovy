@@ -21,7 +21,7 @@ class MqttSessionServiceTest extends IntegrationSpecification {
     def "subscriber should create and re-use mqtt session"() {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def client = buildClient(clientId)
+            def client = buildMqtt5Client(clientId)
         when:
             def shouldNoSession = mqttSessionService.restore(clientId).block()
             def result = client.connect().join()

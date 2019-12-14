@@ -78,7 +78,6 @@ public abstract class MqttPacketOutFactory {
 
 
     public @NotNull PublishOutPacket newPublish(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
@@ -87,7 +86,6 @@ public abstract class MqttPacketOutFactory {
         @NotNull byte[] payload
     ) {
         return newPublish(
-            client,
             packetId,
             qos,
             retained,
@@ -103,7 +101,6 @@ public abstract class MqttPacketOutFactory {
     }
 
     public abstract @NotNull PublishOutPacket newPublish(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull QoS qos,
         boolean retained,
@@ -118,7 +115,6 @@ public abstract class MqttPacketOutFactory {
     );
 
     public abstract @NotNull MqttWritablePacket newPublishAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode,
         @NotNull String reason,
@@ -126,15 +122,13 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newPublishAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishAckReasonCode reasonCode
     ) {
-        return newPublishAck(client, packetId, reasonCode, StringUtils.EMPTY, Array.empty());
+        return newPublishAck(packetId, reasonCode, StringUtils.EMPTY, Array.empty());
     }
 
     public abstract @NotNull MqttWritablePacket newSubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes,
         @NotNull String reason,
@@ -142,15 +136,13 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newSubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<SubscribeAckReasonCode> reasonCodes
     ) {
-        return newSubscribeAck(client, packetId, reasonCodes, StringUtils.EMPTY, Array.empty());
+        return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, Array.empty());
     }
 
     public abstract @NotNull MqttWritablePacket newUnsubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
         @NotNull Array<StringPair> userProperties,
@@ -158,11 +150,10 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newUnsubscribeAck(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull Array<UnsubscribeAckReasonCode> reasonCodes
     ) {
-        return newUnsubscribeAck(client, packetId, reasonCodes, Array.empty(), StringUtils.EMPTY);
+        return newUnsubscribeAck(packetId, reasonCodes, Array.empty(), StringUtils.EMPTY);
     }
 
     public abstract @NotNull MqttWritablePacket newDisconnect(
@@ -181,7 +172,6 @@ public abstract class MqttPacketOutFactory {
     }
 
     public abstract @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull MqttClient client,
         @NotNull AuthenticateReasonCode reasonCode,
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData,
@@ -190,13 +180,11 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull MqttClient client,
         @NotNull AuthenticateReasonCode reasonCode,
         @NotNull String authenticateMethod,
         @NotNull byte[] authenticateData
     ) {
         return newAuthenticate(
-            client,
             reasonCode,
             authenticateMethod,
             authenticateData,
@@ -205,12 +193,11 @@ public abstract class MqttPacketOutFactory {
         );
     }
 
-    public abstract @NotNull MqttWritablePacket newPingRequest(@NotNull MqttClient client);
+    public abstract @NotNull MqttWritablePacket newPingRequest();
 
-    public abstract @NotNull MqttWritablePacket newPingResponse(@NotNull MqttClient client);
+    public abstract @NotNull MqttWritablePacket newPingResponse();
 
     public abstract @NotNull MqttWritablePacket newPublishRelease(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReleaseReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
@@ -218,15 +205,13 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newPublishRelease(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReleaseReasonCode reasonCode
     ) {
-        return newPublishRelease(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+        return newPublishRelease(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
     }
 
     public abstract @NotNull MqttWritablePacket newPublishReceived(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReceivedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
@@ -234,15 +219,13 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newPublishReceived(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishReceivedReasonCode reasonCode
     ) {
-        return newPublishReceived(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+        return newPublishReceived(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
     }
 
     public abstract @NotNull MqttWritablePacket newPublishCompleted(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishCompletedReasonCode reasonCode,
         @NotNull Array<StringPair> userProperties,
@@ -250,10 +233,9 @@ public abstract class MqttPacketOutFactory {
     );
 
     public @NotNull MqttWritablePacket newPublishCompleted(
-        @NotNull MqttClient client,
         int packetId,
         @NotNull PublishCompletedReasonCode reasonCode
     ) {
-        return newPublishCompleted(client, packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+        return newPublishCompleted(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
     }
 }

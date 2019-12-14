@@ -13,7 +13,6 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
         given:
             
             def packet = new ConnectAck5OutPacket(
-                mqtt5Client,
                 ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
                 sessionPresent,
                 "-1",
@@ -25,7 +24,18 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
                 responseInformation,
                 authMethod,
                 authData,
-                userProperties
+                userProperties,
+                clientId,
+                maxQos,
+                sessionExpiryInterval,
+                maximumPacketSize,
+                receiveMaximum,
+                topicAliasMaximum,
+                serverKeepAlive,
+                retainAvailable,
+                wildcardSubscriptionAvailable,
+                subscriptionIdAvailable,
+                sharedSubscriptionAvailable
             )
         
         when:

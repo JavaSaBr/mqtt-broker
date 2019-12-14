@@ -8,6 +8,7 @@ import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
+import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.util.ArrayUtils;
 import com.ss.rlib.common.util.array.Array;
@@ -27,6 +28,10 @@ import java.util.Collections;
 import java.util.Set;
 
 public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConnection> {
+
+    static {
+        DebugUtils.registerIncludedFields("userProperties");
+    }
 
     @Getter
     @RequiredArgsConstructor
@@ -231,5 +236,10 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
 
     protected void unexpectedProperty(@NotNull PacketProperty property) {
         throw new IllegalArgumentException("Unsupported property: " + property);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return DebugUtils.toJsonString(this);
     }
 }
