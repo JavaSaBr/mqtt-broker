@@ -282,12 +282,9 @@ public class ConnectInPacket extends MqttReadablePacket {
         hasUserName = NumberUtils.isSetBit(flags, 7);
         hasPassword = NumberUtils.isSetBit(flags, 6);
 
-        if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal()) {
-
-            // for mqtt < 5 we cannot have password without user
-            if (!hasUserName && hasPassword) {
-                throw new ConnectionRejectException(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD);
-            }
+        // for mqtt < 5 we cannot have password without user
+        if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal() && !hasUserName && hasPassword) {
+            throw new ConnectionRejectException(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD);
         }
 
         willFlag = NumberUtils.isSetBit(flags, 2);

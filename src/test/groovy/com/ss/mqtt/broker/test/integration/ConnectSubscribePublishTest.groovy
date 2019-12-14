@@ -44,8 +44,8 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().qos == MqttQos.AT_MOST_ONCE
             received.get().type == Mqtt3MessageType.PUBLISH
         cleanup:
-            subscriber.disconnect()
-            publisher.disconnect()
+            subscriber.disconnect().join()
+            publisher.disconnect().join()
     }
     
     def "publisher should publish message QoS 0 using mqtt 5"() {
@@ -77,8 +77,8 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().qos == MqttQos.AT_MOST_ONCE
             received.get().type == Mqtt5MessageType.PUBLISH
         cleanup:
-            subscriber.disconnect()
-            publisher.disconnect()
+            subscriber.disconnect().join()
+            publisher.disconnect().join()
     }
     
     def "publisher should publish message QoS 1 using mqtt 3.1.1"() {
@@ -110,8 +110,8 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().qos == MqttQos.AT_LEAST_ONCE
             received.get().type == Mqtt3MessageType.PUBLISH
         cleanup:
-            subscriber.disconnect()
-            publisher.disconnect()
+            subscriber.disconnect().join()
+            publisher.disconnect().join()
     }
     
     def "publisher should publish message QoS 1 using mqtt 5"() {
@@ -177,8 +177,8 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().qos == MqttQos.EXACTLY_ONCE
             received.get().type == Mqtt3MessageType.PUBLISH
         cleanup:
-            subscriber.disconnect()
-            publisher.disconnect()
+            subscriber.disconnect().join()
+            publisher.disconnect().join()
     }
     
     def "publisher should publish message QoS 2 using mqtt 5"() {
@@ -211,8 +211,8 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
             received.get().qos == MqttQos.EXACTLY_ONCE
             received.get().type == Mqtt5MessageType.PUBLISH
         cleanup:
-            subscriber.disconnect()
-            publisher.disconnect()
+            subscriber.disconnect().join()
+            publisher.disconnect().join()
     }
     
     def publish(Mqtt5AsyncClient publisher, String subscriberId, MqttQos qos) {
