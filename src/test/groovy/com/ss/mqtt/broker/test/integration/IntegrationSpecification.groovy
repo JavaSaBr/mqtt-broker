@@ -28,34 +28,65 @@ class IntegrationSpecification extends Specification {
     private static final idGenerator = new AtomicInteger(1)
     
     @Autowired
-    InetSocketAddress deviceNetworkAddress
+    InetSocketAddress externalNetworkAddress
     
     @Autowired
-    MqttConnectionConfig deviceConnectionConfig
+    InetSocketAddress internalNetworkAddress
     
-    def buildMqtt311Client() {
-        return buildMqtt311Client(generateClientId())
+    @Autowired
+    MqttConnectionConfig externalConnectionConfig
+    
+    def buildExternalMqtt311Client() {
+        return buildMqtt311Client(generateClientId(), externalNetworkAddress)
     }
     
-    def buildMqtt5Client() {
-        return buildMqtt5Client(generateClientId())
+    def buildInternalMqtt311Client() {
+        return buildMqtt311Client(generateClientId(), internalNetworkAddress)
     }
     
-    def buildMqtt311Client(String clientId) {
+    def buildExternalMqtt5Client() {
+        return buildMqtt5Client(generateClientId(), externalNetworkAddress)
+    }
+    
+    def buildInternalMqtt5Client() {
+        return buildMqtt5Client(generateClientId(), internalNetworkAddress)
+    }
+    
+    def buildExternalMqtt311Client(String clientId) {
         return MqttClient.builder()
             .identifier(clientId)
-            .serverHost(deviceNetworkAddress.getHostName())
-            .serverPort(deviceNetworkAddress.getPort())
+            .serverHost(externalNetworkAddress.getHostName())
+            .serverPort(externalNetworkAddress.getPort())
             .useMqttVersion3()
             .build()
             .toAsync()
     }
     
-    def buildMqtt5Client(String clientId) {
+    def buildMqtt311Client(String clientId, InetSocketAddress address) {
         return MqttClient.builder()
             .identifier(clientId)
-            .serverHost(deviceNetworkAddress.getHostName())
-            .serverPort(deviceNetworkAddress.getPort())
+            .serverHost(address.getHostName())
+            .serverPort(address.getPort())
+            .useMqttVersion3()
+            .build()
+            .toAsync()
+    }
+    
+    def buildExternalMqtt5Client(String clientId) {
+        return MqttClient.builder()
+            .identifier(clientId)
+            .serverHost(externalNetworkAddress.getHostName())
+            .serverPort(externalNetworkAddress.getPort())
+            .useMqttVersion5()
+            .build()
+            .toAsync()
+    }
+    
+    def buildMqtt5Client(String clientId, InetSocketAddress address) {
+        return MqttClient.builder()
+            .identifier(clientId)
+            .serverHost(address.getHostName())
+            .serverPort(address.getPort())
             .useMqttVersion5()
             .build()
             .toAsync()
@@ -91,17 +122,17 @@ class IntegrationSpecification extends Specification {
     
     def buildMqtt5MockClient() {
         return new MqttMockClient(
-            deviceNetworkAddress.getHostName(),
-            deviceNetworkAddress.getPort(),
-            mqtt5MockedConnection(deviceConnectionConfig)
+            externalNetworkAddress.getHostName(),
+            externalNetworkAddress.getPort(),
+            mqtt5MockedConnection(externalConnectionConfig)
         )
     }
     
     def buildMqtt311MockClient() {
         return new MqttMockClient(
-            deviceNetworkAddress.getHostName(),
-            deviceNetworkAddress.getPort(),
-            mqtt311MockedConnection(deviceConnectionConfig)
+            externalNetworkAddress.getHostName(),
+            externalNetworkAddress.getPort(),
+            mqtt311MockedConnection(externalConnectionConfig)
         )
     }
     

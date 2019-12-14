@@ -24,7 +24,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     def "should clear/restore topic subscribers after disconnect/reconnect"() {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def subscriber = buildMqtt5Client(clientId)
+            def subscriber = buildExternalMqtt5Client(clientId)
         when:
             connectAndSubscribe(subscriber, true, topicFilter)
             def matches = subscriptionService.topicSubscribers.matches(TopicName.from(topicFilter))

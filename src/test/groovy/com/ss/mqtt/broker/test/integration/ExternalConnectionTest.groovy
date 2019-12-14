@@ -14,11 +14,11 @@ import com.ss.rlib.common.util.ArrayUtils
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
 
-class ConnectionTest extends IntegrationSpecification {
+class ExternalConnectionTest extends IntegrationSpecification {
     
     def "client should connect to broker without user and pass using mqtt 3.1.1"() {
         given:
-            def client = buildMqtt311Client()
+            def client = buildExternalMqtt311Client()
         when:
             def result = client.connect().join()
         then:
@@ -30,7 +30,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should connect to broker without user and pass using mqtt 5"() {
         given:
-            def client = buildMqtt5Client()
+            def client = buildExternalMqtt5Client()
         when:
             def result = client.connect().join()
         then:
@@ -49,7 +49,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should connect to broker with user and pass using mqtt 3.1.1"() {
         given:
-            def client = buildMqtt311Client()
+            def client = buildExternalMqtt311Client()
         when:
             def result = connectWith(client, 'user1', 'password')
         then:
@@ -61,7 +61,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should connect to broker with user and pass using mqtt 5"() {
         given:
-            def client = buildMqtt5Client()
+            def client = buildExternalMqtt5Client()
         when:
             def result = connectWith(client, 'user1', 'password')
         then:
@@ -80,7 +80,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should not connect to broker without providing a client id using mqtt 3.1.1"() {
         given:
-            def client = buildMqtt311Client("")
+            def client = buildExternalMqtt311Client("")
         when:
             client.connect().join()
         then:
@@ -91,7 +91,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should connect to broker without providing a client id using mqtt 5"() {
         given:
-            def client = buildMqtt5Client("")
+            def client = buildExternalMqtt5Client("")
         when:
             def result = client.connect().join()
         then:
@@ -104,7 +104,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should not connect to broker with invalid client id using mqtt 3.1.1"(String clientId) {
         given:
-            def client = buildMqtt311Client(clientId)
+            def client = buildExternalMqtt311Client(clientId)
         when:
             client.connect().join()
         then:
@@ -117,7 +117,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should not connect to broker with invalid client id using mqtt 5"(String clientId) {
         given:
-            def client = buildMqtt5Client(clientId)
+            def client = buildExternalMqtt5Client(clientId)
         when:
             client.connect().join()
         then:
@@ -130,7 +130,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should not connect to broker with wrong pass using mqtt 3.1.1"() {
         given:
-            def client = buildMqtt311Client()
+            def client = buildExternalMqtt311Client()
         when:
             connectWith(client, "user", "wrongPassword")
         then:
@@ -166,7 +166,7 @@ class ConnectionTest extends IntegrationSpecification {
     
     def "client should not connect to broker with wrong pass using mqtt 5"() {
         given:
-            def client = buildMqtt5Client()
+            def client = buildExternalMqtt5Client()
         when:
             connectWith(client, "user", "wrongPassword")
         then:
