@@ -51,7 +51,7 @@ public class SubscribeTopicFilter {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "SubscribeTopicFilter(" + "topicFilter=" + topicFilter.getRawTopic() + ", qos=" + qos + ", retainHandling=" +
             retainHandling + ", noLocal=" + noLocal + ", retainAsPublished=" + retainAsPublished + ')';
     }
