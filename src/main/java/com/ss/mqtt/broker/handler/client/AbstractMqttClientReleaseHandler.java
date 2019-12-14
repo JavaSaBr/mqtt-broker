@@ -34,7 +34,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
         client.setClientId(StringUtils.EMPTY);
 
         if (StringUtils.isEmpty(clientId)) {
-            log.warn("This client {} is already released", client);
+            log.warn("This client {} is already released or rejected", client);
             return Mono.empty();
         }
 

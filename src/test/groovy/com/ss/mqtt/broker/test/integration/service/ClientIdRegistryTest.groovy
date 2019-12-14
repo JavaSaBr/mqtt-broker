@@ -109,7 +109,7 @@ class ClientIdRegistryTest extends IntegrationSpecification {
     def "subscriber should register its client id on connect and unregister on disconnect"() {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def client = buildClient(clientId)
+            def client = buildMqtt5Client(clientId)
         when:
             def result = client.connect().join()
         then:

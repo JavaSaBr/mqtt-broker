@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.test.integration
 
 import com.hivemq.client.mqtt.MqttClient
+import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.model.MqttPropertyConstants
@@ -9,7 +10,6 @@ import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.test.integration.config.MqttBrokerTestConfig
 import com.ss.mqtt.broker.test.mock.MqttMockClient
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
@@ -32,12 +32,26 @@ class IntegrationSpecification extends Specification {
     
     @Autowired
     MqttConnectionConfig deviceConnectionConfig
-
-    def buildClient() {
-        return buildClient(generateClientId())
+    
+    def buildMqtt311Client() {
+        return buildMqtt311Client(generateClientId())
     }
     
-    def buildClient(String clientId) {
+    def buildMqtt5Client() {
+        return buildMqtt5Client(generateClientId())
+    }
+    
+    def buildMqtt311Client(String clientId) {
+        return MqttClient.builder()
+            .identifier(clientId)
+            .serverHost(deviceNetworkAddress.getHostName())
+            .serverPort(deviceNetworkAddress.getPort())
+            .useMqttVersion3()
+            .build()
+            .toAsync()
+    }
+    
+    def buildMqtt5Client(String clientId) {
         return MqttClient.builder()
             .identifier(clientId)
             .serverHost(deviceNetworkAddress.getHostName())
@@ -53,6 +67,16 @@ class IntegrationSpecification extends Specification {
     
     def generateClientId(String prefix) {
         return prefix + "_" + idGenerator.incrementAndGet()
+    }
+    
+    def connectWith(Mqtt3AsyncClient client, String user, String pass) {
+        return client.connectWith()
+            .simpleAuth()
+            .username(user)
+            .password(pass.getBytes(encoding))
+            .applySimpleAuth()
+            .send()
+            .join()
     }
     
     def connectWith(Mqtt5AsyncClient client, String user, String pass) {
