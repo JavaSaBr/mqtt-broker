@@ -19,29 +19,28 @@ public abstract class AbstractTopic {
     static final String MULTI_LEVEL_WILDCARD = "#";
     static final String SINGLE_LEVEL_WILDCARD = "+";
 
-    static void checkTopic(@NotNull String topic) {
-        if (topic.length() == 0) {
-            throw new IllegalArgumentException("Topic has zero length.");
-        } else if (topic.contains("//") || topic.startsWith("/") || topic.endsWith("/")) {
-            throw new IllegalArgumentException("Topic has zero length level: " + topic);
-        }
+    static boolean checkTopic(@NotNull String topic) {
+        return topic.length() != 0 && !topic.contains("//") && !topic.startsWith("/") && !topic.endsWith("/");
     }
 
     private final @NotNull String[] segments;
     private final @NotNull String rawTopic;
+    private final @Getter boolean invalid;
 
     private final int length;
 
-    AbstractTopic() {
+    AbstractTopic(boolean invalid) {
         length = 0;
         segments = ArrayUtils.EMPTY_STRING_ARRAY;
         rawTopic = StringUtils.EMPTY;
+        this.invalid = invalid;
     }
 
     AbstractTopic(@NotNull String topicName) {
         length = topicName.length();
         segments = topicName.split(DELIMITER);
         rawTopic = topicName;
+        invalid = false;
     }
 
     @NotNull String getSegment(int level) {

@@ -5,6 +5,9 @@ import com.ss.mqtt.broker.model.topic.TopicName
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static com.ss.mqtt.broker.model.topic.TopicFilter.INVALID_TOPIC_FILTER
+import static com.ss.mqtt.broker.model.topic.TopicName.INVALID_TOPIC_NAME
+
 class TopicTest extends Specification {
     
     @Unroll
@@ -22,17 +25,17 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should fail create topic name: #stringTopicName"(String stringTopicName, String errorMessage) {
+    def "should fail create topic name: #stringTopicName"(String stringTopicName) {
         when:
-            TopicName.from(stringTopicName)
+            def topicName = TopicName.from(stringTopicName)
         then:
-            def ex = thrown IllegalArgumentException
-            ex.message == errorMessage
+            topicName == INVALID_TOPIC_NAME
         where:
-            stringTopicName | errorMessage
-            ""              | "Topic has zero length."
-            "topic/+"       | "Single level wildcard is incorrectly used: topic/+"
-            "topic/#"       | "Multi level wildcard is incorrectly used: topic/#"
+            stringTopicName << [
+                "",
+                "topic/+",
+                "topic/#"
+            ]
     }
     
     @Unroll
@@ -52,22 +55,20 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter, String errorMessage) {
+    def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter) {
         when:
-            TopicFilter.from(stringTopicFilter)
+            def topicFilter = TopicFilter.from(stringTopicFilter)
         then:
-            def ex = thrown IllegalArgumentException
-            ex.message == errorMessage
+            topicFilter == INVALID_TOPIC_FILTER
         where:
-            stringTopicFilter | errorMessage
-            ""                | "Topic has zero length."
-            "topic/in/"       | "Topic has zero length level: topic/in/"
-            "/topic/in"       | "Topic has zero length level: /topic/in"
-            "topic//in"       | "Topic has zero length level: topic//in"
-            "topic/++/in"     | "Single level wildcard is incorrectly used: topic/++/in"
-            "topic/#/in"      | "Multi level wildcard is incorrectly used: topic/#/in"
-            "topic/##"        | "Multi level wildcard is incorrectly used: topic/##"
-        
+            stringTopicFilter << [
+                "",
+                "topic/in/",
+                "/topic/in",
+                "topic//in",
+                "topic/++/in",
+                "topic/#/in",
+                "topic/##"
+            ]
     }
-    
 }

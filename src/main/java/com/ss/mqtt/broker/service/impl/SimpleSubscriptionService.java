@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.service.impl;
 
 import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
+import static com.ss.mqtt.broker.model.ActionResult.FAILED;
 import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
@@ -31,12 +32,11 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull A argument,
         @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
     ) {
-        var subscribers = topicSubscribers.matches(topicName);
-        if (subscribers.isEmpty()) {
-            return EMPTY;
+        if (topicName.isInvalid()) {
+            return FAILED;
         }
         ActionResult result = EMPTY;
-        for (var subscriber : subscribers) {
+        for (var subscriber : topicSubscribers.matches(topicName)) {
             result = result.and(action.apply(subscriber, argument));
         }
         return result;
@@ -56,6 +56,9 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull SubscribeTopicFilter subscribe,
         @NotNull MqttClient mqttClient
     ) {
+        if (subscribe.getTopicFilter().isInvalid()) {
+            return SubscribeAckReasonCode.UNSPECIFIED_ERROR;
+        }
         var session = mqttClient.getSession();
         if (session == null) {
             return null;
@@ -79,6 +82,9 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull TopicFilter topicFilter,
         @NotNull MqttClient mqttClient
     ) {
+        if (topicFilter.isInvalid()) {
+            return UnsubscribeAckReasonCode.UNSPECIFIED_ERROR;
+        }
         var session = mqttClient.getSession();
         if (session == null) {
             return null;
