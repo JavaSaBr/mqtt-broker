@@ -1,7 +1,6 @@
 package com.ss.mqtt.broker.test.integration.service
 
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import com.ss.mqtt.broker.config.MqttConnectionConfig
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.service.MqttSessionService
 import com.ss.mqtt.broker.test.integration.IntegrationSpecification
@@ -15,13 +14,10 @@ class MqttSessionServiceTest extends IntegrationSpecification {
     @Autowired
     MqttSessionService mqttSessionService
     
-    @Autowired
-    MqttConnectionConfig connectionConfig
-    
     def "subscriber should create and re-use mqtt session"() {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def client = buildMqtt5Client(clientId)
+            def client = buildExternalMqtt5Client(clientId)
         when:
             def shouldNoSession = mqttSessionService.restore(clientId).block()
             def result = client.connect().join()
@@ -36,7 +32,7 @@ class MqttSessionServiceTest extends IntegrationSpecification {
         then:
             restored != null
         when:
-            mqttSessionService.store(clientId, restored, connectionConfig.getDefaultSessionExpiryInterval()).block()
+            mqttSessionService.store(clientId, restored, externalConnectionConfig.getDefaultSessionExpiryInterval()).block()
             client.connect().join()
             shouldNoSession = mqttSessionService.restore(clientId).block()
         then:

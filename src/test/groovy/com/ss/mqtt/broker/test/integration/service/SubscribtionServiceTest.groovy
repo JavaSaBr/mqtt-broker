@@ -28,7 +28,8 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     def "should clear/restore topic subscribers after disconnect/reconnect"() {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def subscriber = buildMqtt5Client(clientId)
+
+            def subscriber = buildExternalMqtt5Client(clientId)
             def topicName = from(topicFilter)
             
             def matchesCount = 0
@@ -81,7 +82,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     ) {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def subscriber = buildMqtt5Client(clientId)
+            def subscriber = buildExternalMqtt5Client(clientId)
             
             def matchesCount = 0
             Subscriber matchedSubscriber = null
@@ -131,8 +132,8 @@ class SubscribtionServiceTest extends IntegrationSpecification {
         given:
             def clientId1 = clientIdRegistry.generate().block()
             def clientId2 = clientIdRegistry.generate().block()
-            def subscriber1 = buildMqtt5Client(clientId1)
-            def subscriber2 = buildMqtt5Client(clientId2)
+            def subscriber1 = buildExternalMqtt5Client(clientId1)
+            def subscriber2 = buildExternalMqtt5Client(clientId2)
             
             def matchesCount = 0
             def matchedSubscribers = new LinkedHashSet<String>();
@@ -188,7 +189,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     ) {
         given:
             def clientId = clientIdRegistry.generate().block()
-            def subscriber = buildMqtt5Client(clientId)
+            def subscriber = buildExternalMqtt5Client(clientId)
         when:
             subscriber.connectWith()
                 .cleanStart(true)
