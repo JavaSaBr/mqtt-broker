@@ -20,7 +20,8 @@ public class SharedSubscriber {
 
     public SharedSubscriber(@NotNull Subscriber subscriber) {
         group = ((SharedTopicFilter) subscriber.getTopicFilter()).getGroup();
-        subscribers = Array.of(subscriber);
+        subscribers = Array.ofType(Subscriber.class);
+        subscribers.add(subscriber);
         lock = new StampedLock();
         current = 0;
     }
@@ -42,7 +43,6 @@ public class SharedSubscriber {
         long stamp = lock.writeLock();
         try {
             subscribers.add(subscriber);
-            current++;
         } finally {
             lock.unlockWrite(stamp);
         }
@@ -51,7 +51,11 @@ public class SharedSubscriber {
     public boolean removeSubscriber(@NotNull MqttClient client) {
         long stamp = lock.writeLock();
         try {
-            var result = subscribers.removeIfConverted(client, Subscriber::getMqttClient, Objects::equals);
+            var result = subscribers.removeIfConverted(
+                client,
+                Subscriber::getMqttClient,
+                Objects::equals
+            );
             if (result) {
                 current--;
             }
@@ -61,4 +65,12 @@ public class SharedSubscriber {
         }
     }
 
+    public int size() {
+        long stamp = lock.writeLock();
+        try {
+            return subscribers.size();
+        } finally {
+            lock.unlockWrite(stamp);
+        }
+    }
 }

@@ -14,10 +14,10 @@ public class TopicFilter extends AbstractTopic {
         if (multiPos != -1 && multiPos != topicFilter.length() - 1) {
             return INVALID_TOPIC_FILTER;
         } else if(topicFilter.startsWith("$shared")) {
-            int firstSlash = topicFilter.indexOf(DELIMITER);
+            int firstSlash = topicFilter.indexOf(DELIMITER) + 1;
             int secondSlash = topicFilter.indexOf(DELIMITER, firstSlash);
             var group = topicFilter.substring(firstSlash, secondSlash);
-            var realTopicFilter = topicFilter.substring(secondSlash);
+            var realTopicFilter = topicFilter.substring(secondSlash + 1);
             return new SharedTopicFilter(realTopicFilter, group);
         } else {
             return new TopicFilter(topicFilter);

@@ -19,6 +19,23 @@ public class TopicSubscribers {
 
     private final static NotNullSupplier<TopicSubscribers> TOPIC_SUBSCRIBER_SUPPLIER = TopicSubscribers::new;
 
+    private static boolean removeSharedSubscriber(
+        @NotNull ConcurrentObjectDictionary<String, SharedSubscriber> subscribersMap,
+        @NotNull SharedTopicFilter topic,
+        @NotNull MqttClient client
+    ) {
+        boolean removed = false;
+        var group = topic.getGroup();
+        var subscribers = subscribersMap.get(group);
+        if (subscribers != null) {
+            removed = subscribers.removeSubscriber(client);
+            if (removed && subscribers.size() == 0) {
+                subscribersMap.remove(group);
+            }
+        }
+        return removed;
+    }
+
     private static boolean removeDuplicateWithLowerQoS(
         @NotNull Array<Subscriber> subscribers,
         @NotNull Subscriber candidate
@@ -117,7 +134,7 @@ public class TopicSubscribers {
                 var sharedSubscriber = subscribers.get(group);
                 if (sharedSubscriber == null) {
                     sharedSubscriber = new SharedSubscriber(singleSubscriber);
-                    subscribers.runInWriteLock(group, sharedSubscriber, ObjectDictionary::put);
+                    subscribers.put(group, sharedSubscriber);
                 } else {
                     sharedSubscriber.addSubscriber(singleSubscriber);
                 }
@@ -157,11 +174,12 @@ public class TopicSubscribers {
         if (TopicFilter.isShared(topicFilter)) {
             var sharedSubscribers = getSharedSubscribers();
             if (sharedSubscribers != null) {
-                var group = ((SharedTopicFilter) topicFilter).getGroup();
-                var subscribers = sharedSubscribers.getInReadLock(group, ObjectDictionary::get);
-                if (subscribers != null) {
-                    removed = subscribers.removeSubscriber(mqttClient);
-                }
+                //noinspection ConstantConditions
+                removed = sharedSubscribers.getInWriteLock(
+                    (SharedTopicFilter) topicFilter,
+                    mqttClient,
+                    TopicSubscribers::removeSharedSubscriber
+                );
             }
         } else {
             var subscribers = getSingleSubscribers();

@@ -90,7 +90,6 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 matchedSubscriber = subs
                 SUCCESS
             }
-        when:
             subscriber.connectWith()
                 .cleanStart(true)
                 .send()
@@ -105,9 +104,10 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 .qos(topicFilter2.second())
                 .send()
                 .join()
-            
+        when:
             subscriptionService.forEachTopicSubscriber(from(topicName), clientId, action)
         then:
+            matchesCount == 1
             matchedSubscriber.topicFilter.getRawTopic() == targetTopicFilter
         cleanup:
             subscriber.disconnect().join()
@@ -118,6 +118,65 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             "topic/Another"      | of("topic/Filter", EXACTLY_ONCE)  | of("topic/#", AT_LEAST_ONCE) | "topic/#"
             "topic/Filter/First" | of("topic/+/First", AT_MOST_ONCE) | of("topic/#", AT_LEAST_ONCE) | "topic/#"
             "topic/Filter/First" | of("topic/+/First", EXACTLY_ONCE) | of("topic/#", AT_LEAST_ONCE) | "topic/+/First"
+    }
+    
+    @Unroll
+    def "should match all subscribers with shared and single topic"(
+        String topicName,
+        Pair<String, MqttQos> topicFilter1,
+        Pair<String, MqttQos> topicFilter2,
+        String targetTopicFilter,
+        int targetCount
+    ) {
+        given:
+            def clientId1 = clientIdRegistry.generate().block()
+            def clientId2 = clientIdRegistry.generate().block()
+            def subscriber1 = buildMqtt5Client(clientId1)
+            def subscriber2 = buildMqtt5Client(clientId2)
+            
+            def matchesCount = 0
+            def matchedSubscribers = new LinkedHashSet<String>();
+            def action = { Subscriber subscriber, String clientId ->
+                matchesCount++
+                matchedSubscribers.add(subscriber.getMqttClient().getClientId())
+                SUCCESS
+            }
+            
+            subscriber1.connectWith()
+                .cleanStart(true)
+                .send()
+                .join()
+            subscriber2.connectWith()
+                .cleanStart(true)
+                .send()
+                .join()
+            
+            
+            subscriber1.subscribeWith()
+                .topicFilter(topicFilter1.first())
+                .qos(topicFilter1.second())
+                .send()
+                .join()
+            subscriber2.subscribeWith()
+                .topicFilter(topicFilter2.first())
+                .qos(topicFilter2.second())
+                .send()
+                .join()
+        when:
+            subscriptionService.forEachTopicSubscriber(from(topicName), clientId, action)
+        then:
+            matchesCount == targetCount
+            matchedSubscribers[0] == clientId1
+            matchedSubscribers[1] == clientId2
+        cleanup:
+            subscriber1.disconnect().join()
+            subscriber2.disconnect().join()
+        where:
+            topicName            | topicFilter1                                     | topicFilter2                                 | targetTopicFilter | targetCount
+            "topic/Filter"       | of("\$shared/group1/topic/Filter", AT_MOST_ONCE) | of("\$shared/group2/topic/#", AT_LEAST_ONCE) | "topic/#"         | 2
+            "topic/Filter"       | of("\$shared/group1/topic/Filter", EXACTLY_ONCE) | of("topic/#", AT_LEAST_ONCE)                 | "topic/Filter"    | 2
+            "topic/Filter/First" | of("topic/+/First", AT_MOST_ONCE)                | of("\$shared/group2/topic/#", AT_LEAST_ONCE) | "topic/#"         | 2
+            "topic/Filter/First" | of("topic/+/First", EXACTLY_ONCE)                | of("topic/#", AT_LEAST_ONCE)                 | "topic/+/First"   | 2
     }
     
     @Unroll
