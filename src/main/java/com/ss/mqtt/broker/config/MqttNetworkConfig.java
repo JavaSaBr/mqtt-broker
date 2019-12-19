@@ -1,13 +1,12 @@
 package com.ss.mqtt.broker.config;
 
 import com.ss.mqtt.broker.handler.client.MqttClientReleaseHandler;
-import com.ss.mqtt.broker.handler.packet.in.*;
+import com.ss.mqtt.broker.handler.packet.in.PacketInHandler;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.client.ExternalMqttClient;
 import com.ss.mqtt.broker.network.client.InternalMqttClient;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Network;

@@ -20,6 +20,6 @@ public class DisconnetInPacketHandler extends AbstractPacketHandler<UnsafeMqttCl
             log.error("Disconnect client {} by error reason {}", client, reasonCode);
         }
 
-        client.release().subscribe();
+        client.getConnection().close();
     }
 }

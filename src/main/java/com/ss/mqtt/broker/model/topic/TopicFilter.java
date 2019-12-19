@@ -1,13 +1,16 @@
 package com.ss.mqtt.broker.model.topic;
 
+import com.ss.mqtt.broker.util.TopicUtils;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+@NoArgsConstructor
 public class TopicFilter extends AbstractTopic {
 
     public static final TopicFilter INVALID_TOPIC_FILTER = new TopicFilter();
 
     public static @NotNull TopicFilter from(@NotNull String topicFilter) {
-        if (!checkTopic(topicFilter) || topicFilter.contains("++")) {
+        if (!TopicUtils.check(topicFilter) || topicFilter.contains("++")) {
             return INVALID_TOPIC_FILTER;
         }
         int multiPos = topicFilter.indexOf(MULTI_LEVEL_WILDCARD);
@@ -22,14 +25,6 @@ public class TopicFilter extends AbstractTopic {
         } else {
             return new TopicFilter(topicFilter);
         }
-    }
-
-    public static boolean isShared(@NotNull TopicFilter topicFilter) {
-        return topicFilter instanceof SharedTopicFilter;
-    }
-
-    private TopicFilter() {
-        super(true);
     }
 
     TopicFilter(@NotNull String topicFilter) {

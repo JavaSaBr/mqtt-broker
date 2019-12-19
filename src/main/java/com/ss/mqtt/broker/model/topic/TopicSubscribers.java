@@ -2,9 +2,7 @@ package com.ss.mqtt.broker.model.topic;
 
 import static com.ss.mqtt.broker.model.topic.AbstractTopic.MULTI_LEVEL_WILDCARD;
 import static com.ss.mqtt.broker.model.topic.AbstractTopic.SINGLE_LEVEL_WILDCARD;
-import com.ss.mqtt.broker.model.SharedSubscriber;
-import com.ss.mqtt.broker.model.SubscribeTopicFilter;
-import com.ss.mqtt.broker.model.Subscriber;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.function.NotNullSupplier;
 import com.ss.rlib.common.util.array.Array;
@@ -19,18 +17,46 @@ public class TopicSubscribers {
 
     private final static NotNullSupplier<TopicSubscribers> TOPIC_SUBSCRIBER_SUPPLIER = TopicSubscribers::new;
 
+    private static void createSharedSubscriber(
+        @NotNull ConcurrentArray<Subscriber> subscribers,
+        @NotNull MqttClient client,
+        @NotNull SubscribeTopicFilter subscribe
+    ) {
+        var group = ((SharedTopicFilter) subscribe.getTopicFilter()).getGroup();
+
+        var sharedSubscriber = (SharedSubscriber) subscribers.findAny(
+            group,
+            TopicSubscribers::sharedSubscriberWithGroup
+        );
+
+        if (sharedSubscriber == null) {
+            sharedSubscriber = new SharedSubscriber(subscribe);
+            sharedSubscriber.addSubscriber(client);
+            subscribers.add(sharedSubscriber);
+        } else {
+            sharedSubscriber.addSubscriber(client);
+        }
+    }
+
+    private static boolean sharedSubscriberWithGroup(@NotNull String group, @NotNull Subscriber subscriber) {
+        return subscriber instanceof SharedSubscriber && group.equals(((SharedSubscriber) subscriber).getGroup());
+    }
+
     private static boolean removeSharedSubscriber(
-        @NotNull ConcurrentObjectDictionary<String, SharedSubscriber> subscribersMap,
+        @NotNull ConcurrentArray<Subscriber> subscribers,
         @NotNull SharedTopicFilter topic,
         @NotNull MqttClient client
     ) {
         boolean removed = false;
-        var group = topic.getGroup();
-        var subscribers = subscribersMap.get(group);
-        if (subscribers != null) {
-            removed = subscribers.removeSubscriber(client);
-            if (removed && subscribers.size() == 0) {
-                subscribersMap.remove(group);
+        var sharedSubscriber = (SharedSubscriber) subscribers.findAny(
+            topic.getGroup(),
+            TopicSubscribers::sharedSubscriberWithGroup
+        );
+
+        if (sharedSubscriber != null) {
+            removed = sharedSubscriber.removeSubscriber(client);
+            if (removed && sharedSubscriber.size() == 0) {
+                subscribers.remove(sharedSubscriber);
             }
         }
         return removed;
@@ -44,7 +70,7 @@ public class TopicSubscribers {
         if (found == -1) {
             return true;
         }
-        var existed = subscribers.get(found);
+        var existed = (SingleSubscriber) subscribers.get(found);
         if (existed.getQos().ordinal() < candidate.getQos().ordinal()) {
             subscribers.fastRemove(found);
             return true;
@@ -63,16 +89,7 @@ public class TopicSubscribers {
         if (topicSubscribers == null) {
             return null;
         }
-        collectSingleSubscribers(topicSubscribers, result);
-        collectSharedSubscribers(topicSubscribers, result);
-        return topicSubscribers;
-    }
-
-    private static void collectSingleSubscribers(
-        @NotNull TopicSubscribers topicSubscribers,
-        @NotNull Array<Subscriber> result
-    ) {
-        var subscribers = topicSubscribers.getSingleSubscribers();
+        var subscribers = topicSubscribers.getSubscribers();
         if (subscribers != null) {
             long stamp = subscribers.readLock();
             try {
@@ -85,37 +102,24 @@ public class TopicSubscribers {
                 subscribers.readUnlock(stamp);
             }
         }
-    }
-
-    private static void collectSharedSubscribers(
-        @NotNull TopicSubscribers topicSubscribers,
-        @NotNull Array<Subscriber> resultSubscribers
-    ) {
-        var subscribers = topicSubscribers.getSharedSubscribers();
-        if (subscribers != null) {
-            long stamp = subscribers.readLock();
-            try {
-                subscribers.forEach(
-                    resultSubscribers,
-                    (result, group, shared) -> result.add(shared.getSubscriber())
-                );
-            } finally {
-                subscribers.readUnlock(stamp);
-            }
-        }
+        return topicSubscribers;
     }
 
     private volatile @Getter @Nullable ConcurrentObjectDictionary<String, TopicSubscribers> topicSubscribers;
-    private volatile @Getter @Nullable ConcurrentObjectDictionary<String, SharedSubscriber> sharedSubscribers;
-    private volatile @Getter @Nullable ConcurrentArray<Subscriber> singleSubscribers;
+    private volatile @Getter @Nullable ConcurrentArray<Subscriber> subscribers;
 
     public void addSubscriber(@NotNull MqttClient client, @NotNull SubscribeTopicFilter subscribe) {
-        addSubscriber(0, subscribe.getTopicFilter(), new Subscriber(client, subscribe));
+        addSubscriber(0, subscribe.getTopicFilter(), client, subscribe);
     }
 
-    private void addSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull Subscriber subscriber) {
+    private void addSubscriber(
+        int level,
+        @NotNull TopicFilter topicFilter,
+        @NotNull MqttClient client,
+        @NotNull SubscribeTopicFilter subscribe
+    ) {
         if (level == topicFilter.levelsCount()) {
-            addSubscriber(subscriber);
+            createSubscriber(client, subscribe);
         } else {
             var topicSubscriber = getOrCreateTopicSubscribers().getInWriteLock(
                 topicFilter.getSegment(level),
@@ -123,29 +127,30 @@ public class TopicSubscribers {
                 ObjectDictionary::getOrCompute
             );
             //noinspection ConstantConditions
-            topicSubscriber.addSubscriber(level + 1, topicFilter, subscriber);
+            topicSubscriber.addSubscriber(level + 1, topicFilter, client, subscribe);
         }
     }
 
-    private void addSubscriber(@NotNull Subscriber subscriber) {
-        if (subscriber.isShared()) {
-            getOrCreateSharedSubscribers().runInReadLock(subscriber, (subscribers, singleSubscriber) -> {
-                var group = singleSubscriber.getGroup();
-                var sharedSubscriber = subscribers.get(group);
-                if (sharedSubscriber == null) {
-                    sharedSubscriber = new SharedSubscriber(singleSubscriber);
-                    subscribers.put(group, sharedSubscriber);
-                } else {
-                    sharedSubscriber.addSubscriber(singleSubscriber);
-                }
-            });
+    private void createSubscriber(
+        @NotNull MqttClient client,
+        @NotNull SubscribeTopicFilter subscribe
+    ) {
+        if (subscribe.getTopicFilter() instanceof SharedTopicFilter) {
+            getOrCreateSubscribers().runInReadLock(
+                client,
+                subscribe,
+                TopicSubscribers::createSharedSubscriber
+            );
         } else {
-            getOrCreateSingleSubscribers().runInWriteLock(subscriber, Array::add);
+            getOrCreateSubscribers().runInWriteLock(
+                new SingleSubscriber(client, subscribe),
+                Array::add
+            );
         }
     }
 
-    public boolean removeSubscriber(@NotNull MqttClient client, @NotNull SubscribeTopicFilter subscribe) {
-        return removeSubscriber(client, subscribe.getTopicFilter());
+    public void removeSubscriber(@NotNull MqttClient client, @NotNull SubscribeTopicFilter subscribe) {
+        removeSubscriber(client, subscribe.getTopicFilter());
     }
 
     public boolean removeSubscriber(@NotNull MqttClient client, @NotNull TopicFilter topicFilter) {
@@ -171,19 +176,16 @@ public class TopicSubscribers {
 
     private boolean removeSubscriber(@NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
         var removed = false;
-        if (TopicFilter.isShared(topicFilter)) {
-            var sharedSubscribers = getSharedSubscribers();
-            if (sharedSubscribers != null) {
+        var subscribers = getSubscribers();
+        if (subscribers != null) {
+            if (topicFilter instanceof SharedTopicFilter) {
                 //noinspection ConstantConditions
-                removed = sharedSubscribers.getInWriteLock(
+                removed = subscribers.getInWriteLock(
                     (SharedTopicFilter) topicFilter,
                     mqttClient,
                     TopicSubscribers::removeSharedSubscriber
                 );
-            }
-        } else {
-            var subscribers = getSingleSubscribers();
-            if (subscribers != null) {
+            } else {
                 removed = subscribers.removeIfConvertedInWriteLock(
                     mqttClient,
                     Subscriber::getMqttClient,
@@ -245,27 +247,16 @@ public class TopicSubscribers {
         return topicSubscribers;
     }
 
-    private @NotNull ConcurrentArray<Subscriber> getOrCreateSingleSubscribers() {
-        if (singleSubscribers == null) {
+    private @NotNull ConcurrentArray<Subscriber> getOrCreateSubscribers() {
+        if (subscribers == null) {
             synchronized (this) {
-                if (singleSubscribers == null) {
-                    singleSubscribers = ConcurrentArray.ofType(Subscriber.class);
+                if (subscribers == null) {
+                    subscribers = ConcurrentArray.ofType(Subscriber.class);
                 }
             }
         }
         //noinspection ConstantConditions
-        return singleSubscribers;
+        return subscribers;
     }
 
-    private @NotNull ConcurrentObjectDictionary<String, SharedSubscriber> getOrCreateSharedSubscribers() {
-        if (sharedSubscribers == null) {
-            synchronized (this) {
-                if (sharedSubscribers == null) {
-                    sharedSubscribers = ConcurrentObjectDictionary.ofType(String.class, SharedSubscriber.class);
-                }
-            }
-        }
-        //noinspection ConstantConditions
-        return sharedSubscribers;
-    }
 }

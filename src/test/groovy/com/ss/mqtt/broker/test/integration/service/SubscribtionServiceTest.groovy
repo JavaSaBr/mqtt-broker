@@ -2,6 +2,7 @@ package com.ss.mqtt.broker.test.integration.service
 
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
+import com.ss.mqtt.broker.model.SingleSubscriber
 import com.ss.mqtt.broker.model.Subscriber
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService
@@ -33,7 +34,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             def topicName = from(topicFilter)
             
             def matchesCount = 0
-            def matchedSubscriber = null
+            SingleSubscriber matchedSubscriber = null
             def action = { subs, clId ->
                 matchesCount++
                 matchedSubscriber = subs
@@ -85,7 +86,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             def subscriber = buildExternalMqtt5Client(clientId)
             
             def matchesCount = 0
-            Subscriber matchedSubscriber = null
+            SingleSubscriber matchedSubscriber = null
             def action = { subs, clId ->
                 matchesCount++
                 matchedSubscriber = subs
@@ -136,10 +137,10 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             def subscriber2 = buildExternalMqtt5Client(clientId2)
             
             def matchesCount = 0
-            def matchedSubscribers = new LinkedHashSet<String>();
+            def matchedSubscribers = new LinkedHashSet<String>()
             def action = { Subscriber subscriber, String clientId ->
                 matchesCount++
-                matchedSubscribers.add(subscriber.getMqttClient().getClientId())
+                matchedSubscribers.add(subscriber.mqttClient.clientId)
                 SUCCESS
             }
             

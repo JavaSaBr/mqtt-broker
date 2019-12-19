@@ -30,7 +30,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
     protected abstract @NotNull QoS getQoS();
 
-    protected void sendPublish(
+    void sendPublish(
         @NotNull MqttClient client,
         @NotNull PublishInPacket packet,
         int packetId,

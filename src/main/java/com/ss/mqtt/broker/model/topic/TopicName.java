@@ -1,14 +1,17 @@
 package com.ss.mqtt.broker.model.topic;
 
+import com.ss.mqtt.broker.util.TopicUtils;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+@NoArgsConstructor
 public class TopicName extends AbstractTopic {
 
-    public static final TopicName INVALID_TOPIC_NAME = new TopicName(true);
-    public static final TopicName EMPTY_TOPIC_NAME = new TopicName(false);
+    public static final TopicName INVALID_TOPIC_NAME = new TopicName();
+    public static final TopicName EMPTY_TOPIC_NAME = new TopicName();
 
     public static @NotNull TopicName from(@NotNull String topicName) {
-        if (!checkTopic(topicName) ||
+        if (!TopicUtils.check(topicName) ||
             topicName.contains(MULTI_LEVEL_WILDCARD) ||
             topicName.contains(SINGLE_LEVEL_WILDCARD)
         ) {
@@ -21,10 +24,5 @@ public class TopicName extends AbstractTopic {
     private TopicName(@NotNull String topicName) {
         super(topicName);
     }
-
-    private TopicName(boolean invalid) {
-        super(invalid);
-    }
-
 }
 
