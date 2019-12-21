@@ -10,7 +10,8 @@ import com.ss.mqtt.broker.test.network.NetworkUnitSpecification
 import spock.lang.Unroll
 
 import static com.ss.mqtt.broker.model.QoS.*
-import static com.ss.mqtt.broker.model.topic.TopicFilter.from
+import static com.ss.mqtt.broker.util.TopicUtils.newTopicFilter
+import static com.ss.mqtt.broker.util.TopicUtils.newTopicName
 
 class TopicSubscriberTest extends NetworkUnitSpecification {
     
@@ -40,16 +41,16 @@ class TopicSubscriberTest extends NetworkUnitSpecification {
             }
         where:
             topicFilters << [
-                [from("topic/second/in"), from("topic/+/in"), from("topic/#")],
-                [from("topic/+/in"), from("topic/first/in"), from("topic/out")],
-                [from("topic/second/in"), from("topic/first/in"), from("topic/out")],
-                [from("topic/second/in"), from("topic/+/in"), from("topic/#")]
+                [newTopicFilter("topic/second/in"), newTopicFilter("topic/+/in"), newTopicFilter("topic/#")],
+                [newTopicFilter("topic/+/in"), newTopicFilter("topic/first/in"), newTopicFilter("topic/out")],
+                [newTopicFilter("topic/second/in"), newTopicFilter("topic/first/in"), newTopicFilter("topic/out")],
+                [newTopicFilter("topic/second/in"), newTopicFilter("topic/+/in"), newTopicFilter("topic/#")]
             ]
             topicNames << [
-                TopicName.from("topic/second/in"),
-                TopicName.from("topic/first/in"),
-                TopicName.from("topic/second/in"),
-                TopicName.from("topic/second/in")
+                newTopicName("topic/second/in"),
+                newTopicName("topic/first/in"),
+                newTopicName("topic/second/in"),
+                newTopicName("topic/second/in")
             ]
             subscriberQos << [
                 [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE],

@@ -26,7 +26,7 @@ public interface SubscriptionService {
     @NotNull <A> ActionResult forEachTopicSubscriber(
         @NotNull TopicName topicName,
         @NotNull A argument,
-        @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
+        @NotNull NotNullBiFunction<SingleSubscriber, A, ActionResult> action
     );
 
     /**

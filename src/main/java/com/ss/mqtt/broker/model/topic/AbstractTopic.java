@@ -1,8 +1,9 @@
 package com.ss.mqtt.broker.model.topic;
 
+import static com.ss.mqtt.broker.util.TopicUtils.DELIMITER;
+import static com.ss.rlib.common.util.ArrayUtils.EMPTY_STRING_ARRAY;
+import static com.ss.rlib.common.util.StringUtils.EMPTY;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -15,18 +16,14 @@ public abstract class AbstractTopic {
         DebugUtils.registerIncludedFields("rawTopic");
     }
 
-    static final String DELIMITER = "/";
-    static final String MULTI_LEVEL_WILDCARD = "#";
-    static final String SINGLE_LEVEL_WILDCARD = "+";
-
     private final @NotNull String[] segments;
     private final @NotNull String rawTopic;
     private final int length;
 
     AbstractTopic() {
         length = 0;
-        segments = ArrayUtils.EMPTY_STRING_ARRAY;
-        rawTopic = StringUtils.EMPTY;
+        segments = EMPTY_STRING_ARRAY;
+        rawTopic = EMPTY;
     }
 
     AbstractTopic(@NotNull String topicName) {

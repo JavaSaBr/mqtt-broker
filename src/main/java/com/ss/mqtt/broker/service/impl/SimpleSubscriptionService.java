@@ -2,16 +2,11 @@ package com.ss.mqtt.broker.service.impl;
 
 import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
 import static com.ss.mqtt.broker.model.ActionResult.FAILED;
-import static com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
-import static com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode.*;
-import static com.ss.mqtt.broker.model.topic.TopicFilter.*;
-import static com.ss.mqtt.broker.model.topic.TopicName.*;
-import com.ss.mqtt.broker.exception.SubscriptionRejectException;
+import static com.ss.mqtt.broker.util.TopicUtils.*;
 import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
-import com.ss.mqtt.broker.model.topic.SharedTopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.model.topic.TopicSubscribers;
@@ -34,9 +29,9 @@ public class SimpleSubscriptionService implements SubscriptionService {
     public <A> @NotNull ActionResult forEachTopicSubscriber(
         @NotNull TopicName topicName,
         @NotNull A argument,
-        @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
+        @NotNull NotNullBiFunction<SingleSubscriber, A, ActionResult> action
     ) {
-        if (topicName == INVALID_TOPIC_NAME) {
+        if (isInvalid(topicName)) {
             return FAILED;
         }
         ActionResult result = EMPTY;
@@ -60,18 +55,22 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull SubscribeTopicFilter subscribe,
         @NotNull MqttClient client
     ) {
-        checkTopicFilter(client, subscribe.getTopicFilter());
-
-        if (subscribe.getTopicFilter() == INVALID_TOPIC_FILTER) {
-            return SubscribeAckReasonCode.UNSPECIFIED_ERROR;
-        }
+        var config = client.getConnectionConfig();
+        var topic = subscribe.getTopicFilter();
         var session = client.getSession();
         if (session == null) {
             return null;
+        } else if (!config.isSharedSubscriptionAvailable() && isShared(topic)) {
+            return SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+        } else if (!config.isWildcardSubscriptionAvailable() && hasWildcard(topic)) {
+            return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+        } else if (isInvalid(topic)) {
+            return SubscribeAckReasonCode.UNSPECIFIED_ERROR;
+        } else {
+            session.addSubscriber(subscribe);
+            topicSubscribers.addSubscriber(client, subscribe);
+            return subscribe.getQos().getSubscribeAckReasonCode();
         }
-        session.addSubscriber(subscribe);
-        topicSubscribers.addSubscriber(client, subscribe);
-        return subscribe.getQos().getSubscribeAckReasonCode();
     }
 
     @Override
@@ -88,16 +87,12 @@ public class SimpleSubscriptionService implements SubscriptionService {
         @NotNull TopicFilter topic,
         @NotNull MqttClient client
     ) {
-        checkTopicFilter(client, topic);
-
-        if (topic == INVALID_TOPIC_FILTER) {
-            return UNSPECIFIED_ERROR;
-        }
         var session = client.getSession();
         if (session == null) {
             return null;
-        }
-        if (topicSubscribers.removeSubscriber(client, topic)) {
+        } else if (isInvalid(topic)) {
+            return UNSPECIFIED_ERROR;
+        } else if (topicSubscribers.removeSubscriber(client, topic)) {
             session.removeSubscriber(topic);
             return SUCCESS;
         } else {
@@ -119,14 +114,5 @@ public class SimpleSubscriptionService implements SubscriptionService {
             mqttClient,
             TopicSubscribers::addSubscriber
         );
-    }
-
-    private static void checkTopicFilter(@NotNull MqttClient client, @NotNull TopicFilter topic) {
-        var config = client.getConnectionConfig();
-        if (!config.isSharedSubscriptionAvailable() && topic instanceof SharedTopicFilter) {
-            throw new SubscriptionRejectException(SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
-        } else if (!config.isWildcardSubscriptionAvailable()) {
-            throw new SubscriptionRejectException(WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
-        }
     }
 }

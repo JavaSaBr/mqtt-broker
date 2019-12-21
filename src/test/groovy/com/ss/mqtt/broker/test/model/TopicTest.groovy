@@ -1,19 +1,17 @@
 package com.ss.mqtt.broker.test.model
 
-import com.ss.mqtt.broker.model.topic.TopicFilter
-import com.ss.mqtt.broker.model.topic.TopicName
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static com.ss.mqtt.broker.model.topic.TopicFilter.INVALID_TOPIC_FILTER
-import static com.ss.mqtt.broker.model.topic.TopicName.INVALID_TOPIC_NAME
+import static com.ss.mqtt.broker.util.TopicUtils.*
 
 class TopicTest extends Specification {
     
     @Unroll
     def "should create topic name: #stringTopicName"(String stringTopicName, int levelsCount) {
         when:
-            def topicName = TopicName.from(stringTopicName)
+            def topicName = newTopicName(stringTopicName)
         then:
             topicName.segments.size() == levelsCount
             topicName.rawTopic == stringTopicName
@@ -27,9 +25,9 @@ class TopicTest extends Specification {
     @Unroll
     def "should fail create topic name: #stringTopicName"(String stringTopicName) {
         when:
-            def topicName = TopicName.from(stringTopicName)
+            def topicName = newTopicName(stringTopicName)
         then:
-            topicName == INVALID_TOPIC_NAME
+            isInvalid(topicName)
         where:
             stringTopicName << [
                 "",
@@ -41,7 +39,7 @@ class TopicTest extends Specification {
     @Unroll
     def "should create topic filter: #stringTopicFilter"(String stringTopicFilter, int levelsCount) {
         when:
-            def topicFilter = TopicFilter.from(stringTopicFilter)
+            def topicFilter = newTopicFilter(stringTopicFilter)
         then:
             topicFilter.segments.size() == levelsCount
             topicFilter.rawTopic == stringTopicFilter
@@ -57,9 +55,9 @@ class TopicTest extends Specification {
     @Unroll
     def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter) {
         when:
-            def topicFilter = TopicFilter.from(stringTopicFilter)
+            def topicFilter = newTopicFilter(stringTopicFilter)
         then:
-            topicFilter == INVALID_TOPIC_FILTER
+            isInvalid(topicFilter)
         where:
             stringTopicFilter << [
                 "",

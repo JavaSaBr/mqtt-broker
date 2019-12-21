@@ -7,7 +7,7 @@ public class SharedTopicFilter extends TopicFilter {
 
     private final @Getter @NotNull String group;
 
-    SharedTopicFilter(@NotNull String topicFilter, @NotNull String group) {
+    public SharedTopicFilter(@NotNull String topicFilter, @NotNull String group) {
         super(topicFilter);
         this.group = group;
     }

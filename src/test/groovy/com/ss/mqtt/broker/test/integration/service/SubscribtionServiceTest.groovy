@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.test.integration.service
 
+
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
 import com.ss.mqtt.broker.model.SingleSubscriber
-import com.ss.mqtt.broker.model.Subscriber
 import com.ss.mqtt.broker.service.ClientIdRegistry
 import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService
 import com.ss.mqtt.broker.test.integration.IntegrationSpecification
@@ -15,7 +15,7 @@ import java.util.concurrent.CompletionException
 
 import static com.hivemq.client.mqtt.datatypes.MqttQos.*
 import static com.ss.mqtt.broker.model.ActionResult.SUCCESS
-import static com.ss.mqtt.broker.model.topic.TopicName.from
+import static com.ss.mqtt.broker.util.TopicUtils.newTopicName
 import static org.spockframework.util.Pair.of
 
 class SubscribtionServiceTest extends IntegrationSpecification {
@@ -28,14 +28,12 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     
     def "should clear/restore topic subscribers after disconnect/reconnect"() {
         given:
-            def clientId = clientIdRegistry.generate().block()
-
             def subscriber = buildExternalMqtt5Client(clientId)
-            def topicName = from(topicFilter)
-            
+            def topicName = newTopicName(topicFilter)
+    
             def matchesCount = 0
             SingleSubscriber matchedSubscriber = null
-            def action = { subs, clId ->
+            def action = { subs, empty ->
                 matchesCount++
                 matchedSubscriber = subs
                 SUCCESS
@@ -51,11 +49,11 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 .send()
                 .join()
             
-            def actionResult = subscriptionService.forEachTopicSubscriber(topicName, clientId, action)
+            def actionResult = subscriptionService.forEachTopicSubscriber(topicName, null, action)
         then:
             matchesCount == 1
             matchedSubscriber.mqttClient.getClientId() == clientId
-            matchedSubscriber.topicFilter.getRawTopic() == topicFilter
+            matchedSubscriber.subscribe.topicFilter.getRawTopic() == topicFilter
             actionResult == SUCCESS
         when:
             subscriber.disconnect().join()
@@ -68,7 +66,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
         then:
             matchesCount == 2
             matchedSubscriber.mqttClient.getClientId() == clientId
-            matchedSubscriber.topicFilter.getRawTopic() == topicFilter
+            matchedSubscriber.subscribe.topicFilter.getRawTopic() == topicFilter
             actionResult == SUCCESS
         cleanup:
             subscriber.disconnect().join()
@@ -82,18 +80,16 @@ class SubscribtionServiceTest extends IntegrationSpecification {
         String targetTopicFilter
     ) {
         given:
-            def clientId = clientIdRegistry.generate().block()
-            def subscriber = buildExternalMqtt5Client(clientId)
+            def subscriber = buildExternalMqtt5Client()
             
             def matchesCount = 0
             SingleSubscriber matchedSubscriber = null
-            def action = { subs, clId ->
+            def action = { subs, empty ->
                 matchesCount++
                 matchedSubscriber = subs
                 SUCCESS
             }
             subscriber.connectWith()
-                .cleanStart(true)
                 .send()
                 .join()
             subscriber.subscribeWith()
@@ -107,10 +103,10 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 .send()
                 .join()
         when:
-            subscriptionService.forEachTopicSubscriber(from(topicName), clientId, action)
+            subscriptionService.forEachTopicSubscriber(newTopicName(topicName), null, action)
         then:
             matchesCount == 1
-            matchedSubscriber.topicFilter.getRawTopic() == targetTopicFilter
+            matchedSubscriber.subscribe.topicFilter.getRawTopic() == targetTopicFilter
         cleanup:
             subscriber.disconnect().join()
         where:
@@ -138,21 +134,18 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             
             def matchesCount = 0
             def matchedSubscribers = new LinkedHashSet<String>()
-            def action = { Subscriber subscriber, String clientId ->
+            def action = { SingleSubscriber subscriber, String clientId ->
                 matchesCount++
                 matchedSubscribers.add(subscriber.mqttClient.clientId)
                 SUCCESS
             }
             
             subscriber1.connectWith()
-                .cleanStart(true)
                 .send()
                 .join()
             subscriber2.connectWith()
-                .cleanStart(true)
                 .send()
                 .join()
-            
             
             subscriber1.subscribeWith()
                 .topicFilter(topicFilter1.first())
@@ -165,7 +158,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 .send()
                 .join()
         when:
-            subscriptionService.forEachTopicSubscriber(from(topicName), clientId, action)
+            subscriptionService.forEachTopicSubscriber(newTopicName(topicName), clientId, action)
         then:
             matchesCount == targetCount
             matchedSubscribers[0] == clientId1
@@ -174,45 +167,42 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             subscriber1.disconnect().join()
             subscriber2.disconnect().join()
         where:
-            topicName            | topicFilter1                                     | topicFilter2                                 | targetTopicFilter | targetCount
-            "topic/Filter"       | of("\$shared/group1/topic/Filter", AT_MOST_ONCE) | of("\$shared/group2/topic/#", AT_LEAST_ONCE) | "topic/#"         | 2
-            "topic/Filter"       | of("\$shared/group1/topic/Filter", EXACTLY_ONCE) | of("topic/#", AT_LEAST_ONCE)                 | "topic/Filter"    | 2
-            "topic/Filter/First" | of("topic/+/First", AT_MOST_ONCE)                | of("\$shared/group2/topic/#", AT_LEAST_ONCE) | "topic/#"         | 2
-            "topic/Filter/First" | of("topic/+/First", EXACTLY_ONCE)                | of("topic/#", AT_LEAST_ONCE)                 | "topic/+/First"   | 2
+            topicName            | topicFilter1                                    | topicFilter2                                | targetTopicFilter | targetCount
+            "topic/Filter"       | of("\$share/group1/topic/Filter", AT_MOST_ONCE) | of("\$share/group2/topic/#", AT_LEAST_ONCE) | "topic/#"         | 2
+            "topic/Filter"       | of("\$share/group1/topic/Filter", EXACTLY_ONCE) | of("topic/#", AT_LEAST_ONCE)                | "topic/Filter"    | 2
+            "topic/Filter/First" | of("topic/+/First", AT_MOST_ONCE)               | of("\$share/group2/topic/#", AT_LEAST_ONCE) | "topic/#"         | 2
+            "topic/Filter/First" | of("topic/+/First", EXACTLY_ONCE)               | of("topic/#", AT_LEAST_ONCE)                | "topic/+/First"   | 2
     }
     
     @Unroll
     def "should reject subscribe with wrong topic filter"(
         String wrongTopicFilter,
-        Class<Throwable> exception,
-        Class<Throwable> cause,
-        String message
+        Class<Throwable> exception
     ) {
         given:
-            def clientId = clientIdRegistry.generate().block()
-            def subscriber = buildExternalMqtt5Client(clientId)
+            def subscriber = buildExternalMqtt5Client()
         when:
             subscriber.connectWith()
-                .cleanStart(true)
                 .send()
                 .join()
             subscriber.subscribeWith()
                 .topicFilter(wrongTopicFilter)
-                .qos(AT_MOST_ONCE)
                 .send()
                 .join()
         then:
             def ex = thrown exception
             if (ex.cause != null) {
-                ex.cause.class == cause
+                ex.cause.class == Mqtt5SubAckException
                 ex.cause.message == "SUBACK contains only Error Codes"
             }
+        cleanup:
+            subscriber.disconnect().join()
         where:
-            wrongTopicFilter  | exception                | cause                | message
-            "topic/"          | CompletionException      | Mqtt5SubAckException | "SUBACK contains only Error Codes"
-            "topic//Filter"   | CompletionException      | Mqtt5SubAckException | "SUBACK contains only Error Codes"
-            "/topic/Another"  | CompletionException      | Mqtt5SubAckException | "SUBACK contains only Error Codes"
-            "topic/##"        | IllegalArgumentException | null                 | null
-            "++/Filter/First" | IllegalArgumentException | null                 | null
+            wrongTopicFilter  | exception
+            "topic/"          | CompletionException
+            "topic//Filter"   | CompletionException
+            "/topic/Another"  | CompletionException
+            "topic/##"        | IllegalArgumentException
+            "++/Filter/First" | IllegalArgumentException
     }
 }

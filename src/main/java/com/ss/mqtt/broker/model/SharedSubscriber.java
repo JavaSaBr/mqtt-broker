@@ -10,41 +10,41 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SharedSubscriber extends AbstractSubscriber {
+public class SharedSubscriber implements Subscriber {
 
-    private final ConcurrentArray<MqttClient> clients;
+    private final SharedTopicFilter topicFilter;
+    private final ConcurrentArray<SingleSubscriber> subscribers;
     private final AtomicInteger current;
 
     public SharedSubscriber(@NotNull SubscribeTopicFilter topic) {
-        super(topic);
-        clients = ConcurrentArray.ofType(MqttClient.class);
+        subscribers = ConcurrentArray.ofType(Subscriber.class);
         current = new AtomicInteger(0);
+        topicFilter = (SharedTopicFilter) topic.getTopicFilter();
     }
 
-    @Override
-    public @NotNull MqttClient getMqttClient() {
+    public @NotNull SingleSubscriber getSubscriber() {
         //noinspection ConstantConditions
-        return clients.getInReadLock(current.getAndIncrement(), SharedSubscriber::next);
+        return subscribers.getInReadLock(current.getAndIncrement(), SharedSubscriber::next);
     }
 
-    public void addSubscriber(@NotNull MqttClient client) {
-        clients.runInWriteLock(client, Array::add);
+    public void addSubscriber(@NotNull SingleSubscriber client) {
+        subscribers.runInWriteLock(client, Array::add);
     }
 
     public boolean removeSubscriber(@NotNull MqttClient client) {
-        return clients.removeIfInWriteLock(client, Objects::equals);
+        return subscribers.removeIfConvertedInWriteLock(client, SingleSubscriber::getMqttClient, Objects::equals);
     }
 
     public int size() {
         //noinspection ConstantConditions
-        return clients.getInReadLock(Collection::size);
+        return subscribers.getInReadLock(Collection::size);
     }
 
-    private static @NotNull MqttClient next(@NotNull Array<MqttClient> subscribers, int current) {
+    private static @NotNull SingleSubscriber next(@NotNull Array<SingleSubscriber> subscribers, int current) {
         return subscribers.get(current % subscribers.size());
     }
 
     public @NotNull String getGroup() {
-        return ((SharedTopicFilter) subscribeTopicFilter.getTopicFilter()).getGroup();
+        return topicFilter.getGroup();
     }
 }
