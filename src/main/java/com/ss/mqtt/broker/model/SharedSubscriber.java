@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SharedSubscriber implements Subscriber {
 
-    private final SharedTopicFilter topicFilter;
+    private final @NotNull SharedTopicFilter topicFilter;
     private final ConcurrentArray<SingleSubscriber> subscribers;
     private final AtomicInteger current;
 

@@ -72,7 +72,7 @@ public class TopicSubscribers {
         return isSharedSubscriber(subscriber) && group.equals(((SharedSubscriber) subscriber).getGroup());
     }
 
-    private static MqttClient singleSubscriberToMqttClient(@NotNull Subscriber subscriber) {
+    private static @Nullable MqttClient singleSubscriberToMqttClient(@NotNull Subscriber subscriber) {
         return isSingleSubscriber(subscriber) ? ((SingleSubscriber) subscriber).getMqttClient() : null;
     }
 

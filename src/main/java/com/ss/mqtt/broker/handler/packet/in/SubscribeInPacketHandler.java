@@ -19,14 +19,17 @@ public class SubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttCl
     protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull SubscribeInPacket packet) {
         var ackReasonCodes = subscriptionService.subscribe(client, packet.getTopicFilters());
         client.send(client.getPacketOutFactory().newSubscribeAck(packet.getPacketId(), ackReasonCodes));
-        ackReasonCodes.forEach(client, SubscribeInPacketHandler::checkException);
+        ackReasonCodes.findAny(client, SubscribeInPacketHandler::hasInvalidReason);
     }
 
-    private static void checkException(@NotNull UnsafeMqttClient client, @NotNull SubscribeAckReasonCode reason) {
+    private static boolean hasInvalidReason(@NotNull UnsafeMqttClient client, @NotNull SubscribeAckReasonCode reason) {
         if (reason == SHARED_SUBSCRIPTIONS_NOT_SUPPORTED || reason == WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED) {
             int reasonIndex = Byte.toUnsignedInt(reason.getValue());
             var disconnect = client.getPacketOutFactory().newDisconnect(client, DisconnectReasonCode.of(reasonIndex));
             client.sendWithFeedback(disconnect).thenAccept(result -> client.getConnection().close());
+            return true;
+        } else {
+            return false;
         }
     }
 }
