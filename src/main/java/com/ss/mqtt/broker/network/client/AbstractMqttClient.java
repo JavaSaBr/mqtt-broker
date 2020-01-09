@@ -32,8 +32,8 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     }
 
     protected final @NotNull MqttConnection connection;
-    protected final MqttClientReleaseHandler releaseHandler;
-    protected final AtomicBoolean released;
+    protected final @NotNull MqttClientReleaseHandler releaseHandler;
+    protected final @NotNull AtomicBoolean released;
 
     private volatile @Setter @NotNull String clientId;
     private volatile @Setter @Getter @Nullable MqttSession session;

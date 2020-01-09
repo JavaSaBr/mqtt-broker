@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SimpleSubscriptionService implements SubscriptionService {
 
-    private final TopicSubscribers topicSubscribers = new TopicSubscribers();
+    private final @NotNull TopicSubscribers topicSubscribers = new TopicSubscribers();
 
     @Override
     public <A> @NotNull ActionResult forEachTopicSubscriber(

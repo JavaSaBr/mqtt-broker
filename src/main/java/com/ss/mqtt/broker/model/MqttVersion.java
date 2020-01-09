@@ -62,10 +62,10 @@ public enum MqttVersion {
         return availableVersions[level];
     }
 
-    private final String name;
-    private final byte[] nameInBytes;
+    private final @NotNull MqttPacketOutFactory packetOutFactory;
+    private final byte @NotNull [] nameInBytes;
+    private final @NotNull String name;
     private final byte version;
-    private final MqttPacketOutFactory packetOutFactory;
 
     MqttVersion(@NotNull String name, int version, @NotNull MqttPacketOutFactory packetOutFactory) {
         this.name = name;
