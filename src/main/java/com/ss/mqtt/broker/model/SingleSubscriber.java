@@ -7,7 +7,7 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 @ToString
-@EqualsAndHashCode(of = "mqttClient", callSuper = false)
+@EqualsAndHashCode(of = "mqttClient")
 public class SingleSubscriber implements Subscriber {
 
     private final @Getter @NotNull MqttClient mqttClient;

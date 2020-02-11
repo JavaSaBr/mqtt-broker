@@ -1,9 +1,13 @@
 package com.ss.mqtt.broker.util;
 
+import static java.util.Collections.unmodifiableList;
 import com.ss.mqtt.broker.model.topic.SharedTopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicName;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TopicUtils {
 
@@ -12,7 +16,7 @@ public class TopicUtils {
     public static final TopicName EMPTY_TOPIC_NAME = new TopicName();
 
     private static final String SHARE_KEYWORD = "$share";
-    public static final String DELIMITER = "/";
+    private static final String DELIMITER = "/";
     public static final String MULTI_LEVEL_WILDCARD = "#";
     public static final String SINGLE_LEVEL_WILDCARD = "+";
 
@@ -49,6 +53,17 @@ public class TopicUtils {
         } else {
             return new TopicFilter(topicFilter);
         }
+    }
+
+    public static @NotNull List<String> splitTopic(@NotNull String topic) {
+        var segments = new ArrayList<String>();
+        int pos = 0, end;
+        while ((end = topic.indexOf(DELIMITER, pos)) >= 0) {
+            segments.add(topic.substring(pos, end));
+            pos = end + 1;
+        }
+        segments.add(topic.substring(pos));
+        return unmodifiableList(segments);
     }
 
     private static @NotNull TopicFilter newSharedTopicFilter(@NotNull String topicFilter) {
