@@ -1,13 +1,12 @@
 package com.ss.mqtt.broker.util;
 
-import static java.util.Collections.unmodifiableList;
+import static com.ss.rlib.common.util.array.ArrayFactory.newReadOnlyArray;
 import com.ss.mqtt.broker.model.topic.SharedTopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicName;
+import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.util.StringUtils;
 
 public class TopicUtils {
 
@@ -55,15 +54,16 @@ public class TopicUtils {
         }
     }
 
-    public static @NotNull List<String> splitTopic(@NotNull String topic) {
-        var segments = new ArrayList<String>();
-        int pos = 0, end;
+    public static @NotNull Array<String> splitTopic(@NotNull String topic) {
+        int segmentCount = StringUtils.countOccurrencesOf(topic, DELIMITER) + 1;
+        var segments = new String[segmentCount];
+        int i = 0, pos = 0, end;
         while ((end = topic.indexOf(DELIMITER, pos)) >= 0) {
-            segments.add(topic.substring(pos, end));
+            segments[i++] = topic.substring(pos, end);
             pos = end + 1;
         }
-        segments.add(topic.substring(pos));
-        return unmodifiableList(segments);
+        segments[i] = topic.substring(pos);
+        return newReadOnlyArray(segments);
     }
 
     private static @NotNull TopicFilter newSharedTopicFilter(@NotNull String topicFilter) {

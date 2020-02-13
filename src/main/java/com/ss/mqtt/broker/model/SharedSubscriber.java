@@ -12,6 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SharedSubscriber implements Subscriber {
 
+    private static @NotNull SingleSubscriber next(@NotNull Array<SingleSubscriber> subscribers, int current) {
+        return subscribers.get(current % subscribers.size());
+    }
+
     private final @NotNull SharedTopicFilter topicFilter;
     private final @NotNull ConcurrentArray<SingleSubscriber> subscribers;
     private final @NotNull AtomicInteger current;
@@ -38,10 +42,6 @@ public class SharedSubscriber implements Subscriber {
     public int size() {
         //noinspection ConstantConditions
         return subscribers.getInReadLock(Collection::size);
-    }
-
-    private static @NotNull SingleSubscriber next(@NotNull Array<SingleSubscriber> subscribers, int current) {
-        return subscribers.get(current % subscribers.size());
     }
 
     public @NotNull String getGroup() {

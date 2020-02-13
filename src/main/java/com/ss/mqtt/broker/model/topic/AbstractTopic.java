@@ -3,11 +3,10 @@ package com.ss.mqtt.broker.model.topic;
 import static com.ss.mqtt.broker.util.TopicUtils.splitTopic;
 import static com.ss.rlib.common.util.StringUtils.EMPTY;
 import com.ss.mqtt.broker.util.DebugUtils;
+import com.ss.rlib.common.util.array.Array;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 @Getter
 @EqualsAndHashCode(of = "rawTopic")
@@ -17,13 +16,13 @@ public abstract class AbstractTopic {
         DebugUtils.registerIncludedFields("rawTopic");
     }
 
-    private final @NotNull List<String> segments;
+    private final @NotNull Array<String> segments;
     private final @NotNull String rawTopic;
     private final int length;
 
     AbstractTopic() {
         length = 0;
-        segments = List.of();
+        segments = empty();
         rawTopic = EMPTY;
     }
 
@@ -39,6 +38,10 @@ public abstract class AbstractTopic {
 
     int levelsCount() {
         return segments.size();
+    }
+
+    String lastSegment() {
+        return segments.get(segments.size() - 1);
     }
 
     @Override
