@@ -9,7 +9,7 @@ import static com.ss.mqtt.broker.util.TopicUtils.*
 class TopicUtilsTest extends Specification {
     
     @Unroll
-    def "should create valid topic name: #topicName"(String topicName) {
+    def "should create valid topic name: [#topicName]"() {
         expect:
             !isInvalid(buildTopicName(topicName))
         where:
@@ -19,7 +19,7 @@ class TopicUtilsTest extends Specification {
     }
     
     @Unroll
-    def "should create valid topic filter: #topicFilter"(String topicFilter) {
+    def "should create valid topic filter: [#topicFilter]"() {
         expect:
             !isInvalid(buildTopicFilter(topicFilter))
         where:
@@ -31,7 +31,7 @@ class TopicUtilsTest extends Specification {
     }
     
     @Unroll
-    def "should detect invalid topic name: #topicName"(String topicName) {
+    def "should detect invalid topic name: [#topicName]"() {
         expect:
             isInvalid(buildTopicName(topicName))
         where:
@@ -43,7 +43,7 @@ class TopicUtilsTest extends Specification {
     }
     
     @Unroll
-    def "should detect invalid topic filter: #topicFilter"(String topicFilter) {
+    def "should detect invalid topic filter: [#topicFilter]"() {
         expect:
             isInvalid(buildTopicFilter(topicFilter))
         where:

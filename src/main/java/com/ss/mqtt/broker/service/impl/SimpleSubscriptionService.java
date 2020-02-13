@@ -2,6 +2,9 @@ package com.ss.mqtt.broker.service.impl;
 
 import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
 import static com.ss.mqtt.broker.model.ActionResult.FAILED;
+import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.UNSPECIFIED_ERROR;
+import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode.*;
 import static com.ss.mqtt.broker.util.TopicUtils.*;
 import com.ss.mqtt.broker.model.*;
@@ -61,11 +64,11 @@ public class SimpleSubscriptionService implements SubscriptionService {
         if (session == null) {
             return null;
         } else if (!config.isSharedSubscriptionAvailable() && isShared(topic)) {
-            return SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+            return SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
         } else if (!config.isWildcardSubscriptionAvailable() && hasWildcard(topic)) {
-            return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+            return WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
         } else if (isInvalid(topic)) {
-            return SubscribeAckReasonCode.UNSPECIFIED_ERROR;
+            return UNSPECIFIED_ERROR;
         } else {
             session.addSubscriber(subscribe);
             topicSubscribers.addSubscriber(client, subscribe);
@@ -91,7 +94,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
         if (session == null) {
             return null;
         } else if (isInvalid(topic)) {
-            return UNSPECIFIED_ERROR;
+            return UnsubscribeAckReasonCode.UNSPECIFIED_ERROR;
         } else if (topicSubscribers.removeSubscriber(client, topic)) {
             session.removeSubscriber(topic);
             return SUCCESS;

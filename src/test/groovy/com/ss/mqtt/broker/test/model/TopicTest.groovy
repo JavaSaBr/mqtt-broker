@@ -9,7 +9,7 @@ import static com.ss.mqtt.broker.util.TopicUtils.*
 class TopicTest extends Specification {
     
     @Unroll
-    def "should create topic name: #stringTopicName"(String stringTopicName, int levelsCount) {
+    def "should create topic name: [#stringTopicName]"() {
         when:
             def topicName = buildTopicName(stringTopicName)
         then:
@@ -23,11 +23,9 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should fail create topic name: #stringTopicName"(String stringTopicName) {
-        when:
-            def topicName = buildTopicName(stringTopicName)
-        then:
-            isInvalid(topicName)
+    def "should fail create topic name: [#stringTopicName]"() {
+        expect:
+            isInvalid(buildTopicName(stringTopicName))
         where:
             stringTopicName << [
                 "",
@@ -37,7 +35,7 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should create topic filter: #stringTopicFilter"(String stringTopicFilter, int levelsCount) {
+    def "should create topic filter: [#stringTopicFilter]"() {
         when:
             def topicFilter = buildTopicFilter(stringTopicFilter)
         then:
@@ -53,11 +51,9 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter) {
-        when:
-            def topicFilter = buildTopicFilter(stringTopicFilter)
-        then:
-            isInvalid(topicFilter)
+    def "should fail create topic filter: [#stringTopicFilter]"() {
+        expect:
+            isInvalid(buildTopicFilter(stringTopicFilter))
         where:
             stringTopicFilter << [
                 "",
@@ -71,7 +67,7 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should match topicFilter[#topicFilter] with topicName[#topicName]"(String topicFilter, String topicName) {
+    def "should match topic filter: [#topicFilter] with topic name: [#topicName]"() {
         expect:
             buildTopicName(topicName).match(buildTopicFilter(topicFilter))
         where:
@@ -83,7 +79,7 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should not match topicFilter[#topicFilter] with topicName[#topicName]"(String topicFilter, String topicName) {
+    def "should not match topic filter: [#topicFilter] with topic name: [#topicName]"() {
         expect:
             !buildTopicName(topicName).match(buildTopicFilter(topicFilter))
         where:
