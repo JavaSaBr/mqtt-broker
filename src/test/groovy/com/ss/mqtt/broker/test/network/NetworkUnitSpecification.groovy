@@ -8,7 +8,6 @@ import com.ss.mqtt.broker.model.SubscribeTopicFilter
 import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
-import com.ss.mqtt.broker.model.topic.TopicName
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.client.MqttClient
 import com.ss.mqtt.broker.test.UnitSpecification
@@ -19,8 +18,8 @@ import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
 
-import static com.ss.mqtt.broker.util.TopicUtils.newTopicFilter
-import static com.ss.mqtt.broker.util.TopicUtils.newTopicName
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName
 
 class NetworkUnitSpecification extends UnitSpecification {
     
@@ -55,21 +54,21 @@ class NetworkUnitSpecification extends UnitSpecification {
     public static final authMethod = "testAuthMethod"
     public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
     public static final reasonString = "reasonString"
-    public static final publishTopic = newTopicName("publish/Topic")
+    public static final publishTopic = buildTopicName("publish/Topic")
     public static final responseTopic = "response/Topic"
     public static final topicFilter = "topic/Filter"
-    public static final topicFilter1Obj311 = new SubscribeTopicFilter(newTopicFilter(topicFilter), QoS.AT_LEAST_ONCE)
+    public static final topicFilter1Obj311 = new SubscribeTopicFilter(buildTopicFilter(topicFilter), QoS.AT_LEAST_ONCE)
     public static final topicFilter1Obj5 = new SubscribeTopicFilter(
-        newTopicFilter(topicFilter),
+        buildTopicFilter(topicFilter),
         QoS.AT_LEAST_ONCE,
         SubscribeRetainHandling.DO_NOT_SEND,
         true,
         false,
     )
     public static final topicFilter2 = "topic/Filter2"
-    public static final topicFilter2Obj311 = new SubscribeTopicFilter(newTopicFilter(topicFilter2), QoS.EXACTLY_ONCE)
+    public static final topicFilter2Obj311 = new SubscribeTopicFilter(buildTopicFilter(topicFilter2), QoS.EXACTLY_ONCE)
     public static final topicFilter2Obj5 = new SubscribeTopicFilter(
-        newTopicFilter(topicFilter2),
+        buildTopicFilter(topicFilter2),
         QoS.EXACTLY_ONCE,
         SubscribeRetainHandling.DO_NOT_SEND,
         true,

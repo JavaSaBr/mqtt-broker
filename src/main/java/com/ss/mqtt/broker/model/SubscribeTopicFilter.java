@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.model;
 
-import static com.ss.mqtt.broker.util.TopicUtils.newTopicFilter;
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -44,7 +44,7 @@ public class SubscribeTopicFilter {
     private final boolean retainAsPublished;
 
     public SubscribeTopicFilter(@NotNull String topicFilter, @NotNull QoS qos) {
-        this(newTopicFilter(topicFilter), qos, SubscribeRetainHandling.SEND, true, true);
+        this(buildTopicFilter(topicFilter), qos, SubscribeRetainHandling.SEND, true, true);
     }
 
     public SubscribeTopicFilter(@NotNull TopicFilter topicFilter, @NotNull QoS qos) {

@@ -36,7 +36,7 @@ public class TopicUtils {
         return topic.contains(SINGLE_LEVEL_WILDCARD) || topic.contains(MULTI_LEVEL_WILDCARD);
     }
 
-    public static @NotNull TopicName newTopicName(@NotNull String topicName) {
+    public static @NotNull TopicName buildTopicName(@NotNull String topicName) {
         if (isInvalidTopicName(topicName)) {
             return INVALID_TOPIC_NAME;
         } else {
@@ -44,11 +44,11 @@ public class TopicUtils {
         }
     }
 
-    public static @NotNull TopicFilter newTopicFilter(@NotNull String topicFilter) {
+    public static @NotNull TopicFilter buildTopicFilter(@NotNull String topicFilter) {
         if (isInvalidTopicFilter(topicFilter)) {
             return INVALID_TOPIC_FILTER;
         } else if (isShared(topicFilter)) {
-            return newSharedTopicFilter(topicFilter);
+            return buildSharedTopicFilter(topicFilter);
         } else {
             return new TopicFilter(topicFilter);
         }
@@ -66,7 +66,7 @@ public class TopicUtils {
         return newReadOnlyArray(segments);
     }
 
-    private static @NotNull TopicFilter newSharedTopicFilter(@NotNull String topicFilter) {
+    private static @NotNull TopicFilter buildSharedTopicFilter(@NotNull String topicFilter) {
         int firstSlash = topicFilter.indexOf(DELIMITER) + 1;
         int secondSlash = topicFilter.indexOf(DELIMITER, firstSlash);
         var group = topicFilter.substring(firstSlash, secondSlash);

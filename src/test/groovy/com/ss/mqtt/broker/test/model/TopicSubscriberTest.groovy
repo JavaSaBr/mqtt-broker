@@ -10,8 +10,8 @@ import com.ss.mqtt.broker.test.network.NetworkUnitSpecification
 import spock.lang.Unroll
 
 import static com.ss.mqtt.broker.model.QoS.*
-import static com.ss.mqtt.broker.util.TopicUtils.newTopicFilter
-import static com.ss.mqtt.broker.util.TopicUtils.newTopicName
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName
 
 class TopicSubscriberTest extends NetworkUnitSpecification {
     
@@ -41,16 +41,16 @@ class TopicSubscriberTest extends NetworkUnitSpecification {
             }
         where:
             topicFilters << [
-                [newTopicFilter("topic/second/in"), newTopicFilter("topic/+/in"), newTopicFilter("topic/#")],
-                [newTopicFilter("topic/+/in"), newTopicFilter("topic/first/in"), newTopicFilter("topic/out")],
-                [newTopicFilter("topic/second/in"), newTopicFilter("topic/first/in"), newTopicFilter("topic/out")],
-                [newTopicFilter("topic/second/in"), newTopicFilter("topic/+/in"), newTopicFilter("topic/#")]
+                [buildTopicFilter("topic/second/in"), buildTopicFilter("topic/+/in"), buildTopicFilter("topic/#")],
+                [buildTopicFilter("topic/+/in"), buildTopicFilter("topic/first/in"), buildTopicFilter("topic/out")],
+                [buildTopicFilter("topic/second/in"), buildTopicFilter("topic/first/in"), buildTopicFilter("topic/out")],
+                [buildTopicFilter("topic/second/in"), buildTopicFilter("topic/+/in"), buildTopicFilter("topic/#")]
             ]
             topicNames << [
-                newTopicName("topic/second/in"),
-                newTopicName("topic/first/in"),
-                newTopicName("topic/second/in"),
-                newTopicName("topic/second/in")
+                buildTopicName("topic/second/in"),
+                buildTopicName("topic/first/in"),
+                buildTopicName("topic/second/in"),
+                buildTopicName("topic/second/in")
             ]
             subscriberQos << [
                 [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE],

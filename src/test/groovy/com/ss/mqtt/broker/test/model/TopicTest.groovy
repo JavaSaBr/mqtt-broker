@@ -11,7 +11,7 @@ class TopicTest extends Specification {
     @Unroll
     def "should create topic name: #stringTopicName"(String stringTopicName, int levelsCount) {
         when:
-            def topicName = newTopicName(stringTopicName)
+            def topicName = buildTopicName(stringTopicName)
         then:
             topicName.segments.size() == levelsCount
             topicName.rawTopic == stringTopicName
@@ -25,7 +25,7 @@ class TopicTest extends Specification {
     @Unroll
     def "should fail create topic name: #stringTopicName"(String stringTopicName) {
         when:
-            def topicName = newTopicName(stringTopicName)
+            def topicName = buildTopicName(stringTopicName)
         then:
             isInvalid(topicName)
         where:
@@ -39,7 +39,7 @@ class TopicTest extends Specification {
     @Unroll
     def "should create topic filter: #stringTopicFilter"(String stringTopicFilter, int levelsCount) {
         when:
-            def topicFilter = newTopicFilter(stringTopicFilter)
+            def topicFilter = buildTopicFilter(stringTopicFilter)
         then:
             topicFilter.segments.size() == levelsCount
             topicFilter.rawTopic == stringTopicFilter
@@ -55,7 +55,7 @@ class TopicTest extends Specification {
     @Unroll
     def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter) {
         when:
-            def topicFilter = newTopicFilter(stringTopicFilter)
+            def topicFilter = buildTopicFilter(stringTopicFilter)
         then:
             isInvalid(topicFilter)
         where:
@@ -68,5 +68,32 @@ class TopicTest extends Specification {
                 "topic/#/in",
                 "topic/##"
             ]
+    }
+    
+    @Unroll
+    def "should match topicFilter[#topicFilter] with topicName[#topicName]"(String topicFilter, String topicName) {
+        expect:
+            buildTopicName(topicName).match(buildTopicFilter(topicFilter))
+        where:
+            topicFilter  | topicName
+            "topic/in"   | "topic/in"
+            "topic/+"    | "topic/in"
+            "topic/#"    | "topic/in"
+            "topic/+/in" | "topic/m/in"
+    }
+    
+    @Unroll
+    def "should not match topicFilter[#topicFilter] with topicName[#topicName]"(String topicFilter, String topicName) {
+        expect:
+            !buildTopicName(topicName).match(buildTopicFilter(topicFilter))
+        where:
+            topicFilter  | topicName
+            "topic/in"   | "topic/m/in"
+            "topic/in"   | "topic/in/m"
+            "topic/+"    | "topic/m/in"
+            "topic/+"    | "topic/in/m"
+            "topic/#"    | "topic"
+            "topic/+/in" | "topic/m/n"
+            "topic/+/in" | "topic/in"
     }
 }

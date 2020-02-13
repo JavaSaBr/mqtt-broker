@@ -15,7 +15,7 @@ import java.util.concurrent.CompletionException
 
 import static com.hivemq.client.mqtt.datatypes.MqttQos.*
 import static com.ss.mqtt.broker.model.ActionResult.SUCCESS
-import static com.ss.mqtt.broker.util.TopicUtils.newTopicName
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName
 import static org.spockframework.util.Pair.of
 
 class SubscribtionServiceTest extends IntegrationSpecification {
@@ -29,7 +29,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
     def "should clear/restore topic subscribers after disconnect/reconnect"() {
         given:
             def subscriber = buildExternalMqtt5Client(clientId)
-            def topicName = newTopicName(topicFilter)
+            def topicName = buildTopicName(topicFilter)
     
             def matchesCount = 0
             SingleSubscriber matchedSubscriber = null
@@ -103,7 +103,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 .send()
                 .join()
         when:
-            subscriptionService.forEachTopicSubscriber(newTopicName(topicName), null, action)
+            subscriptionService.forEachTopicSubscriber(buildTopicName(topicName), null, action)
         then:
             matchesCount == 1
             matchedSubscriber.subscribe.topicFilter.getRawTopic() == targetTopicFilter
@@ -158,7 +158,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
                 .send()
                 .join()
         when:
-            subscriptionService.forEachTopicSubscriber(newTopicName(topicName), clientId, action)
+            subscriptionService.forEachTopicSubscriber(buildTopicName(topicName), clientId, action)
         then:
             matchesCount == targetCount
             matchedSubscribers[0] == clientId1

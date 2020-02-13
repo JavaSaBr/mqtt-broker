@@ -11,7 +11,7 @@ class TopicUtilsTest extends Specification {
     @Unroll
     def "should create valid topic name: #topicName"(String topicName) {
         expect:
-            !isInvalid(newTopicName(topicName))
+            !isInvalid(buildTopicName(topicName))
         where:
             topicName    | _
             "topic/Name" | _
@@ -21,7 +21,7 @@ class TopicUtilsTest extends Specification {
     @Unroll
     def "should create valid topic filter: #topicFilter"(String topicFilter) {
         expect:
-            !isInvalid(newTopicFilter(topicFilter))
+            !isInvalid(buildTopicFilter(topicFilter))
         where:
             topicFilter      | _
             "topic/Filter"   | _
@@ -33,7 +33,7 @@ class TopicUtilsTest extends Specification {
     @Unroll
     def "should detect invalid topic name: #topicName"(String topicName) {
         expect:
-            isInvalid(newTopicName(topicName))
+            isInvalid(buildTopicName(topicName))
         where:
             topicName     | _
             "topic/+"     | _
@@ -45,7 +45,7 @@ class TopicUtilsTest extends Specification {
     @Unroll
     def "should detect invalid topic filter: #topicFilter"(String topicFilter) {
         expect:
-            isInvalid(newTopicFilter(topicFilter))
+            isInvalid(buildTopicFilter(topicFilter))
         where:
             topicFilter   | _
             "topic/"      | _
