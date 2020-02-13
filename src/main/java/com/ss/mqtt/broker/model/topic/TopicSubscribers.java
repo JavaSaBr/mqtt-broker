@@ -6,6 +6,7 @@ import com.ss.mqtt.broker.model.SingleSubscriber;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.Subscriber;
 import com.ss.mqtt.broker.network.client.MqttClient;
+import com.ss.mqtt.broker.util.SubscriberUtils;
 import com.ss.rlib.common.function.NotNullSupplier;
 import com.ss.rlib.common.util.array.Array;
 import com.ss.rlib.common.util.array.ConcurrentArray;
@@ -18,14 +19,6 @@ import org.jetbrains.annotations.Nullable;
 public class TopicSubscribers {
 
     private final static NotNullSupplier<TopicSubscribers> TOPIC_SUBSCRIBER_SUPPLIER = TopicSubscribers::new;
-
-    private static boolean isSharedSubscriber(@NotNull Subscriber subscriber){
-        return subscriber instanceof SharedSubscriber;
-    }
-
-    private static boolean isSingleSubscriber(@NotNull Subscriber subscriber){
-        return subscriber instanceof SingleSubscriber;
-    }
 
     private static void addSubscriber(
         @NotNull ConcurrentArray<Subscriber> subscribers,
@@ -56,7 +49,7 @@ public class TopicSubscribers {
 
         var sharedSubscriber = (SharedSubscriber) subscribers.findAny(
             group,
-            TopicSubscribers::sharedSubscriberWithGroup
+            SubscriberUtils::sharedSubscriberWithGroup
         );
 
         if (sharedSubscriber == null) {
@@ -66,14 +59,6 @@ public class TopicSubscribers {
 
         var singleSubscriber = new SingleSubscriber(client, subscribe);
         sharedSubscriber.addSubscriber(singleSubscriber);
-    }
-
-    private static boolean sharedSubscriberWithGroup(@NotNull String group, @NotNull Subscriber subscriber) {
-        return isSharedSubscriber(subscriber) && group.equals(((SharedSubscriber) subscriber).getGroup());
-    }
-
-    private static @Nullable MqttClient singleSubscriberToMqttClient(@NotNull Subscriber subscriber) {
-        return isSingleSubscriber(subscriber) ? ((SingleSubscriber) subscriber).getMqttClient() : null;
     }
 
     private static boolean removeSubscriber(
@@ -93,7 +78,7 @@ public class TopicSubscribers {
         //noinspection NullableProblems
         return subscribers.removeIfConverted(
             client,
-            TopicSubscribers::singleSubscriberToMqttClient,
+            SubscriberUtils::singleSubscriberToMqttClient,
             Object::equals
         );
     }
@@ -106,7 +91,7 @@ public class TopicSubscribers {
         boolean removed = false;
         var sharedSubscriber = (SharedSubscriber) subscribers.findAny(
             group,
-            TopicSubscribers::sharedSubscriberWithGroup
+            SubscriberUtils::sharedSubscriberWithGroup
         );
 
         if (sharedSubscriber != null) {
@@ -138,7 +123,7 @@ public class TopicSubscribers {
         }
     }
 
-    private static void addSubscriber(@NotNull Array<SingleSubscriber> result, @NotNull Subscriber subscriber) {
+    private static void addToResultArray(@NotNull Array<SingleSubscriber> result, @NotNull Subscriber subscriber) {
         if (subscriber instanceof SharedSubscriber) {
             result.add(((SharedSubscriber) subscriber).getSubscriber());
         } else {
@@ -163,7 +148,7 @@ public class TopicSubscribers {
                 subscribers.forEachFiltered(
                     result,
                     TopicSubscribers::removeDuplicateWithLowerQoS,
-                    TopicSubscribers::addSubscriber
+                    TopicSubscribers::addToResultArray
                 );
             } finally {
                 subscribers.readUnlock(stamp);
@@ -176,10 +161,10 @@ public class TopicSubscribers {
     private volatile @Getter @Nullable ConcurrentArray<Subscriber> subscribers;
 
     public void addSubscriber(@NotNull MqttClient client, @NotNull SubscribeTopicFilter subscribe) {
-        addSubscriber(0, subscribe.getTopicFilter(), client, subscribe);
+        searchPlaceForSubscriber(0, subscribe.getTopicFilter(), client, subscribe);
     }
 
-    private void addSubscriber(
+    private void searchPlaceForSubscriber(
         int level,
         @NotNull TopicFilter topicFilter,
         @NotNull MqttClient client,
@@ -198,7 +183,7 @@ public class TopicSubscribers {
                 ObjectDictionary::getOrCompute
             );
             //noinspection ConstantConditions
-            topicSubscriber.addSubscriber(level + 1, topicFilter, client, subscribe);
+            topicSubscriber.searchPlaceForSubscriber(level + 1, topicFilter, client, subscribe);
         }
     }
 
@@ -207,27 +192,27 @@ public class TopicSubscribers {
     }
 
     public boolean removeSubscriber(@NotNull MqttClient client, @NotNull TopicFilter topicFilter) {
-        return removeSubscriber(0, topicFilter, client);
+        return searchSubscriberToRemove(0, topicFilter, client);
     }
 
-    private boolean removeSubscriber(int level, @NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
+    private boolean searchSubscriberToRemove(int level, @NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
         var removed = false;
         var topicSubscribers = getTopicSubscribers();
         if (level == topicFilter.levelsCount()) {
-            removed = removeSubscriber(topicFilter, mqttClient);
+            removed = tryToRemoveSubscriber(topicFilter, mqttClient);
         } else if (topicSubscribers != null) {
             var topicSubscriber = topicSubscribers.getInReadLock(
                 topicFilter.getSegment(level),
                 ObjectDictionary::get
             );
             if (topicSubscriber != null) {
-                removed = topicSubscriber.removeSubscriber(level + 1, topicFilter, mqttClient);
+                removed = topicSubscriber.searchSubscriberToRemove(level + 1, topicFilter, mqttClient);
             }
         }
         return removed;
     }
 
-    private boolean removeSubscriber(@NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
+    private boolean tryToRemoveSubscriber(@NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
         var removed = false;
         var subscribers = getSubscribers();
         if (subscribers != null) {
