@@ -53,7 +53,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull MqttConnectionConfig config,
         @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory
     ) {
-        super(network, channel, NetworkCryptor.NULL, bufferAllocator, maxPacketsByRead);
+        super(network, channel, bufferAllocator, maxPacketsByRead);
         this.packetHandlers = packetHandlers;
         this.config = config;
         this.mqttVersion = MqttVersion.MQTT_3_1_1;
@@ -72,7 +72,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
             channel,
             bufferAllocator,
             this::updateLastActivity,
-            this::handleReadPacket,
+            this::handleReceivedPacket,
             maxPacketsByRead
         );
     }

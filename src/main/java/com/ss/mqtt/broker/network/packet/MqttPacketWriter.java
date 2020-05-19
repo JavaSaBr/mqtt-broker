@@ -3,6 +3,9 @@ package com.ss.mqtt.broker.network.packet;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.util.MqttDataUtils;
+import com.ss.rlib.common.function.NotNullBiConsumer;
+import com.ss.rlib.common.function.NotNullConsumer;
+import com.ss.rlib.common.function.NullableSupplier;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.packet.WritablePacket;
 import com.ss.rlib.network.packet.impl.AbstractPacketWriter;
@@ -21,9 +24,9 @@ public class MqttPacketWriter extends AbstractPacketWriter<MqttWritablePacket, M
         @NotNull AsynchronousSocketChannel channel,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Runnable updateActivityFunction,
-        @NotNull Supplier<@NotNull WritablePacket> nextWritePacketSupplier,
-        @NotNull Consumer<@NotNull WritablePacket> writtenPacketHandler,
-        @NotNull BiConsumer<@NotNull WritablePacket, Boolean> sentPacketHandler
+        @NotNull NullableSupplier<@NotNull WritablePacket> nextWritePacketSupplier,
+        @NotNull NotNullConsumer<@NotNull WritablePacket> writtenPacketHandler,
+        @NotNull NotNullBiConsumer<@NotNull WritablePacket, Boolean> sentPacketHandler
     ) {
         super(
             connection,

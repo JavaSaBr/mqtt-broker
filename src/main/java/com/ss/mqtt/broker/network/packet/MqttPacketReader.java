@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.in.*;
 import com.ss.mqtt.broker.util.MqttDataUtils;
 import com.ss.rlib.common.function.ByteFunction;
+import com.ss.rlib.common.function.NotNullConsumer;
 import com.ss.rlib.common.util.NumberUtils;
 import com.ss.rlib.common.util.array.ArrayFactory;
 import com.ss.rlib.network.BufferAllocator;
@@ -13,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.util.function.Consumer;
 
 public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, MqttConnection> {
 
@@ -38,12 +38,17 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
         AuthenticationInPacket::new
     );
 
+    @Override
+    protected boolean canStartReadPacket(@NotNull ByteBuffer buffer) {
+        return buffer.remaining() >= PACKET_LENGTH_START_BYTE;
+    }
+
     public MqttPacketReader(
         @NotNull MqttConnection connection,
         @NotNull AsynchronousSocketChannel channel,
         @NotNull BufferAllocator bufferAllocator,
         @NotNull Runnable updateActivityFunction,
-        @NotNull Consumer<MqttReadablePacket> readPacketHandler,
+        @NotNull NotNullConsumer<MqttReadablePacket> readPacketHandler,
         int maxPacketsByRead
     ) {
         super(
@@ -54,11 +59,6 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
             readPacketHandler,
             maxPacketsByRead
         );
-    }
-
-    @Override
-    protected boolean canStartReadPacket(@NotNull ByteBuffer buffer) {
-        return buffer.remaining() >= PACKET_LENGTH_START_BYTE;
     }
 
     @Override
