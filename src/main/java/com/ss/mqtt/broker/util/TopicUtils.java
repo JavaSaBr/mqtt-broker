@@ -54,7 +54,7 @@ public class TopicUtils {
         }
     }
 
-    public static @NotNull Array<String> splitTopic(@NotNull String topic) {
+    public static @NotNull String[] splitTopic(@NotNull String topic) {
         int segmentCount = StringUtils.countOccurrencesOf(topic, DELIMITER) + 1;
         var segments = new String[segmentCount];
         int i = 0, pos = 0, end;
@@ -63,7 +63,7 @@ public class TopicUtils {
             pos = end + 1;
         }
         segments[i] = topic.substring(pos);
-        return newReadOnlyArray(segments);
+        return segments;
     }
 
     private static @NotNull TopicFilter buildSharedTopicFilter(@NotNull String topicFilter) {
