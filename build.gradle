@@ -20,8 +20,8 @@ allprojects {
     apply plugin: "groovy"
     apply plugin: "org.springframework.boot"
 
-    sourceCompatibility = JavaVersion.VERSION_13
-    targetCompatibility = JavaVersion.VERSION_13
+    sourceCompatibility = JavaVersion.VERSION_14
+    targetCompatibility = JavaVersion.VERSION_14
 
     repositories {
         jcenter()
@@ -38,8 +38,8 @@ allprojects {
         springVersion = '5.1.6.RELEASE'
         junitJupiterVersion = "5.5.2"
         testcontainersVersion = "1.12.1"
-        groovyVersion = "2.5.8"
-        spockVersion = "1.2-groovy-2.5"
+        groovyVersion = "3.0.4"
+        spockVersion = "2.0-M3-groovy-3.0"
         projectReactorVersion = "3.3.0.RELEASE"
         byteBuddyVersion = "1.10.2"
         objenesisVersion = "3.1"
@@ -118,7 +118,7 @@ task buildSingleArtifactWithoutTests(type: GradleBuild) {
 }
 
 wrapper {
-    gradleVersion = '6.0'
+    gradleVersion = '6.5'
     distributionType = Wrapper.DistributionType.ALL
 }
 
