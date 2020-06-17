@@ -17,7 +17,7 @@ public class SubscriberUtils {
         return subscriber instanceof SingleSubscriber;
     }
 
-    public static boolean sharedSubscriberWithGroup(@NotNull String group, @NotNull Subscriber subscriber) {
+    public static boolean isSharedSubscriberWithGroup(@NotNull String group, @NotNull Subscriber subscriber) {
         return isSharedSubscriber(subscriber) && group.equals(((SharedSubscriber) subscriber).getGroup());
     }
 

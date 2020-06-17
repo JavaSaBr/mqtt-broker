@@ -16,6 +16,8 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class TopicSubscribers {
 
     private final static NotNullSupplier<TopicSubscribers> TOPIC_SUBSCRIBER_SUPPLIER = TopicSubscribers::new;
@@ -49,7 +51,7 @@ public class TopicSubscribers {
 
         var sharedSubscriber = (SharedSubscriber) subscribers.findAny(
             group,
-            SubscriberUtils::sharedSubscriberWithGroup
+            SubscriberUtils::isSharedSubscriberWithGroup
         );
 
         if (sharedSubscriber == null) {
@@ -91,7 +93,7 @@ public class TopicSubscribers {
         boolean removed = false;
         var sharedSubscriber = (SharedSubscriber) subscribers.findAny(
             group,
-            SubscriberUtils::sharedSubscriberWithGroup
+            SubscriberUtils::isSharedSubscriberWithGroup
         );
 
         if (sharedSubscriber != null) {
@@ -213,17 +215,9 @@ public class TopicSubscribers {
     }
 
     private boolean tryToRemoveSubscriber(@NotNull TopicFilter topicFilter, @NotNull MqttClient mqttClient) {
-        var removed = false;
-        var subscribers = getSubscribers();
-        if (subscribers != null) {
-            //noinspection ConstantConditions
-            removed = subscribers.getInWriteLock(
-                topicFilter,
-                mqttClient,
-                TopicSubscribers::removeSubscriber
-            );
-        }
-        return removed;
+        return Optional.ofNullable(getSubscribers())
+            .map(subscribers -> subscribers.getInWriteLock(topicFilter, mqttClient, TopicSubscribers::removeSubscriber))
+            .orElse(false);
     }
 
     public @NotNull Array<SingleSubscriber> matches(@NotNull TopicName topicName) {
