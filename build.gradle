@@ -118,7 +118,7 @@ task buildSingleArtifactWithoutTests(type: GradleBuild) {
 }
 
 wrapper {
-    gradleVersion = '6.5'
+    gradleVersion = '6.6-milestone-1'
     distributionType = Wrapper.DistributionType.ALL
 }
 
