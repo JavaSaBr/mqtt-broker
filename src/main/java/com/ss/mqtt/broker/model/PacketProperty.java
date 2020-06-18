@@ -64,8 +64,8 @@ public enum PacketProperty {
     }
 
     private final @Getter byte id;
-    private final @Getter PacketDataType dataType;
-    private final Object defaultValue;
+    private final @Getter @NotNull PacketDataType dataType;
+    private final @Nullable Object defaultValue;
 
     PacketProperty(int id, @NotNull PacketDataType dataType) {
         this(id, dataType, null);

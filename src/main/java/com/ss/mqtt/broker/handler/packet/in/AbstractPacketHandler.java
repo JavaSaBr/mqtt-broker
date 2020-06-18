@@ -9,8 +9,10 @@ public abstract class AbstractPacketHandler<C extends UnsafeMqttClient, R extend
 
     @Override
     public void handle(@NotNull UnsafeMqttClient client, @NotNull MqttReadablePacket packet) {
+        //noinspection unchecked
         handleImpl((C) client, (R) packet);
     }
 
     protected abstract void handleImpl(@NotNull C client, @NotNull R packet);
 }
+

@@ -1,5 +1,6 @@
 package com.ss.mqtt.broker.network.packet.in;
 
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.MqttConnection;
@@ -55,7 +56,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
         }
 
         while (buffer.hasRemaining()) {
-            topicFilters.add(TopicFilter.from(readString(buffer)));
+            topicFilters.add(buildTopicFilter(readString(buffer)));
         }
     }
 

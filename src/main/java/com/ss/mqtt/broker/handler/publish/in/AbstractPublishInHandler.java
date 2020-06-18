@@ -3,7 +3,7 @@ package com.ss.mqtt.broker.handler.publish.in;
 import com.ss.mqtt.broker.handler.publish.out.PublishOutHandler;
 import com.ss.mqtt.broker.model.ActionResult;
 import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.Subscriber;
+import com.ss.mqtt.broker.model.SingleSubscriber;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.SubscriptionService;
@@ -25,7 +25,7 @@ abstract class AbstractPublishInHandler implements PublishInHandler {
     }
 
     private @NotNull ActionResult sendToSubscriber(
-        @NotNull Subscriber subscriber,
+        @NotNull SingleSubscriber subscriber,
         @NotNull PublishInPacket packet
     ) {
         return publishOutHandler(subscriber.getQos()).handle(packet, subscriber);

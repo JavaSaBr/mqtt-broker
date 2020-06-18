@@ -1,10 +1,13 @@
 package com.ss.mqtt.broker.service.impl;
 
 import static com.ss.mqtt.broker.model.ActionResult.EMPTY;
-import com.ss.mqtt.broker.model.ActionResult;
-import com.ss.mqtt.broker.model.MqttSession;
-import com.ss.mqtt.broker.model.SubscribeTopicFilter;
-import com.ss.mqtt.broker.model.Subscriber;
+import static com.ss.mqtt.broker.model.ActionResult.FAILED;
+import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.UNSPECIFIED_ERROR;
+import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+import static com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode.*;
+import static com.ss.mqtt.broker.util.TopicUtils.*;
+import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
@@ -23,20 +26,19 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SimpleSubscriptionService implements SubscriptionService {
 
-    private final TopicSubscribers topicSubscribers = new TopicSubscribers();
+    private final @NotNull TopicSubscribers topicSubscribers = new TopicSubscribers();
 
     @Override
     public <A> @NotNull ActionResult forEachTopicSubscriber(
         @NotNull TopicName topicName,
         @NotNull A argument,
-        @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
+        @NotNull NotNullBiFunction<SingleSubscriber, A, ActionResult> action
     ) {
-        var subscribers = topicSubscribers.matches(topicName);
-        if (subscribers.isEmpty()) {
-            return EMPTY;
+        if (isInvalid(topicName)) {
+            return FAILED;
         }
         ActionResult result = EMPTY;
-        for (var subscriber : subscribers) {
+        for (var subscriber : topicSubscribers.matches(topicName)) {
             result = result.and(action.apply(subscriber, argument));
         }
         return result;
@@ -54,15 +56,24 @@ public class SimpleSubscriptionService implements SubscriptionService {
 
     private @Nullable SubscribeAckReasonCode addSubscription(
         @NotNull SubscribeTopicFilter subscribe,
-        @NotNull MqttClient mqttClient
+        @NotNull MqttClient client
     ) {
-        var session = mqttClient.getSession();
+        var config = client.getConnectionConfig();
+        var topic = subscribe.getTopicFilter();
+        var session = client.getSession();
         if (session == null) {
             return null;
+        } else if (!config.isSharedSubscriptionAvailable() && isShared(topic)) {
+            return SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+        } else if (!config.isWildcardSubscriptionAvailable() && hasWildcard(topic)) {
+            return WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+        } else if (isInvalid(topic)) {
+            return UNSPECIFIED_ERROR;
+        } else {
+            session.addSubscriber(subscribe);
+            topicSubscribers.addSubscriber(client, subscribe);
+            return subscribe.getQos().getSubscribeAckReasonCode();
         }
-        session.addSubscriber(subscribe);
-        topicSubscribers.addSubscriber(mqttClient, subscribe);
-        return subscribe.getQos().getSubscribeAckReasonCode();
     }
 
     @Override
@@ -76,18 +87,19 @@ public class SimpleSubscriptionService implements SubscriptionService {
     }
 
     private @Nullable UnsubscribeAckReasonCode removeSubscription(
-        @NotNull TopicFilter topicFilter,
-        @NotNull MqttClient mqttClient
+        @NotNull TopicFilter topic,
+        @NotNull MqttClient client
     ) {
-        var session = mqttClient.getSession();
+        var session = client.getSession();
         if (session == null) {
             return null;
-        }
-        if (topicSubscribers.removeSubscriber(mqttClient, topicFilter)) {
-            session.removeSubscriber(topicFilter);
-            return UnsubscribeAckReasonCode.SUCCESS;
+        } else if (isInvalid(topic)) {
+            return UnsubscribeAckReasonCode.UNSPECIFIED_ERROR;
+        } else if (topicSubscribers.removeSubscriber(client, topic)) {
+            session.removeSubscriber(topic);
+            return SUCCESS;
         } else {
-            return UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
+            return NO_SUBSCRIPTION_EXISTED;
         }
     }
 

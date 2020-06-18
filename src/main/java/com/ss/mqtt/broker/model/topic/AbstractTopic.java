@@ -1,11 +1,12 @@
 package com.ss.mqtt.broker.model.topic;
 
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+
+import static com.ss.mqtt.broker.util.TopicUtils.splitTopic;
+import static com.ss.rlib.common.util.StringUtils.EMPTY;
 
 @Getter
 @EqualsAndHashCode(of = "rawTopic")
@@ -15,32 +16,21 @@ public abstract class AbstractTopic {
         DebugUtils.registerIncludedFields("rawTopic");
     }
 
-    static final String DELIMITER = "/";
-    static final String MULTI_LEVEL_WILDCARD = "#";
-    static final String SINGLE_LEVEL_WILDCARD = "+";
-
-    static void checkTopic(@NotNull String topic) {
-        if (topic.length() == 0) {
-            throw new IllegalArgumentException("Topic has zero length.");
-        } else if (topic.contains("//") || topic.startsWith("/") || topic.endsWith("/")) {
-            throw new IllegalArgumentException("Topic has zero length level: " + topic);
-        }
-    }
-
+    private static final String[] EMPTY_ARRAY = new String[0];
     private final @NotNull String[] segments;
     private final @NotNull String rawTopic;
-
     private final int length;
 
     AbstractTopic() {
         length = 0;
-        segments = ArrayUtils.EMPTY_STRING_ARRAY;
-        rawTopic = StringUtils.EMPTY;
+
+        segments = EMPTY_ARRAY;
+        rawTopic = EMPTY;
     }
 
     AbstractTopic(@NotNull String topicName) {
         length = topicName.length();
-        segments = topicName.split(DELIMITER);
+        segments = splitTopic(topicName);
         rawTopic = topicName;
     }
 
@@ -50,6 +40,10 @@ public abstract class AbstractTopic {
 
     int levelsCount() {
         return segments.length;
+    }
+
+    String lastSegment() {
+        return segments[segments.length - 1];
     }
 
     @Override

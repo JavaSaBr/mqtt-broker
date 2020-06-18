@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
     @Override
-    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull Subscriber subscriber) {
+    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull SingleSubscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var session = client.getSession();
@@ -30,7 +30,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
     protected abstract @NotNull QoS getQoS();
 
-    protected void sendPublish(
+    void sendPublish(
         @NotNull MqttClient client,
         @NotNull PublishInPacket packet,
         int packetId,

@@ -19,7 +19,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
             def subscriber = buildExternalMqtt311Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildExternalMqtt311Client()
         when:
             subscriber.connect().join()
@@ -52,7 +52,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildExternalMqtt5Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildExternalMqtt5Client()
         when:
             subscriber.connect().join()
@@ -85,7 +85,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
             def subscriber = buildExternalMqtt311Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildExternalMqtt311Client()
         when:
             subscriber.connect().join()
@@ -118,7 +118,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildExternalMqtt5Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildExternalMqtt5Client()
         when:
            
@@ -152,7 +152,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt3Publish>()
             def subscriber = buildExternalMqtt311Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildExternalMqtt311Client()
         when:
             subscriber.connect().join()
@@ -185,7 +185,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         given:
             def received = new AtomicReference<Mqtt5Publish>()
             def subscriber = buildExternalMqtt5Client()
-            def subscriberId = subscriber.getConfig().clientIdentifier.get()toString()
+            def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
             def publisher = buildExternalMqtt5Client()
         when:
             

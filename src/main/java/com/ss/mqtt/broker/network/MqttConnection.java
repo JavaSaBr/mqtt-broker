@@ -1,19 +1,17 @@
 package com.ss.mqtt.broker.network;
 
 import com.ss.mqtt.broker.config.MqttConnectionConfig;
+import com.ss.mqtt.broker.handler.packet.in.PacketInHandler;
 import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.MqttVersion;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
-import com.ss.mqtt.broker.handler.packet.in.PacketInHandler;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.rlib.network.BufferAllocator;
 import com.ss.rlib.network.Connection;
 import com.ss.rlib.network.Network;
-import com.ss.rlib.network.NetworkCryptor;
 import com.ss.rlib.network.impl.AbstractConnection;
 import com.ss.rlib.network.packet.PacketReader;
 import com.ss.rlib.network.packet.PacketWriter;
@@ -53,7 +51,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         @NotNull MqttConnectionConfig config,
         @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory
     ) {
-        super(network, channel, NetworkCryptor.NULL, bufferAllocator, maxPacketsByRead);
+        super(network, channel, bufferAllocator, maxPacketsByRead);
         this.packetHandlers = packetHandlers;
         this.config = config;
         this.mqttVersion = MqttVersion.MQTT_3_1_1;
@@ -72,7 +70,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
             channel,
             bufferAllocator,
             this::updateLastActivity,
-            this::handleReadPacket,
+            this::handleReceivedPacket,
             maxPacketsByRead
         );
     }

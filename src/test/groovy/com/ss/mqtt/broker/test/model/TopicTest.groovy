@@ -1,16 +1,17 @@
 package com.ss.mqtt.broker.test.model
 
-import com.ss.mqtt.broker.model.topic.TopicFilter
-import com.ss.mqtt.broker.model.topic.TopicName
+
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import static com.ss.mqtt.broker.util.TopicUtils.*
 
 class TopicTest extends Specification {
     
     @Unroll
-    def "should create topic name: #stringTopicName"(String stringTopicName, int levelsCount) {
+    def "should create topic name: [#stringTopicName]"() {
         when:
-            def topicName = TopicName.from(stringTopicName)
+            def topicName = buildTopicName(stringTopicName)
         then:
             topicName.segments.size() == levelsCount
             topicName.rawTopic == stringTopicName
@@ -22,23 +23,21 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should fail create topic name: #stringTopicName"(String stringTopicName, String errorMessage) {
-        when:
-            TopicName.from(stringTopicName)
-        then:
-            def ex = thrown IllegalArgumentException
-            ex.message == errorMessage
+    def "should fail create topic name: [#stringTopicName]"() {
+        expect:
+            isInvalid(buildTopicName(stringTopicName))
         where:
-            stringTopicName | errorMessage
-            ""              | "Topic has zero length."
-            "topic/+"       | "Single level wildcard is incorrectly used: topic/+"
-            "topic/#"       | "Multi level wildcard is incorrectly used: topic/#"
+            stringTopicName << [
+                "",
+                "topic/+",
+                "topic/#"
+            ]
     }
     
     @Unroll
-    def "should create topic filter: #stringTopicFilter"(String stringTopicFilter, int levelsCount) {
+    def "should create topic filter: [#stringTopicFilter]"() {
         when:
-            def topicFilter = TopicFilter.from(stringTopicFilter)
+            def topicFilter = buildTopicFilter(stringTopicFilter)
         then:
             topicFilter.segments.size() == levelsCount
             topicFilter.rawTopic == stringTopicFilter
@@ -52,22 +51,45 @@ class TopicTest extends Specification {
     }
     
     @Unroll
-    def "should fail create topic filter: #stringTopicFilter"(String stringTopicFilter, String errorMessage) {
-        when:
-            TopicFilter.from(stringTopicFilter)
-        then:
-            def ex = thrown IllegalArgumentException
-            ex.message == errorMessage
+    def "should fail create topic filter: [#stringTopicFilter]"() {
+        expect:
+            isInvalid(buildTopicFilter(stringTopicFilter))
         where:
-            stringTopicFilter | errorMessage
-            ""                | "Topic has zero length."
-            "topic/in/"       | "Topic has zero length level: topic/in/"
-            "/topic/in"       | "Topic has zero length level: /topic/in"
-            "topic//in"       | "Topic has zero length level: topic//in"
-            "topic/++/in"     | "Single level wildcard is incorrectly used: topic/++/in"
-            "topic/#/in"      | "Multi level wildcard is incorrectly used: topic/#/in"
-            "topic/##"        | "Multi level wildcard is incorrectly used: topic/##"
-        
+            stringTopicFilter << [
+                "",
+                "topic/in/",
+                "/topic/in",
+                "topic//in",
+                "topic/++/in",
+                "topic/#/in",
+                "topic/##"
+            ]
     }
     
+    @Unroll
+    def "should match topic filter: [#topicFilter] with topic name: [#topicName]"() {
+        expect:
+            buildTopicName(topicName).match(buildTopicFilter(topicFilter))
+        where:
+            topicFilter  | topicName
+            "topic/in"   | "topic/in"
+            "topic/+"    | "topic/in"
+            "topic/#"    | "topic/in"
+            "topic/+/in" | "topic/m/in"
+    }
+    
+    @Unroll
+    def "should not match topic filter: [#topicFilter] with topic name: [#topicName]"() {
+        expect:
+            !buildTopicName(topicName).match(buildTopicFilter(topicFilter))
+        where:
+            topicFilter  | topicName
+            "topic/in"   | "topic/m/in"
+            "topic/in"   | "topic/in/m"
+            "topic/+"    | "topic/m/in"
+            "topic/+"    | "topic/in/m"
+            "topic/#"    | "topic"
+            "topic/+/in" | "topic/m/n"
+            "topic/+/in" | "topic/in"
+    }
 }

@@ -7,7 +7,6 @@ import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.rlib.common.function.NotNullBiFunction;
-import com.ss.rlib.common.function.NotNullNullableBiFunction;
 import com.ss.rlib.common.util.array.Array;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +26,7 @@ public interface SubscriptionService {
     @NotNull <A> ActionResult forEachTopicSubscriber(
         @NotNull TopicName topicName,
         @NotNull A argument,
-        @NotNull NotNullBiFunction<Subscriber, A, ActionResult> action
+        @NotNull NotNullBiFunction<SingleSubscriber, A, ActionResult> action
     );
 
     /**

@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class FileCredentialsSource extends AbstractCredentialSource {
 
-    private final String fileName;
+    private final @NotNull String fileName;
 
     public FileCredentialsSource(@NotNull String fileName) {
         this.fileName = fileName;

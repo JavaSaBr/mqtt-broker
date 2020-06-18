@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.network.packet.in;
 
-import static com.ss.mqtt.broker.model.topic.TopicName.EMPTY_TOPIC_NAME;
+import static com.ss.mqtt.broker.util.TopicUtils.EMPTY_TOPIC_NAME;
+import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
@@ -297,7 +298,7 @@ public class PublishInPacket extends MqttReadablePacket {
     @Override
     protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
-        topicName = TopicName.from(readString(buffer));
+        topicName = buildTopicName(readString(buffer));
         packetId = qos != QoS.AT_MOST_ONCE ? readUnsignedShort(buffer) : 0;
     }
 
