@@ -203,9 +203,9 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     private int keepAlive;
     private int willQos;
+
     private boolean willRetain;
     private boolean cleanStart;
-
     private boolean hasUserName;
     private boolean hasPassword;
     private boolean willFlag;
@@ -218,6 +218,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     private int receiveMax;
     private int maximumPacketSize;
     private int topicAliasMaximum;
+
     private boolean requestResponseInformation;
     private boolean requestProblemInformation;
 

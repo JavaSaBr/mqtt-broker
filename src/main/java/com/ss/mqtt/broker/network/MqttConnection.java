@@ -89,6 +89,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         );
     }
 
+
     @Override
     public @NotNull String toString() {
         return getRemoteAddress();

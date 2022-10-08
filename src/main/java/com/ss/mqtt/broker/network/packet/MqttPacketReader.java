@@ -100,4 +100,14 @@ public class MqttPacketReader extends AbstractPacketReader<MqttReadablePacket, M
 
         return PACKET_FACTORIES[type].apply(info);
     }
+
+    @Override
+    protected void readAndHandlePacket(
+        @NotNull ByteBuffer bufferToRead,
+        int dataLength,
+        @NotNull MqttReadablePacket packet
+    ) {
+        packet.read(this.connection, bufferToRead, dataLength);
+        readPacketHandler.accept(packet);
+    }
 }
