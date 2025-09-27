@@ -2,7 +2,7 @@ package com.ss.mqtt.broker.test.integration
 
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCode
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import com.ss.mqtt.broker.model.MqttPropertyConstants
+import javasabr.mqtt.legacy.model.MqttPropertyConstants
 
 class InternalConnectionTest extends IntegrationSpecification {
 

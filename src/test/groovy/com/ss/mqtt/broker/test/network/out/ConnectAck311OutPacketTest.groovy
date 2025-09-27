@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode
-import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
-import com.ss.mqtt.broker.network.packet.out.ConnectAck311OutPacket
+import javasabr.mqtt.legacy.model.MqttPropertyConstants
+import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode
+import javasabr.mqtt.legacy.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.legacy.network.packet.out.ConnectAck311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils

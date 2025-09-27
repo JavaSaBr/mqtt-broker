@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.network.client.MqttClient
+import javasabr.mqtt.legacy.network.client.MqttClient
 import com.ss.mqtt.broker.test.network.NetworkUnitSpecification
 import spock.lang.Shared
 

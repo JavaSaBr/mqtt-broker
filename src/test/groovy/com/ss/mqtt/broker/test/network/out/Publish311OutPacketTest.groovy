@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.QoS
-import com.ss.mqtt.broker.network.packet.in.PublishInPacket
-import com.ss.mqtt.broker.network.packet.out.Publish311OutPacket
+import javasabr.mqtt.legacy.model.QoS
+import javasabr.mqtt.legacy.network.packet.in.PublishInPacket
+import javasabr.mqtt.legacy.network.packet.out.Publish311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

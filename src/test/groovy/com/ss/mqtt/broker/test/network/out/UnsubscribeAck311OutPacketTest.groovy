@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.data.type.StringPair
-import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
-import com.ss.mqtt.broker.network.packet.in.UnsubscribeAckInPacket
-import com.ss.mqtt.broker.network.packet.out.UnsubscribeAck311OutPacket
+import javasabr.mqtt.legacy.model.data.type.StringPair
+import javasabr.mqtt.legacy.model.reason.code.UnsubscribeAckReasonCode
+import javasabr.mqtt.legacy.network.packet.in.UnsubscribeAckInPacket
+import javasabr.mqtt.legacy.network.packet.out.UnsubscribeAck311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

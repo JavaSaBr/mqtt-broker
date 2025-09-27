@@ -1,17 +1,16 @@
 package com.ss.mqtt.broker.test.model
 
-import com.ss.mqtt.broker.model.QoS
-import com.ss.mqtt.broker.model.SubscribeTopicFilter
-import com.ss.mqtt.broker.model.topic.TopicFilter
-import com.ss.mqtt.broker.model.topic.TopicName
-import com.ss.mqtt.broker.model.topic.TopicSubscribers
-import com.ss.mqtt.broker.network.client.MqttClient
+import javasabr.mqtt.legacy.model.QoS
+import javasabr.mqtt.legacy.model.SubscribeTopicFilter
+import javasabr.mqtt.legacy.model.topic.TopicFilter
+import javasabr.mqtt.legacy.model.topic.TopicName
+import javasabr.mqtt.legacy.model.topic.TopicSubscribers
+import javasabr.mqtt.legacy.network.client.MqttClient
 import com.ss.mqtt.broker.test.network.NetworkUnitSpecification
 import spock.lang.Unroll
 
-import static com.ss.mqtt.broker.model.QoS.*
-import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter
-import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName
+import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicFilter
+import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicName
 
 class TopicSubscriberTest extends NetworkUnitSpecification {
 

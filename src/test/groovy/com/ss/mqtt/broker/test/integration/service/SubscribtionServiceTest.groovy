@@ -3,9 +3,9 @@ package com.ss.mqtt.broker.test.integration.service
 
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
-import com.ss.mqtt.broker.model.SingleSubscriber
-import com.ss.mqtt.broker.service.ClientIdRegistry
-import com.ss.mqtt.broker.service.impl.SimpleSubscriptionService
+import javasabr.mqtt.legacy.model.SingleSubscriber
+import javasabr.mqtt.legacy.service.ClientIdRegistry
+import javasabr.mqtt.legacy.service.impl.SimpleSubscriptionService
 import com.ss.mqtt.broker.test.integration.IntegrationSpecification
 import org.spockframework.util.Pair
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,8 +14,8 @@ import spock.lang.Unroll
 import java.util.concurrent.CompletionException
 
 import static com.hivemq.client.mqtt.datatypes.MqttQos.*
-import static com.ss.mqtt.broker.model.ActionResult.SUCCESS
-import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName
+import static javasabr.mqtt.legacy.model.ActionResult.SUCCESS
+import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicName
 import static org.spockframework.util.Pair.of
 
 class SubscribtionServiceTest extends IntegrationSpecification {

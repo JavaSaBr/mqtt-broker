@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.in
 
-import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode
-import com.ss.mqtt.broker.network.packet.in.PublishAckInPacket
+import javasabr.mqtt.legacy.model.PacketProperty
+import javasabr.mqtt.legacy.model.reason.code.PublishAckReasonCode
+import javasabr.mqtt.legacy.network.packet.in.PublishAckInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

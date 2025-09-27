@@ -1,15 +1,15 @@
 package com.ss.mqtt.broker.test.network
 
-import com.ss.mqtt.broker.config.MqttConnectionConfig
-import com.ss.mqtt.broker.model.MqttVersion
-import com.ss.mqtt.broker.model.QoS
-import com.ss.mqtt.broker.model.SubscribeRetainHandling
-import com.ss.mqtt.broker.model.SubscribeTopicFilter
-import com.ss.mqtt.broker.model.data.type.StringPair
-import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
-import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
-import com.ss.mqtt.broker.network.MqttConnection
-import com.ss.mqtt.broker.network.client.MqttClient
+import javasabr.mqtt.legacy.config.MqttConnectionConfig
+import javasabr.mqtt.legacy.model.MqttVersion
+import javasabr.mqtt.legacy.model.QoS
+import javasabr.mqtt.legacy.model.SubscribeRetainHandling
+import javasabr.mqtt.legacy.model.SubscribeTopicFilter
+import javasabr.mqtt.legacy.model.data.type.StringPair
+import javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode
+import javasabr.mqtt.legacy.model.reason.code.UnsubscribeAckReasonCode
+import javasabr.mqtt.legacy.network.MqttConnection
+import javasabr.mqtt.legacy.network.client.MqttClient
 import com.ss.mqtt.broker.test.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -17,8 +17,8 @@ import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
 
-import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter
-import static com.ss.mqtt.broker.util.TopicUtils.buildTopicName
+import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicFilter
+import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicName
 
 class NetworkUnitSpecification extends UnitSpecification {
 

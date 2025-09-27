@@ -3,10 +3,10 @@ package com.ss.mqtt.broker.test.integration
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
-import com.ss.mqtt.broker.config.MqttConnectionConfig
-import com.ss.mqtt.broker.model.MqttPropertyConstants
-import com.ss.mqtt.broker.model.MqttVersion
-import com.ss.mqtt.broker.network.MqttConnection
+import javasabr.mqtt.legacy.config.MqttConnectionConfig
+import javasabr.mqtt.legacy.model.MqttPropertyConstants
+import javasabr.mqtt.legacy.model.MqttVersion
+import javasabr.mqtt.legacy.network.MqttConnection
 import com.ss.mqtt.broker.test.integration.config.MqttBrokerTestConfig
 import com.ss.mqtt.broker.test.mock.MqttMockClient
 import org.springframework.beans.factory.annotation.Autowired
@@ -142,7 +142,7 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_5) >> true
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       getConfig() >> deviceConnectionConfig
-      getClient() >> Stub(com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient) {
+      getClient() >> Stub(javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient) {
         getConnectionConfig() >> deviceConnectionConfig
         getSessionExpiryInterval() >> MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED
         getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
@@ -159,7 +159,7 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_5) >> false
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       getConfig() >> deviceConnectionConfig
-      getClient() >> Stub(com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient) {
+      getClient() >> Stub(javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient) {
         getConnectionConfig() >> deviceConnectionConfig
         getSessionExpiryInterval() >> MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED
         getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()

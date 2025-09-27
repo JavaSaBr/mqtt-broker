@@ -20,6 +20,16 @@ repositories {
 rootProject.version = "0.0.1"
 group = "javasabr.mqtt"
 
+subprojects {
+  repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+      url  "https://gitlab.com/api/v4/projects/37512056/packages/maven"
+    }
+  }
+}
+
 allprojects {
   apply plugin: "java"
   apply plugin: "groovy"

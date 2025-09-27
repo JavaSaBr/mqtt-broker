@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.test.network.in
 
-import com.ss.mqtt.broker.exception.MalformedPacketMqttException
-import com.ss.mqtt.broker.model.MqttVersion
-import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
+import javasabr.mqtt.legacy.exception.MalformedPacketMqttException
+import javasabr.mqtt.legacy.model.MqttVersion
+import javasabr.mqtt.legacy.model.PacketProperty
+import javasabr.mqtt.legacy.network.packet.in.ConnectInPacket
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 

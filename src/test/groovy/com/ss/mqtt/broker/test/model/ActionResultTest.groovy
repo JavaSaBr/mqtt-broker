@@ -1,10 +1,8 @@
 package com.ss.mqtt.broker.test.model
 
-import com.ss.mqtt.broker.model.ActionResult
+import javasabr.mqtt.legacy.model.ActionResult
 import com.ss.mqtt.broker.test.network.NetworkUnitSpecification
 import spock.lang.Unroll
-
-import static com.ss.mqtt.broker.model.ActionResult.*
 
 class ActionResultTest extends NetworkUnitSpecification {
 

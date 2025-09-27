@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.QoS
-import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
-import com.ss.mqtt.broker.network.packet.out.Connect5OutPacket
+import javasabr.mqtt.legacy.model.QoS
+import javasabr.mqtt.legacy.network.packet.in.ConnectInPacket
+import javasabr.mqtt.legacy.network.packet.out.Connect5OutPacket
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 

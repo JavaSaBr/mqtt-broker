@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode
-import com.ss.mqtt.broker.network.packet.in.AuthenticationInPacket
-import com.ss.mqtt.broker.network.packet.out.Authentication5OutPacket
+import javasabr.mqtt.legacy.model.reason.code.AuthenticateReasonCode
+import javasabr.mqtt.legacy.network.packet.in.AuthenticationInPacket
+import javasabr.mqtt.legacy.network.packet.out.Authentication5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
 class Authentication5OutPacketTest extends BaseOutPacketTest {

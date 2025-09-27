@@ -6,10 +6,10 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger name="com.ss.mqtt.broker.network.client.AbstractMqttClient" level="DEBUG" additivity="false">
+    <Logger name="javasabr.mqtt.legacy.network.client.AbstractMqttClient" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>
-    <Logger name="com.ss.mqtt.broker.model.impl.DefaultMqttSession" level="DEBUG" additivity="false">
+    <Logger name="javasabr.mqtt.legacy.model.impl.DefaultMqttSession" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>
     <Root level="INFO">

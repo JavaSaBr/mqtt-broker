@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.data.type.StringPair
-import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode
-import com.ss.mqtt.broker.network.packet.in.PublishReceivedInPacket
-import com.ss.mqtt.broker.network.packet.out.PublishReceived311OutPacket
+import javasabr.mqtt.legacy.model.data.type.StringPair
+import javasabr.mqtt.legacy.model.reason.code.PublishReceivedReasonCode
+import javasabr.mqtt.legacy.network.packet.in.PublishReceivedInPacket
+import javasabr.mqtt.legacy.network.packet.out.PublishReceived311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.test.network.in
 
-import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.network.packet.in.UnsubscribeInPacket
+import javasabr.mqtt.legacy.model.PacketProperty
+import javasabr.mqtt.legacy.network.packet.in.UnsubscribeInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

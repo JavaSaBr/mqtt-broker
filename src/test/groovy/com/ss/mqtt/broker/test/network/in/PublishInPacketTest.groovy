@@ -1,10 +1,10 @@
 package com.ss.mqtt.broker.test.network.in
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants
-import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.QoS
-import com.ss.mqtt.broker.model.data.type.StringPair
-import com.ss.mqtt.broker.network.packet.in.PublishInPacket
+import javasabr.mqtt.legacy.model.MqttPropertyConstants
+import javasabr.mqtt.legacy.model.PacketProperty
+import javasabr.mqtt.legacy.model.QoS
+import javasabr.mqtt.legacy.model.data.type.StringPair
+import javasabr.mqtt.legacy.network.packet.in.PublishInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.common.util.ArrayUtils

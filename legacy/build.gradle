@@ -1,0 +1,10 @@
+plugins {
+  id "java"
+}
+
+apply from: "$rootDir/gradle/configure-java.gradle"
+
+dependencies {
+
+  testImplementation projects.testSupport
+}

@@ -1,18 +1,17 @@
 package com.ss.mqtt.broker.test.integration
 
 import com.hivemq.client.mqtt.datatypes.MqttQos
-import com.ss.mqtt.broker.model.QoS
-import com.ss.mqtt.broker.model.SubscribeTopicFilter
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode
-import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode
-import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode
-import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode
-import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
-import com.ss.mqtt.broker.network.packet.in.PublishInPacket
-import com.ss.mqtt.broker.network.packet.in.PublishReleaseInPacket
-import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket
-import com.ss.mqtt.broker.network.packet.out.*
-import com.ss.mqtt.broker.service.MqttSessionService
+import javasabr.mqtt.legacy.model.QoS
+import javasabr.mqtt.legacy.model.SubscribeTopicFilter
+import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode
+import javasabr.mqtt.legacy.model.reason.code.PublishCompletedReasonCode
+import javasabr.mqtt.legacy.model.reason.code.PublishReceivedReasonCode
+import javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode
+import javasabr.mqtt.legacy.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.legacy.network.packet.in.PublishInPacket
+import javasabr.mqtt.legacy.network.packet.in.PublishReleaseInPacket
+import javasabr.mqtt.legacy.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.legacy.service.MqttSessionService
 import javasabr.rlib.collections.array.Array
 import org.springframework.beans.factory.annotation.Autowired
 

@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.integration.service
 
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import com.ss.mqtt.broker.service.ClientIdRegistry
-import com.ss.mqtt.broker.service.MqttSessionService
+import javasabr.mqtt.legacy.service.ClientIdRegistry
+import javasabr.mqtt.legacy.service.MqttSessionService
 import com.ss.mqtt.broker.test.integration.IntegrationSpecification
 import org.springframework.beans.factory.annotation.Autowired
 

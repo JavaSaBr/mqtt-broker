@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket
-import com.ss.mqtt.broker.network.packet.out.SubscribeAck5OutPacket
+import javasabr.mqtt.legacy.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.legacy.network.packet.out.SubscribeAck5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
 class SubscribeAck5OutPacketTest extends BaseOutPacketTest {

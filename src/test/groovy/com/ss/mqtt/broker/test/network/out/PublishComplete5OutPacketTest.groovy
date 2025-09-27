@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode
-import com.ss.mqtt.broker.network.packet.in.PublishCompleteInPacket
-import com.ss.mqtt.broker.network.packet.out.PublishComplete5OutPacket
+import javasabr.mqtt.legacy.model.reason.code.PublishCompletedReasonCode
+import javasabr.mqtt.legacy.network.packet.in.PublishCompleteInPacket
+import javasabr.mqtt.legacy.network.packet.out.PublishComplete5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishComplete5OutPacketTest extends BaseOutPacketTest {

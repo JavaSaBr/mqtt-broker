@@ -1,0 +1,5 @@
+dependencies {
+  compileOnly libs.jspecify
+  compileOnly libs.lombok
+  annotationProcessor libs.lombok
+}

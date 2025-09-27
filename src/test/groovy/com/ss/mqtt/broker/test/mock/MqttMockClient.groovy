@@ -1,10 +1,9 @@
 package com.ss.mqtt.broker.test.mock
 
-import com.ss.mqtt.broker.network.MqttConnection
-import com.ss.mqtt.broker.network.packet.PacketType
-import com.ss.mqtt.broker.network.packet.in.*
-import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
-import com.ss.mqtt.broker.util.MqttDataUtils
+import javasabr.mqtt.legacy.network.MqttConnection
+import javasabr.mqtt.legacy.network.packet.PacketType
+import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.legacy.util.MqttDataUtils
 import javasabr.rlib.common.util.NumberUtils
 
 import java.nio.ByteBuffer

@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode
-import com.ss.mqtt.broker.network.packet.in.DisconnectInPacket
-import com.ss.mqtt.broker.network.packet.out.Disconnect5OutPacket
+import javasabr.mqtt.legacy.model.reason.code.DisconnectReasonCode
+import javasabr.mqtt.legacy.network.packet.in.DisconnectInPacket
+import javasabr.mqtt.legacy.network.packet.out.Disconnect5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
 class DisconnectAck5OutPacketTest extends BaseOutPacketTest {

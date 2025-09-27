@@ -4,8 +4,6 @@ package com.ss.mqtt.broker.test.util
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static com.ss.mqtt.broker.util.TopicUtils.*
-
 class TopicUtilsTest extends Specification {
 
   @Unroll

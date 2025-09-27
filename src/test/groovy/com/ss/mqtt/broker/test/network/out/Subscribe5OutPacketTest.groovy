@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.MqttPropertyConstants
-import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket
-import com.ss.mqtt.broker.network.packet.out.Subscribe5OutPacket
+import javasabr.mqtt.legacy.model.MqttPropertyConstants
+import javasabr.mqtt.legacy.network.packet.in.SubscribeInPacket
+import javasabr.mqtt.legacy.network.packet.out.Subscribe5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
 class Subscribe5OutPacketTest extends BaseOutPacketTest {

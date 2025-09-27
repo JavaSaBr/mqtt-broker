@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.integration.config
 
-import com.ss.mqtt.broker.config.MqttBrokerConfig
-import com.ss.mqtt.broker.config.MqttNetworkConfig
-import com.ss.mqtt.broker.network.MqttConnection
+import javasabr.mqtt.legacy.config.MqttBrokerConfig
+import javasabr.mqtt.legacy.config.MqttNetworkConfig
+import javasabr.mqtt.legacy.network.MqttConnection
 import javasabr.rlib.network.server.ServerNetwork
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean

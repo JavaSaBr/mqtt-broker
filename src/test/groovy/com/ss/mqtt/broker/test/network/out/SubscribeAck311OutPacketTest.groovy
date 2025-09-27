@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.test.network.out
 
-import com.ss.mqtt.broker.model.data.type.StringPair
-import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket
-import com.ss.mqtt.broker.network.packet.out.SubscribeAck311OutPacket
+import javasabr.mqtt.legacy.model.data.type.StringPair
+import javasabr.mqtt.legacy.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.legacy.network.packet.out.SubscribeAck311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.test.util
 
 import com.ss.mqtt.broker.test.UnitSpecification
-import com.ss.mqtt.broker.util.MqttDataUtils
+import javasabr.mqtt.legacy.util.MqttDataUtils
 
 import java.nio.ByteBuffer
 

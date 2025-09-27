@@ -1,10 +1,10 @@
 package com.ss.mqtt.broker.test.extension
 
-import com.ss.mqtt.broker.model.PacketProperty
-import com.ss.mqtt.broker.model.data.type.PacketDataType
-import com.ss.mqtt.broker.model.data.type.StringPair
-import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
-import com.ss.mqtt.broker.util.MqttDataUtils
+import javasabr.mqtt.legacy.model.PacketProperty
+import javasabr.mqtt.legacy.model.data.type.PacketDataType
+import javasabr.mqtt.legacy.model.data.type.StringPair
+import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.legacy.util.MqttDataUtils
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 import spock.lang.Specification
