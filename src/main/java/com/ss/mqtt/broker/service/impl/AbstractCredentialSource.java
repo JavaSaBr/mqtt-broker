@@ -1,9 +1,9 @@
 package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.service.CredentialSource;
-import com.ss.rlib.common.util.dictionary.ConcurrentObjectDictionary;
-import com.ss.rlib.common.util.dictionary.Dictionary;
-import com.ss.rlib.common.util.dictionary.ObjectDictionary;
+import javasabr.rlib.collections.dictionary.DictionaryFactory;
+import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
+import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
@@ -11,17 +11,27 @@ import java.util.Arrays;
 
 public abstract class AbstractCredentialSource implements CredentialSource {
 
-    private final ConcurrentObjectDictionary<String, byte[]> credentials =
-        ConcurrentObjectDictionary.ofType(String.class, byte[].class);
+    private final LockableRefToRefDictionary<String, byte[]> credentials =
+        DictionaryFactory.stampedLockBasedRefToRefDictionary(String.class, byte[].class);
 
     abstract void init();
 
-    void putAll(@NotNull Dictionary<String, byte[]> creds) {
-        credentials.runInWriteLock(creds, Dictionary::put);
+    void putAll(@NotNull RefToRefDictionary<String, byte[]> creds) {
+      long stamp = credentials.writeLock();
+      try {
+        credentials.append(creds);
+      } finally {
+        credentials.writeUnlock(stamp);
+      }
     }
 
     void put(@NotNull String user, @NotNull byte[] pass) {
-        credentials.runInWriteLock(user, pass, ObjectDictionary::put);
+      long stamp = credentials.writeLock();
+      try {
+        credentials.put(user, pass);
+      } finally {
+        credentials.writeUnlock(stamp);
+      }
     }
 
     @Override

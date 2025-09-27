@@ -11,9 +11,10 @@ import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.client.MqttClient
 import com.ss.mqtt.broker.test.UnitSpecification
-import com.ss.rlib.common.util.array.Array
-import com.ss.rlib.common.util.array.ArrayFactory
-import com.ss.rlib.common.util.array.IntegerArray
+import javasabr.rlib.collections.array.Array
+import javasabr.rlib.collections.array.ArrayFactory
+import javasabr.rlib.collections.array.IntArray
+import javasabr.rlib.common.util.ArrayUtils
 import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
@@ -76,22 +77,25 @@ class NetworkUnitSpecification extends UnitSpecification {
     )
     public static final serverReference = "serverReference"
     public static final contentType = "application/json"
-    public static final subscribeAckReasonCodes = ArrayFactory.asArray(
+    public static final subscribeAckReasonCodes = Array.typed(
+        SubscribeAckReasonCode,
         SubscribeAckReasonCode.GRANTED_QOS_1,
         SubscribeAckReasonCode.GRANTED_QOS_0,
         SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
     )
-    public static final unsubscribeAckReasonCodes = ArrayFactory.asArray(
+    public static final unsubscribeAckReasonCodes = Array.typed(
+        UnsubscribeAckReasonCode,
         UnsubscribeAckReasonCode.SUCCESS,
         UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
         UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
     )
-    public static final userProperties = ArrayFactory.asArray(
+    public static final userProperties = Array.typed(
+        StringPair,
         new StringPair("key1", "val1"),
         new StringPair("key2", "val2"),
         new StringPair("key3", "val3"),
     )
-    public static final subscriptionIds = IntegerArray.of(subscriptionId, subscriptionId2)
+    public static final subscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
     public static final topicFilters = Array.of(topicFilter, topicFilter2)
     public static final topicFiltersObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
     public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)

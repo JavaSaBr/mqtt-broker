@@ -1,6 +1,12 @@
 package com.ss.mqtt.broker.handler.packet.in;
 
-import static com.ss.mqtt.broker.model.MqttPropertyConstants.*;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.SERVER_KEEP_ALIVE_DISABLED;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED;
+import static com.ss.mqtt.broker.model.MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
 import static com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 import static com.ss.mqtt.broker.util.ReactorUtils.ifTrue;
@@ -15,23 +21,22 @@ import com.ss.mqtt.broker.service.AuthenticationService;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.rlib.common.util.StringUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 @Log4j2
 @RequiredArgsConstructor
 public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, ConnectInPacket> {
 
-    private final @NotNull ClientIdRegistry clientIdRegistry;
-    private final @NotNull AuthenticationService authenticationService;
-    private final @NotNull MqttSessionService mqttSessionService;
-    private final @NotNull SubscriptionService subscriptionService;
+    private final ClientIdRegistry clientIdRegistry;
+    private final AuthenticationService authenticationService;
+    private final MqttSessionService mqttSessionService;
+    private final SubscriptionService subscriptionService;
 
     @Override
-    protected void handleImpl(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
+    protected void handleImpl(UnsafeMqttClient client, ConnectInPacket packet) {
 
         var connection = client.getConnection();
         connection.setMqttVersion(packet.getMqttVersion());
@@ -46,9 +51,9 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             .subscribe();
     }
 
-    private @NotNull Mono<Boolean> registerClient(
-        @NotNull UnsafeMqttClient client,
-        @NotNull ConnectInPacket packet
+    private Mono<Boolean> registerClient(
+        UnsafeMqttClient client,
+        ConnectInPacket packet
     ) {
 
         var requestedClientId = packet.getClientId();
@@ -73,9 +78,9 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         }
     }
 
-    private @NotNull Mono<Boolean> restoreSession(
-        @NotNull UnsafeMqttClient client,
-        @NotNull ConnectInPacket packet
+    private Mono<Boolean> restoreSession(
+        UnsafeMqttClient client,
+        ConnectInPacket packet
     ) {
 
         if (packet.isCleanStart()) {
@@ -90,9 +95,9 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     }
 
     private Mono<Boolean> onConnected(
-        @NotNull UnsafeMqttClient client,
-        @NotNull ConnectInPacket packet,
-        @NotNull MqttSession session,
+        UnsafeMqttClient client,
+        ConnectInPacket packet,
+        MqttSession session,
         boolean sessionRestored
     ) {
 
@@ -156,7 +161,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             .thenApply(result -> onSentConnAck(client, session, result)));
     }
 
-    private boolean onSentConnAck(@NotNull UnsafeMqttClient client, @NotNull MqttSession session, boolean result) {
+    private boolean onSentConnAck(UnsafeMqttClient client, MqttSession session, boolean result) {
 
         if (!result) {
             log.warn("Was issue with sending conn ack packet to client {}", client.getClientId());
@@ -167,7 +172,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         return true;
     }
 
-    private boolean checkPacketException(@NotNull UnsafeMqttClient client, @NotNull ConnectInPacket packet) {
+    private boolean checkPacketException(UnsafeMqttClient client, ConnectInPacket packet) {
 
         var exception = packet.getException();
 

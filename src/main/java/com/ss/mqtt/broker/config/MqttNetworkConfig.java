@@ -8,16 +8,15 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.client.ExternalMqttClient;
 import com.ss.mqtt.broker.network.client.InternalMqttClient;
 import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
-import com.ss.rlib.network.BufferAllocator;
-import com.ss.rlib.network.Network;
-import com.ss.rlib.network.NetworkFactory;
-import com.ss.rlib.network.ServerNetworkConfig;
-import com.ss.rlib.network.ServerNetworkConfig.SimpleServerNetworkConfig;
-import com.ss.rlib.network.impl.DefaultBufferAllocator;
-import com.ss.rlib.network.server.ServerNetwork;
+import javasabr.rlib.network.BufferAllocator;
+import javasabr.rlib.network.Network;
+import javasabr.rlib.network.NetworkFactory;
+import javasabr.rlib.network.ServerNetworkConfig;
+import javasabr.rlib.network.ServerNetworkConfig.SimpleServerNetworkConfig;
+import javasabr.rlib.network.impl.DefaultBufferAllocator;
+import javasabr.rlib.network.server.ServerNetwork;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -38,8 +37,9 @@ public class MqttNetworkConfig {
     private final Environment env;
 
     @Bean
-    @NotNull ServerNetworkConfig internalNetworkConfig() {
-        return SimpleServerNetworkConfig.builder()
+    ServerNetworkConfig internalNetworkConfig() {
+        return SimpleServerNetworkConfig
+            .builder()
             .readBufferSize(env.getProperty("mqtt.internal.network.read.buffer.size", int.class, 2048))
             .pendingBufferSize(env.getProperty("mqtt.internal.network.pending.buffer.size", int.class, 4096))
             .writeBufferSize(env.getProperty("mqtt.internal.network.write.buffer.size", int.class, 2048))
@@ -49,8 +49,9 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull ServerNetworkConfig externalNetworkConfig() {
-        return SimpleServerNetworkConfig.builder()
+    ServerNetworkConfig externalNetworkConfig() {
+        return SimpleServerNetworkConfig
+            .builder()
             .readBufferSize(env.getProperty("mqtt.external.network.read.buffer.size", int.class, 100))
             .pendingBufferSize(env.getProperty("mqtt.external.network.pending.buffer.size", int.class, 200))
             .writeBufferSize(env.getProperty("mqtt.external.network.write.buffer.size", int.class, 100))
@@ -60,22 +61,22 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull BufferAllocator internalBufferAllocator(@NotNull ServerNetworkConfig internalNetworkConfig) {
+    BufferAllocator internalBufferAllocator(ServerNetworkConfig internalNetworkConfig) {
         return new DefaultBufferAllocator(internalNetworkConfig);
     }
 
     @Bean
-    @NotNull BufferAllocator externalBufferAllocator(@NotNull ServerNetworkConfig externalNetworkConfig) {
+    BufferAllocator externalBufferAllocator(ServerNetworkConfig externalNetworkConfig) {
         return new DefaultBufferAllocator(externalNetworkConfig);
     }
 
     @Bean
-    @NotNull ServerNetwork<@NotNull MqttConnection> externalNetwork(
-        @NotNull ServerNetworkConfig externalNetworkConfig,
-        @NotNull BufferAllocator externalBufferAllocator,
-        @NotNull MqttConnectionConfig externalConnectionConfig,
-        PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttClientReleaseHandler mqttClientReleaseHandler
+    ServerNetwork<MqttConnection> externalNetwork(
+        ServerNetworkConfig externalNetworkConfig,
+        BufferAllocator externalBufferAllocator,
+        MqttConnectionConfig externalConnectionConfig,
+        PacketInHandler[] packetHandlers,
+        MqttClientReleaseHandler mqttClientReleaseHandler
     ) {
         return NetworkFactory.newServerNetwork(
             externalNetworkConfig,
@@ -89,12 +90,12 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull ServerNetwork<@NotNull MqttConnection> internalNetwork(
-        @NotNull ServerNetworkConfig internalNetworkConfig,
-        @NotNull BufferAllocator internalBufferAllocator,
-        @NotNull MqttConnectionConfig internalConnectionConfig,
-        PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttClientReleaseHandler mqttClientReleaseHandler
+    ServerNetwork<MqttConnection> internalNetwork(
+        ServerNetworkConfig internalNetworkConfig,
+        BufferAllocator internalBufferAllocator,
+        MqttConnectionConfig internalConnectionConfig,
+        PacketInHandler[] packetHandlers,
+        MqttClientReleaseHandler mqttClientReleaseHandler
     ) {
         return NetworkFactory.newServerNetwork(
             internalNetworkConfig,
@@ -108,9 +109,9 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull InetSocketAddress externalNetworkAddress(
-        @NotNull ServerNetwork<@NotNull MqttConnection> externalNetwork,
-        @NotNull Consumer<@NotNull MqttConnection> externalConnectionConsumer
+    InetSocketAddress externalNetworkAddress(
+        ServerNetwork<MqttConnection> externalNetwork,
+        Consumer<MqttConnection> externalConnectionConsumer
     ) {
 
         var address = new InetSocketAddress(
@@ -125,9 +126,9 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull InetSocketAddress internalNetworkAddress(
-        @NotNull ServerNetwork<@NotNull MqttConnection> internalNetwork,
-        @NotNull Consumer<@NotNull MqttConnection> internalConnectionConsumer
+     InetSocketAddress internalNetworkAddress(
+        ServerNetwork<MqttConnection> internalNetwork,
+        Consumer<MqttConnection> internalConnectionConsumer
     ) {
 
         var address = new InetSocketAddress(
@@ -142,7 +143,7 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull Consumer<@NotNull MqttConnection> externalConnectionConsumer() {
+    Consumer<MqttConnection> externalConnectionConsumer() {
         return mqttConnection -> {
             log.info("Accepted external connection: {}", mqttConnection);
             var client = (UnsafeMqttClient) mqttConnection.getClient();
@@ -151,7 +152,7 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull Consumer<@NotNull MqttConnection> internalConnectionConsumer() {
+    Consumer<MqttConnection> internalConnectionConsumer() {
         return mqttConnection -> {
             log.info("Accepted internal connection: {}", mqttConnection);
             var client = (UnsafeMqttClient) mqttConnection.getClient();
@@ -160,7 +161,7 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull MqttConnectionConfig externalConnectionConfig() {
+    MqttConnectionConfig externalConnectionConfig() {
         return new MqttConnectionConfig(
             QoS.of(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
             env.getProperty(
@@ -222,7 +223,7 @@ public class MqttNetworkConfig {
     }
 
     @Bean
-    @NotNull MqttConnectionConfig internalConnectionConfig() {
+    MqttConnectionConfig internalConnectionConfig() {
         return new MqttConnectionConfig(
             QoS.of(env.getProperty("mqtt.internal.connection.max.qos", int.class, 2)),
             env.getProperty(
@@ -283,11 +284,11 @@ public class MqttNetworkConfig {
         );
     }
 
-    private @NotNull ChannelFactory externalConnectionFactory(
-        @NotNull BufferAllocator bufferAllocator,
-        @NotNull MqttConnectionConfig connectionConfig,
-        PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttClientReleaseHandler releaseHandler
+    private ChannelFactory externalConnectionFactory(
+        BufferAllocator bufferAllocator,
+        MqttConnectionConfig connectionConfig,
+        PacketInHandler[] packetHandlers,
+        MqttClientReleaseHandler releaseHandler
     ) {
         return connectionFactory(
             bufferAllocator,
@@ -298,11 +299,11 @@ public class MqttNetworkConfig {
         );
     }
 
-    private @NotNull ChannelFactory internalConnectionFactory(
-        @NotNull BufferAllocator bufferAllocator,
-        @NotNull MqttConnectionConfig connectionConfig,
-        PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttClientReleaseHandler releaseHandler
+    private ChannelFactory internalConnectionFactory(
+        BufferAllocator bufferAllocator,
+        MqttConnectionConfig connectionConfig,
+        PacketInHandler[] packetHandlers,
+        MqttClientReleaseHandler releaseHandler
     ) {
         return connectionFactory(
             bufferAllocator,
@@ -313,12 +314,12 @@ public class MqttNetworkConfig {
         );
     }
 
-    private @NotNull ChannelFactory connectionFactory(
-        @NotNull BufferAllocator bufferAllocator,
-        @NotNull MqttConnectionConfig connectionConfig,
-        PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttClientReleaseHandler releaseHandler,
-        @NotNull BiFunction<MqttConnection, MqttClientReleaseHandler, UnsafeMqttClient> clientFactory
+    private ChannelFactory connectionFactory(
+        BufferAllocator bufferAllocator,
+        MqttConnectionConfig connectionConfig,
+        PacketInHandler[] packetHandlers,
+        MqttClientReleaseHandler releaseHandler,
+        BiFunction<MqttConnection, MqttClientReleaseHandler, UnsafeMqttClient> clientFactory
     ) {
         return (network, channel) -> new MqttConnection(
             network,

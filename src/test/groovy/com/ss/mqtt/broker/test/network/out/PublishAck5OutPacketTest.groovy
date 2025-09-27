@@ -3,7 +3,7 @@ package com.ss.mqtt.broker.test.network.out
 import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode
 import com.ss.mqtt.broker.network.packet.in.PublishAckInPacket
 import com.ss.mqtt.broker.network.packet.out.PublishAck5OutPacket
-import com.ss.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.BufferUtils
 
 class PublishAck5OutPacketTest extends BaseOutPacketTest {
     

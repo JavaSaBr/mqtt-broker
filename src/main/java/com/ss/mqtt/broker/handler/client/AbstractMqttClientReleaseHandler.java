@@ -5,10 +5,9 @@ import com.ss.mqtt.broker.network.client.AbstractMqttClient;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import com.ss.rlib.common.util.StringUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 @Log4j2
@@ -16,19 +15,19 @@ import reactor.core.publisher.Mono;
 public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttClient> implements
     MqttClientReleaseHandler {
 
-    private final @NotNull ClientIdRegistry clientIdRegistry;
-    private final @NotNull MqttSessionService sessionService;
-    private final @NotNull SubscriptionService subscriptionService;
+    private final ClientIdRegistry clientIdRegistry;
+    private final MqttSessionService sessionService;
+    private final SubscriptionService subscriptionService;
 
     @Override
-    public @NotNull Mono<?> release(@NotNull UnsafeMqttClient client) {
+    public Mono<?> release(UnsafeMqttClient client) {
         var clientId = client.getClientId();
         //noinspection unchecked
         return releaseImpl((T) client)
             .doOnNext(aVoid -> log.info("Client {} was released", clientId));
     }
 
-    protected @NotNull Mono<?> releaseImpl(@NotNull T client) {
+    protected Mono<?> releaseImpl(T client) {
 
         var clientId = client.getClientId();
         client.setClientId(StringUtils.EMPTY);

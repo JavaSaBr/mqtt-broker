@@ -4,10 +4,11 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ss.rlib.common.util.ReflectionUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
-import org.jetbrains.annotations.NotNull;
+import java.util.Collection;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.ReflectionUtils;
 
 import java.lang.StackWalker.Option;
 import java.lang.reflect.Field;
@@ -15,77 +16,82 @@ import java.util.Set;
 
 public class DebugUtils {
 
-    public static class PrintOnlyProvidedFields implements ExclusionStrategy {
+  public static class PrintOnlyProvidedFields implements ExclusionStrategy {
 
-        private final @NotNull Class<?> type;
-        private final @NotNull Set<String> fieldNames;
+    private final Class<?> type;
+    private final Set<String> fieldNames;
 
-        public PrintOnlyProvidedFields(@NotNull Class<?> type, @NotNull String... fieldNames) {
-            this.type = type;
-            this.fieldNames = Set.of(fieldNames);
-        }
-
-        @Override
-        public boolean shouldSkipField(@NotNull FieldAttributes attributes) {
-
-            var declaringClass = attributes.getDeclaringClass();
-
-            if (declaringClass != type) {
-                return false;
-            } else {
-                return !fieldNames.contains(attributes.getName());
-            }
-        }
-
-        @Override
-        public boolean shouldSkipClass(@NotNull Class<?> clazz) {
-            return false;
-        }
+    public PrintOnlyProvidedFields(Class<?> type, String... fieldNames) {
+      this.type = type;
+      this.fieldNames = Set.of(fieldNames);
     }
 
-    private static final Array<ExclusionStrategy> ADDITIONAL_EXCLUDE_STRATEGIES =
-        ArrayFactory.newCopyOnModifyArray(ExclusionStrategy.class);
-
-    private static class ExclusionStrategyContainer implements ExclusionStrategy {
-
-        @Override
-        public boolean shouldSkipField(@NotNull FieldAttributes attributes) {
-            return ADDITIONAL_EXCLUDE_STRATEGIES.anyMatchR(attributes, ExclusionStrategy::shouldSkipField);
-        }
-
-        @Override
-        public boolean shouldSkipClass(@NotNull Class<?> clazz) {
-            return ADDITIONAL_EXCLUDE_STRATEGIES.anyMatchR(clazz, ExclusionStrategy::shouldSkipClass);
-        }
+    @Override
+    public boolean shouldSkipField(FieldAttributes attributes) {
+      Class<?> declaringClass = attributes.getDeclaringClass();
+      if (declaringClass != type) {
+        return false;
+      } else {
+        return !fieldNames.contains(attributes.getName());
+      }
     }
 
-    private static final ExclusionStrategy[] EXCLUSION_STRATEGIES = ArrayFactory.toArray(
-        new ExclusionStrategyContainer()
-    );
+    @Override
+    public boolean shouldSkipClass(Class<?> clazz) {
+      return false;
+    }
+  }
 
-    private static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .setExclusionStrategies(EXCLUSION_STRATEGIES)
-        .create();
+  private static final MutableArray<ExclusionStrategy> ADDITIONAL_EXCLUDE_STRATEGIES =
+      ArrayFactory.copyOnModifyArray(ExclusionStrategy.class);
 
-    public static void registerIncludedFields(@NotNull String... fieldNames) {
+  private static class ExclusionStrategyContainer implements ExclusionStrategy {
 
-        var callerClass = StackWalker
-            .getInstance(Option.RETAIN_CLASS_REFERENCE)
-            .getCallerClass();
-
-        var allFields = ReflectionUtils.getAllDeclaredFields(callerClass);
-
-        for (var fieldName : fieldNames) {
-            if (!allFields.anyMatchConverted(fieldName, Field::getName, String::equals)) {
-                throw new RuntimeException("Not found field " + fieldName + " in type " + callerClass);
-            }
-        }
-
-        ADDITIONAL_EXCLUDE_STRATEGIES.add(new PrintOnlyProvidedFields(callerClass, fieldNames));
+    @Override
+    public boolean shouldSkipField(FieldAttributes attributes) {
+      return ADDITIONAL_EXCLUDE_STRATEGIES
+          .iterations()
+          .anyMatch(attributes, ExclusionStrategy::shouldSkipField);
     }
 
-    public static @NotNull String toJsonString(@NotNull Object object) {
-        return GSON.toJson(object);
+    @Override
+    public boolean shouldSkipClass(Class<?> clazz) {
+      return ADDITIONAL_EXCLUDE_STRATEGIES
+          .iterations()
+          .anyMatch(clazz, ExclusionStrategy::shouldSkipClass);
     }
+  }
+
+  private static final ExclusionStrategy[] EXCLUSION_STRATEGIES = ArrayUtils.array(new ExclusionStrategyContainer());
+
+  private static final Gson GSON = new GsonBuilder()
+      .setPrettyPrinting()
+      .setExclusionStrategies(EXCLUSION_STRATEGIES)
+      .create();
+
+  public static void registerIncludedFields(String... fieldNames) {
+
+    Class<?> callerClass = StackWalker
+        .getInstance(Option.RETAIN_CLASS_REFERENCE)
+        .getCallerClass();
+
+    Collection<Field> allFields = ReflectionUtils.getAllDeclaredFields(callerClass);
+
+    for (String fieldName : fieldNames) {
+
+      boolean anyMatch = allFields
+          .stream()
+          .anyMatch(field -> field.getName().equals(fieldName));
+
+      if (!anyMatch) {
+        throw new RuntimeException("Not found field " + fieldName + " in type " + callerClass);
+      }
+    }
+
+    ADDITIONAL_EXCLUDE_STRATEGIES.add(new PrintOnlyProvidedFields(callerClass, fieldNames));
+  }
+
+  public static String toJsonString(Object object) {
+    return GSON.toJson(object);
+  }
 }

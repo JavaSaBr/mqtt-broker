@@ -1,39 +1,47 @@
 package com.ss.mqtt.broker.factory.packet.out;
 
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.model.reason.code.*;
+import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishReleaseReasonCode;
+import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.network.packet.out.PublishOutPacket;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.StringUtils;
 
 public abstract class MqttPacketOutFactory {
 
-    public abstract @NotNull MqttWritablePacket newConnectAck(
-        @NotNull MqttClient client,
-        @NotNull ConnectAckReasonCode reasonCode,
+    public abstract MqttWritablePacket newConnectAck(
+        MqttClient client,
+        ConnectAckReasonCode reasonCode,
         boolean sessionPresent,
-        @NotNull String requestedClientId,
+        String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
         int requestedReceiveMax,
-        @NotNull String reason,
-        @NotNull String serverReference,
-        @NotNull String responseInformation,
-        @NotNull String authenticationMethod,
-        @NotNull byte[] authenticationData,
-        @NotNull Array<StringPair> userProperties
+        String reason,
+        String serverReference,
+        String responseInformation,
+        String authenticationMethod,
+        byte[] authenticationData,
+        MutableArray<StringPair> userProperties
     );
 
-    public @NotNull MqttWritablePacket newConnectAck(
-        @NotNull MqttClient client,
-        @NotNull ConnectAckReasonCode reasonCode,
+    public MqttWritablePacket newConnectAck(
+        MqttClient client,
+        ConnectAckReasonCode reasonCode,
         boolean sessionPresent,
-        @NotNull String requestedClientId,
+        String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
         int requestedReceiveMax
@@ -51,13 +59,13 @@ public abstract class MqttPacketOutFactory {
             StringUtils.EMPTY,
             StringUtils.EMPTY,
             ArrayUtils.EMPTY_BYTE_ARRAY,
-            Array.empty()
+            MutableArray.ofType(StringPair.class)
         );
     }
 
-    public @NotNull MqttWritablePacket newConnectAck(
-        @NotNull MqttClient client,
-        @NotNull ConnectAckReasonCode reasonCode
+    public MqttWritablePacket newConnectAck(
+        MqttClient client,
+        ConnectAckReasonCode reasonCode
     ) {
         return newConnectAck(
             client,
@@ -72,18 +80,17 @@ public abstract class MqttPacketOutFactory {
             StringUtils.EMPTY,
             StringUtils.EMPTY,
             ArrayUtils.EMPTY_BYTE_ARRAY,
-            Array.empty()
+            MutableArray.ofType(StringPair.class)
         );
     }
 
-
-    public @NotNull PublishOutPacket newPublish(
+    public PublishOutPacket newPublish(
         int packetId,
-        @NotNull QoS qos,
+        QoS qos,
         boolean retained,
         boolean duplicate,
-        @NotNull String topicName,
-        @NotNull byte[] payload
+        String topicName,
+        byte[] payload
     ) {
         return newPublish(
             packetId,
@@ -96,146 +103,143 @@ public abstract class MqttPacketOutFactory {
             false,
             StringUtils.EMPTY,
             ArrayUtils.EMPTY_BYTE_ARRAY,
-            Array.empty()
+            MutableArray.ofType(StringPair.class)
         );
     }
 
-    public abstract @NotNull PublishOutPacket newPublish(
+    public abstract PublishOutPacket newPublish(
         int packetId,
-        @NotNull QoS qos,
+        QoS qos,
         boolean retained,
         boolean duplicate,
-        @NotNull String topicName,
+        String topicName,
         int topicAlias,
-        @NotNull byte[] payload,
+        byte[] payload,
         boolean stringPayload,
-        @NotNull String responseTopic,
-        @NotNull byte[] correlationData,
-        @NotNull Array<StringPair> userProperties
+        String responseTopic,
+        byte[] correlationData,
+        MutableArray<StringPair> userProperties
     );
 
-    public abstract @NotNull MqttWritablePacket newPublishAck(
+    public abstract MqttWritablePacket newPublishAck(
         int packetId,
-        @NotNull PublishAckReasonCode reasonCode,
-        @NotNull String reason,
-        @NotNull Array<StringPair> userProperties
+        PublishAckReasonCode reasonCode,
+        String reason,
+        MutableArray<StringPair> userProperties
     );
 
-    public @NotNull MqttWritablePacket newPublishAck(
+    public MqttWritablePacket newPublishAck(
         int packetId,
-        @NotNull PublishAckReasonCode reasonCode
+        PublishAckReasonCode reasonCode
     ) {
-        return newPublishAck(packetId, reasonCode, StringUtils.EMPTY, Array.empty());
+        return newPublishAck(packetId, reasonCode, StringUtils.EMPTY, MutableArray.ofType(StringPair.class));
     }
 
-    public abstract @NotNull MqttWritablePacket newSubscribeAck(
+    public abstract MqttWritablePacket newSubscribeAck(
         int packetId,
-        @NotNull Array<SubscribeAckReasonCode> reasonCodes,
-        @NotNull String reason,
-        @NotNull Array<StringPair> userProperties
+        Array<SubscribeAckReasonCode> reasonCodes,
+        String reason,
+        MutableArray<StringPair> userProperties
     );
 
-    public @NotNull MqttWritablePacket newSubscribeAck(
+    public MqttWritablePacket newSubscribeAck(
         int packetId,
-        @NotNull Array<SubscribeAckReasonCode> reasonCodes
+        Array<SubscribeAckReasonCode> reasonCodes
     ) {
-        return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, Array.empty());
+        return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, MutableArray.ofType(StringPair.class));
     }
 
-    public abstract @NotNull MqttWritablePacket newUnsubscribeAck(
+    public abstract MqttWritablePacket newUnsubscribeAck(
         int packetId,
-        @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        Array<UnsubscribeAckReasonCode> reasonCodes,
+        MutableArray<StringPair> userProperties,
+        String reason
     );
 
-    public @NotNull MqttWritablePacket newUnsubscribeAck(
+    public MqttWritablePacket newUnsubscribeAck(
         int packetId,
-        @NotNull Array<UnsubscribeAckReasonCode> reasonCodes
+        Array<UnsubscribeAckReasonCode> reasonCodes
     ) {
-        return newUnsubscribeAck(packetId, reasonCodes, Array.empty(), StringUtils.EMPTY);
+        return newUnsubscribeAck(packetId, reasonCodes, MutableArray.ofType(StringPair.class), StringUtils.EMPTY);
     }
 
-    public abstract @NotNull MqttWritablePacket newDisconnect(
-        @NotNull MqttClient client,
-        @NotNull DisconnectReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason,
-        @NotNull String serverReference
+    public abstract MqttWritablePacket newDisconnect(
+        MqttClient client,
+        DisconnectReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason,
+        String serverReference
     );
 
-    public @NotNull MqttWritablePacket newDisconnect(
-        @NotNull MqttClient client,
-        @NotNull DisconnectReasonCode reasonCode
-    ) {
-        return newDisconnect(client, reasonCode, Array.empty(), StringUtils.EMPTY, StringUtils.EMPTY);
+    public MqttWritablePacket newDisconnect(MqttClient client, DisconnectReasonCode reasonCode) {
+        return newDisconnect(client, reasonCode, MutableArray.ofType(StringPair.class), StringUtils.EMPTY, StringUtils.EMPTY);
     }
 
-    public abstract @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull AuthenticateReasonCode reasonCode,
-        @NotNull String authenticateMethod,
-        @NotNull byte[] authenticateData,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+    public abstract MqttWritablePacket newAuthenticate(
+        AuthenticateReasonCode reasonCode,
+        String authenticateMethod,
+        byte[] authenticateData,
+        MutableArray<StringPair> userProperties,
+        String reason
     );
 
-    public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull AuthenticateReasonCode reasonCode,
-        @NotNull String authenticateMethod,
-        @NotNull byte[] authenticateData
+    public MqttWritablePacket newAuthenticate(
+        AuthenticateReasonCode reasonCode,
+        String authenticateMethod,
+        byte[] authenticateData
     ) {
         return newAuthenticate(
             reasonCode,
             authenticateMethod,
             authenticateData,
-            Array.empty(),
+            MutableArray.ofType(StringPair.class),
             StringUtils.EMPTY
         );
     }
 
-    public abstract @NotNull MqttWritablePacket newPingRequest();
+    public abstract MqttWritablePacket newPingRequest();
 
-    public abstract @NotNull MqttWritablePacket newPingResponse();
+    public abstract MqttWritablePacket newPingResponse();
 
-    public abstract @NotNull MqttWritablePacket newPublishRelease(
+    public abstract MqttWritablePacket newPublishRelease(
         int packetId,
-        @NotNull PublishReleaseReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishReleaseReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason
     );
 
-    public @NotNull MqttWritablePacket newPublishRelease(
+    public MqttWritablePacket newPublishRelease(
         int packetId,
-        @NotNull PublishReleaseReasonCode reasonCode
+        PublishReleaseReasonCode reasonCode
     ) {
-        return newPublishRelease(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+        return newPublishRelease(packetId, reasonCode, MutableArray.ofType(StringPair.class), StringUtils.EMPTY);
     }
 
-    public abstract @NotNull MqttWritablePacket newPublishReceived(
+    public abstract MqttWritablePacket newPublishReceived(
         int packetId,
-        @NotNull PublishReceivedReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishReceivedReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason
     );
 
-    public @NotNull MqttWritablePacket newPublishReceived(
+    public MqttWritablePacket newPublishReceived(
         int packetId,
-        @NotNull PublishReceivedReasonCode reasonCode
+        PublishReceivedReasonCode reasonCode
     ) {
-        return newPublishReceived(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+        return newPublishReceived(packetId, reasonCode, MutableArray.ofType(StringPair.class), StringUtils.EMPTY);
     }
 
-    public abstract @NotNull MqttWritablePacket newPublishCompleted(
+    public abstract MqttWritablePacket newPublishCompleted(
         int packetId,
-        @NotNull PublishCompletedReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishCompletedReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason
     );
 
-    public @NotNull MqttWritablePacket newPublishCompleted(
+    public MqttWritablePacket newPublishCompleted(
         int packetId,
-        @NotNull PublishCompletedReasonCode reasonCode
+        PublishCompletedReasonCode reasonCode
     ) {
-        return newPublishCompleted(packetId, reasonCode, Array.empty(), StringUtils.EMPTY);
+        return newPublishCompleted(packetId, reasonCode, MutableArray.ofType(StringPair.class), StringUtils.EMPTY);
     }
 }

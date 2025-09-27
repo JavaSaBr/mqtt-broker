@@ -1,14 +1,12 @@
 package com.ss.mqtt.broker.exception;
 
-import org.jetbrains.annotations.NotNull;
-
 public class InconsistentSubscriptionStateException extends RuntimeException {
 
-    public InconsistentSubscriptionStateException(@NotNull String message) {
+    public InconsistentSubscriptionStateException(String message) {
         super(message);
     }
 
-    public InconsistentSubscriptionStateException(@NotNull Throwable cause) {
+    public InconsistentSubscriptionStateException(Throwable cause) {
         super(cause);
     }
 }

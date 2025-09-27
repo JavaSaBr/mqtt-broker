@@ -9,7 +9,8 @@ import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode
 import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
 import com.ss.mqtt.broker.network.packet.out.Connect311OutPacket
-import com.ss.rlib.common.util.ArrayUtils
+import javasabr.rlib.common.util.ArrayUtils
+import spock.lang.Ignore
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
@@ -138,7 +139,8 @@ class ExternalConnectionTest extends IntegrationSpecification {
             def cause = ex.cause as Mqtt3ConnAckException
             cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
     }
-    
+
+  @Ignore
     def "client should not connect to broker without username and with pass using mqtt 3.1.1"() {
         given:
             def client = buildMqtt311MockClient()

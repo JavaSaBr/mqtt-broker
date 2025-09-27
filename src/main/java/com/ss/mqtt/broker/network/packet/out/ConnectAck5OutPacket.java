@@ -6,7 +6,7 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.array.Array;
+import javasabr.rlib.collections.array.Array;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -226,16 +226,16 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         PacketProperty.AUTHENTICATION_DATA
     );
 
-    private final @NotNull Array<StringPair> userProperties;
+    private final Array<StringPair> userProperties;
 
-    private final @NotNull String clientId;
-    private final @NotNull String requestedClientId;
-    private final @NotNull String reason;
-    private final @NotNull String serverReference;
-    private final @NotNull String responseInformation;
-    private final @NotNull String authenticationMethod;
-    private final @NotNull byte[] authenticationData;
-    private final @NotNull QoS maxQos;
+    private final String clientId;
+    private final String requestedClientId;
+    private final String reason;
+    private final String serverReference;
+    private final String responseInformation;
+    private final String authenticationMethod;
+    private final byte[] authenticationData;
+    private final QoS maxQos;
 
     private final long requestedSessionExpiryInterval;
     private final long sessionExpiryInterval;
@@ -253,20 +253,20 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     private final boolean sharedSubscriptionAvailable;
 
     public ConnectAck5OutPacket(
-        @NotNull ConnectAckReasonCode reasonCode,
+        ConnectAckReasonCode reasonCode,
         boolean sessionPresent,
-        @NotNull String requestedClientId,
+        String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
         int requestedReceiveMax,
-        @NotNull String reason,
-        @NotNull String serverReference,
-        @NotNull String responseInformation,
-        @NotNull String authenticationMethod,
-        @NotNull byte[] authenticationData,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String clientId,
-        @NotNull QoS maxQos,
+        String reason,
+        String serverReference,
+        String responseInformation,
+        String authenticationMethod,
+        byte[] authenticationData,
+        Array<StringPair> userProperties,
+        String clientId,
+        QoS maxQos,
         long sessionExpiryInterval,
         int maximumPacketSize,
         int receiveMax,
@@ -317,7 +317,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
         writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);

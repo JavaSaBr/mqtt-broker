@@ -3,8 +3,7 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
+import javasabr.rlib.collections.array.Array;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -37,15 +36,15 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @NotNull Array<StringPair> userProperties;
-    private final @NotNull String reason;
-    private final @NotNull PublishAckReasonCode reasonCode;
+    private final Array<StringPair> userProperties;
+    private final String reason;
+    private final PublishAckReasonCode reasonCode;
 
     public PublishAck5OutPacket(
         int packetId,
-        @NotNull PublishAckReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishAckReasonCode reasonCode,
+        Array<StringPair> userProperties,
+        String reason
     ) {
         super(packetId);
         this.reasonCode = reasonCode;
@@ -64,14 +63,14 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
     }
 
     @Override
-    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    protected void writeVariableHeader(ByteBuffer buffer) {
         super.writeVariableHeader(buffer);
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
         writeByte(buffer, reasonCode.getValue());
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901125
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);

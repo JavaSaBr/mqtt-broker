@@ -1,9 +1,8 @@
 package com.ss.mqtt.broker.util;
 
-import com.ss.rlib.common.util.StringUtils;
+import javasabr.rlib.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -12,7 +11,7 @@ import java.util.function.Supplier;
 
 public class ReactorUtils {
 
-    public static @NotNull Function<Boolean, Boolean> ifTrue(@NotNull Runnable function) {
+    public static Function<Boolean, Boolean> ifTrue(Runnable function) {
         return value -> {
             if (value) {
                 function.run();
@@ -21,7 +20,7 @@ public class ReactorUtils {
         };
     }
 
-    public static <A> @NotNull Function<Boolean, Boolean> ifTrue(@NotNull A arg, @NotNull Consumer<A> function) {
+    public static <A> Function<Boolean, Boolean> ifTrue(@NotNull A arg, Consumer<A> function) {
         return value -> {
             if (value) {
                 function.accept(arg);
@@ -30,9 +29,9 @@ public class ReactorUtils {
         };
     }
 
-    public static <R> @NotNull Function<String, Mono<R>> ifNotEmpty(
-        @NotNull Function<String, Mono<R>> toContinue,
-        @NotNull Supplier<Mono<R>> another
+    public static <R> Function<String, Mono<R>> ifNotEmpty(
+        Function<String, Mono<R>> toContinue,
+        Supplier<Mono<R>> another
     ) {
         return value -> {
             if (StringUtils.isNotEmpty(value)) {
@@ -43,9 +42,9 @@ public class ReactorUtils {
         };
     }
 
-    public static <R> @NotNull Function<Boolean, Mono<R>> ifTrue(
-        @NotNull Supplier<Mono<R>> function,
-        @NotNull Runnable another
+    public static <R> Function<Boolean, Mono<R>> ifTrue(
+        Supplier<Mono<R>> function,
+        Runnable another
     ) {
         return value -> {
 
@@ -58,12 +57,12 @@ public class ReactorUtils {
         };
     }
 
-    public static <R, T1, T2, T3> @NotNull Function<Boolean, Mono<R>> ifTrue(
-        @NotNull T1 arg1,
-        @NotNull T2 arg2,
-        @NotNull BiFunction<T1, T2, Mono<R>> function,
-        @NotNull T3 arg3,
-        @NotNull Consumer<T3> another
+    public static <R, T1, T2, T3> Function<Boolean, Mono<R>> ifTrue(
+        T1 arg1,
+        T2 arg2,
+        BiFunction<T1, T2, Mono<R>> function,
+        T3 arg3,
+        Consumer<T3> another
     ) {
         return value -> {
 

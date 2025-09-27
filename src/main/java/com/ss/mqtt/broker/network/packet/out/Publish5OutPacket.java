@@ -4,10 +4,8 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
+import javasabr.rlib.collections.array.Array;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -139,9 +137,9 @@ public class Publish5OutPacket extends Publish311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @NotNull String responseTopic;
-    private final @NotNull byte[] correlationData;
-    private final @NotNull Array<StringPair> userProperties;
+    private final String responseTopic;
+    private final byte[] correlationData;
+    private final Array<StringPair> userProperties;
 
     private final int topicAlias;
 
@@ -149,16 +147,16 @@ public class Publish5OutPacket extends Publish311OutPacket {
 
     public Publish5OutPacket(
         int packetId,
-        @NotNull QoS qos,
+        QoS qos,
         boolean retained,
         boolean duplicate,
-        @NotNull String topicName,
-        @NotNull byte[] payload,
+        String topicName,
+        byte[] payload,
         int topicAlias,
         boolean stringPayload,
-        @NotNull String responseTopic,
-        @NotNull byte[] correlationData,
-        @NotNull Array<StringPair> userProperties
+        String responseTopic,
+        byte[] correlationData,
+        Array<StringPair> userProperties
     ) {
         super(packetId, qos, retained, duplicate, topicName, payload);
         this.topicAlias = topicAlias;
@@ -174,7 +172,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
         writeProperty(buffer, PacketProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);

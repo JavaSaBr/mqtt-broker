@@ -3,12 +3,11 @@ package com.ss.mqtt.broker.handler.publish.out;
 import com.ss.mqtt.broker.model.*;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
-import org.jetbrains.annotations.NotNull;
 
 abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
     @Override
-    public @NotNull ActionResult handle(@NotNull PublishInPacket packet, @NotNull SingleSubscriber subscriber) {
+    public ActionResult handle(PublishInPacket packet, SingleSubscriber subscriber) {
 
         var client = subscriber.getMqttClient();
         var session = client.getSession();
@@ -21,18 +20,18 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
         }
     }
 
-    protected abstract @NotNull ActionResult handleImpl(
-        @NotNull PublishInPacket packet,
-        @NotNull Subscriber subscriber,
-        @NotNull MqttClient client,
-        @NotNull MqttSession session
+    protected abstract ActionResult handleImpl(
+        PublishInPacket packet,
+        Subscriber subscriber,
+        MqttClient client,
+        MqttSession session
     );
 
-    protected abstract @NotNull QoS getQoS();
+    protected abstract QoS getQoS();
 
     void sendPublish(
-        @NotNull MqttClient client,
-        @NotNull PublishInPacket packet,
+        MqttClient client,
+        PublishInPacket packet,
         int packetId,
         boolean duplicate
     ) {

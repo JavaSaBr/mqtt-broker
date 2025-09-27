@@ -9,12 +9,12 @@ import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.ArrayFactory;
-import com.ss.rlib.common.util.array.IntegerArray;
-import com.ss.rlib.common.util.array.MutableIntegerArray;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.IntArray;
+import javasabr.rlib.collections.array.MutableIntArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.NumberUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -255,7 +255,7 @@ public class PublishInPacket extends MqttReadablePacket {
      * To reduce the size of the PUBLISH packet the sender can use a Topic Alias. The Topic Alias is described
      * in section 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
      */
-    private @NotNull TopicName topicName;
+    private TopicName topicName;
 
     /**
      * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section
@@ -263,15 +263,15 @@ public class PublishInPacket extends MqttReadablePacket {
      */
     private int packetId;
 
-    private @NotNull byte[] payload;
+    private byte[] payload;
 
     // properties
-    private @NotNull String responseTopic;
-    private @NotNull String contentType;
+    private String responseTopic;
+    private String contentType;
 
-    private @NotNull IntegerArray subscriptionIds;
+    private IntArray subscriptionIds;
 
-    private @NotNull byte[] correlationData;
+    private byte[] correlationData;
 
     private long messageExpiryInterval = MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
     private int topicAlias = MqttPropertyConstants.TOPIC_ALIAS_DEFAULT;
@@ -287,7 +287,7 @@ public class PublishInPacket extends MqttReadablePacket {
         this.contentType = StringUtils.EMPTY;
         this.correlationData = ArrayUtils.EMPTY_BYTE_ARRAY;
         this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.subscriptionIds = IntegerArray.EMPTY;
+        this.subscriptionIds = IntArray.empty();
     }
 
     @Override
@@ -296,25 +296,25 @@ public class PublishInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
         topicName = buildTopicName(readString(buffer));
         packetId = qos != QoS.AT_MOST_ONCE ? readUnsignedShort(buffer) : 0;
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718040
         payload = readPayload(buffer);
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
+    protected void applyProperty(PacketProperty property, long value) {
         switch (property) {
             case PAYLOAD_FORMAT_INDICATOR:
                 payloadFormatIndicator = NumberUtils.toBoolean(value);
@@ -330,11 +330,11 @@ public class PublishInPacket extends MqttReadablePacket {
                 messageExpiryInterval = value;
                 break;
             case SUBSCRIPTION_IDENTIFIER:
-                if (subscriptionIds == IntegerArray.EMPTY) {
-                    subscriptionIds = ArrayFactory.newMutableIntegerArray();
+                if (subscriptionIds == IntArray.empty()) {
+                    subscriptionIds = ArrayFactory.mutableIntArray();
                 }
-                if (subscriptionIds instanceof MutableIntegerArray) {
-                    ((MutableIntegerArray) subscriptionIds).add((int) value);
+                if (subscriptionIds instanceof MutableIntArray array) {
+                  array.add((int) value);
                 }
                 break;
             default:

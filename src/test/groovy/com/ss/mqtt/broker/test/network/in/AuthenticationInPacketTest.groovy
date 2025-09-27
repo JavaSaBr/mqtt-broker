@@ -3,8 +3,8 @@ package com.ss.mqtt.broker.test.network.in
 import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.network.packet.in.AuthenticationInPacket
-import com.ss.rlib.common.util.BufferUtils
-import com.ss.rlib.common.util.array.Array
+import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.collections.array.Array
 
 class AuthenticationInPacketTest extends BaseInPacketTest {
 

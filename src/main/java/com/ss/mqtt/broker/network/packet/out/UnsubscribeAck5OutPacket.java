@@ -3,12 +3,11 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
 
 /**
  * Unsubscribe acknowledgement.
@@ -37,15 +36,15 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @NotNull Array<UnsubscribeAckReasonCode> reasonCodes;
-    private final @NotNull Array<StringPair> userProperties;
-    private final @NotNull String reason;
+    private final Array<UnsubscribeAckReasonCode> reasonCodes;
+    private final Array<StringPair> userProperties;
+    private final String reason;
 
     public UnsubscribeAck5OutPacket(
         int packetId,
-        @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        Array<UnsubscribeAckReasonCode> reasonCodes,
+        Array<StringPair> userProperties,
+        String reason
     ) {
         super(packetId);
         this.reasonCodes = reasonCodes;
@@ -64,7 +63,7 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901182
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
@@ -76,7 +75,7 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
     }
 
     @Override
-    protected void writePayload(@NotNull ByteBuffer buffer) {
+    protected void writePayload(ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901185
         for (var reasonCode : reasonCodes) {
             writeByte(buffer, reasonCode.getValue());

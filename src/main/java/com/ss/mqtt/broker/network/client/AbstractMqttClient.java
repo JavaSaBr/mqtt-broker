@@ -10,14 +10,11 @@ import com.ss.mqtt.broker.factory.packet.out.MqttPacketOutFactory;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.StringUtils;
-import lombok.EqualsAndHashCode;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,11 +28,11 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
         DebugUtils.registerIncludedFields("clientId");
     }
 
-    protected final @NotNull MqttConnection connection;
-    protected final @NotNull MqttClientReleaseHandler releaseHandler;
-    protected final @NotNull AtomicBoolean released;
+    protected final MqttConnection connection;
+    protected final MqttClientReleaseHandler releaseHandler;
+    protected final AtomicBoolean released;
 
-    private volatile @Setter @NotNull String clientId;
+    private volatile @Setter String clientId;
     private volatile @Setter @Getter @Nullable MqttSession session;
 
     private volatile long sessionExpiryInterval;
@@ -47,7 +44,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     private volatile boolean requestResponseInformation = false;
     private volatile boolean requestProblemInformation = false;
 
-    public AbstractMqttClient(@NotNull MqttConnection connection, @NotNull MqttClientReleaseHandler releaseHandler) {
+    public AbstractMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
         this.connection = connection;
         this.releaseHandler = releaseHandler;
         this.released = new AtomicBoolean(false);
@@ -61,7 +58,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     }
 
     @Override
-    public void handle(@NotNull MqttReadablePacket packet) {
+    public void handle(MqttReadablePacket packet) {
         log.debug("Client [{}] received packet: {} : {}", clientId, packet.getName(), packet);
 
         var packetHandler = connection.getPacketHandlers()[packet.getPacketType()];
@@ -93,35 +90,35 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     }
 
     @Override
-    public void send(@NotNull MqttWritablePacket packet) {
+    public void send(MqttWritablePacket packet) {
         log.debug("Send to client [{}] packet: {} : {}", clientId, packet.getName(), packet);
         connection.send(packet);
     }
 
     @Override
-    public @NotNull CompletableFuture<Boolean> sendWithFeedback(@NotNull MqttWritablePacket packet) {
+    public CompletableFuture<Boolean> sendWithFeedback(MqttWritablePacket packet) {
         log.debug("Send to client [{}] packet: {} : {}", clientId, packet.getName(), packet);
         return connection.sendWithFeedback(packet);
     }
 
-    public void reject(@NotNull ConnectAckReasonCode reasonCode) {
+    public void reject(ConnectAckReasonCode reasonCode) {
         connection
             .sendWithFeedback(getPacketOutFactory().newConnectAck(this, reasonCode))
             .thenAccept(sent -> connection.close());
     }
 
     @Override
-    public @NotNull MqttPacketOutFactory getPacketOutFactory() {
+    public MqttPacketOutFactory getPacketOutFactory() {
         return connection.getMqttVersion().getPacketOutFactory();
     }
 
     @Override
-    public @NotNull MqttConnectionConfig getConnectionConfig() {
+    public MqttConnectionConfig getConnectionConfig() {
         return connection.getConfig();
     }
 
     @Override
-    public @NotNull Mono<?> release() {
+    public Mono<?> release() {
         if (released.compareAndSet(false, true)) {
             return releaseHandler.release(this);
         } else {
@@ -130,7 +127,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         return DebugUtils.toJsonString(this);
     }
 }

@@ -4,9 +4,8 @@ import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.array.Array;
+import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -52,14 +51,14 @@ public class Authentication5OutPacket extends MqttWritablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @NotNull Array<StringPair> userProperties;
+    private final Array<StringPair> userProperties;
 
-    private final @NotNull AuthenticateReasonCode reasonCode;
+    private final AuthenticateReasonCode reasonCode;
 
-    private final @NotNull String reason;
-    private final @NotNull String authenticateMethod;
+    private final String reason;
+    private final String authenticateMethod;
 
-    private final @NotNull byte[] authenticateData;
+    private final byte[] authenticateData;
 
     @Override
     protected byte getPacketType() {
@@ -67,7 +66,7 @@ public class Authentication5OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    protected void writeVariableHeader(ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
         writeByte(buffer, reasonCode.getValue());
     }
@@ -78,7 +77,7 @@ public class Authentication5OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901221
         writeStringPairProperties(

@@ -4,12 +4,11 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
 
 /**
  * Subscribe request.
@@ -35,17 +34,17 @@ public class Subscribe5OutPacket extends Subscribe311OutPacket {
     );
 
     // properties
-    private final @NotNull Array<StringPair> userProperties;
+    private final Array<StringPair> userProperties;
     private final int subscriptionId;
 
-    public Subscribe5OutPacket(@NotNull Array<SubscribeTopicFilter> topicFilters, int packetId) {
-        this(topicFilters, packetId, Array.empty(), MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED);
+    public Subscribe5OutPacket(Array<SubscribeTopicFilter> topicFilters, int packetId) {
+        this(topicFilters, packetId, Array.empty(StringPair.class), MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED);
     }
 
     public Subscribe5OutPacket(
-        @NotNull Array<SubscribeTopicFilter> topicFilters,
+        Array<SubscribeTopicFilter> topicFilters,
         int packetId,
-        @NotNull Array<StringPair> userProperties,
+        Array<StringPair> userProperties,
         int subscriptionId
     ) {
         super(topicFilters, packetId);
@@ -53,7 +52,7 @@ public class Subscribe5OutPacket extends Subscribe311OutPacket {
         this.subscriptionId = subscriptionId;
     }
 
-    protected int buildSubscriptionOptions(@NotNull SubscribeTopicFilter topicFilter) {
+    protected int buildSubscriptionOptions(SubscribeTopicFilter topicFilter) {
 
         var subscriptionOptions = 0;
 
@@ -78,7 +77,7 @@ public class Subscribe5OutPacket extends Subscribe311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901164
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
         writeProperty(

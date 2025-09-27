@@ -4,7 +4,7 @@ import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode
 import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
 import com.ss.mqtt.broker.network.packet.out.ConnectAck5OutPacket
-import com.ss.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAck5OutPacketTest extends BaseOutPacketTest {
     

@@ -7,18 +7,17 @@ import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishCompleteInPacket;
 import com.ss.mqtt.broker.network.packet.in.PublishReceivedInPacket;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public final class Qos2PublishOutHandler extends PersistentPublishOutHandler {
 
     @Override
-    protected @NotNull QoS getQoS() {
+    protected QoS getQoS() {
         return QoS.EXACTLY_ONCE;
     }
 
     @Override
-    public boolean handleResponse(@NotNull MqttClient client, @NotNull HasPacketId response) {
+    public boolean handleResponse(MqttClient client, HasPacketId response) {
 
         var packetOutFactory = client.getPacketOutFactory();
 

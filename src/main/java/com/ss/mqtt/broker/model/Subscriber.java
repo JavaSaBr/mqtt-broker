@@ -1,3 +1,3 @@
 package com.ss.mqtt.broker.model;
 
-public interface Subscriber {}
+public sealed interface Subscriber permits SingleSubscriber, SharedSubscriber {}

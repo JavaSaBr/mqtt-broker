@@ -1,6 +1,6 @@
 package com.ss.mqtt.broker.model.reason.code;
 
-import com.ss.rlib.common.util.ObjectUtils;
+import javasabr.rlib.common.util.ObjectUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;

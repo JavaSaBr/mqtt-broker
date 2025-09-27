@@ -3,7 +3,7 @@ package com.ss.mqtt.broker.test.network.out
 import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode
 import com.ss.mqtt.broker.network.packet.in.PublishReceivedInPacket
 import com.ss.mqtt.broker.network.packet.out.PublishReceived5OutPacket
-import com.ss.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.BufferUtils
 
 class PublishReceived5OutPacketTest extends BaseOutPacketTest {
     

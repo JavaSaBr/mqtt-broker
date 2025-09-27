@@ -11,12 +11,13 @@ import com.ss.mqtt.broker.test.integration.config.MqttBrokerTestConfig
 import com.ss.mqtt.broker.test.mock.MqttMockClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 
-@ContextConfiguration(classes = MqttBrokerTestConfig)
+@SpringJUnitConfig(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {
     
     public static final encoding = StandardCharsets.UTF_8

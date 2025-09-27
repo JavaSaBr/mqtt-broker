@@ -2,49 +2,60 @@ package com.ss.mqtt.broker.model;
 
 import com.ss.mqtt.broker.model.topic.SharedTopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ConcurrentArray;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.LockableArray;
 
-public class SharedSubscriber implements Subscriber {
+public final class SharedSubscriber implements Subscriber {
 
-    private static @NotNull SingleSubscriber next(@NotNull Array<SingleSubscriber> subscribers, int current) {
-        return subscribers.get(current % subscribers.size());
-    }
+  private static SingleSubscriber next(Array<SingleSubscriber> subscribers, int current) {
+    return subscribers.get(current % subscribers.size());
+  }
 
-    private final @NotNull SharedTopicFilter topicFilter;
-    private final @NotNull ConcurrentArray<SingleSubscriber> subscribers;
-    private final @NotNull AtomicInteger current;
+  private final SharedTopicFilter topicFilter;
+  private final LockableArray<SingleSubscriber> subscribers;
+  private final AtomicInteger current;
 
-    public SharedSubscriber(@NotNull SubscribeTopicFilter topic) {
-        subscribers = ConcurrentArray.ofType(Subscriber.class);
-        current = new AtomicInteger(0);
-        topicFilter = (SharedTopicFilter) topic.getTopicFilter();
-    }
+  public SharedSubscriber(SubscribeTopicFilter topic) {
+    this.subscribers = ArrayFactory.stampedLockBasedArray(Subscriber.class);
+    this.current = new AtomicInteger(0);
+    this.topicFilter = (SharedTopicFilter) topic.getTopicFilter();
+  }
 
-    public @NotNull SingleSubscriber getSubscriber() {
-        //noinspection ConstantConditions
-        return subscribers.getInReadLock(current.getAndIncrement(), SharedSubscriber::next);
-    }
+  public SingleSubscriber getSubscriber() {
+    //noinspection ConstantConditions
+    return subscribers
+        .operations()
+        .getInReadLock(current.getAndIncrement(), SharedSubscriber::next);
+  }
 
-    public void addSubscriber(@NotNull SingleSubscriber client) {
-        subscribers.runInWriteLock(client, Array::add);
-    }
+  public void addSubscriber(SingleSubscriber client) {
+    subscribers.operations()
+        .inWriteLock(client, Collection::add);
+  }
 
-    public boolean removeSubscriber(@NotNull MqttClient client) {
-        return subscribers.removeIfConvertedInWriteLock(client, SingleSubscriber::getMqttClient, Objects::equals);
-    }
+  public boolean removeSubscriber(MqttClient client) {
+    return subscribers
+        .operations()
+        .getInWriteLock(client, (singleSubscribers, mqttClient) -> {
+          int index = singleSubscribers.indexOf(SingleSubscriber::getMqttClient, mqttClient);
+          if (index >= 0) {
+            singleSubscribers.remove(index);
+            return true;
+          }
+          return false;
+        });
+  }
 
-    public int size() {
-        //noinspection ConstantConditions
-        return subscribers.getInReadLock(Collection::size);
-    }
+  public int size() {
+    //noinspection ConstantConditions
+    return subscribers.size();
+  }
 
-    public @NotNull String getGroup() {
-        return topicFilter.getGroup();
-    }
+  public String getGroup() {
+    return topicFilter.getGroup();
+  }
 }

@@ -1,9 +1,10 @@
 package com.ss.mqtt.broker.test.network.out
 
+import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.network.packet.in.SubscribeAckInPacket
 import com.ss.mqtt.broker.network.packet.out.SubscribeAck311OutPacket
-import com.ss.rlib.common.util.BufferUtils
-import com.ss.rlib.common.util.array.Array
+import javasabr.rlib.collections.array.Array
+import javasabr.rlib.common.util.BufferUtils
 
 class SubscribeAck311OutPacketTest extends BaseOutPacketTest {
     
@@ -24,7 +25,7 @@ class SubscribeAck311OutPacketTest extends BaseOutPacketTest {
             result
             reader.reasonCodes == subscribeAckReasonCodes
             reader.packetId == packetId
-            reader.userProperties == Array.empty()
+            reader.userProperties == Array.empty(StringPair)
             reader.reason == ""
     }
 }

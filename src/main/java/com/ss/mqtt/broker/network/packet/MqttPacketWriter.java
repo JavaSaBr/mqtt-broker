@@ -3,30 +3,27 @@ package com.ss.mqtt.broker.network.packet;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.util.MqttDataUtils;
-import com.ss.rlib.common.function.NotNullBiConsumer;
-import com.ss.rlib.common.function.NotNullConsumer;
-import com.ss.rlib.common.function.NullableSupplier;
-import com.ss.rlib.network.BufferAllocator;
-import com.ss.rlib.network.packet.WritablePacket;
-import com.ss.rlib.network.packet.impl.AbstractPacketWriter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javasabr.rlib.network.BufferAllocator;
+import javasabr.rlib.network.packet.WritablePacket;
+import javasabr.rlib.network.packet.impl.AbstractPacketWriter;
+import org.jspecify.annotations.Nullable;
 
 public class MqttPacketWriter extends AbstractPacketWriter<MqttWritablePacket, MqttConnection> {
 
     public MqttPacketWriter(
-        @NotNull MqttConnection connection,
-        @NotNull AsynchronousSocketChannel channel,
-        @NotNull BufferAllocator bufferAllocator,
-        @NotNull Runnable updateActivityFunction,
-        @NotNull NullableSupplier<@NotNull WritablePacket> nextWritePacketSupplier,
-        @NotNull NotNullConsumer<@NotNull WritablePacket> writtenPacketHandler,
-        @NotNull NotNullBiConsumer<@NotNull WritablePacket, Boolean> sentPacketHandler
+        MqttConnection connection,
+        AsynchronousSocketChannel channel,
+        BufferAllocator bufferAllocator,
+        Runnable updateActivityFunction,
+        Supplier<@Nullable WritablePacket> nextWritePacketSupplier,
+        Consumer<WritablePacket> writtenPacketHandler,
+        BiConsumer<WritablePacket, Boolean> sentPacketHandler
     ) {
         super(
             connection,
@@ -40,17 +37,17 @@ public class MqttPacketWriter extends AbstractPacketWriter<MqttWritablePacket, M
     }
 
     @Override
-    protected int getTotalSize(@NotNull WritablePacket packet, int expectedLength) {
+    protected int getTotalSize(WritablePacket packet, int expectedLength) {
         return 1 + MqttDataUtils.sizeOfMbi(expectedLength) + expectedLength;
     }
 
     @Override
     protected boolean onBeforeWrite(
-        @NotNull MqttWritablePacket packet,
+        MqttWritablePacket packet,
         int expectedLength,
         int totalSize,
-        @NotNull ByteBuffer firstBuffer,
-        @NotNull ByteBuffer secondBuffer
+        ByteBuffer firstBuffer,
+        ByteBuffer secondBuffer
     ) {
         firstBuffer.clear();
         secondBuffer.clear();
@@ -59,11 +56,11 @@ public class MqttPacketWriter extends AbstractPacketWriter<MqttWritablePacket, M
 
     @Override
     protected boolean onWrite(
-        @NotNull MqttWritablePacket packet,
+        MqttWritablePacket packet,
         int expectedLength,
         int totalSize,
-        @NotNull ByteBuffer firstBuffer,
-        @NotNull ByteBuffer secondBuffer
+        ByteBuffer firstBuffer,
+        ByteBuffer secondBuffer
     ) {
         if (!packet.write(secondBuffer)) {
             return false;
@@ -75,11 +72,11 @@ public class MqttPacketWriter extends AbstractPacketWriter<MqttWritablePacket, M
 
     @Override
     protected boolean onAfterWrite(
-        @NotNull MqttWritablePacket packet,
+        MqttWritablePacket packet,
         int expectedLength,
         int totalSize,
-        @NotNull ByteBuffer firstBuffer,
-        @NotNull ByteBuffer secondBuffer
+        ByteBuffer firstBuffer,
+        ByteBuffer secondBuffer
     ) {
         firstBuffer.put((byte) packet.getPacketTypeAndFlags());
         MqttDataUtils.writeMbi(secondBuffer.remaining(), firstBuffer);

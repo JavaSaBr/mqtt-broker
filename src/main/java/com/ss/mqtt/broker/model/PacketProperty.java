@@ -1,8 +1,8 @@
 package com.ss.mqtt.broker.model;
 
 import com.ss.mqtt.broker.model.data.type.PacketDataType;
-import com.ss.rlib.common.util.ClassUtils;
-import com.ss.rlib.common.util.ObjectUtils;
+import javasabr.rlib.common.util.ClassUtils;
+import javasabr.rlib.common.util.ObjectUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
