@@ -3,9 +3,7 @@ package com.ss.mqtt.broker.test.integration.config
 import com.ss.mqtt.broker.config.MqttBrokerConfig
 import com.ss.mqtt.broker.config.MqttNetworkConfig
 import com.ss.mqtt.broker.network.MqttConnection
-import com.ss.rlib.network.server.ServerNetwork
-import org.jetbrains.annotations.NotNull
-import org.springframework.beans.factory.annotation.Autowired
+import javasabr.rlib.network.server.ServerNetwork
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

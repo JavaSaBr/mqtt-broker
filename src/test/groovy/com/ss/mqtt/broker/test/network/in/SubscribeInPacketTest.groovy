@@ -5,8 +5,8 @@ import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.model.SubscribeRetainHandling
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket
-import com.ss.rlib.common.util.BufferUtils
-import com.ss.rlib.common.util.array.Array
+import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.collections.array.Array
 
 class SubscribeInPacketTest extends BaseInPacketTest {
     

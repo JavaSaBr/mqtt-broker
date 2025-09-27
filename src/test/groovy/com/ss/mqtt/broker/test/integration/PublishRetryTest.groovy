@@ -20,7 +20,6 @@ import com.ss.mqtt.broker.network.packet.out.PublishReceived5OutPacket
 import com.ss.mqtt.broker.network.packet.out.Subscribe311OutPacket
 import com.ss.mqtt.broker.network.packet.out.Subscribe5OutPacket
 import com.ss.mqtt.broker.service.MqttSessionService
-import com.ss.rlib.common.util.array.Array
 import org.springframework.beans.factory.annotation.Autowired
 
 class PublishRetryTest extends IntegrationSpecification {

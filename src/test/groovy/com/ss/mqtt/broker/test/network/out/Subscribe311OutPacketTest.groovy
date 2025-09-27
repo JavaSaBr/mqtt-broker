@@ -3,8 +3,6 @@ package com.ss.mqtt.broker.test.network.out
 import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket
 import com.ss.mqtt.broker.network.packet.out.Subscribe311OutPacket
-import com.ss.rlib.common.util.BufferUtils
-import com.ss.rlib.common.util.array.Array
 
 class Subscribe311OutPacketTest extends BaseOutPacketTest {
     

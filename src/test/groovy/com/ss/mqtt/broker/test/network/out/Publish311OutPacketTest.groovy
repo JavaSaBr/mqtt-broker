@@ -3,8 +3,8 @@ package com.ss.mqtt.broker.test.network.out
 import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket
 import com.ss.mqtt.broker.network.packet.out.Publish311OutPacket
-import com.ss.rlib.common.util.BufferUtils
-import com.ss.rlib.common.util.array.Array
+import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.collections.array.Array
 
 class Publish311OutPacketTest extends BaseOutPacketTest {
     

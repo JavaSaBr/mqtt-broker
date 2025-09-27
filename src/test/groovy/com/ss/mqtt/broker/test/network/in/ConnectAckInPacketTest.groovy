@@ -5,8 +5,8 @@ import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
-import com.ss.rlib.common.util.ArrayUtils
-import com.ss.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.ArrayUtils
+import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAckInPacketTest extends BaseInPacketTest {
     

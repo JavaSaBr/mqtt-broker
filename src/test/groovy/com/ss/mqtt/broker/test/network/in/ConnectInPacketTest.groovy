@@ -4,8 +4,8 @@ import com.ss.mqtt.broker.exception.MalformedPacketMqttException
 import com.ss.mqtt.broker.model.MqttVersion
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.network.packet.in.ConnectInPacket
-import com.ss.rlib.common.util.ArrayUtils
-import com.ss.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.ArrayUtils
+import javasabr.rlib.common.util.BufferUtils
 
 class ConnectInPacketTest extends BaseInPacketTest {
     

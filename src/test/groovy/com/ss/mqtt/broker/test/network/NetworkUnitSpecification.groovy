@@ -11,9 +11,9 @@ import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode
 import com.ss.mqtt.broker.network.MqttConnection
 import com.ss.mqtt.broker.network.client.MqttClient
 import com.ss.mqtt.broker.test.UnitSpecification
-import com.ss.rlib.common.util.array.Array
-import com.ss.rlib.common.util.array.ArrayFactory
-import com.ss.rlib.common.util.array.IntegerArray
+import javasabr.rlib.collections.array.Array
+import javasabr.rlib.collections.array.ArrayFactory
+import javasabr.rlib.collections.array.IntArray
 import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
@@ -91,7 +91,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         new StringPair("key2", "val2"),
         new StringPair("key3", "val3"),
     )
-    public static final subscriptionIds = IntegerArray.of(subscriptionId, subscriptionId2)
+    public static final subscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
     public static final topicFilters = Array.of(topicFilter, topicFilter2)
     public static final topicFiltersObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
     public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)

@@ -5,9 +5,8 @@ import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket
 import com.ss.mqtt.broker.util.MqttDataUtils
-import com.ss.rlib.common.util.array.Array
-import com.ss.rlib.common.util.array.IntegerArray
-import org.jetbrains.annotations.NotNull
+import javasabr.rlib.collections.array.Array
+import javasabr.rlib.collections.array.IntArray
 import spock.lang.Specification
 
 import java.nio.ByteBuffer
@@ -17,8 +16,7 @@ class SpecificationExtensions extends Specification {
     static final writer = new MqttWritablePacket() {
     
         @Override
-        protected void writeImpl(@NotNull ByteBuffer buffer) {
-        }
+        protected void writeImpl(ByteBuffer buffer) {}
     }
     
     static ByteBuffer putMbi(ByteBuffer self, int value) {
@@ -68,7 +66,7 @@ class SpecificationExtensions extends Specification {
         return self
     }
     
-    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, IntegerArray values) {
+    static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, IntArray values) {
         values.each { writer.writeProperty(self, property, it) }
         return self
     }

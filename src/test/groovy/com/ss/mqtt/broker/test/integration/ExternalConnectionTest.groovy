@@ -9,7 +9,6 @@ import com.ss.mqtt.broker.model.QoS
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode
 import com.ss.mqtt.broker.network.packet.in.ConnectAckInPacket
 import com.ss.mqtt.broker.network.packet.out.Connect311OutPacket
-import com.ss.rlib.common.util.ArrayUtils
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
