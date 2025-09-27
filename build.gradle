@@ -11,17 +11,19 @@ buildscript {
   }
 }
 
+repositories {
+  maven {
+    url  "https://gitlab.com/api/v4/projects/37512056/packages/maven"
+  }
+}
+
 rootProject.version = "0.0.1"
-group = "com.spaceshift"
+group = "javasabr.mqtt"
 
 allprojects {
-
   apply plugin: "java"
   apply plugin: "groovy"
   apply plugin: "org.springframework.boot"
-
-  //sourceCompatibility = JavaVersion.VERSION_17
-  //targetCompatibility = JavaVersion.VERSION_17
 
   repositories {
     mavenCentral()
@@ -86,29 +88,28 @@ allprojects {
   }
 
   processResources {
-    filter(ReplaceTokens, tokens: [
-    ])
+    filter(ReplaceTokens, tokens: [])
   }
 }
 
-task buildSingleArtifact(type: GradleBuild) {
-  group = 'build'
-  description = 'Build all modules -> Build result artifact'
+tasks.register("buildSingleArtifact", GradleBuild) {
+  group = "build"
+  description = "Build all modules -> Build result artifact"
   tasks = ['build', 'bootJar']
 }
 
-task buildSingleArtifactWithoutTests(type: GradleBuild) {
-  group = 'build'
-  description = 'Build all modules without tests -> Build result artifact'
+tasks.register("buildSingleArtifactWithoutTests", GradleBuild) {
+  group = "build"
+  description = "Build all modules without tests -> Build result artifact"
   tasks = ['classes', 'bootJar']
-}
-
-wrapper {
-  gradleVersion = '6.6-milestone-1'
-  distributionType = Wrapper.DistributionType.ALL
 }
 
 configurations.each {
   it.exclude group: "org.slf4j", module: "slf4j-log4j12"
   it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+}
+
+wrapper {
+  gradleVersion = '9.1.0'
+  distributionType = Wrapper.DistributionType.ALL
 }
