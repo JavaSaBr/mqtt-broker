@@ -6,19 +6,18 @@ import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import org.jetbrains.annotations.NotNull;
 
 public class Qos1PublishInHandler extends AbstractPublishInHandler {
 
     public Qos1PublishInHandler(
-        @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishOutHandler[] publishOutHandlers
+        SubscriptionService subscriptionService,
+        PublishOutHandler[] publishOutHandlers
     ) {
         super(subscriptionService, publishOutHandlers);
     }
 
     @Override
-    public void handle(@NotNull MqttClient client, @NotNull PublishInPacket packet) {
+    public void handle(MqttClient client, PublishInPacket packet) {
 
         var session = client.getSession();
 
@@ -32,9 +31,9 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
 
     @Override
     protected void handleResult(
-        @NotNull MqttClient client,
-        @NotNull PublishInPacket packet,
-        @NotNull ActionResult result
+        MqttClient client,
+        PublishInPacket packet,
+        ActionResult result
     ) {
 
         PublishAckReasonCode reasonCode;

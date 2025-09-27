@@ -4,10 +4,9 @@ import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -53,13 +52,13 @@ public class AuthenticationInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull AuthenticateReasonCode reasonCode;
+    private AuthenticateReasonCode reasonCode;
 
     // properties
-    private @NotNull String reason;
-    private @NotNull String authenticationMethod;
+    private String reason;
+    private String authenticationMethod;
 
-    private @NotNull byte[] authenticationData;
+    private byte[] authenticationData;
 
     public AuthenticationInPacket(byte info) {
         super(info);
@@ -75,18 +74,18 @@ public class AuthenticationInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
         reasonCode = AuthenticateReasonCode.of(readUnsignedByte(buffer));
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
+    protected void applyProperty(PacketProperty property, byte[] value) {
         switch (property) {
             case AUTHENTICATION_DATA:
                 authenticationData = value;
@@ -97,7 +96,7 @@ public class AuthenticationInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, String value) {
         switch (property) {
             case REASON_STRING:
                 reason = value;

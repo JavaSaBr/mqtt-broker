@@ -2,12 +2,11 @@ package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.mqtt.broker.util.MqttDataUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.network.packet.impl.AbstractWritablePacket;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.common.util.NumberUtils;
+import javasabr.rlib.network.packet.impl.AbstractWritablePacket;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 

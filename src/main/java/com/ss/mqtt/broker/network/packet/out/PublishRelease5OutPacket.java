@@ -3,12 +3,11 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.PublishReleaseReasonCode;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
 
 /**
  * Publish release (QoS 2 delivery part 2).
@@ -37,15 +36,15 @@ public class PublishRelease5OutPacket extends PublishRelease311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @NotNull Array<StringPair> userProperties;
-    private final @NotNull PublishReleaseReasonCode reasonCode;
-    private final @NotNull String reason;
+    private final Array<StringPair> userProperties;
+    private final PublishReleaseReasonCode reasonCode;
+    private final String reason;
 
     public PublishRelease5OutPacket(
         int packetId,
-        @NotNull PublishReleaseReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishReleaseReasonCode reasonCode,
+        Array<StringPair> userProperties,
+        String reason
     ) {
         super(packetId);
         this.userProperties = userProperties;
@@ -59,7 +58,7 @@ public class PublishRelease5OutPacket extends PublishRelease311OutPacket {
     }
 
     @Override
-    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    protected void writeVariableHeader(ByteBuffer buffer) {
         super.writeVariableHeader(buffer);
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901144
@@ -72,7 +71,7 @@ public class PublishRelease5OutPacket extends PublishRelease311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
         super.writeProperties(buffer);
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901145

@@ -3,10 +3,9 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
@@ -18,21 +17,21 @@ public class Connect311OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
 
-    private final @NotNull String username;
-    private final @NotNull String willTopic;
-    private final @NotNull String clientId;
+    private final String username;
+    private final String willTopic;
+    private final String clientId;
 
-    private final @NotNull byte[] password;
-    private final @NotNull byte[] willPayload;
+    private final byte[] password;
+    private final byte[] willPayload;
 
-    private final @NotNull QoS willQos;
+    private final QoS willQos;
 
     private final int keepAlive;
 
     private final boolean willRetain;
     private final boolean cleanStart;
 
-    public Connect311OutPacket(@NotNull String clientId, int keepAlive) {
+    public Connect311OutPacket(String clientId, int keepAlive) {
         this(
             StringUtils.EMPTY,
             StringUtils.EMPTY,
@@ -46,7 +45,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
         );
     }
 
-    protected @NotNull MqttVersion getMqttVersion() {
+    protected MqttVersion getMqttVersion() {
         return MqttVersion.MQTT_3_1_1;
     }
 
@@ -56,7 +55,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    protected void writeVariableHeader(ByteBuffer buffer) {
 
         var mqttVersion = getMqttVersion();
 
@@ -68,7 +67,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writePayload(@NotNull ByteBuffer buffer) {
+    protected void writePayload(ByteBuffer buffer) {
 
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718031
         writeString(buffer, clientId);
@@ -115,5 +114,5 @@ public class Connect311OutPacket extends MqttWritablePacket {
         return connectFlags;
     }
 
-    protected void appendWillProperties(@NotNull ByteBuffer buffer) { }
+    protected void appendWillProperties(ByteBuffer buffer) { }
 }

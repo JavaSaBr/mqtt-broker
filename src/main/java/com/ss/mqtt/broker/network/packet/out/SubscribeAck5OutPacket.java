@@ -4,8 +4,7 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
+import javasabr.rlib.collections.array.Array;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -41,14 +40,14 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private final @NotNull Array<StringPair> userProperties;
-    private final @NotNull String reason;
+    private final Array<StringPair> userProperties;
+    private final String reason;
 
     public SubscribeAck5OutPacket(
         int packetId,
-        @NotNull Array<SubscribeAckReasonCode> reasonCodes,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        Array<SubscribeAckReasonCode> reasonCodes,
+        Array<StringPair> userProperties,
+        String reason
     ) {
         super(reasonCodes, packetId);
         this.userProperties = userProperties;
@@ -66,7 +65,7 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901174
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);

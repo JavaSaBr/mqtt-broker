@@ -7,9 +7,7 @@ import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.StringUtils;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -49,16 +47,16 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull PublishCompletedReasonCode reasonCode;
+    private PublishCompletedReasonCode reasonCode;
     private int packetId;
 
     // properties
-    private @NotNull String reason;
+    private String reason;
 
     public PublishCompleteInPacket(byte info) {
         super(info);
         this.reasonCode = PublishCompletedReasonCode.SUCCESS;
-        this.reason = StringUtils.EMPTY;
+        this.reason = "";
     }
 
     @Override
@@ -67,7 +65,7 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         super.readVariableHeader(connection, buffer);
 
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718083
@@ -80,18 +78,18 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
     }
 
     @Override
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
         return super.isPropertiesSupported(connection, buffer) && buffer.hasRemaining();
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, String value) {
         switch (property) {
             case REASON_STRING:
                 reason = value;

@@ -9,12 +9,12 @@ import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.ArrayFactory;
-import com.ss.rlib.common.util.array.IntegerArray;
-import com.ss.rlib.common.util.array.MutableIntegerArray;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.IntArray;
+import javasabr.rlib.collections.array.MutableIntArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.NumberUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -269,7 +269,7 @@ public class PublishInPacket extends MqttReadablePacket {
     private @NotNull String responseTopic;
     private @NotNull String contentType;
 
-    private @NotNull IntegerArray subscriptionIds;
+    private @NotNull IntArray subscriptionIds;
 
     private @NotNull byte[] correlationData;
 
@@ -287,7 +287,7 @@ public class PublishInPacket extends MqttReadablePacket {
         this.contentType = StringUtils.EMPTY;
         this.correlationData = ArrayUtils.EMPTY_BYTE_ARRAY;
         this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
-        this.subscriptionIds = IntegerArray.EMPTY;
+        this.subscriptionIds = IntArray.empty();
     }
 
     @Override
@@ -330,11 +330,11 @@ public class PublishInPacket extends MqttReadablePacket {
                 messageExpiryInterval = value;
                 break;
             case SUBSCRIPTION_IDENTIFIER:
-                if (subscriptionIds == IntegerArray.EMPTY) {
-                    subscriptionIds = ArrayFactory.newMutableIntegerArray();
+                if (subscriptionIds == IntArray.empty()) {
+                    subscriptionIds = ArrayFactory.mutableIntArray();
                 }
-                if (subscriptionIds instanceof MutableIntegerArray) {
-                    ((MutableIntegerArray) subscriptionIds).add((int) value);
+                if (subscriptionIds instanceof MutableIntArray array) {
+                  array.add((int) value);
                 }
                 break;
             default:

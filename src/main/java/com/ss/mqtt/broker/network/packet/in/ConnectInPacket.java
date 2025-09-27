@@ -4,14 +4,15 @@ import com.ss.mqtt.broker.exception.ConnectionRejectException;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.MqttVersion;
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.NumberUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -192,14 +193,14 @@ public class ConnectInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull MqttVersion mqttVersion;
+    private MqttVersion mqttVersion;
 
-    private @NotNull String clientId;
-    private @NotNull String willTopic;
-    private @NotNull String username;
-    private @NotNull byte[] password;
+    private String clientId;
+    private String willTopic;
+    private String username;
+    private byte[] password;
 
-    private @NotNull byte[] willPayload;
+    private byte[] willPayload;
 
     private int keepAlive;
     private int willQos;
@@ -211,8 +212,8 @@ public class ConnectInPacket extends MqttReadablePacket {
     private boolean willFlag;
 
     // properties
-    private @NotNull String authenticationMethod;
-    private @NotNull byte[] authenticationData;
+    private String authenticationMethod;
+    private byte[] authenticationData;
 
     private long sessionExpiryInterval;
     private int receiveMax;
@@ -223,7 +224,7 @@ public class ConnectInPacket extends MqttReadablePacket {
 
     public ConnectInPacket(byte info) {
         super(info);
-        this.userProperties = Array.empty();
+        this.userProperties = MutableArray.ofType(StringPair.class);
         this.mqttVersion = MqttVersion.MQTT_3_1_1;
         this.clientId = StringUtils.EMPTY;
         this.willTopic = StringUtils.EMPTY;
@@ -246,7 +247,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718030
         var protocolName = readString(buffer);
@@ -292,7 +293,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
 
         /*
           The ClientID MUST be present and is the first field in the CONNECT packet Payload
@@ -336,17 +337,17 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
         return mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal();
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
+    protected void applyProperty(PacketProperty property, @NotNull byte[] value) {
         switch (property) {
             case AUTHENTICATION_DATA:
                 authenticationData = value;
@@ -357,7 +358,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, @NotNull String value) {
         switch (property) {
             case AUTHENTICATION_METHOD:
                 authenticationMethod = value;
@@ -368,7 +369,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
+    protected void applyProperty(PacketProperty property, long value) {
         switch (property) {
             case REQUEST_RESPONSE_INFORMATION:
                 requestResponseInformation = NumberUtils.toBoolean(value);

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 @ToString
 @EqualsAndHashCode(of = "mqttClient")
 @RequiredArgsConstructor
-public class SingleSubscriber implements Subscriber {
+public final class SingleSubscriber implements Subscriber {
 
     private final @Getter @NotNull MqttClient mqttClient;
     private final @NotNull SubscribeTopicFilter subscribe;

@@ -4,7 +4,7 @@ import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
-import com.ss.rlib.common.function.NotNullTripleConsumer;
+import javasabr.rlib.functions.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 
 public interface MqttSession {
@@ -56,7 +56,7 @@ public interface MqttSession {
     <F, S> void forEachTopicFilter(
         @NotNull F first,
         @NotNull S second,
-        @NotNull NotNullTripleConsumer<F, S, SubscribeTopicFilter> consumer
+        @NotNull TriConsumer<F, S, SubscribeTopicFilter> consumer
     );
     void addSubscriber(@NotNull SubscribeTopicFilter subscribe);
     void removeSubscriber(@NotNull TopicFilter subscribe);

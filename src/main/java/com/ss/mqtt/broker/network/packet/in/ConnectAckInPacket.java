@@ -1,13 +1,14 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.NumberUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -233,8 +234,8 @@ public class ConnectAckInPacket extends MqttReadablePacket {
      * packet containing the appropriate Connect Reason code from this table. If a Server sends a CONNACK
      * packet containing a Reason code of 128 or greater it MUST then close the Network Connection
      */
-    private @NotNull ConnectAckReasonCode reasonCode;
-    private @NotNull QoS maximumQos;
+    private ConnectAckReasonCode reasonCode;
+    private QoS maximumQos;
 
     /**
      * The Session Present flag informs the Client whether the Server is using Session State from a
@@ -246,12 +247,12 @@ public class ConnectAckInPacket extends MqttReadablePacket {
     private boolean sessionPresent;
 
     // properties
-    private @NotNull String assignedClientId;
-    private @NotNull String reason;
-    private @NotNull String responseInformation;
-    private @NotNull String authenticationMethod;
-    private @NotNull String serverReference;
-    private @NotNull byte[] authenticationData;
+    private String assignedClientId;
+    private String reason;
+    private String responseInformation;
+    private String authenticationMethod;
+    private String serverReference;
+    private byte[] authenticationData;
 
     private long sessionExpiryInterval;
 
@@ -267,7 +268,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
 
     public ConnectAckInPacket(byte info) {
         super(info);
-        this.userProperties = Array.empty();
+        this.userProperties = MutableArray.ofType(StringPair.class);
         this.reasonCode = ConnectAckReasonCode.SUCCESS;
         this.maximumQos = QoS.EXACTLY_ONCE;
         this.retainAvailable = MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT;
@@ -293,7 +294,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
         sessionPresent = readUnsignedByte(buffer) == 1;
@@ -301,12 +302,12 @@ public class ConnectAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull byte[] value) {
+    protected void applyProperty(PacketProperty property, byte[] value) {
         switch (property) {
             case AUTHENTICATION_DATA:
                 authenticationData = value;
@@ -317,7 +318,7 @@ public class ConnectAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, String value) {
         switch (property) {
             case REASON_STRING:
                 reason = value;

@@ -26,7 +26,6 @@ allprojects {
   repositories {
     mavenCentral()
     mavenLocal()
-    maven { url "https://dl.bintray.com/javasabr/maven" }
   }
 
   dependencies {

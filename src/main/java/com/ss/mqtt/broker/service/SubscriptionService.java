@@ -6,8 +6,8 @@ import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.model.topic.TopicName;
 import com.ss.mqtt.broker.network.client.MqttClient;
-import com.ss.rlib.common.function.NotNullBiFunction;
-import com.ss.rlib.common.util.array.Array;
+import java.util.function.BiFunction;
+import javasabr.rlib.collections.array.Array;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,7 +26,7 @@ public interface SubscriptionService {
     @NotNull <A> ActionResult forEachTopicSubscriber(
         @NotNull TopicName topicName,
         @NotNull A argument,
-        @NotNull NotNullBiFunction<SingleSubscriber, A, ActionResult> action
+        @NotNull BiFunction<SingleSubscriber, A, ActionResult> action
     );
 
     /**

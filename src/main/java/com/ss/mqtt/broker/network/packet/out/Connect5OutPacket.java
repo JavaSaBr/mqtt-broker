@@ -6,14 +6,13 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.util.MqttDataUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.StringUtils;
 
 /**
  * Connect request.
@@ -182,9 +181,9 @@ public class Connect5OutPacket extends Connect311OutPacket {
     );
 
     // properties
-    private final @NotNull Array<StringPair> userProperties;
-    private final @NotNull String authenticationMethod;
-    private final @NotNull byte[] authenticationData;
+    private final Array<StringPair> userProperties;
+    private final String authenticationMethod;
+    private final byte[] authenticationData;
 
     private final long sessionExpiryInterval;
     private final int receiveMax;
@@ -193,7 +192,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
     private final boolean requestResponseInformation;
     private final boolean requestProblemInformation;
 
-    public Connect5OutPacket(@NotNull String clientId, int keepAlive) {
+    public Connect5OutPacket(String clientId, int keepAlive) {
         this(
             StringUtils.EMPTY,
             StringUtils.EMPTY,
@@ -204,7 +203,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
             keepAlive,
             false,
             false,
-            Array.empty(),
+            Array.empty(StringPair.class),
             StringUtils.EMPTY,
             ArrayUtils.EMPTY_BYTE_ARRAY,
             MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED,
@@ -217,18 +216,18 @@ public class Connect5OutPacket extends Connect311OutPacket {
     }
 
     public Connect5OutPacket(
-        @NotNull String username,
-        @NotNull String willTopic,
-        @NotNull String clientId,
-        @NotNull byte[] password,
-        @NotNull byte[] willPayload,
-        @NotNull QoS willQos,
+        String username,
+        String willTopic,
+        String clientId,
+        byte[] password,
+        byte[] willPayload,
+        QoS willQos,
         int keepAlive,
         boolean willRetain,
         boolean cleanStart,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String authenticationMethod,
-        @NotNull byte[] authenticationData,
+        Array<StringPair> userProperties,
+        String authenticationMethod,
+        byte[] authenticationData,
         long sessionExpiryInterval,
         int receiveMax,
         int maximumPacketSize,
@@ -248,7 +247,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
         this.requestProblemInformation = requestProblemInformation;
     }
 
-    protected @NotNull MqttVersion getMqttVersion() {
+    protected MqttVersion getMqttVersion() {
         return MqttVersion.MQTT_5;
     }
 
@@ -258,7 +257,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
     }
 
     @Override
-    protected void appendWillProperties(@NotNull ByteBuffer buffer) {
+    protected void appendWillProperties(ByteBuffer buffer) {
 
         var propertiesBuffer = getPropertiesBuffer();
 
@@ -276,7 +275,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
     }
 
     @Override
-    protected void writeProperties(@NotNull ByteBuffer buffer) {
+    protected void writeProperties(ByteBuffer buffer) {
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901046
         writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
         writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
@@ -319,6 +318,5 @@ public class Connect5OutPacket extends Connect311OutPacket {
         );
     }
 
-    protected void writeWillProperties(@NotNull ByteBuffer buffer) {
-    }
+    protected void writeWillProperties(ByteBuffer buffer) {}
 }

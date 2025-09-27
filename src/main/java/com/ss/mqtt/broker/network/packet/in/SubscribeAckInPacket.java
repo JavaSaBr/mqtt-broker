@@ -4,11 +4,10 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -43,15 +42,15 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull Array<SubscribeAckReasonCode> reasonCodes;
+    private MutableArray<SubscribeAckReasonCode> reasonCodes;
     private int packetId;
 
     // properties
-    private @NotNull String reason;
+    private String reason;
 
     public SubscribeAckInPacket(byte info) {
         super(info);
-        this.reasonCodes = ArrayFactory.newArray(SubscribeAckReasonCode.class);
+        this.reasonCodes = ArrayFactory.mutableArray(SubscribeAckReasonCode.class);
         this.reason = StringUtils.EMPTY;
     }
 
@@ -61,13 +60,13 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718070
         packetId = readUnsignedShort(buffer);
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
 
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718071
         if (buffer.remaining() < 1) {
@@ -80,12 +79,12 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, String value) {
         switch (property) {
             case REASON_STRING:
                 reason = value;

@@ -8,15 +8,14 @@ import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 abstract class AbstractPublishInHandler implements PublishInHandler {
 
-    protected final @NotNull SubscriptionService subscriptionService;
-    protected final @NotNull PublishOutHandler[] publishOutHandlers;
+    protected final SubscriptionService subscriptionService;
+    protected final PublishOutHandler[] publishOutHandlers;
 
-    public void handle(@NotNull MqttClient client, @NotNull PublishInPacket packet) {
+    public void handle(MqttClient client, PublishInPacket packet) {
         handleResult(client, packet, subscriptionService.forEachTopicSubscriber(
             packet.getTopicName(),
             packet,
@@ -24,21 +23,21 @@ abstract class AbstractPublishInHandler implements PublishInHandler {
         ));
     }
 
-    private @NotNull ActionResult sendToSubscriber(
-        @NotNull SingleSubscriber subscriber,
-        @NotNull PublishInPacket packet
+    private ActionResult sendToSubscriber(
+        SingleSubscriber subscriber,
+        PublishInPacket packet
     ) {
         return publishOutHandler(subscriber.getQos()).handle(packet, subscriber);
     }
 
-    private @NotNull PublishOutHandler publishOutHandler(@NotNull QoS qos) {
+    private PublishOutHandler publishOutHandler(QoS qos) {
         return publishOutHandlers[qos.ordinal()];
     }
 
     protected void handleResult(
-        @NotNull MqttClient client,
-        @NotNull PublishInPacket packet,
-        @NotNull ActionResult result
+        MqttClient client,
+        PublishInPacket packet,
+        ActionResult result
     ) {
         // nothing to do
     }

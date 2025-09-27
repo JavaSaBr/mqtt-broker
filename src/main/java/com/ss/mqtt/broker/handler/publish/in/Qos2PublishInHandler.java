@@ -10,19 +10,18 @@ import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import com.ss.mqtt.broker.network.packet.in.PublishReleaseInPacket;
 import com.ss.mqtt.broker.service.SubscriptionService;
-import org.jetbrains.annotations.NotNull;
 
 public class Qos2PublishInHandler extends AbstractPublishInHandler implements MqttSession.PendingPacketHandler {
 
     public Qos2PublishInHandler(
-        @NotNull SubscriptionService subscriptionService,
-        @NotNull PublishOutHandler[] publishOutHandlers
+        SubscriptionService subscriptionService,
+        PublishOutHandler[] publishOutHandlers
     ) {
         super(subscriptionService, publishOutHandlers);
     }
 
     @Override
-    public void handle(@NotNull MqttClient client, @NotNull PublishInPacket packet) {
+    public void handle(MqttClient client, PublishInPacket packet) {
 
         var session = client.getSession();
 
@@ -44,9 +43,9 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
 
     @Override
     protected void handleResult(
-        @NotNull MqttClient client,
-        @NotNull PublishInPacket packet,
-        @NotNull ActionResult result
+        MqttClient client,
+        PublishInPacket packet,
+        ActionResult result
     ) {
 
         // because it was checked
@@ -80,7 +79,7 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
     }
 
     @Override
-    public boolean handleResponse(@NotNull MqttClient client, @NotNull HasPacketId response) {
+    public boolean handleResponse(MqttClient client, HasPacketId response) {
 
         if (!(response instanceof PublishReleaseInPacket)) {
             throw new IllegalStateException("Unexpected response " + response);

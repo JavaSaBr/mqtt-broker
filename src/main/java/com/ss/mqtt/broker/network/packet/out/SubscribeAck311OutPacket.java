@@ -3,9 +3,8 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.array.Array;
+import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
@@ -24,7 +23,7 @@ public class SubscribeAck311OutPacket extends MqttWritablePacket {
     /**
      * The order of Reason Codes in the SUBACK packet MUST match the order of Topic Filters in the SUBSCRIBE packet.
      */
-    private final @NotNull Array<SubscribeAckReasonCode> reasonCodes;
+    private final Array<SubscribeAckReasonCode> reasonCodes;
 
     /**
      * The Packet Identifier from the SUBSCRIBE.
@@ -42,13 +41,13 @@ public class SubscribeAck311OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    protected void writeVariableHeader(ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718070
         writeShort(buffer, packetId);
     }
 
     @Override
-    protected void writePayload(@NotNull ByteBuffer buffer) {
+    protected void writePayload(ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718071
         for (var reasonCode : reasonCodes) {
             writeByte(buffer, reasonCode.getValue());

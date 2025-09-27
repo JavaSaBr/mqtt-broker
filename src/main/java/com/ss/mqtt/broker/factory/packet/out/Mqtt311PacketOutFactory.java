@@ -1,47 +1,67 @@
 package com.ss.mqtt.broker.factory.packet.out;
 
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import com.ss.mqtt.broker.model.reason.code.*;
+import com.ss.mqtt.broker.model.reason.code.AuthenticateReasonCode;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.DisconnectReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishReceivedReasonCode;
+import com.ss.mqtt.broker.model.reason.code.PublishReleaseReasonCode;
+import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
+import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.client.MqttClient;
-import com.ss.mqtt.broker.network.packet.out.*;
-import com.ss.rlib.common.util.array.Array;
-import org.jetbrains.annotations.NotNull;
+import com.ss.mqtt.broker.network.packet.out.ConnectAck311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.Disconnect311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import com.ss.mqtt.broker.network.packet.out.PingRequest311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.PingResponse311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.Publish311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.PublishAck311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.PublishComplete311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.PublishOutPacket;
+import com.ss.mqtt.broker.network.packet.out.PublishReceived311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.PublishRelease311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.SubscribeAck311OutPacket;
+import com.ss.mqtt.broker.network.packet.out.UnsubscribeAck311OutPacket;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
 
 public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
 
     @Override
-    public @NotNull MqttWritablePacket newConnectAck(
-        @NotNull MqttClient client,
-        @NotNull ConnectAckReasonCode reasonCode,
+    public  MqttWritablePacket newConnectAck(
+        MqttClient client,
+        ConnectAckReasonCode reasonCode,
         boolean sessionPresent,
-        @NotNull String requestedClientId,
+        String requestedClientId,
         long requestedSessionExpiryInterval,
         int requestedKeepAlive,
         int requestedReceiveMax,
-        @NotNull String reason,
-        @NotNull String serverReference,
-        @NotNull String responseInformation,
-        @NotNull String authenticationMethod,
-        @NotNull byte[] authenticationData,
-        @NotNull Array<StringPair> userProperties
+        String reason,
+        String serverReference,
+        String responseInformation,
+        String authenticationMethod,
+        byte[] authenticationData,
+        MutableArray<StringPair> userProperties
     ) {
         return new ConnectAck311OutPacket(reasonCode, sessionPresent);
     }
 
     @Override
-    public @NotNull PublishOutPacket newPublish(
+    public PublishOutPacket newPublish(
         int packetId,
-        @NotNull QoS qos,
+        QoS qos,
         boolean retained,
         boolean duplicate,
-        @NotNull String topicName,
+        String topicName,
         int topicAlias,
-        @NotNull byte[] payload,
+        byte[] payload,
         boolean stringPayload,
-        @NotNull String responseTopic,
-        @NotNull byte[] correlationData,
-        @NotNull Array<StringPair> userProperties
+        String responseTopic,
+        byte[] correlationData,
+        MutableArray<StringPair> userProperties
     ) {
         return new Publish311OutPacket(
             packetId,
@@ -54,93 +74,93 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPublishAck(
+    public MqttWritablePacket newPublishAck(
         int packetId,
-        @NotNull PublishAckReasonCode reasonCode,
-        @NotNull String reason,
-        @NotNull Array<StringPair> userProperties
+        PublishAckReasonCode reasonCode,
+        String reason,
+        MutableArray<StringPair> userProperties
     ) {
         return new PublishAck311OutPacket(packetId);
     }
 
     @Override
-    public @NotNull MqttWritablePacket newSubscribeAck(
+    public MqttWritablePacket newSubscribeAck(
         int packetId,
-        @NotNull Array<SubscribeAckReasonCode> reasonCodes,
-        @NotNull String reason,
-        @NotNull Array<StringPair> userProperties
+        Array<SubscribeAckReasonCode> reasonCodes,
+        String reason,
+        MutableArray<StringPair> userProperties
     ) {
         return new SubscribeAck311OutPacket(reasonCodes, packetId);
     }
 
     @Override
-    public @NotNull MqttWritablePacket newUnsubscribeAck(
+    public MqttWritablePacket newUnsubscribeAck(
         int packetId,
-        @NotNull Array<UnsubscribeAckReasonCode> reasonCodes,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        Array<UnsubscribeAckReasonCode> reasonCodes,
+        MutableArray<StringPair> userProperties,
+        String reason
     ) {
         return new UnsubscribeAck311OutPacket(packetId);
     }
 
     @Override
-    public @NotNull MqttWritablePacket newDisconnect(
-        @NotNull MqttClient client,
-        @NotNull DisconnectReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason,
-        @NotNull String serverReference
+    public MqttWritablePacket newDisconnect(
+        MqttClient client,
+        DisconnectReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason,
+        String serverReference
     ) {
         return new Disconnect311OutPacket();
     }
 
     @Override
-    public @NotNull MqttWritablePacket newAuthenticate(
-        @NotNull AuthenticateReasonCode reasonCode,
-        @NotNull String authenticateMethod,
-        @NotNull byte[] authenticateData,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+    public MqttWritablePacket newAuthenticate(
+        AuthenticateReasonCode reasonCode,
+        String authenticateMethod,
+        byte[] authenticateData,
+        MutableArray<StringPair> userProperties,
+        String reason
     ) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPingRequest() {
+    public  MqttWritablePacket newPingRequest() {
         return new PingRequest311OutPacket();
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPingResponse() {
+    public  MqttWritablePacket newPingResponse() {
         return new PingResponse311OutPacket();
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPublishRelease(
+    public  MqttWritablePacket newPublishRelease(
         int packetId,
-        @NotNull PublishReleaseReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishReleaseReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason
     ) {
         return new PublishRelease311OutPacket(packetId);
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPublishReceived(
+    public MqttWritablePacket newPublishReceived(
         int packetId,
-        @NotNull PublishReceivedReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishReceivedReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason
     ) {
         return new PublishReceived311OutPacket(packetId);
     }
 
     @Override
-    public @NotNull MqttWritablePacket newPublishCompleted(
+    public  MqttWritablePacket newPublishCompleted(
         int packetId,
-        @NotNull PublishCompletedReasonCode reasonCode,
-        @NotNull Array<StringPair> userProperties,
-        @NotNull String reason
+        PublishCompletedReasonCode reasonCode,
+        MutableArray<StringPair> userProperties,
+        String reason
     ) {
         return new PublishComplete311OutPacket(packetId);
     }

@@ -12,6 +12,6 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class StringPair {
 
-    private final @NotNull String name;
-    private final @NotNull String value;
+    private final String name;
+    private final String value;
 }

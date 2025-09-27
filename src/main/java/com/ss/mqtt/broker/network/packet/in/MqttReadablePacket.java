@@ -10,10 +10,9 @@ import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.util.DebugUtils;
 import com.ss.mqtt.broker.util.MqttDataUtils;
-import com.ss.rlib.common.util.ArrayUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
-import com.ss.rlib.network.packet.impl.AbstractReadablePacket;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.network.packet.impl.AbstractReadablePacket;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +31,8 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     static {
         DebugUtils.registerIncludedFields("userProperties");
     }
+
+    private static final MutableArray<StringPair> EMPTY_PROPERTIES = MutableArray.ofType(StringPair.class);
 
     @Getter
     @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     /**
      * The list of user properties.
      */
-    protected @Getter @NotNull Array<StringPair> userProperties;
+    protected @Getter @NotNull MutableArray<StringPair> userProperties;
 
     /**
      * The happened exception during parsing this packet.
@@ -62,7 +63,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     protected @Getter @Nullable Exception exception;
 
     protected MqttReadablePacket(byte info) {
-        this.userProperties = Array.empty();
+        this.userProperties = EMPTY_PROPERTIES;
     }
 
     public abstract byte getPacketType();
@@ -167,8 +168,8 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
     protected void applyProperty(@NotNull PacketProperty property, @NotNull StringPair value) {
         switch (property) {
             case USER_PROPERTY:
-                if (userProperties == Array.<StringPair>empty()) {
-                    userProperties = ArrayFactory.newArray(StringPair.class);
+                if (userProperties == EMPTY_PROPERTIES) {
+                    userProperties = MutableArray.ofType(StringPair.class);
                 }
                 userProperties.add(value);
                 break;

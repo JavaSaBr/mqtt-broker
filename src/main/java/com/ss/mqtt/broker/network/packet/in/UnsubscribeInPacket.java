@@ -5,10 +5,9 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -30,12 +29,12 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull Array<TopicFilter> topicFilters;
+    private MutableArray<TopicFilter> topicFilters;
     private int packetId;
 
     public UnsubscribeInPacket(byte info) {
         super(info);
-        this.topicFilters = ArrayFactory.newArray(TopicFilter.class);
+        this.topicFilters = ArrayFactory.mutableArray(TopicFilter.class);
     }
 
     @Override
@@ -44,12 +43,12 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         packetId = readUnsignedShort(buffer);
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
 
         if (buffer.remaining() < 1) {
             throw new IllegalStateException("No any topic filters.");
@@ -61,7 +60,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 }

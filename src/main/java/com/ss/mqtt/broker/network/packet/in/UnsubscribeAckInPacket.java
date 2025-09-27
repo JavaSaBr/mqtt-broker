@@ -5,11 +5,10 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.StringUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -45,15 +44,15 @@ public class UnsubscribeAckInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull Array<UnsubscribeAckReasonCode> reasonCodes;
+    private MutableArray<UnsubscribeAckReasonCode> reasonCodes;
     private int packetId;
 
     // properties
-    private @NotNull String reason;
+    private String reason;
 
     public UnsubscribeAckInPacket(byte info) {
         super(info);
-        this.reasonCodes = Array.empty();
+        this.reasonCodes = ArrayFactory.mutableArray(UnsubscribeAckReasonCode.class);
         this.reason = StringUtils.EMPTY;
     }
 
@@ -63,13 +62,13 @@ public class UnsubscribeAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718079
         packetId = readUnsignedShort(buffer);
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901194
         if (!connection.isSupported(MqttVersion.MQTT_5)) {
@@ -80,7 +79,7 @@ public class UnsubscribeAckInPacket extends MqttReadablePacket {
             return;
         }
 
-        reasonCodes = ArrayFactory.newArray(UnsubscribeAckReasonCode.class, buffer.remaining());
+        reasonCodes = ArrayFactory.mutableArray(UnsubscribeAckReasonCode.class, buffer.remaining());
 
         while (buffer.hasRemaining()) {
             reasonCodes.add(UnsubscribeAckReasonCode.of(readUnsignedByte(buffer)));
@@ -88,12 +87,12 @@ public class UnsubscribeAckInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, String value) {
         switch (property) {
             case REASON_STRING:
                 reason = value;

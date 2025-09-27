@@ -1,15 +1,20 @@
 package com.ss.mqtt.broker.network.packet.in;
 
 import static com.ss.mqtt.broker.util.TopicUtils.buildTopicFilter;
-import com.ss.mqtt.broker.model.*;
+
+import com.ss.mqtt.broker.model.MqttPropertyConstants;
+import com.ss.mqtt.broker.model.MqttVersion;
+import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.QoS;
+import com.ss.mqtt.broker.model.SubscribeRetainHandling;
+import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.NumberUtils;
-import com.ss.rlib.common.util.array.Array;
-import com.ss.rlib.common.util.array.ArrayFactory;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.util.NumberUtils;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -45,7 +50,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
         PacketProperty.USER_PROPERTY
     );
 
-    private @NotNull Array<SubscribeTopicFilter> topicFilters;
+    private MutableArray<SubscribeTopicFilter> topicFilters;
     private int packetId;
 
     // properties
@@ -53,7 +58,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
 
     public SubscribeInPacket(byte info) {
         super(info);
-        this.topicFilters = ArrayFactory.newArray(SubscribeTopicFilter.class);
+        this.topicFilters = ArrayFactory.mutableArray(SubscribeTopicFilter.class);
         this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED;
     }
 
@@ -63,13 +68,13 @@ public class SubscribeInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
         packetId = readUnsignedShort(buffer);
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
 
         if (buffer.remaining() < 1) {
             throw new IllegalStateException("No any topic filters.");
@@ -100,12 +105,12 @@ public class SubscribeInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
+    protected void applyProperty(PacketProperty property, long value) {
         switch (property) {
             case SUBSCRIPTION_IDENTIFIER:
                 subscriptionId = (int) value;

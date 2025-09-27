@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class MqttConnectionConfig {
 
-    private final @NotNull QoS maxQos;
+    private final QoS maxQos;
 
     private final int maximumPacketSize;
     private final int minKeepAliveTime;

@@ -2,9 +2,8 @@ package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.network.packet.PacketType;
-import com.ss.rlib.common.util.array.Array;
+import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
@@ -16,7 +15,7 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
 
     private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
 
-    private final @NotNull Array<SubscribeTopicFilter> topicFilters;
+    private final Array<SubscribeTopicFilter> topicFilters;
     private final int packetId;
 
     @Override
@@ -25,13 +24,13 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
     }
 
     @Override
-    protected void writeVariableHeader(@NotNull ByteBuffer buffer) {
+    protected void writeVariableHeader(ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
         writeShort(buffer, packetId);
     }
 
     @Override
-    protected void writePayload(@NotNull ByteBuffer buffer) {
+    protected void writePayload(ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
         for (var topicFilter : topicFilters) {
             writeString(buffer, topicFilter.getTopicFilter().toString());
@@ -39,7 +38,7 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
         }
     }
 
-    protected int buildSubscriptionOptions(@NotNull SubscribeTopicFilter topicFilter) {
+    protected int buildSubscriptionOptions(SubscribeTopicFilter topicFilter) {
         return topicFilter.getQos().ordinal();
     }
 }

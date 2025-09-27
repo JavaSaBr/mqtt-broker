@@ -7,7 +7,7 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.network.MqttConnection;
 import com.ss.mqtt.broker.network.packet.PacketType;
 import com.ss.mqtt.broker.util.DebugUtils;
-import com.ss.rlib.common.util.StringUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,11 +60,11 @@ public class DisconnectInPacket extends MqttReadablePacket {
         PacketProperty.SERVER_REFERENCE
     );
 
-    private @NotNull DisconnectReasonCode reasonCode;
+    private DisconnectReasonCode reasonCode;
 
     // properties
-    private @NotNull String reason;
-    private @NotNull String serverReference;
+    private String reason;
+    private String serverReference;
 
     private long sessionExpiryInterval;
 
@@ -82,13 +82,13 @@ public class DisconnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readImpl(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
         this.sessionExpiryInterval = connection.getClient().getSessionExpiryInterval();
         super.readImpl(connection, buffer);
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
         // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
         if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
@@ -97,17 +97,17 @@ public class DisconnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected boolean isPropertiesSupported(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
         return connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining();
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
+    protected void applyProperty(PacketProperty property, long value) {
         switch (property) {
             case SESSION_EXPIRY_INTERVAL:
                 sessionExpiryInterval = value;
@@ -118,7 +118,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, @NotNull String value) {
+    protected void applyProperty(PacketProperty property, String value) {
         switch (property) {
             case REASON_STRING:
                 reason = value;
