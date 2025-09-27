@@ -1,6 +1,8 @@
 package com.ss.mqtt.broker.service.impl;
 
 import com.ss.mqtt.broker.service.ClientIdRegistry;
+import java.util.BitSet;
+import java.util.UUID;
 import javasabr.rlib.collections.dictionary.Dictionary;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
@@ -8,9 +10,6 @@ import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import reactor.core.publisher.Mono;
-
-import java.util.BitSet;
-import java.util.UUID;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryClientIdRegistry implements ClientIdRegistry {
@@ -79,9 +78,7 @@ public class InMemoryClientIdRegistry implements ClientIdRegistry {
   @Override
   public Mono<String> generate() {
     while (true) {
-      String clientId = UUID
-          .randomUUID()
-          .toString();
+      String clientId = UUID.randomUUID().toString();
       boolean contains = clientIdRegistry
           .operations()
           .getBooleanInReadLock(clientId, Dictionary::containsKey);

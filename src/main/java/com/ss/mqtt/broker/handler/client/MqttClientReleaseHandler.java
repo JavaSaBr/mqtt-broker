@@ -5,5 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface MqttClientReleaseHandler {
 
-    Mono<?> release(UnsafeMqttClient client);
+  Mono<?> release(UnsafeMqttClient client);
 }

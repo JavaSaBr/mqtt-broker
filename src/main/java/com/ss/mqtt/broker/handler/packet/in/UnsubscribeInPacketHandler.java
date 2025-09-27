@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UnsubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, UnsubscribeInPacket> {
 
-    private final SubscriptionService subscriptionService;
+  private final SubscriptionService subscriptionService;
 
-    @Override
-    protected void handleImpl(UnsafeMqttClient client, UnsubscribeInPacket packet) {
-        var ackReasonCodes = subscriptionService.unsubscribe(client, packet.getTopicFilters());
-        client.send(client.getPacketOutFactory().newUnsubscribeAck(packet.getPacketId(), ackReasonCodes));
-    }
+  @Override
+  protected void handleImpl(UnsafeMqttClient client, UnsubscribeInPacket packet) {
+    var ackReasonCodes = subscriptionService.unsubscribe(client, packet.getTopicFilters());
+    client.send(client
+        .getPacketOutFactory()
+        .newUnsubscribeAck(packet.getPacketId(), ackReasonCodes));
+  }
 }

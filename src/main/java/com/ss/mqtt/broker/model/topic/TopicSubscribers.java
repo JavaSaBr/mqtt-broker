@@ -1,6 +1,8 @@
 package com.ss.mqtt.broker.model.topic;
 
-import static com.ss.mqtt.broker.util.TopicUtils.*;
+import static com.ss.mqtt.broker.util.TopicUtils.MULTI_LEVEL_WILDCARD;
+import static com.ss.mqtt.broker.util.TopicUtils.SINGLE_LEVEL_WILDCARD;
+import static com.ss.mqtt.broker.util.TopicUtils.isShared;
 
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.SharedSubscriber;
@@ -234,11 +236,7 @@ public class TopicSubscribers {
     return resultArray;
   }
 
-  private void processLevel(
-      int level,
-      String segment,
-      TopicName topicName,
-      MutableArray<SingleSubscriber> result) {
+  private void processLevel(int level, String segment, TopicName topicName, MutableArray<SingleSubscriber> result) {
     var nextLevel = level + 1;
     processSegment(nextLevel, segment, topicName, result);
     processSegment(nextLevel, SINGLE_LEVEL_WILDCARD, topicName, result);

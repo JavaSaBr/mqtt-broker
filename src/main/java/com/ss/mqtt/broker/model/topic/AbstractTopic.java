@@ -1,10 +1,10 @@
 package com.ss.mqtt.broker.model.topic;
 
+import static com.ss.mqtt.broker.util.TopicUtils.splitTopic;
+
 import com.ss.mqtt.broker.util.DebugUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-
-import static com.ss.mqtt.broker.util.TopicUtils.splitTopic;
 
 @Getter
 @EqualsAndHashCode(of = "rawTopic")

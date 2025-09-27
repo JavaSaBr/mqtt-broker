@@ -1,6 +1,7 @@
 package com.ss.mqtt.broker.handler.publish.out;
 
 import static com.ss.mqtt.broker.model.reason.code.PublishReleaseReasonCode.SUCCESS;
+
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
@@ -11,23 +12,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public final class Qos2PublishOutHandler extends PersistentPublishOutHandler {
 
-    @Override
-    protected QoS getQoS() {
-        return QoS.EXACTLY_ONCE;
+  @Override
+  protected QoS getQoS() {
+    return QoS.EXACTLY_ONCE;
+  }
+
+  @Override
+  public boolean handleResponse(MqttClient client, HasPacketId response) {
+
+    var packetOutFactory = client.getPacketOutFactory();
+
+    if (response instanceof PublishReceivedInPacket) {
+      client.send(packetOutFactory.newPublishRelease(response.getPacketId(), SUCCESS));
+      return false;
+    } else if (response instanceof PublishCompleteInPacket) {
+      return true;
+    } else {
+      throw new IllegalStateException("Unexpected response: " + response);
     }
-
-    @Override
-    public boolean handleResponse(MqttClient client, HasPacketId response) {
-
-        var packetOutFactory = client.getPacketOutFactory();
-
-        if (response instanceof PublishReceivedInPacket) {
-            client.send(packetOutFactory.newPublishRelease(response.getPacketId(), SUCCESS));
-            return false;
-        } else if (response instanceof PublishCompleteInPacket) {
-            return true;
-        } else {
-            throw new IllegalStateException("Unexpected response: " + response);
-        }
-    }
+  }
 }

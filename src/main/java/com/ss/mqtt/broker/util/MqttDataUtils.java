@@ -1,86 +1,84 @@
 package com.ss.mqtt.broker.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.nio.ByteBuffer;
 
 public class MqttDataUtils {
 
-    public static int MAX_MBI = 268_435_455;
+  public static int MAX_MBI = 268_435_455;
 
-    /**
-     * Write a MQTT multi-byte integer to byte buffer.
-     * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
-     *
-     * @throws IllegalArgumentException if number is too big.
-     */
-    public static @NotNull ByteBuffer writeMbi(int number, @NotNull ByteBuffer buffer) {
+  /**
+   * Write a MQTT multi-byte integer to byte buffer.
+   * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
+   *
+   * @throws IllegalArgumentException if number is too big.
+   */
+  public static ByteBuffer writeMbi(int number, ByteBuffer buffer) {
 
-        var sizeInBytes = 0;
-        var valueToWrite = number;
-        do {
+    var sizeInBytes = 0;
+    var valueToWrite = number;
+    do {
 
-            var digit = (byte) (valueToWrite % 128);
-            valueToWrite = valueToWrite / 128;
+      var digit = (byte) (valueToWrite % 128);
+      valueToWrite = valueToWrite / 128;
 
-            if (valueToWrite > 0) {
-                digit |= 0x80;
-            }
+      if (valueToWrite > 0) {
+        digit |= 0x80;
+      }
 
-            buffer.put(digit);
-            sizeInBytes++;
+      buffer.put(digit);
+      sizeInBytes++;
 
-        } while (valueToWrite > 0);
+    } while (valueToWrite > 0);
 
-        if (sizeInBytes > 4) {
-            throw new IllegalArgumentException(number + " is too big.");
-        }
-
-        return buffer;
+    if (sizeInBytes > 4) {
+      throw new IllegalArgumentException(number + " is too big.");
     }
 
-    /**
-     * Read a MQTT multi-byte integer from byte buffer.
-     * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
-     *
-     * @return -1 if buffer's data isn't enough to read integer.
-     */
-    public static int readMbi(@NotNull ByteBuffer buffer) {
+    return buffer;
+  }
 
-        var originalPos = buffer.position();
+  /**
+   * Read a MQTT multi-byte integer from byte buffer.
+   * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
+   *
+   * @return -1 if buffer's data isn't enough to read integer.
+   */
+  public static int readMbi(ByteBuffer buffer) {
 
-        int result = 0;
-        int multiplier = 1;
+    var originalPos = buffer.position();
 
-        byte readValue;
-        do {
+    int result = 0;
+    int multiplier = 1;
 
-            if (!buffer.hasRemaining()) {
-                buffer.position(originalPos);
-                return -1;
-            }
+    byte readValue;
+    do {
 
-            readValue = buffer.get();
-            result += ((readValue & 0x7F) * multiplier);
-            multiplier *= 128;
+      if (!buffer.hasRemaining()) {
+        buffer.position(originalPos);
+        return -1;
+      }
 
-        } while ((readValue & 0x80) != 0);
+      readValue = buffer.get();
+      result += ((readValue & 0x7F) * multiplier);
+      multiplier *= 128;
 
-        return result;
-    }
+    } while ((readValue & 0x80) != 0);
 
-    /**
-     * Get byte count of MQTT multi-byte integer.
-     */
-    public static int sizeOfMbi(int number) {
+    return result;
+  }
 
-        var sizeInBytes = 0;
-        var valueToWrite = number;
-        do {
-            valueToWrite = valueToWrite / 128;
-            sizeInBytes++;
-        } while (valueToWrite > 0);
+  /**
+   * Get byte count of MQTT multi-byte integer.
+   */
+  public static int sizeOfMbi(int number) {
 
-        return sizeInBytes;
-    }
+    var sizeInBytes = 0;
+    var valueToWrite = number;
+    do {
+      valueToWrite = valueToWrite / 128;
+      sizeInBytes++;
+    } while (valueToWrite > 0);
+
+    return sizeInBytes;
+  }
 }

@@ -9,6 +9,8 @@ import com.ss.mqtt.broker.network.packet.MqttPacketReader;
 import com.ss.mqtt.broker.network.packet.MqttPacketWriter;
 import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.util.function.Function;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Connection;
 import javasabr.rlib.network.Network;
@@ -19,82 +21,82 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.nio.channels.AsynchronousSocketChannel;
-import java.util.function.Function;
 
 @Log4j2
 public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttWritablePacket> {
 
-    @Getter(AccessLevel.PROTECTED)
-    private final @NotNull PacketReader packetReader;
+  @Getter(AccessLevel.PROTECTED)
+  private final PacketReader packetReader;
 
-    @Getter(AccessLevel.PROTECTED)
-    private final @NotNull PacketWriter packetWriter;
+  @Getter(AccessLevel.PROTECTED)
+  private final PacketWriter packetWriter;
 
-    private final @Getter PacketInHandler @NotNull [] packetHandlers;
+  @Getter
+  private final PacketInHandler[] packetHandlers;
 
-    private final @Getter @NotNull UnsafeMqttClient client;
-    private final @Getter @NotNull MqttConnectionConfig config;
+  @Getter
+  private final UnsafeMqttClient client;
+  @Getter
+  private final MqttConnectionConfig config;
 
-    private volatile @Getter @Setter @NotNull MqttVersion mqttVersion;
-    private volatile @Getter @Setter @Nullable MqttSession session;
+  @Getter
+  @Setter
+  private volatile MqttVersion mqttVersion;
 
-    public MqttConnection(
-        @NotNull Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
-        @NotNull AsynchronousSocketChannel channel,
-        @NotNull BufferAllocator bufferAllocator,
-        int maxPacketsByRead,
-        PacketInHandler @NotNull [] packetHandlers,
-        @NotNull MqttConnectionConfig config,
-        @NotNull Function<MqttConnection, UnsafeMqttClient> clientFactory
-    ) {
-        super(network, channel, bufferAllocator, maxPacketsByRead);
-        this.packetHandlers = packetHandlers;
-        this.config = config;
-        this.mqttVersion = MqttVersion.MQTT_3_1_1;
-        this.packetReader = createPacketReader();
-        this.packetWriter = createPacketWriter();
-        this.client = clientFactory.apply(this);
-    }
+  @Getter
+  @Setter
+  private volatile MqttSession session;
 
-    public boolean isSupported(@NotNull MqttVersion mqttVersion) {
-        return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
-    }
+  public MqttConnection(
+      Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
+      AsynchronousSocketChannel channel,
+      BufferAllocator bufferAllocator,
+      int maxPacketsByRead,
+      PacketInHandler[] packetHandlers,
+      MqttConnectionConfig config,
+      Function<MqttConnection, UnsafeMqttClient> clientFactory) {
+    super(network, channel, bufferAllocator, maxPacketsByRead);
+    this.packetHandlers = packetHandlers;
+    this.config = config;
+    this.mqttVersion = MqttVersion.MQTT_3_1_1;
+    this.packetReader = createPacketReader();
+    this.packetWriter = createPacketWriter();
+    this.client = clientFactory.apply(this);
+  }
 
-    private @NotNull PacketReader createPacketReader() {
-        return new MqttPacketReader(
-            this,
-            channel,
-            bufferAllocator,
-            this::updateLastActivity,
-            this::handleReceivedPacket,
-            maxPacketsByRead
-        );
-    }
+  public boolean isSupported(MqttVersion mqttVersion) {
+    return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
+  }
 
-    private @NotNull PacketWriter createPacketWriter() {
-        return new MqttPacketWriter(
-            this,
-            channel,
-            bufferAllocator,
-            this::updateLastActivity,
-            this::nextPacketToWrite,
-            this::onWrittenPacket,
-            this::onSentPacket
-        );
-    }
+  private PacketReader createPacketReader() {
+    return new MqttPacketReader(
+        this,
+        channel,
+        bufferAllocator,
+        this::updateLastActivity,
+        this::handleReceivedPacket,
+        maxPacketsByRead);
+  }
 
-    @Override
-    public @NotNull String toString() {
-        return getRemoteAddress();
-    }
+  private PacketWriter createPacketWriter() {
+    return new MqttPacketWriter(
+        this,
+        channel,
+        bufferAllocator,
+        this::updateLastActivity,
+        this::nextPacketToWrite,
+        this::onWrittenPacket,
+        this::onSentPacket);
+  }
 
-    @Override
-    protected void doClose() {
-        client.release().subscribe();
-        super.doClose();
-    }
+  @Override
+  public String toString() {
+    return getRemoteAddress();
+  }
+
+  @Override
+  protected void doClose() {
+    client.release().subscribe();
+    super.doClose();
+  }
 }

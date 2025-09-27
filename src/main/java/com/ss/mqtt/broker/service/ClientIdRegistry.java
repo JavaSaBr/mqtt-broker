@@ -1,14 +1,14 @@
 package com.ss.mqtt.broker.service;
 
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 public interface ClientIdRegistry {
 
-    @NotNull Mono<Boolean> register(@NotNull String clientId);
-    @NotNull Mono<Boolean> unregister(@NotNull String clientId);
+  Mono<Boolean> register(String clientId);
 
-    boolean validate(@NotNull String clientId);
+  Mono<Boolean> unregister(String clientId);
 
-    @NotNull Mono<String> generate();
+  boolean validate(String clientId);
+
+  Mono<String> generate();
 }

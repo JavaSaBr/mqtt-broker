@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PublishInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, PublishInPacket> {
 
-    private final PublishingService publishingService;
+  private final PublishingService publishingService;
 
-    @Override
-    protected void handleImpl(UnsafeMqttClient client, PublishInPacket packet) {
-        publishingService.publish(client, packet);
-    }
+  @Override
+  protected void handleImpl(UnsafeMqttClient client, PublishInPacket packet) {
+    publishingService.publish(client, packet);
+  }
 }

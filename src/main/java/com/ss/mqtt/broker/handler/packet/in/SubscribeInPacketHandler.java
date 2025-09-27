@@ -10,10 +10,9 @@ import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket;
 import com.ss.mqtt.broker.network.packet.out.MqttWritablePacket;
 import com.ss.mqtt.broker.service.SubscriptionService;
+import java.util.Set;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Set;
 
 @RequiredArgsConstructor
 public class SubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, SubscribeInPacket> {

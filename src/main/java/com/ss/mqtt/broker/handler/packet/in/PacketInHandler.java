@@ -5,7 +5,7 @@ import com.ss.mqtt.broker.network.packet.in.MqttReadablePacket;
 
 public interface PacketInHandler {
 
-    PacketInHandler EMPTY = (client, packet) -> {};
+  PacketInHandler EMPTY = (client, packet) -> {};
 
-    void handle(MqttClient.UnsafeMqttClient client, MqttReadablePacket packet);
+  void handle(MqttClient.UnsafeMqttClient client, MqttReadablePacket packet);
 }

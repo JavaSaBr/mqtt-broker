@@ -7,15 +7,15 @@ import com.ss.mqtt.broker.network.packet.PacketType;
  */
 public class Disconnect311OutPacket extends MqttWritablePacket {
 
-    private static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
+  private static final byte PACKET_TYPE = (byte) PacketType.DISCONNECT.ordinal();
 
-    @Override
-    public int getExpectedLength() {
-        return 0;
-    }
+  @Override
+  public int getExpectedLength() {
+    return 0;
+  }
 
-    @Override
-    protected byte getPacketType() {
-        return PACKET_TYPE;
-    }
+  @Override
+  protected byte getPacketType() {
+    return PACKET_TYPE;
+  }
 }

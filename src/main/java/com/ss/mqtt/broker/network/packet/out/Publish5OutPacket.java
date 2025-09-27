@@ -5,19 +5,18 @@ import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.util.DebugUtils;
-import javasabr.rlib.collections.array.Array;
-
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
 
 public class Publish5OutPacket extends Publish311OutPacket {
 
-    static {
-        DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
-    }
+  static {
+    DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
+  }
 
-    private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the value of the Payload Forma t Indicator, either of:
             · 0 (0x00) Byte Indicates that the Payload is unspecified bytes, which is equivalent to not sending a
@@ -31,7 +30,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
           PUBACK, PUBREC, or DISCONNECT with Reason Code of 0x99 (Payload format invalid) as described in section 4.13.
           Refer to section 5.4.9 for information about security issues in validating the payload format.
          */
-        PacketProperty.PAYLOAD_FORMAT_INDICATOR,
+      PacketProperty.PAYLOAD_FORMAT_INDICATOR,
         /*
           Followed by the Four Byte Integer representing the Message Expiry Interval.
           If present, the Four Byte value is the lifetime of the Application Message in seconds. If the Message Expiry
@@ -44,7 +43,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
           value minus the time that the Application Message has been waiting in the Server [MQTT-3.3.2-6]. Refer to
           section 4.1 for details and limitations of stored state.
          */
-        PacketProperty.MESSAGE_EXPIRY_INTERVAL,
+      PacketProperty.MESSAGE_EXPIRY_INTERVAL,
         /*
           Followed by the Two Byte integer representing the Topic Alias value. It is a Protocol Error to include the
           Topic Alias value more than once.
@@ -83,7 +82,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
           sends a PUBLISH containing a Topic Alias value of 1 to a Server and the Server sends a PUBLISH with a Topic
           Alias value of 1 to that Client they will in general be referring to different Topics.
          */
-        PacketProperty.TOPIC_ALIAS,
+      PacketProperty.TOPIC_ALIAS,
         /*
           Followed by a UTF-8 Encoded String which is used as the Topic Name for a response message. The Response Topic
           MUST be a UTF-8 Encoded String as defined in section 1.5.4 [MQTT-3.3.2-13]. The Response Topic MUST NOT
@@ -100,7 +99,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
           the Topic Name of a PUBLISH. If the Request Message contains a Correlation Data, the receiver of the Request
           Message should also include this Correlation Data as a property in the PUBLISH packet of the Response Message.
          */
-        PacketProperty.RESPONSE_TOPIC,
+      PacketProperty.RESPONSE_TOPIC,
         /*
           Followed by Binary Data. The Correlation Data is used by the sender of the Request Message to identify which
           request the Response Message is for when it is received. It is a Protocol Error to include Correlation Data
@@ -121,7 +120,7 @@ public class Publish5OutPacket extends Publish311OutPacket {
 
           Refer to section 4.10 for more information about Request / Response
          */
-        PacketProperty.CORRELATION_DATA,
+      PacketProperty.CORRELATION_DATA,
         /*
           Followed by a UTF-8 String Pair. The User Property is allowed to appear multiple times to represent multiple
           name, value pairs. The same name is allowed to appear more than once.
@@ -134,56 +133,54 @@ public class Publish5OutPacket extends Publish311OutPacket {
           This property is intended to provide a means of transferring application layer name-value tags whose meaning
           and interpretation are known only by the application programs responsible for sending and receiving them.
          */
-        PacketProperty.USER_PROPERTY
-    );
+      PacketProperty.USER_PROPERTY);
 
-    private final String responseTopic;
-    private final byte[] correlationData;
-    private final Array<StringPair> userProperties;
+  private final String responseTopic;
+  private final byte[] correlationData;
+  private final Array<StringPair> userProperties;
 
-    private final int topicAlias;
+  private final int topicAlias;
 
-    private final boolean stringPayload;
+  private final boolean stringPayload;
 
-    public Publish5OutPacket(
-        int packetId,
-        QoS qos,
-        boolean retained,
-        boolean duplicate,
-        String topicName,
-        byte[] payload,
-        int topicAlias,
-        boolean stringPayload,
-        String responseTopic,
-        byte[] correlationData,
-        Array<StringPair> userProperties
-    ) {
-        super(packetId, qos, retained, duplicate, topicName, payload);
-        this.topicAlias = topicAlias;
-        this.stringPayload = stringPayload;
-        this.responseTopic = responseTopic;
-        this.correlationData = correlationData;
-        this.userProperties = userProperties;
-    }
+  public Publish5OutPacket(
+      int packetId,
+      QoS qos,
+      boolean retained,
+      boolean duplicate,
+      String topicName,
+      byte[] payload,
+      int topicAlias,
+      boolean stringPayload,
+      String responseTopic,
+      byte[] correlationData,
+      Array<StringPair> userProperties) {
+    super(packetId, qos, retained, duplicate, topicName, payload);
+    this.topicAlias = topicAlias;
+    this.stringPayload = stringPayload;
+    this.responseTopic = responseTopic;
+    this.correlationData = correlationData;
+    this.userProperties = userProperties;
+  }
 
-    @Override
-    protected boolean isPropertiesSupported() {
-        return true;
-    }
+  @Override
+  protected boolean isPropertiesSupported() {
+    return true;
+  }
 
-    @Override
-    protected void writeProperties(ByteBuffer buffer) {
+  @Override
+  protected void writeProperties(ByteBuffer buffer) {
 
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
-        writeProperty(buffer, PacketProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);
-        writeProperty(buffer,
-            PacketProperty.MESSAGE_EXPIRY_INTERVAL,
-            0,
-            MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
-        );
-        writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
-        writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
-        writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
-        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
-    }
+    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
+    writeProperty(buffer, PacketProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);
+    writeProperty(
+        buffer,
+        PacketProperty.MESSAGE_EXPIRY_INTERVAL,
+        0,
+        MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED);
+    writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
+    writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
+    writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
+    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+  }
 }

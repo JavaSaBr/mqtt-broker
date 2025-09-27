@@ -2,7 +2,6 @@ package com.ss.mqtt.broker.model;
 
 import com.ss.mqtt.broker.model.topic.SharedTopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
-
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.rlib.collections.array.Array;
@@ -33,21 +32,23 @@ public final class SharedSubscriber implements Subscriber {
   }
 
   public void addSubscriber(SingleSubscriber client) {
-    subscribers.operations()
+    subscribers
+        .operations()
         .inWriteLock(client, Collection::add);
   }
 
   public boolean removeSubscriber(MqttClient client) {
     return subscribers
         .operations()
-        .getInWriteLock(client, (singleSubscribers, mqttClient) -> {
-          int index = singleSubscribers.indexOf(SingleSubscriber::getMqttClient, mqttClient);
-          if (index >= 0) {
-            singleSubscribers.remove(index);
-            return true;
-          }
-          return false;
-        });
+        .getInWriteLock(
+            client, (singleSubscribers, mqttClient) -> {
+              int index = singleSubscribers.indexOf(SingleSubscriber::getMqttClient, mqttClient);
+              if (index >= 0) {
+                singleSubscribers.remove(index);
+                return true;
+              }
+              return false;
+            });
   }
 
   public int size() {

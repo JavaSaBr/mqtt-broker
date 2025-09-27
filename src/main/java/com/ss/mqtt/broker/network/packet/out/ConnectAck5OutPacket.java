@@ -1,28 +1,26 @@
 package com.ss.mqtt.broker.network.packet.out;
 
-import com.ss.mqtt.broker.model.QoS;
-import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.model.MqttPropertyConstants;
 import com.ss.mqtt.broker.model.PacketProperty;
+import com.ss.mqtt.broker.model.QoS;
 import com.ss.mqtt.broker.model.data.type.StringPair;
+import com.ss.mqtt.broker.model.reason.code.ConnectAckReasonCode;
 import com.ss.mqtt.broker.util.DebugUtils;
-import javasabr.rlib.collections.array.Array;
-import org.jetbrains.annotations.NotNull;
-
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
 
 /**
  * Connect acknowledgment.
  */
 public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
-    static {
-        DebugUtils.registerIncludedFields("reasonCode", "sessionPresent", "clientId");
-    }
+  static {
+    DebugUtils.registerIncludedFields("reasonCode", "sessionPresent", "clientId");
+  }
 
-    private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the Four Byte Integer representing the Session Expiry Interval in seconds. It is a Protocol
           Error to include the Session Expiry Interval more than once.
@@ -30,7 +28,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           If the Session Expiry Interval is absent the value in the CONNECT Packet used. The server uses this
           property to inform the Client that it is using a value other than that sent by the Client in the CONNACK.
          */
-        PacketProperty.SESSION_EXPIRY_INTERVAL,
+      PacketProperty.SESSION_EXPIRY_INTERVAL,
         /*
           Followed by the Two Byte Integer representing the Receive Maximum value. It is a Protocol Error to
           include the Receive Maximum value more than once or for it to have the value 0.
@@ -41,7 +39,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
           If the Receive Maximum value is absent, then its value defaults to 65,535.
          */
-        PacketProperty.RECEIVE_MAXIMUM,
+      PacketProperty.RECEIVE_MAXIMUM,
         /*
           Followed by a Byte with a value of either 0 or 1. It is a Protocol Error to include Maximum QoS more than
           once, or to have a value other than 0 or 1. If the Maximum QoS is absent, the Client uses a Maximum
@@ -62,7 +60,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           reject the connection. It SHOULD use a CONNACK packet with Reason Code 0x9B (QoS not supported)
           as described in section 4.13 Handling errors, and MUST close the Network Connection
          */
-        PacketProperty.MAXIMUM_QOS,
+      PacketProperty.MAXIMUM_QOS,
         /*
           Followed by a Byte field. If present, this byte declares whether the Server supports retained messages. A
           value of 0 means that retained messages are not supported. A value of 1 means retained messages are
@@ -79,7 +77,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           Server SHOULD send a DISCONNECT with Reason Code of 0x9A (Retain not supported) as described
           in section 4.13.
          */
-        PacketProperty.RETAIN_AVAILABLE,
+      PacketProperty.RETAIN_AVAILABLE,
         /*
           Followed by a Four Byte Integer representing the Maximum Packet Size the Server is willing to accept. If
           the Maximum Packet Size is not present, there is no limit on the packet size imposed beyond the
@@ -96,7 +94,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           a Server receives a packet whose size exceeds this limit, this is a Protocol Error, the Server uses
           DISCONNECT with Reason Code 0x95 (Packet too large), as described in section 4.13.
          */
-        PacketProperty.MAXIMUM_PACKET_SIZE,
+      PacketProperty.MAXIMUM_PACKET_SIZE,
         /*
           Followed by the UTF-8 string which is the Assigned Client Identifier. It is a Protocol Error to include the
           Assigned Client Identifier more than once.
@@ -108,7 +106,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           containing an Assigned Client Identifier. The Assigned Client Identifier MUST be a new Client Identifier
           not used by any other Session currently in the Server [
          */
-        PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
+      PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
         /*
           Followed by the Two Byte Integer representing the Topic Alias Maximum value. It is a Protocol Error to
           include the Topic Alias Maximum value more than once. If the Topic Alias Maximum property is absent,
@@ -121,7 +119,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           on this connection. If Topic Alias Maximum is absent or 0, the Client MUST NOT send any Topic Aliases on
           to the Server
          */
-        PacketProperty.TOPIC_ALIAS_MAXIMUM,
+      PacketProperty.TOPIC_ALIAS_MAXIMUM,
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
           Reason String is a human readable string designed for diagnostics and SHOULD NOT be parsed by the
@@ -131,7 +129,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           property if it would increase the size of the CONNACK packet beyond the Maximum Packet Size specified
           by the Client [MQTT-3.2.2-19]. It is a Protocol Error to include the Reason String more than once.
          */
-        PacketProperty.REASON_STRING,
+      PacketProperty.REASON_STRING,
         /*
           Followed by a UTF-8 String Pair. This property can be used to provide additional information to the Client
           including diagnostic information. The Server MUST NOT send this property if it would increase the size of
@@ -142,7 +140,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           The content and meaning of this property is not defined by this specification. The receiver of a CONNACK
           containing this property MAY ignore it.
          */
-        PacketProperty.USER_PROPERTY,
+      PacketProperty.USER_PROPERTY,
         /*
           Followed by a Byte field. If present, this byte declares whether the Server supports Wildcard
           Subscriptions. A value is 0 means that Wildcard Subscriptions are not supported. A value of 1 means
@@ -160,7 +158,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           Wildcard Subscription. In this case the Server MAY send a SUBACK Control Packet with a Reason Code
           0xA2 (Wildcard Subscriptions not supported).
          */
-        PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
+      PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
         /*
           Followed by a Byte field. If present, this byte declares whether the Server supports Subscription
           Identifiers. A value is 0 means that Subscription Identifiers are not supported. A value of 1 means
@@ -172,7 +170,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           Subscription Identifiers, this is a Protocol Error. The Server uses DISCONNECT with Reason Code of
           0xA1 (Subscription Identifiers not supported) as described in section 4.13.
          */
-        PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+      PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
         /*
           Followed by a Byte field. If present, this byte declares whether the Server supports Shared Subscriptions.
           A value is 0 means that Shared Subscriptions are not supported. A value of 1 means Shared
@@ -183,7 +181,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           Shared Subscriptions, this is a Protocol Error. The Server uses DISCONNECT with Reason Code 0x9E
           (Shared Subscriptions not supported) as described in section 4.13.
          */
-        PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
+      PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
         /*
           Followed by a Two Byte Integer with the Keep Alive time assigned by the Server. If the Server sends a
           Server Keep Alive on the CONNACK packet, the Client MUST use this value instead of the Keep Alive
@@ -191,7 +189,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           the Server MUST use the Keep Alive value set by the Client on CONNECT [MQTT-3.2.2-22]. It is a
           Protocol Error to include the Server Keep Alive more than once.
          */
-        PacketProperty.SERVER_KEEP_ALIVE,
+      PacketProperty.SERVER_KEEP_ALIVE,
         /*
           Followed by a UTF-8 Encoded String which is used as the basis for creating a Response Topic. The way
           in which the Client creates a Response Topic from the Response Information is not defined by this
@@ -200,7 +198,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
           If the Client sends a Request Response Information with a value 1, it is OPTIONAL for the Server to send
           the Response Information in the CONNACK.
          */
-        PacketProperty.RESPONSE_INFORMATION,
+      PacketProperty.RESPONSE_INFORMATION,
         /*
           Followed by a UTF-8 Encoded String which can be used by the Client to identify another Server to use. It
           is a Protocol Error to include the Server Reference more than once.
@@ -210,187 +208,162 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
           Refer to section 4.11 Server redirection for information about how Server Reference is used
          */
-        PacketProperty.SERVER_REFERENCE,
+      PacketProperty.SERVER_REFERENCE,
         /*
           Followed by a UTF-8 Encoded String containing the name of the authentication method. It is a Protocol
           Error to include the Authentication Method more than once. Refer to section 4.12 for more information
           about extended authentication.
          */
-        PacketProperty.AUTHENTICATION_METHOD,
+      PacketProperty.AUTHENTICATION_METHOD,
         /*
           Followed by Binary Data containing authentication data. The contents of this data are defined by the
           authentication method and the state of already exchanged authentication data. It is a Protocol Error to
           include the Authentication Data more than once. Refer to section 4.12 for more information about
           extended authentication.
          */
-        PacketProperty.AUTHENTICATION_DATA
-    );
+      PacketProperty.AUTHENTICATION_DATA);
 
-    private final Array<StringPair> userProperties;
+  private final Array<StringPair> userProperties;
 
-    private final String clientId;
-    private final String requestedClientId;
-    private final String reason;
-    private final String serverReference;
-    private final String responseInformation;
-    private final String authenticationMethod;
-    private final byte[] authenticationData;
-    private final QoS maxQos;
+  private final String clientId;
+  private final String requestedClientId;
+  private final String reason;
+  private final String serverReference;
+  private final String responseInformation;
+  private final String authenticationMethod;
+  private final byte[] authenticationData;
+  private final QoS maxQos;
 
-    private final long requestedSessionExpiryInterval;
-    private final long sessionExpiryInterval;
+  private final long requestedSessionExpiryInterval;
+  private final long sessionExpiryInterval;
 
-    private final int requestedKeepAlive;
-    private final int requestedReceiveMax;
-    private final int maximumPacketSize;
-    private final int receiveMax;
-    private final int topicAliasMaximum;
-    private final int keepAlive;
+  private final int requestedKeepAlive;
+  private final int requestedReceiveMax;
+  private final int maximumPacketSize;
+  private final int receiveMax;
+  private final int topicAliasMaximum;
+  private final int keepAlive;
 
-    private final boolean retainAvailable;
-    private final boolean wildcardSubscriptionAvailable;
-    private final boolean subscriptionIdAvailable;
-    private final boolean sharedSubscriptionAvailable;
+  private final boolean retainAvailable;
+  private final boolean wildcardSubscriptionAvailable;
+  private final boolean subscriptionIdAvailable;
+  private final boolean sharedSubscriptionAvailable;
 
-    public ConnectAck5OutPacket(
-        ConnectAckReasonCode reasonCode,
-        boolean sessionPresent,
-        String requestedClientId,
-        long requestedSessionExpiryInterval,
-        int requestedKeepAlive,
-        int requestedReceiveMax,
-        String reason,
-        String serverReference,
-        String responseInformation,
-        String authenticationMethod,
-        byte[] authenticationData,
-        Array<StringPair> userProperties,
-        String clientId,
-        QoS maxQos,
-        long sessionExpiryInterval,
-        int maximumPacketSize,
-        int receiveMax,
-        int topicAliasMaximum,
-        int keepAlive,
-        boolean retainAvailable,
-        boolean wildcardSubscriptionAvailable,
-        boolean subscriptionIdAvailable,
-        boolean sharedSubscriptionAvailable
-    ) {
-        super(reasonCode, sessionPresent);
-        this.requestedClientId = requestedClientId;
-        this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
-        this.requestedKeepAlive = requestedKeepAlive;
-        this.requestedReceiveMax = requestedReceiveMax;
-        this.reason = reason;
-        this.serverReference = serverReference;
-        this.responseInformation = responseInformation;
-        this.authenticationMethod = authenticationMethod;
-        this.authenticationData = authenticationData;
-        this.userProperties = userProperties;
-        this.clientId = clientId;
-        this.maxQos = maxQos;
-        this.sessionExpiryInterval = sessionExpiryInterval;
-        this.maximumPacketSize = maximumPacketSize;
-        this.receiveMax = receiveMax;
-        this.topicAliasMaximum = topicAliasMaximum;
-        this.keepAlive = keepAlive;
-        this.retainAvailable = retainAvailable;
-        this.wildcardSubscriptionAvailable = wildcardSubscriptionAvailable;
-        this.subscriptionIdAvailable = subscriptionIdAvailable;
-        this.sharedSubscriptionAvailable = sharedSubscriptionAvailable;
-    }
+  public ConnectAck5OutPacket(
+      ConnectAckReasonCode reasonCode,
+      boolean sessionPresent,
+      String requestedClientId,
+      long requestedSessionExpiryInterval,
+      int requestedKeepAlive,
+      int requestedReceiveMax,
+      String reason,
+      String serverReference,
+      String responseInformation,
+      String authenticationMethod,
+      byte[] authenticationData,
+      Array<StringPair> userProperties,
+      String clientId,
+      QoS maxQos,
+      long sessionExpiryInterval,
+      int maximumPacketSize,
+      int receiveMax,
+      int topicAliasMaximum,
+      int keepAlive,
+      boolean retainAvailable,
+      boolean wildcardSubscriptionAvailable,
+      boolean subscriptionIdAvailable,
+      boolean sharedSubscriptionAvailable) {
+    super(reasonCode, sessionPresent);
+    this.requestedClientId = requestedClientId;
+    this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
+    this.requestedKeepAlive = requestedKeepAlive;
+    this.requestedReceiveMax = requestedReceiveMax;
+    this.reason = reason;
+    this.serverReference = serverReference;
+    this.responseInformation = responseInformation;
+    this.authenticationMethod = authenticationMethod;
+    this.authenticationData = authenticationData;
+    this.userProperties = userProperties;
+    this.clientId = clientId;
+    this.maxQos = maxQos;
+    this.sessionExpiryInterval = sessionExpiryInterval;
+    this.maximumPacketSize = maximumPacketSize;
+    this.receiveMax = receiveMax;
+    this.topicAliasMaximum = topicAliasMaximum;
+    this.keepAlive = keepAlive;
+    this.retainAvailable = retainAvailable;
+    this.wildcardSubscriptionAvailable = wildcardSubscriptionAvailable;
+    this.subscriptionIdAvailable = subscriptionIdAvailable;
+    this.sharedSubscriptionAvailable = sharedSubscriptionAvailable;
+  }
 
-    @Override
-    public int getExpectedLength() {
-        return -1;
-    }
+  @Override
+  public int getExpectedLength() {
+    return -1;
+  }
 
-    @Override
-    protected byte getReasonCodeValue() {
-        return reasonCode.getMqtt5();
-    }
+  @Override
+  protected byte getReasonCodeValue() {
+    return reasonCode.getMqtt5();
+  }
 
-    @Override
-    protected boolean isPropertiesSupported() {
-        return true;
-    }
+  @Override
+  protected boolean isPropertiesSupported() {
+    return true;
+  }
 
-    @Override
-    protected void writeProperties(ByteBuffer buffer) {
+  @Override
+  protected void writeProperties(ByteBuffer buffer) {
 
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
-        writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
-        writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_INFORMATION, responseInformation);
-        writeNotEmptyProperty(buffer, PacketProperty.SERVER_REFERENCE, serverReference);
-        writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
-        writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
-        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
-        writeProperty(
-            buffer,
-            PacketProperty.MAXIMUM_QOS,
-            maxQos.ordinal(),
-            MqttPropertyConstants.MAXIMUM_QOS_DEFAULT.ordinal()
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.RETAIN_AVAILABLE,
-            retainAvailable,
-            MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.SESSION_EXPIRY_INTERVAL,
-            sessionExpiryInterval,
-            requestedSessionExpiryInterval
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
-            clientId,
-            requestedClientId
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.RECEIVE_MAXIMUM,
-            receiveMax,
-            requestedReceiveMax
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.MAXIMUM_PACKET_SIZE,
-            maximumPacketSize,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.TOPIC_ALIAS_MAXIMUM,
-            topicAliasMaximum,
-            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
-            wildcardSubscriptionAvailable,
-            MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
-            subscriptionIdAvailable,
-            MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
-            sharedSubscriptionAvailable,
-            MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
-        );
-        writeProperty(
-            buffer,
-            PacketProperty.SERVER_KEEP_ALIVE,
-            keepAlive,
-            requestedKeepAlive
-        );
-    }
+    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
+    writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
+    writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_INFORMATION, responseInformation);
+    writeNotEmptyProperty(buffer, PacketProperty.SERVER_REFERENCE, serverReference);
+    writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
+    writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
+    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+    writeProperty(
+        buffer,
+        PacketProperty.MAXIMUM_QOS,
+        maxQos.ordinal(),
+        MqttPropertyConstants.MAXIMUM_QOS_DEFAULT.ordinal());
+    writeProperty(
+        buffer,
+        PacketProperty.RETAIN_AVAILABLE,
+        retainAvailable,
+        MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT);
+    writeProperty(
+        buffer,
+        PacketProperty.SESSION_EXPIRY_INTERVAL,
+        sessionExpiryInterval,
+        requestedSessionExpiryInterval);
+    writeProperty(buffer, PacketProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId, requestedClientId);
+    writeProperty(buffer, PacketProperty.RECEIVE_MAXIMUM, receiveMax, requestedReceiveMax);
+    writeProperty(
+        buffer,
+        PacketProperty.MAXIMUM_PACKET_SIZE,
+        maximumPacketSize,
+        MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX);
+    writeProperty(
+        buffer,
+        PacketProperty.TOPIC_ALIAS_MAXIMUM,
+        topicAliasMaximum,
+        MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED);
+    writeProperty(
+        buffer,
+        PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
+        wildcardSubscriptionAvailable,
+        MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT);
+    writeProperty(
+        buffer,
+        PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+        subscriptionIdAvailable,
+        MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT);
+    writeProperty(
+        buffer,
+        PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
+        sharedSubscriptionAvailable,
+        MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT);
+    writeProperty(buffer, PacketProperty.SERVER_KEEP_ALIVE, keepAlive, requestedKeepAlive);
+  }
 }

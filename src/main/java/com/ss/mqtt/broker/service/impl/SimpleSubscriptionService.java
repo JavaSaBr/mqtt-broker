@@ -5,11 +5,17 @@ import static com.ss.mqtt.broker.model.ActionResult.FAILED;
 import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.UNSPECIFIED_ERROR;
 import static com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
-import static com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode.*;
-import static com.ss.mqtt.broker.util.TopicUtils.*;
+import static com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
+import static com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
+import static com.ss.mqtt.broker.util.TopicUtils.hasWildcard;
+import static com.ss.mqtt.broker.util.TopicUtils.isInvalid;
+import static com.ss.mqtt.broker.util.TopicUtils.isShared;
 
 import com.ss.mqtt.broker.config.MqttConnectionConfig;
-import com.ss.mqtt.broker.model.*;
+import com.ss.mqtt.broker.model.ActionResult;
+import com.ss.mqtt.broker.model.MqttSession;
+import com.ss.mqtt.broker.model.SingleSubscriber;
+import com.ss.mqtt.broker.model.SubscribeTopicFilter;
 import com.ss.mqtt.broker.model.reason.code.SubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
 import com.ss.mqtt.broker.model.topic.TopicFilter;
@@ -34,7 +40,9 @@ public class SimpleSubscriptionService implements SubscriptionService {
 
   @Override
   public <A> ActionResult forEachTopicSubscriber(
-      TopicName topicName, A arg1, BiFunction<SingleSubscriber, A, ActionResult> action) {
+      TopicName topicName,
+      A arg1,
+      BiFunction<SingleSubscriber, A, ActionResult> action) {
     if (isInvalid(topicName)) {
       return FAILED;
     }
@@ -46,9 +54,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public Array<SubscribeAckReasonCode> subscribe(
-      MqttClient mqttClient,
-      Array<SubscribeTopicFilter> topicFilters) {
+  public Array<SubscribeAckReasonCode> subscribe(MqttClient mqttClient, Array<SubscribeTopicFilter> topicFilters) {
     return topicFilters
         .stream()
         .map(topicFilter -> addSubscription(topicFilter, mqttClient))
@@ -56,9 +62,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
   }
 
   @Nullable
-  private SubscribeAckReasonCode addSubscription(
-      SubscribeTopicFilter subscribe,
-      MqttClient client) {
+  private SubscribeAckReasonCode addSubscription(SubscribeTopicFilter subscribe, MqttClient client) {
     MqttSession session = client.getSession();
     if (session == null) {
       return null;
@@ -83,9 +87,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public Array<UnsubscribeAckReasonCode> unsubscribe(
-      MqttClient mqttClient,
-      Array<TopicFilter> topicFilters) {
+  public Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient mqttClient, Array<TopicFilter> topicFilters) {
     return topicFilters
         .stream()
         .map(topicFilter -> removeSubscription(topicFilter, mqttClient))

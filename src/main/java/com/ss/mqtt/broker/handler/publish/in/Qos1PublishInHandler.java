@@ -9,50 +9,42 @@ import com.ss.mqtt.broker.service.SubscriptionService;
 
 public class Qos1PublishInHandler extends AbstractPublishInHandler {
 
-    public Qos1PublishInHandler(
-        SubscriptionService subscriptionService,
-        PublishOutHandler[] publishOutHandlers
-    ) {
-        super(subscriptionService, publishOutHandlers);
+  public Qos1PublishInHandler(SubscriptionService subscriptionService, PublishOutHandler[] publishOutHandlers) {
+    super(subscriptionService, publishOutHandlers);
+  }
+
+  @Override
+  public void handle(MqttClient client, PublishInPacket packet) {
+
+    var session = client.getSession();
+
+    // it means this client was already closed
+    if (session == null) {
+      return;
     }
 
-    @Override
-    public void handle(MqttClient client, PublishInPacket packet) {
+    super.handle(client, packet);
+  }
 
-        var session = client.getSession();
+  @Override
+  protected void handleResult(MqttClient client, PublishInPacket packet, ActionResult result) {
 
-        // it means this client was already closed
-        if (session == null) {
-            return;
-        }
+    PublishAckReasonCode reasonCode;
 
-        super.handle(client, packet);
+    switch (result) {
+      case EMPTY:
+        reasonCode = PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
+        break;
+      case SUCCESS:
+        reasonCode = PublishAckReasonCode.SUCCESS;
+        break;
+      default:
+        reasonCode = PublishAckReasonCode.UNSPECIFIED_ERROR;
+        break;
     }
 
-    @Override
-    protected void handleResult(
-        MqttClient client,
-        PublishInPacket packet,
-        ActionResult result
-    ) {
-
-        PublishAckReasonCode reasonCode;
-
-        switch (result) {
-            case EMPTY:
-                reasonCode = PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS;
-                break;
-            case SUCCESS:
-                reasonCode = PublishAckReasonCode.SUCCESS;
-                break;
-            default:
-                reasonCode = PublishAckReasonCode.UNSPECIFIED_ERROR;
-                break;
-        }
-
-        client.send(client.getPacketOutFactory().newPublishAck(
-            packet.getPacketId(),
-            reasonCode
-        ));
-    }
+    client.send(client
+        .getPacketOutFactory()
+        .newPublishAck(packet.getPacketId(), reasonCode));
+  }
 }

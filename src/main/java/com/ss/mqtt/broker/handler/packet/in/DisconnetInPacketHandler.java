@@ -8,17 +8,19 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DisconnetInPacketHandler extends AbstractPacketHandler<UnsafeMqttClient, DisconnectInPacket> {
 
-    @Override
-    protected void handleImpl(UnsafeMqttClient client, DisconnectInPacket packet) {
+  @Override
+  protected void handleImpl(UnsafeMqttClient client, DisconnectInPacket packet) {
 
-        var reasonCode = packet.getReasonCode();
+    var reasonCode = packet.getReasonCode();
 
-        if (reasonCode == DisconnectReasonCode.NORMAL_DISCONNECTION) {
-            log.info("Disconnect client {}", client);
-        } else {
-            log.error("Disconnect client {} by error reason {}", client, reasonCode);
-        }
-
-        client.getConnection().close();
+    if (reasonCode == DisconnectReasonCode.NORMAL_DISCONNECTION) {
+      log.info("Disconnect client {}", client);
+    } else {
+      log.error("Disconnect client {} by error reason {}", client, reasonCode);
     }
+
+    client
+        .getConnection()
+        .close();
+  }
 }

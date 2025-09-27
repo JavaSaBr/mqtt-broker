@@ -9,5 +9,5 @@ import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
  */
 public interface PublishOutHandler {
 
-    ActionResult handle(PublishInPacket packet, SingleSubscriber subscriber);
+  ActionResult handle(PublishInPacket packet, SingleSubscriber subscriber);
 }

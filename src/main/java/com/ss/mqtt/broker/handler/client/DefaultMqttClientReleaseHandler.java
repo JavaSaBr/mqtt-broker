@@ -7,11 +7,10 @@ import com.ss.mqtt.broker.service.SubscriptionService;
 
 public class DefaultMqttClientReleaseHandler extends AbstractMqttClientReleaseHandler<ExternalMqttClient> {
 
-    public DefaultMqttClientReleaseHandler(
-        ClientIdRegistry clientIdRegistry,
-        MqttSessionService sessionService,
-        SubscriptionService subscriptionService
-    ) {
-        super(clientIdRegistry, sessionService, subscriptionService);
-    }
+  public DefaultMqttClientReleaseHandler(
+      ClientIdRegistry clientIdRegistry,
+      MqttSessionService sessionService,
+      SubscriptionService subscriptionService) {
+    super(clientIdRegistry, sessionService, subscriptionService);
+  }
 }

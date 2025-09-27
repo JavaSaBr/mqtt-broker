@@ -8,12 +8,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public abstract class PublishOutPacket extends MqttWritablePacket implements HasPacketId {
 
-    private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
+  private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
 
-    protected final @Getter int packetId;
+  @Getter
+  protected final int packetId;
 
-    @Override
-    protected byte getPacketType() {
-        return PACKET_TYPE;
-    }
+  @Override
+  protected byte getPacketType() {
+    return PACKET_TYPE;
+  }
 }

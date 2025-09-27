@@ -1,14 +1,13 @@
 package com.ss.mqtt.broker.service;
 
 import com.ss.mqtt.broker.model.MqttSession;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 public interface MqttSessionService {
 
-    @NotNull Mono<MqttSession> restore(@NotNull String clientId);
+  Mono<MqttSession> restore(String clientId);
 
-    @NotNull Mono<MqttSession> create(@NotNull String clientId);
+  Mono<MqttSession> create(String clientId);
 
-    @NotNull Mono<Boolean> store(@NotNull String clientId, @NotNull MqttSession session, long expiryInterval);
+  Mono<Boolean> store(String clientId, MqttSession session, long expiryInterval);
 }

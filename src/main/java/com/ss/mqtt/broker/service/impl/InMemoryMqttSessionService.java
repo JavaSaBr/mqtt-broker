@@ -4,6 +4,7 @@ import com.ss.mqtt.broker.model.MqttSession;
 import com.ss.mqtt.broker.model.MqttSession.UnsafeMqttSession;
 import com.ss.mqtt.broker.model.impl.DefaultMqttSession;
 import com.ss.mqtt.broker.service.MqttSessionService;
+import java.io.Closeable;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.Dictionary;
@@ -15,8 +16,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
-
-import java.io.Closeable;
 
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -116,13 +115,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       MutableArray<UnsafeMqttSession> expired) {
     long time = System.currentTimeMillis();
     for (UnsafeMqttSession session : expired) {
-
       if (session.getExpirationTime() <= time) {
         continue;
       }
 
       UnsafeMqttSession removed = sessions.remove(session.getClientId());
-
       log.debug("Removed expired session for client:[{}]", session.getClientId());
 
       // if we already have new session under the same client id
@@ -134,13 +131,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     }
   }
 
-  private boolean findToRemove(
-      MutableArray<UnsafeMqttSession> toCheck,
-      MutableArray<UnsafeMqttSession> toRemove) {
+  private boolean findToRemove(MutableArray<UnsafeMqttSession> toCheck, MutableArray<UnsafeMqttSession> toRemove) {
 
     var currentTime = System.currentTimeMillis();
 
-    for (var session : toCheck) {
+    for (UnsafeMqttSession session : toCheck) {
       if (session.getExpirationTime() > currentTime) {
         toRemove.add(session);
       }

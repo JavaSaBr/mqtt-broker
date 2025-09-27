@@ -4,15 +4,14 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.lang.StackWalker.Option;
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Set;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.ReflectionUtils;
-
-import java.lang.StackWalker.Option;
-import java.lang.reflect.Field;
-import java.util.Set;
 
 public class DebugUtils {
 
@@ -42,8 +41,8 @@ public class DebugUtils {
     }
   }
 
-  private static final MutableArray<ExclusionStrategy> ADDITIONAL_EXCLUDE_STRATEGIES =
-      ArrayFactory.copyOnModifyArray(ExclusionStrategy.class);
+  private static final MutableArray<ExclusionStrategy> ADDITIONAL_EXCLUDE_STRATEGIES = ArrayFactory.copyOnModifyArray(
+      ExclusionStrategy.class);
 
   private static class ExclusionStrategyContainer implements ExclusionStrategy {
 
@@ -81,7 +80,9 @@ public class DebugUtils {
 
       boolean anyMatch = allFields
           .stream()
-          .anyMatch(field -> field.getName().equals(fieldName));
+          .anyMatch(field -> field
+              .getName()
+              .equals(fieldName));
 
       if (!anyMatch) {
         throw new RuntimeException("Not found field " + fieldName + " in type " + callerClass);

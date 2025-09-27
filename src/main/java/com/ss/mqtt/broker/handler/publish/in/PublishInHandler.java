@@ -8,5 +8,5 @@ import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
  */
 public interface PublishInHandler {
 
-    void handle(MqttClient client, PublishInPacket packet);
+  void handle(MqttClient client, PublishInPacket packet);
 }

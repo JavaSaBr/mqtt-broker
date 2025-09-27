@@ -7,6 +7,8 @@ import com.ss.mqtt.broker.model.topic.TopicFilter;
 import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.functions.TriConsumer;
@@ -16,9 +18,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 @ToString(of = "clientId")
@@ -161,10 +160,11 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     try {
       pendingOutPublishes
           .iterations()
-          .forEach(mqttClient, (pendingPublish, client) -> {
-            PendingPacketHandler handler = pendingPublish.handler;
-            handler.resend(client, pendingPublish.publish, pendingPublish.packetId);
-          });
+          .forEach(
+              mqttClient, (pendingPublish, client) -> {
+                PendingPacketHandler handler = pendingPublish.handler;
+                handler.resend(client, pendingPublish.publish, pendingPublish.packetId);
+              });
     } finally {
       pendingOutPublishes.readUnlock(stamp);
     }
@@ -194,7 +194,8 @@ public class DefaultMqttSession implements UnsafeMqttSession {
 
   @Override
   public void addSubscriber(SubscribeTopicFilter subscribe) {
-    topicFilters.operations()
+    topicFilters
+        .operations()
         .inWriteLock(subscribe, Collection::add);
   }
 
@@ -213,15 +214,22 @@ public class DefaultMqttSession implements UnsafeMqttSession {
 
   @Override
   public void clear() {
-    pendingInPublishes.operations().inWriteLock(Collection::clear);
-    pendingOutPublishes.operations().inWriteLock(Collection::clear);
+    pendingInPublishes
+        .operations()
+        .inWriteLock(Collection::clear);
+    pendingOutPublishes
+        .operations()
+        .inWriteLock(Collection::clear);
   }
 
   @Override
   public void onPersisted() {
-    pendingInPublishes.operations().inWriteLock(Collection::clear);
+    pendingInPublishes
+        .operations()
+        .inWriteLock(Collection::clear);
   }
 
   @Override
-  public void onRestored() {}
+  public void onRestored() {
+  }
 }

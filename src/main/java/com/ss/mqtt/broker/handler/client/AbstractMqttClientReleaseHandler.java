@@ -1,7 +1,7 @@
 package com.ss.mqtt.broker.handler.client;
 
-import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.network.client.AbstractMqttClient;
+import com.ss.mqtt.broker.network.client.MqttClient.UnsafeMqttClient;
 import com.ss.mqtt.broker.service.ClientIdRegistry;
 import com.ss.mqtt.broker.service.MqttSessionService;
 import com.ss.mqtt.broker.service.SubscriptionService;
@@ -15,46 +15,47 @@ import reactor.core.publisher.Mono;
 public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttClient> implements
     MqttClientReleaseHandler {
 
-    private final ClientIdRegistry clientIdRegistry;
-    private final MqttSessionService sessionService;
-    private final SubscriptionService subscriptionService;
+  private final ClientIdRegistry clientIdRegistry;
+  private final MqttSessionService sessionService;
+  private final SubscriptionService subscriptionService;
 
-    @Override
-    public Mono<?> release(UnsafeMqttClient client) {
-        var clientId = client.getClientId();
-        //noinspection unchecked
-        return releaseImpl((T) client)
-            .doOnNext(aVoid -> log.info("Client {} was released", clientId));
+  @Override
+  public Mono<?> release(UnsafeMqttClient client) {
+    var clientId = client.getClientId();
+    //noinspection unchecked
+    return releaseImpl((T) client).doOnNext(aVoid -> log.info("Client {} was released", clientId));
+  }
+
+  protected Mono<?> releaseImpl(T client) {
+
+    var clientId = client.getClientId();
+    client.setClientId(StringUtils.EMPTY);
+
+    if (StringUtils.isEmpty(clientId)) {
+      log.warn("This client {} is already released or rejected", client);
+      return Mono.empty();
     }
 
-    protected Mono<?> releaseImpl(T client) {
+    var session = client.getSession();
 
-        var clientId = client.getClientId();
-        client.setClientId(StringUtils.EMPTY);
+    Mono<?> asyncActions = null;
 
-        if (StringUtils.isEmpty(clientId)) {
-            log.warn("This client {} is already released or rejected", client);
-            return Mono.empty();
-        }
-
-        var session = client.getSession();
-
-        Mono<?> asyncActions = null;
-
-        if (session != null) {
-            subscriptionService.cleanSubscriptions(client, session);
-            if (client.getConnectionConfig().isSessionsEnabled()) {
-                asyncActions = sessionService.store(clientId, session, client.getSessionExpiryInterval());
-                client.setSession(null);
-            }
-        }
-
-        if (asyncActions != null) {
-            asyncActions = asyncActions.flatMap(any -> clientIdRegistry.unregister(clientId));
-        } else {
-            asyncActions = clientIdRegistry.unregister(clientId);
-        }
-
-        return asyncActions;
+    if (session != null) {
+      subscriptionService.cleanSubscriptions(client, session);
+      if (client
+          .getConnectionConfig()
+          .isSessionsEnabled()) {
+        asyncActions = sessionService.store(clientId, session, client.getSessionExpiryInterval());
+        client.setSession(null);
+      }
     }
+
+    if (asyncActions != null) {
+      asyncActions = asyncActions.flatMap(any -> clientIdRegistry.unregister(clientId));
+    } else {
+      asyncActions = clientIdRegistry.unregister(clientId);
+    }
+
+    return asyncActions;
+  }
 }

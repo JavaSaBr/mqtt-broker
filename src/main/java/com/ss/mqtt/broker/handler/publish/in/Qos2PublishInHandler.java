@@ -13,84 +13,73 @@ import com.ss.mqtt.broker.service.SubscriptionService;
 
 public class Qos2PublishInHandler extends AbstractPublishInHandler implements MqttSession.PendingPacketHandler {
 
-    public Qos2PublishInHandler(
-        SubscriptionService subscriptionService,
-        PublishOutHandler[] publishOutHandlers
-    ) {
-        super(subscriptionService, publishOutHandlers);
+  public Qos2PublishInHandler(SubscriptionService subscriptionService, PublishOutHandler[] publishOutHandlers) {
+    super(subscriptionService, publishOutHandlers);
+  }
+
+  @Override
+  public void handle(MqttClient client, PublishInPacket packet) {
+
+    var session = client.getSession();
+
+    // it means this client was already closed
+    if (session == null) {
+      return;
     }
 
-    @Override
-    public void handle(MqttClient client, PublishInPacket packet) {
-
-        var session = client.getSession();
-
-        // it means this client was already closed
-        if (session == null) {
-            return;
-        }
-
-        // if this packet is re-try from client
-        if (packet.isDuplicate()) {
-            // if this packet was accepted before then we can skip it
-            if (session.hasInPending(packet.getPacketId())) {
-                return;
-            }
-        }
-
-        super.handle(client, packet);
+    // if this packet is re-try from client
+    if (packet.isDuplicate()) {
+      // if this packet was accepted before then we can skip it
+      if (session.hasInPending(packet.getPacketId())) {
+        return;
+      }
     }
 
-    @Override
-    protected void handleResult(
-        MqttClient client,
-        PublishInPacket packet,
-        ActionResult result
-    ) {
+    super.handle(client, packet);
+  }
 
-        // because it was checked
-        final MqttSession session = client.getSession();
+  @Override
+  protected void handleResult(MqttClient client, PublishInPacket packet, ActionResult result) {
 
-        // it means this client was already closed
-        if (session == null) {
-            return;
-        }
+    // because it was checked
+    final MqttSession session = client.getSession();
 
-        PublishReceivedReasonCode reasonCode;
-
-        switch (result) {
-            case EMPTY:
-                reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
-                break;
-            case SUCCESS:
-                reasonCode = PublishReceivedReasonCode.SUCCESS;
-                break;
-            default:
-                reasonCode = PublishReceivedReasonCode.UNSPECIFIED_ERROR;
-                break;
-        }
-
-        session.registerInPublish(packet, this, packet.getPacketId());
-
-        client.send(client.getPacketOutFactory().newPublishReceived(
-            packet.getPacketId(),
-            reasonCode
-        ));
+    // it means this client was already closed
+    if (session == null) {
+      return;
     }
 
-    @Override
-    public boolean handleResponse(MqttClient client, HasPacketId response) {
+    PublishReceivedReasonCode reasonCode;
 
-        if (!(response instanceof PublishReleaseInPacket)) {
-            throw new IllegalStateException("Unexpected response " + response);
-        }
-
-        var packetOutFactory = client.getPacketOutFactory();
-        client.send(packetOutFactory.newPublishCompleted(
-            response.getPacketId(),
-            PublishCompletedReasonCode.SUCCESS
-        ));
-
-        return true;
+    switch (result) {
+      case EMPTY:
+        reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
+        break;
+      case SUCCESS:
+        reasonCode = PublishReceivedReasonCode.SUCCESS;
+        break;
+      default:
+        reasonCode = PublishReceivedReasonCode.UNSPECIFIED_ERROR;
+        break;
     }
+
+    session.registerInPublish(packet, this, packet.getPacketId());
+
+    client.send(client
+        .getPacketOutFactory()
+        .newPublishReceived(packet.getPacketId(), reasonCode));
+  }
+
+  @Override
+  public boolean handleResponse(MqttClient client, HasPacketId response) {
+
+    if (!(response instanceof PublishReleaseInPacket)) {
+      throw new IllegalStateException("Unexpected response " + response);
+    }
+
+    var packetOutFactory = client.getPacketOutFactory();
+    client.send(packetOutFactory.newPublishCompleted(response.getPacketId(), PublishCompletedReasonCode.SUCCESS));
+
+    return true;
+  }
 }

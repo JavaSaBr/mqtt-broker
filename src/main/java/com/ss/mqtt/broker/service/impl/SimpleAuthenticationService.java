@@ -8,16 +8,15 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SimpleAuthenticationService implements AuthenticationService {
 
-    private final CredentialSource credentialSource;
-    private final boolean allowAnonymousAuth;
+  private final CredentialSource credentialSource;
+  private final boolean allowAnonymousAuth;
 
-    @Override
-    public Mono<Boolean> auth(String userName, byte[] password) {
-        if (allowAnonymousAuth && userName.isEmpty()) {
-            return Mono.just(Boolean.TRUE);
-        } else {
-            return credentialSource.check(userName, password);
-        }
+  @Override
+  public Mono<Boolean> auth(String userName, byte[] password) {
+    if (allowAnonymousAuth && userName.isEmpty()) {
+      return Mono.just(Boolean.TRUE);
+    } else {
+      return credentialSource.check(userName, password);
     }
-
+  }
 }

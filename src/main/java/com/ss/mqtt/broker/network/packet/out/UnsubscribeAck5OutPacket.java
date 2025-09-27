@@ -3,7 +3,6 @@ package com.ss.mqtt.broker.network.packet.out;
 import com.ss.mqtt.broker.model.PacketProperty;
 import com.ss.mqtt.broker.model.data.type.StringPair;
 import com.ss.mqtt.broker.model.reason.code.UnsubscribeAckReasonCode;
-
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -14,7 +13,7 @@ import javasabr.rlib.collections.array.Array;
  */
 public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
 
-    private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
           Reason String is a human readable string designed for diagnostics and SHOULD NOT be parsed by the
@@ -25,7 +24,7 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
           specified by the Client [MQTT-3.11.2-1]. It is a Protocol Error to include the Reason String more than
           once.
          */
-        PacketProperty.REASON_STRING,
+      PacketProperty.REASON_STRING,
         /*
           Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
           information. The Server MUST NOT send this property if it would increase the size of the UNSUBACK
@@ -33,52 +32,46 @@ public class UnsubscribeAck5OutPacket extends UnsubscribeAck311OutPacket {
           allowed to appear multiple times to represent multiple name, value pairs. The same name is allowed to
           appear more than once.
          */
-        PacketProperty.USER_PROPERTY
-    );
+      PacketProperty.USER_PROPERTY);
 
-    private final Array<UnsubscribeAckReasonCode> reasonCodes;
-    private final Array<StringPair> userProperties;
-    private final String reason;
+  private final Array<UnsubscribeAckReasonCode> reasonCodes;
+  private final Array<StringPair> userProperties;
+  private final String reason;
 
-    public UnsubscribeAck5OutPacket(
-        int packetId,
-        Array<UnsubscribeAckReasonCode> reasonCodes,
-        Array<StringPair> userProperties,
-        String reason
-    ) {
-        super(packetId);
-        this.reasonCodes = reasonCodes;
-        this.userProperties = userProperties;
-        this.reason = reason;
+  public UnsubscribeAck5OutPacket(
+      int packetId,
+      Array<UnsubscribeAckReasonCode> reasonCodes,
+      Array<StringPair> userProperties,
+      String reason) {
+    super(packetId);
+    this.reasonCodes = reasonCodes;
+    this.userProperties = userProperties;
+    this.reason = reason;
+  }
+
+  @Override
+  protected boolean isPropertiesSupported() {
+    return true;
+  }
+
+  @Override
+  public int getExpectedLength() {
+    return -1;
+  }
+
+  @Override
+  protected void writeProperties(ByteBuffer buffer) {
+
+    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901182
+    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+    writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
+  }
+
+  @Override
+  protected void writePayload(ByteBuffer buffer) {
+    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901185
+    for (var reasonCode : reasonCodes) {
+      writeByte(buffer, reasonCode.getValue());
     }
-
-    @Override
-    protected boolean isPropertiesSupported() {
-        return true;
-    }
-
-    @Override
-    public int getExpectedLength() {
-        return -1;
-    }
-
-    @Override
-    protected void writeProperties(ByteBuffer buffer) {
-
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901182
-        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
-        writeNotEmptyProperty(
-            buffer,
-            PacketProperty.REASON_STRING,
-            reason
-        );
-    }
-
-    @Override
-    protected void writePayload(ByteBuffer buffer) {
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901185
-        for (var reasonCode : reasonCodes) {
-            writeByte(buffer, reasonCode.getValue());
-        }
-    }
+  }
 }

@@ -1,21 +1,20 @@
 package com.ss.mqtt.broker.network.packet.out;
 
 import com.ss.mqtt.broker.model.PacketProperty;
-import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import com.ss.mqtt.broker.model.data.type.StringPair;
-import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.common.util.StringUtils;
-
+import com.ss.mqtt.broker.model.reason.code.PublishCompletedReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.common.util.StringUtils;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
 public class PublishComplete5OutPacket extends PublishComplete311OutPacket {
 
-    private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
           Followed by the UTF-8 Encoded String representing the reason associated with this response. This
           Reason String is human readable, designed for diagnostics and SHOULD NOT be parsed by the
@@ -26,7 +25,7 @@ public class PublishComplete5OutPacket extends PublishComplete311OutPacket {
           specified by the receiver [MQTT-3.6.2-2]. It is a Protocol Error to include the Reason String more than
           once.
          */
-        PacketProperty.REASON_STRING,
+      PacketProperty.REASON_STRING,
         /*
           Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
           information for the PUBREL. The sender MUST NOT send this property if it would increase the size of the
@@ -34,53 +33,51 @@ public class PublishComplete5OutPacket extends PublishComplete311OutPacket {
           Property is allowed to appear multiple times to represent multiple name, value pairs. The same name is
           allowed to appear more than once
          */
-        PacketProperty.USER_PROPERTY
-    );
+      PacketProperty.USER_PROPERTY);
 
-    private final Array<StringPair> userProperties;
-    private final PublishCompletedReasonCode reasonCode;
-    private final String reason;
+  private final Array<StringPair> userProperties;
+  private final PublishCompletedReasonCode reasonCode;
+  private final String reason;
 
-    public PublishComplete5OutPacket(int packetId, PublishCompletedReasonCode reasonCode) {
-        this(packetId, reasonCode, Array.empty(StringPair.class), StringUtils.EMPTY);
-    }
+  public PublishComplete5OutPacket(int packetId, PublishCompletedReasonCode reasonCode) {
+    this(packetId, reasonCode, Array.empty(StringPair.class), StringUtils.EMPTY);
+  }
 
-    public PublishComplete5OutPacket(
-        int packetId,
-        PublishCompletedReasonCode reasonCode,
-        Array<StringPair> userProperties,
-        String reason
-    ) {
-        super(packetId);
-        this.reasonCode = reasonCode;
-        this.userProperties = userProperties;
-        this.reason = reason;
-    }
+  public PublishComplete5OutPacket(
+      int packetId,
+      PublishCompletedReasonCode reasonCode,
+      Array<StringPair> userProperties,
+      String reason) {
+    super(packetId);
+    this.reasonCode = reasonCode;
+    this.userProperties = userProperties;
+    this.reason = reason;
+  }
 
-    @Override
-    public int getExpectedLength() {
-        return -1;
-    }
+  @Override
+  public int getExpectedLength() {
+    return -1;
+  }
 
-    @Override
-    protected void writeVariableHeader(ByteBuffer buffer) {
-        super.writeVariableHeader(buffer);
+  @Override
+  protected void writeVariableHeader(ByteBuffer buffer) {
+    super.writeVariableHeader(buffer);
 
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
-        writeByte(buffer, reasonCode.getValue());
-    }
+    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
+    writeByte(buffer, reasonCode.getValue());
+  }
 
-    @Override
-    protected boolean isPropertiesSupported() {
-        return true;
-    }
+  @Override
+  protected boolean isPropertiesSupported() {
+    return true;
+  }
 
-    @Override
-    protected void writeProperties(ByteBuffer buffer) {
-        super.writeProperties(buffer);
+  @Override
+  protected void writeProperties(ByteBuffer buffer) {
+    super.writeProperties(buffer);
 
-        // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901155
-        writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
-        writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
-    }
+    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901155
+    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+    writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
+  }
 }

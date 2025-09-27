@@ -37,7 +37,6 @@ allprojects {
     implementation libs.project.reactor.core
     implementation libs.gson
 
-    compileOnly libs.jetbrains.annotations
     compileOnly libs.jspecify
     compileOnly libs.lombok
     annotationProcessor libs.lombok
@@ -52,8 +51,6 @@ allprojects {
     testImplementation libs.groovy.all
     testImplementation libs.byte.buddy.dep
     testImplementation libs.objenesis
-    testCompileOnly libs.jetbrains.annotations
-    testCompileOnly libs.jspecify
   }
 
   test {

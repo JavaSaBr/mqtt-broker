@@ -5,59 +5,64 @@ import com.ss.mqtt.broker.network.client.MqttClient;
 import com.ss.mqtt.broker.network.packet.HasPacketId;
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket;
 import javasabr.rlib.functions.TriConsumer;
-import org.jetbrains.annotations.NotNull;
 
 public interface MqttSession {
 
-    interface UnsafeMqttSession extends MqttSession {
+  interface UnsafeMqttSession extends MqttSession {
 
-        void setExpirationTime(long expirationTime);
+    void setExpirationTime(long expirationTime);
 
-        void clear();
+    void clear();
 
-        void onPersisted();
+    void onPersisted();
 
-        void onRestored();
-    }
+    void onRestored();
+  }
 
-    interface PendingPacketHandler {
-
-        /**
-         * @return true if pending packet can be removed.
-         */
-        boolean handleResponse(@NotNull MqttClient client, @NotNull HasPacketId response);
-
-        default void resend(@NotNull MqttClient client, @NotNull PublishInPacket packet, int packetId) {}
-    }
-
-    @NotNull String getClientId();
-
-    int nextPacketId();
+  interface PendingPacketHandler {
 
     /**
-     * @return the expiration time in ms or -1 if it should not be expired now.
+     * @return true if pending packet can be removed.
      */
-    long getExpirationTime();
+    boolean handleResponse(MqttClient client, HasPacketId response);
 
-    void resendPendingPackets(@NotNull MqttClient client);
+    default void resend(MqttClient client, PublishInPacket packet, int packetId) {
+    }
+  }
 
-    boolean hasOutPending();
-    boolean hasInPending();
+  String getClientId();
 
-    boolean hasInPending(int packetId);
-    boolean hasOutPending(int packetId);
+  int nextPacketId();
 
-    void registerOutPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
-    void registerInPublish(@NotNull PublishInPacket publish, @NotNull PendingPacketHandler handler, int packetId);
+  /**
+   * @return the expiration time in ms or -1 if it should not be expired now.
+   */
+  long getExpirationTime();
 
-    void updateOutPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
-    void updateInPendingPacket(@NotNull MqttClient client, @NotNull HasPacketId response);
+  void resendPendingPackets(MqttClient client);
 
-    <F, S> void forEachTopicFilter(
-        @NotNull F first,
-        @NotNull S second,
-        @NotNull TriConsumer<F, S, SubscribeTopicFilter> consumer
-    );
-    void addSubscriber(@NotNull SubscribeTopicFilter subscribe);
-    void removeSubscriber(@NotNull TopicFilter subscribe);
+  boolean hasOutPending();
+
+  boolean hasInPending();
+
+  boolean hasInPending(int packetId);
+
+  boolean hasOutPending(int packetId);
+
+  void registerOutPublish(PublishInPacket publish, PendingPacketHandler handler, int packetId);
+
+  void registerInPublish(PublishInPacket publish, PendingPacketHandler handler, int packetId);
+
+  void updateOutPendingPacket(MqttClient client, HasPacketId response);
+
+  void updateInPendingPacket(MqttClient client, HasPacketId response);
+
+  <F, S> void forEachTopicFilter(
+      F first,
+      S second,
+      TriConsumer<F, S, SubscribeTopicFilter> consumer);
+
+  void addSubscriber(SubscribeTopicFilter subscribe);
+
+  void removeSubscriber(TopicFilter subscribe);
 }

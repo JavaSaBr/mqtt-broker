@@ -5,10 +5,7 @@ import com.ss.mqtt.broker.service.SubscriptionService;
 
 public class Qos0PublishInHandler extends AbstractPublishInHandler {
 
-    public Qos0PublishInHandler(
-        SubscriptionService subscriptionService,
-        PublishOutHandler[] publishOutHandlers
-    ) {
-        super(subscriptionService, publishOutHandlers);
-    }
+  public Qos0PublishInHandler(SubscriptionService subscriptionService, PublishOutHandler[] publishOutHandlers) {
+    super(subscriptionService, publishOutHandlers);
+  }
 }
