@@ -255,7 +255,7 @@ public class PublishInPacket extends MqttReadablePacket {
      * To reduce the size of the PUBLISH packet the sender can use a Topic Alias. The Topic Alias is described
      * in section 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
      */
-    private @NotNull TopicName topicName;
+    private TopicName topicName;
 
     /**
      * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section
@@ -263,15 +263,15 @@ public class PublishInPacket extends MqttReadablePacket {
      */
     private int packetId;
 
-    private @NotNull byte[] payload;
+    private byte[] payload;
 
     // properties
-    private @NotNull String responseTopic;
-    private @NotNull String contentType;
+    private String responseTopic;
+    private String contentType;
 
-    private @NotNull IntArray subscriptionIds;
+    private IntArray subscriptionIds;
 
-    private @NotNull byte[] correlationData;
+    private byte[] correlationData;
 
     private long messageExpiryInterval = MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
     private int topicAlias = MqttPropertyConstants.TOPIC_ALIAS_DEFAULT;
@@ -296,25 +296,25 @@ public class PublishInPacket extends MqttReadablePacket {
     }
 
     @Override
-    protected void readVariableHeader(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
         topicName = buildTopicName(readString(buffer));
         packetId = qos != QoS.AT_MOST_ONCE ? readUnsignedShort(buffer) : 0;
     }
 
     @Override
-    protected void readPayload(@NotNull MqttConnection connection, @NotNull ByteBuffer buffer) {
+    protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718040
         payload = readPayload(buffer);
     }
 
     @Override
-    protected @NotNull Set<PacketProperty> getAvailableProperties() {
+    protected Set<PacketProperty> getAvailableProperties() {
         return AVAILABLE_PROPERTIES;
     }
 
     @Override
-    protected void applyProperty(@NotNull PacketProperty property, long value) {
+    protected void applyProperty(PacketProperty property, long value) {
         switch (property) {
             case PAYLOAD_FORMAT_INDICATOR:
                 payloadFormatIndicator = NumberUtils.toBoolean(value);

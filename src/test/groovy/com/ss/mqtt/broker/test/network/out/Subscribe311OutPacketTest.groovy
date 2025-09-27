@@ -1,8 +1,11 @@
 package com.ss.mqtt.broker.test.network.out
 
 import com.ss.mqtt.broker.model.MqttPropertyConstants
+import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket
 import com.ss.mqtt.broker.network.packet.out.Subscribe311OutPacket
+import javasabr.rlib.collections.array.Array
+import javasabr.rlib.common.util.BufferUtils
 
 class Subscribe311OutPacketTest extends BaseOutPacketTest {
     
@@ -28,7 +31,7 @@ class Subscribe311OutPacketTest extends BaseOutPacketTest {
             result
             reader.packetId == 1
             reader.topicFilters == topicFiltersObj311
-            reader.userProperties == Array.empty()
+            reader.userProperties == Array.empty(StringPair)
             reader.subscriptionId == MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED
     }
 }

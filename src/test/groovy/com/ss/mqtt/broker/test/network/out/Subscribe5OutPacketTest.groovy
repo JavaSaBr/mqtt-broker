@@ -3,6 +3,7 @@ package com.ss.mqtt.broker.test.network.out
 import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.network.packet.in.SubscribeInPacket
 import com.ss.mqtt.broker.network.packet.out.Subscribe5OutPacket
+import javasabr.rlib.common.util.BufferUtils
 
 class Subscribe5OutPacketTest extends BaseOutPacketTest {
     

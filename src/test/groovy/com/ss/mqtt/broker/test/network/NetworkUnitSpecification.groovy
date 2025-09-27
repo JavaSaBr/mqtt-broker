@@ -14,6 +14,7 @@ import com.ss.mqtt.broker.test.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.IntArray
+import javasabr.rlib.common.util.ArrayUtils
 import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
@@ -76,17 +77,20 @@ class NetworkUnitSpecification extends UnitSpecification {
     )
     public static final serverReference = "serverReference"
     public static final contentType = "application/json"
-    public static final subscribeAckReasonCodes = ArrayFactory.asArray(
+    public static final subscribeAckReasonCodes = Array.typed(
+        SubscribeAckReasonCode,
         SubscribeAckReasonCode.GRANTED_QOS_1,
         SubscribeAckReasonCode.GRANTED_QOS_0,
         SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
     )
-    public static final unsubscribeAckReasonCodes = ArrayFactory.asArray(
+    public static final unsubscribeAckReasonCodes = Array.typed(
+        UnsubscribeAckReasonCode,
         UnsubscribeAckReasonCode.SUCCESS,
         UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
         UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
     )
-    public static final userProperties = ArrayFactory.asArray(
+    public static final userProperties = Array.typed(
+        StringPair,
         new StringPair("key1", "val1"),
         new StringPair("key2", "val2"),
         new StringPair("key3", "val3"),

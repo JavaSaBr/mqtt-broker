@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 @NoArgsConstructor
 public class TopicName extends AbstractTopic {
 
-    public TopicName(@NotNull String topicName) {
+    public TopicName(String topicName) {
         super(topicName);
     }
 }

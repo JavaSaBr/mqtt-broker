@@ -3,7 +3,9 @@ package com.ss.mqtt.broker.test.network.in
 import com.ss.mqtt.broker.model.MqttPropertyConstants
 import com.ss.mqtt.broker.model.PacketProperty
 import com.ss.mqtt.broker.model.QoS
+import com.ss.mqtt.broker.model.data.type.StringPair
 import com.ss.mqtt.broker.network.packet.in.PublishInPacket
+import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 import javasabr.rlib.collections.array.Array
@@ -29,7 +31,7 @@ class PublishInPacketTest extends BaseInPacketTest {
             !packet.duplicate
             packet.retained
             packet.responseTopic == ""
-            packet.subscriptionIds == IntegerArray.EMPTY
+            packet.subscriptionIds == IntArray.empty()
             packet.contentType == ""
             packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
             packet.payload == publishPayload
@@ -98,12 +100,12 @@ class PublishInPacketTest extends BaseInPacketTest {
             !packet.duplicate
             packet.retained
             packet.responseTopic == ""
-            packet.subscriptionIds == IntegerArray.EMPTY
+            packet.subscriptionIds == IntArray.empty()
             packet.contentType == ""
             packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
             packet.payload == publishPayload
             packet.packetId == packetId
-            packet.userProperties == Array.empty()
+            packet.userProperties == Array.empty(StringPair)
             packet.messageExpiryInterval == MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
             packet.topicAlias == MqttPropertyConstants.TOPIC_ALIAS_DEFAULT
             packet.payloadFormatIndicator == MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT

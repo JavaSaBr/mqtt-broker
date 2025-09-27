@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 @NoArgsConstructor
 public class TopicFilter extends AbstractTopic {
 
-    public TopicFilter(@NotNull String topicFilter) {
+    public TopicFilter(String topicFilter) {
         super(topicFilter);
     }
 }
