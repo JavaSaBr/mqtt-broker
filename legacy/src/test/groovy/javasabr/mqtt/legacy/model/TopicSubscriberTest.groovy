@@ -3,6 +3,7 @@ package javasabr.mqtt.legacy.model
 import javasabr.mqtt.legacy.network.MqttClient
 import javasabr.mqtt.legacy.network.NetworkUnitSpecification
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.model.topic.TopicSubscribers
