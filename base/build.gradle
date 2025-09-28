@@ -2,5 +2,7 @@ apply plugin: "java-library"
 apply from: "$rootDir/gradle/configure-java.gradle"
 
 dependencies {
+  api libs.gson
+  api libs.rlib.collections
   testImplementation projects.testSupport
 }

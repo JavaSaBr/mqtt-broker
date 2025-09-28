@@ -3,7 +3,7 @@ package javasabr.mqtt.model.utils;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import org.springframework.util.StringUtils;
+import javasabr.rlib.common.util.StringUtils;
 
 public class TopicUtils {
 
@@ -52,7 +52,7 @@ public class TopicUtils {
   }
 
   public static String[] splitTopic(String topic) {
-    int segmentCount = StringUtils.countOccurrencesOf(topic, DELIMITER) + 1;
+    int segmentCount = countOccurrencesOf(topic, DELIMITER) + 1;
     var segments = new String[segmentCount];
     int i = 0, pos = 0, end;
     while ((end = topic.indexOf(DELIMITER, pos)) >= 0) {
@@ -93,4 +93,20 @@ public class TopicUtils {
   private static boolean isShared(String topicFilter) {
     return topicFilter.startsWith(SHARE_KEYWORD);
   }
+
+  public static int countOccurrencesOf(String str, String sub) {
+    if (StringUtils.isEmpty(str)) {
+      return 0;
+    }
+
+    int count = 0;
+    int pos = 0;
+    int idx;
+    while ((idx = str.indexOf(sub, pos)) != -1) {
+      ++count;
+      pos = idx + sub.length();
+    }
+    return count;
+  }
+
 }
