@@ -1,0 +1,12 @@
+package javasabr.mqtt.legacy.exception;
+
+public class CredentialsSourceException extends RuntimeException {
+
+  public CredentialsSourceException(String message) {
+    super(message);
+  }
+
+  public CredentialsSourceException(Throwable cause) {
+    super(cause);
+  }
+}

@@ -1,6 +1,6 @@
 [versions]
 # https://gitlab.com/JavaSaBr/maven-repo/-/packages
-rlib = "10.0.alpha"
+rlib = "10.0.alpha1"
 # https://mvnrepository.com/artifact/org.jetbrains/annotations
 jetbrains-annotations = "26.0.2"
 # https://mvnrepository.com/artifact/org.projectlombok/lombok
@@ -38,6 +38,7 @@ moquette-broker = "0.17"
 [libraries]
 rlib-network = { module = "javasabr.rlib:rlib-network", version.ref = "rlib" }
 rlib-logger-slf4j = { module = "javasabr.rlib:rlib-logger-slf4j", version.ref = "rlib" }
+rlib-collections = { module = "javasabr.rlib:rlib-collections", version.ref = "rlib" }
 springboot-starter-core = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springboot" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "springboot" }
 project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "project-reactor" }

@@ -1,0 +1,14 @@
+plugins {
+  id "java-library"
+}
+
+dependencies {
+  api libs.hivemq.mqtt.client
+  api libs.moquette.broker
+  api libs.spring.test
+  api libs.spock.core
+  api libs.spock.spring
+  api libs.groovy.all
+  api libs.byte.buddy.dep
+  api libs.objenesis
+}

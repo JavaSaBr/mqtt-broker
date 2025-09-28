@@ -1,0 +1,30 @@
+plugins {
+  id "java"
+  id "groovy"
+  id "org.springframework.boot"
+}
+
+apply from: "$rootDir/gradle/configure-java.gradle"
+
+dependencies {
+  implementation projects.model
+  implementation projects.base
+
+  implementation libs.rlib.network
+  implementation libs.rlib.logger.slf4j
+  implementation libs.springboot.starter.core
+  implementation libs.springboot.starter.log4j2
+  implementation libs.project.reactor.core
+
+  testImplementation projects.testSupport
+}
+
+
+tasks.withType(GroovyCompile).configureEach {
+  options.forkOptions.jvmArgs += "--enable-preview"
+}
+
+configurations.each {
+  it.exclude group: "org.slf4j", module: "slf4j-log4j12"
+  it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+}

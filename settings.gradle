@@ -1,3 +1,10 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = 'MQTT-Broker'
+
+include(":base")
+include(":model")
+include(":network")
+include(":application")
+include(":legacy")
+include(":test-support")

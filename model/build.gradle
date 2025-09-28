@@ -1,0 +1,8 @@
+apply plugin: "java-library"
+apply from: "$rootDir/gradle/configure-java.gradle"
+
+dependencies {
+  api projects.base
+
+  testImplementation projects.testSupport
+}

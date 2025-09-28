@@ -1,0 +1,40 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+dependencies {
+  compileOnly libs.jspecify
+  compileOnly libs.lombok
+  annotationProcessor libs.lombok
+}
+
+test {
+  useJUnitPlatform()
+  failOnNoDiscoveredTests = false
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs 'src/main/groovy'
+    }
+  }
+  test {
+    java {
+      srcDirs 'src/test/groovy'
+    }
+  }
+}
+
+tasks.withType(Test).configureEach {
+  maxParallelForks = 2
+  forkEvery = 100
+  jvmArgs += "--enable-preview"
+}
+
+tasks.withType(JavaCompile).configureEach {
+  options.compilerArgs += "--enable-preview"
+}
+
+
+processResources {
+  filter(ReplaceTokens, tokens: [])
+}
