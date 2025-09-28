@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.SubscribeTopicFilter;
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.legacy.network.packet.PacketType;
 import java.nio.ByteBuffer;
 import javasabr.rlib.collections.array.Array;

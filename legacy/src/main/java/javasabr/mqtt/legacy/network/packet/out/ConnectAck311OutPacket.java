@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.legacy.network.packet.PacketType;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 

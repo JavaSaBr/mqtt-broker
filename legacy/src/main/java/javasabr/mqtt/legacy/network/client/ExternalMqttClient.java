@@ -2,7 +2,7 @@ package javasabr.mqtt.legacy.network.client;
 
 import javasabr.mqtt.legacy.handler.client.MqttClientReleaseHandler;
 import javasabr.mqtt.legacy.network.MqttConnection;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 
 public class ExternalMqttClient extends AbstractMqttClient {
 

@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.model.reason.code.PublishReleaseReasonCode;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;

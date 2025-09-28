@@ -1,16 +1,17 @@
 package javasabr.mqtt.legacy.network.client;
 
-import javasabr.mqtt.legacy.config.MqttConnectionConfig;
+import javasabr.mqtt.legacy.out.MqttPacketOutFactories;
+import javasabr.mqtt.model.MqttConnectionConfig;
 import javasabr.mqtt.legacy.out.MqttPacketOutFactory;
 import javasabr.mqtt.legacy.handler.client.MqttClientReleaseHandler;
 import javasabr.mqtt.legacy.handler.packet.in.PacketInHandler;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.legacy.network.MqttConnection;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket;
 import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javasabr.rlib.common.util.StringUtils;
@@ -111,9 +112,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   @Override
   public MqttPacketOutFactory getPacketOutFactory() {
-    return connection
-        .getMqttVersion()
-        .getPacketOutFactory();
+    return MqttPacketOutFactories.of(connection.getMqttVersion());
   }
 
   @Override

@@ -1,10 +1,10 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.legacy.util.MqttDataUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -203,10 +203,10 @@ public class Connect5OutPacket extends Connect311OutPacket {
         Array.empty(StringPair.class),
         StringUtils.EMPTY,
         ArrayUtils.EMPTY_BYTE_ARRAY,
-        MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED,
-        MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED,
-        MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED,
-        MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED,
+        MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED,
+        MqttProperties.RECEIVE_MAXIMUM_UNDEFINED,
+        MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED,
+        MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED,
         false,
         false);
   }
@@ -278,22 +278,22 @@ public class Connect5OutPacket extends Connect311OutPacket {
     writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
     writeProperty(buffer, PacketProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation, false);
     writeProperty(buffer, PacketProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation, false);
-    writeProperty(buffer, PacketProperty.RECEIVE_MAXIMUM, receiveMax, MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED);
+    writeProperty(buffer, PacketProperty.RECEIVE_MAXIMUM, receiveMax, MqttProperties.RECEIVE_MAXIMUM_UNDEFINED);
     writeProperty(
         buffer,
         PacketProperty.TOPIC_ALIAS_MAXIMUM,
         topicAliasMaximum,
-        MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED);
+        MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED);
     writeProperty(
         buffer,
         PacketProperty.SESSION_EXPIRY_INTERVAL,
         sessionExpiryInterval,
-        MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED);
+        MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED);
     writeProperty(
         buffer,
         PacketProperty.MAXIMUM_PACKET_SIZE,
         maximumPacketSize,
-        MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED);
+        MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED);
   }
 
   protected void writeWillProperties(ByteBuffer buffer) {

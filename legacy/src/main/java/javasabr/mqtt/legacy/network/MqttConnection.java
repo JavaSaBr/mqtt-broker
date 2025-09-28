@@ -1,10 +1,9 @@
 package javasabr.mqtt.legacy.network;
 
-import javasabr.mqtt.legacy.config.MqttConnectionConfig;
+import javasabr.mqtt.model.MqttConnectionConfig;
 import javasabr.mqtt.legacy.handler.packet.in.PacketInHandler;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.MqttPacketReader;
 import javasabr.mqtt.legacy.network.packet.MqttPacketWriter;
 import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket;

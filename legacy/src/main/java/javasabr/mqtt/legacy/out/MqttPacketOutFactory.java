@@ -11,7 +11,7 @@ import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
-import javasabr.mqtt.model.network.MqttClient;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.legacy.network.packet.out.PublishOutPacket;
 import javasabr.rlib.collections.array.Array;

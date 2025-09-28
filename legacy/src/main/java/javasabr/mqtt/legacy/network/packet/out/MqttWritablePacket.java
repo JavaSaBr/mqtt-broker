@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.legacy.util.MqttDataUtils;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

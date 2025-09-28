@@ -1,9 +1,9 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.legacy.network;
 
-import javasabr.mqtt.legacy.model.topic.TopicFilter;
-import javasabr.mqtt.legacy.network.client.MqttClient;
 import javasabr.mqtt.legacy.network.packet.HasPacketId;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.functions.TriConsumer;
 
 public interface MqttSession {

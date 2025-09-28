@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 
 public class Publish311OutPacket extends PublishOutPacket {

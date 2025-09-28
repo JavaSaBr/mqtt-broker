@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.SubscribeTopicFilter;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.data.type.StringPair;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -37,7 +37,7 @@ public class Subscribe5OutPacket extends Subscribe311OutPacket {
   private final int subscriptionId;
 
   public Subscribe5OutPacket(Array<SubscribeTopicFilter> topicFilters, int packetId) {
-    this(topicFilters, packetId, Array.empty(StringPair.class), MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED);
+    this(topicFilters, packetId, Array.empty(StringPair.class), MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
   }
 
   public Subscribe5OutPacket(
@@ -86,6 +86,6 @@ public class Subscribe5OutPacket extends Subscribe311OutPacket {
         buffer,
         PacketProperty.SUBSCRIPTION_IDENTIFIER,
         subscriptionId,
-        MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED);
+        MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
   }
 }

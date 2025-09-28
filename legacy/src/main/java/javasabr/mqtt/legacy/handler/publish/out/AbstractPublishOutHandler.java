@@ -1,12 +1,12 @@
 package javasabr.mqtt.legacy.handler.publish.out;
 
-import javasabr.mqtt.legacy.model.ActionResult;
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.SingleSubscriber;
-import javasabr.mqtt.legacy.model.Subscriber;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.ActionResult;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
 
 abstract class AbstractPublishOutHandler implements PublishOutHandler {
@@ -14,7 +14,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
   @Override
   public ActionResult handle(PublishInPacket packet, SingleSubscriber subscriber) {
 
-    var client = subscriber.getMqttClient();
+    MqttClient client = (MqttClient) subscriber.getUser();
     var session = client.getSession();
 
     // if session is null it means this client was already closed
@@ -44,7 +44,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
         packet
             .getTopicName()
             .toString(),
-        MqttPropertyConstants.TOPIC_ALIAS_NOT_SET,
+        MqttProperties.TOPIC_ALIAS_NOT_SET,
         packet.getPayload(),
         packet.isPayloadFormatIndicator(),
         packet.getResponseTopic(),

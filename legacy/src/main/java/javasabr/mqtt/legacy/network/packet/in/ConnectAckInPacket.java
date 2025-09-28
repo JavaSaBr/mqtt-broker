@@ -1,11 +1,11 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
 import java.nio.ByteBuffer;
@@ -270,21 +270,21 @@ public class ConnectAckInPacket extends MqttReadablePacket {
     this.userProperties = MutableArray.ofType(StringPair.class);
     this.reasonCode = ConnectAckReasonCode.SUCCESS;
     this.maximumQos = QoS.EXACTLY_ONCE;
-    this.retainAvailable = MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT;
+    this.retainAvailable = MqttProperties.RETAIN_AVAILABLE_DEFAULT;
     this.assignedClientId = StringUtils.EMPTY;
     this.reason = StringUtils.EMPTY;
-    this.sharedSubscriptionAvailable = MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT;
-    this.wildcardSubscriptionAvailable = MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT;
-    this.subscriptionIdAvailable = MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT;
+    this.sharedSubscriptionAvailable = MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT;
+    this.wildcardSubscriptionAvailable = MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT;
+    this.subscriptionIdAvailable = MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT;
     this.responseInformation = StringUtils.EMPTY;
     this.serverReference = StringUtils.EMPTY;
     this.authenticationMethod = StringUtils.EMPTY;
     this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
-    this.serverKeepAlive = MqttPropertyConstants.SERVER_KEEP_ALIVE_UNDEFINED;
-    this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
-    this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-    this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
-    this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
+    this.serverKeepAlive = MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED;
+    this.maximumPacketSize = MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
+    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+    this.topicAliasMaximum = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+    this.receiveMax = MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
   }
 
   @Override
@@ -357,8 +357,8 @@ public class ConnectAckInPacket extends MqttReadablePacket {
       case RECEIVE_MAXIMUM:
         receiveMax = (int) NumberUtils.validate(
             value,
-            MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
-            MqttPropertyConstants.RECEIVE_MAXIMUM_MAX);
+            MqttProperties.RECEIVE_MAXIMUM_MIN,
+            MqttProperties.RECEIVE_MAXIMUM_MAX);
         break;
       case MAXIMUM_QOS:
         maximumQos = QoS.of((int) value);
@@ -366,26 +366,26 @@ public class ConnectAckInPacket extends MqttReadablePacket {
       case SERVER_KEEP_ALIVE:
         serverKeepAlive = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.SERVER_KEEP_ALIVE_MIN,
-            MqttPropertyConstants.SERVER_KEEP_ALIVE_MAX);
+            MqttProperties.SERVER_KEEP_ALIVE_MIN,
+            MqttProperties.SERVER_KEEP_ALIVE_MAX);
         break;
       case TOPIC_ALIAS_MAXIMUM:
         topicAliasMaximum = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.TOPIC_ALIAS_MIN,
-            MqttPropertyConstants.TOPIC_ALIAS_MAX);
+            MqttProperties.TOPIC_ALIAS_MIN,
+            MqttProperties.TOPIC_ALIAS_MAX);
         break;
       case SESSION_EXPIRY_INTERVAL:
         sessionExpiryInterval = NumberUtils.validate(
             value,
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_MIN,
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY);
+            MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
+            MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
         break;
       case MAXIMUM_PACKET_SIZE:
         maximumPacketSize = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MIN,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX);
+            MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
+            MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
         break;
       default:
         unexpectedProperty(property);

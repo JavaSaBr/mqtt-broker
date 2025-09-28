@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
-import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicFilter;
+import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.topic.TopicFilter;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
 import java.nio.ByteBuffer;

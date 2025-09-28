@@ -1,12 +1,12 @@
 package javasabr.mqtt.legacy.handler.publish.out;
 
-import static javasabr.mqtt.legacy.model.ActionResult.SUCCESS;
+import static javasabr.mqtt.model.ActionResult.SUCCESS;
 
-import javasabr.mqtt.legacy.model.ActionResult;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.Subscriber;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.ActionResult;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
 
 public class Qos0PublishOutHandler extends AbstractPublishOutHandler {

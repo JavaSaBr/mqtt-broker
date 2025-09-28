@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
 import java.nio.ByteBuffer;

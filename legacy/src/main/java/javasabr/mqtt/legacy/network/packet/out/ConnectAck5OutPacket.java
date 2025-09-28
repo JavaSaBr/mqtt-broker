@@ -1,11 +1,11 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -326,12 +326,12 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         buffer,
         PacketProperty.MAXIMUM_QOS,
         maxQos.ordinal(),
-        MqttPropertyConstants.MAXIMUM_QOS_DEFAULT.ordinal());
+        MqttProperties.MAXIMUM_QOS_DEFAULT.ordinal());
     writeProperty(
         buffer,
         PacketProperty.RETAIN_AVAILABLE,
         retainAvailable,
-        MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT);
+        MqttProperties.RETAIN_AVAILABLE_DEFAULT);
     writeProperty(
         buffer,
         PacketProperty.SESSION_EXPIRY_INTERVAL,
@@ -343,27 +343,27 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
         buffer,
         PacketProperty.MAXIMUM_PACKET_SIZE,
         maximumPacketSize,
-        MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX);
+        MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
     writeProperty(
         buffer,
         PacketProperty.TOPIC_ALIAS_MAXIMUM,
         topicAliasMaximum,
-        MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED);
+        MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED);
     writeProperty(
         buffer,
         PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
         wildcardSubscriptionAvailable,
-        MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT);
+        MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT);
     writeProperty(
         buffer,
         PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
         subscriptionIdAvailable,
-        MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT);
+        MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT);
     writeProperty(
         buffer,
         PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
         sharedSubscriptionAvailable,
-        MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT);
+        MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT);
     writeProperty(buffer, PacketProperty.SERVER_KEEP_ALIVE, keepAlive, requestedKeepAlive);
   }
 }

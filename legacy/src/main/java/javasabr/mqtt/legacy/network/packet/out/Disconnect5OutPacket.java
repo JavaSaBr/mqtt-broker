@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.model.reason.code.DisconnectReasonCode;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -80,12 +80,12 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
     writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
     writeNotEmptyProperty(buffer, PacketProperty.SERVER_REFERENCE, serverReference);
 
-    if (sessionExpiryInterval != MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+    if (sessionExpiryInterval != MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED) {
       writeProperty(
           buffer,
           PacketProperty.SESSION_EXPIRY_INTERVAL,
           sessionExpiryInterval,
-          MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT);
+          MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT);
     }
   }
 }

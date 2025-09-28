@@ -1,6 +1,6 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model;
 
-import javasabr.mqtt.legacy.model.data.type.PacketDataType;
+import javasabr.mqtt.model.data.type.PacketDataType;
 import java.util.stream.Stream;
 import javasabr.rlib.common.util.ClassUtils;
 import javasabr.rlib.common.util.ObjectUtils;

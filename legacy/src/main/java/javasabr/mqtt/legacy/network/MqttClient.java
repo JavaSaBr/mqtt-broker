@@ -1,17 +1,16 @@
-package javasabr.mqtt.legacy.network.client;
+package javasabr.mqtt.legacy.network;
 
-import javasabr.mqtt.legacy.config.MqttConnectionConfig;
-import javasabr.mqtt.legacy.out.MqttPacketOutFactory;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.legacy.network.MqttConnection;
-import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket;
 import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket;
+import javasabr.mqtt.legacy.out.MqttPacketOutFactory;
+import javasabr.mqtt.model.MqttConnectionConfig;
+import javasabr.mqtt.model.MqttUser;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket;
 import java.util.concurrent.CompletableFuture;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-public interface MqttClient {
+public interface MqttClient extends MqttUser {
 
   interface UnsafeMqttClient extends MqttClient {
 

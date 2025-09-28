@@ -1,19 +1,19 @@
 package javasabr.mqtt.model.subscriber;
 
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.network.MqttClient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @ToString
-@EqualsAndHashCode(of = "mqttClient")
+@EqualsAndHashCode(of = "user")
 @RequiredArgsConstructor
 public final class SingleSubscriber implements Subscriber {
 
   @Getter
-  private final MqttClient mqttClient;
+  private final MqttUser user;
   private final SubscribeTopicFilter subscribe;
 
   public QoS getQos() {

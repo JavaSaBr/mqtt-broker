@@ -1,9 +1,9 @@
 package javasabr.mqtt.model.topic;
 
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import java.util.Objects;
 import java.util.function.Supplier;
-import javasabr.mqtt.model.network.MqttClient;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
@@ -28,25 +28,25 @@ public class TopicSubscribers {
 
   private static void addSubscriber(
       LockableArray<Subscriber> subscribers,
-      MqttClient client,
+      MqttUser user,
       SubscribeTopicFilter subscribe) {
     if (TopicUtils.isShared(subscribe.getTopicFilter())) {
-      addSharedSubscriber(subscribers, client, subscribe);
+      addSharedSubscriber(subscribers, user, subscribe);
     } else {
-      addSingleSubscriber(subscribers, client, subscribe);
+      addSingleSubscriber(subscribers, user, subscribe);
     }
   }
 
   private static void addSingleSubscriber(
       LockableArray<Subscriber> subscribers,
-      MqttClient client,
+      MqttUser user,
       SubscribeTopicFilter subscribe) {
-    subscribers.add(new SingleSubscriber(client, subscribe));
+    subscribers.add(new SingleSubscriber(user, subscribe));
   }
 
   private static void addSharedSubscriber(
       LockableArray<Subscriber> subscribers,
-      MqttClient client,
+      MqttUser user,
       SubscribeTopicFilter subscribe) {
 
     String group = ((SharedTopicFilter) subscribe.getTopicFilter()).getGroup();
@@ -59,21 +59,21 @@ public class TopicSubscribers {
       subscribers.add(sharedSubscriber);
     }
 
-    var singleSubscriber = new SingleSubscriber(client, subscribe);
+    var singleSubscriber = new SingleSubscriber(user, subscribe);
     sharedSubscriber.addSubscriber(singleSubscriber);
   }
 
-  private static boolean removeSubscriber(LockableArray<Subscriber> subscribers, TopicFilter topic, MqttClient client) {
+  private static boolean removeSubscriber(LockableArray<Subscriber> subscribers, TopicFilter topic, MqttUser user) {
     return TopicUtils.isShared(topic)
-           ? removeSharedSubscriber(subscribers, ((SharedTopicFilter) topic).getGroup(), client)
-           : removeSingleSubscriber(subscribers, client);
+           ? removeSharedSubscriber(subscribers, ((SharedTopicFilter) topic).getGroup(), user)
+           : removeSingleSubscriber(subscribers, user);
   }
 
-  private static boolean removeSingleSubscriber(LockableArray<Subscriber> subscribers, MqttClient client) {
+  private static boolean removeSingleSubscriber(LockableArray<Subscriber> subscribers, MqttUser user) {
     for (int i = 0, length = subscribers.size(); i < length; i++) {
       Subscriber subscriber = subscribers.get(i);
-      MqttClient mqttClient = SubscriberUtils.singleSubscriberToMqttClient(subscriber);
-      if (Objects.equals(client, mqttClient)) {
+      MqttUser mqttClient = SubscriberUtils.singleSubscriberToMqttUser(subscriber);
+      if (Objects.equals(user, mqttClient)) {
         subscribers.remove(i);
         return true;
       }
@@ -84,7 +84,7 @@ public class TopicSubscribers {
   private static boolean removeSharedSubscriber(
       LockableArray<Subscriber> subscribers,
       String group,
-      MqttClient client) {
+      MqttUser client) {
 
     boolean removed = false;
     SharedSubscriber sharedSubscriber = (SharedSubscriber) subscribers
@@ -163,20 +163,20 @@ public class TopicSubscribers {
   private volatile @Getter
   @Nullable LockableArray<Subscriber> subscribers;
 
-  public void addSubscriber(MqttClient client, SubscribeTopicFilter subscribe) {
-    searchPlaceForSubscriber(0, subscribe.getTopicFilter(), client, subscribe);
+  public void addSubscriber(MqttUser user, SubscribeTopicFilter subscribe) {
+    searchPlaceForSubscriber(0, subscribe.getTopicFilter(), user, subscribe);
   }
 
   private void searchPlaceForSubscriber(
       int level,
       TopicFilter topicFilter,
-      MqttClient client,
+      MqttUser user,
       SubscribeTopicFilter subscribe) {
     if (level == topicFilter.levelsCount()) {
       LockableArray<Subscriber> subscribers = getOrCreateSubscribers();
       subscribers
           .operations()
-          .inWriteLock(client, subscribe, TopicSubscribers::addSubscriber);
+          .inWriteLock(user, subscribe, TopicSubscribers::addSubscriber);
     } else {
       LockableRefToRefDictionary<String, TopicSubscribers> topicSubscribers = getOrCreateTopicSubscribers();
       TopicSubscribers topicSubscriber = topicSubscribers
@@ -187,44 +187,44 @@ public class TopicSubscribers {
               MutableRefToRefDictionary::getOrCompute);
 
       //noinspection ConstantConditions
-      topicSubscriber.searchPlaceForSubscriber(level + 1, topicFilter, client, subscribe);
+      topicSubscriber.searchPlaceForSubscriber(level + 1, topicFilter, user, subscribe);
     }
   }
 
-  public void removeSubscriber(MqttClient client, SubscribeTopicFilter subscribe) {
-    removeSubscriber(client, subscribe.getTopicFilter());
+  public void removeSubscriber(MqttUser user, SubscribeTopicFilter subscribe) {
+    removeSubscriber(user, subscribe.getTopicFilter());
   }
 
-  public boolean removeSubscriber(MqttClient client, TopicFilter topicFilter) {
-    return searchSubscriberToRemove(0, topicFilter, client);
+  public boolean removeSubscriber(MqttUser user, TopicFilter topicFilter) {
+    return searchSubscriberToRemove(0, topicFilter, user);
   }
 
-  private boolean searchSubscriberToRemove(int level, TopicFilter topicFilter, MqttClient mqttClient) {
+  private boolean searchSubscriberToRemove(int level, TopicFilter topicFilter, MqttUser user) {
     var removed = false;
 
     LockableRefToRefDictionary<String, TopicSubscribers> topicSubscribers = getTopicSubscribers();
     if (level == topicFilter.levelsCount()) {
-      removed = tryToRemoveSubscriber(topicFilter, mqttClient);
+      removed = tryToRemoveSubscriber(topicFilter, user);
     } else if (topicSubscribers != null) {
       TopicSubscribers topicSubscriber = topicSubscribers
           .operations()
           .getInReadLock(topicFilter.getSegment(level), Dictionary::get);
       if (topicSubscriber != null) {
-        removed = topicSubscriber.searchSubscriberToRemove(level + 1, topicFilter, mqttClient);
+        removed = topicSubscriber.searchSubscriberToRemove(level + 1, topicFilter, user);
       }
     }
 
     return removed;
   }
 
-  private boolean tryToRemoveSubscriber(TopicFilter topicFilter, MqttClient mqttClient) {
+  private boolean tryToRemoveSubscriber(TopicFilter topicFilter, MqttUser user) {
     LockableArray<Subscriber> subscribers = getSubscribers();
     if (subscribers == null) {
       return false;
     }
     return subscribers
         .operations()
-        .getInWriteLock(topicFilter, mqttClient, TopicSubscribers::removeSubscriber);
+        .getInWriteLock(topicFilter, user, TopicSubscribers::removeSubscriber);
   }
 
   public Array<SingleSubscriber> matches(TopicName topicName) {

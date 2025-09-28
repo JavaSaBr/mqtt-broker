@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.handler.packet.in;
 
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket;
 
 public abstract class AbstractPacketHandler<C extends UnsafeMqttClient, R extends MqttReadablePacket> implements

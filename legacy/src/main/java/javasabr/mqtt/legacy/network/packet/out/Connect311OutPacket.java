@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.QoS;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.legacy.network.packet.PacketType;
 import java.nio.ByteBuffer;
 import javasabr.rlib.common.util.ArrayUtils;

@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.handler.packet.in;
 
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
 import javasabr.mqtt.legacy.service.PublishingService;
 import lombok.RequiredArgsConstructor;

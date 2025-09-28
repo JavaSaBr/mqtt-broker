@@ -1,15 +1,15 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
-import static javasabr.mqtt.legacy.util.TopicUtils.EMPTY_TOPIC_NAME;
-import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicName;
+import static javasabr.mqtt.model.utils.TopicUtils.EMPTY_TOPIC_NAME;
+import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.topic.TopicName;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -262,9 +262,9 @@ public class PublishInPacket extends MqttReadablePacket {
 
   private byte[] correlationData;
 
-  private long messageExpiryInterval = MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
-  private int topicAlias = MqttPropertyConstants.TOPIC_ALIAS_DEFAULT;
-  private boolean payloadFormatIndicator = MqttPropertyConstants.PAYLOAD_FORMAT_INDICATOR_DEFAULT;
+  private long messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
+  private int topicAlias = MqttProperties.TOPIC_ALIAS_DEFAULT;
+  private boolean payloadFormatIndicator = MqttProperties.PAYLOAD_FORMAT_INDICATOR_DEFAULT;
 
   public PublishInPacket(byte info) {
     super(info);
@@ -311,8 +311,8 @@ public class PublishInPacket extends MqttReadablePacket {
       case TOPIC_ALIAS:
         topicAlias = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.TOPIC_ALIAS_MIN,
-            MqttPropertyConstants.TOPIC_ALIAS_MAX);
+            MqttProperties.TOPIC_ALIAS_MIN,
+            MqttProperties.TOPIC_ALIAS_MAX);
         break;
       case MESSAGE_EXPIRY_INTERVAL:
         messageExpiryInterval = value;

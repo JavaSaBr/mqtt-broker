@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.handler.packet.in;
 
-import javasabr.mqtt.legacy.model.reason.code.DisconnectReasonCode;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.in.DisconnectInPacket;
 import lombok.extern.log4j.Log4j2;
 

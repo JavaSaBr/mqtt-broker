@@ -1,12 +1,12 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.reason.code.DisconnectReasonCode;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -70,7 +70,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
     this.reasonCode = DisconnectReasonCode.NORMAL_DISCONNECTION;
     this.reason = StringUtils.EMPTY;
     this.serverReference = StringUtils.EMPTY;
-    this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT;
+    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT;
   }
 
   @Override

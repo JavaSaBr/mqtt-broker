@@ -1,16 +1,16 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
-import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicFilter;
+import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.SubscribeRetainHandling;
-import javasabr.mqtt.legacy.model.SubscribeTopicFilter;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.SubscribeRetainHandling;
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -58,7 +58,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
   public SubscribeInPacket(byte info) {
     super(info);
     this.topicFilters = ArrayFactory.mutableArray(SubscribeTopicFilter.class);
-    this.subscriptionId = MqttPropertyConstants.SUBSCRIPTION_ID_UNDEFINED;
+    this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_UNDEFINED;
   }
 
   @Override

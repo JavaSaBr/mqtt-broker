@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.handler.client;
 
 import javasabr.mqtt.legacy.network.client.AbstractMqttClient;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.service.ClientIdRegistry;
 import javasabr.mqtt.legacy.service.MqttSessionService;
 import javasabr.mqtt.legacy.service.SubscriptionService;

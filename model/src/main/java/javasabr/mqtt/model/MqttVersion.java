@@ -1,8 +1,5 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model;
 
-import javasabr.mqtt.legacy.out.Mqtt311PacketOutFactory;
-import javasabr.mqtt.legacy.out.Mqtt5PacketOutFactory;
-import javasabr.mqtt.legacy.out.MqttPacketOutFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,9 +8,9 @@ import lombok.Getter;
 
 @Getter
 public enum MqttVersion {
-  UNKNOWN("Unknown", -1, new Mqtt311PacketOutFactory()),
-  MQTT_3_1_1("MQTT", 4, new Mqtt311PacketOutFactory()),
-  MQTT_5("MQTT", 5, new Mqtt5PacketOutFactory());
+  UNKNOWN("Unknown", -1),
+  MQTT_3_1_1("MQTT", 4),
+  MQTT_5("MQTT", 5);
 
   private static final Map<String, MqttVersion[]> NAME_LEVEL_VERSIONS;
 
@@ -60,15 +57,13 @@ public enum MqttVersion {
     return availableVersions[level];
   }
 
-  private final MqttPacketOutFactory packetOutFactory;
   private final byte[] nameInBytes;
   private final String name;
   private final byte version;
 
-  MqttVersion(String name, int version, MqttPacketOutFactory packetOutFactory) {
+  MqttVersion(String name, int version) {
     this.name = name;
     this.version = (byte) version;
     this.nameInBytes = name.getBytes(StandardCharsets.UTF_8);
-    this.packetOutFactory = packetOutFactory;
   }
 }

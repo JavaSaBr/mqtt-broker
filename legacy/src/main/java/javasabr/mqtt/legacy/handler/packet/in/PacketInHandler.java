@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.handler.packet.in;
 
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket;
 
 public interface PacketInHandler {

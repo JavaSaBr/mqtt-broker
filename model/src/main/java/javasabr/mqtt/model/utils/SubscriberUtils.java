@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.utils;
 
-import javasabr.mqtt.model.network.MqttClient;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
@@ -21,7 +21,7 @@ public class SubscriberUtils {
   }
 
   @Nullable
-  public static MqttClient singleSubscriberToMqttClient(Subscriber subscriber) {
-    return isSingleSubscriber(subscriber) ? ((SingleSubscriber) subscriber).getMqttClient() : null;
+  public static MqttUser singleSubscriberToMqttUser(Subscriber subscriber) {
+    return isSingleSubscriber(subscriber) ? ((SingleSubscriber) subscriber).getUser() : null;
   }
 }

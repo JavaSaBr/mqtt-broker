@@ -1,10 +1,10 @@
 package javasabr.mqtt.legacy.network.packet.out;
 
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -177,8 +177,8 @@ public class Publish5OutPacket extends Publish311OutPacket {
         buffer,
         PacketProperty.MESSAGE_EXPIRY_INTERVAL,
         0,
-        MqttPropertyConstants.MESSAGE_EXPIRY_INTERVAL_UNDEFINED);
-    writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttPropertyConstants.TOPIC_ALIAS_DEFAULT);
+        MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED);
+    writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttProperties.TOPIC_ALIAS_DEFAULT);
     writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
     writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
     writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);

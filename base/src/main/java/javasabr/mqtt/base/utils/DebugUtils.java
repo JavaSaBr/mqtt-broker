@@ -1,4 +1,4 @@
-package javasabr.mqtt.legacy.util;
+package javasabr.mqtt.base.utils;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;

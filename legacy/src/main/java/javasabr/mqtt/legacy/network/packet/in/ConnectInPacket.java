@@ -1,14 +1,14 @@
 package javasabr.mqtt.legacy.network.packet.in;
 
 import javasabr.mqtt.legacy.exception.ConnectionRejectException;
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.PacketProperty;
-import javasabr.mqtt.legacy.model.data.type.StringPair;
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.packet.PacketType;
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -229,10 +229,10 @@ public class ConnectInPacket extends MqttReadablePacket {
     this.authenticationMethod = StringUtils.EMPTY;
     this.willPayload = ArrayUtils.EMPTY_BYTE_ARRAY;
     this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
-    this.sessionExpiryInterval = MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-    this.receiveMax = MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
-    this.maximumPacketSize = MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
-    this.topicAliasMaximum = MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+    this.receiveMax = MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
+    this.maximumPacketSize = MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
+    this.topicAliasMaximum = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
     this.requestResponseInformation = false;
     this.requestProblemInformation = false;
   }
@@ -377,26 +377,26 @@ public class ConnectInPacket extends MqttReadablePacket {
       case RECEIVE_MAXIMUM:
         receiveMax = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.RECEIVE_MAXIMUM_MIN,
-            MqttPropertyConstants.RECEIVE_MAXIMUM_MAX);
+            MqttProperties.RECEIVE_MAXIMUM_MIN,
+            MqttProperties.RECEIVE_MAXIMUM_MAX);
         break;
       case TOPIC_ALIAS_MAXIMUM:
         topicAliasMaximum = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.TOPIC_ALIAS_MIN,
-            MqttPropertyConstants.TOPIC_ALIAS_MAX);
+            MqttProperties.TOPIC_ALIAS_MIN,
+            MqttProperties.TOPIC_ALIAS_MAX);
         break;
       case SESSION_EXPIRY_INTERVAL:
         sessionExpiryInterval = NumberUtils.validate(
             value,
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_MIN,
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_INFINITY);
+            MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
+            MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
         break;
       case MAXIMUM_PACKET_SIZE:
         maximumPacketSize = NumberUtils.validate(
             (int) value,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MIN,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_MAX);
+            MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
+            MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
         break;
       default:
         unexpectedProperty(property);

@@ -1,14 +1,14 @@
 package javasabr.mqtt.legacy.service;
 
-import javasabr.mqtt.legacy.model.ActionResult;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.SingleSubscriber;
-import javasabr.mqtt.legacy.model.SubscribeTopicFilter;
-import javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.legacy.model.reason.code.UnsubscribeAckReasonCode;
-import javasabr.mqtt.legacy.model.topic.TopicFilter;
-import javasabr.mqtt.legacy.model.topic.TopicName;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.ActionResult;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.legacy.network.MqttClient;
 import java.util.function.BiFunction;
 import javasabr.rlib.collections.array.Array;
 

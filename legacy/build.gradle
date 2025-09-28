@@ -5,6 +5,8 @@ plugins {
 apply from: "$rootDir/gradle/configure-java.gradle"
 
 dependencies {
+  implementation projects.model
+  implementation projects.base
 
   testImplementation projects.testSupport
 }

@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.handler.publish.in;
 
 import javasabr.mqtt.legacy.handler.publish.out.PublishOutHandler;
-import javasabr.mqtt.legacy.model.ActionResult;
-import javasabr.mqtt.legacy.model.reason.code.PublishAckReasonCode;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.ActionResult;
+import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
 import javasabr.mqtt.legacy.service.SubscriptionService;
 

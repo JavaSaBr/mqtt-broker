@@ -1,6 +1,5 @@
-package javasabr.mqtt.model.network.connection;
+package javasabr.mqtt.model;
 
-import javasabr.mqtt.model.QoS;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

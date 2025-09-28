@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.handler.publish.out;
 
-import javasabr.mqtt.legacy.model.ActionResult;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.Subscriber;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.ActionResult;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
 
 public abstract class PersistentPublishOutHandler extends AbstractPublishOutHandler implements

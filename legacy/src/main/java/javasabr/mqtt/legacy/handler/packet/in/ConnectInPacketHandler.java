@@ -1,22 +1,22 @@
 package javasabr.mqtt.legacy.handler.packet.in;
 
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.MAXIMUM_PACKET_SIZE_UNDEFINED;
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.RECEIVE_MAXIMUM_UNDEFINED;
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.SERVER_KEEP_ALIVE_DISABLED;
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DISABLED;
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED;
-import static javasabr.mqtt.legacy.model.MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
-import static javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
-import static javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
+import static javasabr.mqtt.model.MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
+import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
+import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
+import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
+import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 import static javasabr.mqtt.legacy.util.ReactorUtils.ifTrue;
 
 import javasabr.mqtt.legacy.exception.ConnectionRejectException;
 import javasabr.mqtt.legacy.exception.MalformedPacketMqttException;
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.MqttVersion;
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.in.ConnectInPacket;
 import javasabr.mqtt.legacy.service.AuthenticationService;
 import javasabr.mqtt.legacy.service.ClientIdRegistry;

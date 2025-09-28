@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.model.network.MqttClient;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,12 +37,12 @@ public final class SharedSubscriber implements Subscriber {
         .inWriteLock(client, Collection::add);
   }
 
-  public boolean removeSubscriber(MqttClient client) {
+  public boolean removeSubscriber(MqttUser user) {
     return subscribers
         .operations()
         .getInWriteLock(
-            client, (singleSubscribers, mqttClient) -> {
-              int index = singleSubscribers.indexOf(SingleSubscriber::getMqttClient, mqttClient);
+            user, (singleSubscribers, mqttClient) -> {
+              int index = singleSubscribers.indexOf(SingleSubscriber::getUser, mqttClient);
               if (index >= 0) {
                 singleSubscribers.remove(index);
                 return true;

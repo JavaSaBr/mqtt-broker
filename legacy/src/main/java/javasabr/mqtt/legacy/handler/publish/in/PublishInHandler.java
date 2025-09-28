@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.handler.publish.in;
 
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
 
 /**

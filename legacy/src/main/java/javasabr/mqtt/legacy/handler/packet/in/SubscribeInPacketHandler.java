@@ -1,12 +1,12 @@
 package javasabr.mqtt.legacy.handler.packet.in;
 
-import static javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
-import static javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static java.lang.Byte.toUnsignedInt;
 
-import javasabr.mqtt.legacy.model.reason.code.DisconnectReasonCode;
-import javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
+import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.legacy.network.packet.in.SubscribeInPacket;
 import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.legacy.service.SubscriptionService;

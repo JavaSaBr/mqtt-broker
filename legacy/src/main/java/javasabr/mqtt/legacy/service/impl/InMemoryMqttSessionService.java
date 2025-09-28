@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.service.impl;
 
-import javasabr.mqtt.legacy.model.MqttSession;
-import javasabr.mqtt.legacy.model.MqttSession.UnsafeMqttSession;
-import javasabr.mqtt.legacy.model.impl.DefaultMqttSession;
+import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.legacy.network.MqttSession.UnsafeMqttSession;
+import javasabr.mqtt.legacy.network.DefaultMqttSession;
 import javasabr.mqtt.legacy.service.MqttSessionService;
 import java.io.Closeable;
 import javasabr.rlib.collections.array.ArrayFactory;

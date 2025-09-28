@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.handler.publish.out;
 
-import static javasabr.mqtt.legacy.model.reason.code.PublishReleaseReasonCode.SUCCESS;
+import static javasabr.mqtt.model.reason.code.PublishReleaseReasonCode.SUCCESS;
 
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.legacy.network.MqttClient;
 import javasabr.mqtt.legacy.network.packet.HasPacketId;
 import javasabr.mqtt.legacy.network.packet.in.PublishCompleteInPacket;
 import javasabr.mqtt.legacy.network.packet.in.PublishReceivedInPacket;
