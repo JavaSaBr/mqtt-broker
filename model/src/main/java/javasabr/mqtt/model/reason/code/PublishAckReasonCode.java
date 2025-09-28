@@ -1,4 +1,4 @@
-package javasabr.mqtt.legacy.model.reason.code;
+package javasabr.mqtt.model.reason.code;
 
 import java.util.stream.Stream;
 import javasabr.rlib.common.util.ObjectUtils;
@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum PublishReceivedReasonCode {
-
+public enum PublishAckReasonCode {
   /**
-   * The message is accepted. Publication of the QoS 2 message proceeds..
+   * The message is accepted. Publication of the QoS 1 message proceeds.
    */
   SUCCESS((byte) 0x00),
   /**
@@ -17,6 +16,9 @@ public enum PublishReceivedReasonCode {
    * there are no matching subscribers, it MAY use this Reason Code instead of 0x00 (Success).
    */
   NO_MATCHING_SUBSCRIBERS((byte) 0x10),
+
+  // ERRORS
+
   /**
    * The receiver does not accept the publish but either does not want to reveal the reason, or it does not match one of
    * the other values.
@@ -44,22 +46,22 @@ public enum PublishReceivedReasonCode {
    */
   QUOTA_EXCEEDED((byte) 0x97),
   /**
-   * The payload format does not match the one specified in the Payload Format Indicator.
+   * The payload format does not match the specified Payload Format Indicator.
    */
   PAYLOAD_FORMAT_INVALID((byte) 0x99);
 
-  private static final PublishReceivedReasonCode[] VALUES;
+  private static final PublishAckReasonCode[] VALUES;
 
   static {
 
     var maxId = Stream
         .of(values())
-        .mapToInt(PublishReceivedReasonCode::getValue)
+        .mapToInt(PublishAckReasonCode::getValue)
         .map(value -> Byte.toUnsignedInt((byte) value))
         .max()
         .orElse(0);
 
-    var values = new PublishReceivedReasonCode[maxId + 1];
+    var values = new PublishAckReasonCode[maxId + 1];
 
     for (var value : values()) {
       values[Byte.toUnsignedInt(value.value)] = value;
@@ -68,7 +70,7 @@ public enum PublishReceivedReasonCode {
     VALUES = values;
   }
 
-  public static PublishReceivedReasonCode of(int index) {
+  public static PublishAckReasonCode of(int index) {
     return ObjectUtils.notNull(
         VALUES[index],
         index,

@@ -1,4 +1,4 @@
-package javasabr.mqtt.legacy.model.reason.code;
+package javasabr.mqtt.model.reason.code;
 
 import java.util.stream.Stream;
 import javasabr.rlib.common.util.ObjectUtils;
