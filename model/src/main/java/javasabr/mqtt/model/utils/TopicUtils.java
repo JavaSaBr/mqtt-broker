@@ -1,8 +1,8 @@
-package javasabr.mqtt.legacy.util;
+package javasabr.mqtt.model.utils;
 
-import javasabr.mqtt.legacy.model.topic.SharedTopicFilter;
-import javasabr.mqtt.legacy.model.topic.TopicFilter;
-import javasabr.mqtt.legacy.model.topic.TopicName;
+import javasabr.mqtt.model.topic.SharedTopicFilter;
+import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.TopicName;
 import org.springframework.util.StringUtils;
 
 public class TopicUtils {

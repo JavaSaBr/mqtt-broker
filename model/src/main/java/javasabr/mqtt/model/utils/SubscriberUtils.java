@@ -1,9 +1,9 @@
-package javasabr.mqtt.legacy.util;
+package javasabr.mqtt.model.utils;
 
-import javasabr.mqtt.legacy.model.SharedSubscriber;
-import javasabr.mqtt.legacy.model.SingleSubscriber;
-import javasabr.mqtt.legacy.model.Subscriber;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.network.MqttClient;
+import javasabr.mqtt.model.subscriber.SharedSubscriber;
+import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.Subscriber;
 import org.jspecify.annotations.Nullable;
 
 public class SubscriberUtils {
