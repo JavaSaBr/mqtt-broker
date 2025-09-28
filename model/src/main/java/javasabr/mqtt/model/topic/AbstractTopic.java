@@ -1,8 +1,7 @@
-package javasabr.mqtt.legacy.model.topic;
+package javasabr.mqtt.model.topic;
 
-import static javasabr.mqtt.legacy.util.TopicUtils.splitTopic;
-
-import javasabr.mqtt.legacy.util.DebugUtils;
+import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.model.utils.TopicUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -20,15 +19,15 @@ public abstract class AbstractTopic {
   private final String rawTopic;
   private final int length;
 
-  AbstractTopic() {
+  protected AbstractTopic() {
     length = 0;
     segments = EMPTY_ARRAY;
     rawTopic = EMPTY;
   }
 
-  AbstractTopic(String topicName) {
+  protected AbstractTopic(String topicName) {
     length = topicName.length();
-    segments = splitTopic(topicName);
+    segments = TopicUtils.splitTopic(topicName);
     rawTopic = topicName;
   }
 

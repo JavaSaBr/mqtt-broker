@@ -1,4 +1,4 @@
-package javasabr.mqtt.legacy.model.topic;
+package javasabr.mqtt.model.topic;
 
 import lombok.Getter;
 

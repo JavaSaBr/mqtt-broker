@@ -1,18 +1,15 @@
-package javasabr.mqtt.legacy.model.topic;
+package javasabr.mqtt.model.topic;
 
-import static javasabr.mqtt.legacy.util.TopicUtils.MULTI_LEVEL_WILDCARD;
-import static javasabr.mqtt.legacy.util.TopicUtils.SINGLE_LEVEL_WILDCARD;
-import static javasabr.mqtt.legacy.util.TopicUtils.isShared;
-
-import javasabr.mqtt.legacy.model.QoS;
-import javasabr.mqtt.legacy.model.SharedSubscriber;
-import javasabr.mqtt.legacy.model.SingleSubscriber;
-import javasabr.mqtt.legacy.model.SubscribeTopicFilter;
-import javasabr.mqtt.legacy.model.Subscriber;
-import javasabr.mqtt.legacy.network.client.MqttClient;
-import javasabr.mqtt.legacy.util.SubscriberUtils;
+import javasabr.mqtt.model.QoS;
 import java.util.Objects;
 import java.util.function.Supplier;
+import javasabr.mqtt.model.network.MqttClient;
+import javasabr.mqtt.model.subscriber.SharedSubscriber;
+import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.model.utils.SubscriberUtils;
+import javasabr.mqtt.model.utils.TopicUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
@@ -33,7 +30,7 @@ public class TopicSubscribers {
       LockableArray<Subscriber> subscribers,
       MqttClient client,
       SubscribeTopicFilter subscribe) {
-    if (isShared(subscribe.getTopicFilter())) {
+    if (TopicUtils.isShared(subscribe.getTopicFilter())) {
       addSharedSubscriber(subscribers, client, subscribe);
     } else {
       addSingleSubscriber(subscribers, client, subscribe);
@@ -67,7 +64,7 @@ public class TopicSubscribers {
   }
 
   private static boolean removeSubscriber(LockableArray<Subscriber> subscribers, TopicFilter topic, MqttClient client) {
-    return isShared(topic)
+    return TopicUtils.isShared(topic)
            ? removeSharedSubscriber(subscribers, ((SharedTopicFilter) topic).getGroup(), client)
            : removeSingleSubscriber(subscribers, client);
   }
@@ -239,8 +236,8 @@ public class TopicSubscribers {
   private void processLevel(int level, String segment, TopicName topicName, MutableArray<SingleSubscriber> result) {
     var nextLevel = level + 1;
     processSegment(nextLevel, segment, topicName, result);
-    processSegment(nextLevel, SINGLE_LEVEL_WILDCARD, topicName, result);
-    processSegment(nextLevel, MULTI_LEVEL_WILDCARD, topicName, result);
+    processSegment(nextLevel, TopicUtils.SINGLE_LEVEL_WILDCARD, topicName, result);
+    processSegment(nextLevel, TopicUtils.MULTI_LEVEL_WILDCARD, topicName, result);
   }
 
   private void processSegment(
