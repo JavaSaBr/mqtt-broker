@@ -1,6 +1,6 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model;
 
-import javasabr.mqtt.legacy.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

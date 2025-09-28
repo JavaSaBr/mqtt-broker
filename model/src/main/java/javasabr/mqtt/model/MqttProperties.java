@@ -1,6 +1,6 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model;
 
-public interface MqttPropertyConstants {
+public interface MqttProperties {
 
   QoS MAXIMUM_QOS_DEFAULT = QoS.EXACTLY_ONCE;
 

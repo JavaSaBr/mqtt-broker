@@ -1,4 +1,4 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model;
 
 public enum SubscribeRetainHandling {
   /**
