@@ -1,3 +1,0 @@
-moduleName=test-specification
-moduleVersion=1.0
-extensionClasses=javasabr.mqtt.legacy.extension.SpecificationExtensions
