@@ -5,6 +5,6 @@ rootProject.name = 'MQTT-Broker'
 include(":base")
 include(":model")
 include(":network")
+include(":service")
 include(":application")
-include(":legacy")
 include(":test-support")

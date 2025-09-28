@@ -3,6 +3,7 @@ apply from: "$rootDir/gradle/configure-java.gradle"
 
 dependencies {
   api libs.gson
+  api libs.project.reactor.core
   api libs.rlib.collections
   testImplementation projects.testSupport
 }
