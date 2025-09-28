@@ -1,4 +1,4 @@
-package javasabr.mqtt.legacy.model.data.type;
+package javasabr.mqtt.model.data.type;
 
 public enum PacketDataType {
   BYTE,
