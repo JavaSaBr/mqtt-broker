@@ -1,6 +1,6 @@
-package javasabr.mqtt.legacy.config;
+package javasabr.mqtt.model.network.connection;
 
-import javasabr.mqtt.legacy.model.QoS;
+import javasabr.mqtt.model.QoS;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

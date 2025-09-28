@@ -2,16 +2,17 @@ package javasabr.mqtt.legacy.config;
 
 import javasabr.mqtt.legacy.handler.client.MqttClientReleaseHandler;
 import javasabr.mqtt.legacy.handler.packet.in.PacketInHandler;
-import javasabr.mqtt.legacy.model.MqttPropertyConstants;
-import javasabr.mqtt.legacy.model.QoS;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.legacy.network.MqttConnection;
 import javasabr.mqtt.legacy.network.client.ExternalMqttClient;
 import javasabr.mqtt.legacy.network.client.InternalMqttClient;
-import javasabr.mqtt.legacy.network.client.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.model.network.MqttClient.UnsafeMqttClient;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import javasabr.mqtt.model.network.connection.MqttConnectionConfig;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.NetworkFactory;
@@ -156,47 +157,47 @@ public class MqttNetworkConfig {
         env.getProperty(
             "mqtt.external.connection.max.packet.size",
             int.class,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT),
+            MqttProperties.MAXIMUM_PACKET_SIZE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.min.keep.alive",
             int.class,
-            MqttPropertyConstants.SERVER_KEEP_ALIVE_DEFAULT),
+            MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.receive.maximum",
             int.class,
-            MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT),
+            MqttProperties.RECEIVE_MAXIMUM_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.topic.alias.maximum",
             int.class,
-            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED),
+            MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT),
+            MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.keep.alive.enabled",
             boolean.class,
-            MqttPropertyConstants.KEEP_ALIVE_ENABLED_DEFAULT),
+            MqttProperties.KEEP_ALIVE_ENABLED_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.sessions.enabled",
             boolean.class,
-            MqttPropertyConstants.SESSIONS_ENABLED_DEFAULT),
+            MqttProperties.SESSIONS_ENABLED_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.retain.available",
             boolean.class,
-            MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT),
+            MqttProperties.RETAIN_AVAILABLE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
-            MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
+            MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.subscription.id.available",
             boolean.class,
-            MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT),
+            MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,
-            MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT));
+            MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT));
   }
 
   @Bean
@@ -206,47 +207,47 @@ public class MqttNetworkConfig {
         env.getProperty(
             "mqtt.internal.connection.max.packet.size",
             int.class,
-            MqttPropertyConstants.MAXIMUM_PACKET_SIZE_DEFAULT),
+            MqttProperties.MAXIMUM_PACKET_SIZE_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.min.keep.alive",
             int.class,
-            MqttPropertyConstants.SERVER_KEEP_ALIVE_DEFAULT),
+            MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.receive.maximum",
             int.class,
-            MqttPropertyConstants.RECEIVE_MAXIMUM_DEFAULT),
+            MqttProperties.RECEIVE_MAXIMUM_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.topic.alias.maximum",
             int.class,
-            MqttPropertyConstants.TOPIC_ALIAS_MAXIMUM_DISABLED),
+            MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED),
         env.getProperty(
             "mqtt.internal.connection.default.session.expiration.time",
             long.class,
-            MqttPropertyConstants.SESSION_EXPIRY_INTERVAL_DEFAULT),
+            MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.keep.alive.enabled",
             boolean.class,
-            MqttPropertyConstants.KEEP_ALIVE_ENABLED_DEFAULT),
+            MqttProperties.KEEP_ALIVE_ENABLED_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.sessions.enabled",
             boolean.class,
-            MqttPropertyConstants.SESSIONS_ENABLED_DEFAULT),
+            MqttProperties.SESSIONS_ENABLED_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.retain.available",
             boolean.class,
-            MqttPropertyConstants.RETAIN_AVAILABLE_DEFAULT),
+            MqttProperties.RETAIN_AVAILABLE_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.wildcard.subscription.available",
             boolean.class,
-            MqttPropertyConstants.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
+            MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.subscription.id.available",
             boolean.class,
-            MqttPropertyConstants.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT),
+            MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT),
         env.getProperty(
             "mqtt.internal.connection.shared.subscription.available",
             boolean.class,
-            MqttPropertyConstants.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT));
+            MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT));
   }
 
   private ChannelFactory externalConnectionFactory(
