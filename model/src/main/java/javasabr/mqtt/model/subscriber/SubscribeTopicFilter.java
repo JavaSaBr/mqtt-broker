@@ -1,8 +1,10 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model.subscriber;
 
-import static javasabr.mqtt.legacy.util.TopicUtils.buildTopicFilter;
+import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
-import javasabr.mqtt.legacy.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.SubscribeRetainHandling;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

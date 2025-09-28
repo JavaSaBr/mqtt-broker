@@ -1,6 +1,7 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.network.MqttClient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,3 +1,3 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model.subscriber;
 
 public sealed interface Subscriber permits SingleSubscriber, SharedSubscriber {}

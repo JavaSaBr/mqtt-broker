@@ -1,7 +1,7 @@
-package javasabr.mqtt.legacy.model;
+package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.legacy.model.topic.SharedTopicFilter;
-import javasabr.mqtt.legacy.network.client.MqttClient;
+import javasabr.mqtt.model.network.MqttClient;
+import javasabr.mqtt.model.topic.SharedTopicFilter;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.rlib.collections.array.Array;
