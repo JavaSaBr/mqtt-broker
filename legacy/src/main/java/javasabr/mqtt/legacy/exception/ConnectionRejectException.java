@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.exception;
 
-import javasabr.mqtt.legacy.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import lombok.Getter;
 
 public class ConnectionRejectException extends MqttException {
