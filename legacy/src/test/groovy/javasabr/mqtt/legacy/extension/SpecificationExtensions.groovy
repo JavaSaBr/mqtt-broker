@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.extension
 
-import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket
-import javasabr.mqtt.legacy.util.MqttDataUtils
+import javasabr.mqtt.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.data.type.PacketDataType
 import javasabr.mqtt.model.data.type.StringPair

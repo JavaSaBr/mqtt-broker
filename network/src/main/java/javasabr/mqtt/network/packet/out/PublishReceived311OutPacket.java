@@ -1,0 +1,32 @@
+package javasabr.mqtt.network.packet.out;
+
+import javasabr.mqtt.network.packet.PacketType;
+import java.nio.ByteBuffer;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Publish received (QoS 2 delivery part 1).
+ */
+@RequiredArgsConstructor
+public class PublishReceived311OutPacket extends MqttWritablePacket {
+
+  private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RECEIVED.ordinal();
+
+  private final int packetId;
+
+  @Override
+  public int getExpectedLength() {
+    return 2;
+  }
+
+  @Override
+  protected byte getPacketType() {
+    return PACKET_TYPE;
+  }
+
+  @Override
+  protected void writeVariableHeader(ByteBuffer buffer) {
+    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718050
+    writeShort(buffer, packetId);
+  }
+}

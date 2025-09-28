@@ -3,7 +3,7 @@ package javasabr.mqtt.legacy.integration
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
-import javasabr.mqtt.legacy.network.MqttConnection
+import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.legacy.integration.config.MqttBrokerTestConfig
 import javasabr.mqtt.legacy.mock.MqttMockClient
 import javasabr.mqtt.model.MqttConnectionConfig
@@ -16,7 +16,7 @@ import spock.lang.Specification
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 
-import static javasabr.mqtt.legacy.network.MqttClient.*
+import static javasabr.mqtt.network.MqttClient.*
 
 @SpringJUnitConfig(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {

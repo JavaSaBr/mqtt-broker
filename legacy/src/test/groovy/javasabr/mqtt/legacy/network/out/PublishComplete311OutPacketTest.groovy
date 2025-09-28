@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.PublishCompleteInPacket
-import javasabr.mqtt.legacy.network.packet.out.PublishComplete311OutPacket
+import javasabr.mqtt.network.packet.in.PublishCompleteInPacket
+import javasabr.mqtt.network.packet.out.PublishComplete311OutPacket
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils

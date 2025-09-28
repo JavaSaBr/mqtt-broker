@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.SubscribeAckInPacket
-import javasabr.mqtt.legacy.network.packet.out.SubscribeAck311OutPacket
+import javasabr.mqtt.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.network.packet.out.SubscribeAck311OutPacket
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils

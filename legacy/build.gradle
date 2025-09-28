@@ -9,6 +9,7 @@ apply from: "$rootDir/gradle/configure-java.gradle"
 dependencies {
   implementation projects.model
   implementation projects.base
+  implementation projects.network
 
   implementation libs.rlib.network
   implementation libs.rlib.logger.slf4j

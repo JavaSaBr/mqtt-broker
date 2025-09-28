@@ -3,8 +3,8 @@ package javasabr.mqtt.legacy.handler.publish.in;
 import javasabr.mqtt.legacy.handler.publish.out.PublishOutHandler;
 import javasabr.mqtt.model.ActionResult;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
-import javasabr.mqtt.legacy.network.MqttClient;
-import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.legacy.service.SubscriptionService;
 
 public class Qos1PublishInHandler extends AbstractPublishInHandler {

@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.network.packet.in.DisconnectInPacket
+import javasabr.mqtt.network.packet.in.DisconnectInPacket
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.rlib.collections.array.Array

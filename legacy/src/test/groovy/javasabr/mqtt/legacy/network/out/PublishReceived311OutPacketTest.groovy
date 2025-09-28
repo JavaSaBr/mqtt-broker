@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.PublishReceivedInPacket
-import javasabr.mqtt.legacy.network.packet.out.PublishReceived311OutPacket
+import javasabr.mqtt.network.packet.in.PublishReceivedInPacket
+import javasabr.mqtt.network.packet.out.PublishReceived311OutPacket
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
 import javasabr.rlib.collections.array.Array

@@ -2,7 +2,7 @@ package javasabr.mqtt.legacy.integration.config
 
 import javasabr.mqtt.legacy.config.MqttBrokerConfig
 import javasabr.mqtt.legacy.config.MqttNetworkConfig
-import javasabr.mqtt.legacy.network.MqttConnection
+import javasabr.mqtt.network.MqttConnection
 import javasabr.rlib.network.server.ServerNetwork
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean

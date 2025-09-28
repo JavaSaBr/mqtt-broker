@@ -1,9 +1,9 @@
 package javasabr.mqtt.legacy.handler.publish.out;
 
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.legacy.network.MqttClient;
-import javasabr.mqtt.legacy.network.packet.HasPacketId;
-import javasabr.mqtt.legacy.network.packet.in.PublishAckInPacket;
+import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.packet.HasPacketId;
+import javasabr.mqtt.network.packet.in.PublishAckInPacket;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -4,8 +4,8 @@ import javasabr.mqtt.legacy.handler.publish.out.PublishOutHandler;
 import javasabr.mqtt.model.ActionResult;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.legacy.network.MqttClient;
-import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.legacy.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 

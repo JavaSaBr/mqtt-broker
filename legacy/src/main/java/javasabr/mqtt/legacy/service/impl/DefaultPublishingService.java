@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.service.impl;
 
 import javasabr.mqtt.legacy.handler.publish.in.PublishInHandler;
-import javasabr.mqtt.legacy.network.MqttClient;
-import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.legacy.service.PublishingService;
 import lombok.RequiredArgsConstructor;
 

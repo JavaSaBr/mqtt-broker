@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.packet.in.ConnectAckInPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS

@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.AuthenticationInPacket
-import javasabr.mqtt.legacy.network.packet.out.Authentication5OutPacket
+import javasabr.mqtt.network.packet.in.AuthenticationInPacket
+import javasabr.mqtt.network.packet.out.Authentication5OutPacket
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode
 import javasabr.rlib.common.util.BufferUtils
 

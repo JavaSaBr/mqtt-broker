@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.network.packet.in.PublishReleaseInPacket
+import javasabr.mqtt.network.packet.in.PublishReleaseInPacket
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
 import javasabr.rlib.collections.array.Array

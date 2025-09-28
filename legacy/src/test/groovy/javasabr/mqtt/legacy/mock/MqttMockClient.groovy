@@ -1,14 +1,14 @@
 package javasabr.mqtt.legacy.mock
 
-import javasabr.mqtt.legacy.network.MqttConnection
-import javasabr.mqtt.legacy.network.packet.PacketType
-import javasabr.mqtt.legacy.network.packet.in.ConnectAckInPacket
-import javasabr.mqtt.legacy.network.packet.in.MqttReadablePacket
-import javasabr.mqtt.legacy.network.packet.in.PublishInPacket
-import javasabr.mqtt.legacy.network.packet.in.PublishReleaseInPacket
-import javasabr.mqtt.legacy.network.packet.in.SubscribeAckInPacket
-import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket
-import javasabr.mqtt.legacy.util.MqttDataUtils
+import javasabr.mqtt.network.MqttConnection
+import javasabr.mqtt.network.packet.PacketType
+import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.packet.in.MqttReadablePacket
+import javasabr.mqtt.network.packet.in.PublishInPacket
+import javasabr.mqtt.network.packet.in.PublishReleaseInPacket
+import javasabr.mqtt.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.rlib.common.util.NumberUtils
 
 import java.nio.ByteBuffer

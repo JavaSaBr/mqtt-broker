@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.network.packet.in.PublishAckInPacket
+import javasabr.mqtt.network.packet.in.PublishAckInPacket
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.rlib.collections.array.Array

@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.PublishReceivedInPacket
-import javasabr.mqtt.legacy.network.packet.out.PublishReceived5OutPacket
+import javasabr.mqtt.network.packet.in.PublishReceivedInPacket
+import javasabr.mqtt.network.packet.out.PublishReceived5OutPacket
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
 import javasabr.rlib.common.util.BufferUtils
 

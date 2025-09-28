@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.MqttClient
+import javasabr.mqtt.network.MqttClient
 import javasabr.mqtt.legacy.network.NetworkUnitSpecification
 import spock.lang.Shared
 

@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.PublishReleaseInPacket
-import javasabr.mqtt.legacy.network.packet.out.PublishRelease311OutPacket
+import javasabr.mqtt.network.packet.in.PublishReleaseInPacket
+import javasabr.mqtt.network.packet.out.PublishRelease311OutPacket
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
 import javasabr.rlib.collections.array.Array

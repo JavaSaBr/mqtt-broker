@@ -6,9 +6,9 @@ import static java.lang.Byte.toUnsignedInt;
 
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.legacy.network.packet.in.SubscribeInPacket;
-import javasabr.mqtt.legacy.network.packet.out.MqttWritablePacket;
+import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.packet.in.SubscribeInPacket;
+import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.legacy.service.SubscriptionService;
 import java.util.Set;
 import javasabr.rlib.collections.array.Array;

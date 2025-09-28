@@ -37,6 +37,7 @@ moquette-broker = "0.17"
 
 [libraries]
 rlib-network = { module = "javasabr.rlib:rlib-network", version.ref = "rlib" }
+rlib-logger-api = { module = "javasabr.rlib:rlib-logger-api", version.ref = "rlib" }
 rlib-logger-slf4j = { module = "javasabr.rlib:rlib-logger-slf4j", version.ref = "rlib" }
 rlib-collections = { module = "javasabr.rlib:rlib-collections", version.ref = "rlib" }
 springboot-starter-core = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springboot" }

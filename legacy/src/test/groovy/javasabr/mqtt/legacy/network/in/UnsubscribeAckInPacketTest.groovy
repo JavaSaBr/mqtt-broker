@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.network.packet.in.UnsubscribeAckInPacket
+import javasabr.mqtt.network.packet.in.UnsubscribeAckInPacket
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.rlib.collections.array.Array

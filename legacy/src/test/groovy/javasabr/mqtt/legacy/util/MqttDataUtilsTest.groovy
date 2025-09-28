@@ -1,6 +1,7 @@
 package javasabr.mqtt.legacy.util
 
 import javasabr.mqtt.legacy.UnitSpecification
+import javasabr.mqtt.network.utils.MqttDataUtils
 
 import java.nio.ByteBuffer
 

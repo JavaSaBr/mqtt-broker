@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.SubscribeInPacket
-import javasabr.mqtt.legacy.network.packet.out.Subscribe5OutPacket
+import javasabr.mqtt.network.packet.in.SubscribeInPacket
+import javasabr.mqtt.network.packet.out.Subscribe5OutPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.rlib.common.util.BufferUtils
 

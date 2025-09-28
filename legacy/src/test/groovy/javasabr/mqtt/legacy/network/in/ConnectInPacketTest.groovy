@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.exception.MalformedPacketMqttException
-import javasabr.mqtt.legacy.network.packet.in.ConnectInPacket
+import javasabr.mqtt.model.exception.MalformedPacketMqttException
+import javasabr.mqtt.network.packet.in.ConnectInPacket
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.PacketProperty
 import javasabr.rlib.common.util.ArrayUtils

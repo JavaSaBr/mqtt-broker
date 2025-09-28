@@ -11,13 +11,13 @@ import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 import static javasabr.mqtt.legacy.util.ReactorUtils.ifTrue;
 
-import javasabr.mqtt.legacy.exception.ConnectionRejectException;
-import javasabr.mqtt.legacy.exception.MalformedPacketMqttException;
-import javasabr.mqtt.legacy.network.MqttSession;
+import javasabr.mqtt.model.exception.ConnectionRejectException;
+import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.legacy.network.packet.in.ConnectInPacket;
+import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.packet.in.ConnectInPacket;
 import javasabr.mqtt.legacy.service.AuthenticationService;
 import javasabr.mqtt.legacy.service.ClientIdRegistry;
 import javasabr.mqtt.legacy.service.MqttSessionService;

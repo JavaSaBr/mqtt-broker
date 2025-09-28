@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.service;
 
-import javasabr.mqtt.legacy.network.MqttClient;
-import javasabr.mqtt.legacy.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.packet.in.PublishInPacket;
 
 public interface PublishingService {
 

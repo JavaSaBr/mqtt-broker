@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.UnsubscribeAckInPacket
-import javasabr.mqtt.legacy.network.packet.out.UnsubscribeAck5OutPacket
+import javasabr.mqtt.network.packet.in.UnsubscribeAckInPacket
+import javasabr.mqtt.network.packet.out.UnsubscribeAck5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeAck5OutPacketTest extends BaseOutPacketTest {

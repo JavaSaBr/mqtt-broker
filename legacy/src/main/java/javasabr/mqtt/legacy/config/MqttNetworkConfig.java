@@ -1,13 +1,13 @@
 package javasabr.mqtt.legacy.config;
 
-import javasabr.mqtt.legacy.handler.client.MqttClientReleaseHandler;
-import javasabr.mqtt.legacy.handler.packet.in.PacketInHandler;
+import javasabr.mqtt.network.handler.client.MqttClientReleaseHandler;
+import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.legacy.network.MqttConnection;
-import javasabr.mqtt.legacy.network.client.ExternalMqttClient;
-import javasabr.mqtt.legacy.network.client.InternalMqttClient;
-import javasabr.mqtt.legacy.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.client.ExternalMqttClient;
+import javasabr.mqtt.network.client.InternalMqttClient;
+import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.BiFunction;

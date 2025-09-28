@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.network.in
 
-import javasabr.mqtt.legacy.network.packet.in.PublishCompleteInPacket
+import javasabr.mqtt.network.packet.in.PublishCompleteInPacket
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.rlib.collections.array.Array

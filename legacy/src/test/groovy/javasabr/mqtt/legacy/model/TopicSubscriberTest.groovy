@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.model
 
-import javasabr.mqtt.legacy.network.MqttClient
+import javasabr.mqtt.network.MqttClient
 import javasabr.mqtt.legacy.network.NetworkUnitSpecification
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter

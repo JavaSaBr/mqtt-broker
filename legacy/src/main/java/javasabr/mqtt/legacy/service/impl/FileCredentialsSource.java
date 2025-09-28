@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.service.impl;
 
-import javasabr.mqtt.legacy.exception.CredentialsSourceException;
+import javasabr.mqtt.model.exception.CredentialsSourceException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;

@@ -1,10 +1,10 @@
 package javasabr.mqtt.legacy.config;
 
 import javasabr.mqtt.legacy.handler.client.DefaultMqttClientReleaseHandler;
-import javasabr.mqtt.legacy.handler.client.MqttClientReleaseHandler;
+import javasabr.mqtt.network.handler.client.MqttClientReleaseHandler;
 import javasabr.mqtt.legacy.handler.packet.in.ConnectInPacketHandler;
 import javasabr.mqtt.legacy.handler.packet.in.DisconnetInPacketHandler;
-import javasabr.mqtt.legacy.handler.packet.in.PacketInHandler;
+import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
 import javasabr.mqtt.legacy.handler.packet.in.PublishAckInPacketHandler;
 import javasabr.mqtt.legacy.handler.packet.in.PublishCompleteInPacketHandler;
 import javasabr.mqtt.legacy.handler.packet.in.PublishInPacketHandler;
@@ -20,7 +20,7 @@ import javasabr.mqtt.legacy.handler.publish.out.PublishOutHandler;
 import javasabr.mqtt.legacy.handler.publish.out.Qos0PublishOutHandler;
 import javasabr.mqtt.legacy.handler.publish.out.Qos1PublishOutHandler;
 import javasabr.mqtt.legacy.handler.publish.out.Qos2PublishOutHandler;
-import javasabr.mqtt.legacy.network.packet.PacketType;
+import javasabr.mqtt.network.packet.PacketType;
 import javasabr.mqtt.legacy.service.AuthenticationService;
 import javasabr.mqtt.legacy.service.ClientIdRegistry;
 import javasabr.mqtt.legacy.service.CredentialSource;

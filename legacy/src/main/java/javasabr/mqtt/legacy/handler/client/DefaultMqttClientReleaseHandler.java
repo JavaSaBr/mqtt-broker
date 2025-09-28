@@ -1,6 +1,6 @@
 package javasabr.mqtt.legacy.handler.client;
 
-import javasabr.mqtt.legacy.network.client.ExternalMqttClient;
+import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.legacy.service.ClientIdRegistry;
 import javasabr.mqtt.legacy.service.MqttSessionService;
 import javasabr.mqtt.legacy.service.SubscriptionService;

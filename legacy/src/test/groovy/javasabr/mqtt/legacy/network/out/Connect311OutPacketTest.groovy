@@ -1,7 +1,7 @@
 package javasabr.mqtt.legacy.network.out
 
-import javasabr.mqtt.legacy.network.packet.in.ConnectInPacket
-import javasabr.mqtt.legacy.network.packet.out.Connect311OutPacket
+import javasabr.mqtt.network.packet.in.ConnectInPacket
+import javasabr.mqtt.network.packet.out.Connect311OutPacket
 import javasabr.mqtt.model.QoS
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
