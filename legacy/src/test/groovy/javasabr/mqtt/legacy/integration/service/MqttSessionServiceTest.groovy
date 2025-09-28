@@ -1,8 +1,8 @@
 package javasabr.mqtt.legacy.integration.service
 
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import javasabr.mqtt.legacy.service.ClientIdRegistry
-import javasabr.mqtt.legacy.service.MqttSessionService
+import javasabr.mqtt.service.ClientIdRegistry
+import javasabr.mqtt.service.MqttSessionService
 import javasabr.mqtt.legacy.integration.IntegrationSpecification
 import org.springframework.beans.factory.annotation.Autowired
 

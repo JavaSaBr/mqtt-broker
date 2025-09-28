@@ -13,7 +13,7 @@ import javasabr.mqtt.network.packet.out.PublishReceived311OutPacket
 import javasabr.mqtt.network.packet.out.PublishReceived5OutPacket
 import javasabr.mqtt.network.packet.out.Subscribe311OutPacket
 import javasabr.mqtt.network.packet.out.Subscribe5OutPacket
-import javasabr.mqtt.legacy.service.MqttSessionService
+import javasabr.mqtt.service.MqttSessionService
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
