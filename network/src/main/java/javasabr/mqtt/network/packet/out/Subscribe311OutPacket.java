@@ -18,7 +18,7 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
   private final int packetId;
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

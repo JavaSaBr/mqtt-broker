@@ -12,12 +12,14 @@ import java.util.EnumSet;
 import java.util.Set;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 /**
  * Publish received (QoS 2 delivery part 1).
  */
 @Getter
-public class PublishReceivedInPacket extends MqttReadablePacket implements HasPacketId {
+@Accessors(fluent = true, chain = false)
+public class PublishReceivedInPacket extends MqttReadablePacket implements HasPacketId<MqttConnection> {
 
   private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RECEIVED.ordinal();
 

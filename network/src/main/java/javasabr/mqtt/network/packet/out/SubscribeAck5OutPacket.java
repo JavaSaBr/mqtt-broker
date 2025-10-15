@@ -57,11 +57,6 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
-    return -1;
-  }
-
-  @Override
   protected void writeProperties(ByteBuffer buffer) {
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901174

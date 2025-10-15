@@ -9,6 +9,7 @@ import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -298,7 +299,7 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
+  public int expectedLength(MqttConnection connection) {
     return -1;
   }
 

@@ -20,7 +20,7 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
   @Override
   public void handle(MqttClient client, PublishInPacket packet) {
 
-    var session = client.getSession();
+    var session = client.session();
 
     // it means this client was already closed
     if (session == null) {
@@ -42,7 +42,7 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
   protected void handleResult(MqttClient client, PublishInPacket packet, ActionResult result) {
 
     // because it was checked
-    final MqttSession session = client.getSession();
+    final MqttSession session = client.session();
 
     // it means this client was already closed
     if (session == null) {
@@ -66,7 +66,7 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
     session.registerInPublish(packet, this, packet.getPacketId());
 
     client.send(client
-        .getPacketOutFactory()
+        .packetOutFactory()
         .newPublishReceived(packet.getPacketId(), reasonCode));
   }
 
@@ -77,8 +77,8 @@ public class Qos2PublishInHandler extends AbstractPublishInHandler implements Mq
       throw new IllegalStateException("Unexpected response " + response);
     }
 
-    var packetOutFactory = client.getPacketOutFactory();
-    client.send(packetOutFactory.newPublishCompleted(response.getPacketId(), PublishCompletedReasonCode.SUCCESS));
+    var packetOutFactory = client.packetOutFactory();
+    client.send(packetOutFactory.newPublishCompleted(response.packetId(), PublishCompletedReasonCode.SUCCESS));
 
     return true;
   }

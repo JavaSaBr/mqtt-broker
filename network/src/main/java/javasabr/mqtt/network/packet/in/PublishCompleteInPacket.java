@@ -11,12 +11,14 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
 @Getter
-public class PublishCompleteInPacket extends MqttReadablePacket implements HasPacketId {
+@Accessors(fluent = true, chain = false)
+public class PublishCompleteInPacket extends MqttReadablePacket implements HasPacketId<MqttConnection> {
 
   private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_COMPLETED.ordinal();
 

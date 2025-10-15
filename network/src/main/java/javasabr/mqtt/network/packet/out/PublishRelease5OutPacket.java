@@ -6,6 +6,7 @@ import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -50,7 +51,7 @@ public class PublishRelease5OutPacket extends PublishRelease311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
+  public int expectedLength(MqttConnection connection) {
     return -1;
   }
 

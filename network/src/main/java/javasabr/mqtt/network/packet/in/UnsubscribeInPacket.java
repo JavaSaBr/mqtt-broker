@@ -54,7 +54,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
     }
 
     while (buffer.hasRemaining()) {
-      topicFilters.add(buildTopicFilter(readString(buffer)));
+      topicFilters.add(buildTopicFilter(readString(buffer, Integer.MAX_VALUE)));
     }
   }
 

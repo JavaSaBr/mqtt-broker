@@ -1,5 +1,6 @@
 package javasabr.mqtt.network.packet.out;
 
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
 import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +16,12 @@ public class PublishReceived311OutPacket extends MqttWritablePacket {
   private final int packetId;
 
   @Override
-  public int getExpectedLength() {
+  public int expectedLength(MqttConnection connection) {
     return 2;
   }
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

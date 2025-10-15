@@ -48,7 +48,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

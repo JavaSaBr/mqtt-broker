@@ -9,7 +9,7 @@ public class PublishReleaseInPacketHandler extends AbstractPacketHandler<UnsafeM
 
   @Override
   protected void handleImpl(UnsafeMqttClient client, PublishReleaseInPacket packet) {
-    var session = client.getSession();
+    var session = client.session();
     if (session != null) {
       session.updateInPendingPacket(client, packet);
     }

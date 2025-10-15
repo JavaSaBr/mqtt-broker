@@ -145,13 +145,13 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       getConfig() >> deviceConnectionConfig
       getClient() >> Stub(UnsafeMqttClient) {
-        getConnectionConfig() >> deviceConnectionConfig
-        getSessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
-        getMaximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
-        getClientId() >> IntegrationSpecification.clientId
-        getKeepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        getTopicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+        connectionConfig() >> deviceConnectionConfig
+        sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
+        receiveMax() >> deviceConnectionConfig.getReceiveMaximum()
+        maximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
+        clientId() >> IntegrationSpecification.clientId
+        keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
+        topicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
       }
     }
   }
@@ -162,13 +162,13 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       getConfig() >> deviceConnectionConfig
       getClient() >> Stub(UnsafeMqttClient) {
-        getConnectionConfig() >> deviceConnectionConfig
-        getSessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
-        getMaximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
-        getClientId() >> IntegrationSpecification.clientId
-        getKeepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        getTopicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+        connectionConfig() >> deviceConnectionConfig
+        sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
+        receiveMax() >> deviceConnectionConfig.getReceiveMaximum()
+        maximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
+        clientId() >> IntegrationSpecification.clientId
+        keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
+        topicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
       }
     }
   }

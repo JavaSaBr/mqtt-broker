@@ -25,7 +25,6 @@ import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
 
 @CustomLog
@@ -40,8 +39,8 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
   @Override
   protected void handleImpl(UnsafeMqttClient client, ConnectInPacket packet) {
 
-    var connection = client.getConnection();
-    connection.setMqttVersion(packet.getMqttVersion());
+    var connection = client.connection();
+    connection.mqttVersion(packet.getMqttVersion());
 
     if (checkPacketException(client, packet)) {
       return;
@@ -61,12 +60,12 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     if (StringUtils.isNotEmpty(requestedClientId)) {
       return clientIdRegistry
           .register(requestedClientId)
-          .map(ifTrue(requestedClientId, client::setClientId));
+          .map(ifTrue(requestedClientId, client::clientId));
     } else {
 
       var mqttVersion = client
-          .getConnection()
-          .getMqttVersion();
+          .connection()
+          .mqttVersion();
 
       // we can't assign generated client if for mqtt version less than 5
       if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal()) {
@@ -77,7 +76,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
           .generate()
           .flatMap(newClientId -> clientIdRegistry
               .register(newClientId)
-              .map(ifTrue(newClientId, client::setClientId)));
+              .map(ifTrue(newClientId, client::clientId)));
     }
   }
 
@@ -85,14 +84,14 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
     if (packet.isCleanStart()) {
       return mqttSessionService
-          .create(client.getClientId())
+          .create(client.clientId())
           .flatMap(session -> onConnected(client, packet, session, false));
     } else {
       return mqttSessionService
-          .restore(client.getClientId())
+          .restore(client.clientId())
           .flatMap(session -> onConnected(client, packet, session, true))
           .switchIfEmpty(Mono.defer(() -> mqttSessionService
-              .create(client.getClientId())
+              .create(client.clientId())
               .flatMap(session -> onConnected(client, packet, session, false))));
     }
   }
@@ -103,13 +102,13 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
       MqttSession session,
       boolean sessionRestored) {
 
-    var connection = client.getConnection();
-    var config = connection.getConfig();
+    var connection = client.connection();
+    var config = connection.config();
 
     // if it was closed in parallel
-    if (connection.isClosed() && config.isSessionsEnabled()) {
+    if (connection.closed() && config.isSessionsEnabled()) {
       // store the session again
-      return mqttSessionService.store(client.getClientId(), session, config.getDefaultSessionExpiryInterval());
+      return mqttSessionService.store(client.clientId(), session, config.getDefaultSessionExpiryInterval());
     }
 
     // select result keep alive time
@@ -140,7 +139,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
                             ? TOPIC_ALIAS_MAXIMUM_DISABLED
                             : Math.min(packet.getTopicAliasMaximum(), config.getTopicAliasMaximum());
 
-    client.setSession(session);
+    client.session(session);
     client.configure(
         sessionExpiryInterval,
         receiveMax,
@@ -151,7 +150,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
         packet.isRequestProblemInformation());
 
     var connectAck = client
-        .getPacketOutFactory()
+        .packetOutFactory()
         .newConnectAck(
             client,
             ConnectAckReasonCode.SUCCESS,
@@ -171,7 +170,7 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
   private boolean onSentConnAck(UnsafeMqttClient client, MqttSession session, boolean result) {
 
     if (!result) {
-      log.warning(client.getClientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
+      log.warning(client.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
       return false;
     }
 

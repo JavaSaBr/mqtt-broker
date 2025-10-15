@@ -73,7 +73,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   public Mono<Boolean> store(String clientId, MqttSession session, long expiryInterval) {
 
     var unsafe = (UnsafeMqttSession) session;
-    unsafe.setExpirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
+    unsafe.expirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
     unsafe.onPersisted();
 
     storedSession
@@ -115,16 +115,16 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       MutableArray<UnsafeMqttSession> expired) {
     long time = System.currentTimeMillis();
     for (UnsafeMqttSession session : expired) {
-      if (session.getExpirationTime() <= time) {
+      if (session.expirationTime() <= time) {
         continue;
       }
 
-      UnsafeMqttSession removed = sessions.remove(session.getClientId());
-      log.debug(session.getClientId(), "Removed expired session for client:[%]"::formatted);
+      UnsafeMqttSession removed = sessions.remove(session.clientId());
+      log.debug(session.clientId(), "Removed expired session for client:[%]"::formatted);
 
       // if we already have new session under the same client id
       if (removed != null && removed != session) {
-        sessions.put(session.getClientId(), removed);
+        sessions.put(session.clientId(), removed);
       } else if (removed != null) {
         removed.clear();
       }
@@ -136,7 +136,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     var currentTime = System.currentTimeMillis();
 
     for (UnsafeMqttSession session : toCheck) {
-      if (session.getExpirationTime() > currentTime) {
+      if (session.expirationTime() > currentTime) {
         toRemove.add(session);
       }
     }

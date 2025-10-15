@@ -1,6 +1,7 @@
 package javasabr.mqtt.network.packet.out;
 
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
 import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
@@ -35,12 +36,12 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
   private final boolean sessionPresent;
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 
   @Override
-  public int getExpectedLength() {
+  public int expectedLength(MqttConnection connection) {
     return 2;
   }
 

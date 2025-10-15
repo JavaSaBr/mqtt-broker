@@ -246,7 +246,7 @@ public class ConnectInPacket extends MqttReadablePacket {
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718030
-    var protocolName = readString(buffer);
+    var protocolName = readString(buffer, Integer.MAX_VALUE);
     var protocolLevel = buffer.get();
 
     mqttVersion = MqttVersion.of(protocolName, protocolLevel);
@@ -310,14 +310,14 @@ public class ConnectInPacket extends MqttReadablePacket {
           If the Server rejects the ClientID it MAY respond to the CONNECT packet with a CONNACK using
           Reason Code 0x85 (Client Identifier not valid) and then it MUST close the Network Connection
          */
-    clientId = readString(buffer);
+    clientId = readString(buffer, Integer.MAX_VALUE);
 
     if (willFlag && mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal()) {
       readProperties(buffer, WILL_PROPERTIES);
     }
 
     if (willFlag) {
-      willTopic = readString(buffer);
+      willTopic = readString(buffer, Integer.MAX_VALUE);
     }
 
     if (willFlag) {
@@ -325,7 +325,7 @@ public class ConnectInPacket extends MqttReadablePacket {
     }
 
     if (hasUserName) {
-      username = readString(buffer);
+      username = readString(buffer, Integer.MAX_VALUE);
     }
 
     if (hasPassword) {

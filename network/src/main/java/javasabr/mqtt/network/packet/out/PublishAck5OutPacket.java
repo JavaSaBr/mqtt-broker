@@ -50,11 +50,6 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
-    return -1;
-  }
-
-  @Override
   protected boolean isPropertiesSupported() {
     return true;
   }

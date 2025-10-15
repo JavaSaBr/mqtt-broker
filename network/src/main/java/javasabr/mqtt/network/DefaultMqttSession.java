@@ -17,11 +17,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.extern.log4j.Log4j2;
+import lombok.experimental.Accessors;
 
 @CustomLog
 @ToString(of = "clientId")
 @EqualsAndHashCode(of = "clientId")
+@Accessors(fluent = true, chain = false)
 public class DefaultMqttSession implements UnsafeMqttSession {
 
   @Getter
@@ -49,7 +50,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
 
-    int packetId = response.getPacketId();
+    int packetId = response.packetId();
     PendingPublish pendingPublish;
 
     long stamp = pendingPublishes.readLock();
@@ -81,8 +82,9 @@ public class DefaultMqttSession implements UnsafeMqttSession {
   private final AtomicInteger packetIdGenerator;
   private final LockableArray<SubscribeTopicFilter> topicFilters;
 
-  private volatile @Getter
-  @Setter long expirationTime = -1;
+  @Getter
+  @Setter
+  private volatile long expirationTime = -1;
 
   public DefaultMqttSession(String clientId) {
     this.clientId = clientId;
@@ -106,7 +108,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public String getClientId() {
+  public String clientId() {
     return clientId;
   }
 

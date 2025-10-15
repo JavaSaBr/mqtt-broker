@@ -6,29 +6,28 @@ import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
 import javasabr.mqtt.network.packet.MqttPacketReader;
 import javasabr.mqtt.network.packet.MqttPacketWriter;
-import javasabr.mqtt.network.packet.in.MqttReadablePacket;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.Function;
 import javasabr.rlib.network.BufferAllocator;
-import javasabr.rlib.network.Connection;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.impl.AbstractConnection;
-import javasabr.rlib.network.packet.PacketReader;
-import javasabr.rlib.network.packet.PacketWriter;
+import javasabr.rlib.network.packet.NetworkPacketReader;
+import javasabr.rlib.network.packet.NetworkPacketWriter;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @CustomLog
-public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttWritablePacket> {
+@Accessors(fluent = true, chain = false)
+public class MqttConnection extends AbstractConnection<MqttConnection> {
 
   @Getter(AccessLevel.PROTECTED)
-  private final PacketReader packetReader;
+  private final NetworkPacketReader packetReader;
 
   @Getter(AccessLevel.PROTECTED)
-  private final PacketWriter packetWriter;
+  private final NetworkPacketWriter packetWriter;
 
   @Getter
   private final PacketInHandler[] packetHandlers;
@@ -47,7 +46,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
   private volatile MqttSession session;
 
   public MqttConnection(
-      Network<? extends Connection<MqttReadablePacket, MqttWritablePacket>> network,
+      Network<MqttConnection> network,
       AsynchronousSocketChannel channel,
       BufferAllocator bufferAllocator,
       int maxPacketsByRead,
@@ -67,7 +66,7 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
     return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
   }
 
-  private PacketReader createPacketReader() {
+  private NetworkPacketReader createPacketReader() {
     return new MqttPacketReader(
         this,
         channel,
@@ -77,20 +76,20 @@ public class MqttConnection extends AbstractConnection<MqttReadablePacket, MqttW
         maxPacketsByRead);
   }
 
-  private PacketWriter createPacketWriter() {
+  private NetworkPacketWriter createPacketWriter() {
     return new MqttPacketWriter(
         this,
         channel,
         bufferAllocator,
         this::updateLastActivity,
         this::nextPacketToWrite,
-        this::onWrittenPacket,
-        this::onSentPacket);
+        this::serializedPacket,
+        this::handleSentPacket);
   }
 
   @Override
   public String toString() {
-    return getRemoteAddress();
+    return remoteAddress;
   }
 
   @Override

@@ -11,12 +11,14 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 /**
  * Publish acknowledgment (QoS 1).
  */
 @Getter
-public class PublishAckInPacket extends MqttReadablePacket implements HasPacketId {
+@Accessors(fluent = true, chain = false)
+public class PublishAckInPacket extends MqttReadablePacket implements HasPacketId<MqttConnection> {
 
   private static final int PACKET_TYPE = PacketType.PUBLISH_ACK.ordinal();
 

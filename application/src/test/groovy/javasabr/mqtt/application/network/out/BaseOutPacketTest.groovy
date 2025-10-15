@@ -8,23 +8,23 @@ class BaseOutPacketTest extends NetworkUnitSpecification {
 
   @Shared
   MqttClient mqtt5Client = Stub(MqttClient.UnsafeMqttClient) {
-    getConnectionConfig() >> mqttConnectionConfig
-    getSessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
-    getReceiveMax() >> NetworkUnitSpecification.receiveMaximum
-    getMaximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
-    getClientId() >> clientId
-    getKeepAlive() >> serverKeepAlive
-    getTopicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
+    connectionConfig() >> mqttConnectionConfig
+    sessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
+    receiveMax() >> NetworkUnitSpecification.receiveMaximum
+    maximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
+    clientId() >> clientId
+    keepAlive() >> serverKeepAlive
+    topicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
   }
 
   @Shared
   MqttClient mqtt311Client = Stub(MqttClient.UnsafeMqttClient) {
-    getConnectionConfig() >> mqttConnectionConfig
-    getSessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
-    getReceiveMax() >> NetworkUnitSpecification.receiveMaximum
-    getMaximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
-    getClientId() >> clientId
-    getKeepAlive() >> serverKeepAlive
-    getTopicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
+    connectionConfig() >> mqttConnectionConfig
+    sessionExpiryInterval() >> NetworkUnitSpecification.sessionExpiryInterval
+    receiveMax() >> NetworkUnitSpecification.receiveMaximum
+    maximumPacketSize() >> NetworkUnitSpecification.maximumPacketSize
+    clientId() >> clientId
+    keepAlive() >> serverKeepAlive
+    topicAliasMaximum() >> NetworkUnitSpecification.topicAliasMaximum
   }
 }

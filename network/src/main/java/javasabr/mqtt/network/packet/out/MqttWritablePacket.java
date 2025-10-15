@@ -5,20 +5,23 @@ import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.NumberUtils;
-import javasabr.rlib.network.packet.impl.AbstractWritablePacket;
+import javasabr.rlib.network.packet.impl.AbstractWritableNetworkPacket;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public abstract class MqttWritablePacket extends AbstractWritablePacket {
+public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<MqttConnection> {
 
   private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
       1024 * 1024));
 
+  protected static final int PACKET_ID_SIZE = 2;
+
   @Override
-  protected void writeImpl(ByteBuffer buffer) {
+  protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {
     writeVariableHeader(buffer);
 
     if (isPropertiesSupported()) {
@@ -43,13 +46,13 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
 
   public final int getPacketTypeAndFlags() {
 
-    var type = getPacketType();
+    var type = packetType();
     var controlFlags = getPacketFlags();
 
     return NumberUtils.setHighByteBits(controlFlags, type);
   }
 
-  protected byte getPacketType() {
+  protected byte packetType() {
     throw new UnsupportedOperationException();
   }
 

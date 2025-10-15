@@ -20,7 +20,7 @@ public class DisconnetInPacketHandler extends AbstractPacketHandler<UnsafeMqttCl
     }
 
     client
-        .getConnection()
+        .connection()
         .close();
   }
 }

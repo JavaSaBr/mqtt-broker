@@ -59,7 +59,7 @@ public class Authentication5OutPacket extends MqttWritablePacket {
   private final byte[] authenticateData;
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

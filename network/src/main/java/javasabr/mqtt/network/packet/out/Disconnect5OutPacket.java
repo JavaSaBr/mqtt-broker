@@ -57,11 +57,6 @@ public class Disconnect5OutPacket extends Disconnect311OutPacket {
   private final long sessionExpiryInterval;
 
   @Override
-  public int getExpectedLength() {
-    return -1;
-  }
-
-  @Override
   protected void writeVariableHeader(ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
     writeByte(buffer, reasonCode.getValue());

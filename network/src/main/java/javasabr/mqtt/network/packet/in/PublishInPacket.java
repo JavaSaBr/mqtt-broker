@@ -287,7 +287,7 @@ public class PublishInPacket extends MqttReadablePacket {
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
-    topicName = buildTopicName(readString(buffer));
+    topicName = buildTopicName(readString(buffer, Integer.MAX_VALUE));
     packetId = qos != QoS.AT_MOST_ONCE ? readUnsignedShort(buffer) : 0;
   }
 

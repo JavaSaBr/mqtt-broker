@@ -13,6 +13,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import javasabr.mqtt.model.MqttConnectionConfig;
+import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.NetworkFactory;
@@ -77,7 +78,7 @@ public class MqttNetworkConfig {
       MqttConnectionConfig externalConnectionConfig,
       PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler mqttClientReleaseHandler) {
-    return NetworkFactory.newServerNetwork(
+    return NetworkFactory.serverNetwork(
         externalNetworkConfig,
         externalConnectionFactory(
             externalBufferAllocator,
@@ -93,7 +94,7 @@ public class MqttNetworkConfig {
       MqttConnectionConfig internalConnectionConfig,
       PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler mqttClientReleaseHandler) {
-    return NetworkFactory.newServerNetwork(
+    return NetworkFactory.serverNetwork(
         internalNetworkConfig,
         internalConnectionFactory(
             internalBufferAllocator,
@@ -136,8 +137,8 @@ public class MqttNetworkConfig {
   Consumer<MqttConnection> externalConnectionConsumer() {
     return mqttConnection -> {
       log.info("Accepted external connection: {}", mqttConnection);
-      var client = (UnsafeMqttClient) mqttConnection.getClient();
-      mqttConnection.onReceive((conn, packet) -> client.handle(packet));
+      var client = (UnsafeMqttClient) mqttConnection.client();
+      mqttConnection.onReceive((conn, packet) -> client.handle((MqttReadablePacket) packet));
     };
   }
 
@@ -145,8 +146,8 @@ public class MqttNetworkConfig {
   Consumer<MqttConnection> internalConnectionConsumer() {
     return mqttConnection -> {
       log.info("Accepted internal connection: {}", mqttConnection);
-      var client = (UnsafeMqttClient) mqttConnection.getClient();
-      mqttConnection.onReceive((conn, packet) -> client.handle(packet));
+      var client = (UnsafeMqttClient) mqttConnection.client();
+      mqttConnection.onReceive((conn, packet) -> client.handle((MqttReadablePacket) packet));
     };
   }
 

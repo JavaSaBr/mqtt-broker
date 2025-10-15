@@ -81,8 +81,8 @@ public class DisconnectInPacket extends MqttReadablePacket {
   @Override
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
     this.sessionExpiryInterval = connection
-        .getClient()
-        .getSessionExpiryInterval();
+        .client()
+        .sessionExpiryInterval();
     super.readImpl(connection, buffer);
   }
 

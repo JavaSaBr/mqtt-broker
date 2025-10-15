@@ -85,7 +85,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901168
     while (buffer.hasRemaining()) {
 
-      var topicFilter = readString(buffer);
+      var topicFilter = readString(buffer, Integer.MAX_VALUE);
       var options = readUnsignedByte(buffer);
 
       var qos = QoS.of(options & 0x03);

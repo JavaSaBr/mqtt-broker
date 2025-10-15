@@ -223,13 +223,13 @@ class NetworkUnitSpecification extends UnitSpecification {
       int topicAliasMaximum
   ) {
     return Stub(MqttClient.UnsafeMqttClient) {
-      getConnectionConfig() >> mqttConnectionConfig
-      getSessionExpiryInterval() >> sessionExpiryInterval
-      getReceiveMax() >> receiveMaximum
-      getMaximumPacketSize() >> maximumPacketSize
-      getClientId() >> clientId
-      getKeepAlive() >> serverKeepAlive
-      getTopicAliasMaximum() >> topicAliasMaximum
+      connectionConfig() >> mqttConnectionConfig
+      sessionExpiryInterval() >> sessionExpiryInterval
+      receiveMax() >> receiveMaximum
+      maximumPacketSize() >> maximumPacketSize
+      clientId() >> clientId
+      keepAlive() >> serverKeepAlive
+      topicAliasMaximum() >> topicAliasMaximum
     }
   }
 }

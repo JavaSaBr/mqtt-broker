@@ -44,7 +44,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       String authenticationMethod,
       byte[] authenticationData,
       MutableArray<StringPair> userProperties) {
-    var config = client.getConnectionConfig();
+    var config = client.connectionConfig();
     return new ConnectAck5OutPacket(
         reasonCode,
         sessionPresent,
@@ -58,13 +58,13 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         authenticationMethod,
         authenticationData,
         userProperties,
-        client.getClientId(),
+        client.clientId(),
         config.getMaxQos(),
-        client.getSessionExpiryInterval(),
-        client.getMaximumPacketSize(),
-        client.getReceiveMax(),
-        client.getTopicAliasMaximum(),
-        client.getKeepAlive(),
+        client.sessionExpiryInterval(),
+        client.maximumPacketSize(),
+        client.receiveMax(),
+        client.topicAliasMaximum(),
+        client.keepAlive(),
         config.isRetainAvailable(),
         config.isWildcardSubscriptionAvailable(),
         config.isSubscriptionIdAvailable(),
@@ -137,7 +137,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         userProperties,
         reason,
         serverReference,
-        client.getSessionExpiryInterval());
+        client.sessionExpiryInterval());
   }
 
   @Override

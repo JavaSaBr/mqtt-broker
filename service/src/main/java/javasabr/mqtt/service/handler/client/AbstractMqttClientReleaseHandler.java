@@ -22,32 +22,32 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
 
   @Override
   public Mono<?> release(UnsafeMqttClient client) {
-    var clientId = client.getClientId();
+    var clientId = client.clientId();
     //noinspection unchecked
     return releaseImpl((T) client).doOnNext(aVoid -> log.info(clientId, "Client:[%s] was released"::formatted));
   }
 
   protected Mono<?> releaseImpl(T client) {
 
-    var clientId = client.getClientId();
-    client.setClientId(StringUtils.EMPTY);
+    var clientId = client.clientId();
+    client.clientId(StringUtils.EMPTY);
 
     if (StringUtils.isEmpty(clientId)) {
       log.warning(client, "This client:[%s] is already released or rejected"::formatted);
       return Mono.empty();
     }
 
-    var session = client.getSession();
+    var session = client.session();
 
     Mono<?> asyncActions = null;
 
     if (session != null) {
       subscriptionService.cleanSubscriptions(client, session);
       if (client
-          .getConnectionConfig()
+          .connectionConfig()
           .isSessionsEnabled()) {
-        asyncActions = sessionService.store(clientId, session, client.getSessionExpiryInterval());
-        client.setSession(null);
+        asyncActions = sessionService.store(clientId, session, client.sessionExpiryInterval());
+        client.session(null);
       }
     }
 

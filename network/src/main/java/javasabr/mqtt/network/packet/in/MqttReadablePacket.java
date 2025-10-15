@@ -19,12 +19,12 @@ import java.util.Set;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
-import javasabr.rlib.network.packet.impl.AbstractReadablePacket;
+import javasabr.rlib.network.packet.impl.AbstractReadableNetworkPacket;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
-public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConnection> {
+public abstract class MqttReadablePacket extends AbstractReadableNetworkPacket<MqttConnection> {
 
   static {
     DebugUtils.registerIncludedFields("userProperties");
@@ -81,8 +81,8 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
   }
 
   @Override
-  protected void handleException(ByteBuffer buffer, Exception exception) {
-    super.handleException(buffer, exception);
+  protected void handleException(MqttConnection connection, ByteBuffer buffer, Exception exception) {
+    super.handleException(connection, buffer, exception);
 
     if (!(exception instanceof MqttException)) {
       exception = new ConnectionRejectException(exception, ConnectAckReasonCode.PROTOCOL_ERROR);
@@ -139,10 +139,10 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
           applyProperty(property, MqttDataUtils.readMbi(buffer));
           break;
         case UTF_8_STRING:
-          applyProperty(property, readString(buffer));
+          applyProperty(property, readString(buffer, Integer.MAX_VALUE));
           break;
         case UTF_8_STRING_PAIR:
-          applyProperty(property, new StringPair(readString(buffer), readString(buffer)));
+          applyProperty(property, new StringPair(readString(buffer, Integer.MAX_VALUE), readString(buffer, Integer.MAX_VALUE)));
           break;
         case BINARY:
           applyProperty(property, readBytes(buffer));
@@ -190,7 +190,7 @@ public abstract class MqttReadablePacket extends AbstractReadablePacket<MqttConn
   }
 
   @Override
-  protected String readString(ByteBuffer buffer) {
+  protected String readString(ByteBuffer buffer, int maxLength) {
 
     var utf8Decoder = LOCAL_DECODER.get();
     var inBuffer = utf8Decoder.getInBuffer();

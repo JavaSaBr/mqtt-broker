@@ -55,11 +55,6 @@ public class PublishReceived5OutPacket extends PublishReceived311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
-    return -1;
-  }
-
-  @Override
   protected void writeVariableHeader(ByteBuffer buffer) {
     super.writeVariableHeader(buffer);
 
