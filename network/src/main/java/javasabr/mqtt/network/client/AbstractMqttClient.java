@@ -14,7 +14,6 @@ import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.base.utils.DebugUtils;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -35,7 +34,6 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   }
 
   final MqttConnection connection;
-  final MqttPacketOutFactory packetOutFactory;
   final MqttClientReleaseHandler releaseHandler;
   final AtomicBoolean released;
 
@@ -57,27 +55,26 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   volatile boolean requestProblemInformation = false;
 
   public AbstractMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
+    MqttConnectionConfig config = connection.config();
     this.connection = connection;
     this.releaseHandler = releaseHandler;
     this.released = new AtomicBoolean(false);
-    this.clientId = StringUtils.EMPTY;
-    var config = connection.config();
+    this.clientId = connection.remoteAddress();
     this.sessionExpiryInterval = config.getDefaultSessionExpiryInterval();
     this.receiveMax = config.getReceiveMaximum();
     this.maximumPacketSize = config.getMaximumPacketSize();
     this.topicAliasMaximum = config.getTopicAliasMaximum();
     this.keepAlive = config.getMinKeepAliveTime();
-    this.packetOutFactory = MqttPacketOutFactories.of(connection.mqttVersion());
   }
 
   @Override
   public void handle(MqttReadablePacket packet) {
-    log.debug(clientId, packet.name(), packet, "Client:[%s] received packet:[%s]:[%s]"::formatted);
-    PacketInHandler packetHandler = connection.packetHandlers()[packet.getPacketType()];
+    log.debug(clientId, packet.name(), packet, "[%s] Received packet:[%s] %s"::formatted);
+    PacketInHandler packetHandler = connection.packetHandlers()[packet.packetType()];
     if (packetHandler != null) {
       packetHandler.handle(this, packet);
     } else {
-      log.warning(this, packet, "No packet handler in client:[%s] for packet:[%s]"::formatted);
+      log.warning(clientId, packet.name(), packet, "[%s] No packet handler for packet:[%s] %s"::formatted);
     }
   }
 
@@ -101,13 +98,13 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   @Override
   public void send(MqttWritablePacket packet) {
-    log.debug(clientId, packet.name(), packet, "Send to client:[%s] packet:[%s]:[%s]"::formatted);
+    log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     connection.send(packet);
   }
 
   @Override
   public CompletableFuture<Boolean> sendWithFeedback(MqttWritablePacket packet) {
-    log.debug(clientId, packet.name(), packet, "Send to client:[%s] packet:[%s]:[%s]"::formatted);
+    log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     return connection.sendWithFeedback(packet);
   }
 
@@ -119,7 +116,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   @Override
   public MqttPacketOutFactory packetOutFactory() {
-    return packetOutFactory;
+    return MqttPacketOutFactories.of(connection.mqttVersion());
   }
 
   @Override

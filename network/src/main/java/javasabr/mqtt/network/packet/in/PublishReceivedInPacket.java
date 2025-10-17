@@ -80,7 +80,7 @@ public class PublishReceivedInPacket extends MqttReadablePacket implements HasPa
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 

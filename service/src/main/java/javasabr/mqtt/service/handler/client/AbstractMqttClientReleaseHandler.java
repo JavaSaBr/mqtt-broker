@@ -24,7 +24,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
   public Mono<?> release(UnsafeMqttClient client) {
     var clientId = client.clientId();
     //noinspection unchecked
-    return releaseImpl((T) client).doOnNext(aVoid -> log.info(clientId, "Client:[%s] was released"::formatted));
+    return releaseImpl((T) client).doOnNext(aVoid -> log.info(clientId, "[%s] Client was released"::formatted));
   }
 
   protected Mono<?> releaseImpl(T client) {
@@ -33,7 +33,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
     client.clientId(StringUtils.EMPTY);
 
     if (StringUtils.isEmpty(clientId)) {
-      log.warning(client, "This client:[%s] is already released or rejected"::formatted);
+      log.warning(client.clientId(), "[%s] This client is already released or rejected"::formatted);
       return Mono.empty();
     }
 

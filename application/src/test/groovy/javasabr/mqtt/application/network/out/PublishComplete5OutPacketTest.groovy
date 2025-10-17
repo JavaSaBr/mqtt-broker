@@ -21,7 +21,7 @@ class PublishComplete5OutPacketTest extends BaseOutPacketTest {
     when:
 
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt5Connection, it)
         }
 
         def reader = new PublishCompleteInPacket(0b0111_0000 as byte)

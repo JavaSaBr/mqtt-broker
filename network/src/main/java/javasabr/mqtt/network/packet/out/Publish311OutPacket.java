@@ -39,7 +39,7 @@ public class Publish311OutPacket extends PublishOutPacket {
   }
 
   @Override
-  protected byte getPacketFlags() {
+  protected byte packetFlags() {
 
     byte info = (byte) (qos.ordinal() << 1);
 

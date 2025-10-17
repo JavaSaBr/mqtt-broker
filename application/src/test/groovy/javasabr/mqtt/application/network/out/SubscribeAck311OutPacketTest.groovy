@@ -15,7 +15,7 @@ class SubscribeAck311OutPacketTest extends BaseOutPacketTest {
     when:
 
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt311Connection, it)
         }
 
         def reader = new SubscribeAckInPacket(0b1001_0000 as byte)

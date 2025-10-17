@@ -300,11 +300,11 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
 
   @Override
   public int expectedLength(MqttConnection connection) {
-    return -1;
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override
-  protected byte getReasonCodeValue() {
+  protected byte reasonCodeValue() {
     return reasonCode.getMqtt5();
   }
 

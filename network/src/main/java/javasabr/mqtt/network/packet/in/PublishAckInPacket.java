@@ -60,7 +60,7 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return (byte) PACKET_TYPE;
   }
 

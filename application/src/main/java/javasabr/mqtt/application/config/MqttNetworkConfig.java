@@ -21,13 +21,14 @@ import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.ServerNetworkConfig.SimpleServerNetworkConfig;
 import javasabr.rlib.network.impl.DefaultBufferAllocator;
 import javasabr.rlib.network.server.ServerNetwork;
+import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-@Log4j2
+@CustomLog
 @Configuration
 @RequiredArgsConstructor
 public class MqttNetworkConfig {
@@ -45,7 +46,7 @@ public class MqttNetworkConfig {
         .pendingBufferSize(env.getProperty("mqtt.internal.network.pending.buffer.size", int.class, 4096))
         .writeBufferSize(env.getProperty("mqtt.internal.network.write.buffer.size", int.class, 2048))
         .threadGroupName("InternalNetwork")
-        .threadGroupSize(env.getProperty("mqtt.internal.network.thread.count", int.class, 1))
+        .threadGroupMaxSize(env.getProperty("mqtt.internal.network.thread.count", int.class, 1))
         .build();
   }
 
@@ -57,7 +58,7 @@ public class MqttNetworkConfig {
         .pendingBufferSize(env.getProperty("mqtt.external.network.pending.buffer.size", int.class, 200))
         .writeBufferSize(env.getProperty("mqtt.external.network.write.buffer.size", int.class, 100))
         .threadGroupName("ExternalNetwork")
-        .threadGroupSize(env.getProperty("mqtt.external.network.thread.count", int.class, 1))
+        .threadGroupMaxSize(env.getProperty("mqtt.external.network.thread.count", int.class, 1))
         .build();
   }
 
@@ -136,7 +137,7 @@ public class MqttNetworkConfig {
   @Bean
   Consumer<MqttConnection> externalConnectionConsumer() {
     return mqttConnection -> {
-      log.info("Accepted external connection: {}", mqttConnection);
+      log.info(mqttConnection.remoteAddress(), "[%s] Accepted external connection"::formatted);
       var client = (UnsafeMqttClient) mqttConnection.client();
       mqttConnection.onReceive((conn, packet) -> client.handle((MqttReadablePacket) packet));
     };
@@ -145,7 +146,7 @@ public class MqttNetworkConfig {
   @Bean
   Consumer<MqttConnection> internalConnectionConsumer() {
     return mqttConnection -> {
-      log.info("Accepted internal connection: {}", mqttConnection);
+      log.info(mqttConnection.remoteAddress(), "[%s] Accepted internal connection"::formatted);
       var client = (UnsafeMqttClient) mqttConnection.client();
       mqttConnection.onReceive((conn, packet) -> client.handle((MqttReadablePacket) packet));
     };

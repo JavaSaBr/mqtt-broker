@@ -67,7 +67,7 @@ public abstract class MqttReadablePacket extends AbstractReadableNetworkPacket<M
     this.userProperties = EMPTY_PROPERTIES;
   }
 
-  public abstract byte getPacketType();
+  public abstract byte packetType();
 
   @Override
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {

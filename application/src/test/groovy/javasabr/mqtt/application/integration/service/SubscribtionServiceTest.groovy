@@ -51,7 +51,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
         def actionResult = subscriptionService.forEachTopicSubscriber(topicName, null, action)
     then:
         matchesCount == 1
-        matchedSubscriber.user.getClientId() == clientId
+        matchedSubscriber.user.clientId() == clientId
         matchedSubscriber.subscribe.topicFilter.getRawTopic() == topicFilter
         actionResult == ActionResult.SUCCESS
     when:
@@ -64,7 +64,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
         actionResult = subscriptionService.forEachTopicSubscriber(topicName, clientId, action)
     then:
         matchesCount == 2
-        matchedSubscriber.user.getClientId() == clientId
+        matchedSubscriber.user.clientId() == clientId
         matchedSubscriber.subscribe.topicFilter.getRawTopic() == topicFilter
         actionResult == ActionResult.SUCCESS
     cleanup:

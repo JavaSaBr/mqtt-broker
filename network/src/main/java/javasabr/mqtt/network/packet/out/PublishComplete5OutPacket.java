@@ -6,6 +6,7 @@ import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.StringUtils;
 
@@ -52,6 +53,11 @@ public class PublishComplete5OutPacket extends PublishComplete311OutPacket {
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;
     this.reason = reason;
+  }
+
+  @Override
+  public int expectedLength(MqttConnection connection) {
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override

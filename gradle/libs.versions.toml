@@ -30,7 +30,7 @@ byte-buddy = "1.17.6"
 # https://mvnrepository.com/artifact/org.objenesis/objenesis
 objenesis = "3.4"
 # https://mvnrepository.com/artifact/com.hivemq/hivemq-mqtt-client
-hivemq-mqtt-client = "1.3.7"
+hivemq-mqtt-client = "1.3.10"
 # https://mvnrepository.com/artifact/io.moquette/moquette-broker
 moquette-broker = "0.17"
 

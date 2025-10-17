@@ -42,17 +42,17 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
 
   @Override
   public int expectedLength(MqttConnection connection) {
-    return 2;
+    return PACKET_ID_SIZE;
   }
 
   @Override
   protected void writeVariableHeader(ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
     buffer.put((byte) (sessionPresent ? 0x01 : 0x00));
-    buffer.put(getReasonCodeValue());
+    buffer.put(reasonCodeValue());
   }
 
-  protected byte getReasonCodeValue() {
+  protected byte reasonCodeValue() {
     return reasonCode.getMqtt311();
   }
 }

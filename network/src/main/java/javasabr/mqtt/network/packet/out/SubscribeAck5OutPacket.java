@@ -7,6 +7,7 @@ import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -49,6 +50,11 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
     super(reasonCodes, packetId);
     this.userProperties = userProperties;
     this.reason = reason;
+  }
+
+  @Override
+  public int expectedLength(MqttConnection connection) {
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override

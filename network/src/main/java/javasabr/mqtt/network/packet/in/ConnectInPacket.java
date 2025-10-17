@@ -27,7 +27,7 @@ public class ConnectInPacket extends MqttReadablePacket {
   private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart");
+    DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart", "mqttVersion");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -238,7 +238,7 @@ public class ConnectInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 

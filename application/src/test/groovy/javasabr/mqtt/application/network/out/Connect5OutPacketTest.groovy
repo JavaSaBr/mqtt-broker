@@ -36,7 +36,7 @@ class Connect5OutPacketTest extends BaseOutPacketTest {
     when:
 
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt5Connection, it)
         }
 
         def reader = new ConnectInPacket(0b0001_0000 as byte)

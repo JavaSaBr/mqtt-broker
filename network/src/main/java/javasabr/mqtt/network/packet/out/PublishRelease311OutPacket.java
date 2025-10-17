@@ -21,6 +21,11 @@ public class PublishRelease311OutPacket extends MqttWritablePacket {
   }
 
   @Override
+  protected byte packetFlags() {
+    return 2;
+  }
+
+  @Override
   public int expectedLength(MqttConnection connection) {
     return PACKET_ID_SIZE;
   }

@@ -112,7 +112,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       int packetId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new SubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
   }
 
@@ -120,7 +120,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
   public MqttWritablePacket newUnsubscribeAck(
       int packetId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new UnsubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
   }

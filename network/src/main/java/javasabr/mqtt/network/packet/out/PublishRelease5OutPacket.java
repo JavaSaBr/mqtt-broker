@@ -52,7 +52,7 @@ public class PublishRelease5OutPacket extends PublishRelease311OutPacket {
 
   @Override
   public int expectedLength(MqttConnection connection) {
-    return -1;
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override

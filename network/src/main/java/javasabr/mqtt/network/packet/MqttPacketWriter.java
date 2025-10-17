@@ -71,7 +71,7 @@ public class MqttPacketWriter extends AbstractNetworkPacketWriter<MqttWritablePa
       int totalSize,
       ByteBuffer firstBuffer,
       ByteBuffer secondBuffer) {
-    firstBuffer.put((byte) packet.getPacketTypeAndFlags());
+    firstBuffer.put((byte) packet.packetTypeAndFlags());
     MqttDataUtils.writeMbi(secondBuffer.remaining(), firstBuffer);
     firstBuffer
         .put(secondBuffer)

@@ -2,6 +2,7 @@ package javasabr.mqtt.service.handler.publish.out;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.PublishAckInPacket;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class Qos1PublishOutHandler extends PersistentPublishOutHandler {
   }
 
   @Override
-  public boolean handleResponse(MqttClient client, HasPacketId response) {
+  public boolean handleResponse(MqttClient client, HasPacketId<?> response) {
 
     if (!(response instanceof PublishAckInPacket)) {
       throw new IllegalStateException("Unexpected response: " + response);
