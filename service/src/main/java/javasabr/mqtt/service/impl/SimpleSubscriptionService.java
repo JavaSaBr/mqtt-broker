@@ -63,17 +63,17 @@ public class SimpleSubscriptionService implements SubscriptionService {
 
   @Nullable
   private SubscribeAckReasonCode addSubscription(SubscribeTopicFilter subscribe, MqttClient client) {
-    MqttSession session = client.getSession();
+    MqttSession session = client.session();
     if (session == null) {
       return null;
     }
 
-    MqttConnectionConfig config = client.getConnectionConfig();
+    MqttConnectionConfig config = client.connectionConfig();
     TopicFilter topic = subscribe.getTopicFilter();
 
-    if (!config.isSharedSubscriptionAvailable() && isShared(topic)) {
+    if (!config.sharedSubscriptionAvailable() && isShared(topic)) {
       return SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
-    } else if (!config.isWildcardSubscriptionAvailable() && hasWildcard(topic)) {
+    } else if (!config.wildcardSubscriptionAvailable() && hasWildcard(topic)) {
       return WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     } else if (isInvalid(topic)) {
       return UNSPECIFIED_ERROR;
@@ -96,7 +96,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
 
   @Nullable
   private UnsubscribeAckReasonCode removeSubscription(TopicFilter topic, MqttClient client) {
-    var session = client.getSession();
+    var session = client.session();
     if (session == null) {
       return null;
     } else if (isInvalid(topic)) {

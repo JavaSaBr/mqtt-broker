@@ -1,16 +1,20 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
+import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.packet.PacketType;
 import javasabr.rlib.collections.array.Array;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Subscribe acknowledgement.
  */
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeAck311OutPacket extends MqttWritablePacket {
 
   private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE_ACK.ordinal();
@@ -22,20 +26,20 @@ public class SubscribeAck311OutPacket extends MqttWritablePacket {
   /**
    * The order of Reason Codes in the SUBACK packet MUST match the order of Topic Filters in the SUBSCRIBE packet.
    */
-  private final Array<SubscribeAckReasonCode> reasonCodes;
+  Array<SubscribeAckReasonCode> reasonCodes;
 
   /**
    * The Packet Identifier from the SUBSCRIBE.
    */
-  private final int packetId;
+  int packetId;
 
   @Override
-  public int getExpectedLength() {
+  public int expectedLength(MqttConnection connection) {
     return 2 + reasonCodes.size();
   }
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

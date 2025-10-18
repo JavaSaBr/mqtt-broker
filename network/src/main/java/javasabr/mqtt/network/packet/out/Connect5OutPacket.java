@@ -1,13 +1,13 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.ArrayUtils;

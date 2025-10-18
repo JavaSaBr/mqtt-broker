@@ -28,7 +28,7 @@ public class SubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttCl
 
     Array<SubscribeAckReasonCode> ackReasonCodes = subscriptionService.subscribe(client, packet.getTopicFilters());
     MqttWritablePacket subscribeAck = client
-        .getPacketOutFactory()
+        .packetOutFactory()
         .newSubscribeAck(packet.getPacketId(), ackReasonCodes);
 
     client.send(subscribeAck);
@@ -40,13 +40,13 @@ public class SubscribeInPacketHandler extends AbstractPacketHandler<UnsafeMqttCl
     if (anyReason != null) {
       var disconnectReasonCode = DisconnectReasonCode.of(toUnsignedInt(anyReason.getValue()));
       MqttWritablePacket disconnect = client
-          .getPacketOutFactory()
+          .packetOutFactory()
           .newDisconnect(client, disconnectReasonCode);
 
       client
           .sendWithFeedback(disconnect)
           .thenAccept(result -> client
-              .getConnection()
+              .connection()
               .close());
     }
   }

@@ -1,14 +1,15 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -298,12 +299,12 @@ public class ConnectAck5OutPacket extends ConnectAck311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
-    return -1;
+  public int expectedLength(MqttConnection connection) {
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override
-  protected byte getReasonCodeValue() {
+  protected byte reasonCodeValue() {
     return reasonCode.getMqtt5();
   }
 

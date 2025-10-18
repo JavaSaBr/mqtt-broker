@@ -20,7 +20,7 @@ class UnsubscribeAck5OutPacketTest extends BaseOutPacketTest {
     when:
 
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt5Connection, it)
         }
 
         def reader = new UnsubscribeAckInPacket(0b1011_0000 as byte)

@@ -1,9 +1,10 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
+import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.packet.PacketType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -35,23 +36,23 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
   private final boolean sessionPresent;
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 
   @Override
-  public int getExpectedLength() {
-    return 2;
+  public int expectedLength(MqttConnection connection) {
+    return PACKET_ID_SIZE;
   }
 
   @Override
   protected void writeVariableHeader(ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
     buffer.put((byte) (sessionPresent ? 0x01 : 0x00));
-    buffer.put(getReasonCodeValue());
+    buffer.put(reasonCodeValue());
   }
 
-  protected byte getReasonCodeValue() {
+  protected byte reasonCodeValue() {
     return reasonCode.getMqtt311();
   }
 }

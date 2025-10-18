@@ -16,7 +16,7 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
   @Override
   public void handle(MqttClient client, PublishInPacket packet) {
 
-    var session = client.getSession();
+    var session = client.session();
 
     // it means this client was already closed
     if (session == null) {
@@ -44,7 +44,7 @@ public class Qos1PublishInHandler extends AbstractPublishInHandler {
     }
 
     client.send(client
-        .getPacketOutFactory()
+        .packetOutFactory()
         .newPublishAck(packet.getPacketId(), reasonCode));
   }
 }

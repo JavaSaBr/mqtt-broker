@@ -3,16 +3,16 @@ package javasabr.mqtt.network.packet.in;
 import static javasabr.mqtt.model.utils.TopicUtils.EMPTY_TOPIC_NAME;
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.array.MutableIntArray;
@@ -280,14 +280,14 @@ public class PublishInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
-    topicName = buildTopicName(readString(buffer));
+    topicName = buildTopicName(readString(buffer, Integer.MAX_VALUE));
     packetId = qos != QoS.AT_MOST_ONCE ? readUnsignedShort(buffer) : 0;
   }
 

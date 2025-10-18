@@ -1,5 +1,6 @@
 package javasabr.mqtt.application.extension
 
+import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.packet.out.MqttWritablePacket
 import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.mqtt.model.PacketProperty
@@ -16,7 +17,7 @@ class SpecificationExtensions extends Specification {
   static final writer = new MqttWritablePacket() {
 
     @Override
-    protected void writeImpl(ByteBuffer buffer) {}
+    protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {}
   }
 
   static ByteBuffer putMbi(ByteBuffer self, int value) {

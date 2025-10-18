@@ -20,10 +20,10 @@ public final class Qos2PublishOutHandler extends PersistentPublishOutHandler {
   @Override
   public boolean handleResponse(MqttClient client, HasPacketId response) {
 
-    var packetOutFactory = client.getPacketOutFactory();
+    var packetOutFactory = client.packetOutFactory();
 
     if (response instanceof PublishReceivedInPacket) {
-      client.send(packetOutFactory.newPublishRelease(response.getPacketId(), SUCCESS));
+      client.send(packetOutFactory.newPublishRelease(response.packetId(), SUCCESS));
       return false;
     } else if (response instanceof PublishCompleteInPacket) {
       return true;

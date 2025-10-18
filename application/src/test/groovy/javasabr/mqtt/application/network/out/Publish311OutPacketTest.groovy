@@ -17,12 +17,11 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
             true,
             true,
             publishTopic.toString(),
-            publishPayload
-        )
+            publishPayload)
     when:
 
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt311Connection, it)
         }
 
         def reader = new PublishInPacket(0b0011_1101 as byte)
@@ -49,7 +48,7 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
         )
 
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt311Connection, it)
         }
 
         reader = new PublishInPacket(0b0011_0000 as byte)

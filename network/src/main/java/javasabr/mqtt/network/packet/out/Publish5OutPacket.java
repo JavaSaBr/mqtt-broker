@@ -1,13 +1,14 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 public class Publish5OutPacket extends Publish311OutPacket {
@@ -161,6 +162,11 @@ public class Publish5OutPacket extends Publish311OutPacket {
     this.responseTopic = responseTopic;
     this.correlationData = correlationData;
     this.userProperties = userProperties;
+  }
+
+  @Override
+  public int expectedLength(MqttConnection connection) {
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override

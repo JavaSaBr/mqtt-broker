@@ -70,6 +70,9 @@ class IntegrationSpecification extends Specification {
         .serverHost(address.getHostName())
         .serverPort(address.getPort())
         .useMqttVersion3()
+        .addDisconnectedListener {
+          println "[${clientId}|mqtt311] disconnected:[$it.cause]"
+        }
         .build()
         .toAsync()
   }
@@ -90,6 +93,9 @@ class IntegrationSpecification extends Specification {
         .serverHost(address.getHostName())
         .serverPort(address.getPort())
         .useMqttVersion5()
+        .addDisconnectedListener {
+          println "[${clientId}|mqtt5] disconnected:[$it.cause]"
+        }
         .build()
         .toAsync()
   }
@@ -143,15 +149,15 @@ class IntegrationSpecification extends Specification {
     return Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> true
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      getConfig() >> deviceConnectionConfig
-      getClient() >> Stub(UnsafeMqttClient) {
-        getConnectionConfig() >> deviceConnectionConfig
-        getSessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
-        getMaximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
-        getClientId() >> IntegrationSpecification.clientId
-        getKeepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        getTopicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+      config() >> deviceConnectionConfig
+      client() >> Stub(UnsafeMqttClient) {
+        connectionConfig() >> deviceConnectionConfig
+        sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
+        receiveMax() >> deviceConnectionConfig.receiveMaximum()
+        maximumPacketSize() >> deviceConnectionConfig.maximumPacketSize()
+        clientId() >> IntegrationSpecification.clientId
+        keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
+        topicAliasMaximum() >> deviceConnectionConfig.topicAliasMaximum()
       }
     }
   }
@@ -160,15 +166,15 @@ class IntegrationSpecification extends Specification {
     return Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> false
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      getConfig() >> deviceConnectionConfig
-      getClient() >> Stub(UnsafeMqttClient) {
-        getConnectionConfig() >> deviceConnectionConfig
-        getSessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        getReceiveMax() >> deviceConnectionConfig.getReceiveMaximum()
-        getMaximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
-        getClientId() >> IntegrationSpecification.clientId
-        getKeepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        getTopicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+      config() >> deviceConnectionConfig
+      client() >> Stub(UnsafeMqttClient) {
+        connectionConfig() >> deviceConnectionConfig
+        sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
+        receiveMax() >> deviceConnectionConfig.receiveMaximum()
+        maximumPacketSize() >> deviceConnectionConfig.maximumPacketSize()
+        clientId() >> IntegrationSpecification.clientId
+        keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
+        topicAliasMaximum() >> deviceConnectionConfig.topicAliasMaximum()
       }
     }
   }

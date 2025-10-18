@@ -26,7 +26,7 @@ class Publish5OutPacketTest extends BaseOutPacketTest {
     when:
 
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt5Connection, it)
         }
 
         def reader = new PublishInPacket(0b0011_1101 as byte)
@@ -62,7 +62,7 @@ class Publish5OutPacketTest extends BaseOutPacketTest {
         )
 
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(it)
+          packet.write(mqtt5Connection, it)
         }
 
         reader = new PublishInPacket(0b0011_0000 as byte)

@@ -1,8 +1,9 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
+import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.network.MqttConnection;
 
 public class Publish311OutPacket extends PublishOutPacket {
 
@@ -33,12 +34,12 @@ public class Publish311OutPacket extends PublishOutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
+  public int expectedLength(MqttConnection connection) {
     return 7 + payload.length;
   }
 
   @Override
-  protected byte getPacketFlags() {
+  protected byte packetFlags() {
 
     byte info = (byte) (qos.ordinal() << 1);
 

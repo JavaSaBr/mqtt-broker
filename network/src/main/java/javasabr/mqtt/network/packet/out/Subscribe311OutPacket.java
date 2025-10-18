@@ -1,8 +1,8 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,7 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
   private final int packetId;
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

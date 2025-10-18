@@ -1,21 +1,23 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 /**
  * Publish release (QoS 2 delivery part 2).
  */
 @Getter
+@Accessors(fluent = true, chain = false)
 public class PublishReleaseInPacket extends MqttReadablePacket implements HasPacketId {
 
   private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RELEASED.ordinal();
@@ -58,7 +60,7 @@ public class PublishReleaseInPacket extends MqttReadablePacket implements HasPac
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 

@@ -1,21 +1,23 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 /**
  * Publish acknowledgment (QoS 1).
  */
 @Getter
+@Accessors(fluent = true, chain = false)
 public class PublishAckInPacket extends MqttReadablePacket implements HasPacketId {
 
   private static final int PACKET_TYPE = PacketType.PUBLISH_ACK.ordinal();
@@ -58,7 +60,7 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return (byte) PACKET_TYPE;
   }
 

@@ -32,7 +32,7 @@ class MqttSessionServiceTest extends IntegrationSpecification {
     then:
         restored != null
     when:
-        mqttSessionService.store(clientId, restored, externalConnectionConfig.getDefaultSessionExpiryInterval()).block()
+        mqttSessionService.store(clientId, restored, externalConnectionConfig.defaultSessionExpiryInterval()).block()
         client.connect().join()
         shouldNoSession = mqttSessionService.restore(clientId).block()
     then:

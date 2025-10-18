@@ -1,24 +1,27 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.NumberUtils;
-import javasabr.rlib.network.packet.impl.AbstractWritablePacket;
+import javasabr.rlib.network.packet.impl.AbstractWritableNetworkPacket;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public abstract class MqttWritablePacket extends AbstractWritablePacket {
+public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<MqttConnection> {
 
   private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
       1024 * 1024));
 
+  protected static final int PACKET_ID_SIZE = 2;
+
   @Override
-  protected void writeImpl(ByteBuffer buffer) {
+  protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {
     writeVariableHeader(buffer);
 
     if (isPropertiesSupported()) {
@@ -28,32 +31,27 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
     writePayload(buffer);
   }
 
-  protected void writeVariableHeader(ByteBuffer buffer) {
-  }
+  protected void writeVariableHeader(ByteBuffer buffer) {}
 
-  protected void writePayload(ByteBuffer buffer) {
-  }
+  protected void writePayload(ByteBuffer buffer) {}
 
   protected boolean isPropertiesSupported() {
     return false;
   }
 
-  protected void writeProperties(ByteBuffer buffer) {
-  }
+  protected void writeProperties(ByteBuffer buffer) {}
 
-  public final int getPacketTypeAndFlags() {
-
-    var type = getPacketType();
-    var controlFlags = getPacketFlags();
-
+  public final int packetTypeAndFlags() {
+    byte type = packetType();
+    byte controlFlags = packetFlags();
     return NumberUtils.setHighByteBits(controlFlags, type);
   }
 
-  protected byte getPacketType() {
+  protected byte packetType() {
     throw new UnsupportedOperationException();
   }
 
-  protected byte getPacketFlags() {
+  protected byte packetFlags() {
     return 0;
   }
 
@@ -129,7 +127,6 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
   }
 
   public void writeProperty(ByteBuffer buffer, PacketProperty property, StringPair value) {
-
     buffer.put(property.getId());
     writeString(buffer, value.getName());
     writeString(buffer, value.getValue());
@@ -174,7 +171,7 @@ public abstract class MqttWritablePacket extends AbstractWritablePacket {
       return;
     }
 
-    for (var pair : pairs) {
+    for (StringPair pair : pairs) {
       buffer.put(property.getId());
       writeStringPair(buffer, pair);
     }

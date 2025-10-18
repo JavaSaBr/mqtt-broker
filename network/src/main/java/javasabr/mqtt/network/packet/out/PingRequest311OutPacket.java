@@ -10,7 +10,7 @@ public class PingRequest311OutPacket extends MqttWritablePacket {
   private static final byte PACKET_TYPE = (byte) PacketType.PING_REQUEST.ordinal();
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 }

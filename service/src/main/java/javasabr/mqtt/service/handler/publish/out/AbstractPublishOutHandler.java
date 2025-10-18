@@ -15,7 +15,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
   public ActionResult handle(PublishInPacket packet, SingleSubscriber subscriber) {
 
     MqttClient client = (MqttClient) subscriber.getUser();
-    var session = client.getSession();
+    var session = client.session();
 
     // if session is null it means this client was already closed
     if (session != null) {
@@ -35,7 +35,7 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
 
   void sendPublish(MqttClient client, PublishInPacket packet, int packetId, boolean duplicate) {
 
-    var packetOutFactory = client.getPacketOutFactory();
+    var packetOutFactory = client.packetOutFactory();
     client.send(packetOutFactory.newPublish(
         packetId,
         getQoS(),

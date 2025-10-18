@@ -2,13 +2,13 @@ package javasabr.mqtt.network.packet.in;
 
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.Getter;
@@ -37,7 +37,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 
@@ -54,7 +54,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
     }
 
     while (buffer.hasRemaining()) {
-      topicFilters.add(buildTopicFilter(readString(buffer)));
+      topicFilters.add(buildTopicFilter(readString(buffer, Integer.MAX_VALUE)));
     }
   }
 

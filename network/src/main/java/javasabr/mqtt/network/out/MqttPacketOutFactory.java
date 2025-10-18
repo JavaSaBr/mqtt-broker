@@ -66,9 +66,9 @@ public abstract class MqttPacketOutFactory {
         reasonCode,
         false,
         StringUtils.EMPTY,
-        client.getSessionExpiryInterval(),
-        client.getKeepAlive(),
-        client.getReceiveMax(),
+        client.sessionExpiryInterval(),
+        client.keepAlive(),
+        client.receiveMax(),
         StringUtils.EMPTY,
         StringUtils.EMPTY,
         StringUtils.EMPTY,
@@ -125,20 +125,20 @@ public abstract class MqttPacketOutFactory {
       int packetId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
-      MutableArray<StringPair> userProperties);
+      Array<StringPair> userProperties);
 
   public MqttWritablePacket newSubscribeAck(int packetId, Array<SubscribeAckReasonCode> reasonCodes) {
-    return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, MutableArray.ofType(StringPair.class));
+    return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, Array.empty(StringPair.class));
   }
 
   public abstract MqttWritablePacket newUnsubscribeAck(
       int packetId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason);
 
   public MqttWritablePacket newUnsubscribeAck(int packetId, Array<UnsubscribeAckReasonCode> reasonCodes) {
-    return newUnsubscribeAck(packetId, reasonCodes, MutableArray.ofType(StringPair.class), StringUtils.EMPTY);
+    return newUnsubscribeAck(packetId, reasonCodes, Array.empty(StringPair.class), StringUtils.EMPTY);
   }
 
   public abstract MqttWritablePacket newDisconnect(

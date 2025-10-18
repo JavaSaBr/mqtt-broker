@@ -1,9 +1,9 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 

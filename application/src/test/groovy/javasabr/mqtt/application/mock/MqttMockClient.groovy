@@ -7,6 +7,7 @@ import javasabr.mqtt.network.packet.in.MqttReadablePacket
 import javasabr.mqtt.network.packet.in.PublishInPacket
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket
 import javasabr.mqtt.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.network.packet.out.Disconnect311OutPacket
 import javasabr.mqtt.network.packet.out.MqttWritablePacket
 import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.rlib.common.util.NumberUtils
@@ -30,24 +31,20 @@ class MqttMockClient {
   }
 
   void connect() {
-
     if (socket != null) {
       return
     }
-
     socket = new Socket(brokerHost, brokerPort)
   }
 
   void send(MqttWritablePacket packet) {
 
     def dataBuffer = ByteBuffer.allocate(1024)
-
-    packet.write(dataBuffer)
-
+    packet.write(connection, dataBuffer)
     dataBuffer.flip()
 
     def finalBuffer = ByteBuffer.allocate(1024)
-    finalBuffer.put((byte) packet.getPacketTypeAndFlags())
+    finalBuffer.put((byte) packet.packetTypeAndFlags())
 
     MqttDataUtils.writeMbi(dataBuffer.remaining(), finalBuffer)
 
@@ -62,10 +59,8 @@ class MqttMockClient {
   MqttReadablePacket readNext() {
 
     if (received.position() == 0) {
-
       def input = socket.getInputStream()
       def readBytes = input.read(received.array(), received.position(), received.capacity() - received.position())
-
       if (readBytes > 0) {
         received.position(received.position() + readBytes)
       }
@@ -112,8 +107,12 @@ class MqttMockClient {
     return packet
   }
 
-  def close() {
+  def disconnect() {
+    send(new Disconnect311OutPacket())
+    close()
+  }
 
+  def close() {
     if (socket != null) {
       socket.close()
       socket = null

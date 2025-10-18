@@ -44,7 +44,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       String authenticationMethod,
       byte[] authenticationData,
       MutableArray<StringPair> userProperties) {
-    var config = client.getConnectionConfig();
+    var config = client.connectionConfig();
     return new ConnectAck5OutPacket(
         reasonCode,
         sessionPresent,
@@ -58,17 +58,17 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         authenticationMethod,
         authenticationData,
         userProperties,
-        client.getClientId(),
-        config.getMaxQos(),
-        client.getSessionExpiryInterval(),
-        client.getMaximumPacketSize(),
-        client.getReceiveMax(),
-        client.getTopicAliasMaximum(),
-        client.getKeepAlive(),
-        config.isRetainAvailable(),
-        config.isWildcardSubscriptionAvailable(),
-        config.isSubscriptionIdAvailable(),
-        config.isSharedSubscriptionAvailable());
+        client.clientId(),
+        config.maxQos(),
+        client.sessionExpiryInterval(),
+        client.maximumPacketSize(),
+        client.receiveMax(),
+        client.topicAliasMaximum(),
+        client.keepAlive(),
+        config.retainAvailable(),
+        config.wildcardSubscriptionAvailable(),
+        config.subscriptionIdAvailable(),
+        config.sharedSubscriptionAvailable());
   }
 
   @Override
@@ -112,7 +112,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       int packetId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new SubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
   }
 
@@ -120,7 +120,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
   public MqttWritablePacket newUnsubscribeAck(
       int packetId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new UnsubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
   }
@@ -137,7 +137,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         userProperties,
         reason,
         serverReference,
-        client.getSessionExpiryInterval());
+        client.sessionExpiryInterval());
   }
 
   @Override

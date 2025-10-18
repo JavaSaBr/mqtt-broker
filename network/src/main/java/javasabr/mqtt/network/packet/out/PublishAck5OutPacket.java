@@ -1,11 +1,11 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -47,11 +47,6 @@ public class PublishAck5OutPacket extends PublishAck311OutPacket {
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;
     this.reason = reason;
-  }
-
-  @Override
-  public int getExpectedLength() {
-    return -1;
   }
 
   @Override

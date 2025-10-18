@@ -1,16 +1,16 @@
 package javasabr.mqtt.network;
 
-import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.network.packet.HasPacketId;
+import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.rlib.functions.TriConsumer;
 
 public interface MqttSession {
 
   interface UnsafeMqttSession extends MqttSession {
 
-    void setExpirationTime(long expirationTime);
+    void expirationTime(long expirationTime);
 
     void clear();
 
@@ -26,18 +26,17 @@ public interface MqttSession {
      */
     boolean handleResponse(MqttClient client, HasPacketId response);
 
-    default void resend(MqttClient client, PublishInPacket packet, int packetId) {
-    }
+    default void resend(MqttClient client, PublishInPacket packet, int packetId) {}
   }
 
-  String getClientId();
+  String clientId();
 
   int nextPacketId();
 
   /**
    * @return the expiration time in ms or -1 if it should not be expired now.
    */
-  long getExpirationTime();
+  long expirationTime();
 
   void resendPendingPackets(MqttClient client);
 
@@ -57,10 +56,10 @@ public interface MqttSession {
 
   void updateInPendingPacket(MqttClient client, HasPacketId response);
 
-  <F, S> void forEachTopicFilter(
-      F first,
-      S second,
-      TriConsumer<F, S, SubscribeTopicFilter> consumer);
+  <A, B> void forEachTopicFilter(
+      A arg1,
+      B arg2,
+      TriConsumer<A, B, SubscribeTopicFilter> consumer);
 
   void addSubscriber(SubscribeTopicFilter subscribe);
 

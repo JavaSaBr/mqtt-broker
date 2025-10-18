@@ -1,76 +1,80 @@
 package javasabr.mqtt.network.client;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttConnectionConfig;
-import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.handler.client.MqttClientReleaseHandler;
 import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
 import javasabr.mqtt.network.out.MqttPacketOutFactories;
 import javasabr.mqtt.network.out.MqttPacketOutFactory;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javasabr.rlib.common.util.StringUtils;
+import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @Getter
 @CustomLog
+@Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   static {
     DebugUtils.registerIncludedFields("clientId");
   }
 
-  protected final MqttConnection connection;
-  protected final MqttClientReleaseHandler releaseHandler;
-  protected final AtomicBoolean released;
+  final MqttConnection connection;
+  final MqttClientReleaseHandler releaseHandler;
+  final AtomicBoolean released;
 
   @Setter
-  private volatile String clientId;
+  volatile String clientId;
 
   @Setter
   @Getter
   @Nullable
-  private volatile MqttSession session;
+  volatile MqttSession session;
 
-  private volatile long sessionExpiryInterval;
-  private volatile int receiveMax;
-  private volatile int maximumPacketSize;
-  private volatile int topicAliasMaximum;
-  private volatile int keepAlive;
+  volatile long sessionExpiryInterval;
+  volatile int receiveMax;
+  volatile int maximumPacketSize;
+  volatile int topicAliasMaximum;
+  volatile int keepAlive;
 
-  private volatile boolean requestResponseInformation = false;
-  private volatile boolean requestProblemInformation = false;
+  volatile boolean requestResponseInformation = false;
+  volatile boolean requestProblemInformation = false;
 
   public AbstractMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
+    MqttConnectionConfig config = connection.config();
     this.connection = connection;
     this.releaseHandler = releaseHandler;
     this.released = new AtomicBoolean(false);
-    this.clientId = StringUtils.EMPTY;
-    var config = connection.getConfig();
-    this.sessionExpiryInterval = config.getDefaultSessionExpiryInterval();
-    this.receiveMax = config.getReceiveMaximum();
-    this.maximumPacketSize = config.getMaximumPacketSize();
-    this.topicAliasMaximum = config.getTopicAliasMaximum();
-    this.keepAlive = config.getMinKeepAliveTime();
+    this.clientId = connection.remoteAddress();
+    this.sessionExpiryInterval = config.defaultSessionExpiryInterval();
+    this.receiveMax = config.receiveMaximum();
+    this.maximumPacketSize = config.maximumPacketSize();
+    this.topicAliasMaximum = config.topicAliasMaximum();
+    this.keepAlive = config.minKeepAliveTime();
   }
 
   @Override
   public void handle(MqttReadablePacket packet) {
-    log.debug(clientId, packet.getName(), packet, "Client:[%s] received packet:[%s]:[%s]"::formatted);
-    PacketInHandler packetHandler = connection.getPacketHandlers()[packet.getPacketType()];
+    log.debug(clientId, packet.name(), packet, "[%s] Received packet:[%s] %s"::formatted);
+    PacketInHandler packetHandler = connection.packetHandlers()[packet.packetType()];
     if (packetHandler != null) {
       packetHandler.handle(this, packet);
     } else {
-      log.warning(this, packet, "No packet handler in client:[%s] for packet:[%s]"::formatted);
+      log.warning(clientId, packet.name(), packet, "[%s] No packet handler for packet:[%s] %s"::formatted);
     }
   }
 
@@ -94,30 +98,30 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   @Override
   public void send(MqttWritablePacket packet) {
-    log.debug(clientId, packet.getName(), packet, "Send to client:[%s] packet:[%s]:[%s]"::formatted);
+    log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     connection.send(packet);
   }
 
   @Override
   public CompletableFuture<Boolean> sendWithFeedback(MqttWritablePacket packet) {
-    log.debug(clientId, packet.getName(), packet, "Send to client:[%s] packet:[%s]:[%s]"::formatted);
+    log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     return connection.sendWithFeedback(packet);
   }
 
   public void reject(ConnectAckReasonCode reasonCode) {
     connection
-        .sendWithFeedback(getPacketOutFactory().newConnectAck(this, reasonCode))
-        .thenAccept(sent -> connection.close());
+        .sendWithFeedback(packetOutFactory().newConnectAck(this, reasonCode))
+        .thenAccept(_ -> connection.close());
   }
 
   @Override
-  public MqttPacketOutFactory getPacketOutFactory() {
-    return MqttPacketOutFactories.of(connection.getMqttVersion());
+  public MqttPacketOutFactory packetOutFactory() {
+    return MqttPacketOutFactories.of(connection.mqttVersion());
   }
 
   @Override
-  public MqttConnectionConfig getConnectionConfig() {
-    return connection.getConfig();
+  public MqttConnectionConfig connectionConfig() {
+    return connection.config();
   }
 
   @Override

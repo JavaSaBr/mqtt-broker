@@ -1,12 +1,12 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.StringUtils;
@@ -53,7 +53,7 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 

@@ -1,12 +1,13 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.base.utils.DebugUtils;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -52,13 +53,13 @@ public class SubscribeAck5OutPacket extends SubscribeAck311OutPacket {
   }
 
   @Override
-  protected boolean isPropertiesSupported() {
-    return true;
+  public int expectedLength(MqttConnection connection) {
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override
-  public int getExpectedLength() {
-    return -1;
+  protected boolean isPropertiesSupported() {
+    return true;
   }
 
   @Override

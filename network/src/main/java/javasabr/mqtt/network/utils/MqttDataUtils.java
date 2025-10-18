@@ -14,15 +14,15 @@ public class MqttDataUtils {
    */
   public static ByteBuffer writeMbi(int number, ByteBuffer buffer) {
 
-    var sizeInBytes = 0;
-    var valueToWrite = number;
+    int sizeInBytes = 0;
+    int valueToWrite = number;
     do {
 
       var digit = (byte) (valueToWrite % 128);
       valueToWrite = valueToWrite / 128;
 
       if (valueToWrite > 0) {
-        digit |= 0x80;
+        digit |= (byte) 0x80;
       }
 
       buffer.put(digit);
@@ -45,7 +45,7 @@ public class MqttDataUtils {
    */
   public static int readMbi(ByteBuffer buffer) {
 
-    var originalPos = buffer.position();
+    int originalPos = buffer.position();
 
     int result = 0;
     int multiplier = 1;

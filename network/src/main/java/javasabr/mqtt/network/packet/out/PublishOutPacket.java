@@ -4,7 +4,9 @@ import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.PacketType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public abstract class PublishOutPacket extends MqttWritablePacket implements HasPacketId {
 
@@ -14,7 +16,7 @@ public abstract class PublishOutPacket extends MqttWritablePacket implements Has
   protected final int packetId;
 
   @Override
-  protected byte getPacketType() {
+  protected byte packetType() {
     return PACKET_TYPE;
   }
 }

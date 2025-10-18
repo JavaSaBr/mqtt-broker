@@ -1,15 +1,15 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 
@@ -74,15 +74,15 @@ public class DisconnectInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 
   @Override
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
     this.sessionExpiryInterval = connection
-        .getClient()
-        .getSessionExpiryInterval();
+        .client()
+        .sessionExpiryInterval();
     super.readImpl(connection, buffer);
   }
 

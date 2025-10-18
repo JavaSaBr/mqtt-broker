@@ -1,12 +1,12 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
@@ -67,7 +67,7 @@ public class AuthenticationInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte getPacketType() {
+  public byte packetType() {
     return PACKET_TYPE;
   }
 

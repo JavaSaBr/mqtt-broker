@@ -1,12 +1,12 @@
 package javasabr.mqtt.network;
 
-import javasabr.mqtt.network.out.MqttPacketOutFactory;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
+import java.util.concurrent.CompletableFuture;
 import javasabr.mqtt.model.MqttConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.network.out.MqttPacketOutFactory;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
-import java.util.concurrent.CompletableFuture;
+import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +14,7 @@ public interface MqttClient extends MqttUser {
 
   interface UnsafeMqttClient extends MqttClient {
 
-    MqttConnection getConnection();
+    MqttConnection connection();
 
     void handle(MqttReadablePacket packet);
 
@@ -27,33 +27,33 @@ public interface MqttClient extends MqttUser {
         boolean requestResponseInformation,
         boolean requestProblemInformation);
 
-    void setClientId(String clientId);
+    void clientId(String clientId);
 
-    void setSession(@Nullable MqttSession session);
+    void session(@Nullable MqttSession session);
 
     void reject(ConnectAckReasonCode reasonCode);
 
     Mono<?> release();
   }
 
-  MqttPacketOutFactory getPacketOutFactory();
+  MqttPacketOutFactory packetOutFactory();
 
-  MqttConnectionConfig getConnectionConfig();
+  MqttConnectionConfig connectionConfig();
 
-  String getClientId();
+  String clientId();
 
   @Nullable
-  MqttSession getSession();
+  MqttSession session();
 
-  int getKeepAlive();
+  int keepAlive();
 
-  int getMaximumPacketSize();
+  int maximumPacketSize();
 
-  int getReceiveMax();
+  int receiveMax();
 
-  int getTopicAliasMaximum();
+  int topicAliasMaximum();
 
-  long getSessionExpiryInterval();
+  long sessionExpiryInterval();
 
   void send(MqttWritablePacket packet);
 

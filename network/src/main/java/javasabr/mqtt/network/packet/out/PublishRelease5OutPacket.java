@@ -1,11 +1,12 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 
 /**
@@ -50,8 +51,8 @@ public class PublishRelease5OutPacket extends PublishRelease311OutPacket {
   }
 
   @Override
-  public int getExpectedLength() {
-    return -1;
+  public int expectedLength(MqttConnection connection) {
+    return UNKNOWN_EXPECTED_BYTES;
   }
 
   @Override
