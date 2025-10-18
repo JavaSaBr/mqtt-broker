@@ -1,5 +1,9 @@
 package javasabr.mqtt.network.packet;
 
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.in.AuthenticationInPacket;
 import javasabr.mqtt.network.packet.in.ConnectAckInPacket;
@@ -17,10 +21,6 @@ import javasabr.mqtt.network.packet.in.SubscribeAckInPacket;
 import javasabr.mqtt.network.packet.in.SubscribeInPacket;
 import javasabr.mqtt.network.packet.in.UnsubscribeAckInPacket;
 import javasabr.mqtt.network.packet.in.UnsubscribeInPacket;
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.util.NoSuchElementException;
-import java.util.function.Consumer;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;

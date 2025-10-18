@@ -2,6 +2,10 @@ package javasabr.mqtt.network.packet.in;
 
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
@@ -10,10 +14,6 @@ import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.NumberUtils;

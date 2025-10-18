@@ -1,13 +1,13 @@
 package javasabr.mqtt.network;
 
+import java.nio.channels.AsynchronousSocketChannel;
+import java.util.function.Function;
 import javasabr.mqtt.model.MqttConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
 import javasabr.mqtt.network.packet.MqttPacketReader;
 import javasabr.mqtt.network.packet.MqttPacketWriter;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.util.function.Function;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.impl.AbstractConnection;

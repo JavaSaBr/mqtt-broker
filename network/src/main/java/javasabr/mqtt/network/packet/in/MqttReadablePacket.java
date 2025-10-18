@@ -1,5 +1,13 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.data.type.StringPair;
@@ -8,14 +16,6 @@ import javasabr.mqtt.model.exception.MalformedPacketMqttException;
 import javasabr.mqtt.model.exception.MqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Set;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;

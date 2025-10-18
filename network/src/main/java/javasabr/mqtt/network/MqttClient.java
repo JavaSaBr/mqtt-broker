@@ -1,12 +1,12 @@
 package javasabr.mqtt.network;
 
-import javasabr.mqtt.network.out.MqttPacketOutFactory;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
+import java.util.concurrent.CompletableFuture;
 import javasabr.mqtt.model.MqttConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import javasabr.mqtt.network.out.MqttPacketOutFactory;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
-import java.util.concurrent.CompletableFuture;
+import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 

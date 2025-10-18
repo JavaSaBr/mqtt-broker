@@ -1,11 +1,11 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.rlib.collections.array.Array;
 
 /**

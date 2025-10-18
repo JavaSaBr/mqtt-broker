@@ -1,12 +1,12 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
 

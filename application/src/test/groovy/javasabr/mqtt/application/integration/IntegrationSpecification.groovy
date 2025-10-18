@@ -149,15 +149,15 @@ class IntegrationSpecification extends Specification {
     return Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> true
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      getConfig() >> deviceConnectionConfig
-      getClient() >> Stub(UnsafeMqttClient) {
+      config() >> deviceConnectionConfig
+      client() >> Stub(UnsafeMqttClient) {
         connectionConfig() >> deviceConnectionConfig
         sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        receiveMax() >> deviceConnectionConfig.getReceiveMaximum()
-        maximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
+        receiveMax() >> deviceConnectionConfig.receiveMaximum()
+        maximumPacketSize() >> deviceConnectionConfig.maximumPacketSize()
         clientId() >> IntegrationSpecification.clientId
         keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        topicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+        topicAliasMaximum() >> deviceConnectionConfig.topicAliasMaximum()
       }
     }
   }
@@ -166,15 +166,15 @@ class IntegrationSpecification extends Specification {
     return Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> false
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      getConfig() >> deviceConnectionConfig
-      getClient() >> Stub(UnsafeMqttClient) {
+      config() >> deviceConnectionConfig
+      client() >> Stub(UnsafeMqttClient) {
         connectionConfig() >> deviceConnectionConfig
         sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        receiveMax() >> deviceConnectionConfig.getReceiveMaximum()
-        maximumPacketSize() >> deviceConnectionConfig.getMaximumPacketSize()
+        receiveMax() >> deviceConnectionConfig.receiveMaximum()
+        maximumPacketSize() >> deviceConnectionConfig.maximumPacketSize()
         clientId() >> IntegrationSpecification.clientId
         keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        topicAliasMaximum() >> deviceConnectionConfig.getTopicAliasMaximum()
+        topicAliasMaximum() >> deviceConnectionConfig.topicAliasMaximum()
       }
     }
   }

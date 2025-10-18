@@ -1,19 +1,19 @@
 package javasabr.mqtt.network.client;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttConnectionConfig;
-import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.handler.client.MqttClientReleaseHandler;
 import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
 import javasabr.mqtt.network.out.MqttPacketOutFactories;
 import javasabr.mqtt.network.out.MqttPacketOutFactory;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -60,11 +60,11 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     this.releaseHandler = releaseHandler;
     this.released = new AtomicBoolean(false);
     this.clientId = connection.remoteAddress();
-    this.sessionExpiryInterval = config.getDefaultSessionExpiryInterval();
-    this.receiveMax = config.getReceiveMaximum();
-    this.maximumPacketSize = config.getMaximumPacketSize();
-    this.topicAliasMaximum = config.getTopicAliasMaximum();
-    this.keepAlive = config.getMinKeepAliveTime();
+    this.sessionExpiryInterval = config.defaultSessionExpiryInterval();
+    this.receiveMax = config.receiveMaximum();
+    this.maximumPacketSize = config.maximumPacketSize();
+    this.topicAliasMaximum = config.topicAliasMaximum();
+    this.keepAlive = config.minKeepAliveTime();
   }
 
   @Override

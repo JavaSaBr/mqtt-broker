@@ -43,9 +43,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
 
     if (session != null) {
       subscriptionService.cleanSubscriptions(client, session);
-      if (client
-          .connectionConfig()
-          .isSessionsEnabled()) {
+      if (client.connectionConfig().sessionsEnabled()) {
         asyncActions = sessionService.store(clientId, session, client.sessionExpiryInterval());
         client.session(null);
       }

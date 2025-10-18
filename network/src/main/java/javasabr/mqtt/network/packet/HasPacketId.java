@@ -1,9 +1,9 @@
 package javasabr.mqtt.network.packet;
 
-import javasabr.rlib.network.Connection;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.network.packet.NetworkPacket;
 
-public interface HasPacketId<C extends Connection<C>> extends NetworkPacket<C> {
+public interface HasPacketId extends NetworkPacket<MqttConnection> {
 
   int packetId();
 }

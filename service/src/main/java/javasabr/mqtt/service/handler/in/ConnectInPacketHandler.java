@@ -106,38 +106,38 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     var config = connection.config();
 
     // if it was closed in parallel
-    if (connection.closed() && config.isSessionsEnabled()) {
+    if (connection.closed() && config.sessionsEnabled()) {
       // store the session again
-      return mqttSessionService.store(client.clientId(), session, config.getDefaultSessionExpiryInterval());
+      return mqttSessionService.store(client.clientId(), session, config.defaultSessionExpiryInterval());
     }
 
     // select result keep alive time
-    var minimalKeepAliveTime = Math.max(config.getMinKeepAliveTime(), packet.getKeepAlive());
-    var keepAlive = config.isKeepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
+    var minimalKeepAliveTime = Math.max(config.minKeepAliveTime(), packet.getKeepAlive());
+    var keepAlive = config.keepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
 
     // select result session expiry interval
-    var sessionExpiryInterval = config.isSessionsEnabled()
+    var sessionExpiryInterval = config.sessionsEnabled()
                                 ? packet.getSessionExpiryInterval()
                                 : SESSION_EXPIRY_INTERVAL_DISABLED;
 
     if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_UNDEFINED) {
-      sessionExpiryInterval = config.getDefaultSessionExpiryInterval();
+      sessionExpiryInterval = config.defaultSessionExpiryInterval();
     }
 
     // select result receive max
     var receiveMax = packet.getReceiveMax() == RECEIVE_MAXIMUM_UNDEFINED
-                     ? config.getReceiveMaximum()
-                     : Math.min(packet.getReceiveMax(), config.getReceiveMaximum());
+                     ? config.receiveMaximum()
+                     : Math.min(packet.getReceiveMax(), config.receiveMaximum());
 
     // select result maximum packet size
     var maximumPacketSize = packet.getMaximumPacketSize() == MAXIMUM_PACKET_SIZE_UNDEFINED
-                            ? config.getMaximumPacketSize()
-                            : Math.min(packet.getMaximumPacketSize(), config.getMaximumPacketSize());
+                            ? config.maximumPacketSize()
+                            : Math.min(packet.getMaximumPacketSize(), config.maximumPacketSize());
 
     // select result topic alias maximum
     var topicAliasMaximum = packet.getTopicAliasMaximum() == TOPIC_ALIAS_MAXIMUM_UNDEFINED
                             ? TOPIC_ALIAS_MAXIMUM_DISABLED
-                            : Math.min(packet.getTopicAliasMaximum(), config.getTopicAliasMaximum());
+                            : Math.min(packet.getTopicAliasMaximum(), config.topicAliasMaximum());
 
     client.session(session);
     client.configure(

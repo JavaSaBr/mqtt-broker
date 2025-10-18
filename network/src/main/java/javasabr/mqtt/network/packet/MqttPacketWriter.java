@@ -1,11 +1,11 @@
 package javasabr.mqtt.network.packet;
 
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.functions.ObjBoolConsumer;
 import javasabr.rlib.network.BufferAllocator;

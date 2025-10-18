@@ -71,9 +71,9 @@ public class SimpleSubscriptionService implements SubscriptionService {
     MqttConnectionConfig config = client.connectionConfig();
     TopicFilter topic = subscribe.getTopicFilter();
 
-    if (!config.isSharedSubscriptionAvailable() && isShared(topic)) {
+    if (!config.sharedSubscriptionAvailable() && isShared(topic)) {
       return SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
-    } else if (!config.isWildcardSubscriptionAvailable() && hasWildcard(topic)) {
+    } else if (!config.wildcardSubscriptionAvailable() && hasWildcard(topic)) {
       return WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     } else if (isInvalid(topic)) {
       return UNSPECIFIED_ERROR;

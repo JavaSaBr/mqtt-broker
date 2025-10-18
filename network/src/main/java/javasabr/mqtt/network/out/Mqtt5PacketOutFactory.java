@@ -59,16 +59,16 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
         authenticationData,
         userProperties,
         client.clientId(),
-        config.getMaxQos(),
+        config.maxQos(),
         client.sessionExpiryInterval(),
         client.maximumPacketSize(),
         client.receiveMax(),
         client.topicAliasMaximum(),
         client.keepAlive(),
-        config.isRetainAvailable(),
-        config.isWildcardSubscriptionAvailable(),
-        config.isSubscriptionIdAvailable(),
-        config.isSharedSubscriptionAvailable());
+        config.retainAvailable(),
+        config.wildcardSubscriptionAvailable(),
+        config.subscriptionIdAvailable(),
+        config.sharedSubscriptionAvailable());
   }
 
   @Override

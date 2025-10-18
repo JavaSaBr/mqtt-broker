@@ -7,7 +7,7 @@ import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class PendingOutResponseInPacketHandler<R extends MqttReadablePacket & HasPacketId<MqttConnection>> extends
+public class PendingOutResponseInPacketHandler<R extends MqttReadablePacket & HasPacketId> extends
     AbstractPacketHandler<UnsafeMqttClient, R> {
 
   @Override

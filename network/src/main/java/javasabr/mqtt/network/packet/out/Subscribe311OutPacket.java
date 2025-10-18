@@ -1,8 +1,8 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
 

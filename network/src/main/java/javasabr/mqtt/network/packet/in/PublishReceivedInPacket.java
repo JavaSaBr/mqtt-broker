@@ -1,15 +1,15 @@
 package javasabr.mqtt.network.packet.in;
 
+import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
+import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.PacketType;
-import javasabr.mqtt.base.utils.DebugUtils;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-import java.util.Set;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -19,7 +19,7 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Accessors(fluent = true, chain = false)
-public class PublishReceivedInPacket extends MqttReadablePacket implements HasPacketId<MqttConnection> {
+public class PublishReceivedInPacket extends MqttReadablePacket implements HasPacketId {
 
   private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_RECEIVED.ordinal();
 

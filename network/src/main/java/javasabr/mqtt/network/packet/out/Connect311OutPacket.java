@@ -1,9 +1,9 @@
 package javasabr.mqtt.network.packet.out;
 
+import java.nio.ByteBuffer;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.packet.PacketType;
-import java.nio.ByteBuffer;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
