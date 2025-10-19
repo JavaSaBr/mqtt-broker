@@ -6,7 +6,7 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.application.integration.config.MqttBrokerTestConfig
 import javasabr.mqtt.application.mock.MqttMockClient
-import javasabr.mqtt.model.MqttConnectionConfig
+import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttVersion
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +36,7 @@ class IntegrationSpecification extends Specification {
   InetSocketAddress internalNetworkAddress
 
   @Autowired
-  MqttConnectionConfig externalConnectionConfig
+  MqttServerConnectionConfig externalConnectionConfig
 
   def buildExternalMqtt311Client() {
     return buildMqtt311Client(generateClientId(), externalNetworkAddress)
@@ -144,37 +144,37 @@ class IntegrationSpecification extends Specification {
     )
   }
 
-  def mqtt5MockedConnection(MqttConnectionConfig deviceConnectionConfig) {
+  def mqtt5MockedConnection(MqttServerConnectionConfig deviceConnectionConfig) {
 
     return Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> true
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      config() >> deviceConnectionConfig
+      serverConnectionConfig() >> deviceConnectionConfig
       client() >> Stub(UnsafeMqttClient) {
         connectionConfig() >> deviceConnectionConfig
         sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        receiveMax() >> deviceConnectionConfig.receiveMaximum()
-        maximumPacketSize() >> deviceConnectionConfig.maximumPacketSize()
+        receiveMaxPublishes() >> deviceConnectionConfig.receiveMaxPublishes()
+        maxPacketSize() >> deviceConnectionConfig.maxPacketSize()
         clientId() >> IntegrationSpecification.clientId
         keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        topicAliasMaximum() >> deviceConnectionConfig.topicAliasMaximum()
+        topicAliasMaxValue() >> deviceConnectionConfig.topicAliasMaxValue()
       }
     }
   }
 
-  def mqtt311MockedConnection(MqttConnectionConfig deviceConnectionConfig) {
+  def mqtt311MockedConnection(MqttServerConnectionConfig deviceConnectionConfig) {
     return Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> false
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      config() >> deviceConnectionConfig
+      serverConnectionConfig() >> deviceConnectionConfig
       client() >> Stub(UnsafeMqttClient) {
         connectionConfig() >> deviceConnectionConfig
         sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        receiveMax() >> deviceConnectionConfig.receiveMaximum()
-        maximumPacketSize() >> deviceConnectionConfig.maximumPacketSize()
+        receiveMaxPublishes() >> deviceConnectionConfig.receiveMaxPublishes()
+        maxPacketSize() >> deviceConnectionConfig.maxPacketSize()
         clientId() >> IntegrationSpecification.clientId
         keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        topicAliasMaximum() >> deviceConnectionConfig.topicAliasMaximum()
+        topicAliasMaxValue() >> deviceConnectionConfig.topicAliasMaxValue()
       }
     }
   }

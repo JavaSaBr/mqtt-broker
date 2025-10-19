@@ -8,30 +8,23 @@ import javasabr.rlib.common.util.BufferUtils
 class PublishAck5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new PublishAck5OutPacket(
             packetId,
             PublishAckReasonCode.NOT_AUTHORIZED,
             userProperties,
-            reasonString
-        )
-
+            reasonString)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new PublishAckInPacket(0b0100_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode == PublishAckReasonCode.NOT_AUTHORIZED
-        reader.packetId == packetId
-        reader.userProperties == userProperties
-        reader.reason == reasonString
+        reader.reasonCode() == PublishAckReasonCode.NOT_AUTHORIZED
+        reader.packetId() == packetId
+        reader.userProperties() == userProperties
+        reader.reason() == reasonString
   }
 }

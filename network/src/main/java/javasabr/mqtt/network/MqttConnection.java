@@ -2,10 +2,11 @@ package javasabr.mqtt.network;
 
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.Function;
-import javasabr.mqtt.model.MqttConnectionConfig;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
+import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.network.packet.MqttPacketReader;
 import javasabr.mqtt.network.packet.MqttPacketWriter;
 import javasabr.rlib.network.BufferAllocator;
@@ -16,34 +17,30 @@ import javasabr.rlib.network.packet.NetworkPacketWriter;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @CustomLog
 @Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class MqttConnection extends AbstractConnection<MqttConnection> {
 
   @Getter(AccessLevel.PROTECTED)
-  private final NetworkPacketReader packetReader;
-
+  final NetworkPacketReader packetReader;
   @Getter(AccessLevel.PROTECTED)
-  private final NetworkPacketWriter packetWriter;
+  final NetworkPacketWriter packetWriter;
 
   @Getter
-  private final PacketInHandler[] packetHandlers;
+  final PacketInHandler[] packetHandlers;
 
   @Getter
-  private final UnsafeMqttClient client;
+  final UnsafeMqttClient client;
   @Getter
-  private final MqttConnectionConfig config;
+  final MqttServerConnectionConfig serverConnectionConfig;
 
-  @Getter
-  @Setter
-  private volatile MqttVersion mqttVersion;
-
-  @Getter
-  @Setter
-  private volatile MqttSession session;
+  @Nullable
+  MqttClientConnectionConfig clientConnectionConfig;
 
   public MqttConnection(
       Network<MqttConnection> network,
@@ -51,19 +48,39 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       BufferAllocator bufferAllocator,
       int maxPacketsByRead,
       PacketInHandler[] packetHandlers,
-      MqttConnectionConfig config,
+      MqttServerConnectionConfig config,
       Function<MqttConnection, UnsafeMqttClient> clientFactory) {
     super(network, channel, bufferAllocator, maxPacketsByRead);
     this.packetHandlers = packetHandlers;
-    this.config = config;
-    this.mqttVersion = MqttVersion.MQTT_3_1_1;
+    this.serverConnectionConfig = config;
     this.packetReader = createPacketReader();
     this.packetWriter = createPacketWriter();
     this.client = clientFactory.apply(this);
   }
 
   public boolean isSupported(MqttVersion mqttVersion) {
-    return this.mqttVersion.ordinal() >= mqttVersion.ordinal();
+    return clientConnectionConfig()
+        .mqttVersion()
+        .include(mqttVersion);
+  }
+
+  public void configure(MqttClientConnectionConfig clientConnectionConfig) {
+    synchronized (this) {
+      this.clientConnectionConfig = clientConnectionConfig;
+    }
+  }
+
+  public MqttClientConnectionConfig clientConnectionConfig() {
+    var config = this.clientConnectionConfig;
+    if (config == null) {
+      synchronized (this) {
+        config = this.clientConnectionConfig;
+        if (config == null) {
+          throw new IllegalStateException("The connection is not fully configured.");
+        }
+      }
+    }
+    return config;
   }
 
   private NetworkPacketReader createPacketReader() {

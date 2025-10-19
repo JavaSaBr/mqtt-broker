@@ -9,9 +9,7 @@ import javasabr.rlib.common.util.BufferUtils
 class Connect5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new Connect5OutPacket(
             userName,
             "",
@@ -26,38 +24,33 @@ class Connect5OutPacketTest extends BaseOutPacketTest {
             authMethod,
             authData,
             sessionExpiryInterval,
-            receiveMaximum,
-            maximumPacketSize,
-            topicAliasMaximum,
+            receiveMaxPublishes,
+            maxPacketSize,
+            topicAliasMaxValue,
             requestResponseInformation,
-            requestProblemInformation
-        )
-
+            requestProblemInformation)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new ConnectInPacket(0b0001_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.username == userName
-        reader.clientId == clientId
-        reader.password == userPassword
-        reader.keepAlive == keepAlive
-        reader.userProperties == userProperties
-        reader.cleanStart == cleanStart
-        reader.willRetain == willRetain
-        reader.authenticationMethod == authMethod
-        reader.authenticationData == authData
-        reader.sessionExpiryInterval == sessionExpiryInterval
-        reader.receiveMax == receiveMaximum
-        reader.maximumPacketSize == maximumPacketSize
-        reader.topicAliasMaximum == topicAliasMaximum
-        reader.requestResponseInformation == requestResponseInformation
-        reader.requestProblemInformation == requestProblemInformation
+        reader.username() == userName
+        reader.clientId() == clientId
+        reader.password() == userPassword
+        reader.keepAlive() == keepAlive
+        reader.userProperties() == userProperties
+        reader.cleanStart() == cleanStart
+        reader.willRetain() == willRetain
+        reader.authenticationMethod() == authMethod
+        reader.authenticationData() == authData
+        reader.sessionExpiryInterval() == sessionExpiryInterval
+        reader.receiveMaxPublishes() == receiveMaxPublishes
+        reader.maxPacketSize() == maxPacketSize
+        reader.topicAliasMaxValue() == topicAliasMaxValue
+        reader.requestResponseInformation() == requestResponseInformation
+        reader.requestProblemInformation() == requestProblemInformation
   }
 }

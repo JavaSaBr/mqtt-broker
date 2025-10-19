@@ -7,30 +7,23 @@ import javasabr.rlib.common.util.BufferUtils
 class SubscribeAck5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new SubscribeAck5OutPacket(
             packetId,
             subscribeAckReasonCodes,
             userProperties,
-            reasonString
-        )
-
+            reasonString)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new SubscribeAckInPacket(0b1001_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         reader.reasonCodes == subscribeAckReasonCodes
         reader.packetId == packetId
-        reader.userProperties == userProperties
+        reader.userProperties() == userProperties
         reader.reason == reasonString
   }
 }

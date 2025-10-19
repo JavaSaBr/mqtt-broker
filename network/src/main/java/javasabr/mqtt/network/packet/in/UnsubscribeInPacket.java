@@ -43,7 +43,7 @@ public class UnsubscribeInPacket extends MqttReadablePacket {
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    packetId = readUnsignedShort(buffer);
+    packetId = readShortUnsigned(buffer);
   }
 
   @Override

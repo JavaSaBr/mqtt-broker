@@ -67,9 +67,9 @@ class TopicSubscriberTest extends NetworkUnitSpecification {
             [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE]
         ]
         mqttClients << [
-            [defaultMqttClient, defaultMqttClient, defaultMqttClient],
-            [defaultMqttClient, defaultMqttClient, defaultMqttClient],
-            [defaultMqttClient, defaultMqttClient, defaultMqttClient],
+            [mqtt311Client, mqtt311Client, mqtt311Client],
+            [mqtt311Client, mqtt311Client, mqtt311Client],
+            [mqtt311Client, mqtt311Client, mqtt311Client],
             [defaultMqttClient(), defaultMqttClient(), defaultMqttClient()]
         ]
   }

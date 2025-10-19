@@ -2,6 +2,7 @@ package javasabr.mqtt.network.packet.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +24,13 @@ public class Subscribe311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected void writeVariableHeader(ByteBuffer buffer) {
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
     writeShort(buffer, packetId);
   }
 
   @Override
-  protected void writePayload(ByteBuffer buffer) {
+  protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
     for (var topicFilter : topicFilters) {
       writeString(buffer,

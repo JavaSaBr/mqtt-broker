@@ -69,7 +69,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
-    packetId = readUnsignedShort(buffer);
+    packetId = readShortUnsigned(buffer);
   }
 
   @Override
@@ -86,7 +86,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
     while (buffer.hasRemaining()) {
 
       var topicFilter = readString(buffer, Integer.MAX_VALUE);
-      var options = readUnsignedByte(buffer);
+      var options = readByteUnsigned(buffer);
 
       var qos = QoS.of(options & 0x03);
       var retainHandling = isMqtt5 ? SubscribeRetainHandling.of((options >> 4) & 0x03) : SubscribeRetainHandling.SEND;

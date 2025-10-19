@@ -8,30 +8,23 @@ import javasabr.rlib.common.util.BufferUtils
 class Subscribe5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new Subscribe5OutPacket(
             topicFiltersObj5,
             1,
             userProperties,
-            MqttProperties.SUBSCRIPTION_ID_UNDEFINED
-        )
-
+            MqttProperties.SUBSCRIPTION_ID_UNDEFINED)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new SubscribeInPacket(0b1000_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         reader.packetId == 1
         reader.topicFilters == topicFiltersObj5
-        reader.userProperties == userProperties
+        reader.userProperties() == userProperties
         reader.subscriptionId == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }
 }

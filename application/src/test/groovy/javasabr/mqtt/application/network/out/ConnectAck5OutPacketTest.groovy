@@ -1,68 +1,71 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.network.packet.in.ConnectAckInPacket
 import javasabr.mqtt.network.packet.out.ConnectAck5OutPacket
-import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAck5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
+        def clientConfig = clientConnectionConfig(
+            maxQos,
+            MqttVersion.MQTT_5,
+            240,
+            250,
+            maxPacketSize,
+            300,
+            30,
+            false,
+            false,
+            sessionsEnabled,
+            retainAvailable,
+            wildcardSubscriptionAvailable,
+            subscriptionIdAvailable,
+            sharedSubscriptionAvailable);
+        def requestedClientId = "-1"
+        def requestedSessionExpireInterval = 360
+        def requestedKeepAlive = 120
+        def requestedReceiveMaxPublishes = 500
         def packet = new ConnectAck5OutPacket(
+            clientConfig,
             ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
             sessionPresent,
-            "-1",
-            MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED,
-            MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED,
-            MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED,
+            clientId,
+            requestedClientId,
+            requestedSessionExpireInterval,
+            requestedKeepAlive,
+            requestedReceiveMaxPublishes,
             reasonString,
             serverReference,
             responseInformation,
             authMethod,
             authData,
-            userProperties,
-            clientId,
-            maxQos,
-            sessionExpiryInterval,
-            maximumPacketSize,
-            receiveMaximum,
-            topicAliasMaximum,
-            serverKeepAlive,
-            retainAvailable,
-            wildcardSubscriptionAvailable,
-            subscriptionIdAvailable,
-            sharedSubscriptionAvailable
-        )
-
+            userProperties)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new ConnectAckInPacket(0b0010_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         reader.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
         reader.sessionPresent == sessionPresent
         reader.retainAvailable == retainAvailable
-        reader.sessionExpiryInterval == sessionExpiryInterval
-        reader.receiveMax == receiveMaximum
-        reader.maximumPacketSize == maximumPacketSize
+        reader.sessionExpiryInterval == 240
+        reader.receiveMaxPublishes == 250
+        reader.maxPacketSize == maxPacketSize
         reader.assignedClientId == clientId
-        reader.topicAliasMaximum == topicAliasMaximum
+        reader.topicAliasMaxValue == 300
         reader.reason == reasonString
-        reader.userProperties == userProperties
+        reader.userProperties() == userProperties
         reader.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
         reader.subscriptionIdAvailable == subscriptionIdAvailable
         reader.sharedSubscriptionAvailable == sharedSubscriptionAvailable
-        reader.serverKeepAlive == serverKeepAlive
+        reader.serverKeepAlive == 30
         reader.responseInformation == responseInformation
         reader.serverReference == serverReference
         reader.authenticationData == authData

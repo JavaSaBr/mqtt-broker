@@ -9,9 +9,7 @@ import javasabr.rlib.common.util.BufferUtils
 class SubscribeAckInPacketTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
-
     given:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0.value)
@@ -19,10 +17,9 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1.value)
           it.put(SubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
         }
-
     when:
         def packet = new SubscribeAckInPacket(0b1001_0000 as byte)
-        def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
+        def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason == ""
@@ -35,14 +32,11 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
   }
 
   def "should read packet correctly as mqtt 5.0"() {
-
     given:
-
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(PacketProperty.REASON_STRING, reasonString)
           it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
         }
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)
           it.putMbi(propertiesBuffer.limit())
@@ -52,10 +46,9 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1.value)
           it.put(SubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
         }
-
     when:
         def packet = new SubscribeAckInPacket(0b1001_0000 as byte)
-        def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
+        def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason == reasonString
@@ -65,9 +58,8 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
         packet.reasonCodes.get(2) == SubscribeAckReasonCode.GRANTED_QOS_1
         packet.reasonCodes.get(3) == SubscribeAckReasonCode.UNSPECIFIED_ERROR
-        packet.userProperties == userProperties
+        packet.userProperties() == userProperties
     when:
-
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)
           it.putMbi(0)
@@ -76,9 +68,8 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1.value)
           it.put(SubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
         }
-
         packet = new SubscribeAckInPacket(0b1001_0000 as byte)
-        result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
+        result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason == ""
@@ -88,6 +79,6 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_2
         packet.reasonCodes.get(2) == SubscribeAckReasonCode.GRANTED_QOS_1
         packet.reasonCodes.get(3) == SubscribeAckReasonCode.UNSPECIFIED_ERROR
-        packet.userProperties == Array.empty()
+        packet.userProperties() == Array.empty()
   }
 }

@@ -5,12 +5,15 @@ import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Connect acknowledgment.
  */
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class ConnectAck311OutPacket extends MqttWritablePacket {
 
   private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_ACK.ordinal();
@@ -25,7 +28,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
    * Connect Reason code from this table. If a Server sends a CONNACK packet containing a Reason code of 128 or greater
    * it MUST then close the Network Connection
    */
-  protected final ConnectAckReasonCode reasonCode;
+  ConnectAckReasonCode reasonCode;
 
   /**
    * The Session Present flag informs the Client whether the Server is using Session State from a previous connection
@@ -33,7 +36,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
    * accepts a connection with Clean Start set to 1, the Server MUST set Session Present to 0 in the CONNACK packet in
    * addition to setting a 0x00 (Success) Reason Code in the CONNACK packet
    */
-  private final boolean sessionPresent;
+  boolean sessionPresent;
 
   @Override
   protected byte packetType() {
@@ -46,7 +49,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected void writeVariableHeader(ByteBuffer buffer) {
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
     buffer.put((byte) (sessionPresent ? 0x01 : 0x00));
     buffer.put(reasonCodeValue());

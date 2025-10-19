@@ -3,6 +3,7 @@ package javasabr.mqtt.network.packet.out;
 import java.nio.ByteBuffer;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.PacketType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
@@ -53,19 +54,19 @@ public class Connect311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected void writeVariableHeader(ByteBuffer buffer) {
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
-    var mqttVersion = getMqttVersion();
+    MqttVersion mqttVersion = getMqttVersion();
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718030
-    writeString(buffer, mqttVersion.getName());
-    writeByte(buffer, mqttVersion.getVersion());
+    writeString(buffer, mqttVersion.rawName());
+    writeByte(buffer, mqttVersion.version());
     writeByte(buffer, buildConnectFlags());
     writeShort(buffer, keepAlive);
   }
 
   @Override
-  protected void writePayload(ByteBuffer buffer) {
+  protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718031
     writeString(buffer, clientId);

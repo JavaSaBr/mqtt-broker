@@ -1,5 +1,6 @@
 package javasabr.mqtt.network.out;
 
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
@@ -25,7 +26,6 @@ import javasabr.mqtt.network.packet.out.PublishRelease5OutPacket;
 import javasabr.mqtt.network.packet.out.SubscribeAck5OutPacket;
 import javasabr.mqtt.network.packet.out.UnsubscribeAck5OutPacket;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.MutableArray;
 
 public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
 
@@ -37,38 +37,29 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       String requestedClientId,
       long requestedSessionExpiryInterval,
       int requestedKeepAlive,
-      int requestedReceiveMax,
+      int requestedReceiveMaxPublishes,
       String reason,
       String serverReference,
       String responseInformation,
       String authenticationMethod,
       byte[] authenticationData,
-      MutableArray<StringPair> userProperties) {
-    var config = client.connectionConfig();
+      Array<StringPair> userProperties) {
+    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     return new ConnectAck5OutPacket(
+        connectionConfig,
         reasonCode,
         sessionPresent,
+        client.clientId(),
         requestedClientId,
         requestedSessionExpiryInterval,
         requestedKeepAlive,
-        requestedReceiveMax,
+        requestedReceiveMaxPublishes,
         reason,
         serverReference,
         responseInformation,
         authenticationMethod,
         authenticationData,
-        userProperties,
-        client.clientId(),
-        config.maxQos(),
-        client.sessionExpiryInterval(),
-        client.maximumPacketSize(),
-        client.receiveMax(),
-        client.topicAliasMaximum(),
-        client.keepAlive(),
-        config.retainAvailable(),
-        config.wildcardSubscriptionAvailable(),
-        config.subscriptionIdAvailable(),
-        config.sharedSubscriptionAvailable());
+        userProperties);
   }
 
   @Override
@@ -83,7 +74,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       boolean stringPayload,
       String responseTopic,
       byte[] correlationData,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new Publish5OutPacket(
         packetId,
         qos,
@@ -103,7 +94,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       int packetId,
       PublishAckReasonCode reasonCode,
       String reason,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new PublishAck5OutPacket(packetId, reasonCode, userProperties, reason);
   }
 
@@ -129,15 +120,16 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
   public MqttWritablePacket newDisconnect(
       MqttClient client,
       DisconnectReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason,
       String serverReference) {
+    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     return new Disconnect5OutPacket(
         reasonCode,
         userProperties,
         reason,
         serverReference,
-        client.sessionExpiryInterval());
+        connectionConfig.sessionExpiryInterval());
   }
 
   @Override
@@ -145,7 +137,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
       AuthenticateReasonCode reasonCode,
       String authenticateMethod,
       byte[] authenticateData,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new Authentication5OutPacket(userProperties, reasonCode, reason, authenticateMethod, authenticateData);
   }
@@ -154,7 +146,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
   public MqttWritablePacket newPublishRelease(
       int packetId,
       PublishReleaseReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new PublishRelease5OutPacket(packetId, reasonCode, userProperties, reason);
   }
@@ -163,7 +155,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
   public MqttWritablePacket newPublishReceived(
       int packetId,
       PublishReceivedReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new PublishReceived5OutPacket(packetId, reasonCode, userProperties, reason);
   }
@@ -172,7 +164,7 @@ public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
   public MqttWritablePacket newPublishCompleted(
       int packetId,
       PublishCompletedReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new PublishComplete5OutPacket(packetId, reasonCode, userProperties, reason);
   }

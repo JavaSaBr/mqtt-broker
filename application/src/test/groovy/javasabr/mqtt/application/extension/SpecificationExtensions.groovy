@@ -56,12 +56,14 @@ class SpecificationExtensions extends Specification {
 
   static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> values) {
 
-    switch (property.getDataType()) {
-      case PacketDataType.UTF_8_STRING_PAIR:
+    switch (property.dataType()) {
+      case PacketDataType.UTF_8_STRING_PAIR: {
         writer.writeStringPairProperties(self, property, values as Array<StringPair>)
         break
-      default:
+      }
+      default: {
         throw new IllegalStateException()
+      }
     }
 
     return self

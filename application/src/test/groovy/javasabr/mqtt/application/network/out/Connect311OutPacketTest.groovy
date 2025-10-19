@@ -10,9 +10,7 @@ import javasabr.rlib.common.util.BufferUtils
 class Connect311OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new Connect311OutPacket(
             userName,
             "",
@@ -22,26 +20,21 @@ class Connect311OutPacketTest extends BaseOutPacketTest {
             QoS.AT_MOST_ONCE,
             keepAlive,
             willRetain,
-            cleanStart,
-        )
-
+            cleanStart)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt311Connection, it)
+          packet.write(defaultMqtt311Connection, it)
         }
-
         def reader = new ConnectInPacket(0b0001_0000 as byte)
-        def result = reader.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.username == userName
-        reader.clientId == clientId
-        reader.password == userPassword
-        reader.keepAlive == keepAlive
-        reader.userProperties == Array.empty()
-        reader.cleanStart == cleanStart
-        reader.willRetain == willRetain
+        reader.username() == userName
+        reader.clientId() == clientId
+        reader.password() == userPassword
+        reader.keepAlive() == keepAlive
+        reader.userProperties() == Array.empty()
+        reader.cleanStart() == cleanStart
+        reader.willRetain  == willRetain
   }
 }

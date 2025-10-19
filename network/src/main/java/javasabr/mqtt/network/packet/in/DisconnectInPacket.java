@@ -81,17 +81,16 @@ public class DisconnectInPacket extends MqttReadablePacket {
   @Override
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
     this.sessionExpiryInterval = connection
-        .client()
+        .clientConnectionConfig()
         .sessionExpiryInterval();
     super.readImpl(connection, buffer);
   }
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = DisconnectReasonCode.of(readUnsignedByte(buffer));
+      reasonCode = DisconnectReasonCode.of(readByteUnsigned(buffer));
     }
   }
 

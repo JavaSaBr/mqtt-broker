@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.handler.publish;
+package javasabr.mqtt.network.handler;
 
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
