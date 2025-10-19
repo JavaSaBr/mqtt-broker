@@ -14,7 +14,7 @@ class Connect311OutPacketTest extends BaseOutPacketTest {
         def packet = new Connect311OutPacket(
             userName,
             "",
-            clientId,
+            mqtt311ClientId,
             userPassword,
             ArrayUtils.EMPTY_BYTE_ARRAY,
             QoS.AT_MOST_ONCE,
@@ -30,7 +30,7 @@ class Connect311OutPacketTest extends BaseOutPacketTest {
     then:
         result
         reader.username() == userName
-        reader.clientId() == clientId
+        reader.clientId() == mqtt311ClientId
         reader.password() == userPassword
         reader.keepAlive() == keepAlive
         reader.userProperties() == Array.empty()

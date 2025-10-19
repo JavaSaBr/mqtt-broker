@@ -17,6 +17,7 @@ import javasabr.rlib.collections.array.IntArray
 import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.atomic.AtomicInteger
 
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName
@@ -34,7 +35,8 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final sessionPresent = true
   public static final cleanStart = false
   public static final willRetain = false
-  public static final clientId = "testClientId"
+  public static final mqtt311ClientId = "testMqtt311ClientId"
+  public static final mqtt5ClientId = "testMqtt5ClientId"
   public static final packetId = 1234 as short
   public static final userName = "testUser"
   public static final userPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
@@ -102,15 +104,16 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
   public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
   public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
+  public static final clientIdGenerator = new AtomicInteger(1)
 
   @Shared
   MqttServerConnectionConfig defaultServerConnectionConfig = defaultServerConnectionConfig()
 
   @Shared
-  MqttClient defaultMqtt311Client = mqttClient(defaultMqtt311ClientConnectionConfig(), clientId)
+  MqttClient defaultMqtt311Client = mqttClient(defaultMqtt311ClientConnectionConfig(), mqtt311ClientId)
 
   @Shared
-  MqttClient defaultMqtt5Client = mqttClient(defaultMqtt5ClientConnectionConfig(), clientId)
+  MqttClient defaultMqtt5Client = mqttClient(defaultMqtt5ClientConnectionConfig(), mqtt5ClientId)
 
   @Shared
   MqttConnection defaultMqtt5Connection = mqtt5Connection();
@@ -176,14 +179,14 @@ class NetworkUnitSpecification extends UnitSpecification {
     return mqttConnection(
         defaultServerConnectionConfig(),
         defaultMqtt311ClientConnectionConfig(),
-        clientId)
+        mqtt311ClientId)
   }
 
   MqttConnection mqtt5Connection() {
     return mqttConnection(
         defaultServerConnectionConfig(),
         defaultMqtt5ClientConnectionConfig(),
-        clientId)
+        mqtt5ClientId)
   }
 
   static MqttServerConnectionConfig serverConnectionConfig(
@@ -268,6 +271,17 @@ class NetworkUnitSpecification extends UnitSpecification {
     return Stub(MqttClient.UnsafeMqttClient) {
       connectionConfig() >> clientConfig
       clientId() >> id
+      toString() >> id
+    }
+  }
+
+  MqttClient newMqtt311Client() {
+    def config = defaultMqtt311ClientConnectionConfig()
+    def id = "generatedClient_${clientIdGenerator.incrementAndGet()}"
+    return Stub(MqttClient.UnsafeMqttClient) {
+      connectionConfig() >> config
+      clientId() >> id
+      toString() >> id
     }
   }
 }

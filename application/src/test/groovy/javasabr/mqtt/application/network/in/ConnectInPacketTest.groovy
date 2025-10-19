@@ -16,7 +16,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
           it.put(4 as byte)
           it.put(0b11000010 as byte)
           it.putShort(keepAlive as short)
-          it.putString(clientId)
+          it.putString(mqtt311ClientId)
           it.putString(userName)
           it.putBytes(userPassword)
         }
@@ -25,7 +25,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.clientId() == clientId
+        packet.clientId() == mqtt311ClientId
         packet.mqttVersion() == MqttVersion.MQTT_3_1_1
         packet.password() == userPassword
         packet.username() == userName
@@ -54,7 +54,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
           it.putShort(keepAlive as short)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
-          it.putString(clientId)
+          it.putString(mqtt311ClientId)
           it.putString(userName)
           it.putBytes(userPassword)
         }
@@ -66,7 +66,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
         packet.keepAlive() == keepAlive
         packet.authenticationMethod() == authMethod
         packet.authenticationData() == authData
-        packet.clientId() == clientId
+        packet.clientId() == mqtt311ClientId
         packet.mqttVersion() == MqttVersion.MQTT_5
         packet.maxPacketSize() == maxPacketSize
         packet.password() == userPassword

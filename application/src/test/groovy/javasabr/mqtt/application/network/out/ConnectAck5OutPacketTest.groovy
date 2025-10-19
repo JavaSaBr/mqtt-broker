@@ -33,7 +33,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
             clientConfig,
             ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
             sessionPresent,
-            clientId,
+            mqtt311ClientId,
             requestedClientId,
             requestedSessionExpireInterval,
             requestedKeepAlive,
@@ -58,7 +58,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
         reader.sessionExpiryInterval == 240
         reader.receiveMaxPublishes == 250
         reader.maxPacketSize == maxPacketSize
-        reader.assignedClientId == clientId
+        reader.assignedClientId == mqtt311ClientId
         reader.topicAliasMaxValue == 300
         reader.reason == reasonString
         reader.userProperties() == userProperties

@@ -46,7 +46,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(PacketProperty.REASON_STRING, reasonString)
           it.putProperty(PacketProperty.SERVER_REFERENCE, serverReference)
-          it.putProperty(PacketProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId)
+          it.putProperty(PacketProperty.ASSIGNED_CLIENT_IDENTIFIER, mqtt311ClientId)
           it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
           it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
           it.putProperty(PacketProperty.MAXIMUM_PACKET_SIZE, maxPacketSize)
@@ -76,7 +76,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
         packet.sessionPresent == sessionPresent
         packet.serverReference == serverReference
         packet.reason == reasonString
-        packet.assignedClientId == clientId
+        packet.assignedClientId == mqtt311ClientId
         packet.authenticationData == authData
         packet.authenticationMethod == authMethod
         packet.maxPacketSize == maxPacketSize
