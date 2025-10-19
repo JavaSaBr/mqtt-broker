@@ -7,30 +7,23 @@ import javasabr.rlib.common.util.BufferUtils
 class UnsubscribeAck5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new UnsubscribeAck5OutPacket(
             packetId,
             unsubscribeAckReasonCodes,
             userProperties,
-            reasonString
-        )
-
+            reasonString)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new UnsubscribeAckInPacket(0b1011_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCodes == unsubscribeAckReasonCodes
-        reader.packetId == packetId
-        reader.userProperties == userProperties
-        reader.reason == reasonString
+        reader.reasonCodes() == unsubscribeAckReasonCodes
+        reader.packetId() == packetId
+        reader.userProperties() == userProperties
+        reader.reason() == reasonString
   }
 }

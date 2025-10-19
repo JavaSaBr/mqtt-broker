@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.impl;
 
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.handler.publish.PublishInHandler;
+import javasabr.mqtt.network.handler.PublishInHandler;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.PublishingService;
 import lombok.RequiredArgsConstructor;

@@ -8,30 +8,23 @@ import javasabr.rlib.common.util.BufferUtils
 class PublishRelease5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
-
         def packet = new PublishRelease5OutPacket(
             packetId,
             PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
             userProperties,
-            reasonString
-        )
-
+            reasonString)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new PublishReleaseInPacket(0b0110_0000 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
-        reader.packetId == packetId
-        reader.userProperties == userProperties
-        reader.reason == reasonString
+        reader.reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
+        reader.packetId() == packetId
+        reader.userProperties() == userProperties
+        reader.reason() == reasonString
   }
 }

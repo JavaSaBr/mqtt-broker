@@ -170,12 +170,12 @@ public class Publish5OutPacket extends Publish311OutPacket {
   }
 
   @Override
-  protected boolean isPropertiesSupported() {
+  protected boolean isPropertiesSupported(MqttConnection connection) {
     return true;
   }
 
   @Override
-  protected void writeProperties(ByteBuffer buffer) {
+  protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
     writeProperty(buffer, PacketProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);

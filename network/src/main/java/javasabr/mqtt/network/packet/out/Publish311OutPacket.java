@@ -55,7 +55,7 @@ public class Publish311OutPacket extends PublishOutPacket {
   }
 
   @Override
-  protected void writeVariableHeader(ByteBuffer buffer) {
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc384800412
     writeString(buffer, topicName);
     if (qos.ordinal() > QoS.AT_MOST_ONCE.ordinal()) {
@@ -64,7 +64,7 @@ public class Publish311OutPacket extends PublishOutPacket {
   }
 
   @Override
-  protected void writePayload(ByteBuffer buffer) {
+  protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc384800413
     buffer.put(payload);
   }

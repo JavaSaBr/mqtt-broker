@@ -44,13 +44,13 @@ public class SubscribeAck311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected void writeVariableHeader(ByteBuffer buffer) {
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718070
     writeShort(buffer, packetId);
   }
 
   @Override
-  protected void writePayload(ByteBuffer buffer) {
+  protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718071
     for (var reasonCode : reasonCodes) {
       writeByte(buffer, reasonCode.getValue());

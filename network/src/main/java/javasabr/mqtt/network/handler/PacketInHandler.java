@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.handler.packet.in;
+package javasabr.mqtt.network.handler;
 
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;

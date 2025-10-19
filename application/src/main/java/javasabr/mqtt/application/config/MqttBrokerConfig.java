@@ -1,10 +1,10 @@
 package javasabr.mqtt.application.config;
 
 import javasabr.mqtt.service.handler.client.DefaultMqttClientReleaseHandler;
-import javasabr.mqtt.network.handler.client.MqttClientReleaseHandler;
+import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.service.handler.in.ConnectInPacketHandler;
 import javasabr.mqtt.service.handler.in.DisconnetInPacketHandler;
-import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
+import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.service.handler.in.PublishAckInPacketHandler;
 import javasabr.mqtt.service.handler.in.PublishCompleteInPacketHandler;
 import javasabr.mqtt.service.handler.in.PublishInPacketHandler;
@@ -12,7 +12,7 @@ import javasabr.mqtt.service.handler.in.PublishReceiveInPacketHandler;
 import javasabr.mqtt.service.handler.in.PublishReleaseInPacketHandler;
 import javasabr.mqtt.service.handler.in.SubscribeInPacketHandler;
 import javasabr.mqtt.service.handler.in.UnsubscribeInPacketHandler;
-import javasabr.mqtt.network.handler.publish.PublishInHandler;
+import javasabr.mqtt.network.handler.PublishInHandler;
 import javasabr.mqtt.service.handler.publish.in.Qos0PublishInHandler;
 import javasabr.mqtt.service.handler.publish.in.Qos1PublishInHandler;
 import javasabr.mqtt.service.handler.publish.in.Qos2PublishInHandler;

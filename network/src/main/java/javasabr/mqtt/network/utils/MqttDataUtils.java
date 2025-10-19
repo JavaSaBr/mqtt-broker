@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 public class MqttDataUtils {
 
   public static int MAX_MBI = 268_435_455;
+  public static int UNKNOWN_LENGTH = -1;
 
   /**
    * Write a MQTT multi-byte integer to byte buffer.
@@ -41,7 +42,7 @@ public class MqttDataUtils {
    * Read a MQTT multi-byte integer from byte buffer.
    * https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901011
    *
-   * @return -1 if buffer's data isn't enough to read integer.
+   * @return {@link #UNKNOWN_LENGTH} if buffer's data isn't enough to read integer.
    */
   public static int readMbi(ByteBuffer buffer) {
 

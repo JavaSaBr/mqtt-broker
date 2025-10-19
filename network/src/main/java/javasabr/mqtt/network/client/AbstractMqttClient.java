@@ -3,13 +3,13 @@ package javasabr.mqtt.network.client;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javasabr.mqtt.base.utils.DebugUtils;
-import javasabr.mqtt.model.MqttConnectionConfig;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
-import javasabr.mqtt.network.handler.client.MqttClientReleaseHandler;
-import javasabr.mqtt.network.handler.packet.in.PacketInHandler;
+import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
+import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.network.out.MqttPacketOutFactories;
 import javasabr.mqtt.network.out.MqttPacketOutFactory;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
@@ -45,26 +45,11 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   @Nullable
   volatile MqttSession session;
 
-  volatile long sessionExpiryInterval;
-  volatile int receiveMax;
-  volatile int maximumPacketSize;
-  volatile int topicAliasMaximum;
-  volatile int keepAlive;
-
-  volatile boolean requestResponseInformation = false;
-  volatile boolean requestProblemInformation = false;
-
   public AbstractMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
-    MqttConnectionConfig config = connection.config();
     this.connection = connection;
     this.releaseHandler = releaseHandler;
     this.released = new AtomicBoolean(false);
     this.clientId = connection.remoteAddress();
-    this.sessionExpiryInterval = config.defaultSessionExpiryInterval();
-    this.receiveMax = config.receiveMaximum();
-    this.maximumPacketSize = config.maximumPacketSize();
-    this.topicAliasMaximum = config.topicAliasMaximum();
-    this.keepAlive = config.minKeepAliveTime();
   }
 
   @Override
@@ -76,24 +61,6 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     } else {
       log.warning(clientId, packet.name(), packet, "[%s] No packet handler for packet:[%s] %s"::formatted);
     }
-  }
-
-  @Override
-  public void configure(
-      long sessionExpiryInterval,
-      int receiveMax,
-      int maximumPacketSize,
-      int topicAliasMaximum,
-      int keepAlive,
-      boolean requestResponseInformation,
-      boolean requestProblemInformation) {
-    this.sessionExpiryInterval = sessionExpiryInterval;
-    this.receiveMax = receiveMax;
-    this.maximumPacketSize = maximumPacketSize;
-    this.topicAliasMaximum = topicAliasMaximum;
-    this.keepAlive = keepAlive;
-    this.requestProblemInformation = requestProblemInformation;
-    this.requestResponseInformation = requestResponseInformation;
   }
 
   @Override
@@ -116,12 +83,9 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   @Override
   public MqttPacketOutFactory packetOutFactory() {
-    return MqttPacketOutFactories.of(connection.mqttVersion());
-  }
-
-  @Override
-  public MqttConnectionConfig connectionConfig() {
-    return connection.config();
+    return MqttPacketOutFactories.of(connection
+        .clientConnectionConfig()
+        .mqttVersion());
   }
 
   @Override
@@ -131,6 +95,11 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     } else {
       return Mono.empty();
     }
+  }
+
+  @Override
+  public MqttClientConnectionConfig connectionConfig() {
+    return connection.clientConnectionConfig();
   }
 
   @Override

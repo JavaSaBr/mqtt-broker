@@ -11,8 +11,11 @@ import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 import static javasabr.mqtt.base.utils.ReactorUtils.ifTrue;
 
+import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
@@ -38,16 +41,12 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
   @Override
   protected void handleImpl(UnsafeMqttClient client, ConnectInPacket packet) {
-
-    var connection = client.connection();
-    connection.mqttVersion(packet.getMqttVersion());
-
     if (checkPacketException(client, packet)) {
       return;
     }
-
+    resolveClientConnectionConfig(client, packet);
     authenticationService
-        .auth(packet.getUsername(), packet.getPassword())
+        .auth(packet.username(), packet.password())
         .flatMap(ifTrue(client, packet, this::registerClient, BAD_USER_NAME_OR_PASSWORD, client::reject))
         .flatMap(ifTrue(client, packet, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, client::reject))
         .subscribe();
@@ -55,34 +54,33 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
 
   private Mono<Boolean> registerClient(UnsafeMqttClient client, ConnectInPacket packet) {
 
-    var requestedClientId = packet.getClientId();
-
+    String requestedClientId = packet.clientId();
     if (StringUtils.isNotEmpty(requestedClientId)) {
       return clientIdRegistry
           .register(requestedClientId)
           .map(ifTrue(requestedClientId, client::clientId));
-    } else {
-
-      var mqttVersion = client
-          .connection()
-          .mqttVersion();
-
-      // we can't assign generated client if for mqtt version less than 5
-      if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal()) {
-        return Mono.just(false);
-      }
-
-      return clientIdRegistry
-          .generate()
-          .flatMap(newClientId -> clientIdRegistry
-              .register(newClientId)
-              .map(ifTrue(newClientId, client::clientId)));
     }
+
+    MqttVersion mqttVersion = client
+        .connection()
+        .clientConnectionConfig()
+        .mqttVersion();
+
+    // we can't assign generated client id for mqtt version less than 5
+    if (mqttVersion.isLowerThan(MqttVersion.MQTT_5)) {
+      return Mono.just(false);
+    }
+
+    return clientIdRegistry
+        .generate()
+        .flatMap(newClientId -> clientIdRegistry
+            .register(newClientId)
+            .map(ifTrue(newClientId, client::clientId)));
   }
 
   private Mono<Boolean> restoreSession(UnsafeMqttClient client, ConnectInPacket packet) {
 
-    if (packet.isCleanStart()) {
+    if (packet.cleanStart()) {
       return mqttSessionService
           .create(client.clientId())
           .flatMap(session -> onConnected(client, packet, session, false));
@@ -96,58 +94,73 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
     }
   }
 
+  private void resolveClientConnectionConfig(UnsafeMqttClient client, ConnectInPacket packet) {
+
+    MqttConnection connection = client.connection();
+    MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
+
+    // select result keep alive time
+    int minimalKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), packet.keepAlive());
+    int keepAlive = serverConfig.keepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
+
+    // select result session expiry interval
+    long sessionExpiryInterval = serverConfig.sessionsEnabled()
+                                ? packet.sessionExpiryInterval()
+                                : SESSION_EXPIRY_INTERVAL_DISABLED;
+
+    if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+      sessionExpiryInterval = serverConfig.defaultSessionExpiryInterval();
+    }
+
+    // select result receive max
+    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_UNDEFINED
+                     ? serverConfig.receiveMaxPublishes()
+                     : Math.min(packet.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
+
+    // select result maximum packet size
+    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_PACKET_SIZE_UNDEFINED
+                            ? serverConfig.maxPacketSize()
+                            : Math.min(packet.maxPacketSize(), serverConfig.maxPacketSize());
+
+    // select result topic alias maximum
+    var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_UNDEFINED
+                            ? TOPIC_ALIAS_MAXIMUM_DISABLED
+                            : Math.min(packet.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
+
+    connection.configure(new MqttClientConnectionConfig(
+        serverConfig.maxQos(),
+        packet.mqttVersion(),
+        sessionExpiryInterval,
+        receiveMaxPublishes,
+        maximumPacketSize,
+        topicAliasMaxValue,
+        keepAlive,
+        packet.requestResponseInformation(),
+        packet.requestProblemInformation(),
+        serverConfig.sessionsEnabled(),
+        serverConfig.retainAvailable(),
+        serverConfig.wildcardSubscriptionAvailable(),
+        serverConfig.subscriptionIdAvailable(),
+        serverConfig.sharedSubscriptionAvailable()));
+  }
+
   private Mono<Boolean> onConnected(
       UnsafeMqttClient client,
       ConnectInPacket packet,
       MqttSession session,
       boolean sessionRestored) {
 
-    var connection = client.connection();
-    var config = connection.config();
+    MqttConnection connection = client.connection();
+    MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
+    MqttClientConnectionConfig clientConfig = connection.clientConnectionConfig();
 
     // if it was closed in parallel
-    if (connection.closed() && config.sessionsEnabled()) {
+    if (connection.closed() && serverConfig.sessionsEnabled()) {
       // store the session again
-      return mqttSessionService.store(client.clientId(), session, config.defaultSessionExpiryInterval());
+      return mqttSessionService.store(client.clientId(), session, clientConfig.sessionExpiryInterval());
     }
-
-    // select result keep alive time
-    var minimalKeepAliveTime = Math.max(config.minKeepAliveTime(), packet.getKeepAlive());
-    var keepAlive = config.keepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
-
-    // select result session expiry interval
-    var sessionExpiryInterval = config.sessionsEnabled()
-                                ? packet.getSessionExpiryInterval()
-                                : SESSION_EXPIRY_INTERVAL_DISABLED;
-
-    if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_UNDEFINED) {
-      sessionExpiryInterval = config.defaultSessionExpiryInterval();
-    }
-
-    // select result receive max
-    var receiveMax = packet.getReceiveMax() == RECEIVE_MAXIMUM_UNDEFINED
-                     ? config.receiveMaximum()
-                     : Math.min(packet.getReceiveMax(), config.receiveMaximum());
-
-    // select result maximum packet size
-    var maximumPacketSize = packet.getMaximumPacketSize() == MAXIMUM_PACKET_SIZE_UNDEFINED
-                            ? config.maximumPacketSize()
-                            : Math.min(packet.getMaximumPacketSize(), config.maximumPacketSize());
-
-    // select result topic alias maximum
-    var topicAliasMaximum = packet.getTopicAliasMaximum() == TOPIC_ALIAS_MAXIMUM_UNDEFINED
-                            ? TOPIC_ALIAS_MAXIMUM_DISABLED
-                            : Math.min(packet.getTopicAliasMaximum(), config.topicAliasMaximum());
 
     client.session(session);
-    client.configure(
-        sessionExpiryInterval,
-        receiveMax,
-        maximumPacketSize,
-        topicAliasMaximum,
-        keepAlive,
-        packet.isRequestResponseInformation(),
-        packet.isRequestProblemInformation());
 
     var connectAck = client
         .packetOutFactory()
@@ -155,10 +168,10 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
             client,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
-            packet.getClientId(),
-            packet.getSessionExpiryInterval(),
-            packet.getKeepAlive(),
-            packet.getReceiveMax());
+            packet.clientId(),
+            packet.sessionExpiryInterval(),
+            packet.keepAlive(),
+            packet.receiveMaxPublishes());
 
     subscriptionService.restoreSubscriptions(client, session);
 
@@ -179,17 +192,14 @@ public class ConnectInPacketHandler extends AbstractPacketHandler<UnsafeMqttClie
   }
 
   private boolean checkPacketException(UnsafeMqttClient client, ConnectInPacket packet) {
-
-    var exception = packet.getException();
-
-    if (exception instanceof ConnectionRejectException) {
-      client.reject(((ConnectionRejectException) exception).getReasonCode());
+    Exception exception = packet.exception();
+    if (exception instanceof ConnectionRejectException cre) {
+      client.reject(cre.getReasonCode());
       return true;
     } else if (exception instanceof MalformedPacketMqttException) {
       client.reject(ConnectAckReasonCode.MALFORMED_PACKET);
       return true;
     }
-
     return false;
   }
 }

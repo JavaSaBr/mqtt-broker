@@ -31,7 +31,7 @@ public class PublishRelease311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected void writeVariableHeader(ByteBuffer buffer) {
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718055
     writeShort(buffer, packetId);
   }

@@ -4,9 +4,14 @@ import javasabr.mqtt.model.data.type.PacketDataType;
 import java.util.stream.Stream;
 import javasabr.rlib.common.util.ClassUtils;
 import javasabr.rlib.common.util.ObjectUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
+@Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum PacketProperty {
   PAYLOAD_FORMAT_INDICATOR(0x01, PacketDataType.BYTE),
   MESSAGE_EXPIRY_INTERVAL(0x02, PacketDataType.INTEGER),
@@ -25,7 +30,7 @@ public enum PacketProperty {
   RESPONSE_INFORMATION(0x1A, PacketDataType.UTF_8_STRING),
   SERVER_REFERENCE(0x1C, PacketDataType.UTF_8_STRING),
   REASON_STRING(0x1F, PacketDataType.UTF_8_STRING),
-  RECEIVE_MAXIMUM(0x21, PacketDataType.SHORT),
+  RECEIVE_MAXIMUM_PUBLISH(0x21, PacketDataType.SHORT),
   TOPIC_ALIAS_MAXIMUM(0x22, PacketDataType.SHORT),
   TOPIC_ALIAS(0x23, PacketDataType.SHORT),
   MAXIMUM_QOS(0x24, PacketDataType.BYTE),
@@ -42,7 +47,7 @@ public enum PacketProperty {
 
     int maxId = Stream
         .of(values())
-        .mapToInt(PacketProperty::getId)
+        .mapToInt(PacketProperty::id)
         .max()
         .orElse(0);
 
@@ -55,7 +60,7 @@ public enum PacketProperty {
     PROPERTIES = result;
   }
 
-  public static PacketProperty of(int id) {
+  public static PacketProperty byId(int id) {
     if (id < 0 || id >= PROPERTIES.length) {
       throw new IllegalArgumentException("Unknown property with id: " + id);
     } else {
@@ -64,12 +69,12 @@ public enum PacketProperty {
   }
 
   @Getter
-  private final byte id;
+  byte id;
   @Getter
-  private final PacketDataType dataType;
+  PacketDataType dataType;
 
   @Nullable
-  private final Object defaultValue;
+  Object defaultValue;
 
   PacketProperty(int id, PacketDataType dataType) {
     this(id, dataType, null);
@@ -81,7 +86,7 @@ public enum PacketProperty {
     this.defaultValue = defaultValue;
   }
 
-  public <T> T getDefaultValue() {
+  public <T> T defaultValue() {
     return ClassUtils.unsafeNNCast(ObjectUtils.notNull(defaultValue));
   }
 }

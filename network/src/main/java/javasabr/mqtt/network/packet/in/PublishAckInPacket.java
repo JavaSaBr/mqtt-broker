@@ -68,11 +68,11 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718045
-    packetId = readUnsignedShort(buffer);
+    packetId = readShortUnsigned(buffer);
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishAckReasonCode.of(readUnsignedByte(buffer));
+      reasonCode = PublishAckReasonCode.of(readByteUnsigned(buffer));
     }
   }
 

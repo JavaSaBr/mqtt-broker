@@ -8,6 +8,7 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.ArrayUtils;
@@ -38,7 +39,7 @@ public class Connect5OutPacket extends Connect311OutPacket {
           The value of Receive Maximum applies only to the current Network Connection. If the Receive Maximum
           value is absent then its value defaults to 65,535.
          */
-      PacketProperty.RECEIVE_MAXIMUM,
+      PacketProperty.RECEIVE_MAXIMUM_PUBLISH,
         /*
           Followed by a Four Byte Integer representing the Maximum Packet Size the Client is willing to accept. If
           the Maximum Packet Size is not present, no limit on the packet size is imposed beyond the limitations in
@@ -247,14 +248,14 @@ public class Connect5OutPacket extends Connect311OutPacket {
   }
 
   @Override
-  protected boolean isPropertiesSupported() {
+  protected boolean isPropertiesSupported(MqttConnection connection) {
     return true;
   }
 
   @Override
   protected void appendWillProperties(ByteBuffer buffer) {
 
-    var propertiesBuffer = getPropertiesBuffer();
+    var propertiesBuffer = propertiesBuffer();
 
     writeWillProperties(propertiesBuffer);
 
@@ -271,14 +272,14 @@ public class Connect5OutPacket extends Connect311OutPacket {
   }
 
   @Override
-  protected void writeProperties(ByteBuffer buffer) {
+  protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901046
     writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
     writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticationMethod);
     writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticationData);
     writeProperty(buffer, PacketProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation, false);
     writeProperty(buffer, PacketProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation, false);
-    writeProperty(buffer, PacketProperty.RECEIVE_MAXIMUM, receiveMax, MqttProperties.RECEIVE_MAXIMUM_UNDEFINED);
+    writeProperty(buffer, PacketProperty.RECEIVE_MAXIMUM_PUBLISH, receiveMax, MqttProperties.RECEIVE_MAXIMUM_UNDEFINED);
     writeProperty(
         buffer,
         PacketProperty.TOPIC_ALIAS_MAXIMUM,

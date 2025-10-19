@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.handler.client;
+package javasabr.mqtt.network.handler;
 
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import reactor.core.publisher.Mono;

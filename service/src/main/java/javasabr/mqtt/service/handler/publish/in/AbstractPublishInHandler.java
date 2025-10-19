@@ -5,7 +5,7 @@ import javasabr.mqtt.model.ActionResult;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.handler.publish.PublishInHandler;
+import javasabr.mqtt.network.handler.PublishInHandler;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;

@@ -22,24 +22,24 @@ public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<M
 
   @Override
   protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {
-    writeVariableHeader(buffer);
+    writeVariableHeader(connection, buffer);
 
-    if (isPropertiesSupported()) {
-      appendProperties(buffer);
+    if (isPropertiesSupported(connection)) {
+      appendProperties(connection, buffer);
     }
 
-    writePayload(buffer);
+    writePayload(connection, buffer);
   }
 
-  protected void writeVariableHeader(ByteBuffer buffer) {}
+  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {}
 
-  protected void writePayload(ByteBuffer buffer) {}
+  protected void writePayload(MqttConnection connection, ByteBuffer buffer) {}
 
-  protected boolean isPropertiesSupported() {
+  protected boolean isPropertiesSupported(MqttConnection connection) {
     return false;
   }
 
-  protected void writeProperties(ByteBuffer buffer) {}
+  protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {}
 
   public final int packetTypeAndFlags() {
     byte type = packetType();
@@ -55,15 +55,14 @@ public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<M
     return 0;
   }
 
-  protected ByteBuffer getPropertiesBuffer() {
+  protected ByteBuffer propertiesBuffer() {
     return LOCAL_BUFFER.get().clear();
   }
 
-  private void appendProperties(ByteBuffer buffer) {
+  private void appendProperties(MqttConnection connection, ByteBuffer buffer) {
 
-    var propertiesBuffer = getPropertiesBuffer();
-
-    writeProperties(propertiesBuffer);
+    ByteBuffer propertiesBuffer = propertiesBuffer();
+    writeProperties(connection, propertiesBuffer);
 
     if (propertiesBuffer.position() < 1) {
       buffer.put((byte) 0);
@@ -71,7 +70,6 @@ public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<M
     }
 
     propertiesBuffer.flip();
-
     MqttDataUtils
         .writeMbi(propertiesBuffer.limit(), buffer)
         .put(propertiesBuffer);
@@ -94,24 +92,27 @@ public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<M
   }
 
   public void writeProperty(ByteBuffer buffer, PacketProperty property, long value) {
-
-    buffer.put(property.getId());
-
-    switch (property.getDataType()) {
-      case BYTE:
+    buffer.put(property.id());
+    switch (property.dataType()) {
+      case BYTE: {
         writeByte(buffer, (int) value);
         break;
-      case SHORT:
+      }
+      case SHORT: {
         writeShort(buffer, (int) value);
         break;
-      case INTEGER:
+      }
+      case INTEGER: {
         writeInt(buffer, (int) value);
         break;
-      case MULTI_BYTE_INTEGER:
+      }
+      case MULTI_BYTE_INTEGER: {
         writeMbi(buffer, (int) value);
         break;
-      default:
+      }
+      default: {
         throw new IllegalArgumentException("Incorrect property type: " + property);
+      }
     }
   }
 
@@ -120,59 +121,45 @@ public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<M
       PacketProperty property,
       String value,
       String def) {
-
     if (!def.equals(value)) {
       writeProperty(buffer, property, value);
     }
   }
 
   public void writeProperty(ByteBuffer buffer, PacketProperty property, StringPair value) {
-    buffer.put(property.getId());
+    buffer.put(property.id());
     writeString(buffer, value.getName());
     writeString(buffer, value.getValue());
   }
 
-  public void writeNotEmptyProperty(
-      ByteBuffer buffer,
-      PacketProperty property,
-      String value) {
-
+  public void writeNotEmptyProperty(ByteBuffer buffer, PacketProperty property, String value) {
     if (!value.isEmpty()) {
       writeProperty(buffer, property, value);
     }
   }
 
-  public void writeNotEmptyProperty(
-      ByteBuffer buffer,
-      PacketProperty property,
-      byte[] value) {
-
+  public void writeNotEmptyProperty(ByteBuffer buffer, PacketProperty property, byte[] value) {
     if (value.length > 0) {
       writeProperty(buffer, property, value);
     }
   }
 
   public void writeProperty(ByteBuffer buffer, PacketProperty property, String value) {
-    buffer.put(property.getId());
+    buffer.put(property.id());
     writeString(buffer, value);
   }
 
   public void writeProperty(ByteBuffer buffer, PacketProperty property, byte[] value) {
-    buffer.put(property.getId());
+    buffer.put(property.id());
     writeBytes(buffer, value);
   }
 
-  public void writeStringPairProperties(
-      ByteBuffer buffer,
-      PacketProperty property,
-      Array<StringPair> pairs) {
-
+  public void writeStringPairProperties(ByteBuffer buffer, PacketProperty property, Array<StringPair> pairs) {
     if (pairs.isEmpty()) {
       return;
     }
-
     for (StringPair pair : pairs) {
-      buffer.put(property.getId());
+      buffer.put(property.id());
       writeStringPair(buffer, pair);
     }
   }

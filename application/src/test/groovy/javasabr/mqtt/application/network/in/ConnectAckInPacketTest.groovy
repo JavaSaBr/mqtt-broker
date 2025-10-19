@@ -11,17 +11,14 @@ import javasabr.rlib.common.util.BufferUtils
 class ConnectAckInPacketTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
-
     given:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
           it.put(ConnectAckReasonCode.NOT_AUTHORIZED.mqtt311)
         }
-
     when:
         def packet = new ConnectAckInPacket(0b0010_0000 as byte)
-        def result = packet.read(mqtt311Connection, dataBuffer, dataBuffer.limit())
+        def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reasonCode == ConnectAckReasonCode.NOT_AUTHORIZED
@@ -37,26 +34,24 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
         packet.wildcardSubscriptionAvailable == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
         packet.subscriptionIdAvailable == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
         packet.responseInformation == ""
-        packet.maximumPacketSize == MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED
+        packet.maxPacketSize == MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED
         packet.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
         packet.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
-        packet.topicAliasMaximum == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
-        packet.receiveMax == MqttProperties.RECEIVE_MAXIMUM_UNDEFINED
+        packet.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
+        packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_UNDEFINED
   }
 
   def "should read packet correctly as mqtt 5.0"() {
-
     given:
-
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(PacketProperty.REASON_STRING, reasonString)
           it.putProperty(PacketProperty.SERVER_REFERENCE, serverReference)
-          it.putProperty(PacketProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId)
+          it.putProperty(PacketProperty.ASSIGNED_CLIENT_IDENTIFIER, mqtt311ClientId)
           it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
           it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(PacketProperty.MAXIMUM_PACKET_SIZE, maximumPacketSize)
+          it.putProperty(PacketProperty.MAXIMUM_PACKET_SIZE, maxPacketSize)
           it.putProperty(PacketProperty.MAXIMUM_QOS, QoS.AT_LEAST_ONCE.ordinal())
-          it.putProperty(PacketProperty.RECEIVE_MAXIMUM, receiveMaximum)
+          it.putProperty(PacketProperty.RECEIVE_MAXIMUM_PUBLISH, receiveMaxPublishes)
           it.putProperty(PacketProperty.RETAIN_AVAILABLE, retainAvailable)
           it.putProperty(PacketProperty.RESPONSE_INFORMATION, responseInformation)
           it.putProperty(PacketProperty.SERVER_KEEP_ALIVE, serverKeepAlive)
@@ -64,31 +59,29 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
           it.putProperty(PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
           it.putProperty(PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, wildcardSubscriptionAvailable)
           it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, subscriptionIdAvailable)
-          it.putProperty(PacketProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaximum)
+          it.putProperty(PacketProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaxValue)
         }
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
           it.put(ConnectAckReasonCode.PAYLOAD_FORMAT_INVALID.mqtt5)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
-
     when:
         def packet = new ConnectAckInPacket(0b0010_0000 as byte)
-        def result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
+        def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reasonCode == ConnectAckReasonCode.PAYLOAD_FORMAT_INVALID
         packet.sessionPresent == sessionPresent
         packet.serverReference == serverReference
         packet.reason == reasonString
-        packet.assignedClientId == clientId
+        packet.assignedClientId == mqtt311ClientId
         packet.authenticationData == authData
         packet.authenticationMethod == authMethod
-        packet.maximumPacketSize == maximumPacketSize
+        packet.maxPacketSize == maxPacketSize
         packet.maximumQos == QoS.AT_LEAST_ONCE
-        packet.receiveMax == receiveMaximum
+        packet.receiveMaxPublishes == receiveMaxPublishes
         packet.retainAvailable == retainAvailable
         packet.responseInformation == responseInformation
         packet.serverKeepAlive == serverKeepAlive
@@ -96,31 +89,27 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
         packet.sharedSubscriptionAvailable == sharedSubscriptionAvailable
         packet.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
         packet.subscriptionIdAvailable == subscriptionIdAvailable
-        packet.topicAliasMaximum == topicAliasMaximum
+        packet.topicAliasMaxValue == topicAliasMaxValue
 
     when:
-
         propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
           it.putProperty(PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, wildcardSubscriptionAvailable)
           it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, subscriptionIdAvailable)
         }
-
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
           it.put(ConnectAckReasonCode.PACKET_TOO_LARGE.mqtt5)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
-
         packet = new ConnectAckInPacket(0b0010_0000 as byte)
-        result = packet.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
+        result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reasonCode == ConnectAckReasonCode.PACKET_TOO_LARGE
         packet.sharedSubscriptionAvailable == sharedSubscriptionAvailable
         packet.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
         packet.subscriptionIdAvailable == subscriptionIdAvailable
-
   }
 }

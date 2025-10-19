@@ -11,7 +11,7 @@ import static javasabr.mqtt.model.utils.TopicUtils.hasWildcard;
 import static javasabr.mqtt.model.utils.TopicUtils.isInvalid;
 import static javasabr.mqtt.model.utils.TopicUtils.isShared;
 
-import javasabr.mqtt.model.MqttConnectionConfig;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.ActionResult;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
@@ -68,12 +68,12 @@ public class SimpleSubscriptionService implements SubscriptionService {
       return null;
     }
 
-    MqttConnectionConfig config = client.connectionConfig();
+    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     TopicFilter topic = subscribe.getTopicFilter();
 
-    if (!config.sharedSubscriptionAvailable() && isShared(topic)) {
+    if (!connectionConfig.sharedSubscriptionAvailable() && isShared(topic)) {
       return SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
-    } else if (!config.wildcardSubscriptionAvailable() && hasWildcard(topic)) {
+    } else if (!connectionConfig.wildcardSubscriptionAvailable() && hasWildcard(topic)) {
       return WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     } else if (isInvalid(topic)) {
       return UNSPECIFIED_ERROR;

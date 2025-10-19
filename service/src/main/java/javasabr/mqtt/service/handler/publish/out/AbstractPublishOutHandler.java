@@ -49,6 +49,6 @@ abstract class AbstractPublishOutHandler implements PublishOutHandler {
         packet.isPayloadFormatIndicator(),
         packet.getResponseTopic(),
         packet.getCorrelationData(),
-        packet.getUserProperties()));
+        packet.userProperties()));
   }
 }

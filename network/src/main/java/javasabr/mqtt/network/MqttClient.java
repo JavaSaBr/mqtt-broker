@@ -1,7 +1,7 @@
 package javasabr.mqtt.network;
 
 import java.util.concurrent.CompletableFuture;
-import javasabr.mqtt.model.MqttConnectionConfig;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.out.MqttPacketOutFactory;
@@ -18,15 +18,6 @@ public interface MqttClient extends MqttUser {
 
     void handle(MqttReadablePacket packet);
 
-    void configure(
-        long sessionExpiryInterval,
-        int receiveMax,
-        int maximumPacketSize,
-        int topicAliasMaximum,
-        int keepAlive,
-        boolean requestResponseInformation,
-        boolean requestProblemInformation);
-
     void clientId(String clientId);
 
     void session(@Nullable MqttSession session);
@@ -38,22 +29,12 @@ public interface MqttClient extends MqttUser {
 
   MqttPacketOutFactory packetOutFactory();
 
-  MqttConnectionConfig connectionConfig();
-
   String clientId();
 
   @Nullable
   MqttSession session();
 
-  int keepAlive();
-
-  int maximumPacketSize();
-
-  int receiveMax();
-
-  int topicAliasMaximum();
-
-  long sessionExpiryInterval();
+  MqttClientConnectionConfig connectionConfig();
 
   void send(MqttWritablePacket packet);
 

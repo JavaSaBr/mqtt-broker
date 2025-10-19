@@ -26,7 +26,6 @@ import javasabr.mqtt.network.packet.out.PublishRelease311OutPacket;
 import javasabr.mqtt.network.packet.out.SubscribeAck311OutPacket;
 import javasabr.mqtt.network.packet.out.UnsubscribeAck311OutPacket;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.MutableArray;
 
 public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
 
@@ -44,7 +43,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
       String responseInformation,
       String authenticationMethod,
       byte[] authenticationData,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new ConnectAck311OutPacket(reasonCode, sessionPresent);
   }
 
@@ -60,7 +59,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
       boolean stringPayload,
       String responseTopic,
       byte[] correlationData,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new Publish311OutPacket(packetId, qos, retained, duplicate, topicName, payload);
   }
 
@@ -69,7 +68,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
       int packetId,
       PublishAckReasonCode reasonCode,
       String reason,
-      MutableArray<StringPair> userProperties) {
+      Array<StringPair> userProperties) {
     return new PublishAck311OutPacket(packetId);
   }
 
@@ -95,7 +94,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
   public MqttWritablePacket newDisconnect(
       MqttClient client,
       DisconnectReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason,
       String serverReference) {
     return new Disconnect311OutPacket();
@@ -106,7 +105,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
       AuthenticateReasonCode reasonCode,
       String authenticateMethod,
       byte[] authenticateData,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     throw new UnsupportedOperationException();
   }
@@ -125,7 +124,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
   public MqttWritablePacket newPublishRelease(
       int packetId,
       PublishReleaseReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new PublishRelease311OutPacket(packetId);
   }
@@ -134,7 +133,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
   public MqttWritablePacket newPublishReceived(
       int packetId,
       PublishReceivedReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new PublishReceived311OutPacket(packetId);
   }
@@ -143,7 +142,7 @@ public class Mqtt311PacketOutFactory extends MqttPacketOutFactory {
   public MqttWritablePacket newPublishCompleted(
       int packetId,
       PublishCompletedReasonCode reasonCode,
-      MutableArray<StringPair> userProperties,
+      Array<StringPair> userProperties,
       String reason) {
     return new PublishComplete311OutPacket(packetId);
   }

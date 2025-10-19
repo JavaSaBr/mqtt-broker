@@ -65,11 +65,11 @@ public class PublishReceivedInPacket extends MqttReadablePacket implements HasPa
     super.readVariableHeader(connection, buffer);
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718050
-    packetId = readUnsignedShort(buffer);
+    packetId = readShortUnsigned(buffer);
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReceivedReasonCode.of(readUnsignedByte(buffer));
+      reasonCode = PublishReceivedReasonCode.of(readByteUnsigned(buffer));
     }
   }
 

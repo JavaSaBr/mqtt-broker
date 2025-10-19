@@ -23,18 +23,17 @@ class TopicSubscriberTest extends NetworkUnitSpecification {
       TopicName topicNames,
       QoS[] subscriberQos,
       QoS[] matchedQos,
-      MqttClient[] mqttClients
-  ) {
+      MqttClient[] mqttClients) {
     given:
-        def subscribeTopicFilter = Mock(SubscribeTopicFilter) {
-          getQos() >>> subscriberQos
-          getTopicFilter() >>> topicFilters
+        SubscribeTopicFilter[] subscribeFilters = new SubscribeTopicFilter[mqttClients.length]
+        mqttClients.eachWithIndex { MqttClient entry, int i ->
+          subscribeFilters[i] = new SubscribeTopicFilter(topicFilters[i], subscriberQos[i])
         }
         def topicSubscriber = new TopicSubscribers()
     when:
-        topicSubscriber.addSubscriber(mqttClients[0], subscribeTopicFilter)
-        topicSubscriber.addSubscriber(mqttClients[1], subscribeTopicFilter)
-        topicSubscriber.addSubscriber(mqttClients[2], subscribeTopicFilter)
+        topicSubscriber.addSubscriber(mqttClients[0], subscribeFilters[0])
+        topicSubscriber.addSubscriber(mqttClients[1], subscribeFilters[1])
+        topicSubscriber.addSubscriber(mqttClients[2], subscribeFilters[2])
     then:
         def subscribers = topicSubscriber.matches(topicNames)
         subscribers.size() == matchedQos.size()
@@ -67,10 +66,10 @@ class TopicSubscriberTest extends NetworkUnitSpecification {
             [AT_LEAST_ONCE, AT_MOST_ONCE, EXACTLY_ONCE]
         ]
         mqttClients << [
-            [defaultMqttClient, defaultMqttClient, defaultMqttClient],
-            [defaultMqttClient, defaultMqttClient, defaultMqttClient],
-            [defaultMqttClient, defaultMqttClient, defaultMqttClient],
-            [defaultMqttClient(), defaultMqttClient(), defaultMqttClient()]
+            [defaultMqtt311Client, defaultMqtt311Client, defaultMqtt311Client],
+            [defaultMqtt311Client, defaultMqtt311Client, defaultMqtt311Client],
+            [defaultMqtt311Client, defaultMqtt311Client, defaultMqtt311Client],
+            [newMqtt311Client(), newMqtt311Client(), newMqtt311Client()]
         ]
   }
 }

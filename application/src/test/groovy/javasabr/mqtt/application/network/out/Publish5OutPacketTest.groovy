@@ -8,7 +8,6 @@ import javasabr.rlib.common.util.BufferUtils
 class Publish5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
-
     given:
         def packet = new Publish5OutPacket(
             packetId,
@@ -21,17 +20,13 @@ class Publish5OutPacketTest extends BaseOutPacketTest {
             false,
             responseTopic,
             correlationData,
-            userProperties
-        )
+            userProperties)
     when:
-
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
-
         def reader = new PublishInPacket(0b0011_1101 as byte)
-        def result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         reader.packetId == packetId
@@ -40,13 +35,12 @@ class Publish5OutPacketTest extends BaseOutPacketTest {
         reader.duplicate
         reader.payload == publishPayload
         reader.topicName == publishTopic
-        reader.userProperties == userProperties
+        reader.userProperties() == userProperties
         reader.topicAlias == topicAlias
         !reader.payloadFormatIndicator
         reader.responseTopic == responseTopic
         reader.correlationData == correlationData
     when:
-
         packet = new Publish5OutPacket(
             packetId,
             QoS.AT_MOST_ONCE,
@@ -58,16 +52,14 @@ class Publish5OutPacketTest extends BaseOutPacketTest {
             true,
             responseTopic,
             correlationData,
-            userProperties
-        )
+            userProperties)
 
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(mqtt5Connection, it)
+          packet.write(defaultMqtt5Connection, it)
         }
 
         reader = new PublishInPacket(0b0011_0000 as byte)
-        result = reader.read(mqtt5Connection, dataBuffer, dataBuffer.limit())
-
+        result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         reader.packetId == 0
@@ -76,7 +68,7 @@ class Publish5OutPacketTest extends BaseOutPacketTest {
         !reader.duplicate
         reader.payload == publishPayload
         reader.topicName == publishTopic
-        reader.userProperties == userProperties
+        reader.userProperties() == userProperties
         reader.topicAlias == topicAlias
         reader.payloadFormatIndicator
         reader.responseTopic == responseTopic

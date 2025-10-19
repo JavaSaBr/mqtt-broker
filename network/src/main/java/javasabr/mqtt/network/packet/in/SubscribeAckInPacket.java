@@ -60,7 +60,7 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718070
-    packetId = readUnsignedShort(buffer);
+    packetId = readShortUnsigned(buffer);
   }
 
   @Override
@@ -72,7 +72,7 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
     }
 
     while (buffer.hasRemaining()) {
-      reasonCodes.add(SubscribeAckReasonCode.of(readUnsignedByte(buffer)));
+      reasonCodes.add(SubscribeAckReasonCode.of(readByteUnsigned(buffer)));
     }
   }
 
