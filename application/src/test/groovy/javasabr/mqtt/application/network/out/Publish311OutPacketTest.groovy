@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.packet.in.PublishInPacket
 import javasabr.mqtt.network.packet.out.Publish311OutPacket
-import javasabr.mqtt.model.QoS
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

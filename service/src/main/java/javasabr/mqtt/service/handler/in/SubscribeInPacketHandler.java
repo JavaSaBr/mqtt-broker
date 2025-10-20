@@ -1,16 +1,16 @@
 package javasabr.mqtt.service.handler.in;
 
+import static java.lang.Byte.toUnsignedInt;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
-import static java.lang.Byte.toUnsignedInt;
 
+import java.util.Set;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.packet.in.SubscribeInPacket;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.service.SubscriptionService;
-import java.util.Set;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
 

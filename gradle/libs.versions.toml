@@ -1,6 +1,6 @@
 [versions]
 # https://gitlab.com/JavaSaBr/maven-repo/-/packages
-rlib = "10.0.alpha3"
+rlib = "10.0.alpha4"
 # https://mvnrepository.com/artifact/org.jetbrains/annotations
 jetbrains-annotations = "26.0.2"
 # https://mvnrepository.com/artifact/org.projectlombok/lombok

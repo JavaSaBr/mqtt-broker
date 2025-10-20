@@ -1,9 +1,9 @@
 package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.topic.SharedTopicFilter;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
+import javasabr.mqtt.model.MqttUser;
+import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;

@@ -1,7 +1,7 @@
 package javasabr.mqtt.model;
 
-import javasabr.mqtt.model.data.type.PacketDataType;
 import java.util.stream.Stream;
+import javasabr.mqtt.model.data.type.PacketDataType;
 import javasabr.rlib.common.util.ClassUtils;
 import javasabr.rlib.common.util.ObjectUtils;
 import lombok.AccessLevel;

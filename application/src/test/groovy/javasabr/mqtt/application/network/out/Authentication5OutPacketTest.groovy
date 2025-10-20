@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.reason.code.AuthenticateReasonCode
 import javasabr.mqtt.network.packet.in.AuthenticationInPacket
 import javasabr.mqtt.network.packet.out.Authentication5OutPacket
-import javasabr.mqtt.model.reason.code.AuthenticateReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class Authentication5OutPacketTest extends BaseOutPacketTest {

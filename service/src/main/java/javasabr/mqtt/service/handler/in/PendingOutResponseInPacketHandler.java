@@ -1,7 +1,6 @@
 package javasabr.mqtt.service.handler.in;
 
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import lombok.RequiredArgsConstructor;

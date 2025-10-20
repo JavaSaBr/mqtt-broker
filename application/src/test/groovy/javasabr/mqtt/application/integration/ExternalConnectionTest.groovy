@@ -4,11 +4,11 @@ import com.hivemq.client.mqtt.mqtt3.exceptions.Mqtt3ConnAckException
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCode
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5ConnAckException
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
-import javasabr.mqtt.network.packet.out.Connect311OutPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
+import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.packet.out.Connect311OutPacket
 import javasabr.rlib.common.util.ArrayUtils
 import spock.lang.Ignore
 

@@ -3,12 +3,12 @@ package javasabr.mqtt.application.integration
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
-import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.application.integration.config.MqttBrokerTestConfig
 import javasabr.mqtt.application.mock.MqttMockClient
-import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttProperties
+import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
+import javasabr.mqtt.network.MqttConnection
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import spock.lang.Specification
@@ -16,7 +16,7 @@ import spock.lang.Specification
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 
-import static javasabr.mqtt.network.MqttClient.*
+import static javasabr.mqtt.network.MqttClient.UnsafeMqttClient
 
 @SpringJUnitConfig(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {

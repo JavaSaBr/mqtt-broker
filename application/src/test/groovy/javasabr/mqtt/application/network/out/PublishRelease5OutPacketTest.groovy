@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket
 import javasabr.mqtt.network.packet.out.PublishRelease5OutPacket
-import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishRelease5OutPacketTest extends BaseOutPacketTest {

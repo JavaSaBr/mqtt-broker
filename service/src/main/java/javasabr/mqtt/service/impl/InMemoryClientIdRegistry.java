@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.impl;
 
-import javasabr.mqtt.service.ClientIdRegistry;
 import java.util.BitSet;
 import java.util.UUID;
+import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.rlib.collections.dictionary.Dictionary;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;

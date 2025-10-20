@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.in
 
-import javasabr.mqtt.network.packet.in.DisconnectInPacket
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
+import javasabr.mqtt.network.packet.in.DisconnectInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

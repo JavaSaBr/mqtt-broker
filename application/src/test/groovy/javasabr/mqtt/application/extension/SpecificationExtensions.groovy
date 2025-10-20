@@ -1,11 +1,11 @@
 package javasabr.mqtt.application.extension
 
-import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.packet.out.MqttWritablePacket
-import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.data.type.PacketDataType
 import javasabr.mqtt.model.data.type.StringPair
+import javasabr.mqtt.network.MqttConnection
+import javasabr.mqtt.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 import spock.lang.Specification

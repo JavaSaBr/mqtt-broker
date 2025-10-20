@@ -1,18 +1,18 @@
 package javasabr.mqtt.application.config;
 
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.handler.PacketInHandler;
-import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.client.InternalMqttClient;
-import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.client.ExternalMqttClient;
+import javasabr.mqtt.network.client.InternalMqttClient;
+import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
+import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;

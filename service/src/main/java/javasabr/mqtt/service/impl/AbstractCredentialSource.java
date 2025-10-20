@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.impl;
 
-import javasabr.mqtt.service.CredentialSource;
 import java.util.Arrays;
+import javasabr.mqtt.service.CredentialSource;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;

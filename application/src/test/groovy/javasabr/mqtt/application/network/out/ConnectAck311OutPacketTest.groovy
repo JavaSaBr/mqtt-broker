@@ -1,9 +1,9 @@
 package javasabr.mqtt.application.network.out
 
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
-import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
+import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
