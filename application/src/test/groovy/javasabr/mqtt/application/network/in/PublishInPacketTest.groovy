@@ -1,10 +1,10 @@
 package javasabr.mqtt.application.network.in
 
-import javasabr.mqtt.network.packet.in.PublishInPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
+import javasabr.mqtt.network.packet.in.PublishInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.common.util.ArrayUtils

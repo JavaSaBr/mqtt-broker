@@ -1,12 +1,12 @@
 package javasabr.mqtt.service.handler.client;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
-import javasabr.mqtt.network.client.AbstractMqttClient;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.client.AbstractMqttClient;
+import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MqttSessionService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;

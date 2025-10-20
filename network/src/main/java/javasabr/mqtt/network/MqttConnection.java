@@ -86,8 +86,6 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   private NetworkPacketReader createPacketReader() {
     return new MqttPacketReader(
         this,
-        channel,
-        bufferAllocator,
         this::updateLastActivity,
         this::handleReceivedPacket,
         maxPacketsByRead);
@@ -96,8 +94,6 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   private NetworkPacketWriter createPacketWriter() {
     return new MqttPacketWriter(
         this,
-        channel,
-        bufferAllocator,
         this::updateLastActivity,
         this::nextPacketToWrite,
         this::serializedPacket,

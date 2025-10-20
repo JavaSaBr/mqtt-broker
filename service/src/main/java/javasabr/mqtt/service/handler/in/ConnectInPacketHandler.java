@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.handler.in;
 
+import static javasabr.mqtt.base.utils.ReactorUtils.ifTrue;
 import static javasabr.mqtt.model.MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
 import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
 import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
@@ -9,17 +10,16 @@ import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
-import static javasabr.mqtt.base.utils.ReactorUtils.ifTrue;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
+import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.exception.MalformedPacketMqttException;
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttSession;
-import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
+import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.packet.in.ConnectInPacket;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;

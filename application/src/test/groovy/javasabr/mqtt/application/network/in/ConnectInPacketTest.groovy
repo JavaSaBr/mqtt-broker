@@ -1,9 +1,9 @@
 package javasabr.mqtt.application.network.in
 
-import javasabr.mqtt.model.exception.MalformedPacketMqttException
-import javasabr.mqtt.network.packet.in.ConnectInPacket
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.PacketProperty
+import javasabr.mqtt.model.exception.MalformedPacketMqttException
+import javasabr.mqtt.network.packet.in.ConnectInPacket
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 

@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.network.in
 
-import javasabr.mqtt.network.packet.in.UnsubscribeInPacket
 import javasabr.mqtt.model.PacketProperty
+import javasabr.mqtt.network.packet.in.UnsubscribeInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

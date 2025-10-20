@@ -1,10 +1,10 @@
 package javasabr.mqtt.application.network.in
 
-import javasabr.mqtt.network.packet.in.SubscribeInPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
+import javasabr.mqtt.network.packet.in.SubscribeInPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 

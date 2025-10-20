@@ -3,9 +3,7 @@ package javasabr.mqtt.application.util
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName
-import static javasabr.mqtt.model.utils.TopicUtils.isInvalid
+import static javasabr.mqtt.model.utils.TopicUtils.*
 
 class TopicUtilsTest extends Specification {
 

@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.packet.in.PublishInPacket
 import javasabr.mqtt.network.packet.out.Publish5OutPacket
-import javasabr.mqtt.model.QoS
 import javasabr.rlib.common.util.BufferUtils
 
 class Publish5OutPacketTest extends BaseOutPacketTest {

@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.network.packet.in.SubscribeInPacket
 import javasabr.mqtt.network.packet.out.Subscribe5OutPacket
-import javasabr.mqtt.model.MqttProperties
 import javasabr.rlib.common.util.BufferUtils
 
 class Subscribe5OutPacketTest extends BaseOutPacketTest {

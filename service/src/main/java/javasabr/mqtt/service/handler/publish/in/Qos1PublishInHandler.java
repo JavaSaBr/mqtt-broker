@@ -1,11 +1,11 @@
 package javasabr.mqtt.service.handler.publish.in;
 
-import javasabr.mqtt.service.handler.publish.out.PublishOutHandler;
 import javasabr.mqtt.model.ActionResult;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.handler.publish.out.PublishOutHandler;
 
 public class Qos1PublishInHandler extends AbstractPublishInHandler {
 

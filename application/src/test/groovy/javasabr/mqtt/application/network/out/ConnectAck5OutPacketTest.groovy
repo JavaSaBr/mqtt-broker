@@ -1,9 +1,9 @@
 package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.MqttVersion
+import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.network.packet.in.ConnectAckInPacket
 import javasabr.mqtt.network.packet.out.ConnectAck5OutPacket
-import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAck5OutPacketTest extends BaseOutPacketTest {

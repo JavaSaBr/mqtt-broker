@@ -1,10 +1,10 @@
 package javasabr.mqtt.application.network.in
 
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
+import javasabr.mqtt.network.packet.in.ConnectAckInPacket
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 

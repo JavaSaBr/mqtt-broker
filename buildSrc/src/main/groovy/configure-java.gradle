@@ -1,5 +1,15 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
+plugins {
+  id("java")
+}
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(25)
+  }
+}
+
 dependencies {
   compileOnly libs.jspecify
   compileOnly libs.lombok

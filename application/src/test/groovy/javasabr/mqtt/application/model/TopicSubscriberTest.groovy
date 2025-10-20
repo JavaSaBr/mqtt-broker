@@ -1,17 +1,15 @@
 package javasabr.mqtt.application.model
 
-import javasabr.mqtt.network.MqttClient
 import javasabr.mqtt.application.network.NetworkUnitSpecification
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.model.topic.TopicSubscribers
+import javasabr.mqtt.network.MqttClient
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.QoS.AT_LEAST_ONCE
-import static javasabr.mqtt.model.QoS.AT_MOST_ONCE
-import static javasabr.mqtt.model.QoS.EXACTLY_ONCE
+import static javasabr.mqtt.model.QoS.*
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName
 

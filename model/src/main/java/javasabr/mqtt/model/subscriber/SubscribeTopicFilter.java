@@ -2,9 +2,9 @@ package javasabr.mqtt.model.subscriber;
 
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
-import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
+import javasabr.mqtt.model.topic.TopicFilter;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

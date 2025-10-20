@@ -7,9 +7,7 @@ import javasabr.mqtt.model.topic.TopicSubscribers
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName
-import static javasabr.mqtt.model.utils.TopicUtils.isInvalid
+import static javasabr.mqtt.model.utils.TopicUtils.*
 
 class TopicTest extends Specification {
 

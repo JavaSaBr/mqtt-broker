@@ -1,5 +1,7 @@
-apply plugin: "java-library"
-apply from: "$rootDir/gradle/configure-java.gradle"
+plugins {
+  id("java-library")
+  id("configure-java")
+}
 
 dependencies {
   api projects.network

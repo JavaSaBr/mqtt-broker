@@ -4,9 +4,7 @@ import javasabr.mqtt.application.network.NetworkUnitSpecification
 import javasabr.mqtt.model.ActionResult
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.ActionResult.EMPTY
-import static javasabr.mqtt.model.ActionResult.FAILED
-import static javasabr.mqtt.model.ActionResult.SUCCESS
+import static javasabr.mqtt.model.ActionResult.*
 
 class ActionResultTest extends NetworkUnitSpecification {
 

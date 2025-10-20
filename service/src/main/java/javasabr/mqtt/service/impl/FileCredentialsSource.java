@@ -1,11 +1,11 @@
 package javasabr.mqtt.service.impl;
 
-import javasabr.mqtt.model.exception.CredentialsSourceException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import javasabr.mqtt.model.exception.CredentialsSourceException;
 import javasabr.rlib.collections.dictionary.DictionaryCollectors;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 

@@ -1,8 +1,8 @@
 package javasabr.mqtt.application.network.out
 
+import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.network.packet.in.PublishCompleteInPacket
 import javasabr.mqtt.network.packet.out.PublishComplete5OutPacket
-import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishComplete5OutPacketTest extends BaseOutPacketTest {

@@ -1,9 +1,9 @@
 package javasabr.mqtt.model.topic;
 
-import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.QoS;
 import java.util.Objects;
 import java.util.function.Supplier;
+import javasabr.mqtt.model.MqttUser;
+import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
