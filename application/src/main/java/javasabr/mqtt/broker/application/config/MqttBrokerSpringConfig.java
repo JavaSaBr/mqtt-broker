@@ -9,15 +9,18 @@ import javasabr.mqtt.network.MqttClientFactory;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
+import javasabr.mqtt.network.handler.PublishInHandler;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MqttConnectionService;
 import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.PublishingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionService;
+import javasabr.mqtt.service.impl.DefaultPublishingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
@@ -26,6 +29,13 @@ import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.impl.SimpleSubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PendingResponseMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PublishAckMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PublishCompleteMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PublishMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PublishReceiveMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
@@ -75,6 +85,11 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  PublishingService publishingService() {
+    return new DefaultPublishingService(new PublishInHandler[0]);
+  }
+
+  @Bean
   MqttInMessageHandler connectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
@@ -85,6 +100,36 @@ public class MqttBrokerSpringConfig {
         authenticationService,
         mqttSessionService,
         subscriptionService);
+  }
+
+  @Bean
+  MqttInMessageHandler publishAckMqttInMessageHandler() {
+    return new PublishAckMqttInMessageHandler();
+  }
+
+  @Bean
+  MqttInMessageHandler publishCompleteMqttInMessageHandler() {
+    return new PublishCompleteMqttInMessageHandler();
+  }
+
+  @Bean
+  MqttInMessageHandler publishMqttInMessageHandler(PublishingService publishingService) {
+    return new PublishMqttInMessageHandler(publishingService);
+  }
+
+  @Bean
+  MqttInMessageHandler publishReceiveMqttInMessageHandler() {
+    return new PublishReceiveMqttInMessageHandler();
+  }
+
+  @Bean
+  MqttInMessageHandler publishReleaseMqttInMessageHandler() {
+    return new PublishReleaseMqttInMessageHandler();
+  }
+
+  @Bean
+  MqttInMessageHandler disconnectMqttInMessageHandler() {
+    return new DisconnectMqttInMessageHandler();
   }
 
   @Bean

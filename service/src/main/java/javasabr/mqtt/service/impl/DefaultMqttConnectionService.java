@@ -31,6 +31,7 @@ public class DefaultMqttConnectionService implements MqttConnectionService {
     }
 
     this.inMessageHandlers = inMessageHandlers;
+    log.info(knownInMessageHandlers.size(), "Registered [%s] MqttInMessageHandlers"::formatted);
   }
 
   @Override
