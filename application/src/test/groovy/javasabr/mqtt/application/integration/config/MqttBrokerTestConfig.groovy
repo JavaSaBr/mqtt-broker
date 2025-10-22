@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.integration.config
 
-import javasabr.mqtt.application.config.MqttBrokerConfig
-import javasabr.mqtt.application.config.MqttNetworkConfig
+import javasabr.mqtt.broker.application.config.MqttBrokerConfig
+import javasabr.mqtt.broker.application.config.MqttNetworkConfig
 import javasabr.mqtt.network.MqttConnection
 import javasabr.rlib.network.server.ServerNetwork
 import org.springframework.beans.factory.annotation.Qualifier

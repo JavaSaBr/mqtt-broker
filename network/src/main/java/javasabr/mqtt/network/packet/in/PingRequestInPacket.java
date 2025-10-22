@@ -1,13 +1,13 @@
 package javasabr.mqtt.network.packet.in;
 
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 
 /**
  * PING request.
  */
 public class PingRequestInPacket extends MqttReadablePacket {
 
-  public static final byte PACKET_TYPE = (byte) PacketType.PING_REQUEST.ordinal();
+  public static final byte PACKET_TYPE = (byte) MqttPacketType.PING_REQUEST.ordinal();
 
   public PingRequestInPacket(byte info) {
     super(info);

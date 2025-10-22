@@ -7,7 +7,7 @@ import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Authentication5OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.AUTHENTICATE.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*

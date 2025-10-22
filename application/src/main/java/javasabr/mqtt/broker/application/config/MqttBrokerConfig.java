@@ -1,16 +1,16 @@
-package javasabr.mqtt.application.config;
+package javasabr.mqtt.broker.application.config;
 
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.network.handler.PublishInHandler;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MqttSessionService;
 import javasabr.mqtt.service.PublishingService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.handler.client.DefaultMqttClientReleaseHandler;
+import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.handler.in.ConnectInPacketHandler;
 import javasabr.mqtt.service.handler.in.DisconnetInPacketHandler;
 import javasabr.mqtt.service.handler.in.PublishAckInPacketHandler;
@@ -80,20 +80,20 @@ public class MqttBrokerConfig {
       PublishingService publishingService,
       MqttSessionService mqttSessionService) {
 
-    var handlers = new PacketInHandler[PacketType.INVALID.ordinal()];
-    handlers[PacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
+    var handlers = new PacketInHandler[MqttPacketType.INVALID.ordinal()];
+    handlers[MqttPacketType.CONNECT.ordinal()] = new ConnectInPacketHandler(
         clientIdRegistry,
         authenticationService,
         mqttSessionService,
         subscriptionService);
-    handlers[PacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
-    handlers[PacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
-    handlers[PacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
-    handlers[PacketType.DISCONNECT.ordinal()] = new DisconnetInPacketHandler();
-    handlers[PacketType.PUBLISH_ACK.ordinal()] = new PublishAckInPacketHandler();
-    handlers[PacketType.PUBLISH_RECEIVED.ordinal()] = new PublishReceiveInPacketHandler();
-    handlers[PacketType.PUBLISH_RELEASED.ordinal()] = new PublishReleaseInPacketHandler();
-    handlers[PacketType.PUBLISH_COMPLETED.ordinal()] = new PublishCompleteInPacketHandler();
+    handlers[MqttPacketType.SUBSCRIBE.ordinal()] = new SubscribeInPacketHandler(subscriptionService);
+    handlers[MqttPacketType.UNSUBSCRIBE.ordinal()] = new UnsubscribeInPacketHandler(subscriptionService);
+    handlers[MqttPacketType.PUBLISH.ordinal()] = new PublishInPacketHandler(publishingService);
+    handlers[MqttPacketType.DISCONNECT.ordinal()] = new DisconnetInPacketHandler();
+    handlers[MqttPacketType.PUBLISH_ACK.ordinal()] = new PublishAckInPacketHandler();
+    handlers[MqttPacketType.PUBLISH_RECEIVED.ordinal()] = new PublishReceiveInPacketHandler();
+    handlers[MqttPacketType.PUBLISH_RELEASED.ordinal()] = new PublishReleaseInPacketHandler();
+    handlers[MqttPacketType.PUBLISH_COMPLETED.ordinal()] = new PublishCompleteInPacketHandler();
 
     return handlers;
   }
@@ -103,7 +103,7 @@ public class MqttBrokerConfig {
       ClientIdRegistry clientIdRegistry,
       MqttSessionService mqttSessionService,
       SubscriptionService subscriptionService) {
-    return new DefaultMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, subscriptionService);
+    return new ExternalMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, subscriptionService);
   }
 
   @Bean

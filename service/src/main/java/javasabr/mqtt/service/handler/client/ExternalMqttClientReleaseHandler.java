@@ -5,9 +5,9 @@ import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MqttSessionService;
 import javasabr.mqtt.service.SubscriptionService;
 
-public class DefaultMqttClientReleaseHandler extends AbstractMqttClientReleaseHandler<ExternalMqttClient> {
+public class ExternalMqttClientReleaseHandler extends AbstractMqttClientReleaseHandler<ExternalMqttClient> {
 
-  public DefaultMqttClientReleaseHandler(
+  public ExternalMqttClientReleaseHandler(
       ClientIdRegistry clientIdRegistry,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService) {

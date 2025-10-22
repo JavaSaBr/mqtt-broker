@@ -10,7 +10,7 @@ import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.common.util.StringUtils;
@@ -27,7 +27,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConnectInPacket extends MqttReadablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.CONNECT.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.CONNECT.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart", "mqttVersion");

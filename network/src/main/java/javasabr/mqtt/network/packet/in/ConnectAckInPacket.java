@@ -10,7 +10,7 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
@@ -23,7 +23,7 @@ import lombok.Getter;
 @Getter
 public class ConnectAckInPacket extends MqttReadablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.CONNECT_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.CONNECT_ACK.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*

@@ -9,7 +9,7 @@ import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -20,7 +20,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true, chain = false)
 public class PublishAckInPacket extends MqttReadablePacket implements HasPacketId {
 
-  private static final int PACKET_TYPE = PacketType.PUBLISH_ACK.ordinal();
+  private static final int PACKET_TYPE = MqttPacketType.PUBLISH_ACK.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "packetId");

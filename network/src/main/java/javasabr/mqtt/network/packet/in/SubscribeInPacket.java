@@ -13,7 +13,7 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.NumberUtils;
@@ -25,7 +25,7 @@ import lombok.Getter;
 @Getter
 public class SubscribeInPacket extends MqttReadablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.SUBSCRIBE.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.SUBSCRIBE.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("packetId", "topicFilters");

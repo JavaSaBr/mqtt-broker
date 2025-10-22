@@ -1,4 +1,4 @@
 @NullMarked
-package javasabr.mqtt.application.config;
+package javasabr.mqtt.broker.application.config;
 
 import org.jspecify.annotations.NullMarked;

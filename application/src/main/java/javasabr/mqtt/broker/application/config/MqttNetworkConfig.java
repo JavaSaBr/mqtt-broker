@@ -1,4 +1,4 @@
-package javasabr.mqtt.application.config;
+package javasabr.mqtt.broker.application.config;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -12,7 +12,6 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.network.client.InternalMqttClient;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
@@ -76,14 +75,12 @@ public class MqttNetworkConfig {
       ServerNetworkConfig externalNetworkConfig,
       BufferAllocator externalBufferAllocator,
       MqttServerConnectionConfig externalConnectionConfig,
-      PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler mqttClientReleaseHandler) {
     return NetworkFactory.serverNetwork(
         externalNetworkConfig,
         externalConnectionFactory(
             externalBufferAllocator,
             externalConnectionConfig,
-            packetHandlers,
             mqttClientReleaseHandler));
   }
 
@@ -92,14 +89,12 @@ public class MqttNetworkConfig {
       ServerNetworkConfig internalNetworkConfig,
       BufferAllocator internalBufferAllocator,
       MqttServerConnectionConfig internalConnectionConfig,
-      PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler mqttClientReleaseHandler) {
     return NetworkFactory.serverNetwork(
         internalNetworkConfig,
         internalConnectionFactory(
             internalBufferAllocator,
             internalConnectionConfig,
-            packetHandlers,
             mqttClientReleaseHandler));
   }
 
@@ -270,12 +265,10 @@ public class MqttNetworkConfig {
   private ChannelFactory externalConnectionFactory(
       BufferAllocator bufferAllocator,
       MqttServerConnectionConfig connectionConfig,
-      PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler releaseHandler) {
     return connectionFactory(
         bufferAllocator,
         connectionConfig,
-        packetHandlers,
         releaseHandler,
         ExternalMqttClient::new);
   }
@@ -283,12 +276,10 @@ public class MqttNetworkConfig {
   private ChannelFactory internalConnectionFactory(
       BufferAllocator bufferAllocator,
       MqttServerConnectionConfig connectionConfig,
-      PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler releaseHandler) {
     return connectionFactory(
         bufferAllocator,
         connectionConfig,
-        packetHandlers,
         releaseHandler,
         InternalMqttClient::new);
   }
@@ -296,7 +287,6 @@ public class MqttNetworkConfig {
   private ChannelFactory connectionFactory(
       BufferAllocator bufferAllocator,
       MqttServerConnectionConfig connectionConfig,
-      PacketInHandler[] packetHandlers,
       MqttClientReleaseHandler releaseHandler,
       BiFunction<MqttConnection, MqttClientReleaseHandler, UnsafeMqttClient> clientFactory) {
     return (network, channel) -> new MqttConnection(
@@ -304,7 +294,6 @@ public class MqttNetworkConfig {
         channel,
         bufferAllocator,
         100,
-        packetHandlers,
         connectionConfig,
         mqttConnection -> clientFactory.apply(mqttConnection, releaseHandler));
   }

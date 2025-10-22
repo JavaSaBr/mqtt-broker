@@ -1,12 +1,10 @@
 package javasabr.mqtt.network;
 
 import java.nio.channels.AsynchronousSocketChannel;
-import java.util.function.Function;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.network.handler.PacketInHandler;
 import javasabr.mqtt.network.packet.MqttPacketReader;
 import javasabr.mqtt.network.packet.MqttPacketWriter;
 import javasabr.rlib.network.BufferAllocator;
@@ -31,10 +29,6 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   @Getter(AccessLevel.PROTECTED)
   final NetworkPacketWriter packetWriter;
 
-  @Getter
-  final PacketInHandler[] packetHandlers;
-
-  @Getter
   final UnsafeMqttClient client;
   @Getter
   final MqttServerConnectionConfig serverConnectionConfig;
@@ -47,15 +41,13 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       AsynchronousSocketChannel channel,
       BufferAllocator bufferAllocator,
       int maxPacketsByRead,
-      PacketInHandler[] packetHandlers,
-      MqttServerConnectionConfig config,
-      Function<MqttConnection, UnsafeMqttClient> clientFactory) {
+      MqttServerConnectionConfig serverConnectionConfig,
+      MqttClientFactory clientFactory) {
     super(network, channel, bufferAllocator, maxPacketsByRead);
-    this.packetHandlers = packetHandlers;
-    this.serverConnectionConfig = config;
+    this.serverConnectionConfig = serverConnectionConfig;
     this.packetReader = createPacketReader();
     this.packetWriter = createPacketWriter();
-    this.client = clientFactory.apply(this);
+    this.client = clientFactory.newClient(this);
   }
 
   public boolean isSupported(MqttVersion mqttVersion) {
@@ -81,6 +73,10 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       }
     }
     return config;
+  }
+
+  public MqttClient client() {
+    return client;
   }
 
   private NetworkPacketReader createPacketReader() {

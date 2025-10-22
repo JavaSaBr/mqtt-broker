@@ -1,10 +1,11 @@
-package javasabr.mqtt.network;
+package javasabr.mqtt.network.impl;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
