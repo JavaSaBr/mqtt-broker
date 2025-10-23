@@ -11,7 +11,7 @@ import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.publish.out.PublishOutHandler;
 
-public class Qos2PublishInHandler extends AbstractPublishInHandler implements MqttSession.PendingPacketHandler {
+public class Qos2PublishInHandler extends AbstractPublishInHandler implements MqttSession.PendingMessageHandler {
 
   public Qos2PublishInHandler(SubscriptionService subscriptionService, PublishOutHandler[] publishOutHandlers) {
     super(subscriptionService, publishOutHandlers);

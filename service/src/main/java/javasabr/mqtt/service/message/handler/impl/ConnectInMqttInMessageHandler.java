@@ -55,8 +55,8 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   }
 
   @Override
-  public int packetType() {
-    return MqttPacketType.CONNECT.typeIndex();
+  public MqttPacketType messageType() {
+    return MqttPacketType.CONNECT;
   }
 
   @Override

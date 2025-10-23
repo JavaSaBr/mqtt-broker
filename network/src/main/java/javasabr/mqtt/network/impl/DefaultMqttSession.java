@@ -30,13 +30,13 @@ public class DefaultMqttSession implements UnsafeMqttSession {
   @AllArgsConstructor
   private static class PendingPublish {
     private final PublishInPacket publish;
-    private final PendingPacketHandler handler;
+    private final PendingMessageHandler handler;
     private final int packetId;
   }
 
   private static void registerPublish(
       PublishInPacket publish,
-      PendingPacketHandler handler,
+      PendingMessageHandler handler,
       int packetId,
       LockableArray<PendingPublish> pendingPublishes) {
     PendingPublish pendingPublish = new PendingPublish(publish, handler, packetId);
@@ -114,12 +114,12 @@ public class DefaultMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void registerOutPublish(PublishInPacket publish, PendingPacketHandler handler, int packetId) {
+  public void registerOutPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId) {
     registerPublish(publish, handler, packetId, pendingOutPublishes);
   }
 
   @Override
-  public void registerInPublish(PublishInPacket publish, PendingPacketHandler handler, int packetId) {
+  public void registerInPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId) {
     registerPublish(publish, handler, packetId, pendingInPublishes);
   }
 
@@ -165,7 +165,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
           .iterations()
           .forEach(
               mqttClient, (pendingPublish, client) -> {
-                PendingPacketHandler handler = pendingPublish.handler;
+                PendingMessageHandler handler = pendingPublish.handler;
                 handler.resend(client, pendingPublish.publish, pendingPublish.packetId);
               });
     } finally {

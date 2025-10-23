@@ -12,14 +12,17 @@ import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.network.handler.PublishInHandler;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
+import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.CredentialSource;
-import javasabr.mqtt.service.MqttConnectionService;
 import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.PublishingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
+import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
-import javasabr.mqtt.service.impl.DefaultMqttConnectionService;
+import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultPublishingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
@@ -30,12 +33,17 @@ import javasabr.mqtt.service.impl.SimpleSubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
-import javasabr.mqtt.service.message.handler.impl.PendingResponseMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishAckMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishCompleteMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishReceiveMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.SubscribeMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandler;
+import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos0PublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos1PublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos2PublishInMessageHandler;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
@@ -133,8 +141,50 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttConnectionService mqttConnectionService(Collection<? extends MqttInMessageHandler> inMessageHandlers) {
-    return new DefaultMqttConnectionService(inMessageHandlers);
+  MqttInMessageHandler subscribeMqttInMessageHandler(SubscriptionService subscriptionService) {
+    return new SubscribeMqttInMessageHandler(subscriptionService);
+  }
+
+  @Bean
+  MqttInMessageHandler unsubscribeMqttInMessageHandler(SubscriptionService subscriptionService) {
+    return new UnsubscribeMqttInMessageHandler(subscriptionService);
+  }
+
+  @Bean
+  ConnectionService mqttConnectionService(Collection<? extends MqttInMessageHandler> inMessageHandlers) {
+    return new DefaultConnectionService(inMessageHandlers);
+  }
+
+  @Bean
+  PublishDeliveringService publishDeliveringService() {
+    return null;
+  }
+
+  @Bean
+  MqttPublishInMessageHandler qos0PublishInMessageHandler(
+      SubscriptionService subscriptionService,
+      PublishDeliveringService publishDeliveringService) {
+    return new Qos0PublishInMessageHandler(subscriptionService, publishDeliveringService);
+  }
+
+  @Bean
+  MqttPublishInMessageHandler qos1PublishInMessageHandler(
+      SubscriptionService subscriptionService,
+      PublishDeliveringService publishDeliveringService) {
+    return new Qos1PublishInMessageHandler(subscriptionService, publishDeliveringService);
+  }
+
+  @Bean
+  MqttPublishInMessageHandler qos2PublishInMessageHandler(
+      SubscriptionService subscriptionService,
+      PublishDeliveringService publishDeliveringService) {
+    return new Qos2PublishInMessageHandler(subscriptionService, publishDeliveringService);
+  }
+
+  @Bean
+  PublishReceivingService publishReceivingService(
+      Collection<? extends MqttPublishInMessageHandler> knownPublishInHandlers) {
+    return new DefaultPublishReceivingService(knownPublishInHandlers);
   }
 
   @Bean
@@ -250,11 +300,11 @@ public class MqttBrokerSpringConfig {
   @Bean
   ApplicationListener<ApplicationStartedEvent> externalNetworkStarter(
       ServerNetwork<MqttConnection> externalNetwork,
-      MqttConnectionService mqttConnectionService,
+      ConnectionService connectionService,
       InetSocketAddress externalNetworkAddress) {
     return _ -> {
       externalNetwork.start(externalNetworkAddress);
-      externalNetwork.onAccept(mqttConnectionService::processAcceptedConnection);
+      externalNetwork.onAccept(connectionService::processAcceptedConnection);
       log.info(externalNetworkAddress, "Started external MQTT network by address:[%s]"::formatted);
     };
   }

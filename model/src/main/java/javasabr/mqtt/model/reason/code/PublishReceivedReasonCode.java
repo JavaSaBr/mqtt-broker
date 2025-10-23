@@ -2,14 +2,20 @@ package javasabr.mqtt.model.reason.code;
 
 import java.util.stream.Stream;
 import javasabr.rlib.common.util.ObjectUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
+@Getter
 @RequiredArgsConstructor
+@Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum PublishReceivedReasonCode {
 
   /**
-   * The message is accepted. Publication of the QoS 2 message proceeds..
+   * The message is accepted. Publication of the QoS 2 message proceeds...
    */
   SUCCESS((byte) 0x00),
   /**
@@ -52,14 +58,14 @@ public enum PublishReceivedReasonCode {
 
   static {
 
-    var maxId = Stream
+    int maxValue = Stream
         .of(values())
-        .mapToInt(PublishReceivedReasonCode::getValue)
+        .mapToInt(PublishReceivedReasonCode::value)
         .map(value -> Byte.toUnsignedInt((byte) value))
         .max()
         .orElse(0);
 
-    var values = new PublishReceivedReasonCode[maxId + 1];
+    var values = new PublishReceivedReasonCode[maxValue + 1];
 
     for (var value : values()) {
       values[Byte.toUnsignedInt(value.value)] = value;
@@ -68,13 +74,12 @@ public enum PublishReceivedReasonCode {
     VALUES = values;
   }
 
-  public static PublishReceivedReasonCode of(int index) {
+  public static PublishReceivedReasonCode ofValue(int index) {
     return ObjectUtils.notNull(
         VALUES[index],
         index,
         arg -> new IndexOutOfBoundsException("Doesn't support reason code: " + arg));
   }
 
-  @Getter
-  private final byte value;
+  byte value;
 }

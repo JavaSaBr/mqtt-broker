@@ -69,7 +69,7 @@ public class PublishReceivedInPacket extends MqttReadablePacket implements HasPa
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReceivedReasonCode.of(readByteUnsigned(buffer));
+      reasonCode = PublishReceivedReasonCode.ofValue(readByteUnsigned(buffer));
     }
   }
 

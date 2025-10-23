@@ -2,7 +2,7 @@ package javasabr.mqtt.service;
 
 import javasabr.mqtt.network.MqttConnection;
 
-public interface MqttConnectionService {
+public interface ConnectionService {
 
   void processAcceptedConnection(MqttConnection connection);
 }

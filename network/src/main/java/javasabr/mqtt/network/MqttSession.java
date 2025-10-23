@@ -19,7 +19,7 @@ public interface MqttSession {
     void onRestored();
   }
 
-  interface PendingPacketHandler {
+  interface PendingMessageHandler {
 
     /**
      * @return true if pending packet can be removed.
@@ -48,9 +48,9 @@ public interface MqttSession {
 
   boolean hasOutPending(int packetId);
 
-  void registerOutPublish(PublishInPacket publish, PendingPacketHandler handler, int packetId);
+  void registerOutPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId);
 
-  void registerInPublish(PublishInPacket publish, PendingPacketHandler handler, int packetId);
+  void registerInPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId);
 
   void updateOutPendingPacket(MqttClient client, HasPacketId response);
 

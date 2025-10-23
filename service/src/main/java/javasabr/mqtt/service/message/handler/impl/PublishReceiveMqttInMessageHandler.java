@@ -10,7 +10,7 @@ public class PublishReceiveMqttInMessageHandler extends PendingResponseMqttInMes
   }
 
   @Override
-  public int packetType() {
-    return MqttPacketType.PUBLISH_RECEIVED.typeIndex();
+  public MqttPacketType messageType() {
+    return MqttPacketType.PUBLISH_RECEIVED;
   }
 }

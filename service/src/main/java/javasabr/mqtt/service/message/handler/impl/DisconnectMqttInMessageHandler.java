@@ -15,8 +15,8 @@ public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler
   }
 
   @Override
-  public int packetType() {
-    return MqttPacketType.DISCONNECT.typeIndex();
+  public MqttPacketType messageType() {
+    return MqttPacketType.DISCONNECT;
   }
 
   @Override

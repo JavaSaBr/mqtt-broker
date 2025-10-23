@@ -10,7 +10,7 @@ public class PublishAckMqttInMessageHandler extends PendingResponseMqttInMessage
   }
 
   @Override
-  public int packetType() {
-    return MqttPacketType.PUBLISH_ACK.typeIndex();
+  public MqttPacketType messageType() {
+    return MqttPacketType.PUBLISH_ACK;
   }
 }

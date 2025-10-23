@@ -11,11 +11,20 @@ import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
 
 /**
  * Subscription service
  */
 public interface SubscriptionService {
+
+  boolean isValid(TopicName topicName);
+
+  default Array<SingleSubscriber> findSubscribers(TopicName topicName) {
+    return findSubscribersTo(MutableArray.ofType(SingleSubscriber.class), topicName);
+  }
+
+  Array<SingleSubscriber> findSubscribersTo(MutableArray<SingleSubscriber> container, TopicName topicName);
 
   /**
    * Runs function for each topic subscriber

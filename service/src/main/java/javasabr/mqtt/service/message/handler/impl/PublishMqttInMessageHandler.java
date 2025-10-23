@@ -27,7 +27,7 @@ public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<Ex
   }
 
   @Override
-  public int packetType() {
-    return MqttPacketType.PUBLISH.typeIndex();
+  public MqttPacketType messageType() {
+    return MqttPacketType.PUBLISH;
   }
 }

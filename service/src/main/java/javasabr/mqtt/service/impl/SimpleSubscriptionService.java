@@ -82,7 +82,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
       topicSubscribers.addSubscriber(client, subscribe);
       return subscribe
           .getQos()
-          .getSubscribeAckReasonCode();
+          .subscribeAckReasonCode();
     }
   }
 
