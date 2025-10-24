@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.message.handler;
+package javasabr.mqtt.service.publish.handler;
 
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
@@ -32,7 +32,13 @@ public enum PublishHandlingResult {
   PAYLOAD_FORMAT_INVALID(
       true,
       PublishAckReasonCode.PAYLOAD_FORMAT_INVALID,
-      PublishReceivedReasonCode.PAYLOAD_FORMAT_INVALID);
+      PublishReceivedReasonCode.PAYLOAD_FORMAT_INVALID),
+
+  // CUSTOM
+  NOT_EXPECTED_CLIENT(
+      true,
+      PublishAckReasonCode.UNSPECIFIED_ERROR,
+      PublishReceivedReasonCode.UNSPECIFIED_ERROR);
 
   boolean error;
   PublishAckReasonCode ackReasonCode;

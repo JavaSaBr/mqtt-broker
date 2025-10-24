@@ -14,18 +14,18 @@ import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.message.handler.PublishHandlingResult;
+import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class Qos2PublishInMessageHandler extends Qos0PublishInMessageHandler {
+public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHandler {
 
   PendingMessageHandler pendingMessageHandler;
 
-  public Qos2PublishInMessageHandler(
+  public Qos2MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService) {
     super(subscriptionService, publishDeliveringService);

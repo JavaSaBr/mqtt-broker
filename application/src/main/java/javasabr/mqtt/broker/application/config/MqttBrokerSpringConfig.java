@@ -22,6 +22,7 @@ import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
+import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultPublishingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
@@ -41,9 +42,13 @@ import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHan
 import javasabr.mqtt.service.message.handler.impl.SubscribeMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos0PublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos1PublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos2PublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishOutMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
@@ -156,29 +161,45 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  PublishDeliveringService publishDeliveringService() {
-    return null;
+  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
+    return new Qos0MqttPublishOutMessageHandler(subscriptionService);
   }
 
   @Bean
-  MqttPublishInMessageHandler qos0PublishInMessageHandler(
-      SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService) {
-    return new Qos0PublishInMessageHandler(subscriptionService, publishDeliveringService);
+  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
+    return new Qos1MqttPublishOutMessageHandler(subscriptionService);
   }
 
   @Bean
-  MqttPublishInMessageHandler qos1PublishInMessageHandler(
-      SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService) {
-    return new Qos1PublishInMessageHandler(subscriptionService, publishDeliveringService);
+  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
+    return new Qos2MqttPublishOutMessageHandler(subscriptionService);
   }
 
   @Bean
-  MqttPublishInMessageHandler qos2PublishInMessageHandler(
+  PublishDeliveringService publishDeliveringService(
+      Collection<? extends MqttPublishOutMessageHandler> knownPublishOutHandlers) {
+    return new DefaultPublishDeliveringService(knownPublishOutHandlers);
+  }
+
+  @Bean
+  MqttPublishInMessageHandler qos0MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService) {
-    return new Qos2PublishInMessageHandler(subscriptionService, publishDeliveringService);
+    return new Qos0MqttPublishInMessageHandler(subscriptionService, publishDeliveringService);
+  }
+
+  @Bean
+  MqttPublishInMessageHandler qos1MqttPublishInMessageHandler(
+      SubscriptionService subscriptionService,
+      PublishDeliveringService publishDeliveringService) {
+    return new Qos1MqttPublishInMessageHandler(subscriptionService, publishDeliveringService);
+  }
+
+  @Bean
+  MqttPublishInMessageHandler qos2MqttPublishInMessageHandler(
+      SubscriptionService subscriptionService,
+      PublishDeliveringService publishDeliveringService) {
+    return new Qos2MqttPublishInMessageHandler(subscriptionService, publishDeliveringService);
   }
 
   @Bean

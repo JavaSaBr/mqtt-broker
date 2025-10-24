@@ -6,11 +6,11 @@ import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.message.handler.PublishHandlingResult;
+import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 
-public class Qos1PublishInMessageHandler extends Qos0PublishInMessageHandler {
+public class Qos1MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHandler {
 
-  public Qos1PublishInMessageHandler(
+  public Qos1MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService) {
     super(subscriptionService, publishDeliveringService);

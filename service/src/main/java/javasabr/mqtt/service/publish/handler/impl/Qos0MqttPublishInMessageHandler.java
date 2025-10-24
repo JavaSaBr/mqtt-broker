@@ -5,9 +5,9 @@ import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
 
-public class Qos0PublishInMessageHandler extends AbstractMqttPublishInMessageHandler<ExternalMqttClient> {
+public class Qos0MqttPublishInMessageHandler extends AbstractMqttPublishInMessageHandler<ExternalMqttClient> {
 
-  public Qos0PublishInMessageHandler(
+  public Qos0MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService) {
     super(ExternalMqttClient.class, subscriptionService, publishDeliveringService);

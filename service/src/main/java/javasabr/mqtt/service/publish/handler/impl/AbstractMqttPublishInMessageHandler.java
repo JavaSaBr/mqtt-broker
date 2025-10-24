@@ -6,13 +6,15 @@ import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.message.handler.PublishHandlingResult;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
+import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+@CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
@@ -24,6 +26,10 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
 
   @Override
   public void handle(MqttClient client, PublishInPacket packet) {
+    if (!expectedClient.isInstance(client)) {
+      log.warning(client, "Not expected client:[%s]"::formatted);
+      return;
+    }
     handleImpl(expectedClient.cast(client), packet);
   }
 
