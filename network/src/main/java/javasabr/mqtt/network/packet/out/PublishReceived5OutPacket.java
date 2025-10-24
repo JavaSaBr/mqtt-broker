@@ -65,7 +65,7 @@ public class PublishReceived5OutPacket extends PublishReceived311OutPacket {
     super.writeVariableHeader(connection, buffer);
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
-    writeByte(buffer, reasonCode.getValue());
+    writeByte(buffer, reasonCode.value());
   }
 
   @Override

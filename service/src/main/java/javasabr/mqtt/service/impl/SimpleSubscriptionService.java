@@ -8,7 +8,6 @@ import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SU
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 import static javasabr.mqtt.model.utils.TopicUtils.hasWildcard;
-import static javasabr.mqtt.model.utils.TopicUtils.isInvalid;
 import static javasabr.mqtt.model.utils.TopicUtils.isShared;
 
 import java.util.function.BiFunction;
@@ -18,14 +17,17 @@ import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicSubscribers;
+import javasabr.mqtt.model.utils.TopicUtils;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
+import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
@@ -39,11 +41,31 @@ public class SimpleSubscriptionService implements SubscriptionService {
   TopicSubscribers topicSubscribers = new TopicSubscribers();
 
   @Override
+  public boolean isValid(TopicName topicName) {
+    return !TopicUtils.isInvalid(topicName);
+  }
+
+  @Override
+  public MqttClient resolveClient(Subscriber subscriber) {
+    if (subscriber instanceof SingleSubscriber ss) {
+      return (MqttClient) ss.getUser();
+    }
+    throw new IllegalArgumentException("Unsupported: " + subscriber);
+  }
+
+  @Override
+  public Array<SingleSubscriber> findSubscribersTo(MutableArray<SingleSubscriber> container, TopicName topicName) {
+    Array<SingleSubscriber> matched = topicSubscribers.matches(topicName);
+    container.addAll(matched);
+    return container;
+  }
+
+  @Override
   public <A> ActionResult forEachTopicSubscriber(
       TopicName topicName,
       A arg1,
       BiFunction<SingleSubscriber, A, ActionResult> action) {
-    if (isInvalid(topicName)) {
+    if (TopicUtils.isInvalid(topicName)) {
       return FAILED;
     }
     ActionResult result = EMPTY;
@@ -75,7 +97,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
       return SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
     } else if (!connectionConfig.wildcardSubscriptionAvailable() && hasWildcard(topic)) {
       return WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
-    } else if (isInvalid(topic)) {
+    } else if (TopicUtils.isInvalid(topic)) {
       return UNSPECIFIED_ERROR;
     } else {
       session.addSubscriber(subscribe);
@@ -99,7 +121,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
     var session = client.session();
     if (session == null) {
       return null;
-    } else if (isInvalid(topic)) {
+    } else if (TopicUtils.isInvalid(topic)) {
       return UnsubscribeAckReasonCode.UNSPECIFIED_ERROR;
     } else if (topicSubscribers.removeSubscriber(client, topic)) {
       session.removeSubscriber(topic);

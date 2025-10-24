@@ -4,18 +4,18 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
-import javasabr.mqtt.service.PublishingService;
+import javasabr.mqtt.service.PublishReceivingService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, PublishInPacket> {
 
-  PublishingService publishingService;
+  PublishReceivingService publishReceivingService;
 
-  public PublishMqttInMessageHandler(PublishingService publishingService) {
+  public PublishMqttInMessageHandler(PublishReceivingService publishReceivingService) {
     super(ExternalMqttClient.class, PublishInPacket.class);
-    this.publishingService = publishingService;
+    this.publishReceivingService = publishReceivingService;
   }
 
   @Override
@@ -23,7 +23,7 @@ public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<Ex
       MqttConnection connection,
       ExternalMqttClient client,
       PublishInPacket networkPacket) {
-    publishingService.publish(client, networkPacket);
+    publishReceivingService.processReceivedPublish(client, networkPacket);
   }
 
   @Override

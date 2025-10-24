@@ -9,7 +9,6 @@ import javasabr.mqtt.network.MqttClientFactory;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.handler.PublishInHandler;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
@@ -17,14 +16,12 @@ import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MqttSessionService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
-import javasabr.mqtt.service.PublishingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
-import javasabr.mqtt.service.impl.DefaultPublishingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
@@ -98,11 +95,6 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  PublishingService publishingService() {
-    return new DefaultPublishingService(new PublishInHandler[0]);
-  }
-
-  @Bean
   MqttInMessageHandler connectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
@@ -126,8 +118,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttInMessageHandler publishMqttInMessageHandler(PublishingService publishingService) {
-    return new PublishMqttInMessageHandler(publishingService);
+  MqttInMessageHandler publishMqttInMessageHandler(PublishReceivingService publishReceivingService) {
+    return new PublishMqttInMessageHandler(publishReceivingService);
   }
 
   @Bean
