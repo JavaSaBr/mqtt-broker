@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.packet.in;
+package javasabr.mqtt.network.message.in;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -10,51 +10,53 @@ import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.message.in.MqttInMessage;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
 @Getter
 @Accessors(fluent = true, chain = false)
-public class PublishCompleteInPacket extends MqttInMessage implements HasMessageId {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class PublishCompleteMqttInMessage extends MqttInMessage implements HasMessageId {
 
-  private static final byte PACKET_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETED.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETED.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "packetId");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
-        /*
-          Followed by the UTF-8 Encoded String representing the reason associated with this response. This
-          Reason String is human readable, designed for diagnostics and SHOULD NOT be parsed by the
-          receiver.
+      /*
+        Followed by the UTF-8 Encoded String representing the reason associated with this response. This
+        Reason String is human readable, designed for diagnostics and SHOULD NOT be parsed by the
+        receiver.
 
-          The sender uses this value to give additional information to the receiver. The sender MUST NOT send
-          this Property if it would increase the size of the PUBREL packet beyond the Maximum Packet Size
-          specified by the receiver [MQTT-3.6.2-2]. It is a Protocol Error to include the Reason String more than
-          once.
-         */
+        The sender uses this value to give additional information to the receiver. The sender MUST NOT send
+        this Property if it would increase the size of the PUBREL packet beyond the Maximum Packet Size
+        specified by the receiver [MQTT-3.6.2-2]. It is a Protocol Error to include the Reason String more than
+        once.
+       */
       PacketProperty.REASON_STRING,
-        /*
-          Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
-          information for the PUBREL. The sender MUST NOT send this property if it would increase the size of the
-          PUBREL packet beyond the Maximum Packet Size specified by the receiver [MQTT-3.6.2-3]. The User
-          Property is allowed to appear multiple times to represent multiple name, value pairs. The same name is
-          allowed to appear more than once
-         */
+      /*
+        Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
+        information for the PUBREL. The sender MUST NOT send this property if it would increase the size of the
+        PUBREL packet beyond the Maximum Packet Size specified by the receiver [MQTT-3.6.2-3]. The User
+        Property is allowed to appear multiple times to represent multiple name, value pairs. The same name is
+        allowed to appear more than once
+       */
       PacketProperty.USER_PROPERTY);
 
-  private PublishCompletedReasonCode reasonCode;
-  private int messageId;
+  PublishCompletedReasonCode reasonCode;
+  int messageId;
 
   // properties
-  private String reason;
+  String reason;
 
-  public PublishCompleteInPacket(byte info) {
+  public PublishCompleteMqttInMessage(byte info) {
     super(info);
     this.reasonCode = PublishCompletedReasonCode.SUCCESS;
     this.reason = "";
@@ -62,7 +64,7 @@ public class PublishCompleteInPacket extends MqttInMessage implements HasMessage
 
   @Override
   public byte messageType() {
-    return PACKET_TYPE;
+    return MESSAGE_TYPE;
   }
 
   @Override
@@ -92,11 +94,8 @@ public class PublishCompleteInPacket extends MqttInMessage implements HasMessage
   @Override
   protected void applyProperty(PacketProperty property, String value) {
     switch (property) {
-      case REASON_STRING:
-        reason = value;
-        break;
-      default:
-        unexpectedProperty(property);
+      case REASON_STRING -> reason = value;
+      default -> unexpectedProperty(property);
     }
   }
 }

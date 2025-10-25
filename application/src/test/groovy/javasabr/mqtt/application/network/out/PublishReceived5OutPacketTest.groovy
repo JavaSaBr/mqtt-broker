@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
-import javasabr.mqtt.network.packet.in.PublishReceivedInPacket
+import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
 import javasabr.mqtt.network.packet.out.PublishReceived5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
@@ -18,7 +18,7 @@ class PublishReceived5OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishReceivedInPacket(0b0101_0000 as byte)
+        def reader = new PublishReceivedMqttInMessage(0b0101_0000 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

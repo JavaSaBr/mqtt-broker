@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.packet.in;
+package javasabr.mqtt.network.message.in;
 
 import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
 
@@ -9,51 +9,54 @@ import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Unsubscribe request.
  */
 @Getter
-public class UnsubscribeInPacket extends MqttInMessage {
+@Accessors(fluent = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UnsubscribeMqttInMessage extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttMessageType.UNSUBSCRIBE.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
-        /*
-          The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
-          name is allowed to appear more than once.
-         */
+      /*
+        The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
+        name is allowed to appear more than once.
+       */
       PacketProperty.USER_PROPERTY);
 
-  private MutableArray<TopicFilter> topicFilters;
-  private int packetId;
+  MutableArray<TopicFilter> topicFilters;
+  int messageId;
 
-  public UnsubscribeInPacket(byte info) {
+  public UnsubscribeMqttInMessage(byte info) {
     super(info);
-    this.topicFilters = ArrayFactory.mutableArray(TopicFilter.class);
   }
 
   @Override
   public byte messageType() {
-    return PACKET_TYPE;
+    return MESSAGE_TYPE;
   }
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    packetId = readShortUnsigned(buffer);
+    messageId = readShortUnsigned(buffer);
   }
 
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
-
     if (buffer.remaining() < 1) {
       throw new IllegalStateException("No any topic filters.");
     }
 
+    topicFilters = ArrayFactory.mutableArray(TopicFilter.class);
     while (buffer.hasRemaining()) {
       topicFilters.add(buildTopicFilter(readString(buffer, Integer.MAX_VALUE)));
     }

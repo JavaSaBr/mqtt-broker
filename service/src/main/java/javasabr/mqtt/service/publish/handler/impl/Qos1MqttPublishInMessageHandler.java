@@ -4,7 +4,7 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -55,10 +55,10 @@ public class Qos1MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void handleSuccessfulResult(ExternalMqttClient client, PublishInPacket packet, int subscribers) {
+  protected void handleSuccessfulResult(ExternalMqttClient client, PublishMqttInMessage packet, int subscribers) {
     super.handleSuccessfulResult(client, packet, subscribers);
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(packet.getPacketId(), PublishAckReasonCode.SUCCESS));
+        .newPublishAck(packet.messageId(), PublishAckReasonCode.SUCCESS));
   }
 }

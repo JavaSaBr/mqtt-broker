@@ -312,106 +312,52 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(PacketProperty property, byte[] value) {
     switch (property) {
-      case AUTHENTICATION_DATA: {
-        authenticationData = value;
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case AUTHENTICATION_DATA -> authenticationData = value;
+      default -> unexpectedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(PacketProperty property, String value) {
     switch (property) {
-      case REASON_STRING: {
-        reason = value;
-        break;
-      }
-      case ASSIGNED_CLIENT_IDENTIFIER: {
-        assignedClientId = value;
-        break;
-      }
-      case RESPONSE_INFORMATION: {
-        responseInformation = value;
-        break;
-      }
-      case AUTHENTICATION_METHOD: {
-        authenticationMethod = value;
-        break;
-      }
-      case SERVER_REFERENCE: {
-        serverReference = value;
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case REASON_STRING -> reason = value;
+      case ASSIGNED_CLIENT_IDENTIFIER -> assignedClientId = value;
+      case RESPONSE_INFORMATION -> responseInformation = value;
+      case AUTHENTICATION_METHOD -> authenticationMethod = value;
+      case SERVER_REFERENCE -> serverReference = value;
+      default -> unexpectedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(PacketProperty property, long value) {
     switch (property) {
-      case WILDCARD_SUBSCRIPTION_AVAILABLE: {
-        wildcardSubscriptionAvailable = NumberUtils.toBoolean(value);
-        break;
-      }
-      case SHARED_SUBSCRIPTION_AVAILABLE: {
-        sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
-        break;
-      }
-      case SUBSCRIPTION_IDENTIFIER_AVAILABLE: {
-        subscriptionIdAvailable = NumberUtils.toBoolean(value);
-        break;
-      }
-      case RETAIN_AVAILABLE: {
-        retainAvailable = NumberUtils.toBoolean(value);
-        break;
-      }
-      case RECEIVE_MAXIMUM_PUBLISH: {
-        receiveMaxPublishes = (int) NumberUtils.validate(
-            value,
-            MqttProperties.RECEIVE_MAXIMUM_MIN,
-            MqttProperties.RECEIVE_MAXIMUM_MAX);
-        break;
-      }
-      case MAXIMUM_QOS: {
-        maximumQos = QoS.of((int) value);
-        break;
-      }
-      case SERVER_KEEP_ALIVE: {
-        serverKeepAlive = NumberUtils.validate(
-            (int) value,
-            MqttProperties.SERVER_KEEP_ALIVE_MIN,
-            MqttProperties.SERVER_KEEP_ALIVE_MAX);
-        break;
-      }
-      case TOPIC_ALIAS_MAXIMUM: {
-        topicAliasMaxValue = NumberUtils.validate(
-            (int) value,
-            MqttProperties.TOPIC_ALIAS_MIN,
-            MqttProperties.TOPIC_ALIAS_MAX);
-        break;
-      }
-      case SESSION_EXPIRY_INTERVAL: {
-        sessionExpiryInterval = NumberUtils.validate(
-            value,
-            MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
-            MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
-        break;
-      }
-      case MAXIMUM_PACKET_SIZE: {
-        maxPacketSize = NumberUtils.validate(
-            (int) value,
-            MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
-            MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case WILDCARD_SUBSCRIPTION_AVAILABLE -> wildcardSubscriptionAvailable = NumberUtils.toBoolean(value);
+      case SHARED_SUBSCRIPTION_AVAILABLE -> sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
+      case SUBSCRIPTION_IDENTIFIER_AVAILABLE -> subscriptionIdAvailable = NumberUtils.toBoolean(value);
+      case RETAIN_AVAILABLE -> retainAvailable = NumberUtils.toBoolean(value);
+      case RECEIVE_MAXIMUM_PUBLISH -> receiveMaxPublishes = (int) NumberUtils.validate(
+          value,
+          MqttProperties.RECEIVE_MAXIMUM_MIN,
+          MqttProperties.RECEIVE_MAXIMUM_MAX);
+      case MAXIMUM_QOS -> maximumQos = QoS.of((int) value);
+      case SERVER_KEEP_ALIVE -> serverKeepAlive = NumberUtils.validate(
+          (int) value,
+          MqttProperties.SERVER_KEEP_ALIVE_MIN,
+          MqttProperties.SERVER_KEEP_ALIVE_MAX);
+      case TOPIC_ALIAS_MAXIMUM -> topicAliasMaxValue = NumberUtils.validate(
+          (int) value,
+          MqttProperties.TOPIC_ALIAS_MIN,
+          MqttProperties.TOPIC_ALIAS_MAX);
+      case SESSION_EXPIRY_INTERVAL -> sessionExpiryInterval = NumberUtils.validate(
+          value,
+          MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
+          MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
+      case MAXIMUM_PACKET_SIZE -> maxPacketSize = NumberUtils.validate(
+          (int) value,
+          MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
+          MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
+      default -> unexpectedProperty(property);
     }
   }
 }

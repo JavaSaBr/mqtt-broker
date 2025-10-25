@@ -2,11 +2,11 @@ package javasabr.mqtt.application.network.in
 
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
-import javasabr.mqtt.network.packet.in.DisconnectInPacket
+import javasabr.mqtt.network.message.in.DisconnectMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
-class DisconnectInPacketTest extends BaseInPacketTest {
+class DisconnectMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 5.0"() {
     given:
@@ -22,7 +22,7 @@ class DisconnectInPacketTest extends BaseInPacketTest {
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new DisconnectInPacket(0b1110_0000 as byte)
+        def packet = new DisconnectMqttInMessage(0b1110_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -41,7 +41,7 @@ class DisconnectInPacketTest extends BaseInPacketTest {
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
-        packet = new DisconnectInPacket(0b1110_0000 as byte)
+        packet = new DisconnectMqttInMessage(0b1110_0000 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

@@ -10,7 +10,7 @@ import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.packet.in.SubscribeInPacket;
+import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -20,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeMqttInMessageHandler extends
-    AbstractMqttInMessageHandler<ExternalMqttClient, SubscribeInPacket> {
+    AbstractMqttInMessageHandler<ExternalMqttClient, SubscribeMqttInMessage> {
 
   private final static Set<SubscribeAckReasonCode> INVALID_ACK_CODE = Set.of(
       SHARED_SUBSCRIPTIONS_NOT_SUPPORTED,
@@ -32,7 +32,7 @@ public class SubscribeMqttInMessageHandler extends
   public SubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, SubscribeInPacket.class);
+    super(ExternalMqttClient.class, SubscribeMqttInMessage.class);
     this.subscriptionService = subscriptionService;
     this.messageOutFactoryService = messageOutFactoryService;
   }
@@ -46,13 +46,13 @@ public class SubscribeMqttInMessageHandler extends
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      SubscribeInPacket networkPacket) {
+      SubscribeMqttInMessage networkPacket) {
 
     Array<SubscribeAckReasonCode> ackReasonCodes = subscriptionService
-        .subscribe(client, networkPacket.getTopicFilters());
+        .subscribe(client, networkPacket.topicFilters());
     MqttWritablePacket subscribeAck = messageOutFactoryService
         .resolveFactory(client)
-        .newSubscribeAck(networkPacket.getPacketId(), ackReasonCodes);
+        .newSubscribeAck(networkPacket.messageId(), ackReasonCodes);
 
     client.send(subscribeAck);
 

@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.network.packet.in.SubscribeInPacket
+import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.mqtt.network.packet.out.Subscribe5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
@@ -18,11 +18,11 @@ class Subscribe5OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt5Connection, it)
         }
-        def reader = new SubscribeInPacket(0b1000_0000 as byte)
+        def reader = new SubscribeMqttInMessage(0b1000_0000 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.packetId == 1
+        reader.messageId == 1
         reader.topicFilters == topicFiltersObj5
         reader.userProperties() == userProperties
         reader.subscriptionId == MqttProperties.SUBSCRIPTION_ID_UNDEFINED

@@ -8,7 +8,7 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
 import javasabr.mqtt.network.message.HasMessageId;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.functions.TriConsumer;
@@ -29,13 +29,13 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   @Getter
   @AllArgsConstructor
   private static class PendingPublish {
-    private final PublishInPacket publish;
+    private final PublishMqttInMessage publish;
     private final PendingMessageHandler handler;
     private final int packetId;
   }
 
   private static void registerPublish(
-      PublishInPacket publish,
+      PublishMqttInMessage publish,
       PendingMessageHandler handler,
       int packetId,
       LockableArray<PendingPublish> pendingPublishes) {
@@ -114,12 +114,12 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void registerOutPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId) {
+  public void registerOutPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId) {
     registerPublish(publish, handler, packetId, pendingOutPublishes);
   }
 
   @Override
-  public void registerInPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId) {
+  public void registerInPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId) {
     registerPublish(publish, handler, packetId, pendingInPublishes);
   }
 

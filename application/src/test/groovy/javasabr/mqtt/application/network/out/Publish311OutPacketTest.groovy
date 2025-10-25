@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.network.packet.in.PublishInPacket
+import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.mqtt.network.packet.out.Publish311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
@@ -21,11 +21,11 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt311Connection, it)
         }
-        def reader = new PublishInPacket(0b0011_1101 as byte)
+        def reader = new PublishMqttInMessage(0b0011_1101 as byte)
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.packetId == packetId
+        reader.messageId == packetId
         reader.qos == QoS.EXACTLY_ONCE
         reader.retained
         reader.duplicate
@@ -43,11 +43,11 @@ class Publish311OutPacketTest extends BaseOutPacketTest {
         dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt311Connection, it)
         }
-        reader = new PublishInPacket(0b0011_0000 as byte)
+        reader = new PublishMqttInMessage(0b0011_0000 as byte)
         result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.packetId == 0
+        reader.messageId == 0
         reader.qos == QoS.AT_MOST_ONCE
         !reader.retained
         !reader.duplicate

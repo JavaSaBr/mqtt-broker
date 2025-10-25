@@ -4,13 +4,13 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
+import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
 
 public class PublishReleaseMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalMqttClient, PublishReleaseInPacket> {
+    extends AbstractMqttInMessageHandler<ExternalMqttClient, PublishReleaseMqttInMessage> {
 
   public PublishReleaseMqttInMessageHandler() {
-    super(ExternalMqttClient.class, PublishReleaseInPacket.class);
+    super(ExternalMqttClient.class, PublishReleaseMqttInMessage.class);
   }
 
   @Override
@@ -22,7 +22,7 @@ public class PublishReleaseMqttInMessageHandler
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      PublishReleaseInPacket networkPacket) {
+      PublishReleaseMqttInMessage networkPacket) {
     MqttSession session = client.session();
     if (session != null) {
       session.updateInPendingPacket(client, networkPacket);

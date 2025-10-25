@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.packet.out.PublishOutPacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -25,7 +25,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public PublishHandlingResult handle(PublishInPacket packet, SingleSubscriber subscriber) {
+  public PublishHandlingResult handle(PublishMqttInMessage packet, SingleSubscriber subscriber) {
     MqttClient mqttClient = subscriptionService.resolveClient(subscriber);
     if (!expectedClient.isInstance(mqttClient)) {
       log.warning(mqttClient, "Accepted not expected client:[%s]"::formatted);
@@ -34,11 +34,11 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
     return handleImpl(packet, expectedClient.cast(mqttClient));
   }
 
-  protected abstract PublishHandlingResult handleImpl(PublishInPacket packet, C client) ;
+  protected abstract PublishHandlingResult handleImpl(PublishMqttInMessage packet, C client) ;
 
   protected void startDelivering(
       MqttClient client,
-      PublishInPacket packet,
+      PublishMqttInMessage packet,
       int messageId,
       boolean duplicate) {
     PublishOutPacket publish = messageOutFactoryService
@@ -46,16 +46,16 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
         .newPublish(
             messageId,
             qos(),
-            packet.isRetained(),
+            packet.retained(),
             duplicate,
             packet
-                .getTopicName()
+                .topicName()
                 .toString(),
             MqttProperties.TOPIC_ALIAS_NOT_SET,
-            packet.getPayload(),
-            packet.isPayloadFormatIndicator(),
-            packet.getResponseTopic(),
-            packet.getCorrelationData(),
+            packet.payload(),
+            packet.payloadFormatIndicator(),
+            packet.responseTopic(),
+            packet.correlationData(),
             packet.userProperties());
     client.send(publish);
   }

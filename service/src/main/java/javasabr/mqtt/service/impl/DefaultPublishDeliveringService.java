@@ -3,7 +3,7 @@ package javasabr.mqtt.service.impl;
 import java.util.Collection;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -45,7 +45,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   }
 
   @Override
-  public PublishHandlingResult startDelivering(PublishInPacket publish, SingleSubscriber subscriber) {
+  public PublishHandlingResult startDelivering(PublishMqttInMessage publish, SingleSubscriber subscriber) {
     try {
       //noinspection DataFlowIssue
       return publishOutMessageHandlers[subscriber.getQos().index()].handle(publish, subscriber);

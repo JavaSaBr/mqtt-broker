@@ -1,12 +1,12 @@
 package javasabr.mqtt.application.network.in
 
 import javasabr.mqtt.model.PacketProperty
-import javasabr.mqtt.model.reason.code.PublishAckReasonCode
-import javasabr.mqtt.network.packet.in.PublishAckInPacket
+import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
+import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
-class PublishAckInPacketTest extends BaseInPacketTest {
+class PublishCompleteMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -14,13 +14,13 @@ class PublishAckInPacketTest extends BaseInPacketTest {
           it.putShort(packetId)
         }
     when:
-        def packet = new PublishAckInPacket(0b0100_0000 as byte)
+        def packet = new PublishCompleteMqttInMessage(0b0111_0000 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason() == ""
         packet.messageId() == packetId
-        packet.reasonCode() == PublishAckReasonCode.SUCCESS
+        packet.reasonCode() == PublishCompletedReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }
 
@@ -32,32 +32,32 @@ class PublishAckInPacketTest extends BaseInPacketTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)
-          it.put(PublishAckReasonCode.PAYLOAD_FORMAT_INVALID.value)
+          it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new PublishAckInPacket(0b0100_0000 as byte)
+        def packet = new PublishCompleteMqttInMessage(0b0111_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason() == reasonString
         packet.messageId() == packetId
-        packet.reasonCode() == PublishAckReasonCode.PAYLOAD_FORMAT_INVALID
+        packet.reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
         packet.userProperties() == userProperties
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)
-          it.put(PublishAckReasonCode.UNSPECIFIED_ERROR.value)
+          it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
           it.putMbi(0)
         }
-        packet = new PublishAckInPacket(0b0100_0000 as byte)
+        packet = new PublishCompleteMqttInMessage(0b0111_0000 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason() == ""
         packet.messageId() == packetId
-        packet.reasonCode() == PublishAckReasonCode.UNSPECIFIED_ERROR
+        packet.reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
         packet.userProperties() == Array.empty()
   }
 }

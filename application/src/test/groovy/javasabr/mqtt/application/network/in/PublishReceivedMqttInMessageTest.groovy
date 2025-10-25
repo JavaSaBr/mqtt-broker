@@ -2,11 +2,11 @@ package javasabr.mqtt.application.network.in
 
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
-import javasabr.mqtt.network.packet.in.PublishReceivedInPacket
+import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
-class PublishReceivedInPacketTest extends BaseInPacketTest {
+class PublishReceivedMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -14,7 +14,7 @@ class PublishReceivedInPacketTest extends BaseInPacketTest {
           it.putShort(packetId)
         }
     when:
-        def packet = new PublishReceivedInPacket(0b0101_0000 as byte)
+        def packet = new PublishReceivedMqttInMessage(0b0101_0000 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -37,7 +37,7 @@ class PublishReceivedInPacketTest extends BaseInPacketTest {
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new PublishReceivedInPacket(0b0101_0000 as byte)
+        def packet = new PublishReceivedMqttInMessage(0b0101_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -51,7 +51,7 @@ class PublishReceivedInPacketTest extends BaseInPacketTest {
           it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value)
           it.putMbi(0)
         }
-        packet = new PublishReceivedInPacket(0b0101_0000 as byte)
+        packet = new PublishReceivedMqttInMessage(0b0101_0000 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

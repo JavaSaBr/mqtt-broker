@@ -1,13 +1,13 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.packet.in.PublishCompleteInPacket;
+import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage;
 
 public class PublishCompleteMqttInMessageHandler extends
-    PendingOutResponseMqttInMessageHandler<PublishCompleteInPacket> {
+    PendingOutResponseMqttInMessageHandler<PublishCompleteMqttInMessage> {
 
   public PublishCompleteMqttInMessageHandler() {
-    super(PublishCompleteInPacket.class);
+    super(PublishCompleteMqttInMessage.class);
   }
 
   @Override

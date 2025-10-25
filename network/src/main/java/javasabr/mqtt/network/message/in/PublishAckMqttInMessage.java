@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.packet.in;
+package javasabr.mqtt.network.message.in;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -10,51 +10,53 @@ import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.message.in.MqttInMessage;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Publish acknowledgment (QoS 1).
  */
 @Getter
 @Accessors(fluent = true, chain = false)
-public class PublishAckInPacket extends MqttInMessage implements HasMessageId {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class PublishAckMqttInMessage extends MqttInMessage implements HasMessageId {
 
-  private static final int PACKET_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
+  private static final int MESSAGE_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "packetId");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
-        /*
-          Followed by the UTF-8 Encoded String representing the reason associated with this response. This
-          Reason String is a human readable string designed for diagnostics and is not intended to be parsed by
-          the receiver.
+      /*
+        Followed by the UTF-8 Encoded String representing the reason associated with this response. This
+        Reason String is a human readable string designed for diagnostics and is not intended to be parsed by
+        the receiver.
 
-          The sender uses this value to give additional information to the receiver. The sender MUST NOT send
-          this property if it would increase the size of the PUBACK packet beyond the Maximum Packet Size
-          specified by the receiver [MQTT-3.4.2-2]. It is a Protocol Error to include the Reason String more than
-          once.
-         */
+        The sender uses this value to give additional information to the receiver. The sender MUST NOT send
+        this property if it would increase the size of the PUBACK packet beyond the Maximum Packet Size
+        specified by the receiver [MQTT-3.4.2-2]. It is a Protocol Error to include the Reason String more than
+        once.
+       */
       PacketProperty.REASON_STRING,
-        /*
-          Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
-          information. The sender MUST NOT send this property if it would increase the size of the PUBACK
-          packet beyond the Maximum Packet Size specified by the receiver [MQTT-3.4.2-3]. The User Property is
-          allowed to appear multiple times to represent multiple name, value pairs. The same name is allowed to
-          appear more than once.
-         */
+      /*
+        Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
+        information. The sender MUST NOT send this property if it would increase the size of the PUBACK
+        packet beyond the Maximum Packet Size specified by the receiver [MQTT-3.4.2-3]. The User Property is
+        allowed to appear multiple times to represent multiple name, value pairs. The same name is allowed to
+        appear more than once.
+       */
       PacketProperty.USER_PROPERTY);
 
-  private PublishAckReasonCode reasonCode;
-  private int messageId;
+  PublishAckReasonCode reasonCode;
+  int messageId;
 
   // properties
-  private String reason;
+  String reason;
 
-  public PublishAckInPacket(byte info) {
+  public PublishAckMqttInMessage(byte info) {
     super(info);
     this.reasonCode = PublishAckReasonCode.SUCCESS;
     this.reason = "";
@@ -62,7 +64,7 @@ public class PublishAckInPacket extends MqttInMessage implements HasMessageId {
 
   @Override
   public byte messageType() {
-    return (byte) PACKET_TYPE;
+    return (byte) MESSAGE_TYPE;
   }
 
   @Override
@@ -90,11 +92,8 @@ public class PublishAckInPacket extends MqttInMessage implements HasMessageId {
   @Override
   protected void applyProperty(PacketProperty property, String value) {
     switch (property) {
-      case REASON_STRING:
-        reason = value;
-        break;
-      default:
-        unexpectedProperty(property);
+      case REASON_STRING -> reason = value;
+      default -> unexpectedProperty(property);
     }
   }
 }

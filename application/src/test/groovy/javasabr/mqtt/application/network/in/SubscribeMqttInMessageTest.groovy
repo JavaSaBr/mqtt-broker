@@ -4,11 +4,11 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
-import javasabr.mqtt.network.packet.in.SubscribeInPacket
+import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
-class SubscribeInPacketTest extends BaseInPacketTest {
+class SubscribeMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -20,7 +20,7 @@ class SubscribeInPacketTest extends BaseInPacketTest {
           it.put(0b0000_0010 as byte)
         }
     when:
-        def packet = new SubscribeInPacket(0b1000_0000 as byte)
+        def packet = new SubscribeMqttInMessage(0b1000_0000 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -35,7 +35,7 @@ class SubscribeInPacketTest extends BaseInPacketTest {
         packet.topicFilters.get(1).isNoLocal()
         packet.topicFilters.get(1).isRetainAsPublished()
         packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.userProperties() == Array.empty()
         packet.subscriptionId == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }
@@ -56,7 +56,7 @@ class SubscribeInPacketTest extends BaseInPacketTest {
           it.put(0b0001_0110 as byte)
         }
     when:
-        def packet = new SubscribeInPacket(0b0110_0000 as byte)
+        def packet = new SubscribeMqttInMessage(0b0110_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -71,7 +71,7 @@ class SubscribeInPacketTest extends BaseInPacketTest {
         packet.topicFilters.get(1).isNoLocal()
         !packet.topicFilters.get(1).isRetainAsPublished()
         packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.userProperties() == userProperties
         packet.subscriptionId == subscriptionId
     when:
@@ -83,7 +83,7 @@ class SubscribeInPacketTest extends BaseInPacketTest {
           it.putString(topicFilter2)
           it.put(0b0000_0010 as byte)
         }
-        packet = new SubscribeInPacket(0b0110_0000 as byte)
+        packet = new SubscribeMqttInMessage(0b0110_0000 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -98,7 +98,7 @@ class SubscribeInPacketTest extends BaseInPacketTest {
         !packet.topicFilters.get(1).isNoLocal()
         !packet.topicFilters.get(1).isRetainAsPublished()
         packet.topicFilters.get(1).getRetainHandling() == SubscribeRetainHandling.SEND
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.userProperties() == Array.empty()
         packet.subscriptionId == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }

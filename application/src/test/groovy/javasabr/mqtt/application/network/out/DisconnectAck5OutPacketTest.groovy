@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
-import javasabr.mqtt.network.packet.in.DisconnectInPacket
+import javasabr.mqtt.network.message.in.DisconnectMqttInMessage
 import javasabr.mqtt.network.packet.out.Disconnect5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
@@ -19,7 +19,7 @@ class DisconnectAck5OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt5Connection, it)
         }
-        def reader = new DisconnectInPacket(0b1110_0000 as byte)
+        def reader = new DisconnectMqttInMessage(0b1110_0000 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

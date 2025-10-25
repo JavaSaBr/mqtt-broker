@@ -2,11 +2,11 @@ package javasabr.mqtt.application.network.in
 
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
-import javasabr.mqtt.network.packet.in.SubscribeAckInPacket
+import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
-class SubscribeAckInPacketTest extends BaseInPacketTest {
+class SubscribeAckMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -18,12 +18,12 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
           it.put(SubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
         }
     when:
-        def packet = new SubscribeAckInPacket(0b1001_0000 as byte)
+        def packet = new SubscribeAckMqttInMessage(0b1001_0000 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason == ""
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.reasonCodes.size() == 4
         packet.reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_2
@@ -47,12 +47,12 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
           it.put(SubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
         }
     when:
-        def packet = new SubscribeAckInPacket(0b1001_0000 as byte)
+        def packet = new SubscribeAckMqttInMessage(0b1001_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason == reasonString
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.reasonCodes.size() == 4
         packet.reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
@@ -68,12 +68,12 @@ class SubscribeAckInPacketTest extends BaseInPacketTest {
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1.value)
           it.put(SubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
         }
-        packet = new SubscribeAckInPacket(0b1001_0000 as byte)
+        packet = new SubscribeAckMqttInMessage(0b1001_0000 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         packet.reason == ""
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.reasonCodes.size() == 4
         packet.reasonCodes.get(0) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_2

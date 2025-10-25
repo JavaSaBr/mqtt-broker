@@ -350,71 +350,41 @@ public class ConnectMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(PacketProperty property, byte[] value) {
     switch (property) {
-      case AUTHENTICATION_DATA: {
-        authenticationData = value;
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case AUTHENTICATION_DATA -> authenticationData = value;
+      default -> unexpectedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(PacketProperty property, String value) {
     switch (property) {
-      case AUTHENTICATION_METHOD: {
-        authenticationMethod = value;
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case AUTHENTICATION_METHOD -> authenticationMethod = value;
+      default -> unexpectedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(PacketProperty property, long value) {
     switch (property) {
-      case REQUEST_RESPONSE_INFORMATION: {
-        requestResponseInformation = NumberUtils.toBoolean(value);
-        break;
-      }
-      case REQUEST_PROBLEM_INFORMATION: {
-        requestProblemInformation = NumberUtils.toBoolean(value);
-        break;
-      }
-      case RECEIVE_MAXIMUM_PUBLISH: {
-        receiveMaxPublishes = NumberUtils.validate(
-            (int) value,
-            MqttProperties.RECEIVE_MAXIMUM_MIN,
-            MqttProperties.RECEIVE_MAXIMUM_MAX);
-        break;
-      }
-      case TOPIC_ALIAS_MAXIMUM: {
-        topicAliasMaxValue = NumberUtils.validate(
-            (int) value,
-            MqttProperties.TOPIC_ALIAS_MIN,
-            MqttProperties.TOPIC_ALIAS_MAX);
-        break;
-      }
-      case SESSION_EXPIRY_INTERVAL: {
-        sessionExpiryInterval = NumberUtils.validate(
-            value,
-            MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
-            MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
-        break;
-      }
-      case MAXIMUM_PACKET_SIZE: {
-        maxPacketSize = NumberUtils.validate(
-            (int) value,
-            MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
-            MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case REQUEST_RESPONSE_INFORMATION -> requestResponseInformation = NumberUtils.toBoolean(value);
+      case REQUEST_PROBLEM_INFORMATION -> requestProblemInformation = NumberUtils.toBoolean(value);
+      case RECEIVE_MAXIMUM_PUBLISH -> receiveMaxPublishes = NumberUtils.validate(
+          (int) value,
+          MqttProperties.RECEIVE_MAXIMUM_MIN,
+          MqttProperties.RECEIVE_MAXIMUM_MAX);
+      case TOPIC_ALIAS_MAXIMUM -> topicAliasMaxValue = NumberUtils.validate(
+          (int) value,
+          MqttProperties.TOPIC_ALIAS_MIN,
+          MqttProperties.TOPIC_ALIAS_MAX);
+      case SESSION_EXPIRY_INTERVAL -> sessionExpiryInterval = NumberUtils.validate(
+          value,
+          MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
+          MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
+      case MAXIMUM_PACKET_SIZE -> maxPacketSize = NumberUtils.validate(
+          (int) value,
+          MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
+          MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
+      default -> unexpectedProperty(property);
     }
   }
 }

@@ -90,30 +90,17 @@ public class AuthenticationMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(PacketProperty property, byte[] value) {
     switch (property) {
-      case AUTHENTICATION_DATA: {
-        authenticationData = value;
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case AUTHENTICATION_DATA -> authenticationData = value;
+      default -> unexpectedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(PacketProperty property, String value) {
     switch (property) {
-      case REASON_STRING: {
-        reason = value;
-        break;
-      }
-      case AUTHENTICATION_METHOD: {
-        authenticationMethod = value;
-        break;
-      }
-      default: {
-        unexpectedProperty(property);
-      }
+      case REASON_STRING -> reason = value;
+      case AUTHENTICATION_METHOD -> authenticationMethod = value;
+      default -> unexpectedProperty(property);
     }
   }
 }

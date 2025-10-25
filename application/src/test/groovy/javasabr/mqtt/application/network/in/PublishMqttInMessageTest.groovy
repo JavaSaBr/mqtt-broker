@@ -4,13 +4,13 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
-import javasabr.mqtt.network.packet.in.PublishInPacket
+import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
-class PublishInPacketTest extends BaseInPacketTest {
+class PublishMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -20,7 +20,7 @@ class PublishInPacketTest extends BaseInPacketTest {
           it.put(publishPayload)
         }
     when:
-        def packet = new PublishInPacket(0b0110_0011 as byte)
+        def packet = new PublishMqttInMessage(0b0110_0011 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -32,7 +32,7 @@ class PublishInPacketTest extends BaseInPacketTest {
         packet.contentType == ""
         packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
         packet.payload == publishPayload
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.userProperties() == Array.empty()
         packet.messageExpiryInterval == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
         packet.topicAlias == MqttProperties.TOPIC_ALIAS_DEFAULT
@@ -59,7 +59,7 @@ class PublishInPacketTest extends BaseInPacketTest {
           it.put(publishPayload)
         }
     when:
-        def packet = new PublishInPacket(0b0110_0011 as byte)
+        def packet = new PublishMqttInMessage(0b0110_0011 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -71,7 +71,7 @@ class PublishInPacketTest extends BaseInPacketTest {
         packet.contentType == contentType
         packet.correlationData == correlationData
         packet.payload == publishPayload
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.userProperties() == userProperties
         packet.messageExpiryInterval == messageExpiryInterval
         packet.topicAlias == topicAlias
@@ -83,7 +83,7 @@ class PublishInPacketTest extends BaseInPacketTest {
           it.putMbi(0)
           it.put(publishPayload)
         }
-        packet = new PublishInPacket(0b0110_0011 as byte)
+        packet = new PublishMqttInMessage(0b0110_0011 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -95,7 +95,7 @@ class PublishInPacketTest extends BaseInPacketTest {
         packet.contentType == ""
         packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
         packet.payload == publishPayload
-        packet.packetId == packetId
+        packet.messageId == packetId
         packet.userProperties() == Array.empty(StringPair)
         packet.messageExpiryInterval == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
         packet.topicAlias == MqttProperties.TOPIC_ALIAS_DEFAULT

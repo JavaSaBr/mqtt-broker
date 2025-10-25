@@ -4,7 +4,9 @@ import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.message.MqttMessageType
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.message.in.MqttInMessage
-import javasabr.mqtt.network.packet.in.*
+import javasabr.mqtt.network.message.in.PublishMqttInMessage
+import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage
+import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage
 import javasabr.mqtt.network.packet.out.Disconnect311OutPacket
 import javasabr.mqtt.network.packet.out.MqttWritablePacket
 import javasabr.mqtt.network.utils.MqttDataUtils
@@ -82,13 +84,13 @@ class MqttMockClient {
         packet = new ConnectAckMqttInMessage(info)
         break
       case MqttMessageType.SUBSCRIBE_ACK:
-        packet = new SubscribeAckInPacket(info)
+        packet = new SubscribeAckMqttInMessage(info)
         break
       case MqttMessageType.PUBLISH:
-        packet = new PublishInPacket(info)
+        packet = new PublishMqttInMessage(info)
         break
       case MqttMessageType.PUBLISH_RELEASED:
-        packet = new PublishReleaseInPacket(info)
+        packet = new PublishReleaseMqttInMessage(info)
         break
       default:
         throw new IllegalStateException("Unknown packet of type: $type")
