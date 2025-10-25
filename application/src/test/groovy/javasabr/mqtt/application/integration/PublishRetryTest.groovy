@@ -11,7 +11,14 @@ import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage
 import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage
-import javasabr.mqtt.network.packet.out.*
+import javasabr.mqtt.network.message.out.ConnectMqtt311OutMessage
+import javasabr.mqtt.network.message.out.ConnectMqtt5OutMessage
+import javasabr.mqtt.network.message.out.PublishCompleteMqtt5OutMessage
+import javasabr.mqtt.network.message.out.PublishCompleteMqtt311OutMessage
+import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
+import javasabr.mqtt.network.message.out.PublishReceivedMqtt311OutMessage
+import javasabr.mqtt.network.message.out.SubscribeMqtt5OutMessage
+import javasabr.mqtt.network.message.out.SubscribeMqtt311OutMessage
 import javasabr.mqtt.service.session.MqttSessionService
 import javasabr.rlib.collections.array.Array
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,12 +36,12 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new Connect311OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
-        subscriber.send(new Subscribe311OutPacket(
+        subscriber.send(new SubscribeMqtt311OutMessage(
             Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.AT_LEAST_ONCE)),
             1
         ))
@@ -56,7 +63,7 @@ class PublishRetryTest extends IntegrationSpecification {
         subscriber.disconnect()
         Thread.sleep(1_000)
         subscriber.connect()
-        subscriber.send(new Connect311OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
     then:
@@ -77,12 +84,12 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new Connect5OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
-        subscriber.send(new Subscribe5OutPacket(
+        subscriber.send(new SubscribeMqtt5OutMessage(
             Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.AT_LEAST_ONCE)),
             1
         ))
@@ -104,7 +111,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new Connect5OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
     then:
@@ -125,12 +132,12 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new Connect311OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
-        subscriber.send(new Subscribe311OutPacket(
+        subscriber.send(new SubscribeMqtt311OutMessage(
             Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.EXACTLY_ONCE)),
             1
         ))
@@ -152,7 +159,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new Connect311OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
     then:
@@ -163,12 +170,12 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new Connect311OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
-        subscriber.send(new PublishReceived311OutPacket(receivedDupPublish.getPacketId()))
+        subscriber.send(new PublishReceivedMqtt311OutMessage(receivedDupPublish.messageId()))
         def releaseAck = subscriber.readNext() as PublishReleaseMqttInMessage
-        subscriber.send(new PublishComplete311OutPacket(receivedDupPublish.getPacketId()))
+        subscriber.send(new PublishCompleteMqtt311OutMessage(receivedDupPublish.messageId()))
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
         receivedDupPublish.duplicate
@@ -188,12 +195,12 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new Connect5OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
-        subscriber.send(new Subscribe5OutPacket(
+        subscriber.send(new SubscribeMqtt5OutMessage(
             Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.EXACTLY_ONCE)),
             1
         ))
@@ -215,7 +222,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new Connect5OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
     then:
@@ -226,17 +233,17 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new Connect5OutPacket(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
-        subscriber.send(new PublishReceived5OutPacket(
-            receivedDupPublish.getPacketId(),
+        subscriber.send(new PublishReceivedMqtt5OutMessage(
+            receivedDupPublish.messageId(),
             PublishReceivedReasonCode.SUCCESS
         ))
 
         def releaseAck = subscriber.readNext() as PublishReleaseMqttInMessage
-        subscriber.send(new PublishComplete5OutPacket(
-            receivedDupPublish.getPacketId(),
+        subscriber.send(new PublishCompleteMqtt5OutMessage(
+            receivedDupPublish.messageId(),
             PublishCompletedReasonCode.SUCCESS
         ))
     then:

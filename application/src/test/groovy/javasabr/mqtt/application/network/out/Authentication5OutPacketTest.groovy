@@ -2,14 +2,14 @@ package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode
 import javasabr.mqtt.network.message.in.AuthenticationMqttInMessage
-import javasabr.mqtt.network.packet.out.Authentication5OutPacket
+import javasabr.mqtt.network.message.out.AuthenticationMqtt5OutMessage
 import javasabr.rlib.common.util.BufferUtils
 
 class Authentication5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
     given:
-        def packet = new Authentication5OutPacket(
+        def packet = new AuthenticationMqtt5OutMessage(
             userProperties,
             AuthenticateReasonCode.CONTINUE_AUTHENTICATION,
             reasonString,

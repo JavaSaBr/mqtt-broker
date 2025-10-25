@@ -7,8 +7,8 @@ import javasabr.mqtt.network.message.in.MqttInMessage
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage
 import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage
-import javasabr.mqtt.network.packet.out.Disconnect311OutPacket
-import javasabr.mqtt.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.network.message.out.DisconnectMqtt311OutMessage
+import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.rlib.common.util.NumberUtils
 
@@ -37,7 +37,7 @@ class MqttMockClient {
     socket = new Socket(brokerHost, brokerPort)
   }
 
-  void send(MqttWritablePacket packet) {
+  void send(MqttOutMessage packet) {
 
     def dataBuffer = ByteBuffer.allocate(1024)
     packet.write(connection, dataBuffer)
@@ -108,7 +108,7 @@ class MqttMockClient {
   }
 
   def disconnect() {
-    send(new Disconnect311OutPacket())
+    send(new DisconnectMqtt311OutMessage())
     close()
   }
 

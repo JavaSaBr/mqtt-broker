@@ -3,7 +3,7 @@ package javasabr.mqtt.application.network.out
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
-import javasabr.mqtt.network.packet.out.ConnectAck5OutPacket
+import javasabr.mqtt.network.message.out.ConnectAckMqtt5OutMessage
 import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAck5OutPacketTest extends BaseOutPacketTest {
@@ -29,7 +29,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
         def requestedSessionExpireInterval = 360
         def requestedKeepAlive = 120
         def requestedReceiveMaxPublishes = 500
-        def packet = new ConnectAck5OutPacket(
+        def packet = new ConnectAckMqtt5OutMessage(
             clientConfig,
             ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
             sessionPresent,

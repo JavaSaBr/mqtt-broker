@@ -11,7 +11,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.collections.array.Array;
@@ -50,7 +50,7 @@ public class SubscribeMqttInMessageHandler extends
 
     Array<SubscribeAckReasonCode> ackReasonCodes = subscriptionService
         .subscribe(client, networkPacket.topicFilters());
-    MqttWritablePacket subscribeAck = messageOutFactoryService
+    MqttOutMessage subscribeAck = messageOutFactoryService
         .resolveFactory(client)
         .newSubscribeAck(networkPacket.messageId(), ackReasonCodes);
 
@@ -62,7 +62,7 @@ public class SubscribeMqttInMessageHandler extends
 
     if (anyReason != null) {
       var disconnectReasonCode = DisconnectReasonCode.of(toUnsignedInt(anyReason.getValue()));
-      MqttWritablePacket disconnect = messageOutFactoryService
+      MqttOutMessage disconnect = messageOutFactoryService
           .resolveFactory(client)
           .newDisconnect(client, disconnectReasonCode);
 

@@ -27,7 +27,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements HasMe
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RECEIVED.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    DebugUtils.registerIncludedFields("reasonCode", "messageId");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(

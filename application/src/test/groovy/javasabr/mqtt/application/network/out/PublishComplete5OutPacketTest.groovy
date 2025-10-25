@@ -2,14 +2,14 @@ package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage
-import javasabr.mqtt.network.packet.out.PublishComplete5OutPacket
+import javasabr.mqtt.network.message.out.PublishCompleteMqtt5OutMessage
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishComplete5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
     given:
-        def packet = new PublishComplete5OutPacket(
+        def packet = new PublishCompleteMqtt5OutMessage(
             packetId,
             PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
             userProperties,

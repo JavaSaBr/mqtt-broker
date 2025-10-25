@@ -4,7 +4,7 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
-import javasabr.mqtt.network.packet.out.PublishOutPacket;
+import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
@@ -41,7 +41,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
       PublishMqttInMessage packet,
       int messageId,
       boolean duplicate) {
-    PublishOutPacket publish = messageOutFactoryService
+    PublishMqttOutMessage publish = messageOutFactoryService
         .resolveFactory(client)
         .newPublish(
             messageId,

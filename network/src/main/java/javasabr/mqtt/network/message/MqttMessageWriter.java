@@ -4,14 +4,14 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.utils.MqttDataUtils;
 import javasabr.rlib.functions.ObjBoolConsumer;
 import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractNetworkPacketWriter;
 import org.jspecify.annotations.Nullable;
 
-public class MqttMessageWriter extends AbstractNetworkPacketWriter<MqttWritablePacket, MqttConnection> {
+public class MqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutMessage, MqttConnection> {
 
   public static final int DATA_OFFSET = 5;
 
@@ -36,7 +36,7 @@ public class MqttMessageWriter extends AbstractNetworkPacketWriter<MqttWritableP
 
   @Override
   protected boolean onBeforeSerialize(
-      MqttWritablePacket packet,
+      MqttOutMessage packet,
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
@@ -46,7 +46,7 @@ public class MqttMessageWriter extends AbstractNetworkPacketWriter<MqttWritableP
 
   @Override
   protected boolean onAfterSerialize(
-      MqttWritablePacket packet,
+      MqttOutMessage packet,
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {

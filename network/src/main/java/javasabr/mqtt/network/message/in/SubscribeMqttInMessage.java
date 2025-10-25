@@ -33,7 +33,7 @@ public class SubscribeMqttInMessage extends MqttInMessage {
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("packetId", "topicFilters");
+    DebugUtils.registerIncludedFields("messageId", "topicFilters");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(

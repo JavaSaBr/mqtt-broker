@@ -23,7 +23,7 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements HasMes
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASED.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    DebugUtils.registerIncludedFields("reasonCode", "messageId");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(

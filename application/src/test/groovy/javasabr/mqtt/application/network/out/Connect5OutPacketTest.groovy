@@ -2,7 +2,7 @@ package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage
-import javasabr.mqtt.network.packet.out.Connect5OutPacket
+import javasabr.mqtt.network.message.out.ConnectMqtt5OutMessage
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
@@ -10,7 +10,7 @@ class Connect5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
     given:
-        def packet = new Connect5OutPacket(
+        def packet = new ConnectMqtt5OutMessage(
             userName,
             "",
             mqtt311ClientId,

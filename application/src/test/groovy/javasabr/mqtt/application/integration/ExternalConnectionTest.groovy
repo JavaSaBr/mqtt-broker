@@ -8,7 +8,7 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
-import javasabr.mqtt.network.packet.out.Connect311OutPacket
+import javasabr.mqtt.network.message.out.ConnectMqtt311OutMessage
 import javasabr.rlib.common.util.ArrayUtils
 import spock.lang.Ignore
 
@@ -148,7 +148,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
     when:
 
         client.connect()
-        client.send(new Connect311OutPacket(
+        client.send(new ConnectMqtt311OutMessage(
             "",
             "",
             clientId,

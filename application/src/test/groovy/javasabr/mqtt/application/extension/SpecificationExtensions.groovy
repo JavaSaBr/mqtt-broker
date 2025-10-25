@@ -4,7 +4,7 @@ import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.data.type.PacketDataType
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.packet.out.MqttWritablePacket
+import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.utils.MqttDataUtils
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 
 class SpecificationExtensions extends Specification {
 
-  static final writer = new MqttWritablePacket() {
+  static final writer = new MqttOutMessage() {
 
     @Override
     protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {}

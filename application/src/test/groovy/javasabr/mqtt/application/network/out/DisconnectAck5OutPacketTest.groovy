@@ -2,14 +2,14 @@ package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.network.message.in.DisconnectMqttInMessage
-import javasabr.mqtt.network.packet.out.Disconnect5OutPacket
+import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.rlib.common.util.BufferUtils
 
 class DisconnectAck5OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
     given:
-        def packet = new Disconnect5OutPacket(
+        def packet = new DisconnectMqtt5OutMessage(
             DisconnectReasonCode.PACKET_TOO_LARGE,
             userProperties,
             reasonString,

@@ -3,7 +3,7 @@ package javasabr.mqtt.application.network.out
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
-import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket
+import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
@@ -12,7 +12,7 @@ class ConnectAck311OutPacketTest extends BaseOutPacketTest {
 
   def "should write packet correctly"() {
     given:
-        def packet = new ConnectAck311OutPacket(
+        def packet = new ConnectAckMqtt311OutMessage(
             ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
             sessionPresent)
     when:

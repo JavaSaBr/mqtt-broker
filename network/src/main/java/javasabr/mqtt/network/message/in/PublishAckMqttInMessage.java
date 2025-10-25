@@ -26,7 +26,7 @@ public class PublishAckMqttInMessage extends MqttInMessage implements HasMessage
   private static final int MESSAGE_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("reasonCode", "packetId");
+    DebugUtils.registerIncludedFields("reasonCode", "messageId");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(

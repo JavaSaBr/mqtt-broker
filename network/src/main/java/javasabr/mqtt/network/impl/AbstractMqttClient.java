@@ -8,8 +8,8 @@ import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
+import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -49,19 +49,19 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   }
 
   @Override
-  public void send(MqttWritablePacket packet) {
+  public void send(MqttOutMessage packet) {
     log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     connection.send(packet);
   }
 
   @Override
-  public CompletableFuture<Boolean> sendWithFeedback(MqttWritablePacket packet) {
+  public CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage packet) {
     log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     return connection.sendWithFeedback(packet);
   }
 
   @Override
-  public void reject(ConnectAck311OutPacket connectAsk) {
+  public void reject(ConnectAckMqtt311OutMessage connectAsk) {
     connection
         .sendWithFeedback(connectAsk)
         .thenAccept(_ -> connection.close());

@@ -35,7 +35,7 @@ public class PublishMqttInMessage extends MqttInMessage {
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("topicName", "qos", "duplicate", "packetId");
+    DebugUtils.registerIncludedFields("topicName", "qos", "duplicate", "messageId");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
