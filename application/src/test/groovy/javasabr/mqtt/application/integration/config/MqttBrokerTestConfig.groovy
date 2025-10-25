@@ -1,40 +1,49 @@
 package javasabr.mqtt.application.integration.config
 
-import javasabr.mqtt.broker.application.config.MqttBrokerConfig
-import javasabr.mqtt.broker.application.config.MqttNetworkConfig
+import javasabr.mqtt.broker.application.config.MqttBrokerSpringConfig
 import javasabr.mqtt.network.MqttConnection
+import javasabr.mqtt.service.ConnectionService
 import javasabr.rlib.network.server.ServerNetwork
-import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.PropertySource
 
-import java.util.function.Consumer
+import java.util.concurrent.ThreadLocalRandom
 
 @Import([
-    MqttBrokerConfig,
-    MqttNetworkConfig
+    MqttBrokerSpringConfig,
 ])
 @Configuration(proxyBeanMethods = false)
 @PropertySource("classpath:application-test.properties")
 class MqttBrokerTestConfig {
 
   @Bean
-  InetSocketAddress externalNetworkAddress(
-      @Qualifier("externalNetwork") ServerNetwork<MqttConnection> externalNetwork,
-      @Qualifier("externalConnectionConsumer") Consumer<MqttConnection> externalConnectionConsumer) {
-    def address = externalNetwork.start()
-    externalNetwork.onAccept(externalConnectionConsumer)
-    return address
+  InetSocketAddress externalNetworkAddress(ServerNetwork<MqttConnection> externalNetwork) {
+    def random = ThreadLocalRandom.current()
+    for (int i = 0; i < 100; i++) {
+      def address = new InetSocketAddress("localhost", random.nextInt(800, 45000))
+      try {
+        externalNetwork.start(address)
+        return address;
+      } catch (RuntimeException e) {
+      }
+    }
+    throw new RuntimeException()
   }
 
   @Bean
-  InetSocketAddress internalNetworkAddress(
-      @Qualifier("internalNetwork") ServerNetwork<MqttConnection> internalNetwork,
-      @Qualifier("internalConnectionConsumer") Consumer<MqttConnection> internalConnectionConsumer) {
-    def address = internalNetwork.start()
-    internalNetwork.onAccept(internalConnectionConsumer)
-    return address
+  ApplicationListener<ApplicationStartedEvent> externalNetworkStarter() {
+    return (event) -> { };
+  }
+
+  @Bean
+  Void startExternalNetwork(ServerNetwork<MqttConnection> externalNetwork,
+                            ConnectionService connectionService,
+                            InetSocketAddress externalNetworkAddress) {
+    externalNetwork.onAccept(connectionService::processAcceptedConnection);
+    return null;
   }
 }

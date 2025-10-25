@@ -38,7 +38,7 @@ public class DefaultConnectionService implements ConnectionService {
     }
 
     this.inMessageHandlers = inMessageHandlers;
-    log.info(inMessageHandlers, DefaultConnectionService::buildConfigDescription);
+    log.info(inMessageHandlers, DefaultConnectionService::buildServiceDescription);
   }
 
   @Override
@@ -64,20 +64,20 @@ public class DefaultConnectionService implements ConnectionService {
     }
   }
 
-  private static String buildConfigDescription(@Nullable MqttInMessageHandler[] inMessageHandlers) {
+  private static String buildServiceDescription(@Nullable MqttInMessageHandler[] inMessageHandlers) {
     var builder = new StringBuilder();
     builder.append("{\n");
     int count = 0;
-    for (MqttInMessageHandler messageHandler : inMessageHandlers) {
-      if (messageHandler == null) {
+    for (MqttInMessageHandler inMessageHandler : inMessageHandlers) {
+      if (inMessageHandler == null) {
         continue;
       }
       count++;
       builder
-          .append("    \"")
-          .append(messageHandler.messageType())
+          .append("  \"")
+          .append(inMessageHandler.messageType())
           .append("\": \"")
-          .append(messageHandler
+          .append(inMessageHandler
               .getClass()
               .getSimpleName())
           .append("\",")

@@ -28,7 +28,7 @@ import javasabr.mqtt.network.packet.out.SubscribeAck311OutPacket;
 import javasabr.mqtt.network.packet.out.UnsubscribeAck311OutPacket;
 import javasabr.rlib.collections.array.Array;
 
-public class Mqtt311MessageOutFactory extends MessageOutFactory {
+public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
   @Override
   public MqttVersion mqttVersion() {

@@ -21,7 +21,7 @@ import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 
-public abstract class MessageOutFactory {
+public abstract class MqttMessageOutFactory {
 
   public abstract MqttVersion mqttVersion();
 

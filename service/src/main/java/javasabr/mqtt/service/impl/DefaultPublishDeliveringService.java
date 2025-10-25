@@ -29,18 +29,19 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
         .max()
         .orElse(0);
 
-    var publishOutHandlers = new MqttPublishOutMessageHandler[maxIndex + 1];
+    var handlers = new MqttPublishOutMessageHandler[maxIndex + 1];
 
     for (MqttPublishOutMessageHandler knownPublishOutHandler : knownPublishOutHandlers) {
       QoS qos = knownPublishOutHandler.qos();
-      if (publishOutHandlers[qos.index()] != null) {
+      if (handlers[qos.index()] != null) {
         throw new IllegalArgumentException(
             "Found duplicate MqttPublishOutMessageHandler:[" + knownPublishOutHandler + "]");
       }
-      publishOutHandlers[qos.index()] = knownPublishOutHandler;
+      handlers[qos.index()] = knownPublishOutHandler;
     }
 
-    this.publishOutMessageHandlers = publishOutHandlers;
+    this.publishOutMessageHandlers = handlers;
+    log.info(publishOutMessageHandlers, DefaultPublishDeliveringService::buildServiceDescription);
   }
 
   @Override
@@ -52,5 +53,32 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
       return PublishHandlingResult.UNSPECIFIED_ERROR;
     }
+  }
+
+  private static String buildServiceDescription(
+      @Nullable MqttPublishOutMessageHandler[] publishOutMessageHandlers) {
+    var builder = new StringBuilder();
+    builder.append("{\n");
+    int count = 0;
+    for (MqttPublishOutMessageHandler publishOutMessageHandler : publishOutMessageHandlers) {
+      if (publishOutMessageHandler == null) {
+        continue;
+      }
+      count++;
+      builder
+          .append("  \"")
+          .append(publishOutMessageHandler.qos())
+          .append("\": \"")
+          .append(publishOutMessageHandler
+              .getClass()
+              .getSimpleName())
+          .append("\",")
+          .append("\n");
+    }
+    builder
+        .delete(builder.length() - 2, builder.length())
+        .append("\n}");
+
+    return "Registered [%s] MqttPublishOutMessageHandlers: %s".formatted(count, builder);
   }
 }

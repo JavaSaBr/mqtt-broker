@@ -28,18 +28,19 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
         .max()
         .orElse(0);
 
-    var publishInHandlers = new MqttPublishInMessageHandler[maxIndex + 1];
+    var handlers = new MqttPublishInMessageHandler[maxIndex + 1];
 
     for (MqttPublishInMessageHandler knownPublishInHandler : knownPublishInHandlers) {
       QoS qos = knownPublishInHandler.qos();
-      if (publishInHandlers[qos.index()] != null) {
+      if (handlers[qos.index()] != null) {
         throw new IllegalArgumentException(
             "Found duplicate MqttPublishInMessageHandler:[" + knownPublishInHandler + "]");
       }
-      publishInHandlers[qos.index()] = knownPublishInHandler;
+      handlers[qos.index()] = knownPublishInHandler;
     }
 
-    this.publishInHandlers = publishInHandlers;
+    this.publishInHandlers = handlers;
+    log.info(publishInHandlers, DefaultPublishReceivingService::buildServiceDescription);
   }
 
   @Override
@@ -50,5 +51,32 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
     }
+  }
+
+  private static String buildServiceDescription(
+      @Nullable MqttPublishInMessageHandler[] publishInMessageHandlers) {
+    var builder = new StringBuilder();
+    builder.append("{\n");
+    int count = 0;
+    for (MqttPublishInMessageHandler publishInMessageHandler : publishInMessageHandlers) {
+      if (publishInMessageHandler == null) {
+        continue;
+      }
+      count++;
+      builder
+          .append("  \"")
+          .append(publishInMessageHandler.qos())
+          .append("\": \"")
+          .append(publishInMessageHandler
+              .getClass()
+              .getSimpleName())
+          .append("\",")
+          .append("\n");
+    }
+    builder
+        .delete(builder.length() - 2, builder.length())
+        .append("\n}");
+
+    return "Registered [%s] MqttPublishInMessageHandlers: %s".formatted(count, builder);
   }
 }

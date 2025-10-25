@@ -14,14 +14,14 @@ import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
+import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
-import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
+import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
@@ -42,7 +42,7 @@ import javasabr.mqtt.service.message.handler.impl.SubscribeMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandler;
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
-import javasabr.mqtt.service.message.out.factory.MessageOutFactory;
+import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -100,18 +100,18 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MessageOutFactory mqtt311MessageOutFactory() {
+  MqttMessageOutFactory mqtt311MessageOutFactory() {
     return new Mqtt311MessageOutFactory();
   }
 
   @Bean
-  MessageOutFactory mqtt5MessageOutFactory() {
+  MqttMessageOutFactory mqtt5MessageOutFactory() {
     return new Mqtt5MessageOutFactory();
   }
 
   @Bean
   MessageOutFactoryService mqttMessageOutFactoryService(
-      Collection<? extends MessageOutFactory> knownFactories) {
+      Collection<? extends MqttMessageOutFactory> knownFactories) {
     return new DefaultMessageOutFactoryService(knownFactories);
   }
 
