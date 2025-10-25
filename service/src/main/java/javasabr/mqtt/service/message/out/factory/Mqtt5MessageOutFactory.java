@@ -1,6 +1,7 @@
-package javasabr.mqtt.network.out;
+package javasabr.mqtt.service.message.out.factory;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
@@ -27,7 +28,12 @@ import javasabr.mqtt.network.packet.out.SubscribeAck5OutPacket;
 import javasabr.mqtt.network.packet.out.UnsubscribeAck5OutPacket;
 import javasabr.rlib.collections.array.Array;
 
-public class Mqtt5PacketOutFactory extends Mqtt311PacketOutFactory {
+public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
+
+  @Override
+  public MqttVersion mqttVersion() {
+    return MqttVersion.MQTT_5;
+  }
 
   @Override
   public MqttWritablePacket newConnectAck(

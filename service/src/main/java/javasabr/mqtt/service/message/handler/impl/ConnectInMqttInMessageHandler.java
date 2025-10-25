@@ -25,7 +25,8 @@ import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.mqtt.network.packet.in.ConnectInPacket;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
-import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -39,19 +40,22 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
 
   ClientIdRegistry clientIdRegistry;
   AuthenticationService authenticationService;
-  MqttSessionService mqttSessionService;
+  SessionService sessionService;
   SubscriptionService subscriptionService;
+  MessageOutFactoryService messageOutFactoryService;
 
   public ConnectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
-      MqttSessionService mqttSessionService,
-      SubscriptionService subscriptionService) {
+      SessionService sessionService,
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
     super(ExternalMqttClient.class, ConnectInPacket.class);
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
-    this.mqttSessionService = mqttSessionService;
+    this.sessionService = sessionService;
     this.subscriptionService = subscriptionService;
+    this.messageOutFactoryService = messageOutFactoryService;
   }
 
   @Override
@@ -71,9 +75,15 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     resolveClientConnectionConfig(client, networkPacket);
     authenticationService
         .auth(networkPacket.username(), networkPacket.password())
-        .flatMap(ifTrue(client, networkPacket, this::registerClient, BAD_USER_NAME_OR_PASSWORD, client::reject))
-        .flatMap(ifTrue(client, networkPacket, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, client::reject))
+        .flatMap(ifTrue(client, networkPacket, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(client, connectAckReasonCode)))
+        .flatMap(ifTrue(client, networkPacket, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(client, connectAckReasonCode)))
         .subscribe();
+  }
+
+  private void reject(ExternalMqttClient client, ConnectAckReasonCode connectAckReasonCode) {
+    client.send(messageOutFactoryService
+        .resolveFactory(client)
+        .newConnectAck(client, connectAckReasonCode));
   }
 
   private Mono<Boolean> registerClient(ExternalMqttClient client, ConnectInPacket networkPacket) {
@@ -104,14 +114,14 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
 
   private Mono<Boolean> restoreSession(MqttClient.UnsafeMqttClient client, ConnectInPacket packet) {
     if (packet.cleanStart()) {
-      return mqttSessionService
+      return sessionService
           .create(client.clientId())
           .flatMap(session -> onConnected(client, packet, session, false));
     } else {
-      return mqttSessionService
+      return sessionService
           .restore(client.clientId())
           .flatMap(session -> onConnected(client, packet, session, true))
-          .switchIfEmpty(Mono.defer(() -> mqttSessionService
+          .switchIfEmpty(Mono.defer(() -> sessionService
               .create(client.clientId())
               .flatMap(session -> onConnected(client, packet, session, false))));
     }
@@ -180,13 +190,13 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     // if it was closed in parallel
     if (connection.closed() && serverConfig.sessionsEnabled()) {
       // store the session again
-      return mqttSessionService.store(client.clientId(), session, clientConfig.sessionExpiryInterval());
+      return sessionService.store(client.clientId(), session, clientConfig.sessionExpiryInterval());
     }
 
     client.session(session);
 
-    var connectAck = client
-        .packetOutFactory()
+    var connectAck = messageOutFactoryService
+        .resolveFactory(client)
         .newConnectAck(
             client,
             ConnectAckReasonCode.SUCCESS,
@@ -217,10 +227,14 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   private boolean checkPacketException(MqttClient.UnsafeMqttClient client, ConnectInPacket packet) {
     Exception exception = packet.exception();
     if (exception instanceof ConnectionRejectException cre) {
-      client.reject(cre.getReasonCode());
+      client.send(messageOutFactoryService
+          .resolveFactory(client)
+          .newConnectAck(client, cre.getReasonCode()));
       return true;
     } else if (exception instanceof MalformedPacketMqttException) {
-      client.reject(ConnectAckReasonCode.MALFORMED_PACKET);
+      client.send(messageOutFactoryService
+          .resolveFactory(client)
+          .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET));
       return true;
     }
     return false;

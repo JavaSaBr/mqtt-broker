@@ -1,4 +1,4 @@
 @NullMarked
-package javasabr.mqtt.network.handler.client;
+package javasabr.mqtt.service.message.out.factory;
 
 import org.jspecify.annotations.NullMarked;

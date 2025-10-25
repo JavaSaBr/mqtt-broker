@@ -4,12 +4,12 @@ import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.CredentialSource;
-import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
-import javasabr.mqtt.service.impl.InMemoryMqttSessionService;
+import javasabr.mqtt.service.impl.InMemorySessionService;
 import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.impl.SimpleSubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +35,8 @@ public class MqttBrokerConfig {
   }
 
   @Bean
-  MqttSessionService mqttSessionService() {
-    return new InMemoryMqttSessionService(env.getProperty("sessions.clean.thread.interval", int.class, 60000));
+  SessionService mqttSessionService() {
+    return new InMemorySessionService(env.getProperty("sessions.clean.thread.interval", int.class, 60000));
   }
 
   @Bean
@@ -54,9 +54,9 @@ public class MqttBrokerConfig {
   @Bean
   MqttClientReleaseHandler mqttClientReleaseHandler(
       ClientIdRegistry clientIdRegistry,
-      MqttSessionService mqttSessionService,
+      SessionService sessionService,
       SubscriptionService subscriptionService) {
-    return new ExternalMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, subscriptionService);
+    return new ExternalMqttClientReleaseHandler(clientIdRegistry, sessionService, subscriptionService);
   }
 
   @Bean

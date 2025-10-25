@@ -12,14 +12,14 @@ import javasabr.mqtt.network.packet.in.PublishInPacket
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket
 import javasabr.mqtt.network.packet.in.SubscribeAckInPacket
 import javasabr.mqtt.network.packet.out.*
-import javasabr.mqtt.service.MqttSessionService
+import javasabr.mqtt.service.SessionService
 import javasabr.rlib.collections.array.Array
 import org.springframework.beans.factory.annotation.Autowired
 
 class PublishRetryTest extends IntegrationSpecification {
 
   @Autowired
-  MqttSessionService mqttSessionService
+  SessionService mqttSessionService
 
   def "mqtt 3.1.1 client should be generate session with one pending QoS 1 packet"() {
     given:

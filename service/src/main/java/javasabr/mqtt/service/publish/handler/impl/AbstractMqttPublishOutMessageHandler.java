@@ -4,6 +4,8 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.packet.out.PublishOutPacket;
+import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -20,6 +22,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
 
   Class<C> expectedClient;
   SubscriptionService subscriptionService;
+  MessageOutFactoryService messageOutFactoryService;
 
   @Override
   public PublishHandlingResult handle(PublishInPacket packet, SingleSubscriber subscriber) {
@@ -38,20 +41,22 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
       PublishInPacket packet,
       int messageId,
       boolean duplicate) {
-    var packetOutFactory = client.packetOutFactory();
-    client.send(packetOutFactory.newPublish(
-        messageId,
-        qos(),
-        packet.isRetained(),
-        duplicate,
-        packet
-            .getTopicName()
-            .toString(),
-        MqttProperties.TOPIC_ALIAS_NOT_SET,
-        packet.getPayload(),
-        packet.isPayloadFormatIndicator(),
-        packet.getResponseTopic(),
-        packet.getCorrelationData(),
-        packet.userProperties()));
+    PublishOutPacket publish = messageOutFactoryService
+        .resolveFactory(client)
+        .newPublish(
+            messageId,
+            qos(),
+            packet.isRetained(),
+            duplicate,
+            packet
+                .getTopicName()
+                .toString(),
+            MqttProperties.TOPIC_ALIAS_NOT_SET,
+            packet.getPayload(),
+            packet.isPayloadFormatIndicator(),
+            packet.getResponseTopic(),
+            packet.getCorrelationData(),
+            packet.userProperties());
+    client.send(publish);
   }
 }

@@ -4,15 +4,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
-import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.handler.PacketInHandler;
-import javasabr.mqtt.network.out.MqttPacketOutFactories;
-import javasabr.mqtt.network.out.MqttPacketOutFactory;
-import javasabr.mqtt.network.packet.in.MqttReadablePacket;
+import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -53,17 +49,6 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   }
 
   @Override
-  public void handle(MqttReadablePacket packet) {
-    log.debug(clientId, packet.name(), packet, "[%s] Received packet:[%s] %s"::formatted);
-    PacketInHandler packetHandler = null;//connection.packetHandlers()[packet.packetType()];
-    if (packetHandler != null) {
-      packetHandler.handle(this, packet);
-    } else {
-      log.warning(clientId, packet.name(), packet, "[%s] No packet handler for packet:[%s] %s"::formatted);
-    }
-  }
-
-  @Override
   public void send(MqttWritablePacket packet) {
     log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
     connection.send(packet);
@@ -75,17 +60,11 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
     return connection.sendWithFeedback(packet);
   }
 
-  public void reject(ConnectAckReasonCode reasonCode) {
-    connection
-        .sendWithFeedback(packetOutFactory().newConnectAck(this, reasonCode))
-        .thenAccept(_ -> connection.close());
-  }
-
   @Override
-  public MqttPacketOutFactory packetOutFactory() {
-    return MqttPacketOutFactories.of(connection
-        .clientConnectionConfig()
-        .mqttVersion());
+  public void reject(ConnectAck311OutPacket connectAsk) {
+    connection
+        .sendWithFeedback(connectAsk)
+        .thenAccept(_ -> connection.close());
   }
 
   @Override

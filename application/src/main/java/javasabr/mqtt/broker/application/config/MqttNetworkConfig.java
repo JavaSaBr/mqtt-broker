@@ -129,24 +129,6 @@ public class MqttNetworkConfig {
   }
 
   @Bean
-  Consumer<MqttConnection> externalConnectionConsumer() {
-    return mqttConnection -> {
-      log.info(mqttConnection.remoteAddress(), "[%s] Accepted external connection"::formatted);
-      var client = (UnsafeMqttClient) mqttConnection.client();
-      mqttConnection.onReceive((conn, packet) -> client.handle((MqttReadablePacket) packet));
-    };
-  }
-
-  @Bean
-  Consumer<MqttConnection> internalConnectionConsumer() {
-    return mqttConnection -> {
-      log.info(mqttConnection.remoteAddress(), "[%s] Accepted internal connection"::formatted);
-      var client = (UnsafeMqttClient) mqttConnection.client();
-      mqttConnection.onReceive((conn, packet) -> client.handle((MqttReadablePacket) packet));
-    };
-  }
-
-  @Bean
   MqttServerConnectionConfig externalConnectionConfig() {
     return new MqttServerConnectionConfig(
         QoS.of(env.getProperty("mqtt.connection.max.qos", int.class, 2)),

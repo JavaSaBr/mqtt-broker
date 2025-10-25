@@ -4,7 +4,7 @@ import java.io.Closeable;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
 import javasabr.mqtt.network.impl.DefaultMqttSession;
-import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.SessionService;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.Dictionary;
@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
+public class InMemorySessionService implements SessionService, Closeable {
 
   final LockableRefToRefDictionary<String, UnsafeMqttSession> storedSession;
   final Thread cleanThread;
@@ -27,7 +27,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   final int cleanInterval;
   volatile boolean closed;
 
-  public InMemoryMqttSessionService(int cleanInterval) {
+  public InMemorySessionService(int cleanInterval) {
     this.cleanInterval = cleanInterval;
     this.storedSession = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.cleanThread = new Thread(this::cleanup, "InMemoryMqttSessionService-Cleanup");
@@ -106,7 +106,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
       storedSession
           .operations()
-          .inWriteLock(toRemove, InMemoryMqttSessionService::removeExpiredSessions);
+          .inWriteLock(toRemove, InMemorySessionService::removeExpiredSessions);
     }
   }
 

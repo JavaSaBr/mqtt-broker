@@ -12,6 +12,7 @@ import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
+import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -23,12 +24,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHandler {
 
+  MessageOutFactoryService messageOutFactoryService;
   PendingMessageHandler pendingMessageHandler;
 
   public Qos2MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService) {
+      PublishDeliveringService publishDeliveringService,
+      MessageOutFactoryService messageOutFactoryService) {
     super(subscriptionService, publishDeliveringService);
+    this.messageOutFactoryService = messageOutFactoryService;
     this.pendingMessageHandler = this::processPublishRelease;
   }
 
@@ -56,24 +60,24 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   @Override
   protected void handleInvalidTopic(ExternalMqttClient client, int messageId, TopicName topicName) {
     super.handleInvalidTopic(client, messageId, topicName);
-    client.send(client
-        .packetOutFactory()
+    client.send(messageOutFactoryService
+        .resolveFactory(client)
         .newPublishReceived(messageId, PublishReceivedReasonCode.TOPIC_NAME_INVALID));
   }
 
   @Override
   protected void handleEmptySubscriptions(ExternalMqttClient client, int messageId, TopicName topicName) {
     super.handleEmptySubscriptions(client, messageId, topicName);
-    client.send(client
-        .packetOutFactory()
+    client.send(messageOutFactoryService
+        .resolveFactory(client)
         .newPublishReceived(messageId, PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS));
   }
 
   @Override
   protected void handleError(ExternalMqttClient client, int messageId, PublishHandlingResult handlingResult) {
     super.handleError(client, messageId, handlingResult);
-    client.send(client
-        .packetOutFactory()
+    client.send(messageOutFactoryService
+        .resolveFactory(client)
         .newPublishReceived(messageId, handlingResult.receivedReasonCode()));
   }
 
@@ -87,8 +91,8 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
 
     session.registerInPublish(packet, pendingMessageHandler, packet.getPacketId());
     super.startDelivering(client, packet, subscriber);
-    client.send(client
-        .packetOutFactory()
+    client.send(messageOutFactoryService
+        .resolveFactory(client)
         .newPublishReceived(packet.getPacketId(), PublishReceivedReasonCode.SUCCESS));
   }
 
@@ -97,8 +101,9 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
       throw new IllegalStateException("Unexpected response " + response);
     }
 
-    var packetOutFactory = client.packetOutFactory();
-    client.send(packetOutFactory.newPublishCompleted(response.packetId(), PublishCompletedReasonCode.SUCCESS));
+    client.send(messageOutFactoryService
+        .resolveFactory(client)
+        .newPublishCompleted(response.packetId(), PublishCompletedReasonCode.SUCCESS));
     return true;
   }
 }

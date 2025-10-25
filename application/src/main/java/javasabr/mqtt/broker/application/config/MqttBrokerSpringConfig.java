@@ -13,19 +13,21 @@ import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.CredentialSource;
-import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
+import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
-import javasabr.mqtt.service.impl.InMemoryMqttSessionService;
+import javasabr.mqtt.service.impl.InMemorySessionService;
 import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.impl.SimpleSubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
@@ -38,6 +40,9 @@ import javasabr.mqtt.service.message.handler.impl.PublishReceiveMqttInMessageHan
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.SubscribeMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandler;
+import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
+import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
+import javasabr.mqtt.service.message.out.factory.MessageOutFactory;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -71,9 +76,9 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttSessionService mqttSessionService(
+  SessionService mqttSessionService(
       @Value("${sessions.clean.thread.interval:60000}") int cleanInterval) {
-    return new InMemoryMqttSessionService(cleanInterval);
+    return new InMemorySessionService(cleanInterval);
   }
 
   @Bean
@@ -95,16 +100,34 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  MessageOutFactory mqtt311MessageOutFactory() {
+    return new Mqtt311MessageOutFactory();
+  }
+
+  @Bean
+  MessageOutFactory mqtt5MessageOutFactory() {
+    return new Mqtt5MessageOutFactory();
+  }
+
+  @Bean
+  MessageOutFactoryService mqttMessageOutFactoryService(
+      Collection<? extends MessageOutFactory> knownFactories) {
+    return new DefaultMessageOutFactoryService(knownFactories);
+  }
+
+  @Bean
   MqttInMessageHandler connectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
-      MqttSessionService mqttSessionService,
-      SubscriptionService subscriptionService) {
+      SessionService sessionService,
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
     return new ConnectInMqttInMessageHandler(
         clientIdRegistry,
         authenticationService,
-        mqttSessionService,
-        subscriptionService);
+        sessionService,
+        subscriptionService,
+        messageOutFactoryService);
   }
 
   @Bean
@@ -138,13 +161,17 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttInMessageHandler subscribeMqttInMessageHandler(SubscriptionService subscriptionService) {
-    return new SubscribeMqttInMessageHandler(subscriptionService);
+  MqttInMessageHandler subscribeMqttInMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService);
   }
 
   @Bean
-  MqttInMessageHandler unsubscribeMqttInMessageHandler(SubscriptionService subscriptionService) {
-    return new UnsubscribeMqttInMessageHandler(subscriptionService);
+  MqttInMessageHandler unsubscribeMqttInMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new UnsubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService);
   }
 
   @Bean
@@ -153,18 +180,24 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
-    return new Qos0MqttPublishOutMessageHandler(subscriptionService);
+  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new Qos0MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
-    return new Qos1MqttPublishOutMessageHandler(subscriptionService);
+  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new Qos1MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
-    return new Qos2MqttPublishOutMessageHandler(subscriptionService);
+  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new Qos2MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
   }
 
   @Bean
@@ -183,15 +216,23 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttPublishInMessageHandler qos1MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService) {
-    return new Qos1MqttPublishInMessageHandler(subscriptionService, publishDeliveringService);
+      PublishDeliveringService publishDeliveringService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new Qos1MqttPublishInMessageHandler(
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService);
   }
 
   @Bean
   MqttPublishInMessageHandler qos2MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService) {
-    return new Qos2MqttPublishInMessageHandler(subscriptionService, publishDeliveringService);
+      PublishDeliveringService publishDeliveringService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new Qos2MqttPublishInMessageHandler(
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService);
   }
 
   @Bean
@@ -203,9 +244,9 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttClientReleaseHandler externalMqttClientReleaseHandler(
       ClientIdRegistry clientIdRegistry,
-      MqttSessionService mqttSessionService,
+      SessionService sessionService,
       SubscriptionService subscriptionService) {
-    return new ExternalMqttClientReleaseHandler(clientIdRegistry, mqttSessionService, subscriptionService);
+    return new ExternalMqttClientReleaseHandler(clientIdRegistry, sessionService, subscriptionService);
   }
 
   @Bean

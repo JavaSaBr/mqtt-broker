@@ -3,13 +3,16 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 
 public class Qos0MqttPublishOutMessageHandler extends AbstractMqttPublishOutMessageHandler<ExternalMqttClient> {
 
-  public Qos0MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
-    super(ExternalMqttClient.class, subscriptionService);
+  public Qos0MqttPublishOutMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    super(ExternalMqttClient.class, subscriptionService, messageOutFactoryService);
   }
 
   @Override

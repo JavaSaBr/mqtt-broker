@@ -7,12 +7,15 @@ import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.PublishCompleteInPacket;
 import javasabr.mqtt.network.packet.in.PublishReceivedInPacket;
+import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 
 public class Qos2MqttPublishOutMessageHandler extends PersistedMqttPublishOutMessageHandler {
 
-  public Qos2MqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
-    super(subscriptionService);
+  public Qos2MqttPublishOutMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    super(subscriptionService, messageOutFactoryService);
   }
 
   @Override
@@ -22,9 +25,10 @@ public class Qos2MqttPublishOutMessageHandler extends PersistedMqttPublishOutMes
 
   @Override
   protected boolean handleReceivedResponse(MqttClient client, HasPacketId response) {
-    var packetOutFactory = client.packetOutFactory();
     if (response instanceof PublishReceivedInPacket) {
-      client.send(packetOutFactory.newPublishRelease(response.packetId(), SUCCESS));
+      client.send(messageOutFactoryService
+          .resolveFactory(client)
+          .newPublishRelease(response.packetId(), SUCCESS));
       return false;
     } else if (response instanceof PublishCompleteInPacket) {
       return true;

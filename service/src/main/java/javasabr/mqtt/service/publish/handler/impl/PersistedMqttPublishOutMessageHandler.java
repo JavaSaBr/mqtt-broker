@@ -6,6 +6,7 @@ import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
 import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -16,8 +17,10 @@ public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqtt
 
   PendingMessageHandler pendingMessageHandler;
 
-  protected PersistedMqttPublishOutMessageHandler(SubscriptionService subscriptionService) {
-    super(ExternalMqttClient.class, subscriptionService);
+  protected PersistedMqttPublishOutMessageHandler(
+      SubscriptionService subscriptionService,
+      MessageOutFactoryService messageOutFactoryService) {
+    super(ExternalMqttClient.class, subscriptionService, messageOutFactoryService);
     this.pendingMessageHandler = new PendingMessageHandler() {
       @Override
       public boolean handleResponse(MqttClient client, HasPacketId response) {
