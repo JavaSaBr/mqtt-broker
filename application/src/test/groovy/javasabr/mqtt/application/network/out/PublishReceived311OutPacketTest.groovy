@@ -21,7 +21,7 @@ class PublishReceived311OutPacketTest extends BaseOutPacketTest {
     then:
         result
         reader.reasonCode() == PublishReceivedReasonCode.SUCCESS
-        reader.packetId() == packetId
+        reader.messageId() == packetId
         reader.userProperties() == Array.empty(StringPair)
         reader.reason() == ""
   }

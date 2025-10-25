@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class ConnectAck311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.CONNECT_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.CONNECT_ACK.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "sessionPresent");
@@ -39,7 +39,7 @@ public class ConnectAck311OutPacket extends MqttWritablePacket {
   boolean sessionPresent;
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 

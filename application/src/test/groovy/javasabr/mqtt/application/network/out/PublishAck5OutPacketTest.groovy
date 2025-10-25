@@ -23,7 +23,7 @@ class PublishAck5OutPacketTest extends BaseOutPacketTest {
     then:
         result
         reader.reasonCode() == PublishAckReasonCode.NOT_AUTHORIZED
-        reader.packetId() == packetId
+        reader.messageId() == packetId
         reader.userProperties() == userProperties
         reader.reason() == reasonString
   }

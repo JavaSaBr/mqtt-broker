@@ -2,7 +2,7 @@ package javasabr.mqtt.network.packet.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UnsubscribeAck311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.UNSUBSCRIBE_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
 
   private final int packetId;
 
@@ -21,7 +21,7 @@ public class UnsubscribeAck311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 

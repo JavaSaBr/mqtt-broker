@@ -2,7 +2,7 @@ package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.packet.out.ConnectAck5OutPacket
 import javasabr.rlib.common.util.BufferUtils
 
@@ -48,7 +48,7 @@ class ConnectAck5OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt5Connection, it)
         }
-        def reader = new ConnectAckInPacket(0b0010_0000 as byte)
+        def reader = new ConnectAckMqttInMessage(0b0010_0000 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

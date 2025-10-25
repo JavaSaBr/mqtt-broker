@@ -23,7 +23,7 @@ class PublishReceived5OutPacketTest extends BaseOutPacketTest {
     then:
         result
         reader.reasonCode() == PublishReceivedReasonCode.UNSPECIFIED_ERROR
-        reader.packetId() == packetId
+        reader.messageId() == packetId
         reader.userProperties() == userProperties
         reader.reason() == reasonString
   }

@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.packet.in.PublishCompleteInPacket;
 
 public class PublishCompleteMqttInMessageHandler extends
@@ -11,7 +11,7 @@ public class PublishCompleteMqttInMessageHandler extends
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.PUBLISH_COMPLETED;
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_COMPLETED;
   }
 }

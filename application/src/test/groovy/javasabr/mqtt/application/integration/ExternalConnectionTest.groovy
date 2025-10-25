@@ -7,7 +7,7 @@ import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCo
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.packet.out.Connect311OutPacket
 import javasabr.rlib.common.util.ArrayUtils
 import spock.lang.Ignore
@@ -160,7 +160,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
             false
         ))
 
-        def connectAck = client.readNext() as ConnectAckInPacket
+        def connectAck = client.readNext() as ConnectAckMqttInMessage
 
     then:
         connectAck.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD

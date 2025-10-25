@@ -2,8 +2,8 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
 
 public class PublishReleaseMqttInMessageHandler
@@ -14,8 +14,8 @@ public class PublishReleaseMqttInMessageHandler
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.PUBLISH_RELEASED;
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_RELEASED;
   }
 
   @Override

@@ -2,8 +2,8 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.packet.in.DisconnectInPacket;
 import lombok.CustomLog;
 
@@ -15,8 +15,8 @@ public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.DISCONNECT;
+  public MqttMessageType messageType() {
+    return MqttMessageType.DISCONNECT;
   }
 
   @Override

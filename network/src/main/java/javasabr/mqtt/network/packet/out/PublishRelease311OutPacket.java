@@ -2,7 +2,7 @@ package javasabr.mqtt.network.packet.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -11,12 +11,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PublishRelease311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.PUBLISH_RELEASED.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.PUBLISH_RELEASED.ordinal();
 
   private final int packetId;
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 

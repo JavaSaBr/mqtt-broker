@@ -42,12 +42,12 @@ public abstract class MqttWritablePacket extends AbstractWritableNetworkPacket<M
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {}
 
   public final int packetTypeAndFlags() {
-    byte type = packetType();
+    byte type = messageType();
     byte controlFlags = packetFlags();
     return NumberUtils.setHighByteBits(controlFlags, type);
   }
 
-  protected byte packetType() {
+  protected byte messageType() {
     throw new UnsupportedOperationException();
   }
 

@@ -20,13 +20,13 @@ import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSession;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
-import javasabr.mqtt.network.packet.in.ConnectInPacket;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SessionService;
+import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -36,21 +36,21 @@ import reactor.core.publisher.Mono;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, ConnectInPacket> {
+public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, ConnectMqttInMessage> {
 
   ClientIdRegistry clientIdRegistry;
   AuthenticationService authenticationService;
-  SessionService sessionService;
+  MqttSessionService sessionService;
   SubscriptionService subscriptionService;
   MessageOutFactoryService messageOutFactoryService;
 
   public ConnectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
-      SessionService sessionService,
+      MqttSessionService sessionService,
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, ConnectInPacket.class);
+    super(ExternalMqttClient.class, ConnectMqttInMessage.class);
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
@@ -59,15 +59,15 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.CONNECT;
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT;
   }
 
   @Override
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      ConnectInPacket networkPacket) {
+      ConnectMqttInMessage networkPacket) {
 
     if (checkPacketException(client, networkPacket)) {
       return;
@@ -86,7 +86,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
         .newConnectAck(client, connectAckReasonCode));
   }
 
-  private Mono<Boolean> registerClient(ExternalMqttClient client, ConnectInPacket networkPacket) {
+  private Mono<Boolean> registerClient(ExternalMqttClient client, ConnectMqttInMessage networkPacket) {
 
     String requestedClientId = networkPacket.clientId();
     if (StringUtils.isNotEmpty(requestedClientId)) {
@@ -112,7 +112,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
             .map(ifTrue(newClientId, client::clientId)));
   }
 
-  private Mono<Boolean> restoreSession(MqttClient.UnsafeMqttClient client, ConnectInPacket packet) {
+  private Mono<Boolean> restoreSession(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
     if (packet.cleanStart()) {
       return sessionService
           .create(client.clientId())
@@ -127,7 +127,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     }
   }
 
-  private void resolveClientConnectionConfig(MqttClient.UnsafeMqttClient client, ConnectInPacket packet) {
+  private void resolveClientConnectionConfig(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
 
     MqttConnection connection = client.connection();
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
@@ -179,7 +179,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
 
   private Mono<Boolean> onConnected(
       MqttClient.UnsafeMqttClient client,
-      ConnectInPacket packet,
+      ConnectMqttInMessage packet,
       MqttSession session,
       boolean sessionRestored) {
 
@@ -224,7 +224,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     return true;
   }
 
-  private boolean checkPacketException(MqttClient.UnsafeMqttClient client, ConnectInPacket packet) {
+  private boolean checkPacketException(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
     Exception exception = packet.exception();
     if (exception instanceof ConnectionRejectException cre) {
       client.send(messageOutFactoryService

@@ -1,12 +1,12 @@
 package javasabr.mqtt.service.message.handler;
 
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
-import javasabr.mqtt.network.packet.in.MqttReadablePacket;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 
 public interface MqttInMessageHandler {
 
-  MqttPacketType messageType();
+  MqttMessageType messageType();
 
-  void processReceived(MqttConnection connection, MqttReadablePacket networkPacket);
+  void processReceived(MqttConnection connection, MqttInMessage networkPacket);
 }

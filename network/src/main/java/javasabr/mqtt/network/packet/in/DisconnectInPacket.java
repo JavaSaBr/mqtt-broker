@@ -9,7 +9,8 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
 
@@ -17,9 +18,9 @@ import lombok.Getter;
  * Disconnect notification.
  */
 @Getter
-public class DisconnectInPacket extends MqttReadablePacket {
+public class DisconnectInPacket extends MqttInMessage {
 
-  public static final byte PACKET_TYPE = (byte) MqttPacketType.DISCONNECT.ordinal();
+  public static final byte PACKET_TYPE = (byte) MqttMessageType.DISCONNECT.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode");
@@ -74,7 +75,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte packetType() {
+  public byte messageType() {
     return PACKET_TYPE;
   }
 
@@ -100,7 +101,7 @@ public class DisconnectInPacket extends MqttReadablePacket {
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

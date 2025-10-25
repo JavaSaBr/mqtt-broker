@@ -2,7 +2,7 @@ package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
@@ -19,7 +19,7 @@ class ConnectAck311OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt311Connection, it)
         }
-        def reader = new ConnectAckInPacket(0b0010_0000 as byte)
+        def reader = new ConnectAckMqttInMessage(0b0010_0000 as byte)
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result

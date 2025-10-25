@@ -1,14 +1,14 @@
-package javasabr.mqtt.network.packet;
+package javasabr.mqtt.network.message;
 
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.in.AuthenticationInPacket;
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket;
-import javasabr.mqtt.network.packet.in.ConnectInPacket;
+import javasabr.mqtt.network.message.in.AuthenticationMqttInMessage;
+import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage;
+import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.packet.in.DisconnectInPacket;
-import javasabr.mqtt.network.packet.in.MqttReadablePacket;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.network.packet.in.PingRequestInPacket;
 import javasabr.mqtt.network.packet.in.PingResponseInPacket;
 import javasabr.mqtt.network.packet.in.PublishAckInPacket;
@@ -25,16 +25,20 @@ import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.functions.ByteFunction;
 import javasabr.rlib.network.packet.impl.AbstractNetworkPacketReader;
+import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
 
-public class MqttPacketReader extends AbstractNetworkPacketReader<MqttReadablePacket, MqttConnection> {
+@CustomLog
+public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage, MqttConnection> {
 
   private static final int PACKET_LENGTH_START_BYTE = 2;
 
-  private static final ByteFunction<MqttReadablePacket>[] PACKET_FACTORIES = ArrayUtils.array(
-      id -> {throw new NoSuchElementException();},
-      ConnectInPacket::new,
-      ConnectAckInPacket::new,
+  private static final ByteFunction<MqttInMessage>[] PACKET_FACTORIES = ArrayUtils.array(
+      id -> {
+        throw new NoSuchElementException("Unknown MQTT message with id:["+ id + "]");
+      },
+      ConnectMqttInMessage::new,
+      ConnectAckMqttInMessage::new,
       PublishInPacket::new,
       PublishAckInPacket::new,
       PublishReceivedInPacket::new,
@@ -47,12 +51,12 @@ public class MqttPacketReader extends AbstractNetworkPacketReader<MqttReadablePa
       PingRequestInPacket::new,
       PingResponseInPacket::new,
       DisconnectInPacket::new,
-      AuthenticationInPacket::new);
+      AuthenticationMqttInMessage::new);
 
-  public MqttPacketReader(
+  public MqttMessageReader(
       MqttConnection connection,
       Runnable updateActivityFunction,
-      Consumer<MqttReadablePacket> readPacketHandler,
+      Consumer<MqttInMessage> readPacketHandler,
       int maxPacketsByRead) {
     super(connection, updateActivityFunction, readPacketHandler, maxPacketsByRead);
   }
@@ -80,17 +84,22 @@ public class MqttPacketReader extends AbstractNetworkPacketReader<MqttReadablePa
 
   @Nullable
   @Override
-  protected MqttReadablePacket createPacketFor(
+  protected MqttInMessage createPacketFor(
       ByteBuffer buffer,
       int startPacketPosition,
       int packetLength,
       int dataLength) {
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901021
-    var startByte = Byte.toUnsignedInt(buffer.get(startPacketPosition));
-    var type = NumberUtils.getHighByteBits(startByte);
-    var info = NumberUtils.getLowByteBits(startByte);
+    int firstByte = Byte.toUnsignedInt(buffer.get(startPacketPosition));
+    byte type = NumberUtils.getHighByteBits(firstByte);
+    byte info = NumberUtils.getLowByteBits(firstByte);
 
-    return PACKET_FACTORIES[type].apply(info);
+    try {
+      return PACKET_FACTORIES[type].apply(info);
+    } catch (NoSuchElementException | NullPointerException e) {
+      log.error(e.getMessage());
+      return null;
+    }
   }
 }

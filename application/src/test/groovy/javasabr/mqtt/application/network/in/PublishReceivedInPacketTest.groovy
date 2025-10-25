@@ -19,7 +19,7 @@ class PublishReceivedInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == ""
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishReceivedReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }
@@ -42,7 +42,7 @@ class PublishReceivedInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == reasonString
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishReceivedReasonCode.QUOTA_EXCEEDED
         packet.userProperties() == userProperties
     when:
@@ -56,7 +56,7 @@ class PublishReceivedInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == ""
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
         packet.userProperties() == Array.empty()
   }

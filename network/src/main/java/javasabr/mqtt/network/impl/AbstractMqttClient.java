@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.client;
+package javasabr.mqtt.network.impl;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;

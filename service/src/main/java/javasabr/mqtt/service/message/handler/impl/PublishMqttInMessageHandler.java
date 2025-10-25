@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.PublishReceivingService;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<Ex
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.PUBLISH;
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH;
   }
 }

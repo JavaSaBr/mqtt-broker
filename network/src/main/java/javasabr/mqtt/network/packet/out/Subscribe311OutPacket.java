@@ -3,7 +3,7 @@ package javasabr.mqtt.network.packet.out;
 import java.nio.ByteBuffer;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import lombok.RequiredArgsConstructor;
 
@@ -13,13 +13,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Subscribe311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.SUBSCRIBE.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
 
   private final Array<SubscribeTopicFilter> topicFilters;
   private final int packetId;
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 

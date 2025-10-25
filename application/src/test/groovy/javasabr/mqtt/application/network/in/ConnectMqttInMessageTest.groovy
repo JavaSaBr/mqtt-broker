@@ -3,11 +3,11 @@ package javasabr.mqtt.application.network.in
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.exception.MalformedPacketMqttException
-import javasabr.mqtt.network.packet.in.ConnectInPacket
+import javasabr.mqtt.network.message.in.ConnectMqttInMessage
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
-class ConnectInPacketTest extends BaseInPacketTest {
+class ConnectMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -21,7 +21,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
           it.putBytes(userPassword)
         }
     when:
-        def packet = new ConnectInPacket(0b0001_0000 as byte)
+        def packet = new ConnectMqttInMessage(0b0001_0000 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -59,7 +59,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
           it.putBytes(userPassword)
         }
     when:
-        def packet = new ConnectInPacket(0b0001_0000 as byte)
+        def packet = new ConnectMqttInMessage(0b0001_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -93,7 +93,7 @@ class ConnectInPacketTest extends BaseInPacketTest {
           it.putBytes(userPassword)
         }
     when:
-        def packet = new ConnectInPacket(0b0001_0000 as byte)
+        def packet = new ConnectMqttInMessage(0b0001_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result

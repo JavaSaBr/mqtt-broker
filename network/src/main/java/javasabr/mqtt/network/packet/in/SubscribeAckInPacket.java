@@ -6,7 +6,8 @@ import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.StringUtils;
@@ -16,9 +17,9 @@ import lombok.Getter;
  * Subscribe acknowledgement.
  */
 @Getter
-public class SubscribeAckInPacket extends MqttReadablePacket {
+public class SubscribeAckInPacket extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.SUBSCRIBE_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.SUBSCRIBE_ACK.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*
@@ -53,7 +54,7 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte packetType() {
+  public byte messageType() {
     return PACKET_TYPE;
   }
 
@@ -77,7 +78,7 @@ public class SubscribeAckInPacket extends MqttReadablePacket {
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

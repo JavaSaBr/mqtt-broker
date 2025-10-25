@@ -8,8 +8,9 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.HasMessageId;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -18,9 +19,9 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Accessors(fluent = true, chain = false)
-public class PublishAckInPacket extends MqttReadablePacket implements HasPacketId {
+public class PublishAckInPacket extends MqttInMessage implements HasMessageId {
 
-  private static final int PACKET_TYPE = MqttPacketType.PUBLISH_ACK.ordinal();
+  private static final int PACKET_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "packetId");
@@ -48,7 +49,7 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
       PacketProperty.USER_PROPERTY);
 
   private PublishAckReasonCode reasonCode;
-  private int packetId;
+  private int messageId;
 
   // properties
   private String reason;
@@ -60,7 +61,7 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
   }
 
   @Override
-  public byte packetType() {
+  public byte messageType() {
     return (byte) PACKET_TYPE;
   }
 
@@ -68,7 +69,7 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718045
-    packetId = readShortUnsigned(buffer);
+    messageId = readShortUnsigned(buffer);
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
@@ -82,7 +83,7 @@ public class PublishAckInPacket extends MqttReadablePacket implements HasPacketI
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

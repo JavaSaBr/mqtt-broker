@@ -23,7 +23,7 @@ class PublishComplete5OutPacketTest extends BaseOutPacketTest {
     then:
         result
         reader.reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
-        reader.packetId() == packetId
+        reader.messageId() == packetId
         reader.userProperties() == userProperties
         reader.reason() == reasonString
   }

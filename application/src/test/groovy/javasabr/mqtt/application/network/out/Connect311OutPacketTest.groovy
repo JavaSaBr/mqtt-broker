@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.network.out
 
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.network.packet.in.ConnectInPacket
+import javasabr.mqtt.network.message.in.ConnectMqttInMessage
 import javasabr.mqtt.network.packet.out.Connect311OutPacket
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
@@ -25,7 +25,7 @@ class Connect311OutPacketTest extends BaseOutPacketTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt311Connection, it)
         }
-        def reader = new ConnectInPacket(0b0001_0000 as byte)
+        def reader = new ConnectMqttInMessage(0b0001_0000 as byte)
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result

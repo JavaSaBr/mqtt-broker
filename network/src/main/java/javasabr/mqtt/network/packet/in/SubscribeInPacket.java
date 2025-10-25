@@ -13,7 +13,8 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.NumberUtils;
@@ -23,9 +24,9 @@ import lombok.Getter;
  * Subscribe request.
  */
 @Getter
-public class SubscribeInPacket extends MqttReadablePacket {
+public class SubscribeInPacket extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.SUBSCRIBE.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("packetId", "topicFilters");
@@ -62,7 +63,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte packetType() {
+  public byte messageType() {
     return PACKET_TYPE;
   }
 
@@ -103,7 +104,7 @@ public class SubscribeInPacket extends MqttReadablePacket {
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

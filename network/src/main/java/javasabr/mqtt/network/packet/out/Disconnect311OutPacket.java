@@ -1,14 +1,14 @@
 package javasabr.mqtt.network.packet.out;
 
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 
 /**
  * Disconnect notification.
  */
 public class Disconnect311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.DISCONNECT.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.DISCONNECT.ordinal();
 
   @Override
   public int expectedLength(MqttConnection connection) {
@@ -16,7 +16,7 @@ public class Disconnect311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 }

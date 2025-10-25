@@ -1,16 +1,18 @@
-package javasabr.mqtt.network.packet;
+package javasabr.mqtt.network.message;
 
 import lombok.AccessLevel;
+import lombok.CustomLog;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
+@CustomLog
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum MqttPacketType {
+public enum MqttMessageType {
   RESERVED(0),
   /**
    * After a Network Connection is established by a Client to a Server, the first Packet sent from the Client to the
@@ -103,13 +105,14 @@ public enum MqttPacketType {
    */
   INVALID(16);
 
-  private static final MqttPacketType[] VALUES = values();
+  private static final MqttMessageType[] VALUES = values();
 
-  public static MqttPacketType fromByte(byte packetType) {
-    if (packetType < 0 || packetType > AUTHENTICATE.typeIndex()) {
+  public static MqttMessageType fromByte(byte messageType) {
+    if (messageType < 0 || messageType > AUTHENTICATE.typeIndex()) {
+      log.warning(messageType, "Invalid message type:[%s]"::formatted);
       return INVALID;
     } else {
-      return VALUES[packetType];
+      return VALUES[messageType];
     }
   }
 

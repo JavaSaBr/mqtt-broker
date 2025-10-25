@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeAck311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.SUBSCRIBE_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.SUBSCRIBE_ACK.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCodes", "packetId");
@@ -39,7 +39,7 @@ public class SubscribeAck311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 

@@ -20,7 +20,7 @@ class PublishComplete311OutPacketTest extends BaseOutPacketTest {
     then:
         result
         reader.reasonCode() == PublishCompletedReasonCode.SUCCESS
-        reader.packetId() == packetId
+        reader.messageId() == packetId
         reader.userProperties() == Array.empty()
         reader.reason() == ""
   }

@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.impl;
+package javasabr.mqtt.service.session.impl;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7,7 +7,7 @@ import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
-import javasabr.mqtt.network.packet.HasPacketId;
+import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
@@ -24,7 +24,7 @@ import lombok.experimental.Accessors;
 @ToString(of = "clientId")
 @EqualsAndHashCode(of = "clientId")
 @Accessors(fluent = true, chain = false)
-public class DefaultMqttSession implements UnsafeMqttSession {
+public class InMemoryMqttSession implements UnsafeMqttSession {
 
   @Getter
   @AllArgsConstructor
@@ -47,11 +47,11 @@ public class DefaultMqttSession implements UnsafeMqttSession {
 
   private static void updatePendingPacket(
       MqttClient client,
-      HasPacketId response,
+      HasMessageId response,
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
 
-    int packetId = response.packetId();
+    int packetId = response.messageId();
     PendingPublish pendingPublish;
 
     long stamp = pendingPublishes.readLock();
@@ -87,7 +87,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
   @Setter
   private volatile long expirationTime = -1;
 
-  public DefaultMqttSession(String clientId) {
+  public InMemoryMqttSession(String clientId) {
     this.clientId = clientId;
     this.pendingOutPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.pendingInPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
@@ -174,12 +174,12 @@ public class DefaultMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void updateOutPendingPacket(MqttClient client, HasPacketId response) {
+  public void updateOutPendingPacket(MqttClient client, HasMessageId response) {
     updatePendingPacket(client, response, pendingOutPublishes, clientId);
   }
 
   @Override
-  public void updateInPendingPacket(MqttClient client, HasPacketId response) {
+  public void updateInPendingPacket(MqttClient client, HasMessageId response) {
     updatePendingPacket(client, response, pendingInPublishes, clientId);
   }
 

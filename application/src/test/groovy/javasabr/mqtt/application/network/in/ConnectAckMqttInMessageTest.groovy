@@ -4,11 +4,11 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.mqtt.network.packet.in.ConnectAckInPacket
+import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
-class ConnectAckInPacketTest extends BaseInPacketTest {
+class ConnectAckMqttInMessageTest extends BaseInPacketTest {
 
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
@@ -17,7 +17,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
           it.put(ConnectAckReasonCode.NOT_AUTHORIZED.mqtt311)
         }
     when:
-        def packet = new ConnectAckInPacket(0b0010_0000 as byte)
+        def packet = new ConnectAckMqttInMessage(0b0010_0000 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -68,7 +68,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new ConnectAckInPacket(0b0010_0000 as byte)
+        def packet = new ConnectAckMqttInMessage(0b0010_0000 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -103,7 +103,7 @@ class ConnectAckInPacketTest extends BaseInPacketTest {
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
-        packet = new ConnectAckInPacket(0b0010_0000 as byte)
+        packet = new ConnectAckMqttInMessage(0b0010_0000 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

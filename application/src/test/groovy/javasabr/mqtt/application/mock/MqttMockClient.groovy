@@ -1,7 +1,9 @@
 package javasabr.mqtt.application.mock
 
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.packet.MqttPacketType
+import javasabr.mqtt.network.message.MqttMessageType
+import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
+import javasabr.mqtt.network.message.in.MqttInMessage
 import javasabr.mqtt.network.packet.in.*
 import javasabr.mqtt.network.packet.out.Disconnect311OutPacket
 import javasabr.mqtt.network.packet.out.MqttWritablePacket
@@ -52,7 +54,7 @@ class MqttMockClient {
     Thread.sleep(50)
   }
 
-  MqttReadablePacket readNext() {
+  MqttInMessage readNext() {
 
     if (received.position() == 0) {
       def input = socket.getInputStream()
@@ -73,19 +75,19 @@ class MqttMockClient {
     def info = NumberUtils.getLowByteBits(startByte)
     def dataSize = MqttDataUtils.readMbi(received)
 
-    MqttReadablePacket packet
+    MqttInMessage packet
 
-    switch (MqttPacketType.fromByte(type)) {
-      case MqttPacketType.CONNECT_ACK:
-        packet = new ConnectAckInPacket(info)
+    switch (MqttMessageType.fromByte(type)) {
+      case MqttMessageType.CONNECT_ACK:
+        packet = new ConnectAckMqttInMessage(info)
         break
-      case MqttPacketType.SUBSCRIBE_ACK:
+      case MqttMessageType.SUBSCRIBE_ACK:
         packet = new SubscribeAckInPacket(info)
         break
-      case MqttPacketType.PUBLISH:
+      case MqttMessageType.PUBLISH:
         packet = new PublishInPacket(info)
         break
-      case MqttPacketType.PUBLISH_RELEASED:
+      case MqttMessageType.PUBLISH_RELEASED:
         packet = new PublishReleaseInPacket(info)
         break
       default:

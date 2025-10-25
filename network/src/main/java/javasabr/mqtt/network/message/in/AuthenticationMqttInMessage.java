@@ -1,23 +1,28 @@
-package javasabr.mqtt.network.packet.out;
+package javasabr.mqtt.network.message.in;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.rlib.collections.array.Array;
-import lombok.RequiredArgsConstructor;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.StringUtils;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Authentication exchange.
  */
-@RequiredArgsConstructor
-public class Authentication5OutPacket extends MqttWritablePacket {
+@Getter
+@Accessors(fluent = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class AuthenticationMqttInMessage extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttMessageType.AUTHENTICATE.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.AUTHENTICATE.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -50,38 +55,65 @@ public class Authentication5OutPacket extends MqttWritablePacket {
        */
       PacketProperty.USER_PROPERTY);
 
-  private final Array<StringPair> userProperties;
+  AuthenticateReasonCode reasonCode;
 
-  private final AuthenticateReasonCode reasonCode;
+  // properties
+  String reason;
+  String authenticationMethod;
 
-  private final String reason;
-  private final String authenticateMethod;
+  byte[] authenticationData;
 
-  private final byte[] authenticateData;
-
-  @Override
-  protected byte messageType() {
-    return PACKET_TYPE;
+  public AuthenticationMqttInMessage(byte info) {
+    super(info);
+    this.reasonCode = AuthenticateReasonCode.SUCCESS;
+    this.reason = StringUtils.EMPTY;
+    this.authenticationMethod = StringUtils.EMPTY;
+    this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
   }
 
   @Override
-  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
+  public byte messageType() {
+    return MESSAGE_TYPE;
+  }
+
+  @Override
+  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
-    writeByte(buffer, reasonCode.getValue());
+    reasonCode = AuthenticateReasonCode.of(readByteUnsigned(buffer));
   }
 
   @Override
-  protected boolean isPropertiesSupported(MqttConnection connection) {
-    return true;
+  protected Set<PacketProperty> availableProperties() {
+    return AVAILABLE_PROPERTIES;
   }
 
   @Override
-  protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
+  protected void applyProperty(PacketProperty property, byte[] value) {
+    switch (property) {
+      case AUTHENTICATION_DATA: {
+        authenticationData = value;
+        break;
+      }
+      default: {
+        unexpectedProperty(property);
+      }
+    }
+  }
 
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901221
-    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
-    writeNotEmptyProperty(buffer, PacketProperty.REASON_STRING, reason);
-    writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_METHOD, authenticateMethod);
-    writeNotEmptyProperty(buffer, PacketProperty.AUTHENTICATION_DATA, authenticateData);
+  @Override
+  protected void applyProperty(PacketProperty property, String value) {
+    switch (property) {
+      case REASON_STRING: {
+        reason = value;
+        break;
+      }
+      case AUTHENTICATION_METHOD: {
+        authenticationMethod = value;
+        break;
+      }
+      default: {
+        unexpectedProperty(property);
+      }
+    }
   }
 }

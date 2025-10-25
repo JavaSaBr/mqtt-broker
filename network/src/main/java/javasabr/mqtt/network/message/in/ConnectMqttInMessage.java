@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.packet.in;
+package javasabr.mqtt.network.message.in;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -10,7 +10,7 @@ import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.common.util.StringUtils;
@@ -25,9 +25,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ConnectInPacket extends MqttReadablePacket {
+public class ConnectMqttInMessage extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.CONNECT.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart", "mqttVersion");
@@ -221,13 +221,13 @@ public class ConnectInPacket extends MqttReadablePacket {
   boolean requestResponseInformation = false;
   boolean requestProblemInformation = false;
 
-  public ConnectInPacket(byte info) {
+  public ConnectMqttInMessage(byte info) {
     super(info);
   }
 
   @Override
-  public byte packetType() {
-    return PACKET_TYPE;
+  public byte messageType() {
+    return MESSAGE_TYPE;
   }
 
   @Override
@@ -343,7 +343,7 @@ public class ConnectInPacket extends MqttReadablePacket {
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

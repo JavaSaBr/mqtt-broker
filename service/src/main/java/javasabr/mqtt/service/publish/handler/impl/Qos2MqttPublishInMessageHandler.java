@@ -7,8 +7,8 @@ import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.HasPacketId;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -93,14 +93,14 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
         .newPublishReceived(packet.getPacketId(), PublishReceivedReasonCode.SUCCESS));
   }
 
-  private boolean processPublishRelease(MqttClient client, HasPacketId response) {
+  private boolean processPublishRelease(MqttClient client, HasMessageId response) {
     if (!(response instanceof PublishReleaseInPacket)) {
       throw new IllegalStateException("Unexpected response " + response);
     }
 
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishCompleted(response.packetId(), PublishCompletedReasonCode.SUCCESS));
+        .newPublishCompleted(response.messageId(), PublishCompletedReasonCode.SUCCESS));
     return true;
   }
 }

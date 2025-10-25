@@ -3,8 +3,8 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.HasPacketId;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -23,7 +23,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqtt
     super(ExternalMqttClient.class, subscriptionService, messageOutFactoryService);
     this.pendingMessageHandler = new PendingMessageHandler() {
       @Override
-      public boolean handleResponse(MqttClient client, HasPacketId response) {
+      public boolean handleResponse(MqttClient client, HasMessageId response) {
         return handleReceivedResponse(client, response);
       }
       @Override
@@ -51,7 +51,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqtt
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected boolean handleReceivedResponse(MqttClient client, HasPacketId response) {
+  protected boolean handleReceivedResponse(MqttClient client, HasMessageId response) {
     return false;
   }
 

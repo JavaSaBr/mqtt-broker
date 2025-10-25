@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.packet.in;
+package javasabr.mqtt.network.message.in;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -10,20 +10,25 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.common.util.StringUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Acknowledge connection request.
  */
 @Getter
-public class ConnectAckInPacket extends MqttReadablePacket {
+@Accessors(fluent = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ConnectAckMqttInMessage extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.CONNECT_ACK.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT_ACK.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -234,8 +239,8 @@ public class ConnectAckInPacket extends MqttReadablePacket {
    * Connect Reason code from this table. If a Server sends a CONNACK packet containing a Reason code of 128 or greater
    * it MUST then close the Network Connection
    */
-  private ConnectAckReasonCode reasonCode;
-  private QoS maximumQos;
+  ConnectAckReasonCode reasonCode;
+  QoS maximumQos;
 
   /**
    * The Session Present flag informs the Client whether the Server is using Session State from a previous connection
@@ -243,29 +248,29 @@ public class ConnectAckInPacket extends MqttReadablePacket {
    * accepts a connection with Clean Start set to 1, the Server MUST set Session Present to 0 in the CONNACK packet in
    * addition to setting a 0x00 (Success) Reason Code in the CONNACK packet
    */
-  private boolean sessionPresent;
+  boolean sessionPresent;
 
   // properties
-  private String assignedClientId;
-  private String reason;
-  private String responseInformation;
-  private String authenticationMethod;
-  private String serverReference;
-  private byte[] authenticationData;
+  String assignedClientId;
+  String reason;
+  String responseInformation;
+  String authenticationMethod;
+  String serverReference;
+  byte[] authenticationData;
 
-  private long sessionExpiryInterval;
+  long sessionExpiryInterval;
 
-  private int receiveMaxPublishes;
-  private int maxPacketSize;
-  private int topicAliasMaxValue;
-  private int serverKeepAlive;
+  int receiveMaxPublishes;
+  int maxPacketSize;
+  int topicAliasMaxValue;
+  int serverKeepAlive;
 
-  private boolean retainAvailable;
-  private boolean wildcardSubscriptionAvailable;
-  private boolean sharedSubscriptionAvailable;
-  private boolean subscriptionIdAvailable;
+  boolean retainAvailable;
+  boolean wildcardSubscriptionAvailable;
+  boolean sharedSubscriptionAvailable;
+  boolean subscriptionIdAvailable;
 
-  public ConnectAckInPacket(byte info) {
+  public ConnectAckMqttInMessage(byte info) {
     super(info);
     this.userProperties = MutableArray.ofType(StringPair.class);
     this.reasonCode = ConnectAckReasonCode.SUCCESS;
@@ -288,20 +293,19 @@ public class ConnectAckInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte packetType() {
-    return PACKET_TYPE;
+  public byte messageType() {
+    return MESSAGE_TYPE;
   }
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
     sessionPresent = readByteUnsigned(buffer) == 1;
     reasonCode = ConnectAckReasonCode.of(connection.isSupported(MqttVersion.MQTT_5), readByteUnsigned(buffer));
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

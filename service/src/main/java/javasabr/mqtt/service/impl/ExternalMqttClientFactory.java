@@ -3,7 +3,7 @@ package javasabr.mqtt.service.impl;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttClientFactory;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

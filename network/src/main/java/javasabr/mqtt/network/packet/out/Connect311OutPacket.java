@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Connect311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.CONNECT.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.CONNECT.ordinal();
 
   private final String username;
   private final String willTopic;
@@ -49,7 +49,7 @@ public class Connect311OutPacket extends MqttWritablePacket {
   }
 
   @Override
-  protected byte packetType() {
+  protected byte messageType() {
     return PACKET_TYPE;
   }
 

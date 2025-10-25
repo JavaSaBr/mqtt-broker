@@ -8,8 +8,9 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.HasMessageId;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -18,9 +19,9 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Accessors(fluent = true, chain = false)
-public class PublishCompleteInPacket extends MqttReadablePacket implements HasPacketId {
+public class PublishCompleteInPacket extends MqttInMessage implements HasMessageId {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.PUBLISH_COMPLETED.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETED.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "packetId");
@@ -48,7 +49,7 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
       PacketProperty.USER_PROPERTY);
 
   private PublishCompletedReasonCode reasonCode;
-  private int packetId;
+  private int messageId;
 
   // properties
   private String reason;
@@ -60,7 +61,7 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
   }
 
   @Override
-  public byte packetType() {
+  public byte messageType() {
     return PACKET_TYPE;
   }
 
@@ -69,7 +70,7 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
     super.readVariableHeader(connection, buffer);
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718083
-    packetId = readShortUnsigned(buffer);
+    messageId = readShortUnsigned(buffer);
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
@@ -84,7 +85,7 @@ public class PublishCompleteInPacket extends MqttReadablePacket implements HasPa
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

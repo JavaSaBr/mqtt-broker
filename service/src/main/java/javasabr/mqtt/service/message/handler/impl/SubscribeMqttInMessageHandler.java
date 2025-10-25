@@ -8,8 +8,8 @@ import java.util.Set;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.packet.in.SubscribeInPacket;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -38,8 +38,8 @@ public class SubscribeMqttInMessageHandler extends
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.SUBSCRIBE;
+  public MqttMessageType messageType() {
+    return MqttMessageType.SUBSCRIBE;
   }
 
   @Override

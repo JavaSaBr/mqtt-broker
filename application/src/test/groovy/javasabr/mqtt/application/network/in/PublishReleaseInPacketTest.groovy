@@ -19,7 +19,7 @@ class PublishReleaseInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == ""
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishReleaseReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }
@@ -42,7 +42,7 @@ class PublishReleaseInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == reasonString
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
         packet.userProperties() == userProperties
     when:
@@ -56,7 +56,7 @@ class PublishReleaseInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == ""
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishReleaseReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }

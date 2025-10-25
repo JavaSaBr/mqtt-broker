@@ -7,7 +7,8 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -24,9 +25,9 @@ import org.jspecify.annotations.Nullable;
 @Getter
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UnsubscribeAckInPacket extends MqttReadablePacket {
+public class UnsubscribeAckInPacket extends MqttInMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttPacketType.UNSUBSCRIBE_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -63,7 +64,7 @@ public class UnsubscribeAckInPacket extends MqttReadablePacket {
   }
 
   @Override
-  public byte packetType() {
+  public byte messageType() {
     return PACKET_TYPE;
   }
 
@@ -93,7 +94,7 @@ public class UnsubscribeAckInPacket extends MqttReadablePacket {
   }
 
   @Override
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 

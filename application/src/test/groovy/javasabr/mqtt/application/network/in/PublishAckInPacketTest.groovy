@@ -19,7 +19,7 @@ class PublishAckInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == ""
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishAckReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }
@@ -42,7 +42,7 @@ class PublishAckInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == reasonString
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishAckReasonCode.PAYLOAD_FORMAT_INVALID
         packet.userProperties() == userProperties
     when:
@@ -56,7 +56,7 @@ class PublishAckInPacketTest extends BaseInPacketTest {
     then:
         result
         packet.reason() == ""
-        packet.packetId() == packetId
+        packet.messageId() == packetId
         packet.reasonCode() == PublishAckReasonCode.UNSPECIFIED_ERROR
         packet.userProperties() == Array.empty()
   }

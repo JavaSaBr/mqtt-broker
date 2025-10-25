@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.network.client.ExternalMqttClient;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.packet.in.PublishInPacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;

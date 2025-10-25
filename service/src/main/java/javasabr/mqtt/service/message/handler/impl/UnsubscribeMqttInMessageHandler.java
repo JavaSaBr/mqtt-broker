@@ -2,8 +2,8 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.packet.in.UnsubscribeInPacket;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -26,8 +26,8 @@ public class UnsubscribeMqttInMessageHandler extends AbstractMqttInMessageHandle
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.UNSUBSCRIBE;
+  public MqttMessageType messageType() {
+    return MqttMessageType.UNSUBSCRIBE;
   }
 
   @Override

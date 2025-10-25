@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.packet.in;
+package javasabr.mqtt.network.message.in;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
 
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class MqttReadablePacket extends AbstractReadableNetworkPacket<MqttConnection> {
+public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttConnection> {
 
   static {
     DebugUtils.registerIncludedFields("userProperties");
@@ -67,9 +67,9 @@ public abstract class MqttReadablePacket extends AbstractReadableNetworkPacket<M
   @Nullable
   Exception exception;
 
-  protected MqttReadablePacket(byte info) {}
+  protected MqttInMessage(byte info) {}
 
-  public abstract byte packetType();
+  public abstract byte messageType();
 
   public Array<StringPair> userProperties() {
     return userProperties == null ? EMPTY_PROPERTIES : userProperties;
@@ -104,7 +104,7 @@ public abstract class MqttReadablePacket extends AbstractReadableNetworkPacket<M
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {}
 
   protected void readProperties(MqttConnection connection, ByteBuffer buffer) {
-    readProperties(connection, buffer, getAvailableProperties());
+    readProperties(connection, buffer, availableProperties());
   }
 
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {}
@@ -164,7 +164,7 @@ public abstract class MqttReadablePacket extends AbstractReadableNetworkPacket<M
     }
   }
 
-  protected Set<PacketProperty> getAvailableProperties() {
+  protected Set<PacketProperty> availableProperties() {
     return Collections.emptySet();
   }
 

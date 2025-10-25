@@ -3,16 +3,16 @@ package javasabr.mqtt.application.integration.service
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import javasabr.mqtt.application.integration.IntegrationSpecification
 import javasabr.mqtt.service.ClientIdRegistry
-import javasabr.mqtt.service.SessionService
+import javasabr.mqtt.service.session.MqttSessionService
 import org.springframework.beans.factory.annotation.Autowired
 
-class SessionServiceTest extends IntegrationSpecification {
+class MqttSessionServiceTest extends IntegrationSpecification {
 
   @Autowired
   ClientIdRegistry clientIdRegistry
 
   @Autowired
-  SessionService mqttSessionService
+  MqttSessionService mqttSessionService
 
   def "subscriber should create and re-use mqtt session"() {
     given:
