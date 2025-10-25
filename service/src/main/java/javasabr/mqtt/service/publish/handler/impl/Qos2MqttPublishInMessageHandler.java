@@ -3,7 +3,6 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
-import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
@@ -82,15 +81,13 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void startDelivering(ExternalMqttClient client, PublishInPacket packet, SingleSubscriber subscriber) {
-
+  protected void handleSuccessfulResult(ExternalMqttClient client, PublishInPacket packet, int subscribers) {
+    super.handleSuccessfulResult(client, packet, subscribers);
     MqttSession session = client.session();
     if (session == null) {
       return;
     }
-
     session.registerInPublish(packet, pendingMessageHandler, packet.getPacketId());
-    super.startDelivering(client, packet, subscriber);
     client.send(messageOutFactoryService
         .resolveFactory(client)
         .newPublishReceived(packet.getPacketId(), PublishReceivedReasonCode.SUCCESS));

@@ -64,7 +64,7 @@ public class DefaultMqttSession implements UnsafeMqttSession {
     }
 
     if (pendingPublish == null) {
-      log.warning(clientId , response, "Not found pending publish for client:[%s] by received packet:[%]"::formatted);
+      log.warning(clientId , response, "Not found pending publish for client:[%s] by received packet:[%s]"::formatted);
       return;
     }
 

@@ -26,7 +26,7 @@ public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler
       DisconnectInPacket networkPacket) {
     DisconnectReasonCode reasonCode = networkPacket.getReasonCode();
     if (reasonCode == DisconnectReasonCode.NORMAL_DISCONNECTION) {
-      log.info(client, "Disconnect client:[%s]"::formatted);
+      log.info(client.clientId(), "Disconnect client:[%s]"::formatted);
     } else {
       log.error("Disconnect client:[%s] by error reason:[%s]".formatted(client, reasonCode));
     }

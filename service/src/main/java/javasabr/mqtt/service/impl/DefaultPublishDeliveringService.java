@@ -48,7 +48,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   public PublishHandlingResult startDelivering(PublishInPacket publish, SingleSubscriber subscriber) {
     try {
       //noinspection DataFlowIssue
-      return publishOutMessageHandlers[publish.getQos().index()].handle(publish, subscriber);
+      return publishOutMessageHandlers[subscriber.getQos().index()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
       return PublishHandlingResult.UNSPECIFIED_ERROR;

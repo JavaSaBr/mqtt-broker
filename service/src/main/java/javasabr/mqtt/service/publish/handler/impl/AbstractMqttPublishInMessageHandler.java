@@ -39,11 +39,13 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
       handleInvalidTopic(client, packet.getPacketId(), topicName);
       return;
     }
+
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
       handleEmptySubscriptions(client, packet.getPacketId(), topicName);
       return;
     }
+
     for (SingleSubscriber subscriber : subscribers) {
       PublishHandlingResult checkResult = checkSubscriber(client, packet, subscriber);
       if (checkResult.error()) {
@@ -51,8 +53,22 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
         return;
       }
     }
+
+    int count = 0;
+    PublishHandlingResult errorResult = null;
     for (SingleSubscriber subscriber : subscribers) {
-      startDelivering(client, packet, subscriber);
+      PublishHandlingResult result = startDelivering(client, packet, subscriber);
+      if (result.error()) {
+        errorResult = result;
+      } else if(result == PublishHandlingResult.SUCCESS) {
+        count++;
+      }
+    }
+
+    if (errorResult != null) {
+      handleError(client, packet.getPacketId(), errorResult);
+    } else {
+      handleSuccessfulResult(client, packet, count);
     }
   }
 
@@ -62,6 +78,8 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
 
   protected void handleError(C client, int messageId, PublishHandlingResult handlingResult) {}
 
+  protected void handleSuccessfulResult(C client, PublishInPacket packet, int subscribers) {}
+
   protected PublishHandlingResult checkSubscriber(
       C client,
       PublishInPacket packet,
@@ -69,9 +87,7 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected void startDelivering(C client, PublishInPacket packet, SingleSubscriber subscriber) {
-    publishDeliveringService.startDelivering(packet, subscriber);
+  protected PublishHandlingResult startDelivering(C client, PublishInPacket packet, SingleSubscriber subscriber) {
+    return publishDeliveringService.startDelivering(packet, subscriber);
   }
-
-  protected void handleSuccessfulResult(C client, int messageId, int subscribers) {}
 }

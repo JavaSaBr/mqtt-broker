@@ -40,15 +40,14 @@ public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqtt
     if (session == null) {
       return PublishHandlingResult.SKIPPED;
     }
-    // generate new uniq packet id per client
-    var packetId = session.nextPacketId();
 
+    // generate new uniq packet id per client
+    int packetId = session.nextPacketId();
     // register waiting async response
     session.registerOutPublish(packet, pendingMessageHandler, packetId);
 
     // send publish
     startDelivering(client, packet, packetId, false);
-
     return PublishHandlingResult.SUCCESS;
   }
 

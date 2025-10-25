@@ -9,6 +9,9 @@
     <Logger name="javasabr.mqtt.network.client.AbstractMqttClient" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>
+    <Logger name="javasabr.mqtt.service.impl.DefaultConnectionService" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
     <Logger name="javasabr.mqtt.model.network.impl.DefaultMqttSession" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>

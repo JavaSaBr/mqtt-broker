@@ -6,10 +6,10 @@ import javasabr.mqtt.network.client.ExternalMqttClient;
 import javasabr.mqtt.network.packet.HasPacketId;
 import javasabr.mqtt.network.packet.in.MqttReadablePacket;
 
-public abstract class PendingResponseMqttInMessageHandler<P extends MqttReadablePacket & HasPacketId>
+public abstract class PendingOutResponseMqttInMessageHandler<P extends MqttReadablePacket & HasPacketId>
     extends AbstractMqttInMessageHandler<ExternalMqttClient, P> {
 
-  protected PendingResponseMqttInMessageHandler(Class<P> expectedNetworkPacket) {
+  protected PendingOutResponseMqttInMessageHandler(Class<P> expectedNetworkPacket) {
     super(ExternalMqttClient.class, expectedNetworkPacket);
   }
 

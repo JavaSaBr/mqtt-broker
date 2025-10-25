@@ -56,6 +56,12 @@ public class DefaultConnectionService implements ConnectionService {
       return;
     }
 
+    log.debug(
+        connection.client().clientId(),
+        networkPacket.name(),
+        networkPacket,
+        "[%s] Received from client message:[%s] %s"::formatted);
+
     try {
       //noinspection DataFlowIssue
       inMessageHandlers[mrp.packetType()].processReceived(connection, mrp);
