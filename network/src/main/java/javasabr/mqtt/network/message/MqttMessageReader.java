@@ -20,7 +20,7 @@ import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage;
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.in.UnsubscribeAckMqttInMessage;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
-import javasabr.mqtt.network.utils.MqttDataUtils;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.functions.ByteFunction;

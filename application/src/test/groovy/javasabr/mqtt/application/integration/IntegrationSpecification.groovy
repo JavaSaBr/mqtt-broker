@@ -4,7 +4,7 @@ import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import javasabr.mqtt.application.integration.config.MqttBrokerTestConfig
-import javasabr.mqtt.application.mock.MqttMockClient
+import MqttMockClient
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion

@@ -2,6 +2,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
   id("java")
+  id("java-test-fixtures")
+  id("configure-jacoco")
 }
 
 java {

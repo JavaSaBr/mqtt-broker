@@ -1,6 +1,6 @@
 package javasabr.mqtt.application.model
 
-import javasabr.mqtt.application.network.NetworkUnitSpecification
+import NetworkUnitSpecification
 import javasabr.mqtt.model.ActionResult
 import spock.lang.Unroll
 

@@ -1,6 +1,6 @@
 package javasabr.mqtt.application.model
 
-import javasabr.mqtt.application.network.NetworkUnitSpecification
+import NetworkUnitSpecification
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter

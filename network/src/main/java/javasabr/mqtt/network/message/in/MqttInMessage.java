@@ -18,7 +18,7 @@ import javasabr.mqtt.model.exception.MalformedPacketMqttException;
 import javasabr.mqtt.model.exception.MqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.utils.MqttDataUtils;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;

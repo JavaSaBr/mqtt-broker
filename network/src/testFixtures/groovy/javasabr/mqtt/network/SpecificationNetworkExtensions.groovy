@@ -1,9 +1,8 @@
-package javasabr.mqtt.application.extension
+package javasabr.mqtt.network
 
 import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.data.type.PacketDataType
 import javasabr.mqtt.model.data.type.StringPair
-import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.util.MqttDataUtils
 import javasabr.rlib.collections.array.Array
@@ -12,7 +11,7 @@ import spock.lang.Specification
 
 import java.nio.ByteBuffer
 
-class SpecificationExtensions extends Specification {
+class SpecificationNetworkExtensions extends Specification {
 
   static final writer = new MqttOutMessage() {
 

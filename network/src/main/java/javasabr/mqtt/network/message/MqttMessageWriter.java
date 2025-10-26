@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.utils.MqttDataUtils;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.functions.ObjBoolConsumer;
 import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractNetworkPacketWriter;

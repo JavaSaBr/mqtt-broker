@@ -6,7 +6,7 @@ import javasabr.mqtt.base.utils.DebugUtils;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.utils.MqttDataUtils;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.network.packet.impl.AbstractWritableNetworkPacket;

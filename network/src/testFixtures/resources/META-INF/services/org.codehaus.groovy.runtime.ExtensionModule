@@ -1,0 +1,3 @@
+moduleName=network-testFixtures
+moduleVersion=1.0
+extensionClasses=javasabr.mqtt.network.SpecificationNetworkExtensions
