@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.topic;
 
 import javasabr.mqtt.base.utils.DebugUtils;
-import javasabr.mqtt.model.utils.TopicUtils;
+import javasabr.mqtt.model.util.TopicUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.utils;
+package javasabr.mqtt.model.util;
 
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;

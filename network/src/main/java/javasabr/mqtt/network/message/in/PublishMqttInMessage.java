@@ -1,7 +1,7 @@
 package javasabr.mqtt.network.message.in;
 
-import static javasabr.mqtt.model.utils.TopicUtils.EMPTY_TOPIC_NAME;
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicName;
+import static javasabr.mqtt.model.util.TopicUtils.EMPTY_TOPIC_NAME;
+import static javasabr.mqtt.model.util.TopicUtils.buildTopicName;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;

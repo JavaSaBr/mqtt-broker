@@ -1,19 +1,17 @@
-package javasabr.mqtt.application.model
+package javasabr.mqtt.model
 
-import NetworkUnitSpecification
-import javasabr.mqtt.model.ActionResult
+import javasabr.mqtt.test.support.UnitSpecification
 import spock.lang.Unroll
 
 import static javasabr.mqtt.model.ActionResult.*
 
-class ActionResultTest extends NetworkUnitSpecification {
+class ActionResultTest extends UnitSpecification {
 
   @Unroll
   def "#first and #second == #result"(
       ActionResult first,
       ActionResult second,
-      ActionResult result
-  ) {
+      ActionResult result) {
     expect:
         first.and(second) == result
     where:

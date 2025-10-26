@@ -1,4 +1,4 @@
-package javasabr.mqtt.application.integration
+package javasabr.mqtt.broker.application
 
 import com.hivemq.client.mqtt.mqtt3.exceptions.Mqtt3ConnAckException
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCode

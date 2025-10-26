@@ -1,20 +1,22 @@
-package javasabr.mqtt.application.integration
+package javasabr.mqtt.broker.application
 
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
-import javasabr.mqtt.application.integration.config.MqttBrokerTestConfig
-import MqttMockClient
+import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
+import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.network.MqttConnection
+import javasabr.mqtt.network.MqttMockClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 import static javasabr.mqtt.network.MqttClient.UnsafeMqttClient
 
@@ -33,25 +35,14 @@ class IntegrationSpecification extends Specification {
   InetSocketAddress externalNetworkAddress
 
   @Autowired
-  InetSocketAddress internalNetworkAddress
-
-  @Autowired
   MqttServerConnectionConfig externalConnectionConfig
 
   def buildExternalMqtt311Client() {
     return buildMqtt311Client(generateClientId(), externalNetworkAddress)
   }
 
-  def buildInternalMqtt311Client() {
-    return buildMqtt311Client(generateClientId(), internalNetworkAddress)
-  }
-
   def buildExternalMqtt5Client() {
     return buildMqtt5Client(generateClientId(), externalNetworkAddress)
-  }
-
-  def buildInternalMqtt5Client() {
-    return buildMqtt5Client(generateClientId(), internalNetworkAddress)
   }
 
   def buildExternalMqtt311Client(String clientId) {
@@ -71,7 +62,7 @@ class IntegrationSpecification extends Specification {
         .serverPort(address.getPort())
         .useMqttVersion3()
         .addDisconnectedListener {
-          println "[${clientId}|mqtt311] disconnected:[$it.cause]"
+          println "[${clientId}|mqtt311] disconnected:[${it.cause.message}]"
         }
         .build()
         .toAsync()
@@ -94,7 +85,7 @@ class IntegrationSpecification extends Specification {
         .serverPort(address.getPort())
         .useMqttVersion5()
         .addDisconnectedListener {
-          println "[${clientId}|mqtt5] disconnected:[$it.cause]"
+          println "[${clientId}|mqtt5] disconnected:[${it.cause.message}]"
         }
         .build()
         .toAsync()
@@ -144,38 +135,65 @@ class IntegrationSpecification extends Specification {
     )
   }
 
-  def mqtt5MockedConnection(MqttServerConnectionConfig deviceConnectionConfig) {
-
-    return Stub(MqttConnection) {
+  def mqtt5MockedConnection(MqttServerConnectionConfig serverConnConfig) {
+    MqttClientConnectionConfig clientConnConfig = new MqttClientConnectionConfig(
+        serverConnConfig.maxQos(),
+        MqttVersion.MQTT_5,
+        MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED,
+        serverConnConfig.receiveMaxPublishes(),
+        serverConnConfig.maxPacketSize(),
+        serverConnConfig.topicAliasMaxValue(),
+        MqttProperties.SERVER_KEEP_ALIVE_DEFAULT,
+        false,
+        false,
+        serverConnConfig.sessionsEnabled(),
+        serverConnConfig.retainAvailable(),
+        serverConnConfig.wildcardSubscriptionAvailable(),
+        serverConnConfig.subscriptionIdAvailable(),
+        serverConnConfig.sharedSubscriptionAvailable())
+    def connectionRef = new AtomicReference<MqttConnection>()
+    def connection = Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> true
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      serverConnectionConfig() >> deviceConnectionConfig
+      serverConnectionConfig() >> serverConnConfig
       client() >> Stub(UnsafeMqttClient) {
-        connectionConfig() >> deviceConnectionConfig
-        sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        receiveMaxPublishes() >> deviceConnectionConfig.receiveMaxPublishes()
-        maxPacketSize() >> deviceConnectionConfig.maxPacketSize()
-        clientId() >> IntegrationSpecification.clientId
-        keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        topicAliasMaxValue() >> deviceConnectionConfig.topicAliasMaxValue()
+        connectionConfig() >> clientConnConfig
+        connection() >> connectionRef.get()
+        clientId() >> clientId
       }
     }
+    connectionRef.set(connection)
+    return connection
   }
 
-  def mqtt311MockedConnection(MqttServerConnectionConfig deviceConnectionConfig) {
-    return Stub(MqttConnection) {
+  def mqtt311MockedConnection(MqttServerConnectionConfig serverConnConfig) {
+    MqttClientConnectionConfig clientConnConfig = new MqttClientConnectionConfig(
+        serverConnConfig.maxQos(),
+        MqttVersion.MQTT_3_1_1,
+        MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED,
+        serverConnConfig.receiveMaxPublishes(),
+        serverConnConfig.maxPacketSize(),
+        serverConnConfig.topicAliasMaxValue(),
+        MqttProperties.SERVER_KEEP_ALIVE_DEFAULT,
+        false,
+        false,
+        serverConnConfig.sessionsEnabled(),
+        serverConnConfig.retainAvailable(),
+        serverConnConfig.wildcardSubscriptionAvailable(),
+        serverConnConfig.subscriptionIdAvailable(),
+        serverConnConfig.sharedSubscriptionAvailable())
+    def connectionRef = new AtomicReference<MqttConnection>()
+    def connection = Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> false
       isSupported(MqttVersion.MQTT_3_1_1) >> true
-      serverConnectionConfig() >> deviceConnectionConfig
+      serverConnectionConfig() >> serverConnConfig
       client() >> Stub(UnsafeMqttClient) {
-        connectionConfig() >> deviceConnectionConfig
-        sessionExpiryInterval() >> MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-        receiveMaxPublishes() >> deviceConnectionConfig.receiveMaxPublishes()
-        maxPacketSize() >> deviceConnectionConfig.maxPacketSize()
-        clientId() >> IntegrationSpecification.clientId
-        keepAlive() >> MqttProperties.SERVER_KEEP_ALIVE_DEFAULT
-        topicAliasMaxValue() >> deviceConnectionConfig.topicAliasMaxValue()
+        connectionConfig() >> clientConnConfig
+        connection() >> connectionRef.get()
+        clientId() >> clientId
       }
     }
+    connectionRef.set(connection)
+    return connection
   }
 }

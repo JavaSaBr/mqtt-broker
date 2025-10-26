@@ -1,4 +1,4 @@
-package javasabr.mqtt.application.integration
+package javasabr.mqtt.broker.application
 
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient

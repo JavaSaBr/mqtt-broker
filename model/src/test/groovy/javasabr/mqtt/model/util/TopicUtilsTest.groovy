@@ -1,11 +1,11 @@
-package javasabr.mqtt.application.util
+package javasabr.mqtt.model.util
 
-import spock.lang.Specification
+import javasabr.mqtt.test.support.UnitSpecification
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.utils.TopicUtils.*
+import static javasabr.mqtt.model.util.TopicUtils.*
 
-class TopicUtilsTest extends Specification {
+class TopicUtilsTest extends UnitSpecification {
 
   @Unroll
   def "should create valid topic name: [#topicName]"() {

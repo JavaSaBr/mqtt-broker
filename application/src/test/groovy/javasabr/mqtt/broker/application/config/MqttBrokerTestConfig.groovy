@@ -1,6 +1,5 @@
-package javasabr.mqtt.application.integration.config
+package javasabr.mqtt.broker.application.config
 
-import javasabr.mqtt.broker.application.config.MqttBrokerSpringConfig
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.service.ConnectionService
 import javasabr.rlib.network.server.ServerNetwork

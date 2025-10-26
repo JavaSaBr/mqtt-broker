@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.utils;
+package javasabr.mqtt.model.util;
 
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;

@@ -1,13 +1,12 @@
-package javasabr.mqtt.application.model
+package javasabr.mqtt.model
 
-import javasabr.mqtt.model.MqttUser
-import javasabr.mqtt.model.QoS
+
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
 import javasabr.mqtt.model.topic.TopicSubscribers
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.utils.TopicUtils.*
+import static javasabr.mqtt.model.util.TopicUtils.*
 
 class TopicTest extends Specification {
 

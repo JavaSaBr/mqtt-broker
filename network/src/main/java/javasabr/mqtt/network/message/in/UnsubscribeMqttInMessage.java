@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.in;
 
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
+import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;

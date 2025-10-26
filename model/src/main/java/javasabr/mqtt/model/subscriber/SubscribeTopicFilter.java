@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.subscriber;
 
-import static javasabr.mqtt.model.utils.TopicUtils.buildTopicFilter;
+import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;

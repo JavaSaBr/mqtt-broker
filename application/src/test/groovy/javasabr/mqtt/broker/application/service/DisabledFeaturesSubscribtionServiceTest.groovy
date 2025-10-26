@@ -1,9 +1,9 @@
-package javasabr.mqtt.application.integration.service
+package javasabr.mqtt.broker.application.service
 
 import com.hivemq.client.mqtt.MqttClientState
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
 import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
-import javasabr.mqtt.application.integration.IntegrationSpecification
+import javasabr.mqtt.broker.application.IntegrationSpecification
 import org.springframework.test.context.TestPropertySource
 import spock.lang.Unroll
 
