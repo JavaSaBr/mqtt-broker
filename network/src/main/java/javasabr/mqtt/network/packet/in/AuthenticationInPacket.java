@@ -6,7 +6,7 @@ import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.Getter;
@@ -17,7 +17,7 @@ import lombok.Getter;
 @Getter
 public class AuthenticationInPacket extends MqttReadablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.AUTHENTICATE.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.AUTHENTICATE.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*

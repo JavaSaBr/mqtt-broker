@@ -2,7 +2,7 @@ package javasabr.mqtt.network.packet.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PublishAck311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH_ACK.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.PUBLISH_ACK.ordinal();
 
   /**
    * Packet Identifier from the PUBLISH packet that is being acknowledged.

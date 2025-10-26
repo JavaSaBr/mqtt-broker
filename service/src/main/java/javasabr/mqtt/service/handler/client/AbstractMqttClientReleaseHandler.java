@@ -5,7 +5,7 @@ import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.client.AbstractMqttClient;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.service.ClientIdRegistry;
-import javasabr.mqtt.service.MqttSessionService;
+import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.CustomLog;
@@ -18,7 +18,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
     MqttClientReleaseHandler {
 
   private final ClientIdRegistry clientIdRegistry;
-  private final MqttSessionService sessionService;
+  private final SessionService sessionService;
   private final SubscriptionService subscriptionService;
 
   @Override

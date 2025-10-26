@@ -8,7 +8,7 @@ import java.util.Set;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import lombok.Getter;
 @Getter
 public class UnsubscribeInPacket extends MqttReadablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.UNSUBSCRIBE.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.UNSUBSCRIBE.ordinal();
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
         /*

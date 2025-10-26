@@ -1,13 +1,13 @@
 package javasabr.mqtt.network.packet.out;
 
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 
 /**
  * PING request.
  */
 public class PingRequest311OutPacket extends MqttWritablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.PING_REQUEST.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.PING_REQUEST.ordinal();
 
   @Override
   protected byte packetType() {

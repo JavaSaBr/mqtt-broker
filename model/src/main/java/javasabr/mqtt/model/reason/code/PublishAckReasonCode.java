@@ -2,10 +2,16 @@ package javasabr.mqtt.model.reason.code;
 
 import java.util.stream.Stream;
 import javasabr.rlib.common.util.ObjectUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
+@Getter
 @RequiredArgsConstructor
+@Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum PublishAckReasonCode {
   /**
    * The message is accepted. Publication of the QoS 1 message proceeds.
@@ -54,14 +60,14 @@ public enum PublishAckReasonCode {
 
   static {
 
-    var maxId = Stream
+    int maxValue = Stream
         .of(values())
-        .mapToInt(PublishAckReasonCode::getValue)
+        .mapToInt(PublishAckReasonCode::value)
         .map(value -> Byte.toUnsignedInt((byte) value))
         .max()
         .orElse(0);
 
-    var values = new PublishAckReasonCode[maxId + 1];
+    var values = new PublishAckReasonCode[maxValue + 1];
 
     for (var value : values()) {
       values[Byte.toUnsignedInt(value.value)] = value;
@@ -70,13 +76,12 @@ public enum PublishAckReasonCode {
     VALUES = values;
   }
 
-  public static PublishAckReasonCode of(int index) {
+  public static PublishAckReasonCode ofValue(int value) {
     return ObjectUtils.notNull(
-        VALUES[index],
-        index,
+        VALUES[value],
+        value,
         arg -> new IndexOutOfBoundsException("Doesn't support reason code: " + arg));
   }
 
-  @Getter
-  private final byte value;
+  byte value;
 }

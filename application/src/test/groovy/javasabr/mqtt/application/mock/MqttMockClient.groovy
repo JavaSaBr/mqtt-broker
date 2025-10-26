@@ -1,7 +1,7 @@
 package javasabr.mqtt.application.mock
 
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.packet.PacketType
+import javasabr.mqtt.network.packet.MqttPacketType
 import javasabr.mqtt.network.packet.in.*
 import javasabr.mqtt.network.packet.out.Disconnect311OutPacket
 import javasabr.mqtt.network.packet.out.MqttWritablePacket
@@ -75,17 +75,17 @@ class MqttMockClient {
 
     MqttReadablePacket packet
 
-    switch (PacketType.fromByte(type)) {
-      case PacketType.CONNECT_ACK:
+    switch (MqttPacketType.fromByte(type)) {
+      case MqttPacketType.CONNECT_ACK:
         packet = new ConnectAckInPacket(info)
         break
-      case PacketType.SUBSCRIBE_ACK:
+      case MqttPacketType.SUBSCRIBE_ACK:
         packet = new SubscribeAckInPacket(info)
         break
-      case PacketType.PUBLISH:
+      case MqttPacketType.PUBLISH:
         packet = new PublishInPacket(info)
         break
-      case PacketType.PUBLISH_RELEASED:
+      case MqttPacketType.PUBLISH_RELEASED:
         packet = new PublishReleaseInPacket(info)
         break
       default:

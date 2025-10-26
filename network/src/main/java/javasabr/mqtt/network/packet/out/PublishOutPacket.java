@@ -1,7 +1,7 @@
 package javasabr.mqtt.network.packet.out;
 
 import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @RequiredArgsConstructor
 public abstract class PublishOutPacket extends MqttWritablePacket implements HasPacketId {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.PUBLISH.ordinal();
 
   @Getter
   protected final int packetId;

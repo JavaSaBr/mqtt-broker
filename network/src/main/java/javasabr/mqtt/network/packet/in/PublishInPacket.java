@@ -12,7 +12,7 @@ import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.PacketType;
+import javasabr.mqtt.network.packet.MqttPacketType;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.array.MutableIntArray;
@@ -27,7 +27,7 @@ import lombok.Getter;
 @Getter
 public class PublishInPacket extends MqttReadablePacket {
 
-  private static final byte PACKET_TYPE = (byte) PacketType.PUBLISH.ordinal();
+  private static final byte PACKET_TYPE = (byte) MqttPacketType.PUBLISH.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("topicName", "qos", "duplicate", "packetId");

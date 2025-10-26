@@ -3,9 +3,7 @@ package javasabr.mqtt.network;
 import java.util.concurrent.CompletableFuture;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.network.out.MqttPacketOutFactory;
-import javasabr.mqtt.network.packet.in.MqttReadablePacket;
+import javasabr.mqtt.network.packet.out.ConnectAck311OutPacket;
 import javasabr.mqtt.network.packet.out.MqttWritablePacket;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -16,18 +14,14 @@ public interface MqttClient extends MqttUser {
 
     MqttConnection connection();
 
-    void handle(MqttReadablePacket packet);
-
     void clientId(String clientId);
 
     void session(@Nullable MqttSession session);
 
-    void reject(ConnectAckReasonCode reasonCode);
+    void reject(ConnectAck311OutPacket connectAsk);
 
     Mono<?> release();
   }
-
-  MqttPacketOutFactory packetOutFactory();
 
   String clientId();
 
