@@ -1,4 +1,4 @@
-package javasabr.mqtt.base.utils;
+package javasabr.mqtt.base.util;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;

@@ -2,7 +2,7 @@ package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.network.MqttConnection;
@@ -114,8 +114,8 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
 
   public void writeProperty(ByteBuffer buffer, PacketProperty property, StringPair value) {
     buffer.put(property.id());
-    writeString(buffer, value.getName());
-    writeString(buffer, value.getValue());
+    writeString(buffer, value.name());
+    writeString(buffer, value.value());
   }
 
   public void writeNotEmptyProperty(ByteBuffer buffer, PacketProperty property, String value) {
@@ -158,8 +158,8 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
   }
 
   public void writeStringPair(ByteBuffer buffer, StringPair pair) {
-    writeString(buffer, pair.getName());
-    writeString(buffer, pair.getValue());
+    writeString(buffer, pair.name());
+    writeString(buffer, pair.value());
   }
 
   public void writeMbi(ByteBuffer buffer, int value) {

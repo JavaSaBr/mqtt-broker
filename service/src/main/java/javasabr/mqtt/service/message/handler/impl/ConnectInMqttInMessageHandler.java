@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
-import static javasabr.mqtt.base.utils.ReactorUtils.ifTrue;
+import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
 import static javasabr.mqtt.model.MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
 import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
 import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;

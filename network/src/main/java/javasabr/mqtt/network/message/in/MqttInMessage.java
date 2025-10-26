@@ -8,7 +8,7 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
-import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
