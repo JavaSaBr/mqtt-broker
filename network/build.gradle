@@ -1,6 +1,7 @@
 plugins {
   id("java-library")
   id("configure-java")
+  id("groovy")
 }
 
 dependencies {
@@ -10,4 +11,6 @@ dependencies {
   api libs.rlib.logger.api
 
   testImplementation projects.testSupport
+  testImplementation libs.rlib.logger.impl
+  testFixturesApi projects.testSupport
 }

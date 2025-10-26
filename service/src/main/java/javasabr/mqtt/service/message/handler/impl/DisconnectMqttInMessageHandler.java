@@ -2,29 +2,29 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketType;
-import javasabr.mqtt.network.packet.in.DisconnectInPacket;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.DisconnectMqttInMessage;
 import lombok.CustomLog;
 
 @CustomLog
-public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, DisconnectInPacket> {
+public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, DisconnectMqttInMessage> {
 
   public DisconnectMqttInMessageHandler() {
-    super(ExternalMqttClient.class, DisconnectInPacket.class);
+    super(ExternalMqttClient.class, DisconnectMqttInMessage.class);
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.DISCONNECT;
+  public MqttMessageType messageType() {
+    return MqttMessageType.DISCONNECT;
   }
 
   @Override
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      DisconnectInPacket networkPacket) {
-    DisconnectReasonCode reasonCode = networkPacket.getReasonCode();
+      DisconnectMqttInMessage networkPacket) {
+    DisconnectReasonCode reasonCode = networkPacket.reasonCode();
     if (reasonCode == DisconnectReasonCode.NORMAL_DISCONNECTION) {
       log.info(client.clientId(), "Disconnect client:[%s]"::formatted);
     } else {

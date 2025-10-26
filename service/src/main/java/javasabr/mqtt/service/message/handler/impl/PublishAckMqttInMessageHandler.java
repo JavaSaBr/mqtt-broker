@@ -1,16 +1,16 @@
 package javasabr.mqtt.service.message.handler.impl;
 
-import javasabr.mqtt.network.packet.MqttPacketType;
-import javasabr.mqtt.network.packet.in.PublishAckInPacket;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.PublishAckMqttInMessage;
 
-public class PublishAckMqttInMessageHandler extends PendingOutResponseMqttInMessageHandler<PublishAckInPacket> {
+public class PublishAckMqttInMessageHandler extends PendingOutResponseMqttInMessageHandler<PublishAckMqttInMessage> {
 
   public PublishAckMqttInMessageHandler() {
-    super(PublishAckInPacket.class);
+    super(PublishAckMqttInMessage.class);
   }
 
   @Override
-  public MqttPacketType messageType() {
-    return MqttPacketType.PUBLISH_ACK;
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_ACK;
   }
 }

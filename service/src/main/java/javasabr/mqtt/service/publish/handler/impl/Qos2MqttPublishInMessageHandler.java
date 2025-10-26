@@ -7,10 +7,10 @@ import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
-import javasabr.mqtt.network.client.ExternalMqttClient;
-import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
-import javasabr.mqtt.network.packet.in.PublishReleaseInPacket;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.HasMessageId;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
+import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -41,15 +41,15 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void handleImpl(ExternalMqttClient client, PublishInPacket packet) {
+  protected void handleImpl(ExternalMqttClient client, PublishMqttInMessage packet) {
     MqttSession session = client.session();
     if (session == null) {
       return;
     }
     // if this packet is re-try from client
-    if (packet.isDuplicate()) {
+    if (packet.duplicate()) {
       // if this packet was accepted before then we can skip it
-      if (session.hasInPending(packet.getPacketId())) {
+      if (session.hasInPending(packet.messageId())) {
         return;
       }
     }
@@ -81,26 +81,26 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void handleSuccessfulResult(ExternalMqttClient client, PublishInPacket packet, int subscribers) {
+  protected void handleSuccessfulResult(ExternalMqttClient client, PublishMqttInMessage packet, int subscribers) {
     super.handleSuccessfulResult(client, packet, subscribers);
     MqttSession session = client.session();
     if (session == null) {
       return;
     }
-    session.registerInPublish(packet, pendingMessageHandler, packet.getPacketId());
+    session.registerInPublish(packet, pendingMessageHandler, packet.messageId());
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishReceived(packet.getPacketId(), PublishReceivedReasonCode.SUCCESS));
+        .newPublishReceived(packet.messageId(), PublishReceivedReasonCode.SUCCESS));
   }
 
-  private boolean processPublishRelease(MqttClient client, HasPacketId response) {
-    if (!(response instanceof PublishReleaseInPacket)) {
+  private boolean processPublishRelease(MqttClient client, HasMessageId response) {
+    if (!(response instanceof PublishReleaseMqttInMessage)) {
       throw new IllegalStateException("Unexpected response " + response);
     }
 
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishCompleted(response.packetId(), PublishCompletedReasonCode.SUCCESS));
+        .newPublishCompleted(response.messageId(), PublishCompletedReasonCode.SUCCESS));
     return true;
   }
 }

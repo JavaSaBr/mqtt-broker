@@ -16,7 +16,6 @@ import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
-import javasabr.mqtt.service.SessionService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
@@ -27,7 +26,6 @@ import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
-import javasabr.mqtt.service.impl.InMemorySessionService;
 import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.impl.SimpleSubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
@@ -51,6 +49,8 @@ import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandle
 import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler;
+import javasabr.mqtt.service.session.MqttSessionService;
+import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
@@ -76,9 +76,9 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SessionService mqttSessionService(
+  MqttSessionService mqttSessionService(
       @Value("${sessions.clean.thread.interval:60000}") int cleanInterval) {
-    return new InMemorySessionService(cleanInterval);
+    return new InMemoryMqttSessionService(cleanInterval);
   }
 
   @Bean
@@ -119,7 +119,7 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler connectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
-      SessionService sessionService,
+      MqttSessionService sessionService,
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
     return new ConnectInMqttInMessageHandler(
@@ -244,7 +244,7 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttClientReleaseHandler externalMqttClientReleaseHandler(
       ClientIdRegistry clientIdRegistry,
-      SessionService sessionService,
+      MqttSessionService sessionService,
       SubscriptionService subscriptionService) {
     return new ExternalMqttClientReleaseHandler(clientIdRegistry, sessionService, subscriptionService);
   }

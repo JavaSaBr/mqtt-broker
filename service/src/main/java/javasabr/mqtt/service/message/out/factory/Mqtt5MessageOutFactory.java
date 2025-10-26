@@ -14,18 +14,18 @@ import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.packet.out.Authentication5OutPacket;
-import javasabr.mqtt.network.packet.out.ConnectAck5OutPacket;
-import javasabr.mqtt.network.packet.out.Disconnect5OutPacket;
-import javasabr.mqtt.network.packet.out.MqttWritablePacket;
-import javasabr.mqtt.network.packet.out.Publish5OutPacket;
-import javasabr.mqtt.network.packet.out.PublishAck5OutPacket;
-import javasabr.mqtt.network.packet.out.PublishComplete5OutPacket;
-import javasabr.mqtt.network.packet.out.PublishOutPacket;
-import javasabr.mqtt.network.packet.out.PublishReceived5OutPacket;
-import javasabr.mqtt.network.packet.out.PublishRelease5OutPacket;
-import javasabr.mqtt.network.packet.out.SubscribeAck5OutPacket;
-import javasabr.mqtt.network.packet.out.UnsubscribeAck5OutPacket;
+import javasabr.mqtt.network.message.out.AuthenticationMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.ConnectAckMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.PublishCompleteMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
+import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage;
+import javasabr.mqtt.network.message.out.UnsubscribeAckMqtt5OutMessage;
 import javasabr.rlib.collections.array.Array;
 
 public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
@@ -36,7 +36,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   }
 
   @Override
-  public MqttWritablePacket newConnectAck(
+  public MqttOutMessage newConnectAck(
       MqttClient client,
       ConnectAckReasonCode reasonCode,
       boolean sessionPresent,
@@ -51,7 +51,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       byte[] authenticationData,
       Array<StringPair> userProperties) {
     MqttClientConnectionConfig connectionConfig = client.connectionConfig();
-    return new ConnectAck5OutPacket(
+    return new ConnectAckMqtt5OutMessage(
         connectionConfig,
         reasonCode,
         sessionPresent,
@@ -69,7 +69,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   }
 
   @Override
-  public PublishOutPacket newPublish(
+  public PublishMqttOutMessage newPublish(
       int packetId,
       QoS qos,
       boolean retained,
@@ -81,7 +81,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       String responseTopic,
       byte[] correlationData,
       Array<StringPair> userProperties) {
-    return new Publish5OutPacket(
+    return new PublishMqtt5OutMessage(
         packetId,
         qos,
         retained,
@@ -96,41 +96,41 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   }
 
   @Override
-  public MqttWritablePacket newPublishAck(
+  public MqttOutMessage newPublishAck(
       int packetId,
       PublishAckReasonCode reasonCode,
       String reason,
       Array<StringPair> userProperties) {
-    return new PublishAck5OutPacket(packetId, reasonCode, userProperties, reason);
+    return new PublishAckMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
   }
 
   @Override
-  public MqttWritablePacket newSubscribeAck(
+  public MqttOutMessage newSubscribeAck(
       int packetId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
       Array<StringPair> userProperties) {
-    return new SubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
+    return new SubscribeAckMqtt5OutMessage(packetId, reasonCodes, userProperties, reason);
   }
 
   @Override
-  public MqttWritablePacket newUnsubscribeAck(
+  public MqttOutMessage newUnsubscribeAck(
       int packetId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason) {
-    return new UnsubscribeAck5OutPacket(packetId, reasonCodes, userProperties, reason);
+    return new UnsubscribeAckMqtt5OutMessage(packetId, reasonCodes, userProperties, reason);
   }
 
   @Override
-  public MqttWritablePacket newDisconnect(
+  public MqttOutMessage newDisconnect(
       MqttClient client,
       DisconnectReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason,
       String serverReference) {
     MqttClientConnectionConfig connectionConfig = client.connectionConfig();
-    return new Disconnect5OutPacket(
+    return new DisconnectMqtt5OutMessage(
         reasonCode,
         userProperties,
         reason,
@@ -139,39 +139,39 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   }
 
   @Override
-  public MqttWritablePacket newAuthenticate(
+  public MqttOutMessage newAuthenticate(
       AuthenticateReasonCode reasonCode,
       String authenticateMethod,
       byte[] authenticateData,
       Array<StringPair> userProperties,
       String reason) {
-    return new Authentication5OutPacket(userProperties, reasonCode, reason, authenticateMethod, authenticateData);
+    return new AuthenticationMqtt5OutMessage(userProperties, reasonCode, reason, authenticateMethod, authenticateData);
   }
 
   @Override
-  public MqttWritablePacket newPublishRelease(
+  public MqttOutMessage newPublishRelease(
       int packetId,
       PublishReleaseReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishRelease5OutPacket(packetId, reasonCode, userProperties, reason);
+    return new PublishReleaseMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
   }
 
   @Override
-  public MqttWritablePacket newPublishReceived(
+  public MqttOutMessage newPublishReceived(
       int packetId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReceived5OutPacket(packetId, reasonCode, userProperties, reason);
+    return new PublishReceivedMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
   }
 
   @Override
-  public MqttWritablePacket newPublishCompleted(
+  public MqttOutMessage newPublishCompleted(
       int packetId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishComplete5OutPacket(packetId, reasonCode, userProperties, reason);
+    return new PublishCompleteMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
   }
 }

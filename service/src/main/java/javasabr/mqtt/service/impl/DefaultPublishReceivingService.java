@@ -3,7 +3,7 @@ package javasabr.mqtt.service.impl;
 import java.util.Collection;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import lombok.AccessLevel;
@@ -44,10 +44,11 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
   }
 
   @Override
-  public void processReceivedPublish(MqttClient client, PublishInPacket publish) {
+  public void processReceivedPublish(MqttClient client, PublishMqttInMessage publish) {
+    QoS qos = publish.qos();
     try {
       //noinspection DataFlowIssue
-      publishInHandlers[publish.getQos().index()].handle(client, publish);
+      publishInHandlers[qos.index()].handle(client, publish);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
     }

@@ -2,8 +2,8 @@ package javasabr.mqtt.network;
 
 import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
-import javasabr.mqtt.network.packet.HasPacketId;
-import javasabr.mqtt.network.packet.in.PublishInPacket;
+import javasabr.mqtt.network.message.HasMessageId;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.rlib.functions.TriConsumer;
 
 public interface MqttSession {
@@ -24,9 +24,9 @@ public interface MqttSession {
     /**
      * @return true if pending packet can be removed.
      */
-    boolean handleResponse(MqttClient client, HasPacketId response);
+    boolean handleResponse(MqttClient client, HasMessageId response);
 
-    default void resend(MqttClient client, PublishInPacket packet, int packetId) {}
+    default void resend(MqttClient client, PublishMqttInMessage packet, int packetId) {}
   }
 
   String clientId();
@@ -48,13 +48,13 @@ public interface MqttSession {
 
   boolean hasOutPending(int packetId);
 
-  void registerOutPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId);
+  void registerOutPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId);
 
-  void registerInPublish(PublishInPacket publish, PendingMessageHandler handler, int packetId);
+  void registerInPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId);
 
-  void updateOutPendingPacket(MqttClient client, HasPacketId response);
+  void updateOutPendingPacket(MqttClient client, HasMessageId response);
 
-  void updateInPendingPacket(MqttClient client, HasPacketId response);
+  void updateInPendingPacket(MqttClient client, HasMessageId response);
 
   <A, B> void forEachTopicFilter(
       A arg1,

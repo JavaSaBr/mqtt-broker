@@ -2,8 +2,8 @@ package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.packet.MqttPacketType;
-import javasabr.mqtt.network.packet.in.MqttReadablePacket;
+import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.rlib.network.packet.ReadableNetworkPacket;
@@ -23,14 +23,14 @@ public class DefaultConnectionService implements ConnectionService {
     int highestPacketType = knownInMessageHandlers
         .stream()
         .map(MqttInMessageHandler::messageType)
-        .mapToInt(MqttPacketType::typeIndex)
+        .mapToInt(MqttMessageType::typeIndex)
         .max()
         .orElse(0);
 
     var inMessageHandlers = new MqttInMessageHandler[highestPacketType + 1];
 
     for (MqttInMessageHandler knownInMessageHandler : knownInMessageHandlers) {
-      MqttPacketType messageType = knownInMessageHandler.messageType();
+      MqttMessageType messageType = knownInMessageHandler.messageType();
       if (inMessageHandlers[messageType.typeIndex()] != null) {
         throw new IllegalArgumentException("Found duplicate MqttInMessageHandler:[" + knownInMessageHandler + "]");
       }
@@ -51,7 +51,7 @@ public class DefaultConnectionService implements ConnectionService {
       MqttConnection connection,
       ReadableNetworkPacket<MqttConnection> networkPacket) {
 
-    if (!(networkPacket instanceof MqttReadablePacket mrp)) {
+    if (!(networkPacket instanceof MqttInMessage mrp)) {
       log.warning(networkPacket, "Received not processable network packet:[%s]"::formatted);
       return;
     }
@@ -64,7 +64,7 @@ public class DefaultConnectionService implements ConnectionService {
 
     try {
       //noinspection DataFlowIssue
-      inMessageHandlers[mrp.packetType()].processReceived(connection, mrp);
+      inMessageHandlers[mrp.messageType()].processReceived(connection, mrp);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(mrp, "Received not supported MQTT message:[%s]"::formatted);
     }

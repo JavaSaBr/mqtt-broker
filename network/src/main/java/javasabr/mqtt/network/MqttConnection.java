@@ -5,8 +5,8 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.network.packet.MqttPacketReader;
-import javasabr.mqtt.network.packet.MqttPacketWriter;
+import javasabr.mqtt.network.message.MqttMessageReader;
+import javasabr.mqtt.network.message.MqttMessageWriter;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.impl.AbstractConnection;
@@ -80,7 +80,7 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   }
 
   private NetworkPacketReader createPacketReader() {
-    return new MqttPacketReader(
+    return new MqttMessageReader(
         this,
         this::updateLastActivity,
         this::handleReceivedPacket,
@@ -88,7 +88,7 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   }
 
   private NetworkPacketWriter createPacketWriter() {
-    return new MqttPacketWriter(
+    return new MqttMessageWriter(
         this,
         this::updateLastActivity,
         this::nextPacketToWrite,

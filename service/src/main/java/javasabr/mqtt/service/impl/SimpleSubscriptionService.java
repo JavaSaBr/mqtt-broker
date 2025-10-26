@@ -7,8 +7,8 @@ import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.UNSPECIFIED
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
-import static javasabr.mqtt.model.utils.TopicUtils.hasWildcard;
-import static javasabr.mqtt.model.utils.TopicUtils.isShared;
+import static javasabr.mqtt.model.util.TopicUtils.hasWildcard;
+import static javasabr.mqtt.model.util.TopicUtils.isShared;
 
 import java.util.function.BiFunction;
 import javasabr.mqtt.model.ActionResult;
@@ -21,7 +21,7 @@ import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicSubscribers;
-import javasabr.mqtt.model.utils.TopicUtils;
+import javasabr.mqtt.model.util.TopicUtils;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.service.SubscriptionService;
