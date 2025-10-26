@@ -1,0 +1,12 @@
+plugins {
+  id("configure-java")
+  id("jacoco-report-aggregation")
+}
+
+dependencies {
+  jacocoAggregation projects.base
+  jacocoAggregation projects.application
+  jacocoAggregation projects.model
+  jacocoAggregation projects.network
+  jacocoAggregation projects.service
+}
