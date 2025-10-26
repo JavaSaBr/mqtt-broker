@@ -5,7 +5,7 @@ import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;

@@ -1,7 +1,7 @@
 package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
-import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.MqttConnection;
 import lombok.AccessLevel;

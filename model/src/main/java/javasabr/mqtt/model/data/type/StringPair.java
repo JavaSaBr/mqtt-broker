@@ -1,16 +1,15 @@
 package javasabr.mqtt.model.data.type;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import javasabr.mqtt.base.util.DebugUtils;
 
-@Getter
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor
-public class StringPair {
+public record StringPair(String name, String value) {
 
-  private final String name;
-  private final String value;
+  static {
+    DebugUtils.registerIncludedFields("name", "value");
+  }
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
+  }
 }

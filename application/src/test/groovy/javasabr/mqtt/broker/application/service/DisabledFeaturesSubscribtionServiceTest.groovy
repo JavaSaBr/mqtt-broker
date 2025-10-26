@@ -31,7 +31,7 @@ class DisabledFeaturesSubscribtionServiceTest extends IntegrationSpecification {
             .send()
             .join()
     then:
-        Thread.sleep(10)
+        Thread.sleep(50)
         subscriber.state == MqttClientState.DISCONNECTED
         def ex = thrown CompletionException
         if (ex.cause != null) {

@@ -2,7 +2,7 @@ package javasabr.mqtt.network.impl;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javasabr.mqtt.base.utils.DebugUtils;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttConnection;
