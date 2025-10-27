@@ -1,10 +1,13 @@
 package javasabr.mqtt.service;
 
 import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.network.MqttClient;
+import org.jspecify.annotations.Nullable;
 
 public interface TopicService {
 
-  TopicFilter createTopicFilter(String rawTopicFilter);
+  @Nullable
+  TopicFilter createTopicFilter(MqttClient client, String rawTopicFilter);
 
   boolean isShared(TopicFilter topicFilter);
 

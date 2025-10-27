@@ -17,6 +17,7 @@ import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -95,8 +96,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService() {
-    return new SimpleSubscriptionService();
+  SubscriptionService subscriptionService(TopicService topicService) {
+    return new SimpleSubscriptionService(topicService);
   }
 
   @Bean
@@ -131,40 +132,43 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttInMessageHandler publishAckMqttInMessageHandler() {
-    return new PublishAckMqttInMessageHandler();
+  MqttInMessageHandler publishAckMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new PublishAckMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttInMessageHandler publishCompleteMqttInMessageHandler() {
-    return new PublishCompleteMqttInMessageHandler();
+  MqttInMessageHandler publishCompleteMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new PublishCompleteMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttInMessageHandler publishMqttInMessageHandler(PublishReceivingService publishReceivingService) {
-    return new PublishMqttInMessageHandler(publishReceivingService);
+  MqttInMessageHandler publishMqttInMessageHandler(
+      PublishReceivingService publishReceivingService,
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishMqttInMessageHandler(publishReceivingService, messageOutFactoryService);
   }
 
   @Bean
-  MqttInMessageHandler publishReceiveMqttInMessageHandler() {
-    return new PublishReceiveMqttInMessageHandler();
+  MqttInMessageHandler publishReceiveMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new PublishReceiveMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttInMessageHandler publishReleaseMqttInMessageHandler() {
-    return new PublishReleaseMqttInMessageHandler();
+  MqttInMessageHandler publishReleaseMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new PublishReleaseMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttInMessageHandler disconnectMqttInMessageHandler() {
-    return new DisconnectMqttInMessageHandler();
+  MqttInMessageHandler disconnectMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new DisconnectMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean
   MqttInMessageHandler subscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      TopicService topicService) {
+    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
   }
 
   @Bean
@@ -265,6 +269,10 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.max.binary.size",
             int.class,
             MqttProperties.MAXIMUM_BINARY_SIZE),
+        env.getProperty(
+            "mqtt.external.connection.max.topic.levels",
+            int.class,
+            MqttProperties.MAXIMUM_TOPIC_LEVELS),
         env.getProperty(
             "mqtt.external.connection.min.keep.alive",
             int.class,

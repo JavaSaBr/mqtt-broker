@@ -14,6 +14,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
 
+  public static final String SHARE_KEYWORD = "$share";
+  public static final String DELIMITER = "/";
+
+  public static final String MULTI_LEVEL_WILDCARD = "#";
+  public static final String SINGLE_LEVEL_WILDCARD = "+";
+
   static {
     DebugUtils.registerIncludedFields("rawTopic");
   }

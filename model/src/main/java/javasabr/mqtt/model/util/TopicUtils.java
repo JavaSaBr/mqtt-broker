@@ -10,8 +10,8 @@ public class TopicUtils {
   public static final TopicName INVALID_TOPIC_NAME = new TopicName();
   public static final TopicName EMPTY_TOPIC_NAME = new TopicName();
 
-  private static final String SHARE_KEYWORD = "$share";
-  private static final String DELIMITER = "/";
+  public static final String SHARE_KEYWORD = "$share";
+  public static final String DELIMITER = "/";
 
   public static final String MULTI_LEVEL_WILDCARD = "#";
   public static final String SINGLE_LEVEL_WILDCARD = "+";

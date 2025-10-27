@@ -15,14 +15,12 @@ import lombok.experimental.FieldDefaults;
 public class UnsubscribeMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, UnsubscribeMqttInMessage> {
 
   SubscriptionService subscriptionService;
-  MessageOutFactoryService messageOutFactoryService;
 
   public UnsubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, UnsubscribeMqttInMessage.class);
+    super(ExternalMqttClient.class, UnsubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
-    this.messageOutFactoryService = messageOutFactoryService;
   }
 
   @Override

@@ -25,6 +25,7 @@ public interface MqttProperties {
 
   int MAXIMUM_STRING_LENGTH = 2048;
   int MAXIMUM_BINARY_SIZE = 2048;
+  int MAXIMUM_TOPIC_LEVELS = 10;
 
   boolean PAYLOAD_FORMAT_INDICATOR_DEFAULT = false;
 

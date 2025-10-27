@@ -5,13 +5,14 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.DisconnectMqttInMessage;
+import javasabr.mqtt.service.MessageOutFactoryService;
 import lombok.CustomLog;
 
 @CustomLog
 public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, DisconnectMqttInMessage> {
 
-  public DisconnectMqttInMessageHandler() {
-    super(ExternalMqttClient.class, DisconnectMqttInMessage.class);
+  public DisconnectMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    super(ExternalMqttClient.class, DisconnectMqttInMessage.class, messageOutFactoryService);
   }
 
   @Override
