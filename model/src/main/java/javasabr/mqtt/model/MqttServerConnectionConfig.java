@@ -5,6 +5,7 @@ public record MqttServerConnectionConfig(
     int maxPacketSize,
     int maxStringLength,
     int maxBinarySize,
+    int maxTopicLevels,
     int minKeepAliveTime,
     int receiveMaxPublishes,
     int topicAliasMaxValue,

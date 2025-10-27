@@ -1,22 +1,22 @@
 package javasabr.mqtt.network.message.in;
 
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter;
-
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.model.subscribtion.RequestedRawSubscription;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.common.util.NumberUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -28,12 +28,12 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SubscribeMqttInMessage extends MqttInMessage {
+public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("messageId", "topicFilters");
+    DebugUtils.registerIncludedFields("subscriptions");
   }
 
   private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -54,15 +54,14 @@ public class SubscribeMqttInMessage extends MqttInMessage {
        */
       PacketProperty.USER_PROPERTY);
 
-  MutableArray<SubscribeTopicFilter> topicFilters;
-  int messageId;
+  final MutableArray<RequestedRawSubscription> subscriptions;
 
   // properties
   int subscriptionId;
 
   public SubscribeMqttInMessage(byte info) {
     super(info);
-    this.topicFilters = ArrayFactory.mutableArray(SubscribeTopicFilter.class);
+    this.subscriptions = ArrayFactory.mutableArray(RequestedRawSubscription.class);
     this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_UNDEFINED;
   }
 
@@ -79,31 +78,44 @@ public class SubscribeMqttInMessage extends MqttInMessage {
 
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
-
     if (buffer.remaining() < 1) {
-      throw new IllegalStateException("No any topic filters.");
+      throw new MalformedPacketMqttException("No any topic filters");
     }
 
+    MqttServerConnectionConfig severConnConfig = connection.serverConnectionConfig();
     boolean isMqtt5 = connection.isSupported(MqttVersion.MQTT_5);
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901168
     while (buffer.hasRemaining()) {
+      String topicFilter = readString(buffer, severConnConfig.maxStringLength());
 
-      String topicFilter = readString(buffer, Integer.MAX_VALUE);
       int options = readByteUnsigned(buffer);
+      int qosLevel = options & 0b0000_0011;
+      boolean noLocal = true;
+      boolean retainAsPublished = true;
+      SubscribeRetainHandling retainHandling = SubscribeRetainHandling.SEND;
 
-      QoS qos = QoS.of(options & 0x03);
-      SubscribeRetainHandling retainHandling = isMqtt5 ? SubscribeRetainHandling.of((options >> 4) & 0x03) : SubscribeRetainHandling.SEND;
-
-      if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
-        throw new IllegalStateException("Unsupported qos or retain handling");
+      if (isMqtt5) {
+        noLocal = (options & 0b0000_0100) != 0;
+        retainAsPublished = (options & 0b0000_1000) != 0;
+        int retainLevel = (options & 0b0011_0000) >> 4;
+        retainHandling =  SubscribeRetainHandling.of(retainLevel);
+      } else {
+        validateMqtt311Options(options);
       }
 
-      boolean noLocal = !isMqtt5 || NumberUtils.isSetBit(options, 2);
-      boolean rap = !isMqtt5 || NumberUtils.isSetBit(options, 3);
+      QoS qos = QoS.of(qosLevel);
+      if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
+        throw new MalformedPacketMqttException("Unsupported qos or retain handling");
+      }
 
-      topicFilters.add(new SubscribeTopicFilter(buildTopicFilter(topicFilter), qos, retainHandling, noLocal, rap));
+      subscriptions.add(new RequestedRawSubscription(
+          topicFilter,
+          qos,
+          retainHandling,
+          noLocal,
+          retainAsPublished));
     }
   }
 
@@ -117,6 +129,21 @@ public class SubscribeMqttInMessage extends MqttInMessage {
     switch (property) {
       case SUBSCRIPTION_IDENTIFIER -> subscriptionId = (int) value;
       default -> unexpectedProperty(property);
+    }
+  }
+
+  public Array<RequestedRawSubscription> subscriptions() {
+    return subscriptions;
+  }
+
+  private static void validateMqtt311Options(int options) {
+    // for MQTT 3.1.1 these bits must be zero
+    if ((options & 0b0000_0100) != 0) {
+      throw new MalformedPacketMqttException("No local option is not available on this protocol level");
+    } else if ((options & 0b0000_1000) != 0) {
+      throw new MalformedPacketMqttException("Retain as published option is not available on this protocol level");
+    } else if (((options & 0b0011_0000) >> 4) != 0) {
+      throw new MalformedPacketMqttException("Retain level option is not available on this protocol level");
     }
   }
 }

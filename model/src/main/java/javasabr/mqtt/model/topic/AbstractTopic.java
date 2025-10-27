@@ -2,11 +2,16 @@ package javasabr.mqtt.model.topic;
 
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.util.TopicUtils;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @EqualsAndHashCode(of = "rawTopic")
+@Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
 
   static {
@@ -15,9 +20,10 @@ public abstract class AbstractTopic {
 
   private static final String[] EMPTY_ARRAY = new String[0];
   private static final String EMPTY = "";
-  private final String[] segments;
-  private final String rawTopic;
-  private final int length;
+
+  String[] segments;
+  String rawTopic;
+  int length;
 
   protected AbstractTopic() {
     length = 0;
@@ -31,16 +37,20 @@ public abstract class AbstractTopic {
     rawTopic = topicName;
   }
 
-  String getSegment(int level) {
+  public String segment(int level) {
     return segments[level];
   }
 
-  int levelsCount() {
+  public int levelsCount() {
     return segments.length;
   }
 
   String lastSegment() {
     return segments[segments.length - 1];
+  }
+
+  public boolean isInvalid() {
+    return false;
   }
 
   @Override

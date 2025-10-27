@@ -1,10 +1,10 @@
 package javasabr.mqtt.network;
 
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
-import javasabr.rlib.functions.TriConsumer;
+import javasabr.rlib.collections.array.Array;
 
 public interface MqttSession {
 
@@ -56,12 +56,9 @@ public interface MqttSession {
 
   void updateInPendingPacket(MqttClient client, HasMessageId response);
 
-  <A, B> void forEachTopicFilter(
-      A arg1,
-      B arg2,
-      TriConsumer<A, B, SubscribeTopicFilter> consumer);
+  void storeSubscription(Subscription subscription);
 
-  void addSubscriber(SubscribeTopicFilter subscribe);
+  void removeSubscription(TopicFilter subscribe);
 
-  void removeSubscriber(TopicFilter subscribe);
+  Array<Subscription> storedSubscriptions();
 }

@@ -23,8 +23,8 @@ public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      DisconnectMqttInMessage networkPacket) {
-    DisconnectReasonCode reasonCode = networkPacket.reasonCode();
+      DisconnectMqttInMessage message) {
+    DisconnectReasonCode reasonCode = message.reasonCode();
     if (reasonCode == DisconnectReasonCode.NORMAL_DISCONNECTION) {
       log.info(client.clientId(), "Disconnect client:[%s]"::formatted);
     } else {

@@ -22,8 +22,8 @@ public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<Ex
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      PublishMqttInMessage networkPacket) {
-    publishReceivingService.processReceivedPublish(client, networkPacket);
+      PublishMqttInMessage message) {
+    publishReceivingService.processReceivedPublish(client, message);
   }
 
   @Override

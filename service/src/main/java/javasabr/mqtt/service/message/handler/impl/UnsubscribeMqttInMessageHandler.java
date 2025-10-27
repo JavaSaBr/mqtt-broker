@@ -34,13 +34,13 @@ public class UnsubscribeMqttInMessageHandler extends AbstractMqttInMessageHandle
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      UnsubscribeMqttInMessage networkPacket) {
+      UnsubscribeMqttInMessage message) {
 
     Array<UnsubscribeAckReasonCode> ackReasonCodes = subscriptionService
-        .unsubscribe(client, networkPacket.topicFilters());
+        .unsubscribe(client, message.topicFilters());
 
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newUnsubscribeAck(networkPacket.messageId(), ackReasonCodes));
+        .newUnsubscribeAck(message.messageId(), ackReasonCodes));
   }
 }

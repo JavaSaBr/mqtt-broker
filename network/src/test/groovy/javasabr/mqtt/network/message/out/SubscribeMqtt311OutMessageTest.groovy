@@ -22,7 +22,7 @@ class SubscribeMqtt311OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.messageId == 1
-        reader.topicFilters == topicFiltersObj311
+        reader.subscriptions == topicFiltersObj311
         reader.userProperties() == Array.empty(StringPair)
         reader.subscriptionId == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }

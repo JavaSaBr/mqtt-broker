@@ -3,7 +3,7 @@ package javasabr.mqtt.service.session.impl;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
@@ -11,7 +11,6 @@ import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
-import javasabr.rlib.functions.TriConsumer;
 import lombok.AllArgsConstructor;
 import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
@@ -81,7 +80,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   private final LockableArray<PendingPublish> pendingOutPublishes;
   private final LockableArray<PendingPublish> pendingInPublishes;
   private final AtomicInteger packetIdGenerator;
-  private final LockableArray<SubscribeTopicFilter> topicFilters;
+  private final LockableArray<Subscription> subscriptions;
 
   @Getter
   @Setter
@@ -92,7 +91,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
     this.pendingOutPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.pendingInPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.packetIdGenerator = new AtomicInteger(0);
-    this.topicFilters = ArrayFactory.stampedLockBasedArray(SubscribeTopicFilter.class);
+    this.subscriptions = ArrayFactory.stampedLockBasedArray(Subscription.class);
   }
 
   @Override
@@ -184,34 +183,25 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public <A, B> void forEachTopicFilter(A arg1, B arg2, TriConsumer<A, B, SubscribeTopicFilter> consumer) {
-    long stamp = topicFilters.readLock();
+  public void storeSubscription(Subscription subscription) {
+    long stamp = subscriptions.writeLock();
     try {
-      for (SubscribeTopicFilter topicFilter : topicFilters) {
-        consumer.accept(arg1, arg2, topicFilter);
-      }
+      subscriptions.add(subscription);
     } finally {
-      topicFilters.readUnlock(stamp);
+      subscriptions.writeUnlock(stamp);
     }
   }
 
   @Override
-  public void addSubscriber(SubscribeTopicFilter subscribe) {
-    topicFilters
-        .operations()
-        .inWriteLock(subscribe, Collection::add);
-  }
-
-  @Override
-  public void removeSubscriber(TopicFilter topicFilter) {
-    long stamp = topicFilters.writeLock();
+  public void removeSubscription(TopicFilter topicFilter) {
+    long stamp = subscriptions.writeLock();
     try {
-      int index = topicFilters.indexOf(SubscribeTopicFilter::getTopicFilter, topicFilter);
+      int index = subscriptions.indexOf(Subscription::topicFilter, topicFilter);
       if (index >= 0) {
-        topicFilters.remove(index);
+        subscriptions.remove(index);
       }
     } finally {
-      topicFilters.writeUnlock(stamp);
+      subscriptions.writeUnlock(stamp);
     }
   }
 

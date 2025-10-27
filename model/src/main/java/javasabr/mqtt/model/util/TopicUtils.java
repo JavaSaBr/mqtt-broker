@@ -7,18 +7,14 @@ import javasabr.rlib.common.util.StringUtils;
 
 public class TopicUtils {
 
-  private static final TopicFilter INVALID_TOPIC_FILTER = new TopicFilter();
-  private static final TopicName INVALID_TOPIC_NAME = new TopicName();
+  public static final TopicName INVALID_TOPIC_NAME = new TopicName();
   public static final TopicName EMPTY_TOPIC_NAME = new TopicName();
 
   private static final String SHARE_KEYWORD = "$share";
   private static final String DELIMITER = "/";
+
   public static final String MULTI_LEVEL_WILDCARD = "#";
   public static final String SINGLE_LEVEL_WILDCARD = "+";
-
-  public static boolean isInvalid(TopicFilter topicFilter) {
-    return topicFilter == INVALID_TOPIC_FILTER;
-  }
 
   public static boolean isInvalid(TopicName topicName) {
     return topicName == INVALID_TOPIC_NAME;
@@ -29,8 +25,8 @@ public class TopicUtils {
   }
 
   public static boolean hasWildcard(TopicFilter topicFilter) {
-    var topic = topicFilter.getRawTopic();
-    return topic.contains(SINGLE_LEVEL_WILDCARD) || topic.contains(MULTI_LEVEL_WILDCARD);
+    String rawTopic = topicFilter.rawTopic();
+    return rawTopic.contains(SINGLE_LEVEL_WILDCARD) || rawTopic.contains(MULTI_LEVEL_WILDCARD);
   }
 
   public static TopicName buildTopicName(String topicName) {
@@ -43,7 +39,7 @@ public class TopicUtils {
 
   public static TopicFilter buildTopicFilter(String topicFilter) {
     if (isInvalidTopicFilter(topicFilter)) {
-      return INVALID_TOPIC_FILTER;
+      return TopicFilter.INVALID_TOPIC_FILTER;
     } else if (isShared(topicFilter)) {
       return buildSharedTopicFilter(topicFilter);
     } else {
@@ -68,7 +64,7 @@ public class TopicUtils {
     int secondSlash = topicFilter.indexOf(DELIMITER, firstSlash);
     String group = topicFilter.substring(firstSlash, secondSlash);
     if (group.isEmpty()) {
-      return INVALID_TOPIC_FILTER;
+      return TopicFilter.INVALID_TOPIC_FILTER;
     }
     var realTopicFilter = topicFilter.substring(secondSlash + 1);
     return new SharedTopicFilter(realTopicFilter, group);

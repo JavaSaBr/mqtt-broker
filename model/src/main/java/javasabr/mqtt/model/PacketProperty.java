@@ -1,7 +1,7 @@
 package javasabr.mqtt.model;
 
 import java.util.stream.Stream;
-import javasabr.mqtt.model.data.type.PacketDataType;
+import javasabr.mqtt.model.data.type.MqttDataType;
 import javasabr.rlib.common.util.ClassUtils;
 import javasabr.rlib.common.util.ObjectUtils;
 import lombok.AccessLevel;
@@ -13,33 +13,33 @@ import org.jspecify.annotations.Nullable;
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum PacketProperty {
-  PAYLOAD_FORMAT_INDICATOR(0x01, PacketDataType.BYTE),
-  MESSAGE_EXPIRY_INTERVAL(0x02, PacketDataType.INTEGER),
-  CONTENT_TYPE(0x03, PacketDataType.UTF_8_STRING),
-  RESPONSE_TOPIC(0x08, PacketDataType.UTF_8_STRING),
-  CORRELATION_DATA(0x09, PacketDataType.BINARY),
-  SUBSCRIPTION_IDENTIFIER(0x0B, PacketDataType.MULTI_BYTE_INTEGER),
-  SESSION_EXPIRY_INTERVAL(0x11, PacketDataType.INTEGER),
-  ASSIGNED_CLIENT_IDENTIFIER(0x12, PacketDataType.UTF_8_STRING),
-  SERVER_KEEP_ALIVE(0x13, PacketDataType.SHORT),
-  AUTHENTICATION_METHOD(0x15, PacketDataType.UTF_8_STRING),
-  AUTHENTICATION_DATA(0x16, PacketDataType.BINARY),
-  REQUEST_PROBLEM_INFORMATION(0x17, PacketDataType.BYTE),
-  WILL_DELAY_INTERVAL(0x18, PacketDataType.INTEGER),
-  REQUEST_RESPONSE_INFORMATION(0x19, PacketDataType.BYTE),
-  RESPONSE_INFORMATION(0x1A, PacketDataType.UTF_8_STRING),
-  SERVER_REFERENCE(0x1C, PacketDataType.UTF_8_STRING),
-  REASON_STRING(0x1F, PacketDataType.UTF_8_STRING),
-  RECEIVE_MAXIMUM_PUBLISH(0x21, PacketDataType.SHORT),
-  TOPIC_ALIAS_MAXIMUM(0x22, PacketDataType.SHORT),
-  TOPIC_ALIAS(0x23, PacketDataType.SHORT),
-  MAXIMUM_QOS(0x24, PacketDataType.BYTE),
-  RETAIN_AVAILABLE(0x25, PacketDataType.BYTE),
-  USER_PROPERTY(0x26, PacketDataType.UTF_8_STRING_PAIR),
-  MAXIMUM_PACKET_SIZE(0x27, PacketDataType.INTEGER),
-  WILDCARD_SUBSCRIPTION_AVAILABLE(0x28, PacketDataType.BYTE),
-  SUBSCRIPTION_IDENTIFIER_AVAILABLE(0x29, PacketDataType.BYTE),
-  SHARED_SUBSCRIPTION_AVAILABLE(0x2A, PacketDataType.BYTE);
+  PAYLOAD_FORMAT_INDICATOR(0x01, MqttDataType.BYTE),
+  MESSAGE_EXPIRY_INTERVAL(0x02, MqttDataType.INTEGER),
+  CONTENT_TYPE(0x03, MqttDataType.UTF_8_STRING),
+  RESPONSE_TOPIC(0x08, MqttDataType.UTF_8_STRING),
+  CORRELATION_DATA(0x09, MqttDataType.BINARY),
+  SUBSCRIPTION_IDENTIFIER(0x0B, MqttDataType.MULTI_BYTE_INTEGER),
+  SESSION_EXPIRY_INTERVAL(0x11, MqttDataType.INTEGER),
+  ASSIGNED_CLIENT_IDENTIFIER(0x12, MqttDataType.UTF_8_STRING),
+  SERVER_KEEP_ALIVE(0x13, MqttDataType.SHORT),
+  AUTHENTICATION_METHOD(0x15, MqttDataType.UTF_8_STRING),
+  AUTHENTICATION_DATA(0x16, MqttDataType.BINARY),
+  REQUEST_PROBLEM_INFORMATION(0x17, MqttDataType.BYTE),
+  WILL_DELAY_INTERVAL(0x18, MqttDataType.INTEGER),
+  REQUEST_RESPONSE_INFORMATION(0x19, MqttDataType.BYTE),
+  RESPONSE_INFORMATION(0x1A, MqttDataType.UTF_8_STRING),
+  SERVER_REFERENCE(0x1C, MqttDataType.UTF_8_STRING),
+  REASON_STRING(0x1F, MqttDataType.UTF_8_STRING),
+  RECEIVE_MAXIMUM_PUBLISH(0x21, MqttDataType.SHORT),
+  TOPIC_ALIAS_MAXIMUM(0x22, MqttDataType.SHORT),
+  TOPIC_ALIAS(0x23, MqttDataType.SHORT),
+  MAXIMUM_QOS(0x24, MqttDataType.BYTE),
+  RETAIN_AVAILABLE(0x25, MqttDataType.BYTE),
+  USER_PROPERTY(0x26, MqttDataType.UTF_8_STRING_PAIR),
+  MAXIMUM_PACKET_SIZE(0x27, MqttDataType.INTEGER),
+  WILDCARD_SUBSCRIPTION_AVAILABLE(0x28, MqttDataType.BYTE),
+  SUBSCRIPTION_IDENTIFIER_AVAILABLE(0x29, MqttDataType.BYTE),
+  SHARED_SUBSCRIPTION_AVAILABLE(0x2A, MqttDataType.BYTE);
 
   private static final PacketProperty[] PROPERTIES;
 
@@ -71,16 +71,16 @@ public enum PacketProperty {
   @Getter
   byte id;
   @Getter
-  PacketDataType dataType;
+  MqttDataType dataType;
 
   @Nullable
   Object defaultValue;
 
-  PacketProperty(int id, PacketDataType dataType) {
+  PacketProperty(int id, MqttDataType dataType) {
     this(id, dataType, null);
   }
 
-  PacketProperty(int id, PacketDataType dataType, @Nullable Object defaultValue) {
+  PacketProperty(int id, MqttDataType dataType, @Nullable Object defaultValue) {
     this.id = (byte) id;
     this.dataType = dataType;
     this.defaultValue = defaultValue;

@@ -2,53 +2,60 @@ package javasabr.mqtt.model.subscriber;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import javasabr.mqtt.model.MqttUser;
+import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
+import lombok.AccessLevel;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
+@Accessors(fluent = true, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public final class SharedSubscriber implements Subscriber {
 
-  private static SingleSubscriber next(Array<SingleSubscriber> subscribers, int current) {
-    return subscribers.get(current % subscribers.size());
-  }
+  SharedTopicFilter topicFilter;
+  LockableArray<SingleSubscriber> subscribers;
+  AtomicInteger current;
 
-  private final SharedTopicFilter topicFilter;
-  private final LockableArray<SingleSubscriber> subscribers;
-  private final AtomicInteger current;
-
-  public SharedSubscriber(SubscribeTopicFilter topic) {
+  public SharedSubscriber(SharedTopicFilter topicFilter) {
     this.subscribers = ArrayFactory.stampedLockBasedArray(Subscriber.class);
     this.current = new AtomicInteger(0);
-    this.topicFilter = (SharedTopicFilter) topic.getTopicFilter();
+    this.topicFilter = topicFilter;
   }
 
-  public SingleSubscriber getSubscriber() {
-    //noinspection ConstantConditions
-    return subscribers
-        .operations()
-        .getInReadLock(current.getAndIncrement(), SharedSubscriber::next);
+  @Override
+  public SingleSubscriber resolveSingle() {
+    int nextIndex = current.incrementAndGet();
+    long stamp = subscribers.readLock();
+    try {
+      return next(subscribers, nextIndex);
+    } finally {
+      subscribers.readUnlock(stamp);
+    }
   }
 
-  public void addSubscriber(SingleSubscriber client) {
-    subscribers
-        .operations()
-        .inWriteLock(client, Collection::add);
+  public void addSubscriber(SingleSubscriber subscriber) {
+    subscribers.operations()
+        .inWriteLock(subscriber, Collection::add);
   }
 
-  public boolean removeSubscriber(MqttUser user) {
-    return subscribers
-        .operations()
-        .getInWriteLock(
-            user, (singleSubscribers, mqttClient) -> {
-              int index = singleSubscribers.indexOf(SingleSubscriber::getUser, mqttClient);
-              if (index >= 0) {
-                singleSubscribers.remove(index);
-                return true;
-              }
-              return false;
-            });
+  public boolean removeSubscriberWithOwner(SubscriptionOwner owner) {
+    if (subscribers.isEmpty()) {
+      return false;
+    }
+    long stamp = subscribers.writeLock();
+    try {
+      int index = subscribers.indexOf(SingleSubscriber::owner, owner);
+      if (index >= 0) {
+        subscribers.remove(index);
+        return true;
+      }
+    } finally {
+      subscribers.writeUnlock(stamp);
+    }
+    return false;
   }
 
   public int size() {
@@ -56,7 +63,11 @@ public final class SharedSubscriber implements Subscriber {
     return subscribers.size();
   }
 
-  public String getGroup() {
-    return topicFilter.getGroup();
+  public String group() {
+    return topicFilter.group();
+  }
+
+  private static SingleSubscriber next(Array<SingleSubscriber> subscribers, int current) {
+    return subscribers.get(current % subscribers.size());
   }
 }

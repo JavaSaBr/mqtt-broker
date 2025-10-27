@@ -1,12 +1,10 @@
 package javasabr.mqtt.service;
 
-import java.util.function.BiFunction;
-import javasabr.mqtt.model.ActionResult;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
 import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
@@ -19,8 +17,6 @@ import javasabr.rlib.collections.array.MutableArray;
  */
 public interface SubscriptionService {
 
-  boolean isValid(TopicName topicName);
-
   MqttClient resolveClient(Subscriber subscriber);
 
   default Array<SingleSubscriber> findSubscribers(TopicName topicName) {
@@ -30,39 +26,22 @@ public interface SubscriptionService {
   Array<SingleSubscriber> findSubscribersTo(MutableArray<SingleSubscriber> container, TopicName topicName);
 
   /**
-   * Runs function for each topic subscriber
+   * Subscribes MQTT client to listen to topics.
    *
-   * @param topicName topic name
-   * @param argument additional argument
-   * @param action function to run
-   * @return {@link ActionResult} of function
-   */
-  <A> ActionResult forEachTopicSubscriber(
-      TopicName topicName,
-      A argument,
-      BiFunction<SingleSubscriber, A, ActionResult> action);
-
-  /**
-   * Adds MQTT client to topic filter subscribers
-   *
-   * @param mqttClient MQTT client to be added
-   * @param topicFilters topic filters
+   * @param client MQTT client which requests subscriptions
+   * @param subscriptions the list of request to subscribe topics
    * @return array of subscribe ack reason codes
    */
-  Array<SubscribeAckReasonCode> subscribe(
-      MqttClient mqttClient,
-      Array<SubscribeTopicFilter> topicFilters);
+  Array<SubscribeAckReasonCode> subscribe(MqttClient client, Array<Subscription> subscriptions);
 
   /**
-   * Removes MQTT client from subscribers by array of topic names
+   * Removes MQTT client from listening to the topics.
    *
-   * @param mqttClient MQTT client to be removed
+   * @param client MQTT client to be removed
    * @param topicFilters topic filters
    * @return array of unsubscribe ack reason codes
    */
-  Array<UnsubscribeAckReasonCode> unsubscribe(
-      MqttClient mqttClient,
-      Array<TopicFilter> topicFilters);
+  Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient client, Array<TopicFilter> topicFilters);
 
   void cleanSubscriptions(MqttClient mqttClient, MqttSession mqttSession);
 

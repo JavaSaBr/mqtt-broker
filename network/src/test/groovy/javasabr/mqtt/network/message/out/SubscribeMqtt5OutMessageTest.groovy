@@ -22,7 +22,7 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.messageId == 1
-        reader.topicFilters == topicFiltersObj5
+        reader.subscriptions == topicFiltersObj5
         reader.userProperties() == userProperties
         reader.subscriptionId == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }

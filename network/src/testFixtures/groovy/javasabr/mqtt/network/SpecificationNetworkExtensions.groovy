@@ -1,7 +1,7 @@
 package javasabr.mqtt.network
 
 import javasabr.mqtt.model.PacketProperty
-import javasabr.mqtt.model.data.type.PacketDataType
+import javasabr.mqtt.model.data.type.MqttDataType
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.util.MqttDataUtils
@@ -56,7 +56,7 @@ class SpecificationNetworkExtensions extends Specification {
   static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> values) {
 
     switch (property.dataType()) {
-      case PacketDataType.UTF_8_STRING_PAIR: {
+      case MqttDataType.UTF_8_STRING_PAIR: {
         writer.writeStringPairProperties(self, property, values as Array<StringPair>)
         break
       }

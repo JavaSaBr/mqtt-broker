@@ -22,10 +22,10 @@ public class PublishReleaseMqttInMessageHandler
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      PublishReleaseMqttInMessage networkPacket) {
+      PublishReleaseMqttInMessage message) {
     MqttSession session = client.session();
     if (session != null) {
-      session.updateInPendingPacket(client, networkPacket);
+      session.updateInPendingPacket(client, message);
     }
   }
 }

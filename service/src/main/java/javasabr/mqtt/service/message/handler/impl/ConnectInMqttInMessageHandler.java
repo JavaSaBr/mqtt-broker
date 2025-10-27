@@ -23,6 +23,7 @@ import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -42,7 +43,6 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   AuthenticationService authenticationService;
   MqttSessionService sessionService;
   SubscriptionService subscriptionService;
-  MessageOutFactoryService messageOutFactoryService;
 
   public ConnectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
@@ -50,12 +50,11 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, ConnectMqttInMessage.class);
+    super(ExternalMqttClient.class, ConnectMqttInMessage.class, messageOutFactoryService);
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
     this.subscriptionService = subscriptionService;
-    this.messageOutFactoryService = messageOutFactoryService;
   }
 
   @Override
@@ -67,16 +66,14 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      ConnectMqttInMessage networkPacket) {
-
-    if (checkPacketException(client, networkPacket)) {
-      return;
-    }
-    resolveClientConnectionConfig(client, networkPacket);
+      ConnectMqttInMessage message) {
+    resolveClientConnectionConfig(client, message);
     authenticationService
-        .auth(networkPacket.username(), networkPacket.password())
-        .flatMap(ifTrue(client, networkPacket, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(client, connectAckReasonCode)))
-        .flatMap(ifTrue(client, networkPacket, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(client, connectAckReasonCode)))
+        .auth(message.username(), message.password())
+        .flatMap(ifTrue(client,
+            message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(client, connectAckReasonCode)))
+        .flatMap(ifTrue(client,
+            message, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(client, connectAckReasonCode)))
         .subscribe();
   }
 
@@ -224,19 +221,29 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     return true;
   }
 
-  private boolean checkPacketException(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
-    Exception exception = packet.exception();
+  @Override
+  protected boolean checkMessageException(
+      MqttConnection connection,
+      ExternalMqttClient client,
+      ConnectMqttInMessage message) {
+    Exception exception = message.exception();
     if (exception instanceof ConnectionRejectException cre) {
-      client.send(messageOutFactoryService
+      MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newConnectAck(client, cre.getReasonCode()));
+          .newConnectAck(client, cre.getReasonCode());
+      client
+          .sendWithFeedback(feedback)
+          .thenAccept(_ -> connection.close());
       return true;
     } else if (exception instanceof MalformedPacketMqttException) {
-      client.send(messageOutFactoryService
+      MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET));
+          .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET);
+      client
+          .sendWithFeedback(feedback)
+          .thenAccept(_ -> connection.close());
       return true;
     }
-    return false;
+    return super.checkMessageException(connection, client, message);
   }
 }

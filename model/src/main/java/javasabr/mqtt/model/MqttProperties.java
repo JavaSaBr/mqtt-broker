@@ -46,6 +46,7 @@ public interface MqttProperties {
   int TOPIC_ALIAS_NOT_SET = 0;
 
   int SUBSCRIPTION_ID_UNDEFINED = 0;
+  int MESSAGE_ID_UNDEFINED = -1;
 
   boolean SESSIONS_ENABLED_DEFAULT = true;
   boolean KEEP_ALIVE_ENABLED_DEFAULT = false;
