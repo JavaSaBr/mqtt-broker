@@ -3,7 +3,7 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import javasabr.mqtt.base.util.DebugUtils;
-import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.util.MqttDataUtils;
@@ -75,23 +75,23 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
         .put(propertiesBuffer);
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, boolean value) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, boolean value) {
     writeProperty(buffer, property, value ? 1 : 0);
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, boolean value, boolean def) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, boolean value, boolean def) {
     if (value != def) {
       writeProperty(buffer, property, value ? 1 : 0);
     }
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, long value, long def) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, long value, long def) {
     if (value != def) {
       writeProperty(buffer, property, value);
     }
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, long value) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, long value) {
     buffer.put(property.id());
     switch (property.dataType()) {
       case BYTE -> writeByte(buffer, (int) value);
@@ -104,7 +104,7 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
 
   public void writeProperty(
       ByteBuffer buffer,
-      PacketProperty property,
+      MqttMessageProperty property,
       String value,
       String def) {
     if (!def.equals(value)) {
@@ -112,35 +112,35 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
     }
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, StringPair value) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, StringPair value) {
     buffer.put(property.id());
     writeString(buffer, value.name());
     writeString(buffer, value.value());
   }
 
-  public void writeNotEmptyProperty(ByteBuffer buffer, PacketProperty property, String value) {
+  public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, String value) {
     if (!value.isEmpty()) {
       writeProperty(buffer, property, value);
     }
   }
 
-  public void writeNotEmptyProperty(ByteBuffer buffer, PacketProperty property, byte[] value) {
+  public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, byte[] value) {
     if (value.length > 0) {
       writeProperty(buffer, property, value);
     }
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, String value) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, String value) {
     buffer.put(property.id());
     writeString(buffer, value);
   }
 
-  public void writeProperty(ByteBuffer buffer, PacketProperty property, byte[] value) {
+  public void writeProperty(ByteBuffer buffer, MqttMessageProperty property, byte[] value) {
     buffer.put(property.id());
     writeBytes(buffer, value);
   }
 
-  public void writeStringPairProperties(ByteBuffer buffer, PacketProperty property, Array<StringPair> pairs) {
+  public void writeStringPairProperties(ByteBuffer buffer, MqttMessageProperty property, Array<StringPair> pairs) {
     if (pairs.isEmpty()) {
       return;
     }

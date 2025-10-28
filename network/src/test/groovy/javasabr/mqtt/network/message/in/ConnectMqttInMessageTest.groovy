@@ -1,8 +1,8 @@
 package javasabr.mqtt.network.message.in
 
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttVersion
-import javasabr.mqtt.model.PacketProperty
-import javasabr.mqtt.model.exception.MalformedPacketMqttException
+import javasabr.mqtt.model.exception.MalformedMqttProtocolException
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
@@ -36,15 +36,15 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
-          it.putProperty(PacketProperty.RECEIVE_MAXIMUM_PUBLISH, receiveMaxPublishes)
-          it.putProperty(PacketProperty.MAXIMUM_PACKET_SIZE, maxPacketSize)
-          it.putProperty(PacketProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaxValue)
-          it.putProperty(PacketProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation ? 1 : 0)
-          it.putProperty(PacketProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation ? 1 : 0)
-          it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
+          it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH, receiveMaxPublishes)
+          it.putProperty(MqttMessageProperty.MAXIMUM_PACKET_SIZE, maxPacketSize)
+          it.putProperty(MqttMessageProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaxValue)
+          it.putProperty(MqttMessageProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation ? 1 : 0)
+          it.putProperty(MqttMessageProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation ? 1 : 0)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putString("MQTT")
@@ -96,7 +96,7 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result
-        packet.exception() instanceof MalformedPacketMqttException
+        packet.exception() instanceof MalformedMqttProtocolException
     where:
         stringBytes << [
             // https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt

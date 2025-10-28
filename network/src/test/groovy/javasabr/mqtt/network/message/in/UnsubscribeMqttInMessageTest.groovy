@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.in
 
-import javasabr.mqtt.model.PacketProperty
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
@@ -18,9 +18,9 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.topicFilters.size() == 2
-        packet.topicFilters.get(0).toString() == topicFilter
-        packet.topicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters.size() == 2
+        packet.rawTopicFilters.get(0).toString() == topicFilter
+        packet.rawTopicFilters.get(1).toString() == topicFilter2
         packet.messageId == packetId
         packet.userProperties() == Array.empty()
   }
@@ -28,7 +28,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)
@@ -42,9 +42,9 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.topicFilters.size() == 2
-        packet.topicFilters.get(0).toString() == topicFilter
-        packet.topicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters.size() == 2
+        packet.rawTopicFilters.get(0).toString() == topicFilter
+        packet.rawTopicFilters.get(1).toString() == topicFilter2
         packet.messageId == packetId
         packet.userProperties() == userProperties
     when:
@@ -58,9 +58,9 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.topicFilters.size() == 2
-        packet.topicFilters.get(0).toString() == topicFilter
-        packet.topicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters.size() == 2
+        packet.rawTopicFilters.get(0).toString() == topicFilter
+        packet.rawTopicFilters.get(1).toString() == topicFilter2
         packet.messageId == packetId
         packet.userProperties() == Array.empty()
   }

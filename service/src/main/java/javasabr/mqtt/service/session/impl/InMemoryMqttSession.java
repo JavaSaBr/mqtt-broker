@@ -2,16 +2,16 @@ package javasabr.mqtt.service.session.impl;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
+import javasabr.mqtt.model.HasMessageId;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
-import javasabr.mqtt.network.message.HasMessageId;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
+import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
-import lombok.AllArgsConstructor;
 import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -25,20 +25,13 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true, chain = false)
 public class InMemoryMqttSession implements UnsafeMqttSession {
 
-  @Getter
-  @AllArgsConstructor
-  private static class PendingPublish {
-    private final PublishMqttInMessage publish;
-    private final PendingMessageHandler handler;
-    private final int packetId;
-  }
+  private record PendingPublish(Publish publish, PendingMessageHandler handler) {}
 
   private static void registerPublish(
-      PublishMqttInMessage publish,
+      Publish publish,
       PendingMessageHandler handler,
-      int packetId,
       LockableArray<PendingPublish> pendingPublishes) {
-    PendingPublish pendingPublish = new PendingPublish(publish, handler, packetId);
+    PendingPublish pendingPublish = new PendingPublish(publish, handler);
     pendingPublishes
         .operations()
         .inWriteLock(pendingPublish, Collection::add);
@@ -50,14 +43,14 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
 
-    int packetId = response.messageId();
+    int messageId = response.messageId();
     PendingPublish pendingPublish;
 
     long stamp = pendingPublishes.readLock();
     try {
       pendingPublish = pendingPublishes
           .iterations()
-          .findAny(packetId, (element, targetId) -> element.packetId == targetId);
+          .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId);
     } finally {
       pendingPublishes.readUnlock(stamp);
     }
@@ -67,8 +60,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
       return;
     }
 
-    var shouldBeRemoved = pendingPublish.handler.handleResponse(client, response);
-
+    boolean shouldBeRemoved = pendingPublish.handler.handleResponse(client, response);
     if (shouldBeRemoved) {
       pendingPublishes
           .operations()
@@ -95,13 +87,13 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public int nextPacketId() {
+  public int nextMessageId() {
 
     var nextId = packetIdGenerator.incrementAndGet();
 
     if (nextId >= MqttProperties.MAXIMUM_PACKET_ID) {
       packetIdGenerator.compareAndSet(nextId, 0);
-      return nextPacketId();
+      return nextMessageId();
     }
 
     return nextId;
@@ -113,13 +105,13 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void registerOutPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId) {
-    registerPublish(publish, handler, packetId, pendingOutPublishes);
+  public void registerOutPublish(Publish publish, PendingMessageHandler handler) {
+    registerPublish(publish, handler, pendingOutPublishes);
   }
 
   @Override
-  public void registerInPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId) {
-    registerPublish(publish, handler, packetId, pendingInPublishes);
+  public void registerInPublish(Publish publish, PendingMessageHandler handler) {
+    registerPublish(publish, handler, pendingInPublishes);
   }
 
   @Override
@@ -133,40 +125,38 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public boolean hasOutPending(int packetId) {
+  public boolean hasOutPending(int messageId) {
     long stamp = pendingOutPublishes.readLock();
     try {
       return pendingOutPublishes
           .iterations()
-          .findAny(packetId, (element, targetId) -> element.packetId == targetId) != null;
+          .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId) != null;
     } finally {
       pendingOutPublishes.readUnlock(stamp);
     }
   }
 
   @Override
-  public boolean hasInPending(int packetId) {
+  public boolean hasInPending(int messageId) {
     long stamp = pendingInPublishes.readLock();
     try {
       return pendingInPublishes
           .iterations()
-          .findAny(packetId, (element, targetId) -> element.packetId == targetId) != null;
+          .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId) != null;
     } finally {
       pendingInPublishes.readUnlock(stamp);
     }
   }
 
   @Override
-  public void resendPendingPackets(MqttClient mqttClient) {
+  public void resendPendingPackets(MqttClient client) {
     long stamp = pendingOutPublishes.readLock();
     try {
-      pendingOutPublishes
-          .iterations()
-          .forEach(
-              mqttClient, (pendingPublish, client) -> {
-                PendingMessageHandler handler = pendingPublish.handler;
-                handler.resend(client, pendingPublish.publish, pendingPublish.packetId);
-              });
+      for (PendingPublish pending : pendingOutPublishes) {
+        PendingMessageHandler handler = pending.handler;
+        Publish publish = pending.publish;
+        handler.resend(client, publish);
+      }
     } finally {
       pendingOutPublishes.readUnlock(stamp);
     }
@@ -203,6 +193,11 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
     } finally {
       subscriptions.writeUnlock(stamp);
     }
+  }
+
+  @Override
+  public Array<Subscription> storedSubscriptions() {
+    return subscriptions;
   }
 
   @Override

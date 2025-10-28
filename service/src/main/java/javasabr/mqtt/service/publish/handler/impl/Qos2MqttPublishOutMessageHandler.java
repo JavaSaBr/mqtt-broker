@@ -2,9 +2,9 @@ package javasabr.mqtt.service.publish.handler.impl;
 
 import static javasabr.mqtt.model.reason.code.PublishReleaseReasonCode.SUCCESS;
 
+import javasabr.mqtt.model.HasMessageId;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage;
 import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;

@@ -6,7 +6,7 @@ import javasabr.mqtt.broker.application.IntegrationSpecification
 import javasabr.mqtt.model.ActionResult
 import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.service.ClientIdRegistry
-import javasabr.mqtt.service.impl.SimpleSubscriptionService
+import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import org.spockframework.util.Pair
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
@@ -23,7 +23,7 @@ class SubscribtionServiceTest extends IntegrationSpecification {
   ClientIdRegistry clientIdRegistry
 
   @Autowired
-  SimpleSubscriptionService subscriptionService
+  InMemorySubscriptionService subscriptionService
 
   def "should clear/restore topic subscribers after disconnect/reconnect"() {
     given:

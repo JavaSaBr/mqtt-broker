@@ -12,7 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum PacketProperty {
+public enum MqttMessageProperty {
   PAYLOAD_FORMAT_INDICATOR(0x01, MqttDataType.BYTE),
   MESSAGE_EXPIRY_INTERVAL(0x02, MqttDataType.INTEGER),
   CONTENT_TYPE(0x03, MqttDataType.UTF_8_STRING),
@@ -41,17 +41,17 @@ public enum PacketProperty {
   SUBSCRIPTION_IDENTIFIER_AVAILABLE(0x29, MqttDataType.BYTE),
   SHARED_SUBSCRIPTION_AVAILABLE(0x2A, MqttDataType.BYTE);
 
-  private static final PacketProperty[] PROPERTIES;
+  private static final MqttMessageProperty[] PROPERTIES;
 
   static {
 
     int maxId = Stream
         .of(values())
-        .mapToInt(PacketProperty::id)
+        .mapToInt(MqttMessageProperty::id)
         .max()
         .orElse(0);
 
-    var result = new PacketProperty[maxId + 1];
+    var result = new MqttMessageProperty[maxId + 1];
 
     Stream
         .of(values())
@@ -60,7 +60,7 @@ public enum PacketProperty {
     PROPERTIES = result;
   }
 
-  public static PacketProperty byId(int id) {
+  public static MqttMessageProperty byId(int id) {
     if (id < 0 || id >= PROPERTIES.length) {
       throw new IllegalArgumentException("Unknown property with id: " + id);
     } else {
@@ -76,11 +76,11 @@ public enum PacketProperty {
   @Nullable
   Object defaultValue;
 
-  PacketProperty(int id, MqttDataType dataType) {
+  MqttMessageProperty(int id, MqttDataType dataType) {
     this(id, dataType, null);
   }
 
-  PacketProperty(int id, MqttDataType dataType, @Nullable Object defaultValue) {
+  MqttMessageProperty(int id, MqttDataType dataType, @Nullable Object defaultValue) {
     this.id = (byte) id;
     this.dataType = dataType;
     this.defaultValue = defaultValue;

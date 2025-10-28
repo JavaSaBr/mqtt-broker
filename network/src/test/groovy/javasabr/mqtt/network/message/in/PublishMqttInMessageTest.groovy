@@ -1,7 +1,7 @@
 package javasabr.mqtt.network.message.in
 
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.rlib.collections.array.Array
@@ -26,7 +26,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         packet.qos == QoS.AT_LEAST_ONCE
         !packet.duplicate
         packet.retained
-        packet.responseTopic == ""
+        packet.rawResponseTopicName == ""
         packet.subscriptionIds == IntArray.empty()
         packet.contentType == ""
         packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
@@ -34,21 +34,21 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         packet.messageId == packetId
         packet.userProperties() == Array.empty()
         packet.messageExpiryInterval == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
-        packet.topicAlias == MqttProperties.TOPIC_ALIAS_DEFAULT
-        packet.payloadFormatIndicator == MqttProperties.PAYLOAD_FORMAT_INDICATOR_DEFAULT
+        packet.topicAlias == MqttProperties.TOPIC_ALIAS_UNDEFINED
+        packet.payloadFormat == MqttProperties.PAYLOAD_FORMAT_INDICATOR_DEFAULT
   }
 
   def "should read packet correctly as mqtt 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.PAYLOAD_FORMAT_INDICATOR, 1)
-          it.putProperty(PacketProperty.MESSAGE_EXPIRY_INTERVAL, messageExpiryInterval)
-          it.putProperty(PacketProperty.TOPIC_ALIAS, topicAlias)
-          it.putProperty(PacketProperty.RESPONSE_TOPIC, responseTopic)
-          it.putProperty(PacketProperty.CORRELATION_DATA, correlationData)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
-          it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER, subscriptionIds)
-          it.putProperty(PacketProperty.CONTENT_TYPE, contentType)
+          it.putProperty(MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR, 1)
+          it.putProperty(MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL, messageExpiryInterval)
+          it.putProperty(MqttMessageProperty.TOPIC_ALIAS, topicAlias)
+          it.putProperty(MqttMessageProperty.RESPONSE_TOPIC, responseTopic)
+          it.putProperty(MqttMessageProperty.CORRELATION_DATA, correlationData)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, subscriptionIds)
+          it.putProperty(MqttMessageProperty.CONTENT_TYPE, contentType)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putString(publishTopic.toString())
@@ -65,7 +65,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         packet.qos == QoS.AT_LEAST_ONCE
         !packet.duplicate
         packet.retained
-        packet.responseTopic == responseTopic
+        packet.rawResponseTopicName == responseTopic
         packet.subscriptionIds == subscriptionIds
         packet.contentType == contentType
         packet.correlationData == correlationData
@@ -74,7 +74,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         packet.userProperties() == userProperties
         packet.messageExpiryInterval == messageExpiryInterval
         packet.topicAlias == topicAlias
-        packet.payloadFormatIndicator
+        packet.payloadFormat
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putString(publishTopic.toString())
@@ -89,7 +89,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         packet.qos == QoS.AT_LEAST_ONCE
         !packet.duplicate
         packet.retained
-        packet.responseTopic == ""
+        packet.rawResponseTopicName == ""
         packet.subscriptionIds == IntArray.empty()
         packet.contentType == ""
         packet.correlationData == ArrayUtils.EMPTY_BYTE_ARRAY
@@ -97,7 +97,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         packet.messageId == packetId
         packet.userProperties() == Array.empty(StringPair)
         packet.messageExpiryInterval == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
-        packet.topicAlias == MqttProperties.TOPIC_ALIAS_DEFAULT
-        packet.payloadFormatIndicator == MqttProperties.PAYLOAD_FORMAT_INDICATOR_DEFAULT
+        packet.topicAlias == MqttProperties.TOPIC_ALIAS_UNDEFINED
+        packet.payloadFormat == MqttProperties.PAYLOAD_FORMAT_INDICATOR_DEFAULT
   }
 }

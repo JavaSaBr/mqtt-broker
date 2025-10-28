@@ -27,7 +27,6 @@ public abstract class TrackableMqttInMessage extends MqttInMessage {
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
     messageId = readShortUnsigned(buffer);
   }
 }

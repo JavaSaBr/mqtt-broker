@@ -7,15 +7,16 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.common.ThreadSafe;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class TopicTree {
+public class ConcurrentTopicTree implements ThreadSafe {
 
   TopicNode rootNode;
 
-  public TopicTree() {
+  public ConcurrentTopicTree() {
     this.rootNode = new TopicNode();
   }
 

@@ -4,13 +4,13 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
-import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
 import javasabr.mqtt.model.subscribtion.RequestedRawSubscription;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
@@ -36,7 +36,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
     DebugUtils.registerIncludedFields("subscriptions");
   }
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by a Variable Byte Integer representing the identifier of the subscription. The Subscription
         Identifier can have the value of 1 to 268,435,455. It is a Protocol Error if the Subscription Identifier has a
@@ -47,12 +47,12 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
         property is
         not specified, then the absence of a Subscription Identifier is stored with the subscription.
        */
-      PacketProperty.SUBSCRIPTION_IDENTIFIER,
+      MqttMessageProperty.SUBSCRIPTION_IDENTIFIER,
       /*
         The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
         name is allowed to appear more than once.
        */
-      PacketProperty.USER_PROPERTY);
+      MqttMessageProperty.USER_PROPERTY);
 
   final MutableArray<RequestedRawSubscription> subscriptions;
 
@@ -79,7 +79,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (buffer.remaining() < 1) {
-      throw new MalformedPacketMqttException("No any topic filters");
+      throw new MalformedMqttProtocolException("No any topic filters");
     }
 
     MqttServerConnectionConfig severConnConfig = connection.serverConnectionConfig();
@@ -107,7 +107,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
       QoS qos = QoS.of(qosLevel);
       if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
-        throw new MalformedPacketMqttException("Unsupported qos or retain handling");
+        throw new MalformedMqttProtocolException("Unsupported qos or retain handling");
       }
 
       subscriptions.add(new RequestedRawSubscription(
@@ -120,12 +120,12 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, long value) {
+  protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
       case SUBSCRIPTION_IDENTIFIER -> subscriptionId = (int) value;
       default -> unexpectedProperty(property);
@@ -139,11 +139,11 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   private static void validateMqtt311Options(int options) {
     // for MQTT 3.1.1 these bits must be zero
     if ((options & 0b0000_0100) != 0) {
-      throw new MalformedPacketMqttException("No local option is not available on this protocol level");
+      throw new MalformedMqttProtocolException("No local option is not available on this protocol level");
     } else if ((options & 0b0000_1000) != 0) {
-      throw new MalformedPacketMqttException("Retain as published option is not available on this protocol level");
+      throw new MalformedMqttProtocolException("Retain as published option is not available on this protocol level");
     } else if (((options & 0b0011_0000) >> 4) != 0) {
-      throw new MalformedPacketMqttException("Retain level option is not available on this protocol level");
+      throw new MalformedMqttProtocolException("Retain level option is not available on this protocol level");
     }
   }
 }

@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.out;
 
-import javasabr.mqtt.network.message.HasMessageId;
+import javasabr.mqtt.model.HasMessageId;
 import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -117,7 +117,7 @@ public abstract class MqttMessageOutFactory {
       Array<StringPair> userProperties);
 
   public abstract MqttOutMessage newPublishAck(
-      int packetId,
+      int messageId,
       PublishAckReasonCode reasonCode,
       String reason,
       Array<StringPair> userProperties);

@@ -97,11 +97,11 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newPublishAck(
-      int packetId,
+      int messageId,
       PublishAckReasonCode reasonCode,
       String reason,
       Array<StringPair> userProperties) {
-    return new PublishAckMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishAckMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package javasabr.mqtt.model;
 
 public record MqttClientConnectionConfig(
+    MqttServerConnectionConfig server,
     QoS maxQos,
     MqttVersion mqttVersion,
     long sessionExpiryInterval,
@@ -9,9 +10,4 @@ public record MqttClientConnectionConfig(
     int topicAliasMaxValue,
     int keepAlive,
     boolean requestResponseInformation,
-    boolean requestProblemInformation,
-    boolean sessionsEnabled,
-    boolean retainAvailable,
-    boolean wildcardSubscriptionAvailable,
-    boolean subscriptionIdAvailable,
-    boolean sharedSubscriptionAvailable) {}
+    boolean requestProblemInformation) {}

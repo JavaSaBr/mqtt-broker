@@ -1,7 +1,7 @@
 package javasabr.mqtt.network.message.in
 
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.PacketProperty
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.rlib.collections.array.Array
@@ -42,8 +42,8 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.SUBSCRIPTION_IDENTIFIER, subscriptionId)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, subscriptionId)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(packetId)

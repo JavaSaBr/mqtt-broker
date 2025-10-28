@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
+import javasabr.mqtt.model.HasMessageId;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;

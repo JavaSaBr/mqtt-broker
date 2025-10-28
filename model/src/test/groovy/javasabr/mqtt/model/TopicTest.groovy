@@ -1,6 +1,6 @@
 package javasabr.mqtt.model
 
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
+
 import spock.lang.Specification
 import spock.lang.Unroll
 

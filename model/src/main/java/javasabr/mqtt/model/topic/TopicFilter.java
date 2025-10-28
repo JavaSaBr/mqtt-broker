@@ -1,19 +1,36 @@
 package javasabr.mqtt.model.topic;
 
-import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
-@NoArgsConstructor
+@Getter
+@Accessors(fluent = true)
+@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class TopicFilter extends AbstractTopic {
 
-  public static final TopicFilter INVALID_TOPIC_FILTER = new TopicFilter() {
+  public static final String MULTI_LEVEL_WILDCARD = "#";
+  public static final char MULTI_LEVEL_WILDCARD_CHAR = '#';
+  public static final String SINGLE_LEVEL_WILDCARD = "+";
+  public static final char SINGLE_LEVEL_WILDCARD_CHAR = '+';
+
+  public static final TopicFilter INVALID_TOPIC_FILTER = new TopicFilter("$invalid$") {
     @Override
     public boolean isInvalid() {
       return true;
     }
   };
 
-  public TopicFilter(String topicFilter) {
-    super(topicFilter);
+  boolean wildcard;
+
+  public TopicFilter(String rawTopicFilter) {
+    super(rawTopicFilter);
+    this.wildcard = rawTopicFilter.contains(SINGLE_LEVEL_WILDCARD) || rawTopicFilter.contains(MULTI_LEVEL_WILDCARD);
+  }
+
+  public static TopicFilter valueOf(String rawTopicFilter) {
+    return new TopicFilter(rawTopicFilter);
   }
 }
 

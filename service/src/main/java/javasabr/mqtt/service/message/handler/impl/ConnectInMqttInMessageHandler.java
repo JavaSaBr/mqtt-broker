@@ -15,7 +15,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
@@ -158,6 +158,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
                              : Math.min(packet.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
 
     connection.configure(new MqttClientConnectionConfig(
+        serverConfig,
         serverConfig.maxQos(),
         packet.mqttVersion(),
         sessionExpiryInterval,
@@ -166,12 +167,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
         topicAliasMaxValue,
         keepAlive,
         packet.requestResponseInformation(),
-        packet.requestProblemInformation(),
-        serverConfig.sessionsEnabled(),
-        serverConfig.retainAvailable(),
-        serverConfig.wildcardSubscriptionAvailable(),
-        serverConfig.subscriptionIdAvailable(),
-        serverConfig.sharedSubscriptionAvailable()));
+        packet.requestProblemInformation()));
   }
 
   private Mono<Boolean> onConnected(
@@ -235,7 +231,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
           .sendWithFeedback(feedback)
           .thenAccept(_ -> connection.close());
       return true;
-    } else if (exception instanceof MalformedPacketMqttException) {
+    } else if (exception instanceof MalformedMqttProtocolException) {
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
           .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET);

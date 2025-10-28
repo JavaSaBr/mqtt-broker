@@ -1,19 +1,22 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
+import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.HasMessageId;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqttPublishOutMessageHandler<ExternalMqttClient> {
+public abstract class PersistedMqttPublishOutMessageHandler extends
+    AbstractMqttPublishOutMessageHandler<ExternalMqttClient> {
 
   PendingMessageHandler pendingMessageHandler;
 
@@ -27,27 +30,40 @@ public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqtt
         return handleReceivedResponse(client, response);
       }
       @Override
-      public void resend(MqttClient client, PublishMqttInMessage packet, int packetId) {
-        tryToDeliverAgain(client, packet, packetId);
+      public void resend(MqttClient client, Publish publish) {
+        tryToDeliverAgain(client, publish);
       }
     };
   }
 
+  @Nullable
   @Override
-  protected PublishHandlingResult handleImpl(PublishMqttInMessage packet, ExternalMqttClient client) {
+  protected Publish reconstruct(MqttClient client, Publish original) {
+    MqttSession session = client.session();
+    if (session == null) {
+      return null;
+    }
+    return original.with(
+        // generate new uniq packet id per client
+        session.nextMessageId(),
+        qos(),
+        false,
+        MqttProperties.TOPIC_ALIAS_UNDEFINED);
+  }
+
+  @Override
+  protected PublishHandlingResult handleImpl(Publish publish, ExternalMqttClient client) {
 
     MqttSession session = client.session();
     if (session == null) {
       return PublishHandlingResult.SKIPPED;
     }
 
-    // generate new uniq packet id per client
-    int packetId = session.nextPacketId();
     // register waiting async response
-    session.registerOutPublish(packet, pendingMessageHandler, packetId);
+    session.registerOutPublish(publish, pendingMessageHandler);
 
     // send publish
-    startDelivering(client, packet, packetId, false);
+    startDelivering(client, publish);
     return PublishHandlingResult.SUCCESS;
   }
 
@@ -55,7 +71,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends AbstractMqtt
     return false;
   }
 
-  protected void tryToDeliverAgain(MqttClient client, PublishMqttInMessage packet, int messageId) {
-    startDelivering(client, packet, messageId, true);
+  protected void tryToDeliverAgain(MqttClient client, Publish publish) {
+    startDelivering(client, publish.withDuplicated());
   }
 }

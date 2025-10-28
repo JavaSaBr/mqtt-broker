@@ -24,11 +24,12 @@ import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
+import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
+import javasabr.mqtt.service.impl.InMemorySubscriptionService;
 import javasabr.mqtt.service.impl.SimpleAuthenticationService;
-import javasabr.mqtt.service.impl.SimpleSubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
@@ -96,8 +97,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService(TopicService topicService) {
-    return new SimpleSubscriptionService(topicService);
+  SubscriptionService subscriptionService() {
+    return new InMemorySubscriptionService();
   }
 
   @Bean
@@ -114,6 +115,11 @@ public class MqttBrokerSpringConfig {
   MessageOutFactoryService mqttMessageOutFactoryService(
       Collection<? extends MqttMessageOutFactory> knownFactories) {
     return new DefaultMessageOutFactoryService(knownFactories);
+  }
+
+  @Bean
+  TopicService topicService() {
+    return new DefaultTopicService();
   }
 
   @Bean
@@ -144,8 +150,12 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttInMessageHandler publishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishMqttInMessageHandler(publishReceivingService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      TopicService topicService) {
+    return new PublishMqttInMessageHandler(
+        publishReceivingService,
+        messageOutFactoryService,
+        topicService);
   }
 
   @Bean
@@ -174,8 +184,12 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttInMessageHandler unsubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new UnsubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      TopicService topicService) {
+    return new UnsubscribeMqttInMessageHandler(
+        subscriptionService,
+        messageOutFactoryService,
+        topicService);
   }
 
   @Bean

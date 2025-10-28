@@ -6,7 +6,6 @@ import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage

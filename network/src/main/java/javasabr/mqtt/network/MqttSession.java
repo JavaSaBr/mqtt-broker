@@ -1,9 +1,9 @@
 package javasabr.mqtt.network;
 
+import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
-import javasabr.mqtt.network.message.HasMessageId;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.rlib.collections.array.Array;
 
 public interface MqttSession {
@@ -26,12 +26,12 @@ public interface MqttSession {
      */
     boolean handleResponse(MqttClient client, HasMessageId response);
 
-    default void resend(MqttClient client, PublishMqttInMessage packet, int packetId) {}
+    default void resend(MqttClient client, Publish publish) {}
   }
 
   String clientId();
 
-  int nextPacketId();
+  int nextMessageId();
 
   /**
    * @return the expiration time in ms or -1 if it should not be expired now.
@@ -44,13 +44,13 @@ public interface MqttSession {
 
   boolean hasInPending();
 
-  boolean hasInPending(int packetId);
+  boolean hasInPending(int messageId);
 
-  boolean hasOutPending(int packetId);
+  boolean hasOutPending(int messageId);
 
-  void registerOutPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId);
+  void registerOutPublish(Publish publish, PendingMessageHandler handler);
 
-  void registerInPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId);
+  void registerInPublish(Publish publish, PendingMessageHandler handler);
 
   void updateOutPendingPacket(MqttClient client, HasMessageId response);
 

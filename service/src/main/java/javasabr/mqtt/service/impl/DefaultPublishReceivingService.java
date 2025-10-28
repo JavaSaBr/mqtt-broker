@@ -2,8 +2,8 @@ package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import lombok.AccessLevel;
@@ -44,7 +44,7 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
   }
 
   @Override
-  public void processReceivedPublish(MqttClient client, PublishMqttInMessage publish) {
+  public void processReceivedPublish(MqttClient client, Publish publish) {
     QoS qos = publish.qos();
     try {
       //noinspection DataFlowIssue

@@ -7,7 +7,6 @@ import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.model.util.TopicUtils;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.collections.array.MutableArray;
@@ -22,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 @Getter(AccessLevel.PACKAGE)
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TopicNode extends TopicTreeBase {
+class TopicNode extends TopicTreeBase {
 
   private final static Supplier<TopicNode> TOPIC_NODE_FACTORY = TopicNode::new;
 
@@ -76,7 +75,7 @@ public class TopicNode extends TopicTreeBase {
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-    TopicNode topicNode = childNode(TopicUtils.SINGLE_LEVEL_WILDCARD);
+    TopicNode topicNode = childNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
     if (topicNode == null) {
       return;
     }
@@ -88,7 +87,7 @@ public class TopicNode extends TopicTreeBase {
   }
 
   private void multiWildcardTopicMatch(MutableArray<SingleSubscriber> result) {
-    TopicNode topicNode = childNode(TopicUtils.MULTI_LEVEL_WILDCARD);
+    TopicNode topicNode = childNode(TopicFilter.MULTI_LEVEL_WILDCARD);
     if (topicNode != null) {
       appendSubscribersTo(result, topicNode);
     }

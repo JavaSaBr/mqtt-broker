@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.handler.client;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.network.impl.AbstractMqttClient;
@@ -44,9 +45,10 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
 
     if (session != null) {
       subscriptionService.cleanSubscriptions(client, session);
-      MqttClientConnectionConfig connectionConfig = client.connectionConfig();
-      if (connectionConfig.sessionsEnabled()) {
-        asyncActions = sessionService.store(clientId, session, connectionConfig.sessionExpiryInterval());
+      MqttClientConnectionConfig clientConfig = client.connectionConfig();
+      MqttServerConnectionConfig serverConfig = clientConfig.server();
+      if (serverConfig.sessionsEnabled()) {
+        asyncActions = sessionService.store(clientId, session, clientConfig.sessionExpiryInterval());
         client.session(null);
       }
     }

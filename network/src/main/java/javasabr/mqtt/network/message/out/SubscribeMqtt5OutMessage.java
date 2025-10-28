@@ -3,12 +3,12 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
@@ -20,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeMqtt5OutMessage extends SubscribeMqtt311OutMessage {
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by a Variable Byte Integer representing the identifier of the subscription. The Subscription
         Identifier can have the value of 1 to 268,435,455. It is a Protocol Error if the Subscription Identifier has a
@@ -31,44 +31,45 @@ public class SubscribeMqtt5OutMessage extends SubscribeMqtt311OutMessage {
         property is
         not specified, then the absence of a Subscription Identifier is stored with the subscription.
        */
-      PacketProperty.SUBSCRIPTION_IDENTIFIER,
+      MqttMessageProperty.SUBSCRIPTION_IDENTIFIER,
       /*
         The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
         name is allowed to appear more than once.
        */
-      PacketProperty.USER_PROPERTY);
+      MqttMessageProperty.USER_PROPERTY);
 
   // properties
   Array<StringPair> userProperties;
   int subscriptionId;
 
-  public SubscribeMqtt5OutMessage(Array<SubscribeTopicFilter> topicFilters, int messageId) {
-    this(topicFilters, messageId, Array.empty(StringPair.class), MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
+  public SubscribeMqtt5OutMessage(int messageId, Array<Subscription> subscriptions) {
+    this(messageId, subscriptions, Array.empty(StringPair.class), MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
   }
 
   public SubscribeMqtt5OutMessage(
-      Array<SubscribeTopicFilter> topicFilters,
       int messageId,
+      Array<Subscription> subscriptions,
       Array<StringPair> userProperties,
       int subscriptionId) {
-    super(topicFilters, messageId);
+    super(messageId, subscriptions);
     this.userProperties = userProperties;
     this.subscriptionId = subscriptionId;
   }
 
-  protected int buildSubscriptionOptions(SubscribeTopicFilter topicFilter) {
+  @Override
+  protected int buildSubscriptionOptions(Subscription subscription) {
 
-    SubscribeRetainHandling retainHandling = topicFilter.getRetainHandling();
-    QoS qos = topicFilter.getQos();
+    SubscribeRetainHandling retainHandling = subscription.retainHandling();
+    QoS qos = subscription.qos();
 
-    var subscriptionOptions = 0;
+    int subscriptionOptions = 0;
     subscriptionOptions |= retainHandling.ordinal() << 4;
 
-    if (topicFilter.isRetainAsPublished()) {
+    if (subscription.retainAsPublished()) {
       subscriptionOptions |= 0b0000_1000;
     }
 
-    if (topicFilter.isNoLocal()) {
+    if (subscription.noLocal()) {
       subscriptionOptions |= 0b0000_0100;
     }
 
@@ -85,10 +86,10 @@ public class SubscribeMqtt5OutMessage extends SubscribeMqtt311OutMessage {
   @Override
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901164
-    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+    writeStringPairProperties(buffer, MqttMessageProperty.USER_PROPERTY, userProperties);
     writeProperty(
         buffer,
-        PacketProperty.SUBSCRIPTION_IDENTIFIER,
+        MqttMessageProperty.SUBSCRIPTION_IDENTIFIER,
         subscriptionId,
         MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
   }

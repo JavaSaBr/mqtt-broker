@@ -36,8 +36,8 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         reader.topicName == publishTopic
         reader.userProperties() == userProperties
         reader.topicAlias == topicAlias
-        !reader.payloadFormatIndicator
-        reader.responseTopic == responseTopic
+        !reader.payloadFormat
+        reader.rawResponseTopicName == responseTopic
         reader.correlationData == correlationData
     when:
         packet = new PublishMqtt5OutMessage(
@@ -69,8 +69,8 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         reader.topicName == publishTopic
         reader.userProperties() == userProperties
         reader.topicAlias == topicAlias
-        reader.payloadFormatIndicator
-        reader.responseTopic == responseTopic
+        reader.payloadFormat
+        reader.rawResponseTopicName == responseTopic
         reader.correlationData == correlationData
   }
 }

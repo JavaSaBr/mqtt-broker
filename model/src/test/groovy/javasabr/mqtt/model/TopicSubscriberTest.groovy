@@ -1,6 +1,6 @@
 package javasabr.mqtt.model
 
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
+
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification

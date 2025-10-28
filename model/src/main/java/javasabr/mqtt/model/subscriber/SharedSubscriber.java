@@ -64,7 +64,7 @@ public final class SharedSubscriber implements Subscriber {
   }
 
   public String group() {
-    return topicFilter.group();
+    return topicFilter.shareName();
   }
 
   private static SingleSubscriber next(Array<SingleSubscriber> subscribers, int current) {

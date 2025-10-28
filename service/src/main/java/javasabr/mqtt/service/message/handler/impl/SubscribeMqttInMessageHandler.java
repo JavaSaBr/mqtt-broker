@@ -10,6 +10,7 @@ import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.subscribtion.RequestedRawSubscription;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
@@ -57,7 +58,7 @@ public class SubscribeMqttInMessageHandler extends
       SubscribeMqttInMessage message) {
 
     Array<RequestedRawSubscription> rawSubscriptions = message.subscriptions();
-    Array<Subscription> subscriptions = transformSubscriptions(rawSubscriptions);
+    Array<Subscription> subscriptions = transformSubscriptions(client, rawSubscriptions);
 
     MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(client);
     Array<SubscribeAckReasonCode> ackReasonCodes = subscriptionService
@@ -85,13 +86,13 @@ public class SubscribeMqttInMessageHandler extends
     }
   }
 
-  private Array<Subscription> transformSubscriptions(Array<RequestedRawSubscription> rawSubscriptions) {
+  private Array<Subscription> transformSubscriptions(MqttClient client, Array<RequestedRawSubscription> rawSubscriptions) {
     MutableArray<Subscription> subscriptions =
         ArrayFactory.mutableArray(Subscription.class, rawSubscriptions.size());
 
     for (RequestedRawSubscription subscription : rawSubscriptions) {
       String rawTopicFilter = subscription.topicFilter();
-      TopicFilter topicFilter = topicService.createTopicFilter(rawTopicFilter);
+      TopicFilter topicFilter = topicService.createTopicFilter(client, rawTopicFilter);
       subscriptions.add(new Subscription(
           topicFilter,
           subscription.qos(),

@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class TopicTreeBase {
+abstract class TopicTreeBase {
 
   protected static void addSubscriber(
       LockableArray<Subscriber> subscribers,
@@ -43,7 +43,7 @@ public abstract class TopicTreeBase {
       Subscription subscription,
       SharedTopicFilter sharedTopicFilter) {
 
-    String group = sharedTopicFilter.group();
+    String group = sharedTopicFilter.shareName();
     SharedSubscriber sharedSubscriber = (SharedSubscriber) subscribers
         .iterations()
         .findAny(group, TopicTreeBase::isSharedSubscriberWithGroup);
@@ -101,7 +101,7 @@ public abstract class TopicTreeBase {
       LockableArray<Subscriber> subscribers,
       SubscriptionOwner owner,
       SharedTopicFilter sharedTopicFilter) {
-    String group = sharedTopicFilter.group();
+    String group = sharedTopicFilter.shareName();
     SharedSubscriber sharedSubscriber = (SharedSubscriber) subscribers
         .iterations()
         .findAny(group, TopicTreeBase::isSharedSubscriberWithGroup);

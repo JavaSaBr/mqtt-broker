@@ -4,18 +4,19 @@ import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCR
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscribtion.Subscription;
+import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.model.topic.tree.TopicTree;
+import javasabr.mqtt.model.topic.tree.ConcurrentTopicTree;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.TopicService;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -24,18 +25,16 @@ import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 
 /**
- * Simple subscription service
+ * In memory subscription service based on {@link ConcurrentTopicTree}
  */
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SimpleSubscriptionService implements SubscriptionService {
+public class InMemorySubscriptionService implements SubscriptionService {
 
-  TopicService topicService;
-  TopicTree topicTree;
+  ConcurrentTopicTree topicTree;
 
-  public SimpleSubscriptionService(TopicService topicService) {
-    this.topicService = topicService;
-    this.topicTree = new TopicTree();
+  public InMemorySubscriptionService() {
+    this.topicTree = new ConcurrentTopicTree();
   }
 
   @Override
@@ -80,13 +79,14 @@ public class SimpleSubscriptionService implements SubscriptionService {
   }
 
   private SubscribeAckReasonCode addSubscription(MqttClient client, MqttSession session, Subscription subscription) {
-    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
+    MqttClientConnectionConfig clientConfig = client.connectionConfig();
+    MqttServerConnectionConfig serverConfig = clientConfig.server();
     TopicFilter topicFilter = subscription.topicFilter();
-    if (topicService.isInvalid(topicFilter)) {
+    if (topicFilter.isInvalid()) {
       return SubscribeAckReasonCode.TOPIC_FILTER_INVALID;
-    } else if (!connectionConfig.sharedSubscriptionAvailable() && topicService.isShared(topicFilter)) {
+    } else if (!serverConfig.sharedSubscriptionAvailable() && topicFilter instanceof SharedTopicFilter) {
       return SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
-    } else if (!connectionConfig.wildcardSubscriptionAvailable() && topicService.hasWildcard(topicFilter)) {
+    } else if (!serverConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
       return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     }
     session.storeSubscription(subscription);
@@ -119,7 +119,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
   }
 
   private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttSession session, TopicFilter topicFilter) {
-    if (topicService.isInvalid(topicFilter)) {
+    if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
     } else if (topicTree.unsubscribe(client, topicFilter)) {
       session.removeSubscription(topicFilter);

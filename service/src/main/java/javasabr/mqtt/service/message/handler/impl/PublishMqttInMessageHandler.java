@@ -1,24 +1,38 @@
 package javasabr.mqtt.service.message.handler.impl;
 
+import javasabr.mqtt.model.PayloadFormat;
+import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
+import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
+import javasabr.mqtt.service.TopicService;
+import javasabr.rlib.collections.array.IntArray;
 import lombok.AccessLevel;
+import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 
+@CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, PublishMqttInMessage> {
+public class PublishMqttInMessageHandler
+    extends AbstractMqttInMessageHandler<ExternalMqttClient, PublishMqttInMessage> {
 
   PublishReceivingService publishReceivingService;
+  TopicService topicService;
 
   public PublishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
-      MessageOutFactoryService messageOutFactoryService) {
+      MessageOutFactoryService messageOutFactoryService,
+      TopicService topicService) {
     super(ExternalMqttClient.class, PublishMqttInMessage.class, messageOutFactoryService);
     this.publishReceivingService = publishReceivingService;
+    this.topicService = topicService;
   }
 
   @Override
@@ -26,7 +40,56 @@ public class PublishMqttInMessageHandler extends AbstractMqttInMessageHandler<Ex
       MqttConnection connection,
       ExternalMqttClient client,
       PublishMqttInMessage message) {
-    publishReceivingService.processReceivedPublish(client, message);
+
+    MqttSession session = client.session();
+    if (session == null) {
+      log.warning(client.clientId(), "[%s] Client has no any session..."::formatted);
+      return;
+    }
+
+    int messageId = message.messageId();
+
+    if (messageId > 0 && session.hasInPending(messageId)) {
+      client.send(messageOutFactoryService
+          .resolveFactory(client)
+          .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
+      return;
+    }
+
+    String rawTopicName = message.rawTopicName();
+
+    if (!TopicValidator.validateTopicName(rawTopicName)) {
+      client.send(messageOutFactoryService
+          .resolveFactory(client)
+          .newPublishAck(messageId, PublishAckReasonCode.TOPIC_NAME_INVALID));
+      return;
+    }
+
+    TopicName topicName = topicService.createTopicName(client, rawTopicName);
+
+
+    // TODO
+    byte[] payload = message.payload();
+    int topicAlias = message.topicAlias();
+    IntArray subscriptionIds = message.subscriptionIds();
+    String rawResponseTopicName = message.rawResponseTopicName();
+    PayloadFormat payloadFormat = message.payloadFormat();
+
+    publishReceivingService.processReceivedPublish(client, new Publish(
+        messageId,
+        message.qos(),
+        topicName,
+        TopicName.EMPTY_TOPIC_NAME,
+        payload,
+        message.duplicate(),
+        message.retained(),
+        message.contentType(),
+        message.subscriptionIds(),
+        message.correlationData(),
+        message.messageExpiryInterval(),
+        topicAlias,
+        payloadFormat,
+        message.userProperties()));
   }
 
   @Override

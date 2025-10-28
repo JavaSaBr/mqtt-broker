@@ -4,7 +4,6 @@ import javasabr.mqtt.model.*
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
