@@ -27,6 +27,7 @@ class TopicValidatorTest extends UnitSpecification {
         "+/+"               | false
         "#"                 | false
         "/to$NULL_CHAR/ne/" | false
+        '$sys/topic'        | false
   }
 
   @Unroll
@@ -62,6 +63,9 @@ class TopicValidatorTest extends UnitSpecification {
         "+/+topic/filter"    | false
         "+/#/filter"         | false
         "#/filter"           | false
+        '$sys/topic/filter/' | false
+        '$sys/#'             | false
+        '$sys/topic/+'       | false
   }
 
   @Unroll
@@ -98,5 +102,8 @@ class TopicValidatorTest extends UnitSpecification {
         '$share/group1/'                   | false
         '$share'                           | false
         '$share//'                         | false
+        '$share/group1/$sys/topic/filter/' | false
+        '$share/group1/$sys/#'             | false
+        '$share/group1/$sys/topic/+'       | false
   }
 }

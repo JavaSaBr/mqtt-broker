@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.topic.tree;
 
 import java.util.function.Supplier;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscribtion.Subscription;
@@ -24,6 +25,10 @@ import org.jspecify.annotations.Nullable;
 class TopicNode extends TopicTreeBase {
 
   private final static Supplier<TopicNode> TOPIC_NODE_FACTORY = TopicNode::new;
+
+  static {
+    DebugUtils.registerIncludedFields("childNodes", "subscribers");
+  }
 
   @Nullable
   volatile LockableRefToRefDictionary<String, TopicNode> childNodes;
@@ -149,5 +154,10 @@ class TopicNode extends TopicTreeBase {
     }
     //noinspection ConstantConditions
     return subscribers;
+  }
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
   }
 }

@@ -1,5 +1,6 @@
 package javasabr.mqtt.model.subscribtion;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -30,4 +31,11 @@ public record Subscription(
       false, Application Messages forwarded using this subscription have the RETAIN flag set to 0. Retained messages sent
       when the subscription is established have the RETAIN flag set to 1.
      */
-    boolean retainAsPublished) {}
+    boolean retainAsPublished) {
+
+  @JsonValue
+  @Override
+  public String toString() {
+    return "[" + topicFilter.rawTopic() + "|" + qos.index() + "|" + retainHandling + "|" + noLocal + "|" + retainAsPublished + "]";
+  }
+}
