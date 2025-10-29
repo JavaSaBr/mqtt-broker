@@ -27,6 +27,7 @@ import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.UnsubscribeAckMqtt5OutMessage;
 import javasabr.rlib.collections.array.Array;
+import org.jspecify.annotations.Nullable;
 
 public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
@@ -70,7 +71,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
@@ -79,10 +80,10 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       byte[] payload,
       boolean stringPayload,
       String responseTopic,
-      byte[] correlationData,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
     return new PublishMqtt5OutMessage(
-        packetId,
+        messageId,
         qos,
         retained,
         duplicate,

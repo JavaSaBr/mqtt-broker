@@ -1,24 +1,25 @@
 package javasabr.mqtt.model.publishing;
 
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
+import org.jspecify.annotations.Nullable;
 
 public record Publish(
     int messageId,
     QoS qos,
     TopicName topicName,
-    TopicName responseTopicName,
+    @Nullable TopicName responseTopicName,
     byte[] payload,
     boolean duplicated,
     boolean retained,
-    String contentType,
+    @Nullable String contentType,
     IntArray subscriptionIds,
-    byte[] correlationData,
+    byte @Nullable [] correlationData,
     long messageExpiryInterval,
     int topicAlias,
     PayloadFormat payloadFormat,

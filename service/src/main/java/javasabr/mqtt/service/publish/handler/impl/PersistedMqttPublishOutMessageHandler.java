@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;

@@ -4,6 +4,7 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -52,6 +53,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
   protected abstract PublishHandlingResult handleImpl(Publish publish, C client) ;
 
   protected void startDelivering(MqttClient client, Publish publish) {
+    TopicName responseTopicName = publish.responseTopicName();
     PublishMqttOutMessage outMessage = messageOutFactoryService
         .resolveFactory(client)
         .newPublish(
@@ -63,7 +65,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
             publish.topicAlias(),
             publish.payload(),
             publish.payloadFormat() == PayloadFormat.UTF8_STRING,
-            publish.responseTopicName().toString(),
+            responseTopicName == null ? null : responseTopicName.toString(),
             publish.correlationData(),
             publish.userProperties());
     client.send(outMessage);

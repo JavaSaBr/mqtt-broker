@@ -79,7 +79,7 @@ public class PublishMqttInMessageHandler
         messageId,
         message.qos(),
         topicName,
-        TopicName.EMPTY_TOPIC_NAME,
+        null,
         payload,
         message.duplicate(),
         message.retained(),

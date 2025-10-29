@@ -20,6 +20,7 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
+import org.jspecify.annotations.Nullable;
 
 public abstract class MqttMessageOutFactory {
 
@@ -83,14 +84,14 @@ public abstract class MqttMessageOutFactory {
   }
 
   public PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
       String topicName,
       byte[] payload) {
     return newPublish(
-        packetId,
+        messageId,
         qos,
         retained,
         duplicate,
@@ -104,7 +105,7 @@ public abstract class MqttMessageOutFactory {
   }
 
   public abstract PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
@@ -112,8 +113,8 @@ public abstract class MqttMessageOutFactory {
       int topicAlias,
       byte[] payload,
       boolean stringPayload,
-      String responseTopic,
-      byte[] correlationData,
+      @Nullable String responseTopic,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties);
 
   public abstract MqttOutMessage newPublishAck(

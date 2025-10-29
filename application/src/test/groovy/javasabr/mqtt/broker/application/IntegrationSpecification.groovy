@@ -137,6 +137,7 @@ class IntegrationSpecification extends Specification {
 
   def mqtt5MockedConnection(MqttServerConnectionConfig serverConnConfig) {
     MqttClientConnectionConfig clientConnConfig = new MqttClientConnectionConfig(
+        serverConnConfig,
         serverConnConfig.maxQos(),
         MqttVersion.MQTT_5,
         MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED,
@@ -145,12 +146,7 @@ class IntegrationSpecification extends Specification {
         serverConnConfig.topicAliasMaxValue(),
         MqttProperties.SERVER_KEEP_ALIVE_DEFAULT,
         false,
-        false,
-        serverConnConfig.sessionsEnabled(),
-        serverConnConfig.retainAvailable(),
-        serverConnConfig.wildcardSubscriptionAvailable(),
-        serverConnConfig.subscriptionIdAvailable(),
-        serverConnConfig.sharedSubscriptionAvailable())
+        false)
     def connectionRef = new AtomicReference<MqttConnection>()
     def connection = Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> true
@@ -168,6 +164,7 @@ class IntegrationSpecification extends Specification {
 
   def mqtt311MockedConnection(MqttServerConnectionConfig serverConnConfig) {
     MqttClientConnectionConfig clientConnConfig = new MqttClientConnectionConfig(
+        serverConnConfig,
         serverConnConfig.maxQos(),
         MqttVersion.MQTT_3_1_1,
         MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED,
@@ -176,12 +173,7 @@ class IntegrationSpecification extends Specification {
         serverConnConfig.topicAliasMaxValue(),
         MqttProperties.SERVER_KEEP_ALIVE_DEFAULT,
         false,
-        false,
-        serverConnConfig.sessionsEnabled(),
-        serverConnConfig.retainAvailable(),
-        serverConnConfig.wildcardSubscriptionAvailable(),
-        serverConnConfig.subscriptionIdAvailable(),
-        serverConnConfig.sharedSubscriptionAvailable())
+        false)
     def connectionRef = new AtomicReference<MqttConnection>()
     def connection = Stub(MqttConnection) {
       isSupported(MqttVersion.MQTT_5) >> false

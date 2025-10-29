@@ -12,6 +12,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
@@ -139,8 +140,9 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
+  @Nullable
   String responseTopic;
-  byte[] correlationData;
+  byte @Nullable [] correlationData;
   Array<StringPair> userProperties;
 
   int topicAlias;
@@ -155,8 +157,8 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
       byte[] payload,
       int topicAlias,
       boolean stringPayload,
-      String responseTopic,
-      byte[] correlationData,
+      @Nullable String responseTopic,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
     super(messageId, qos, retained, duplicate, topicName, payload);
     this.topicAlias = topicAlias;

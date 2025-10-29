@@ -107,7 +107,12 @@ abstract class TopicTreeBase {
         .iterations()
         .findAny(group, TopicTreeBase::isSharedSubscriberWithGroup);
     if (sharedSubscriber != null) {
-      return sharedSubscriber.removeSubscriberWithOwner(owner);
+      boolean removed = sharedSubscriber.removeSubscriberWithOwner(owner);
+      if (sharedSubscriber.isEmpty()) {
+        // if it was last member
+        subscribers.remove(sharedSubscriber);
+      }
+      return removed;
     }
     return false;
   }

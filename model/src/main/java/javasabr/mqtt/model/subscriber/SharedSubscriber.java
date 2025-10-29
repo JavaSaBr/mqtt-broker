@@ -63,6 +63,10 @@ public final class SharedSubscriber implements Subscriber {
     return subscribers.size();
   }
 
+  public boolean isEmpty() {
+    return subscribers.isEmpty();
+  }
+
   public String group() {
     return topicFilter.shareName();
   }

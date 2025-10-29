@@ -55,7 +55,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
   @Override
   public PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
@@ -66,7 +66,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
       String responseTopic,
       byte[] correlationData,
       Array<StringPair> userProperties) {
-    return new PublishMqtt311OutMessage(packetId, qos, retained, duplicate, topicName, payload);
+    return new PublishMqtt311OutMessage(messageId, qos, retained, duplicate, topicName, payload);
   }
 
   @Override

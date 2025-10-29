@@ -11,6 +11,7 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.network.packet.impl.AbstractWritableNetworkPacket;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttConnection> {
@@ -118,14 +119,15 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
     writeString(buffer, value.value());
   }
 
-  public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, String value) {
-    if (!value.isEmpty()) {
+  public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, @Nullable String value) {
+    if (value != null && !value.isEmpty()) {
       writeProperty(buffer, property, value);
     }
   }
 
-  public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, byte[] value) {
-    if (value.length > 0) {
+
+  public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, byte @Nullable [] value) {
+    if (value != null && value.length > 0) {
       writeProperty(buffer, property, value);
     }
   }
