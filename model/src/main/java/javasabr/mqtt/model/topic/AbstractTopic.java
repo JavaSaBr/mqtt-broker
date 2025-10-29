@@ -69,7 +69,6 @@ public abstract class AbstractTopic {
     if (StringUtils.isEmpty(str)) {
       return 0;
     }
-
     int count = 0;
     int pos = 0;
     int idx;

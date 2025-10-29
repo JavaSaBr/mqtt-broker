@@ -19,6 +19,7 @@ class TopicValidatorTest extends UnitSpecification {
         "topic/name"        | true
         "topic/name/"       | true
         "/topic/name/"      | true
+        "/to  pic/nam e/"   | true
         "/topic"            | true
         ""                  | false
         "//"                | false
@@ -46,6 +47,7 @@ class TopicValidatorTest extends UnitSpecification {
         "/+/"                | true
         "+/filter"           | true
         "+/filter/+"         | true
+        "+/ fil  ter/+"      | true
         "+/filter/+/segment" | true
         "#"                  | true
         "+/filter/#"         | true
@@ -79,6 +81,7 @@ class TopicValidatorTest extends UnitSpecification {
         '$share/group1/+/'                 | true
         '$share/group1/+/filter'           | true
         '$share/group1/+/filter/+'         | true
+        '$share/group1/+/fi  lt er/+'      | true
         '$share/group1/+/filter/+/segment' | true
         '$share/group1/#'                  | true
         '$share/group1/+/filter/#'         | true
