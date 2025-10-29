@@ -41,7 +41,8 @@ public class TopicValidator {
   private static boolean baseTopicValidation(String rawTopic) {
     return !rawTopic.isEmpty()
         && !rawTopic.contains(NULL_CHAR)
-        && !rawTopic.contains(DOUBLE_DELIMITER);
+        && !rawTopic.contains(DOUBLE_DELIMITER)
+        && !rawTopic.startsWith(TopicFilter.SPECIAL);
   }
 
   /**
@@ -79,10 +80,12 @@ public class TopicValidator {
     if (length == 1) {
       return true;
     }
-    char leftChar = rawTopicFilter.charAt(index - 1);
-    if (leftChar != AbstractTopic.DELIMITER_CHAR) {
-      // before '#' always should be delimiter
-      return false;
+    if (index > 0) {
+      char leftChar = rawTopicFilter.charAt(index - 1);
+      if (leftChar != AbstractTopic.DELIMITER_CHAR) {
+        // before '#' always should be delimiter
+        return false;
+      }
     }
     // '/segment1/segment2/#' should be always in the end of topic filter
     return index == length - 1;

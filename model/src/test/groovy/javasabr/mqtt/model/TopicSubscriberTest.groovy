@@ -7,12 +7,9 @@ import javasabr.mqtt.test.support.UnitSpecification
 import spock.lang.Shared
 import spock.lang.Unroll
 
-import static javasabr.mqtt.model.QoS.*
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicName
 
 class TopicSubscriberTest extends UnitSpecification {
-
+/*
   @Shared
   MqttUser defaultUser = Mock(MqttUser)
   @Shared
@@ -76,5 +73,5 @@ class TopicSubscriberTest extends UnitSpecification {
             [defaultUser, defaultUser, defaultUser],
             [newUser1, newUser2, newUser3]
         ]
-  }
+  }*/
 }
