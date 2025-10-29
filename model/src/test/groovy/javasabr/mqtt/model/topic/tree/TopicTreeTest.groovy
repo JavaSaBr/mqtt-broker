@@ -6,17 +6,12 @@ import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscribtion.Subscription
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner
 import javasabr.mqtt.model.subscription.TestSubscriptionOwner
+import javasabr.mqtt.model.topic.SharedTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification
-import spock.lang.Shared
-
-import java.util.concurrent.atomic.AtomicInteger
 
 class TopicTreeTest extends UnitSpecification {
-
-  @Shared
-  static def ownerIdGenerator = new AtomicInteger(1)
 
   def "should match simple topic correctly"(
       List<Subscription> subscriptions,
@@ -434,8 +429,40 @@ class TopicTreeTest extends UnitSpecification {
         ]
   }
 
-  static def makeOwner() {
-    return new TestSubscriptionOwner("${ownerIdGenerator.incrementAndGet()}")
+  def "should provide different owners when math shared topic"() {
+    given:
+        def group1 = ["id1", "id2", "id3", "id4", "id5"]
+        def group2 = ["id6", "id7", "id8", "id9", "id10"]
+        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        topicTree.subscribe(makeOwner("id1"), makeSharedSubscription('$share/group1/topic/name1'))
+        topicTree.subscribe(makeOwner("id2"), makeSharedSubscription('$share/group1/topic/name1'))
+        topicTree.subscribe(makeOwner("id3"), makeSharedSubscription('$share/group1/topic/name1'))
+        topicTree.subscribe(makeOwner("id4"), makeSharedSubscription('$share/group1/topic/name1'))
+        topicTree.subscribe(makeOwner("id5"), makeSharedSubscription('$share/group1/topic/name1'))
+        topicTree.subscribe(makeOwner("id6"), makeSharedSubscription('$share/group2/topic/name1'))
+        topicTree.subscribe(makeOwner("id7"), makeSharedSubscription('$share/group2/topic/name1'))
+        topicTree.subscribe(makeOwner("id8"), makeSharedSubscription('$share/group2/topic/name1'))
+        topicTree.subscribe(makeOwner("id9"), makeSharedSubscription('$share/group2/topic/name1'))
+        topicTree.subscribe(makeOwner("id10"), makeSharedSubscription('$share/group2/topic/name1'))
+    when:
+        def matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .collect { it.owner().toString() }
+    then:
+        matched.size() == 2
+    when:
+        def matched2 = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .collect { it.owner().toString() }
+    then:
+        matched2.size() == 2
+        matched2 != matched
+    then: "should contains by one owner from different groups"
+        (group1.contains(matched[0]) && group2.contains(matched[1])) ||
+            (group1.contains(matched[1]) && group2.contains(matched[0]))
+        (group1.contains(matched2[0]) && group2.contains(matched2[1])) ||
+            (group1.contains(matched2[1]) && group2.contains(matched2[0]))
+
   }
 
   static def makeOwner(String id) {
@@ -451,10 +478,19 @@ class TopicTreeTest extends UnitSpecification {
         true)
   }
 
+  static def makeSharedSubscription(String topicFilter) {
+    return new Subscription(
+        SharedTopicFilter.valueOf(topicFilter),
+        QoS.AT_LEAST_ONCE,
+        SubscribeRetainHandling.SEND,
+        true,
+        true)
+  }
+
   static def makeSubscription(String topicFilter, int qos) {
     return new Subscription(
         TopicFilter.valueOf(topicFilter),
-        QoS.of(qos),
+        QoS.ofCode(qos),
         SubscribeRetainHandling.SEND,
         true,
         true)

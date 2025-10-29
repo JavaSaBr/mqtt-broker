@@ -7,7 +7,7 @@ import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SU
 import java.util.Set;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.model.subscribtion.RequestedRawSubscription;
+import javasabr.mqtt.model.subscribtion.RequestedSubscription;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttClient;
@@ -57,7 +57,7 @@ public class SubscribeMqttInMessageHandler extends
       ExternalMqttClient client,
       SubscribeMqttInMessage message) {
 
-    Array<RequestedRawSubscription> rawSubscriptions = message.subscriptions();
+    Array<RequestedSubscription> rawSubscriptions = message.subscriptions();
     Array<Subscription> subscriptions = transformSubscriptions(client, rawSubscriptions);
 
     MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(client);
@@ -86,12 +86,12 @@ public class SubscribeMqttInMessageHandler extends
     }
   }
 
-  private Array<Subscription> transformSubscriptions(MqttClient client, Array<RequestedRawSubscription> rawSubscriptions) {
+  private Array<Subscription> transformSubscriptions(MqttClient client, Array<RequestedSubscription> rawSubscriptions) {
     MutableArray<Subscription> subscriptions =
         ArrayFactory.mutableArray(Subscription.class, rawSubscriptions.size());
 
-    for (RequestedRawSubscription subscription : rawSubscriptions) {
-      String rawTopicFilter = subscription.topicFilter();
+    for (RequestedSubscription subscription : rawSubscriptions) {
+      String rawTopicFilter = subscription.rawTopicFilter();
       TopicFilter topicFilter = topicService.createTopicFilter(client, rawTopicFilter);
       subscriptions.add(new Subscription(
           topicFilter,

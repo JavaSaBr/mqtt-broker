@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
-import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
@@ -46,7 +46,7 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
 
   protected boolean checkMessageException(MqttConnection connection, C client, M message) {
     Exception exception = message.exception();
-    if (exception instanceof MalformedMqttProtocolException) {
+    if (exception instanceof MalformedProtocolMqttException) {
       // send feedback and close connection
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)

@@ -280,7 +280,7 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
 
   public PublishMqttInMessage(byte info) {
     super(info);
-    this.qos = QoS.of(info & 0b0110 >> 1);
+    this.qos = QoS.ofCode(info & 0b0110 >> 1);
     this.retained = (info & 0b0001) != 0;
     this.duplicate = (info & 0b1000) != 0;
     this.rawTopicName = StringUtils.EMPTY;

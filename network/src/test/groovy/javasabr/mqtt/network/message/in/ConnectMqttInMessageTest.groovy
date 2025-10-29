@@ -2,7 +2,7 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttVersion
-import javasabr.mqtt.model.exception.MalformedMqttProtocolException
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
@@ -96,7 +96,7 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result
-        packet.exception() instanceof MalformedMqttProtocolException
+        packet.exception() instanceof MalformedProtocolMqttException
     where:
         stringBytes << [
             // https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt

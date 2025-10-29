@@ -19,7 +19,7 @@ public enum QoS {
 
   private static final QoS[] VALUES = values();
 
-  public static QoS of(int level) {
+  public static QoS ofCode(int level) {
     if (level < 0 || level > EXACTLY_ONCE.ordinal()) {
       return INVALID;
     } else {
@@ -27,6 +27,6 @@ public enum QoS {
     }
   }
 
-  int index;
+  int level;
   SubscribeAckReasonCode subscribeAckReasonCode;
 }

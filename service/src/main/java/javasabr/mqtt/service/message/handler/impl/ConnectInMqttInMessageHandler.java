@@ -15,7 +15,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
@@ -231,7 +231,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
           .sendWithFeedback(feedback)
           .thenAccept(_ -> connection.close());
       return true;
-    } else if (exception instanceof MalformedMqttProtocolException) {
+    } else if (exception instanceof MalformedProtocolMqttException) {
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
           .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET);

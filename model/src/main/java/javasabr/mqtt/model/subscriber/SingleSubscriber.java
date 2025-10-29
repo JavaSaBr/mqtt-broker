@@ -19,6 +19,6 @@ public record SingleSubscriber(SubscriptionOwner owner, Subscription subscriptio
   @JsonValue
   @Override
   public String toString() {
-    return "[" + owner + "]->[" + subscription.topicFilter().rawTopic() + "|" + subscription.qos().index() + "]";
+    return "[" + owner + "]->[" + subscription.topicFilter().rawTopic() + "|" + subscription.qos().level() + "]";
   }
 }

@@ -25,7 +25,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
     int maxIndex = knownPublishOutHandlers
         .stream()
         .map(MqttPublishOutMessageHandler::qos)
-        .mapToInt(QoS::index)
+        .mapToInt(QoS::level)
         .max()
         .orElse(0);
 
@@ -33,11 +33,11 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
 
     for (MqttPublishOutMessageHandler knownPublishOutHandler : knownPublishOutHandlers) {
       QoS qos = knownPublishOutHandler.qos();
-      if (handlers[qos.index()] != null) {
+      if (handlers[qos.level()] != null) {
         throw new IllegalArgumentException(
             "Found duplicate MqttPublishOutMessageHandler:[" + knownPublishOutHandler + "]");
       }
-      handlers[qos.index()] = knownPublishOutHandler;
+      handlers[qos.level()] = knownPublishOutHandler;
     }
 
     this.publishOutMessageHandlers = handlers;
@@ -48,7 +48,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
     try {
       //noinspection DataFlowIssue
-      return publishOutMessageHandlers[subscriber.qos().index()].handle(publish, subscriber);
+      return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
       return PublishHandlingResult.UNSPECIFIED_ERROR;

@@ -10,8 +10,8 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
-import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
-import javasabr.mqtt.model.subscribtion.RequestedRawSubscription;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
+import javasabr.mqtt.model.subscribtion.RequestedSubscription;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
@@ -54,14 +54,14 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  final MutableArray<RequestedRawSubscription> subscriptions;
+  final MutableArray<RequestedSubscription> subscriptions;
 
   // properties
   int subscriptionId;
 
   public SubscribeMqttInMessage(byte info) {
     super(info);
-    this.subscriptions = ArrayFactory.mutableArray(RequestedRawSubscription.class);
+    this.subscriptions = ArrayFactory.mutableArray(RequestedSubscription.class);
     this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_UNDEFINED;
   }
 
@@ -79,7 +79,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (buffer.remaining() < 1) {
-      throw new MalformedMqttProtocolException("No any topic filters");
+      throw new MalformedProtocolMqttException("No any topic filters");
     }
 
     MqttServerConnectionConfig severConnConfig = connection.serverConnectionConfig();
@@ -105,12 +105,12 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
         validateMqtt311Options(options);
       }
 
-      QoS qos = QoS.of(qosLevel);
+      QoS qos = QoS.ofCode(qosLevel);
       if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
-        throw new MalformedMqttProtocolException("Unsupported qos or retain handling");
+        throw new MalformedProtocolMqttException("Unsupported qos or retain handling");
       }
 
-      subscriptions.add(new RequestedRawSubscription(
+      subscriptions.add(new RequestedSubscription(
           topicFilter,
           qos,
           retainHandling,
@@ -132,18 +132,18 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
     }
   }
 
-  public Array<RequestedRawSubscription> subscriptions() {
+  public Array<RequestedSubscription> subscriptions() {
     return subscriptions;
   }
 
   private static void validateMqtt311Options(int options) {
     // for MQTT 3.1.1 these bits must be zero
     if ((options & 0b0000_0100) != 0) {
-      throw new MalformedMqttProtocolException("No local option is not available on this protocol level");
+      throw new MalformedProtocolMqttException("No local option is not available on this protocol level");
     } else if ((options & 0b0000_1000) != 0) {
-      throw new MalformedMqttProtocolException("Retain as published option is not available on this protocol level");
+      throw new MalformedProtocolMqttException("Retain as published option is not available on this protocol level");
     } else if (((options & 0b0011_0000) >> 4) != 0) {
-      throw new MalformedMqttProtocolException("Retain level option is not available on this protocol level");
+      throw new MalformedProtocolMqttException("Retain level option is not available on this protocol level");
     }
   }
 }

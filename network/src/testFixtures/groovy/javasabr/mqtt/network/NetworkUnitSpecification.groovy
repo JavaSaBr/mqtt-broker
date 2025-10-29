@@ -4,6 +4,9 @@ import javasabr.mqtt.model.*
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
+import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -11,9 +14,6 @@ import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
-
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicName
 
 class NetworkUnitSpecification extends UnitSpecification {
 
@@ -41,6 +41,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final maxPacketSize = 1024
   public static final maxStringLength = 1024
   public static final maxBinarySize = 1024
+  public static final maxTopicLevels = 10
   public static final topicAliasMaxValue = 32
   public static final subscriptionId = 637
   public static final subscriptionId2 = 623
@@ -51,21 +52,21 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final authMethod = "testAuthMethod"
   public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
-  public static final publishTopic = buildTopicName("publish/Topic")
+  public static final publishTopic = TopicName.valueOf("publish/Topic")
   public static final responseTopic = "response/Topic"
   public static final topicFilter = "topic/Filter"
-  public static final topicFilter1Obj311 = new SubscribeTopicFilter(buildTopicFilter(topicFilter), QoS.AT_LEAST_ONCE)
-  public static final topicFilter1Obj5 = new SubscribeTopicFilter(
-      buildTopicFilter(topicFilter),
+  public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
+  public static final topicFilter1Obj5 = new Subscription(
+      TopicFilter.valueOf(topicFilter),
       QoS.AT_LEAST_ONCE,
       SubscribeRetainHandling.DO_NOT_SEND,
       true,
       false)
 
   public static final topicFilter2 = "topic/Filter2"
-  public static final topicFilter2Obj311 = new SubscribeTopicFilter(buildTopicFilter(topicFilter2), QoS.EXACTLY_ONCE)
-  public static final topicFilter2Obj5 = new SubscribeTopicFilter(
-      buildTopicFilter(topicFilter2),
+  public static final topicFilter2Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter2), QoS.EXACTLY_ONCE)
+  public static final topicFilter2Obj5 = new Subscription(
+      TopicFilter.valueOf(topicFilter2),
       QoS.EXACTLY_ONCE,
       SubscribeRetainHandling.DO_NOT_SEND,
       true,
@@ -120,6 +121,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         maxPacketSize,
         maxStringLength,
         maxBinarySize,
+        maxTopicLevels,
         serverKeepAlive,
         receiveMaxPublishes,
         topicAliasMaxValue,
@@ -134,6 +136,7 @@ class NetworkUnitSpecification extends UnitSpecification {
 
   MqttClientConnectionConfig defaultMqtt311ClientConnectionConfig() {
     return clientConnectionConfig(
+        defaultServerConnectionConfig,
         maxQos,
         MqttVersion.MQTT_3_1_1,
         sessionExpiryInterval,
@@ -142,16 +145,12 @@ class NetworkUnitSpecification extends UnitSpecification {
         topicAliasMaxValue,
         keepAlive,
         false,
-        false,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable)
+        false)
   }
 
   MqttClientConnectionConfig defaultMqtt5ClientConnectionConfig() {
     return clientConnectionConfig(
+        defaultServerConnectionConfig,
         maxQos,
         MqttVersion.MQTT_5,
         sessionExpiryInterval,
@@ -160,12 +159,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         topicAliasMaxValue,
         keepAlive,
         false,
-        false,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable)
+        false)
   }
 
   MqttConnection mqtt311Connection() {
@@ -187,6 +181,7 @@ class NetworkUnitSpecification extends UnitSpecification {
       int maxPacketSize,
       int maxStringLength,
       int maxBinarySize,
+      int maxTopicLevels,
       int serverKeepAlive,
       int receiveMaxPublishes,
       int topicAliasMaxValue,
@@ -202,6 +197,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         maxPacketSize,
         maxStringLength,
         maxBinarySize,
+        maxTopicLevels,
         serverKeepAlive,
         receiveMaxPublishes,
         topicAliasMaxValue,
@@ -215,6 +211,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   }
 
   static MqttClientConnectionConfig clientConnectionConfig(
+      MqttServerConnectionConfig serverConnectionConfig,
       QoS maxQos,
       MqttVersion mqttVersion,
       long sessionExpiryInterval,
@@ -223,13 +220,9 @@ class NetworkUnitSpecification extends UnitSpecification {
       int topicAliasMaxValue,
       int keepAlive,
       boolean requestResponseInformation,
-      boolean requestProblemInformation,
-      boolean sessionsEnabled,
-      boolean retainAvailable,
-      boolean wildcardSubscriptionAvailable,
-      boolean subscriptionIdAvailable,
-      boolean sharedSubscriptionAvailable) {
+      boolean requestProblemInformation) {
     return new MqttClientConnectionConfig(
+        serverConnectionConfig,
         maxQos,
         mqttVersion,
         sessionExpiryInterval,
@@ -238,12 +231,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         topicAliasMaxValue,
         keepAlive,
         requestResponseInformation,
-        requestProblemInformation,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable)
+        requestProblemInformation)
   }
 
   MqttConnection mqttConnection(
@@ -251,7 +239,7 @@ class NetworkUnitSpecification extends UnitSpecification {
       MqttClientConnectionConfig clientConfig,
       String clientId) {
     return Stub(MqttConnection) {
-      isSupported(spock.lang.Specification._) >> { MqttVersion version ->
+      isSupported(_) >> { MqttVersion version ->
         clientConfig.mqttVersion().include(version)
       }
       serverConnectionConfig() >> serverConfig

@@ -2,7 +2,7 @@ package javasabr.mqtt.service.session.impl;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscribtion.Subscription;
@@ -39,7 +39,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
 
   private static void updatePendingPacket(
       MqttClient client,
-      HasMessageId response,
+      TrackableMessage response,
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
 
@@ -163,12 +163,12 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void updateOutPendingPacket(MqttClient client, HasMessageId response) {
+  public void updateOutPendingPacket(MqttClient client, TrackableMessage response) {
     updatePendingPacket(client, response, pendingOutPublishes, clientId);
   }
 
   @Override
-  public void updateInPendingPacket(MqttClient client, HasMessageId response) {
+  public void updateInPendingPacket(MqttClient client, TrackableMessage response) {
     updatePendingPacket(client, response, pendingInPublishes, clientId);
   }
 

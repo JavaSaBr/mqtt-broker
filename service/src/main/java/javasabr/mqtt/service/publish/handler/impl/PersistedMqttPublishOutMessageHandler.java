@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
-import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.network.MqttClient;
@@ -26,7 +26,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     super(ExternalMqttClient.class, subscriptionService, messageOutFactoryService);
     this.pendingMessageHandler = new PendingMessageHandler() {
       @Override
-      public boolean handleResponse(MqttClient client, HasMessageId response) {
+      public boolean handleResponse(MqttClient client, TrackableMessage response) {
         return handleReceivedResponse(client, response);
       }
       @Override
@@ -67,7 +67,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected boolean handleReceivedResponse(MqttClient client, HasMessageId response) {
+  protected boolean handleReceivedResponse(MqttClient client, TrackableMessage response) {
     return false;
   }
 

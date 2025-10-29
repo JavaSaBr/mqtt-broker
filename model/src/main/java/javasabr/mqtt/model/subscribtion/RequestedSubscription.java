@@ -3,11 +3,11 @@ package javasabr.mqtt.model.subscribtion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 
-public record RequestedRawSubscription(
+public record RequestedSubscription(
     /*
       The subscriber's topic filter.
      */
-    String topicFilter,
+    String rawTopicFilter,
     /*
       Maximum QoS field. This gives the maximum QoS level at which the Server can send Application Messages to the
       Client.

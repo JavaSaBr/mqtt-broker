@@ -1,6 +1,6 @@
 package javasabr.mqtt.network;
 
-import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -24,7 +24,7 @@ public interface MqttSession {
     /**
      * @return true if pending packet can be removed.
      */
-    boolean handleResponse(MqttClient client, HasMessageId response);
+    boolean handleResponse(MqttClient client, TrackableMessage response);
 
     default void resend(MqttClient client, Publish publish) {}
   }
@@ -52,9 +52,9 @@ public interface MqttSession {
 
   void registerInPublish(Publish publish, PendingMessageHandler handler);
 
-  void updateOutPendingPacket(MqttClient client, HasMessageId response);
+  void updateOutPendingPacket(MqttClient client, TrackableMessage response);
 
-  void updateInPendingPacket(MqttClient client, HasMessageId response);
+  void updateInPendingPacket(MqttClient client, TrackableMessage response);
 
   void storeSubscription(Subscription subscription);
 

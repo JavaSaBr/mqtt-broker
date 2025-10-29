@@ -3,7 +3,7 @@ package javasabr.mqtt.broker.application.service
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
 import javasabr.mqtt.broker.application.IntegrationSpecification
-import javasabr.mqtt.model.ActionResult
+
 import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.service.ClientIdRegistry
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
@@ -12,10 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
 import java.util.concurrent.CompletionException
-
-import static com.hivemq.client.mqtt.datatypes.MqttQos.*
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicName
-import static org.spockframework.util.Pair.of
 
 class SubscribtionServiceTest extends IntegrationSpecification {
 

@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
@@ -53,7 +53,7 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (buffer.remaining() < 1) {
-      throw new MalformedMqttProtocolException("No any topic filters.");
+      throw new MalformedProtocolMqttException("No any topic filters.");
     }
     rawTopicFilters = ArrayFactory.mutableArray(String.class);
     while (buffer.hasRemaining()) {

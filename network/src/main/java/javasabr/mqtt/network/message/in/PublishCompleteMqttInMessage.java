@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
-import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
@@ -21,7 +21,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishCompleteMqttInMessage extends MqttInMessage implements HasMessageId {
+public class PublishCompleteMqttInMessage extends MqttInMessage implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETED.ordinal();
 

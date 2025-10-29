@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.out;
 
-import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class PublishMqttOutMessage extends MqttOutMessage implements HasMessageId {
+public abstract class PublishMqttOutMessage extends MqttOutMessage implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH.ordinal();
 

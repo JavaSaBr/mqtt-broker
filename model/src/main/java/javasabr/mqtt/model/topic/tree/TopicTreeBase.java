@@ -64,8 +64,9 @@ abstract class TopicTreeBase {
     long stamp = subscribers.readLock();
     try {
       for (Subscriber subscriber : subscribers) {
-        if (removeDuplicateWithLowerQoS(result, subscriber)) {
-          result.add(subscriber.resolveSingle());
+        SingleSubscriber singleSubscriber = subscriber.resolveSingle();
+        if (removeDuplicateWithLowerQoS(result, singleSubscriber)) {
+          result.add(singleSubscriber);
         }
       }
     } finally {
@@ -115,17 +116,15 @@ abstract class TopicTreeBase {
     return subscriber instanceof SharedSubscriber shared && Objects.equals(group, shared.group());
   }
 
-  private static boolean removeDuplicateWithLowerQoS(MutableArray<SingleSubscriber> result, Subscriber candidate) {
-    if (!(candidate instanceof SingleSubscriber single)) {
-      return true;
-    }
+  private static boolean removeDuplicateWithLowerQoS(
+      MutableArray<SingleSubscriber> result, SingleSubscriber candidate) {
 
-    int found = result.indexOf(SingleSubscriber::owner, single.owner());
+    int found = result.indexOf(SingleSubscriber::owner, candidate.owner());
     if (found == -1) {
       return true;
     }
 
-    QoS candidateQos = single.qos();
+    QoS candidateQos = candidate.qos();
     SingleSubscriber exist = result.get(found);
     QoS existeQos = exist.qos();
 

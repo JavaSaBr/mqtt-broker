@@ -14,7 +14,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.exception.MalformedMqttProtocolException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.exception.MqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -194,7 +194,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
     int stringLength = readShortUnsigned(buffer);
     if (stringLength > inBuffer.capacity() || stringLength > maxLength) {
-      throw new MalformedMqttProtocolException();
+      throw new MalformedProtocolMqttException();
     }
 
     inBuffer.clear();
@@ -212,7 +212,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
     CoderResult result = decoder.decode(inBuffer, outBuffer, true);
     if (result.isError()) {
-      throw new MalformedMqttProtocolException();
+      throw new MalformedProtocolMqttException();
     }
 
     return outBuffer
@@ -243,7 +243,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
   }
 
   protected void unexpectedProperty(MqttMessageProperty property) {
-    throw new MalformedMqttProtocolException("Unsupported property:[" + property + "]");
+    throw new MalformedProtocolMqttException("Unsupported property:[" + property + "]");
   }
 
   @Override

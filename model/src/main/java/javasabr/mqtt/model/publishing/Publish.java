@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.publishing;
 
-import javasabr.mqtt.model.HasMessageId;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
@@ -22,7 +22,7 @@ public record Publish(
     long messageExpiryInterval,
     int topicAlias,
     PayloadFormat payloadFormat,
-    Array<StringPair> userProperties) implements HasMessageId {
+    Array<StringPair> userProperties) implements TrackableMessage {
 
   public Publish withDuplicated() {
     if (duplicated) {

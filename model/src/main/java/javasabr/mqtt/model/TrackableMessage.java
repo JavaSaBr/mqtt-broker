@@ -1,6 +1,6 @@
 package javasabr.mqtt.model;
 
-public interface HasMessageId {
+public interface TrackableMessage {
 
   int messageId();
 }

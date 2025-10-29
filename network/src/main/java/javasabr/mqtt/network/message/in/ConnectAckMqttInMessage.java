@@ -340,7 +340,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
           value,
           MqttProperties.RECEIVE_MAXIMUM_MIN,
           MqttProperties.RECEIVE_MAXIMUM_MAX);
-      case MAXIMUM_QOS -> maximumQos = QoS.of((int) value);
+      case MAXIMUM_QOS -> maximumQos = QoS.ofCode((int) value);
       case SERVER_KEEP_ALIVE -> serverKeepAlive = NumberUtils.validate(
           (int) value,
           MqttProperties.SERVER_KEEP_ALIVE_MIN,

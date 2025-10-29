@@ -40,6 +40,6 @@ public class SubscribeMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   protected int buildSubscriptionOptions(Subscription topicFilter) {
-    return topicFilter.qos().index();
+    return topicFilter.qos().level();
   }
 }

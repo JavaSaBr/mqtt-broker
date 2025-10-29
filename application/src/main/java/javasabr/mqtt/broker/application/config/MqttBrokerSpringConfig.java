@@ -270,7 +270,7 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttServerConnectionConfig externalConnectionConfig(Environment env) {
     return new MqttServerConnectionConfig(
-        QoS.of(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
+        QoS.ofCode(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
         env.getProperty(
             "mqtt.external.connection.max.packet.size",
             int.class,

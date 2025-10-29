@@ -33,9 +33,18 @@ public record Subscription(
      */
     boolean retainAsPublished) {
 
+  public static Subscription minimal(TopicFilter topicFilter, QoS qos) {
+    return new Subscription(
+        topicFilter,
+        qos,
+        SubscribeRetainHandling.SEND,
+        true,
+        true);
+  }
+
   @JsonValue
   @Override
   public String toString() {
-    return "[" + topicFilter.rawTopic() + "|" + qos.index() + "|" + retainHandling + "|" + noLocal + "|" + retainAsPublished + "]";
+    return "[" + topicFilter.rawTopic() + "|" + qos.level() + "|" + retainHandling + "|" + noLocal + "|" + retainAsPublished + "]";
   }
 }
