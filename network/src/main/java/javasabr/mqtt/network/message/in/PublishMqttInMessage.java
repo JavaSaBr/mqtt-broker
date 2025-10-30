@@ -32,7 +32,14 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("topicName", "qos", "duplicate", "messageId");
+    DebugUtils.registerIncludedFields(
+        "rawTopicName",
+        "topicAlias",
+        "qos",
+        "duplicate",
+        "messageId",
+        "messageExpiryInterval",
+        "payloadFormat");
   }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(

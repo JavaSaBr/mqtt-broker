@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 class ConnectSubscribePublishTest extends IntegrationSpecification {
 
-  def "publisher should publish message QoS 0 using mqtt 3.1.1"() {
+  def "should deliver publish message QoS 0 using mqtt 3.1.1"() {
     given:
         def received = new AtomicReference<Mqtt3Publish>()
         def subscriber = buildExternalMqtt311Client()
@@ -26,7 +26,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.connect().join()
         def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_MOST_ONCE, received)
         def publishResult = publish(publisher, subscriberId, MqttQos.AT_MOST_ONCE)
-        Thread.sleep(100)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -43,7 +42,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.disconnect().join()
   }
 
-  def "publisher should publish message QoS 0 using mqtt 5"() {
+  def "should deliver publish message QoS 0 using mqtt 5"() {
     given:
         def received = new AtomicReference<Mqtt5Publish>()
         def subscriber = buildExternalMqtt5Client()
@@ -54,7 +53,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.connect().join()
         def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_MOST_ONCE, received)
         def publishResult = publish(publisher, subscriberId, MqttQos.AT_MOST_ONCE)
-        Thread.sleep(100)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -71,7 +69,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.disconnect().join()
   }
 
-  def "publisher should publish message QoS 1 using mqtt 3.1.1"() {
+  def "should deliver publish message QoS 1 using mqtt 3.1.1"() {
     given:
         def received = new AtomicReference<Mqtt3Publish>()
         def subscriber = buildExternalMqtt311Client()
@@ -82,7 +80,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.connect().join()
         def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_LEAST_ONCE, received)
         def publishResult = publish(publisher, subscriberId, MqttQos.AT_LEAST_ONCE)
-        Thread.sleep(100)
     then:
         noExceptionThrown()
         subscribeResult != null

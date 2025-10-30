@@ -1,5 +1,6 @@
 package javasabr.mqtt.model.publishing;
 
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.TrackableMessage;
@@ -24,6 +25,10 @@ public record Publish(
     int topicAlias,
     PayloadFormat payloadFormat,
     Array<StringPair> userProperties) implements TrackableMessage {
+
+  static {
+    DebugUtils.registerIncludedFields("topicName", "messageId", "qos", "topicAlias", "payloadFormat");
+  }
 
   public Publish withDuplicated() {
     if (duplicated) {
@@ -62,5 +67,10 @@ public record Publish(
         topicAlias,
         payloadFormat,
         userProperties);
+  }
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
   }
 }

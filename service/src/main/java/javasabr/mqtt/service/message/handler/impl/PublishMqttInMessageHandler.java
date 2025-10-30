@@ -53,6 +53,7 @@ public class PublishMqttInMessageHandler
       client.send(messageOutFactoryService
           .resolveFactory(client)
           .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
+      log.warning(client.clientId(), messageId, "[%s] Client provided already in use messageId:[%s]..."::formatted);
       return;
     }
 
@@ -62,11 +63,11 @@ public class PublishMqttInMessageHandler
       client.send(messageOutFactoryService
           .resolveFactory(client)
           .newPublishAck(messageId, PublishAckReasonCode.TOPIC_NAME_INVALID));
+      log.warning(client.clientId(), rawTopicName, "[%s] Client provided invalid topic name:[%s]..."::formatted);
       return;
     }
 
     TopicName topicName = topicService.createTopicName(client, rawTopicName);
-
 
     // TODO
     byte[] payload = message.payload();

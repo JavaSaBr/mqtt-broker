@@ -37,6 +37,7 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
+      log.debug(client.clientId(), publish, "[%s] Not found any subscriber for publish: [%s]"::formatted);
       handleEmptySubscriptions(client, publish);
       return;
     }
@@ -44,6 +45,8 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     for (SingleSubscriber subscriber : subscribers) {
       PublishHandlingResult checkResult = checkSubscriber(client, publish, subscriber);
       if (checkResult.error()) {
+        log.debug(client.clientId(), checkResult, subscriber,
+            "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
         handleError(client, publish, checkResult);
         return;
       }
@@ -61,8 +64,12 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     }
 
     if (errorResult != null) {
+      log.debug(client.clientId(), errorResult,
+          "[%s] Found final error:[%s] during processing publish"::formatted);
       handleError(client, publish, errorResult);
     } else {
+      log.debug(client.clientId(), count,
+          "[%s] Successfully started delivering publish to [%s] subscribers"::formatted);
       handleSuccessfulResult(client, publish, count);
     }
   }
