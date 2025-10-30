@@ -9,7 +9,7 @@ class SubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
   def "should write packet correctly"() {
     given:
-        def packet = new SubscribeAckMqtt311OutMessage(subscribeAckReasonCodes, packetId)
+        def packet = new SubscribeAckMqtt311OutMessage(subscribeAckReasonCodes, messageId)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt311Connection, it)
@@ -19,7 +19,7 @@ class SubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCodes == subscribeAckReasonCodes
-        reader.messageId == packetId
+        reader.messageId == messageId
         reader.userProperties() == Array.empty(StringPair)
         reader.reason == ""
   }

@@ -30,7 +30,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final willRetain = false
   public static final mqtt311ClientId = "testMqtt311ClientId"
   public static final mqtt5ClientId = "testMqtt5ClientId"
-  public static final packetId = 1234 as short
+  public static final messageId = 1234 as short
   public static final userName = "testUser"
   public static final userPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
   public static final keepAlive = 120
@@ -94,7 +94,7 @@ class NetworkUnitSpecification extends UnitSpecification {
 
   public static final subscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
   public static final topicFilters = Array.of(topicFilter, topicFilter2)
-  public static final topicFiltersObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
+  public static final subscriptionsObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
   public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
   public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
   public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)

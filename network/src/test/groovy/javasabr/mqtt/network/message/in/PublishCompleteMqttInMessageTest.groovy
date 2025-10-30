@@ -10,7 +10,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
         }
     when:
         def packet = new PublishCompleteMqttInMessage(0b0111_0000 as byte)
@@ -18,7 +18,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason() == ""
-        packet.messageId() == packetId
+        packet.messageId() == messageId
         packet.reasonCode() == PublishCompletedReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }
@@ -30,7 +30,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
@@ -41,12 +41,12 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason() == reasonString
-        packet.messageId() == packetId
+        packet.messageId() == messageId
         packet.reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
         packet.userProperties() == userProperties
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
           it.putMbi(0)
         }
@@ -55,7 +55,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason() == ""
-        packet.messageId() == packetId
+        packet.messageId() == messageId
         packet.reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
         packet.userProperties() == Array.empty()
   }

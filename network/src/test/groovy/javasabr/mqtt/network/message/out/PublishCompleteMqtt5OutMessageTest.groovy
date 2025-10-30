@@ -9,7 +9,7 @@ class PublishCompleteMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write packet correctly"() {
     given:
         def packet = new PublishCompleteMqtt5OutMessage(
-            packetId,
+            messageId,
             PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
             userProperties,
             reasonString)
@@ -22,7 +22,7 @@ class PublishCompleteMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
-        reader.messageId() == packetId
+        reader.messageId() == messageId
         reader.userProperties() == userProperties
         reader.reason() == reasonString
   }

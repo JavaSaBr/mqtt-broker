@@ -1,15 +1,16 @@
 package javasabr.mqtt.network.message.out
 
+import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishMqtt5OutMessage(
-            packetId,
+        def outMessage = new PublishMqtt5OutMessage(
+            messageId,
             QoS.EXACTLY_ONCE,
             true,
             true,
@@ -22,26 +23,26 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             userProperties)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt5Connection, it)
+          outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishMqttInMessage(0b0011_1101 as byte)
-        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new PublishMqttInMessage(0b0011_1101 as byte)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.messageId == packetId
-        reader.qos == QoS.EXACTLY_ONCE
-        reader.retained
-        reader.duplicate
-        reader.payload == publishPayload
-        reader.topicName == publishTopic
-        reader.userProperties() == userProperties
-        reader.topicAlias == topicAlias
-        !reader.payloadFormat
-        reader.rawResponseTopicName == responseTopic
-        reader.correlationData == correlationData
+        inMessage.messageId() == messageId
+        inMessage.qos() == QoS.EXACTLY_ONCE
+        inMessage.retained()
+        inMessage.duplicate()
+        inMessage.payload() == publishPayload
+        inMessage.rawTopicName() == publishTopic.rawTopic()
+        inMessage.userProperties() == userProperties
+        inMessage.topicAlias() == topicAlias
+        inMessage.payloadFormat() == PayloadFormat.BINARY
+        inMessage.rawResponseTopicName() == responseTopic
+        inMessage.correlationData() == correlationData
     when:
-        packet = new PublishMqtt5OutMessage(
-            packetId,
+        outMessage = new PublishMqtt5OutMessage(
+            messageId,
             QoS.AT_MOST_ONCE,
             false,
             false,
@@ -54,23 +55,23 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             userProperties)
 
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt5Connection, it)
+          outMessage.write(defaultMqtt5Connection, it)
         }
 
-        reader = new PublishMqttInMessage(0b0011_0000 as byte)
-        result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        inMessage = new PublishMqttInMessage(0b0011_0000 as byte)
+        result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.messageId == 0
-        reader.qos == QoS.AT_MOST_ONCE
-        !reader.retained
-        !reader.duplicate
-        reader.payload == publishPayload
-        reader.topicName == publishTopic
-        reader.userProperties() == userProperties
-        reader.topicAlias == topicAlias
-        reader.payloadFormat
-        reader.rawResponseTopicName == responseTopic
-        reader.correlationData == correlationData
+        inMessage.messageId() == 0
+        inMessage.qos() == QoS.AT_MOST_ONCE
+        !inMessage.retained()
+        !inMessage.duplicate()
+        inMessage.payload() == publishPayload
+        inMessage.rawTopicName() == publishTopic.rawTopic()
+        inMessage.userProperties() == userProperties
+        inMessage.topicAlias() == topicAlias
+        inMessage.payloadFormat() == PayloadFormat.UTF8_STRING
+        inMessage.rawResponseTopicName() == responseTopic
+        inMessage.correlationData() == correlationData
   }
 }

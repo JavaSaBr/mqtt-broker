@@ -9,7 +9,7 @@ class PublishAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write packet correctly"() {
     given:
         def packet = new PublishAckMqtt5OutMessage(
-            packetId,
+            messageId,
             PublishAckReasonCode.NOT_AUTHORIZED,
             userProperties,
             reasonString)
@@ -22,7 +22,7 @@ class PublishAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCode() == PublishAckReasonCode.NOT_AUTHORIZED
-        reader.messageId() == packetId
+        reader.messageId() == messageId
         reader.userProperties() == userProperties
         reader.reason() == reasonString
   }

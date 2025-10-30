@@ -7,9 +7,10 @@ import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
         def clientConfig = clientConnectionConfig(
+            defaultServerConnectionConfig(),
             maxQos,
             MqttVersion.MQTT_5,
             240,
@@ -18,17 +19,12 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             300,
             30,
             false,
-            false,
-            sessionsEnabled,
-            retainAvailable,
-            wildcardSubscriptionAvailable,
-            subscriptionIdAvailable,
-            sharedSubscriptionAvailable);
+            false);
         def requestedClientId = "-1"
         def requestedSessionExpireInterval = 360
         def requestedKeepAlive = 120
         def requestedReceiveMaxPublishes = 500
-        def packet = new ConnectAckMqtt5OutMessage(
+        def outMessage = new ConnectAckMqtt5OutMessage(
             clientConfig,
             ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
             sessionPresent,
@@ -45,29 +41,29 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             userProperties)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt5Connection, it)
+          outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new ConnectAckMqttInMessage(0b0010_0000 as byte)
-        def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new ConnectAckMqttInMessage(0b0010_0000 as byte)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
-        reader.sessionPresent == sessionPresent
-        reader.retainAvailable == retainAvailable
-        reader.sessionExpiryInterval == 240
-        reader.receiveMaxPublishes == 250
-        reader.maxPacketSize == maxPacketSize
-        reader.assignedClientId == mqtt311ClientId
-        reader.topicAliasMaxValue == 300
-        reader.reason == reasonString
-        reader.userProperties() == userProperties
-        reader.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
-        reader.subscriptionIdAvailable == subscriptionIdAvailable
-        reader.sharedSubscriptionAvailable == sharedSubscriptionAvailable
-        reader.serverKeepAlive == 30
-        reader.responseInformation == responseInformation
-        reader.serverReference == serverReference
-        reader.authenticationData == authData
-        reader.authenticationMethod == authMethod
+        inMessage.reasonCode() == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+        inMessage.sessionPresent() == sessionPresent
+        inMessage.retainAvailable() == retainAvailable
+        inMessage.sessionExpiryInterval() == 240
+        inMessage.receiveMaxPublishes() == 250
+        inMessage.maxPacketSize() == maxPacketSize
+        inMessage.assignedClientId() == mqtt311ClientId
+        inMessage.topicAliasMaxValue() == 300
+        inMessage.reason() == reasonString
+        inMessage.userProperties() == userProperties
+        inMessage.wildcardSubscriptionAvailable() == wildcardSubscriptionAvailable
+        inMessage.subscriptionIdAvailable() == subscriptionIdAvailable
+        inMessage.sharedSubscriptionAvailable() == sharedSubscriptionAvailable
+        inMessage.serverKeepAlive() == 30
+        inMessage.responseInformation() == responseInformation
+        inMessage.serverReference() == serverReference
+        inMessage.authenticationData() == authData
+        inMessage.authenticationMethod() == authMethod
   }
 }

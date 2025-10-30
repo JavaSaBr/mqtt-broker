@@ -2,6 +2,7 @@ package javasabr.mqtt.model.subscribtion;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
+import javasabr.mqtt.model.topic.TopicFilter;
 
 public record RequestedSubscription(
     /*
@@ -29,4 +30,14 @@ public record RequestedSubscription(
       false, Application Messages forwarded using this subscription have the RETAIN flag set to 0. Retained messages sent
       when the subscription is established have the RETAIN flag set to 1.
      */
-    boolean retainAsPublished) {}
+    boolean retainAsPublished) {
+
+  public static RequestedSubscription minimal(String rawTopicFilter, QoS qos) {
+    return new RequestedSubscription(
+        rawTopicFilter,
+        qos,
+        SubscribeRetainHandling.SEND,
+        true,
+        true);
+  }
+}

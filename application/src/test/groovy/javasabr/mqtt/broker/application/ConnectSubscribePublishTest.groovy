@@ -11,13 +11,14 @@ import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PayloadFormatIndicator
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
 import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
 
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicReference
 
 class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 0 using mqtt 3.1.1"() {
     given:
-        def received = new AtomicReference<Mqtt3Publish>()
+        def received = new CompletableFuture<Mqtt3Publish>()
         def subscriber = buildExternalMqtt311Client()
         def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
         def publisher = buildExternalMqtt311Client()
@@ -34,9 +35,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publishResult != null
         publishResult.qos == MqttQos.AT_MOST_ONCE
         publishResult.type == Mqtt3MessageType.PUBLISH
-        received.get() != null
-        received.get().qos == MqttQos.AT_MOST_ONCE
-        received.get().type == Mqtt3MessageType.PUBLISH
+        received.join() != null
+        received.join().qos == MqttQos.AT_MOST_ONCE
+        received.join().type == Mqtt3MessageType.PUBLISH
     cleanup:
         subscriber.disconnect().join()
         publisher.disconnect().join()
@@ -44,7 +45,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 0 using mqtt 5"() {
     given:
-        def received = new AtomicReference<Mqtt5Publish>()
+        def received = new CompletableFuture<Mqtt5Publish>()
         def subscriber = buildExternalMqtt5Client()
         def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
         def publisher = buildExternalMqtt5Client()
@@ -61,9 +62,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publishResult != null
         publishResult.publish.qos == MqttQos.AT_MOST_ONCE
         publishResult.publish.type == Mqtt5MessageType.PUBLISH
-        received.get() != null
-        received.get().qos == MqttQos.AT_MOST_ONCE
-        received.get().type == Mqtt5MessageType.PUBLISH
+        received.join() != null
+        received.join().qos == MqttQos.AT_MOST_ONCE
+        received.join().type == Mqtt5MessageType.PUBLISH
     cleanup:
         subscriber.disconnect().join()
         publisher.disconnect().join()
@@ -71,7 +72,7 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 1 using mqtt 3.1.1"() {
     given:
-        def received = new AtomicReference<Mqtt3Publish>()
+        def received = new CompletableFuture<Mqtt3Publish>()
         def subscriber = buildExternalMqtt311Client()
         def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
         def publisher = buildExternalMqtt311Client()
@@ -88,17 +89,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publishResult != null
         publishResult.qos == MqttQos.AT_LEAST_ONCE
         publishResult.type == Mqtt3MessageType.PUBLISH
-        received.get() != null
-        received.get().qos == MqttQos.AT_LEAST_ONCE
-        received.get().type == Mqtt3MessageType.PUBLISH
+        received.join() != null
+        received.join().qos == MqttQos.AT_LEAST_ONCE
+        received.join().type == Mqtt3MessageType.PUBLISH
     cleanup:
         subscriber.disconnect().join()
         publisher.disconnect().join()
   }
 
-  def "publisher should publish message QoS 1 using mqtt 5"() {
+  def "should deliver publish message QoS 1 using mqtt 5"() {
     given:
-        def received = new AtomicReference<Mqtt5Publish>()
+        def received = new CompletableFuture<Mqtt5Publish>()
         def subscriber = buildExternalMqtt5Client()
         def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
         def publisher = buildExternalMqtt5Client()
@@ -107,7 +108,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.connect().join()
         def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_LEAST_ONCE, received)
         def publishResult = publish(publisher, subscriberId, MqttQos.AT_LEAST_ONCE)
-        Thread.sleep(100)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -116,17 +116,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publishResult != null
         publishResult.publish.qos == MqttQos.AT_LEAST_ONCE
         publishResult.publish.type == Mqtt5MessageType.PUBLISH
-        received.get() != null
-        received.get().qos == MqttQos.AT_LEAST_ONCE
-        received.get().type == Mqtt5MessageType.PUBLISH
+        received.join() != null
+        received.join().qos == MqttQos.AT_LEAST_ONCE
+        received.join().type == Mqtt5MessageType.PUBLISH
     cleanup:
         subscriber.disconnect().join()
         publisher.disconnect().join()
   }
 
-  def "publisher should publish message QoS 2 using mqtt 3.1.1"() {
+  def "should deliver publish message QoS 2 using mqtt 3.1.1"() {
     given:
-        def received = new AtomicReference<Mqtt3Publish>()
+        def received = new CompletableFuture<Mqtt3Publish>()
         def subscriber = buildExternalMqtt311Client()
         def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
         def publisher = buildExternalMqtt311Client()
@@ -135,7 +135,6 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.connect().join()
         def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.EXACTLY_ONCE, received)
         def publishResult = publish(publisher, subscriberId, MqttQos.EXACTLY_ONCE)
-        Thread.sleep(100)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -144,14 +143,14 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publishResult != null
         publishResult.qos == MqttQos.EXACTLY_ONCE
         publishResult.type == Mqtt3MessageType.PUBLISH
-        received.get() != null
-        received.get().qos == MqttQos.EXACTLY_ONCE
-        received.get().type == Mqtt3MessageType.PUBLISH
+        received.join() != null
+        received.join().qos == MqttQos.EXACTLY_ONCE
+        received.join().type == Mqtt3MessageType.PUBLISH
   }
 
-  def "publisher should publish message QoS 2 using mqtt 5"() {
+  def "should deliver publish message QoS 2 using mqtt 5"() {
     given:
-        def received = new AtomicReference<Mqtt5Publish>()
+        def received = new CompletableFuture<Mqtt5Publish>()
         def subscriber = buildExternalMqtt5Client()
         def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
         def publisher = buildExternalMqtt5Client()
@@ -169,9 +168,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publishResult != null
         publishResult.publish.qos == MqttQos.EXACTLY_ONCE
         publishResult.publish.type == Mqtt5MessageType.PUBLISH
-        received.get() != null
-        received.get().qos == MqttQos.EXACTLY_ONCE
-        received.get().type == Mqtt5MessageType.PUBLISH
+        received.join() != null
+        received.join().qos == MqttQos.EXACTLY_ONCE
+        received.join().type == Mqtt5MessageType.PUBLISH
     cleanup:
         subscriber.disconnect().join()
         publisher.disconnect().join()
@@ -191,11 +190,11 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
       Mqtt5AsyncClient subscriber,
       String subscriberId,
       MqttQos qos,
-      AtomicReference<Mqtt5Publish> received) {
+      CompletableFuture<Mqtt5Publish> received) {
     return subscriber.subscribeWith()
         .topicFilter("test/$subscriberId")
         .qos(qos)
-        .callback({ publish -> received.set(publish) })
+        .callback({ publish -> received.complete(publish) })
         .send()
         .join()
   }
@@ -213,11 +212,11 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
       Mqtt3AsyncClient subscriber,
       String subscriberId,
       MqttQos qos,
-      AtomicReference<Mqtt3Publish> received) {
+      CompletableFuture<Mqtt3Publish> received) {
     return subscriber.subscribeWith()
         .topicFilter("test/$subscriberId")
         .qos(qos)
-        .callback({ publish -> received.set(publish) })
+        .callback({ publish -> received.complete(publish) })
         .send()
         .join()
   }

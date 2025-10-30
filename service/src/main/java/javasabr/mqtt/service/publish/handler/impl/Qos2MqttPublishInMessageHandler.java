@@ -9,6 +9,7 @@ import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -84,7 +85,7 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   private boolean processPublishRelease(MqttClient client, TrackableMessage response) {
-    if (!(response instanceof Publish)) {
+    if (!(response instanceof PublishReleaseMqttInMessage)) {
       throw new IllegalStateException("Unexpected response " + response);
     }
     client.send(messageOutFactoryService

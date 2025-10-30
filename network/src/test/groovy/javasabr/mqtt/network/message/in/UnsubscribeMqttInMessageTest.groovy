@@ -9,7 +9,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.putString(topicFilter)
           it.putString(topicFilter2)
         }
@@ -21,7 +21,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         packet.rawTopicFilters.size() == 2
         packet.rawTopicFilters.get(0).toString() == topicFilter
         packet.rawTopicFilters.get(1).toString() == topicFilter2
-        packet.messageId == packetId
+        packet.messageId == messageId
         packet.userProperties() == Array.empty()
   }
 
@@ -31,7 +31,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.putString(topicFilter)
@@ -45,11 +45,11 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         packet.rawTopicFilters.size() == 2
         packet.rawTopicFilters.get(0).toString() == topicFilter
         packet.rawTopicFilters.get(1).toString() == topicFilter2
-        packet.messageId == packetId
+        packet.messageId == messageId
         packet.userProperties() == userProperties
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.putMbi(0)
           it.putString(topicFilter)
           it.putString(topicFilter2)
@@ -61,7 +61,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         packet.rawTopicFilters.size() == 2
         packet.rawTopicFilters.get(0).toString() == topicFilter
         packet.rawTopicFilters.get(1).toString() == topicFilter2
-        packet.messageId == packetId
+        packet.messageId == messageId
         packet.userProperties() == Array.empty()
   }
 }

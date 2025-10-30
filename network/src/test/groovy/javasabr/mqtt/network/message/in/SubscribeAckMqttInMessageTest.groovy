@@ -10,7 +10,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0.value)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_2.value)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1.value)
@@ -22,7 +22,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason == ""
-        packet.messageId == packetId
+        packet.messageId == messageId
         packet.reasonCodes.size() == 4
         packet.reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_2
@@ -37,7 +37,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0.value)
@@ -51,7 +51,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason == reasonString
-        packet.messageId == packetId
+        packet.messageId == messageId
         packet.reasonCodes.size() == 4
         packet.reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
@@ -60,7 +60,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.userProperties() == userProperties
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.putMbi(0)
           it.put(SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED.value)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_2.value)
@@ -72,7 +72,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason == ""
-        packet.messageId == packetId
+        packet.messageId == messageId
         packet.reasonCodes.size() == 4
         packet.reasonCodes.get(0) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
         packet.reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_2
