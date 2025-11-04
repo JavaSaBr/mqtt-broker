@@ -95,7 +95,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901207
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = DisconnectReasonCode.of(readByteUnsigned(buffer));
+      reasonCode = DisconnectReasonCode.ofCode(readByteUnsigned(buffer));
     }
   }
 

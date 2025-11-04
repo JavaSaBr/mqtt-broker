@@ -19,6 +19,11 @@ class SpecificationNetworkExtensions extends Specification {
     protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {}
   }
 
+  static ByteBuffer putByte(ByteBuffer self, int value) {
+    self.put((byte) value)
+    return self
+  }
+
   static ByteBuffer putMbi(ByteBuffer self, int value) {
     MqttDataUtils.writeMbi(value, self)
     return self

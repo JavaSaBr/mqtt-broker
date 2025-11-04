@@ -2,7 +2,6 @@ package javasabr.mqtt.model.subscribtion;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
-import javasabr.mqtt.model.topic.TopicFilter;
 
 public record RequestedSubscription(
     /*

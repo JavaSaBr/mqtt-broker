@@ -21,6 +21,22 @@ public class DefaultTopicService implements TopicService {
   }
 
   @Override
+  public boolean isValidTopicFilter(MqttClient client, String rawTopicFilter) {
+    if (SharedTopicFilter.isShared(rawTopicFilter)) {
+      if (!TopicValidator.validateSharedTopicFilter(rawTopicFilter)) {
+        log.warning(client.clientId(), rawTopicFilter, "[%s] Invalid shared topic filter:[%s]"::formatted);
+        return false;
+      }
+      return true;
+    }
+    if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
+      log.warning(client.clientId(), rawTopicFilter, "[%s] Invalid topic filter:[%s]"::formatted);
+      return false;
+    }
+    return true;
+  }
+
+  @Override
   public TopicName createTopicName(MqttClient client, String rawTopicName) {
     if (!TopicValidator.validateTopicName(rawTopicName)) {
       log.warning(client.clientId(), rawTopicName, "[%s] Invalid topic name:[%s]"::formatted);

@@ -30,7 +30,9 @@ public interface MqttClient extends SubscriptionOwner {
 
   MqttClientConnectionConfig connectionConfig();
 
-  void send(MqttOutMessage packet);
+  void send(MqttOutMessage message);
 
-  CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage packet);
+  CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage message);
+
+  void closeWithReason(MqttOutMessage message);
 }

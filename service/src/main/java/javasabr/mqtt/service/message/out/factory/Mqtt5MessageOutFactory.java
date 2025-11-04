@@ -107,20 +107,20 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newSubscribeAck(
-      int packetId,
+      int messageId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
       Array<StringPair> userProperties) {
-    return new SubscribeAckMqtt5OutMessage(packetId, reasonCodes, userProperties, reason);
+    return new SubscribeAckMqtt5OutMessage(messageId, reasonCodes, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newUnsubscribeAck(
-      int packetId,
+      int messageId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason) {
-    return new UnsubscribeAckMqtt5OutMessage(packetId, reasonCodes, userProperties, reason);
+    return new UnsubscribeAckMqtt5OutMessage(messageId, reasonCodes, userProperties, reason);
   }
 
   @Override
@@ -151,28 +151,28 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newPublishRelease(
-      int packetId,
+      int messageId,
       PublishReleaseReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReleaseMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishReleaseMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newPublishReceived(
-      int packetId,
+      int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReceivedMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishReceivedMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newPublishCompleted(
-      int packetId,
+      int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishCompleteMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishCompleteMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 }

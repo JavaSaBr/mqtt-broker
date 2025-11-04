@@ -8,5 +8,7 @@ public interface TopicService {
 
   TopicFilter createTopicFilter(MqttClient client, String rawTopicFilter);
 
+  boolean isValidTopicFilter(MqttClient client, String rawTopicFilter);
+
   TopicName createTopicName(MqttClient client, String rawTopicName);
 }

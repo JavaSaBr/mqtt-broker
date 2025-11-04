@@ -79,7 +79,7 @@ public class SubscribeAckMqttInMessage extends MqttInMessage {
 
     reasonCodes = ArrayFactory.mutableArray(SubscribeAckReasonCode.class, buffer.remaining());
     while (buffer.hasRemaining()) {
-      reasonCodes.add(SubscribeAckReasonCode.of(readByteUnsigned(buffer)));
+      reasonCodes.add(SubscribeAckReasonCode.ofCode(readByteUnsigned(buffer)));
     }
   }
 

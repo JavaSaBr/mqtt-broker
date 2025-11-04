@@ -12,7 +12,6 @@ import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
 import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
 
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.atomic.AtomicReference
 
 class ConnectSubscribePublishTest extends IntegrationSpecification {
 

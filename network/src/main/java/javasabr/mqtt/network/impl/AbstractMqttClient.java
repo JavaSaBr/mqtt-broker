@@ -49,15 +49,21 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   }
 
   @Override
-  public void send(MqttOutMessage packet) {
-    log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
-    connection.send(packet);
+  public void send(MqttOutMessage message) {
+    log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
+    connection.send(message);
   }
 
   @Override
-  public CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage packet) {
-    log.debug(clientId, packet.name(), packet, "[%s] Send to client packet:[%s] %s"::formatted);
-    return connection.sendWithFeedback(packet);
+  public CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage message) {
+    log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
+    return connection.sendWithFeedback(message);
+  }
+
+  @Override
+  public void closeWithReason(MqttOutMessage message) {
+    sendWithFeedback(message)
+        .thenAccept(_ -> connection.close());
   }
 
   @Override

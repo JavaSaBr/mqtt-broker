@@ -1,6 +1,5 @@
 package javasabr.mqtt.service.message.handler.impl;
 
-import static java.lang.Byte.toUnsignedInt;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 
@@ -9,7 +8,6 @@ import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.subscribtion.RequestedSubscription;
 import javasabr.mqtt.model.subscribtion.Subscription;
-import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
@@ -30,7 +28,7 @@ import lombok.experimental.FieldDefaults;
 public class SubscribeMqttInMessageHandler extends
     AbstractMqttInMessageHandler<ExternalMqttClient, SubscribeMqttInMessage> {
 
-  private final static Set<SubscribeAckReasonCode> INVALID_ACK_CODE = Set.of(
+  private final static Set<SubscribeAckReasonCode> DISCONNECT_CASES = Set.of(
       SHARED_SUBSCRIPTIONS_NOT_SUPPORTED,
       WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
 
@@ -57,8 +55,7 @@ public class SubscribeMqttInMessageHandler extends
       ExternalMqttClient client,
       SubscribeMqttInMessage message) {
 
-    Array<RequestedSubscription> rawSubscriptions = message.subscriptions();
-    Array<Subscription> subscriptions = transformSubscriptions(client, rawSubscriptions);
+    Array<Subscription> subscriptions = transformSubscriptions(client, message.subscriptions());
 
     MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(client);
     Array<SubscribeAckReasonCode> ackReasonCodes = subscriptionService
@@ -69,44 +66,34 @@ public class SubscribeMqttInMessageHandler extends
 
     client.send(subscribeAck);
 
-    SubscribeAckReasonCode anyReason = ackReasonCodes
+    SubscribeAckReasonCode anyReasonToDisconnect = ackReasonCodes
         .reversedIterations()
-        .findAny(INVALID_ACK_CODE, Set::contains);
+        .findAny(DISCONNECT_CASES, Set::contains);
 
-    if (anyReason != null) {
-      var disconnectReasonCode = DisconnectReasonCode.of(toUnsignedInt(anyReason.getValue()));
+    if (anyReasonToDisconnect != null) {
       MqttOutMessage disconnect = messageOutFactory
-          .newDisconnect(client, disconnectReasonCode);
-
-      client
-          .sendWithFeedback(disconnect)
-          .thenAccept(_ -> client
-              .connection()
-              .close());
+          .newDisconnect(client, DisconnectReasonCode.ofCode(anyReasonToDisconnect.code()));
+      client.closeWithReason(disconnect);
     }
   }
 
-  private Array<Subscription> transformSubscriptions(MqttClient client, Array<RequestedSubscription> rawSubscriptions) {
-    MutableArray<Subscription> subscriptions =
-        ArrayFactory.mutableArray(Subscription.class, rawSubscriptions.size());
+  private Array<Subscription> transformSubscriptions(
+      MqttClient client,
+      Array<RequestedSubscription> requestedSubscriptions) {
 
-    for (RequestedSubscription subscription : rawSubscriptions) {
-      String rawTopicFilter = subscription.rawTopicFilter();
-      TopicFilter topicFilter = topicService.createTopicFilter(client, rawTopicFilter);
+    MutableArray<Subscription> subscriptions =
+        ArrayFactory.mutableArray(Subscription.class, requestedSubscriptions.size());
+
+    for (RequestedSubscription requested : requestedSubscriptions) {
+      String rawTopicFilter = requested.rawTopicFilter();
       subscriptions.add(new Subscription(
-          topicFilter,
-          subscription.qos(),
-          subscription.retainHandling(),
-          subscription.noLocal(),
-          subscription.retainAsPublished()));
+          topicService.createTopicFilter(client, rawTopicFilter),
+          requested.qos(),
+          requested.retainHandling(),
+          requested.noLocal(),
+          requested.retainAsPublished()));
     }
 
     return subscriptions;
-  }
-
-  private void sendUnspecifiedError(ExternalMqttClient client, SubscribeMqttInMessage message) {
-    client.send(messageOutFactoryService
-        .resolveFactory(client)
-        .newSubscribeAck(message.messageId(), Array.of(SubscribeAckReasonCode.UNSPECIFIED_ERROR)));
   }
 }

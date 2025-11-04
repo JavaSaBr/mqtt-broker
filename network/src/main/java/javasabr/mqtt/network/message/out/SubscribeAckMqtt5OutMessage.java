@@ -50,7 +50,7 @@ public class SubscribeAckMqtt5OutMessage extends SubscribeAckMqtt311OutMessage {
       Array<SubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason) {
-    super(reasonCodes, messageId);
+    super(messageId, reasonCodes);
     this.userProperties = userProperties;
     this.reason = reason;
   }
@@ -67,7 +67,6 @@ public class SubscribeAckMqtt5OutMessage extends SubscribeAckMqtt311OutMessage {
 
   @Override
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901174
     writeStringPairProperties(buffer, MqttMessageProperty.USER_PROPERTY, userProperties);
     writeNotEmptyProperty(buffer, MqttMessageProperty.REASON_STRING, reason);

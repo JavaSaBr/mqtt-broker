@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.subscribtion.RequestedSubscription
 import javasabr.mqtt.model.subscribtion.Subscription
