@@ -1,0 +1,147 @@
+package javasabr.mqtt.service.impl;
+
+import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
+import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
+
+import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
+import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.model.subscribtion.Subscription;
+import javasabr.mqtt.model.topic.SharedTopicFilter;
+import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.model.topic.tree.ConcurrentTopicTree;
+import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.MqttSession;
+import javasabr.mqtt.service.SubscriptionService;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+import lombok.AccessLevel;
+import lombok.CustomLog;
+import lombok.experimental.FieldDefaults;
+
+/**
+ * In memory subscription service based on {@link ConcurrentTopicTree}
+ */
+@CustomLog
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class InMemorySubscriptionService implements SubscriptionService {
+
+  ConcurrentTopicTree topicTree;
+
+  public InMemorySubscriptionService() {
+    this.topicTree = new ConcurrentTopicTree();
+  }
+
+  @Override
+  public MqttClient resolveClient(Subscriber subscriber) {
+    if (subscriber instanceof SingleSubscriber single) {
+      return (MqttClient) single.owner();
+    }
+    throw new IllegalArgumentException("Unexpected subscriber: " + subscriber);
+  }
+
+  @Override
+  public Array<SingleSubscriber> findSubscribersTo(MutableArray<SingleSubscriber> container, TopicName topicName) {
+    Array<SingleSubscriber> matched = topicTree.matches(topicName);
+    container.addAll(matched);
+    return container;
+  }
+
+  @Override
+  public Array<SubscribeAckReasonCode> subscribe(
+      MqttClient client,
+      Array<Subscription> subscriptions) {
+
+    MutableArray<SubscribeAckReasonCode> subscribeResults = ArrayFactory.mutableArray(
+        SubscribeAckReasonCode.class,
+        subscriptions.size());
+
+    MqttSession session = client.session();
+    if (session == null) {
+      // without session just fill error for each topic filter
+      log.warning(client.clientId(), "[%s] Cannot add subscription for client without session"::formatted);
+      for (int i = 0, length = subscriptions.size(); i < length; i++) {
+        subscribeResults.add(SubscribeAckReasonCode.UNSPECIFIED_ERROR);
+      }
+      return subscribeResults;
+    }
+
+    for (Subscription subscription : subscriptions) {
+      subscribeResults.add(addSubscription(client, session, subscription));
+    }
+
+    return subscribeResults;
+  }
+
+  private SubscribeAckReasonCode addSubscription(MqttClient client, MqttSession session, Subscription subscription) {
+    MqttClientConnectionConfig clientConfig = client.connectionConfig();
+    MqttServerConnectionConfig serverConfig = clientConfig.server();
+    TopicFilter topicFilter = subscription.topicFilter();
+    if (topicFilter.isInvalid()) {
+      return SubscribeAckReasonCode.TOPIC_FILTER_INVALID;
+    } else if (!serverConfig.sharedSubscriptionAvailable() && topicFilter instanceof SharedTopicFilter) {
+      return SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+    } else if (!serverConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
+      return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+    }
+    session.storeSubscription(subscription);
+    topicTree.subscribe(client, subscription);
+    return subscription.qos().subscribeAckReasonCode();
+  }
+
+  @Override
+  public Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient client, Array<TopicFilter> topicFilters) {
+
+    MutableArray<UnsubscribeAckReasonCode> unsubscribeResults = ArrayFactory.mutableArray(
+        UnsubscribeAckReasonCode.class,
+        topicFilters.size());
+
+    MqttSession session = client.session();
+    if (session == null) {
+      // without session just fill error for each topic filter
+      log.warning(client.clientId(), "[%s] Cannot add subscription for client without session"::formatted);
+      for (int i = 0, length = topicFilters.size(); i < length; i++) {
+        unsubscribeResults.add(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR);
+      }
+      return unsubscribeResults;
+    }
+
+    for (TopicFilter topicFilter : topicFilters) {
+      unsubscribeResults.add(removeSubscription(client, session, topicFilter));
+    }
+
+    return unsubscribeResults;
+  }
+
+  private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttSession session, TopicFilter topicFilter) {
+    if (topicFilter.isInvalid()) {
+      return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
+    } else if (topicTree.unsubscribe(client, topicFilter)) {
+      session.removeSubscription(topicFilter);
+      return SUCCESS;
+    } else {
+      return NO_SUBSCRIPTION_EXISTED;
+    }
+  }
+
+  @Override
+  public void cleanSubscriptions(MqttClient client, MqttSession session) {
+    Array<Subscription> subscriptions = session.storedSubscriptions();
+    for (Subscription subscription : subscriptions) {
+      topicTree.unsubscribe(client, subscription.topicFilter());
+    }
+  }
+
+  @Override
+  public void restoreSubscriptions(MqttClient client, MqttSession session) {
+    Array<Subscription> subscriptions = session.storedSubscriptions();
+    for (Subscription subscription : subscriptions) {
+      topicTree.subscribe(client, subscription);
+    }
+  }
+}

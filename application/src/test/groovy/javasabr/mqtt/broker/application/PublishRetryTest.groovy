@@ -6,7 +6,8 @@ import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter
+import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage
@@ -35,9 +36,8 @@ class PublishRetryTest extends IntegrationSpecification {
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
         subscriber.send(new SubscribeMqtt311OutMessage(
-            Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.AT_LEAST_ONCE)),
-            1
-        ))
+            1,
+            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.AT_LEAST_ONCE))))
         def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
     then:
         subscribeAck.reasonCodes.stream()
@@ -83,9 +83,8 @@ class PublishRetryTest extends IntegrationSpecification {
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
         subscriber.send(new SubscribeMqtt5OutMessage(
-            Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.AT_LEAST_ONCE)),
-            1
-        ))
+            1,
+            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.AT_LEAST_ONCE))))
         def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
     then:
         subscribeAck.reasonCodes.stream()
@@ -131,9 +130,8 @@ class PublishRetryTest extends IntegrationSpecification {
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
         subscriber.send(new SubscribeMqtt311OutMessage(
-            Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.EXACTLY_ONCE)),
-            1
-        ))
+            1,
+            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.EXACTLY_ONCE))))
         def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
     then:
         subscribeAck.reasonCodes.stream()
@@ -194,9 +192,8 @@ class PublishRetryTest extends IntegrationSpecification {
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
     when:
         subscriber.send(new SubscribeMqtt5OutMessage(
-            Array.of(new SubscribeTopicFilter("test/retry/$subscriberId", QoS.EXACTLY_ONCE)),
-            1
-        ))
+            1,
+            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.EXACTLY_ONCE))))
         def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
     then:
         subscribeAck.reasonCodes.stream()

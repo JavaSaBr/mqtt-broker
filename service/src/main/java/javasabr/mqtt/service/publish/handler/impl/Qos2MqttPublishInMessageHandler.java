@@ -1,15 +1,14 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
-import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.MqttSession.PendingMessageHandler;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.HasMessageId;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
@@ -41,63 +40,54 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void handleImpl(ExternalMqttClient client, PublishMqttInMessage packet) {
+  protected void handleImpl(ExternalMqttClient client, Publish publish) {
     MqttSession session = client.session();
     if (session == null) {
       return;
     }
     // if this packet is re-try from client
-    if (packet.duplicate()) {
+    if (publish.duplicated()) {
       // if this packet was accepted before then we can skip it
-      if (session.hasInPending(packet.messageId())) {
+      if (session.hasInPending(publish.messageId())) {
         return;
       }
     }
-    super.handleImpl(client, packet);
+    super.handleImpl(client, publish);
   }
 
   @Override
-  protected void handleInvalidTopic(ExternalMqttClient client, int messageId, TopicName topicName) {
-    super.handleInvalidTopic(client, messageId, topicName);
+  protected void handleEmptySubscriptions(ExternalMqttClient client, Publish publish) {
+    super.handleEmptySubscriptions(client, publish);
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishReceived(messageId, PublishReceivedReasonCode.TOPIC_NAME_INVALID));
+        .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS));
   }
 
   @Override
-  protected void handleEmptySubscriptions(ExternalMqttClient client, int messageId, TopicName topicName) {
-    super.handleEmptySubscriptions(client, messageId, topicName);
+  protected void handleError(ExternalMqttClient client, Publish publish, PublishHandlingResult handlingResult) {
+    super.handleError(client, publish, handlingResult);
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishReceived(messageId, PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS));
+        .newPublishReceived(publish.messageId(), handlingResult.receivedReasonCode()));
   }
 
   @Override
-  protected void handleError(ExternalMqttClient client, int messageId, PublishHandlingResult handlingResult) {
-    super.handleError(client, messageId, handlingResult);
-    client.send(messageOutFactoryService
-        .resolveFactory(client)
-        .newPublishReceived(messageId, handlingResult.receivedReasonCode()));
-  }
-
-  @Override
-  protected void handleSuccessfulResult(ExternalMqttClient client, PublishMqttInMessage packet, int subscribers) {
-    super.handleSuccessfulResult(client, packet, subscribers);
+  protected void handleSuccessfulResult(ExternalMqttClient client, Publish publish, int subscribers) {
+    super.handleSuccessfulResult(client, publish, subscribers);
     MqttSession session = client.session();
     if (session == null) {
       return;
     }
-    session.registerInPublish(packet, pendingMessageHandler, packet.messageId());
+    session.registerInPublish(publish, pendingMessageHandler);
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newPublishReceived(packet.messageId(), PublishReceivedReasonCode.SUCCESS));
+        .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.SUCCESS));
   }
 
-  private boolean processPublishRelease(MqttClient client, HasMessageId response) {
+  private boolean processPublishRelease(MqttClient client, TrackableMessage response) {
     if (!(response instanceof PublishReleaseMqttInMessage)) {
       throw new IllegalStateException("Unexpected response " + response);
     }
-
     client.send(messageOutFactoryService
         .resolveFactory(client)
         .newPublishCompleted(response.messageId(), PublishCompletedReasonCode.SUCCESS));

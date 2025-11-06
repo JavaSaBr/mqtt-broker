@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.in
 
-import javasabr.mqtt.model.PacketProperty
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
@@ -10,7 +10,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
         }
     when:
         def packet = new PublishAckMqttInMessage(0b0100_0000 as byte)
@@ -18,7 +18,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason() == ""
-        packet.messageId() == packetId
+        packet.messageId() == messageId
         packet.reasonCode() == PublishAckReasonCode.SUCCESS
         packet.userProperties() == Array.empty()
   }
@@ -26,11 +26,11 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.REASON_STRING, reasonString)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.put(PublishAckReasonCode.PAYLOAD_FORMAT_INVALID.value)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
@@ -41,12 +41,12 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason() == reasonString
-        packet.messageId() == packetId
+        packet.messageId() == messageId
         packet.reasonCode() == PublishAckReasonCode.PAYLOAD_FORMAT_INVALID
         packet.userProperties() == userProperties
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(packetId)
+          it.putShort(messageId)
           it.put(PublishAckReasonCode.UNSPECIFIED_ERROR.value)
           it.putMbi(0)
         }
@@ -55,7 +55,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         packet.reason() == ""
-        packet.messageId() == packetId
+        packet.messageId() == messageId
         packet.reasonCode() == PublishAckReasonCode.UNSPECIFIED_ERROR
         packet.userProperties() == Array.empty()
   }

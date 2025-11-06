@@ -23,11 +23,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   final LockableRefToRefDictionary<String, UnsafeMqttSession> storedSession;
   final Thread cleanThread;
 
-  final int cleanInterval;
+  final int cleanIntervalInMs;
   volatile boolean closed;
 
-  public InMemoryMqttSessionService(int cleanInterval) {
-    this.cleanInterval = cleanInterval;
+  public InMemoryMqttSessionService(int cleanIntervalInMs) {
+    this.cleanIntervalInMs = cleanIntervalInMs;
     this.storedSession = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.cleanThread = new Thread(this::cleanup, "InMemoryMqttSessionService-Cleanup");
     this.cleanThread.setPriority(Thread.MIN_PRIORITY);
@@ -90,7 +90,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     var toRemove = ArrayFactory.mutableArray(UnsafeMqttSession.class);
 
     while (!closed) {
-      ThreadUtils.sleep(cleanInterval);
+      ThreadUtils.sleep(cleanIntervalInMs);
 
       toCheck.clear();
       toRemove.clear();

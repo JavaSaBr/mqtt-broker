@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
@@ -85,14 +86,31 @@ public class DebugUtils {
 
     @Override
     public void serialize(
-        Array<?> value,
+        Array<?> array,
         JsonGenerator gen,
         SerializationContext provider) throws JacksonException {
       gen.writeStartArray();
-      for (Object element : value) {
+      for (Object element : array) {
         gen.writePOJO(element);
       }
       gen.writeEndArray();
+    }
+  }
+
+  public static class RefToRefDictionarySerializer extends StdSerializer<RefToRefDictionary<?, ?>> {
+
+    public RefToRefDictionarySerializer() {
+      super(RefToRefDictionary.class);
+    }
+
+    @Override
+    public void serialize(
+        RefToRefDictionary<?, ?> dictionary,
+        JsonGenerator gen,
+        SerializationContext provider) throws JacksonException {
+      gen.writeStartObject();
+      dictionary.forEach((key, value) -> gen.writePOJOProperty(key.toString(), value));
+      gen.writeEndObject();
     }
   }
 
@@ -113,7 +131,8 @@ public class DebugUtils {
           .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE))
       .addMixIn(Object.class, DebugFieldsFilterMixIn.class)
       .addModule(new SimpleModule()
-          .addSerializer(new ArraySerializer()))
+          .addSerializer(new ArraySerializer())
+          .addSerializer(new RefToRefDictionarySerializer()))
       .filterProvider(DEBUG_FIELDS_FILTER)
       .build();
 

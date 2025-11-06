@@ -1,9 +1,11 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.PayloadFormat;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -13,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @CustomLog
 @RequiredArgsConstructor
@@ -25,38 +28,46 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public PublishHandlingResult handle(PublishMqttInMessage packet, SingleSubscriber subscriber) {
-    MqttClient mqttClient = subscriptionService.resolveClient(subscriber);
-    if (!expectedClient.isInstance(mqttClient)) {
-      log.warning(mqttClient, "Accepted not expected client:[%s]"::formatted);
+  public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
+    MqttClient client = subscriptionService.resolveClient(subscriber);
+    if (!expectedClient.isInstance(client)) {
+      log.warning(client, "Accepted not expected client:[%s]"::formatted);
       return PublishHandlingResult.NOT_EXPECTED_CLIENT;
     }
-    return handleImpl(packet, expectedClient.cast(mqttClient));
+    publish = reconstruct(client, publish);
+    if (publish == null) {
+      return PublishHandlingResult.SKIPPED;
+    }
+    return handleImpl(publish, expectedClient.cast(client));
   }
 
-  protected abstract PublishHandlingResult handleImpl(PublishMqttInMessage packet, C client) ;
+  @Nullable
+  protected Publish reconstruct(MqttClient client, Publish original) {
+    return original.with(
+        MqttProperties.MESSAGE_ID_IS_NOT_SET,
+        qos(),
+        false,
+        MqttProperties.TOPIC_ALIAS_UNDEFINED);
+  }
 
-  protected void startDelivering(
-      MqttClient client,
-      PublishMqttInMessage packet,
-      int messageId,
-      boolean duplicate) {
-    PublishMqttOutMessage publish = messageOutFactoryService
+  protected abstract PublishHandlingResult handleImpl(Publish publish, C client) ;
+
+  protected void startDelivering(MqttClient client, Publish publish) {
+    TopicName responseTopicName = publish.responseTopicName();
+    PublishMqttOutMessage outMessage = messageOutFactoryService
         .resolveFactory(client)
         .newPublish(
-            messageId,
+            publish.messageId(),
             qos(),
-            packet.retained(),
-            duplicate,
-            packet
-                .topicName()
-                .toString(),
-            MqttProperties.TOPIC_ALIAS_NOT_SET,
-            packet.payload(),
-            packet.payloadFormatIndicator(),
-            packet.responseTopic(),
-            packet.correlationData(),
-            packet.userProperties());
-    client.send(publish);
+            publish.retained(),
+            publish.duplicated(),
+            publish.topicName().toString(),
+            publish.topicAlias(),
+            publish.payload(),
+            publish.payloadFormat() == PayloadFormat.UTF8_STRING,
+            responseTopicName == null ? null : responseTopicName.toString(),
+            publish.correlationData(),
+            publish.userProperties());
+    client.send(outMessage);
   }
 }

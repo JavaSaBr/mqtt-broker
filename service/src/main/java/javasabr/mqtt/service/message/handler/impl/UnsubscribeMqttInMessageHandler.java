@@ -1,28 +1,33 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.TopicService;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UnsubscribeMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, UnsubscribeMqttInMessage> {
+public class UnsubscribeMqttInMessageHandler
+    extends AbstractMqttInMessageHandler<ExternalMqttClient, UnsubscribeMqttInMessage> {
 
   SubscriptionService subscriptionService;
-  MessageOutFactoryService messageOutFactoryService;
+  TopicService topicService;
 
   public UnsubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, UnsubscribeMqttInMessage.class);
+      MessageOutFactoryService messageOutFactoryService,
+      TopicService topicService) {
+    super(ExternalMqttClient.class, UnsubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
-    this.messageOutFactoryService = messageOutFactoryService;
+    this.topicService = topicService;
   }
 
   @Override
@@ -34,13 +39,19 @@ public class UnsubscribeMqttInMessageHandler extends AbstractMqttInMessageHandle
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      UnsubscribeMqttInMessage networkPacket) {
+      UnsubscribeMqttInMessage message) {
 
-    Array<UnsubscribeAckReasonCode> ackReasonCodes = subscriptionService
-        .unsubscribe(client, networkPacket.topicFilters());
+    Array<TopicFilter> topicFilters = message
+        .rawTopicFilters()
+        .stream()
+        .map(rawTopicFilter -> topicService.createTopicFilter(client, rawTopicFilter))
+        .collect(ArrayCollectors.toArray(TopicFilter.class));
+
+    Array<UnsubscribeAckReasonCode> unsubscribeResults = subscriptionService
+        .unsubscribe(client, topicFilters);
 
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newUnsubscribeAck(networkPacket.messageId(), ackReasonCodes));
+        .newUnsubscribeAck(message.messageId(), unsubscribeResults, message.userProperties()));
   }
 }

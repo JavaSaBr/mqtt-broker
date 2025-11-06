@@ -3,9 +3,9 @@ package javasabr.mqtt.network.message.in;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
@@ -30,7 +30,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT_ACK.ordinal();
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by the Four Byte Integer representing the Session Expiry Interval in seconds. It is a Protocol
         Error to include the Session Expiry Interval more than once.
@@ -38,7 +38,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         If the Session Expiry Interval is absent the value in the CONNECT Packet used. The server uses this
         property to inform the Client that it is using a value other than that sent by the Client in the CONNACK.
        */
-      PacketProperty.SESSION_EXPIRY_INTERVAL,
+      MqttMessageProperty.SESSION_EXPIRY_INTERVAL,
       /*
         Followed by the Two Byte Integer representing the Receive Maximum value. It is a Protocol Error to
         include the Receive Maximum value more than once or for it to have the value 0.
@@ -49,7 +49,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
 
         If the Receive Maximum value is absent, then its value defaults to 65,535.
        */
-      PacketProperty.RECEIVE_MAXIMUM_PUBLISH,
+      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
       /*
         Followed by a Byte with a value of either 0 or 1. It is a Protocol Error to include Maximum QoS more than
         once, or to have a value other than 0 or 1. If the Maximum QoS is absent, the Client uses a Maximum
@@ -70,7 +70,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         reject the connection. It SHOULD use a CONNACK packet with Reason Code 0x9B (QoS not supported)
         as described in section 4.13 Handling errors, and MUST close the Network Connection
        */
-      PacketProperty.MAXIMUM_QOS,
+      MqttMessageProperty.MAXIMUM_QOS,
       /*
         Followed by a Byte field. If present, this byte declares whether the Server supports retained messages. A
         value of 0 means that retained messages are not supported. A value of 1 means retained messages are
@@ -87,7 +87,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         Server SHOULD send a DISCONNECT with Reason Code of 0x9A (Retain not supported) as described
         in section 4.13.
        */
-      PacketProperty.RETAIN_AVAILABLE,
+      MqttMessageProperty.RETAIN_AVAILABLE,
       /*
         Followed by a Four Byte Integer representing the Maximum Packet Size the Server is willing to accept. If
         the Maximum Packet Size is not present, there is no limit on the packet size imposed beyond the
@@ -104,7 +104,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         a Server receives a packet whose size exceeds this limit, this is a Protocol Error, the Server uses
         DISCONNECT with Reason Code 0x95 (Packet too large), as described in section 4.13.
        */
-      PacketProperty.MAXIMUM_PACKET_SIZE,
+      MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
       /*
         Followed by the UTF-8 string which is the Assigned Client Identifier. It is a Protocol Error to include the
         Assigned Client Identifier more than once.
@@ -116,7 +116,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         containing an Assigned Client Identifier. The Assigned Client Identifier MUST be a new Client Identifier
         not used by any other Session currently in the Server [
        */
-      PacketProperty.ASSIGNED_CLIENT_IDENTIFIER,
+      MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER,
       /*
         Followed by the Two Byte Integer representing the Topic Alias Maximum value. It is a Protocol Error to
         include the Topic Alias Maximum value more than once. If the Topic Alias Maximum property is absent,
@@ -129,7 +129,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         on this connection. If Topic Alias Maximum is absent or 0, the Client MUST NOT send any Topic Aliases on
         to the Server
        */
-      PacketProperty.TOPIC_ALIAS_MAXIMUM,
+      MqttMessageProperty.TOPIC_ALIAS_MAXIMUM,
       /*
         Followed by the UTF-8 Encoded String representing the reason associated with this response. This
         Reason String is a human readable string designed for diagnostics and SHOULD NOT be parsed by the
@@ -139,7 +139,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         property if it would increase the size of the CONNACK packet beyond the Maximum Packet Size specified
         by the Client [MQTT-3.2.2-19]. It is a Protocol Error to include the Reason String more than once.
        */
-      PacketProperty.REASON_STRING,
+      MqttMessageProperty.REASON_STRING,
       /*
         Followed by a UTF-8 String Pair. This property can be used to provide additional information to the Client
         including diagnostic information. The Server MUST NOT send this property if it would increase the size of
@@ -150,7 +150,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         The content and meaning of this property is not defined by this specification. The receiver of a CONNACK
         containing this property MAY ignore it.
        */
-      PacketProperty.USER_PROPERTY,
+      MqttMessageProperty.USER_PROPERTY,
       /*
         Followed by a Byte field. If present, this byte declares whether the Server supports Wildcard
         Subscriptions. A value is 0 means that Wildcard Subscriptions are not supported. A value of 1 means
@@ -168,7 +168,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         Wildcard Subscription. In this case the Server MAY send a SUBACK Control Packet with a Reason Code
         0xA2 (Wildcard Subscriptions not supported).
        */
-      PacketProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
+      MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
       /*
         Followed by a Byte field. If present, this byte declares whether the Server supports Subscription
         Identifiers. A value is 0 means that Subscription Identifiers are not supported. A value of 1 means
@@ -180,7 +180,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         Subscription Identifiers, this is a Protocol Error. The Server uses DISCONNECT with Reason Code of
         0xA1 (Subscription Identifiers not supported) as described in section 4.13.
        */
-      PacketProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+      MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
       /*
         Followed by a Byte field. If present, this byte declares whether the Server supports Shared Subscriptions.
         A value is 0 means that Shared Subscriptions are not supported. A value of 1 means Shared
@@ -191,7 +191,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         Shared Subscriptions, this is a Protocol Error. The Server uses DISCONNECT with Reason Code 0x9E
         (Shared Subscriptions not supported) as described in section 4.13.
        */
-      PacketProperty.SHARED_SUBSCRIPTION_AVAILABLE,
+      MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE,
       /*
         Followed by a Two Byte Integer with the Keep Alive time assigned by the Server. If the Server sends a
         Server Keep Alive on the CONNACK packet, the Client MUST use this value instead of the Keep Alive
@@ -199,7 +199,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         the Server MUST use the Keep Alive value set by the Client on CONNECT [MQTT-3.2.2-22]. It is a
         Protocol Error to include the Server Keep Alive more than once.
        */
-      PacketProperty.SERVER_KEEP_ALIVE,
+      MqttMessageProperty.SERVER_KEEP_ALIVE,
       /*
         Followed by a UTF-8 Encoded String which is used as the basis for creating a Response Topic. The way
         in which the Client creates a Response Topic from the Response Information is not defined by this
@@ -208,7 +208,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         If the Client sends a Request Response Information with a value 1, it is OPTIONAL for the Server to send
         the Response Information in the CONNACK.
        */
-      PacketProperty.RESPONSE_INFORMATION,
+      MqttMessageProperty.RESPONSE_INFORMATION,
       /*
         Followed by a UTF-8 Encoded String which can be used by the Client to identify another Server to use. It
         is a Protocol Error to include the Server Reference more than once.
@@ -218,20 +218,20 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
 
         Refer to section 4.11 Server redirection for information about how Server Reference is used
        */
-      PacketProperty.SERVER_REFERENCE,
+      MqttMessageProperty.SERVER_REFERENCE,
       /*
         Followed by a UTF-8 Encoded String containing the name of the authentication method. It is a Protocol
         Error to include the Authentication Method more than once. Refer to section 4.12 for more information
         about extended authentication.
        */
-      PacketProperty.AUTHENTICATION_METHOD,
+      MqttMessageProperty.AUTHENTICATION_METHOD,
       /*
         Followed by Binary Data containing authentication data. The contents of this data are defined by the
         authentication method and the state of already exchanged authentication data. It is a Protocol Error to
         include the Authentication Data more than once. Refer to section 4.12 for more information about
         extended authentication.
        */
-      PacketProperty.AUTHENTICATION_DATA);
+      MqttMessageProperty.AUTHENTICATION_DATA);
 
   /**
    * The values the Connect Reason Code are shown below. If a well formed CONNECT packet is received by the Server, but
@@ -261,7 +261,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   long sessionExpiryInterval;
 
   int receiveMaxPublishes;
-  int maxPacketSize;
+  int maxMessageSize;
   int topicAliasMaxValue;
   int serverKeepAlive;
 
@@ -286,10 +286,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
     this.authenticationMethod = StringUtils.EMPTY;
     this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
     this.serverKeepAlive = MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED;
-    this.maxPacketSize = MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
+    this.maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
     this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
     this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
-    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
+    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
   }
 
   @Override
@@ -305,12 +305,12 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, byte[] value) {
+  protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
       case AUTHENTICATION_DATA -> authenticationData = value;
       default -> unexpectedProperty(property);
@@ -318,7 +318,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, String value) {
+  protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
       case REASON_STRING -> reason = value;
       case ASSIGNED_CLIENT_IDENTIFIER -> assignedClientId = value;
@@ -330,17 +330,17 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, long value) {
+  protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
       case WILDCARD_SUBSCRIPTION_AVAILABLE -> wildcardSubscriptionAvailable = NumberUtils.toBoolean(value);
       case SHARED_SUBSCRIPTION_AVAILABLE -> sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
       case SUBSCRIPTION_IDENTIFIER_AVAILABLE -> subscriptionIdAvailable = NumberUtils.toBoolean(value);
       case RETAIN_AVAILABLE -> retainAvailable = NumberUtils.toBoolean(value);
-      case RECEIVE_MAXIMUM_PUBLISH -> receiveMaxPublishes = (int) NumberUtils.validate(
+      case RECEIVE_MAXIMUM_PUBLISHES -> receiveMaxPublishes = (int) NumberUtils.validate(
           value,
-          MqttProperties.RECEIVE_MAXIMUM_MIN,
-          MqttProperties.RECEIVE_MAXIMUM_MAX);
-      case MAXIMUM_QOS -> maximumQos = QoS.of((int) value);
+          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN,
+          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX);
+      case MAXIMUM_QOS -> maximumQos = QoS.ofCode((int) value);
       case SERVER_KEEP_ALIVE -> serverKeepAlive = NumberUtils.validate(
           (int) value,
           MqttProperties.SERVER_KEEP_ALIVE_MIN,
@@ -353,10 +353,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
           value,
           MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
           MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
-      case MAXIMUM_PACKET_SIZE -> maxPacketSize = NumberUtils.validate(
+      case MAXIMUM_MESSAGE_SIZE -> maxMessageSize = NumberUtils.validate(
           (int) value,
-          MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
-          MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
+          MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
+          MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
       default -> unexpectedProperty(property);
     }
   }

@@ -15,6 +15,15 @@
     <Logger name="javasabr.mqtt.model.network.impl.DefaultMqttSession" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>
+    <Logger name="javasabr.mqtt.service.impl.DefaultPublishReceivingService" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.publish.handler.impl.AbstractMqttPublishInMessageHandler" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
     <Root level="INFO">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Root>

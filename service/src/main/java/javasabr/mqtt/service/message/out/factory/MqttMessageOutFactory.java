@@ -20,6 +20,7 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
+import org.jspecify.annotations.Nullable;
 
 public abstract class MqttMessageOutFactory {
 
@@ -83,14 +84,14 @@ public abstract class MqttMessageOutFactory {
   }
 
   public PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
       String topicName,
       byte[] payload) {
     return newPublish(
-        packetId,
+        messageId,
         qos,
         retained,
         duplicate,
@@ -104,7 +105,7 @@ public abstract class MqttMessageOutFactory {
   }
 
   public abstract PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
@@ -112,12 +113,12 @@ public abstract class MqttMessageOutFactory {
       int topicAlias,
       byte[] payload,
       boolean stringPayload,
-      String responseTopic,
-      byte[] correlationData,
+      @Nullable String responseTopic,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties);
 
   public abstract MqttOutMessage newPublishAck(
-      int packetId,
+      int messageId,
       PublishAckReasonCode reasonCode,
       String reason,
       Array<StringPair> userProperties);
@@ -127,23 +128,37 @@ public abstract class MqttMessageOutFactory {
   }
 
   public abstract MqttOutMessage newSubscribeAck(
-      int packetId,
+      int messageId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
       Array<StringPair> userProperties);
 
-  public MqttOutMessage newSubscribeAck(int packetId, Array<SubscribeAckReasonCode> reasonCodes) {
-    return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, Array.empty(StringPair.class));
+  public MqttOutMessage newSubscribeAck(int messageId, Array<SubscribeAckReasonCode> reasonCodes) {
+    return newSubscribeAck(messageId, reasonCodes, StringUtils.EMPTY, Array.empty(StringPair.class));
+  }
+
+  public MqttOutMessage newSubscribeAck(
+      int messageId,
+      Array<SubscribeAckReasonCode> reasonCodes,
+      Array<StringPair> userProperties) {
+    return newSubscribeAck(messageId, reasonCodes, StringUtils.EMPTY, userProperties);
   }
 
   public abstract MqttOutMessage newUnsubscribeAck(
-      int packetId,
+      int messageId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason);
 
-  public MqttOutMessage newUnsubscribeAck(int packetId, Array<UnsubscribeAckReasonCode> reasonCodes) {
-    return newUnsubscribeAck(packetId, reasonCodes, Array.empty(StringPair.class), StringUtils.EMPTY);
+  public MqttOutMessage newUnsubscribeAck(int messageId, Array<UnsubscribeAckReasonCode> reasonCodes) {
+    return newUnsubscribeAck(messageId, reasonCodes, Array.empty(StringPair.class), StringUtils.EMPTY);
+  }
+
+  public MqttOutMessage newUnsubscribeAck(
+      int messageId,
+      Array<UnsubscribeAckReasonCode> reasonCodes,
+      Array<StringPair> userProperties) {
+    return newUnsubscribeAck(messageId, reasonCodes, userProperties, StringUtils.EMPTY);
   }
 
   public abstract MqttOutMessage newDisconnect(
@@ -158,6 +173,18 @@ public abstract class MqttMessageOutFactory {
         client,
         reasonCode,
         Array.empty(StringPair.class),
+        StringUtils.EMPTY,
+        StringUtils.EMPTY);
+  }
+
+  public MqttOutMessage newDisconnect(
+      MqttClient client,
+      DisconnectReasonCode reasonCode,
+      Array<StringPair> userProperties) {
+    return newDisconnect(
+        client,
+        reasonCode,
+        userProperties,
         StringUtils.EMPTY,
         StringUtils.EMPTY);
   }

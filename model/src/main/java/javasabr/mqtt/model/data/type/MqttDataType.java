@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.data.type;
 
-public enum PacketDataType {
+public enum MqttDataType {
   BYTE,
   SHORT,
   INTEGER,

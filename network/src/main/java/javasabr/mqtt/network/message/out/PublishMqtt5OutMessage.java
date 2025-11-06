@@ -4,14 +4,15 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
@@ -20,7 +21,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
     DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
   }
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by the value of the Payload Forma t Indicator, either of:
           · 0 (0x00) Byte Indicates that the Payload is unspecified bytes, which is equivalent to not sending a
@@ -34,7 +35,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         PUBACK, PUBREC, or DISCONNECT with Reason Code of 0x99 (Payload format invalid) as described in section 4.13.
         Refer to section 5.4.9 for information about security issues in validating the payload format.
        */
-      PacketProperty.PAYLOAD_FORMAT_INDICATOR,
+      MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR,
       /*
         Followed by the Four Byte Integer representing the Message Expiry Interval.
         If present, the Four Byte value is the lifetime of the Application Message in seconds. If the Message Expiry
@@ -47,7 +48,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         value minus the time that the Application Message has been waiting in the Server [MQTT-3.3.2-6]. Refer to
         section 4.1 for details and limitations of stored state.
        */
-      PacketProperty.MESSAGE_EXPIRY_INTERVAL,
+      MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL,
       /*
         Followed by the Two Byte integer representing the Topic Alias value. It is a Protocol Error to include the
         Topic Alias value more than once.
@@ -86,7 +87,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         sends a PUBLISH containing a Topic Alias value of 1 to a Server and the Server sends a PUBLISH with a Topic
         Alias value of 1 to that Client they will in general be referring to different Topics.
        */
-      PacketProperty.TOPIC_ALIAS,
+      MqttMessageProperty.TOPIC_ALIAS,
       /*
         Followed by a UTF-8 Encoded String which is used as the Topic Name for a response message. The Response Topic
         MUST be a UTF-8 Encoded String as defined in section 1.5.4 [MQTT-3.3.2-13]. The Response Topic MUST NOT
@@ -103,7 +104,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         the Topic Name of a PUBLISH. If the Request Message contains a Correlation Data, the receiver of the Request
         Message should also include this Correlation Data as a property in the PUBLISH packet of the Response Message.
        */
-      PacketProperty.RESPONSE_TOPIC,
+      MqttMessageProperty.RESPONSE_TOPIC,
       /*
         Followed by Binary Data. The Correlation Data is used by the sender of the Request Message to identify which
         request the Response Message is for when it is received. It is a Protocol Error to include Correlation Data
@@ -124,7 +125,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
 
         Refer to section 4.10 for more information about Request / Response
        */
-      PacketProperty.CORRELATION_DATA,
+      MqttMessageProperty.CORRELATION_DATA,
       /*
         Followed by a UTF-8 String Pair. The User Property is allowed to appear multiple times to represent multiple
         name, value pairs. The same name is allowed to appear more than once.
@@ -137,10 +138,11 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         This property is intended to provide a means of transferring application layer name-value tags whose meaning
         and interpretation are known only by the application programs responsible for sending and receiving them.
        */
-      PacketProperty.USER_PROPERTY);
+      MqttMessageProperty.USER_PROPERTY);
 
+  @Nullable
   String responseTopic;
-  byte[] correlationData;
+  byte @Nullable [] correlationData;
   Array<StringPair> userProperties;
 
   int topicAlias;
@@ -155,8 +157,8 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
       byte[] payload,
       int topicAlias,
       boolean stringPayload,
-      String responseTopic,
-      byte[] correlationData,
+      @Nullable String responseTopic,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
     super(messageId, qos, retained, duplicate, topicName, payload);
     this.topicAlias = topicAlias;
@@ -179,15 +181,15 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
   @Override
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
-    writeProperty(buffer, PacketProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);
+    writeProperty(buffer, MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR, stringPayload);
     writeProperty(
         buffer,
-        PacketProperty.MESSAGE_EXPIRY_INTERVAL,
+        MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL,
         0,
         MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED);
-    writeProperty(buffer, PacketProperty.TOPIC_ALIAS, topicAlias, MqttProperties.TOPIC_ALIAS_DEFAULT);
-    writeNotEmptyProperty(buffer, PacketProperty.RESPONSE_TOPIC, responseTopic);
-    writeNotEmptyProperty(buffer, PacketProperty.CORRELATION_DATA, correlationData);
-    writeStringPairProperties(buffer, PacketProperty.USER_PROPERTY, userProperties);
+    writeProperty(buffer, MqttMessageProperty.TOPIC_ALIAS, topicAlias, MqttProperties.TOPIC_ALIAS_UNDEFINED);
+    writeNotEmptyProperty(buffer, MqttMessageProperty.RESPONSE_TOPIC, responseTopic);
+    writeNotEmptyProperty(buffer, MqttMessageProperty.CORRELATION_DATA, correlationData);
+    writeStringPairProperties(buffer, MqttMessageProperty.USER_PROPERTY, userProperties);
   }
 }

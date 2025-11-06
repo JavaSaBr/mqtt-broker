@@ -7,10 +7,10 @@ import javasabr.rlib.common.util.BufferUtils
 
 class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishMqtt311OutMessage(
-            packetId,
+        def outMessage = new PublishMqtt311OutMessage(
+            messageId,
             QoS.EXACTLY_ONCE,
             true,
             true,
@@ -18,40 +18,40 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
             publishPayload)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt311Connection, it)
+          outMessage.write(defaultMqtt311Connection, it)
         }
-        def reader = new PublishMqttInMessage(0b0011_1101 as byte)
-        def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new PublishMqttInMessage(0b0011_1101 as byte)
+        def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.messageId == packetId
-        reader.qos == QoS.EXACTLY_ONCE
-        reader.retained
-        reader.duplicate
-        reader.payload == publishPayload
-        reader.topicName == publishTopic
-        reader.userProperties() == Array.empty()
+        inMessage.messageId() == messageId
+        inMessage.qos() == QoS.EXACTLY_ONCE
+        inMessage.retained()
+        inMessage.duplicate()
+        inMessage.payload() == publishPayload
+        inMessage.rawTopicName() == publishTopic.rawTopic()
+        inMessage.userProperties() == Array.empty()
     when:
-        packet = new PublishMqtt311OutMessage(
-            packetId,
+        outMessage = new PublishMqtt311OutMessage(
+            messageId,
             QoS.AT_MOST_ONCE,
             false,
             false,
             publishTopic.toString(),
             publishPayload)
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt311Connection, it)
+          outMessage.write(defaultMqtt311Connection, it)
         }
-        reader = new PublishMqttInMessage(0b0011_0000 as byte)
-        result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+        inMessage = new PublishMqttInMessage(0b0011_0000 as byte)
+        result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.messageId == 0
-        reader.qos == QoS.AT_MOST_ONCE
-        !reader.retained
-        !reader.duplicate
-        reader.payload == publishPayload
-        reader.topicName == publishTopic
-        reader.userProperties() == Array.empty()
+        inMessage.messageId() == 0
+        inMessage.qos() == QoS.AT_MOST_ONCE
+        !inMessage.retained()
+        !inMessage.duplicate()
+        inMessage.payload() == publishPayload
+        inMessage.rawTopicName() == publishTopic.rawTopic()
+        inMessage.userProperties() == Array.empty()
   }
 }

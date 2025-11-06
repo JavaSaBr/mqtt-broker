@@ -1,7 +1,7 @@
 package javasabr.mqtt.network
 
-import javasabr.mqtt.model.PacketProperty
-import javasabr.mqtt.model.data.type.PacketDataType
+import javasabr.mqtt.model.MqttMessageProperty
+import javasabr.mqtt.model.data.type.MqttDataType
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.util.MqttDataUtils
@@ -19,26 +19,31 @@ class SpecificationNetworkExtensions extends Specification {
     protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {}
   }
 
+  static ByteBuffer putByte(ByteBuffer self, int value) {
+    self.put((byte) value)
+    return self
+  }
+
   static ByteBuffer putMbi(ByteBuffer self, int value) {
     MqttDataUtils.writeMbi(value, self)
     return self
   }
 
-  static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, boolean value) {
+  static ByteBuffer putProperty(ByteBuffer self, MqttMessageProperty property, boolean value) {
     return putProperty(self, property, value ? 1 : 0)
   }
 
-  static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, long value) {
+  static ByteBuffer putProperty(ByteBuffer self, MqttMessageProperty property, long value) {
     writer.writeProperty(self, property, value)
     return self
   }
 
-  static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, byte[] value) {
+  static ByteBuffer putProperty(ByteBuffer self, MqttMessageProperty property, byte[] value) {
     writer.writeProperty(self, property, value)
     return self
   }
 
-  static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, String value) {
+  static ByteBuffer putProperty(ByteBuffer self, MqttMessageProperty property, String value) {
     writer.writeProperty(self, property, value)
     return self
   }
@@ -53,10 +58,10 @@ class SpecificationNetworkExtensions extends Specification {
     return self
   }
 
-  static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, Array<?> values) {
+  static ByteBuffer putProperty(ByteBuffer self, MqttMessageProperty property, Array<?> values) {
 
     switch (property.dataType()) {
-      case PacketDataType.UTF_8_STRING_PAIR: {
+      case MqttDataType.UTF_8_STRING_PAIR: {
         writer.writeStringPairProperties(self, property, values as Array<StringPair>)
         break
       }
@@ -68,7 +73,7 @@ class SpecificationNetworkExtensions extends Specification {
     return self
   }
 
-  static ByteBuffer putProperty(ByteBuffer self, PacketProperty property, IntArray values) {
+  static ByteBuffer putProperty(ByteBuffer self, MqttMessageProperty property, IntArray values) {
     values.each { writer.writeProperty(self, property, it) }
     return self
   }

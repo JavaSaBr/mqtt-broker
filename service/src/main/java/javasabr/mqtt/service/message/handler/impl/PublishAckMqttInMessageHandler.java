@@ -2,11 +2,12 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage;
+import javasabr.mqtt.service.MessageOutFactoryService;
 
 public class PublishAckMqttInMessageHandler extends PendingOutResponseMqttInMessageHandler<PublishAckMqttInMessage> {
 
-  public PublishAckMqttInMessageHandler() {
-    super(PublishAckMqttInMessage.class);
+  public PublishAckMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    super(PublishAckMqttInMessage.class, messageOutFactoryService);
   }
 
   @Override

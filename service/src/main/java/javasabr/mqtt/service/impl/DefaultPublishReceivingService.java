@@ -2,8 +2,8 @@ package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import lombok.AccessLevel;
@@ -24,7 +24,7 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
     int maxIndex = knownPublishInHandlers
         .stream()
         .map(MqttPublishInMessageHandler::qos)
-        .mapToInt(QoS::index)
+        .mapToInt(QoS::level)
         .max()
         .orElse(0);
 
@@ -32,11 +32,11 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
 
     for (MqttPublishInMessageHandler knownPublishInHandler : knownPublishInHandlers) {
       QoS qos = knownPublishInHandler.qos();
-      if (handlers[qos.index()] != null) {
+      if (handlers[qos.level()] != null) {
         throw new IllegalArgumentException(
             "Found duplicate MqttPublishInMessageHandler:[" + knownPublishInHandler + "]");
       }
-      handlers[qos.index()] = knownPublishInHandler;
+      handlers[qos.level()] = knownPublishInHandler;
     }
 
     this.publishInHandlers = handlers;
@@ -44,13 +44,14 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
   }
 
   @Override
-  public void processReceivedPublish(MqttClient client, PublishMqttInMessage publish) {
+  public void processReceivedPublish(MqttClient client, Publish publish) {
+    log.debug(client.clientId(), publish, "[%s] Processing received publish: [%s]"::formatted);
     QoS qos = publish.qos();
     try {
       //noinspection DataFlowIssue
-      publishInHandlers[qos.index()].handle(client, publish);
+      publishInHandlers[qos.level()].handle(client, publish);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(publish, "Received not supported publish message:[%s]"::formatted);
+      log.warning(client.clientId(), publish, "[%s] Received not supported publish message:[%s]"::formatted);
     }
   }
 

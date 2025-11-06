@@ -1,28 +1,25 @@
 package javasabr.mqtt.network.message.in;
 
-import static javasabr.mqtt.model.util.TopicUtils.EMPTY_TOPIC_NAME;
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicName;
-
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.array.MutableIntArray;
 import javasabr.rlib.common.util.ArrayUtils;
-import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish message.
@@ -30,15 +27,22 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishMqttInMessage extends MqttInMessage {
+public class PublishMqttInMessage extends TrackableMqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("topicName", "qos", "duplicate", "messageId");
+    DebugUtils.registerIncludedFields(
+        "rawTopicName",
+        "topicAlias",
+        "qos",
+        "duplicate",
+        "messageId",
+        "messageExpiryInterval",
+        "payloadFormat");
   }
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by the value of the Payload Format Indicator, either of:
         • 0 (0x00) Byte Indicates that the Payload is unspecified bytes, which is equivalent to not sending a
@@ -53,7 +57,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         as described in section 4.13. Refer to section 5.4.9 for information about security issues in validating the
         payload format.
        */
-      PacketProperty.PAYLOAD_FORMAT_INDICATOR,
+      MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR,
       /*
         Followed by the Four Byte Integer representing the Message Expiry Interval.
 
@@ -67,7 +71,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         received value minus the time that the Application Message has been waiting in the Server [MQTT-3.3.2-
         6]. Refer to section 4.1 for details and limitations of stored state.
        */
-      PacketProperty.MESSAGE_EXPIRY_INTERVAL,
+      MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL,
       /*
         Followed by the Two Byte integer representing the Topic Alias value. It is a Protocol Error to include the
         Topic Alias value more than once.
@@ -108,7 +112,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         Client sends a PUBLISH containing a Topic Alias value of 1 to a Server and the Server sends a PUBLISH
         with a Topic Alias value of 1 to that Client they will in general be referring to different Topics.
        */
-      PacketProperty.TOPIC_ALIAS,
+      MqttMessageProperty.TOPIC_ALIAS,
       /*
         Followed by a UTF-8 Encoded String which is used as the Topic Name for a response message. The
         Response Topic MUST be a UTF-8 Encoded String as defined in section 1.5.4 [MQTT-3.3.2-13]. The
@@ -121,7 +125,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         The Server MUST send the Response Topic unaltered to all subscribers receiving the Application
         Message [MQTT-3.3.2-15].
        */
-      PacketProperty.RESPONSE_TOPIC,
+      MqttMessageProperty.RESPONSE_TOPIC,
       /*
         Followed by Binary Data. The Correlation Data is used by the sender of the Request Message to identify
         which request the Response Message is for when it is received. It is a Protocol Error to include
@@ -132,7 +136,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         Message [MQTT-3.3.2-16]. The value of the Correlation Data only has meaning to the sender of the
         Request Message and receiver of the Response Message.
        */
-      PacketProperty.CORRELATION_DATA,
+      MqttMessageProperty.CORRELATION_DATA,
       /*
         Followed by a UTF-8 String Pair. The User Property is allowed to appear multiple times to represent
         multiple name, value pairs. The same name is allowed to appear more than once.
@@ -141,7 +145,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         Application Message to a Client [MQTT-3.3.2-17]. The Server MUST maintain the order of User
         Properties when forwarding the Application Message [MQTT-3.3.2-18].
        */
-      PacketProperty.USER_PROPERTY,
+      MqttMessageProperty.USER_PROPERTY,
       /*
         Followed by a Variable Byte Integer representing the identifier of the subscription.
 
@@ -150,7 +154,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         publication
         is the result of a match to more than one subscription, in this case their order is not significant.
        */
-      PacketProperty.SUBSCRIPTION_IDENTIFIER,
+      MqttMessageProperty.SUBSCRIPTION_IDENTIFIER,
       /*
         Followed by a UTF-8 Encoded String describing the content of the Application Message. The Content
         Type MUST be a UTF-8 Encoded String as defined in section 1.5.4 [MQTT-3.3.2-19].
@@ -160,7 +164,7 @@ public class PublishMqttInMessage extends MqttInMessage {
         A Server MUST send the Content Type unaltered to all subscribers receiving the Application Message
         [MQTT-3.3.2-20].
        */
-      PacketProperty.CONTENT_TYPE);
+      MqttMessageProperty.CONTENT_TYPE);
 
   /**
    * This field indicates the level of assurance for delivery of an Application Message. The QoS levels are shown
@@ -249,39 +253,48 @@ public class PublishMqttInMessage extends MqttInMessage {
    * To reduce the size of the PUBLISH packet the sender can use a Topic Alias. The Topic Alias is described in section
    * 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
    */
-  TopicName topicName;
+  String rawTopicName;
 
   /**
    * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section 2.2.1
    * provides more information about Packet Identifiers.
+   * {@link TrackableMqttInMessage#messageId}
    */
-  int messageId;
+  // int messageId;
 
+  /**
+   * The Payload contains the Application Message that is being published.
+   * The content and format of the data is application specific.
+   * The length of the Payload can be calculated by subtracting the length of the Variable Header
+   * from the Remaining Length field that is in the Fixed Header. It is valid
+   * for a PUBLISH packet to contain a zero length Payload.
+   */
   byte[] payload;
 
   // properties
-  String responseTopic;
+  @Nullable
+  String rawResponseTopicName;
+  @Nullable
   String contentType;
 
-  IntArray subscriptionIds;
+  @Nullable
+  MutableIntArray subscriptionIds;
 
-  byte[] correlationData;
-
-  long messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
-  int topicAlias = MqttProperties.TOPIC_ALIAS_DEFAULT;
-  boolean payloadFormatIndicator = MqttProperties.PAYLOAD_FORMAT_INDICATOR_DEFAULT;
+  byte @Nullable [] correlationData;
+  long messageExpiryInterval;
+  int topicAlias;
+  PayloadFormat payloadFormat;
 
   public PublishMqttInMessage(byte info) {
     super(info);
-    this.qos = QoS.of((info >> 1) & 0x03);
-    this.retained = NumberUtils.isSetBit(info, 0);
-    this.duplicate = NumberUtils.isSetBit(info, 3);
-    this.topicName = EMPTY_TOPIC_NAME;
-    this.responseTopic = StringUtils.EMPTY;
-    this.contentType = StringUtils.EMPTY;
-    this.correlationData = ArrayUtils.EMPTY_BYTE_ARRAY;
+    this.qos = QoS.ofCode((info & 0b0110) >> 1);
+    this.retained = (info & 0b0001) != 0;
+    this.duplicate = (info & 0b1000) != 0;
+    this.rawTopicName = StringUtils.EMPTY;
     this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
-    this.subscriptionIds = IntArray.empty();
+    this.messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
+    this.topicAlias = MqttProperties.TOPIC_ALIAS_UNDEFINED;
+    this.payloadFormat = PayloadFormat.UNDEFINED;
   }
 
   @Override
@@ -292,7 +305,7 @@ public class PublishMqttInMessage extends MqttInMessage {
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
-    topicName = buildTopicName(readString(buffer, Integer.MAX_VALUE));
+    rawTopicName = readString(buffer, Integer.MAX_VALUE);
     messageId = qos != QoS.AT_MOST_ONCE ? readShortUnsigned(buffer) : 0;
   }
 
@@ -303,42 +316,41 @@ public class PublishMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 
+  public IntArray subscriptionIds() {
+    return subscriptionIds == null ? IntArray.empty() : subscriptionIds;
+  }
+
   @Override
-  protected void applyProperty(PacketProperty property, long value) {
+  protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
-      case PAYLOAD_FORMAT_INDICATOR -> payloadFormatIndicator = NumberUtils.toBoolean(value);
-      case TOPIC_ALIAS -> topicAlias = NumberUtils.validate(
-          (int) value,
-          MqttProperties.TOPIC_ALIAS_MIN,
-          MqttProperties.TOPIC_ALIAS_MAX);
+      case PAYLOAD_FORMAT_INDICATOR -> payloadFormat = PayloadFormat.fromCode(value);
+      case TOPIC_ALIAS -> topicAlias = Math.toIntExact(value);
       case MESSAGE_EXPIRY_INTERVAL -> messageExpiryInterval = value;
       case SUBSCRIPTION_IDENTIFIER -> {
-        if (subscriptionIds == IntArray.empty()) {
+        if (subscriptionIds == null) {
           subscriptionIds = ArrayFactory.mutableIntArray();
         }
-        if (subscriptionIds instanceof MutableIntArray array) {
-          array.add((int) value);
-        }
+        subscriptionIds.add((int) value);
       }
       default -> unexpectedProperty(property);
     }
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, String value) {
+  protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case RESPONSE_TOPIC -> responseTopic = value;
+      case RESPONSE_TOPIC -> rawResponseTopicName = value;
       case CONTENT_TYPE -> contentType = value;
       default -> unexpectedProperty(property);
     }
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, byte[] value) {
+  protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
       case CORRELATION_DATA -> correlationData = value;
       default -> unexpectedProperty(property);

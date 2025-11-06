@@ -1,11 +1,15 @@
 package javasabr.mqtt.model.exception;
 
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
+@Getter
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConnectionRejectException extends MqttException {
 
-  private final @Getter ConnectAckReasonCode reasonCode;
+  ConnectAckReasonCode reasonCode;
 
   public ConnectionRejectException(ConnectAckReasonCode reasonCode) {
     this.reasonCode = reasonCode;

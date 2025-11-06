@@ -1,20 +1,21 @@
 package javasabr.mqtt.network.message.in;
 
-import static javasabr.mqtt.model.util.TopicUtils.buildTopicFilter;
-
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import javasabr.mqtt.model.PacketProperty;
-import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttMessageProperty;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unsubscribe request.
@@ -22,19 +23,23 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UnsubscribeMqttInMessage extends MqttInMessage {
+public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
+
+  static {
+    DebugUtils.registerIncludedFields("rawTopicFilters");
+  }
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE.ordinal();
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         The User Property is allowed to appear multiple times to represent multiple name, value pairs. The same
         name is allowed to appear more than once.
        */
-      PacketProperty.USER_PROPERTY);
+      MqttMessageProperty.USER_PROPERTY);
 
-  MutableArray<TopicFilter> topicFilters;
-  int messageId;
+  @Nullable
+  MutableArray<String> rawTopicFilters;
 
   public UnsubscribeMqttInMessage(byte info) {
     super(info);
@@ -46,24 +51,22 @@ public class UnsubscribeMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    messageId = readShortUnsigned(buffer);
-  }
-
-  @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (buffer.remaining() < 1) {
-      throw new IllegalStateException("No any topic filters.");
+      throw new MalformedProtocolMqttException("No any topic filters.");
     }
-
-    topicFilters = ArrayFactory.mutableArray(TopicFilter.class);
+    rawTopicFilters = ArrayFactory.mutableArray(String.class);
     while (buffer.hasRemaining()) {
-      topicFilters.add(buildTopicFilter(readString(buffer, Integer.MAX_VALUE)));
+      rawTopicFilters.add(readString(buffer, Integer.MAX_VALUE));
     }
   }
 
+  public Array<String> rawTopicFilters() {
+    return rawTopicFilters == null ? EMPTY_STRINGS : rawTopicFilters;
+  }
+
   @Override
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 }

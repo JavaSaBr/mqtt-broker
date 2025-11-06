@@ -1,22 +1,24 @@
 package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.model.MqttUser;
+import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.QoS;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import javasabr.mqtt.model.subscribtion.Subscription;
+import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
 
-@ToString
-@EqualsAndHashCode(of = "user")
-@RequiredArgsConstructor
-public final class SingleSubscriber implements Subscriber {
+public record SingleSubscriber(SubscriptionOwner owner, Subscription subscription) implements Subscriber {
 
-  @Getter
-  private final MqttUser user;
-  private final SubscribeTopicFilter subscribe;
+  @Override
+  public SingleSubscriber resolveSingle() {
+    return this;
+  }
 
-  public QoS getQos() {
-    return subscribe.getQos();
+  public QoS qos() {
+    return subscription.qos();
+  }
+
+  @JsonValue
+  @Override
+  public String toString() {
+    return "[" + owner + "]->[" + subscription.topicFilter().rawTopic() + "|" + subscription.qos().level() + "]";
   }
 }

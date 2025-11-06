@@ -2,8 +2,8 @@ package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -25,7 +25,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
     int maxIndex = knownPublishOutHandlers
         .stream()
         .map(MqttPublishOutMessageHandler::qos)
-        .mapToInt(QoS::index)
+        .mapToInt(QoS::level)
         .max()
         .orElse(0);
 
@@ -33,11 +33,11 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
 
     for (MqttPublishOutMessageHandler knownPublishOutHandler : knownPublishOutHandlers) {
       QoS qos = knownPublishOutHandler.qos();
-      if (handlers[qos.index()] != null) {
+      if (handlers[qos.level()] != null) {
         throw new IllegalArgumentException(
             "Found duplicate MqttPublishOutMessageHandler:[" + knownPublishOutHandler + "]");
       }
-      handlers[qos.index()] = knownPublishOutHandler;
+      handlers[qos.level()] = knownPublishOutHandler;
     }
 
     this.publishOutMessageHandlers = handlers;
@@ -45,10 +45,10 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   }
 
   @Override
-  public PublishHandlingResult startDelivering(PublishMqttInMessage publish, SingleSubscriber subscriber) {
+  public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
     try {
       //noinspection DataFlowIssue
-      return publishOutMessageHandlers[subscriber.getQos().index()].handle(publish, subscriber);
+      return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
       return PublishHandlingResult.UNSPECIFIED_ERROR;

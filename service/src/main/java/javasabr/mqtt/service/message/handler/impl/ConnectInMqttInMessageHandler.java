@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
-import static javasabr.mqtt.model.MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
-import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
 import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
@@ -15,7 +15,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
@@ -23,6 +23,7 @@ import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -42,7 +43,6 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   AuthenticationService authenticationService;
   MqttSessionService sessionService;
   SubscriptionService subscriptionService;
-  MessageOutFactoryService messageOutFactoryService;
 
   public ConnectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
@@ -50,12 +50,11 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, ConnectMqttInMessage.class);
+    super(ExternalMqttClient.class, ConnectMqttInMessage.class, messageOutFactoryService);
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
     this.subscriptionService = subscriptionService;
-    this.messageOutFactoryService = messageOutFactoryService;
   }
 
   @Override
@@ -67,16 +66,14 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   protected void processReceived(
       MqttConnection connection,
       ExternalMqttClient client,
-      ConnectMqttInMessage networkPacket) {
-
-    if (checkPacketException(client, networkPacket)) {
-      return;
-    }
-    resolveClientConnectionConfig(client, networkPacket);
+      ConnectMqttInMessage message) {
+    resolveClientConnectionConfig(client, message);
     authenticationService
-        .auth(networkPacket.username(), networkPacket.password())
-        .flatMap(ifTrue(client, networkPacket, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(client, connectAckReasonCode)))
-        .flatMap(ifTrue(client, networkPacket, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(client, connectAckReasonCode)))
+        .auth(message.username(), message.password())
+        .flatMap(ifTrue(client,
+            message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(client, connectAckReasonCode)))
+        .flatMap(ifTrue(client,
+            message, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(client, connectAckReasonCode)))
         .subscribe();
   }
 
@@ -146,14 +143,14 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     }
 
     // select result receive max
-    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_UNDEFINED
+    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
                               ? serverConfig.receiveMaxPublishes()
                               : Math.min(packet.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
     // select result maximum packet size
-    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_PACKET_SIZE_UNDEFINED
-                            ? serverConfig.maxPacketSize()
-                            : Math.min(packet.maxPacketSize(), serverConfig.maxPacketSize());
+    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_UNDEFINED
+                            ? serverConfig.maxMessageSize()
+                            : Math.min(packet.maxPacketSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
     var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_UNDEFINED
@@ -161,6 +158,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
                              : Math.min(packet.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
 
     connection.configure(new MqttClientConnectionConfig(
+        serverConfig,
         serverConfig.maxQos(),
         packet.mqttVersion(),
         sessionExpiryInterval,
@@ -169,12 +167,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
         topicAliasMaxValue,
         keepAlive,
         packet.requestResponseInformation(),
-        packet.requestProblemInformation(),
-        serverConfig.sessionsEnabled(),
-        serverConfig.retainAvailable(),
-        serverConfig.wildcardSubscriptionAvailable(),
-        serverConfig.subscriptionIdAvailable(),
-        serverConfig.sharedSubscriptionAvailable()));
+        packet.requestProblemInformation()));
   }
 
   private Mono<Boolean> onConnected(
@@ -224,19 +217,29 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     return true;
   }
 
-  private boolean checkPacketException(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
-    Exception exception = packet.exception();
+  @Override
+  protected boolean checkMessageException(
+      MqttConnection connection,
+      ExternalMqttClient client,
+      ConnectMqttInMessage message) {
+    Exception exception = message.exception();
     if (exception instanceof ConnectionRejectException cre) {
-      client.send(messageOutFactoryService
+      MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newConnectAck(client, cre.getReasonCode()));
+          .newConnectAck(client, cre.getReasonCode());
+      client
+          .sendWithFeedback(feedback)
+          .thenAccept(_ -> connection.close());
       return true;
-    } else if (exception instanceof MalformedPacketMqttException) {
-      client.send(messageOutFactoryService
+    } else if (exception instanceof MalformedProtocolMqttException) {
+      MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET));
+          .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET);
+      client
+          .sendWithFeedback(feedback)
+          .thenAccept(_ -> connection.close());
       return true;
     }
-    return false;
+    return super.checkMessageException(connection, client, message);
   }
 }

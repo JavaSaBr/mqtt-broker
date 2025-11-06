@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PacketProperty;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -22,7 +22,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishReceivedMqttInMessage extends MqttInMessage implements HasMessageId {
+public class PublishReceivedMqttInMessage extends MqttInMessage implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RECEIVED.ordinal();
 
@@ -30,7 +30,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements HasMe
     DebugUtils.registerIncludedFields("reasonCode", "messageId");
   }
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by the UTF-8 Encoded String representing the reason associated with this response. This
         Reason String is human readable, designed for diagnostics and SHOULD NOT be parsed by the
@@ -41,7 +41,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements HasMe
         specified by the receiver [MQTT-3.6.2-2]. It is a Protocol Error to include the Reason String more than
         once.
        */
-      PacketProperty.REASON_STRING,
+      MqttMessageProperty.REASON_STRING,
       /*
         Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
         information for the PUBREL. The sender MUST NOT send this property if it would increase the size of the
@@ -49,7 +49,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements HasMe
         Property is allowed to appear multiple times to represent multiple name, value pairs. The same name is
         allowed to appear more than once
        */
-      PacketProperty.USER_PROPERTY);
+      MqttMessageProperty.USER_PROPERTY);
 
   PublishReceivedReasonCode reasonCode;
   int messageId;
@@ -88,12 +88,12 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements HasMe
   }
 
   @Override
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, String value) {
+  protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
       case REASON_STRING -> reason = value;
       default -> unexpectedProperty(property);

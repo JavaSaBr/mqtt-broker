@@ -1,10 +1,10 @@
 package javasabr.mqtt.network;
 
-import javasabr.mqtt.model.subscriber.SubscribeTopicFilter;
+import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
-import javasabr.mqtt.network.message.HasMessageId;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
-import javasabr.rlib.functions.TriConsumer;
+import javasabr.rlib.collections.array.Array;
 
 public interface MqttSession {
 
@@ -24,14 +24,14 @@ public interface MqttSession {
     /**
      * @return true if pending packet can be removed.
      */
-    boolean handleResponse(MqttClient client, HasMessageId response);
+    boolean handleResponse(MqttClient client, TrackableMessage response);
 
-    default void resend(MqttClient client, PublishMqttInMessage packet, int packetId) {}
+    default void resend(MqttClient client, Publish publish) {}
   }
 
   String clientId();
 
-  int nextPacketId();
+  int nextMessageId();
 
   /**
    * @return the expiration time in ms or -1 if it should not be expired now.
@@ -44,24 +44,23 @@ public interface MqttSession {
 
   boolean hasInPending();
 
-  boolean hasInPending(int packetId);
+  boolean hasInPending(int messageId);
 
-  boolean hasOutPending(int packetId);
+  boolean hasOutPending(int messageId);
 
-  void registerOutPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId);
+  void registerOutPublish(Publish publish, PendingMessageHandler handler);
 
-  void registerInPublish(PublishMqttInMessage publish, PendingMessageHandler handler, int packetId);
+  void registerInPublish(Publish publish, PendingMessageHandler handler);
 
-  void updateOutPendingPacket(MqttClient client, HasMessageId response);
+  void updateOutPendingPacket(MqttClient client, TrackableMessage response);
 
-  void updateInPendingPacket(MqttClient client, HasMessageId response);
+  void updateInPendingPacket(MqttClient client, TrackableMessage response);
 
-  <A, B> void forEachTopicFilter(
-      A arg1,
-      B arg2,
-      TriConsumer<A, B, SubscribeTopicFilter> consumer);
+  void storeSubscription(Subscription subscription);
 
-  void addSubscriber(SubscribeTopicFilter subscribe);
+  void removeSubscription(TopicFilter subscribe);
 
-  void removeSubscriber(TopicFilter subscribe);
+  Array<Subscription> storedSubscriptions();
+
+  Array<Subscription> findStoredSubscriptionWithId(int subscriptionId);
 }

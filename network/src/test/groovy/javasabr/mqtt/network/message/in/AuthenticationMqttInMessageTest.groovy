@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.in
 
-import javasabr.mqtt.model.PacketProperty
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
@@ -10,10 +10,10 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read packet correctly as mqtt 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
-          it.putProperty(PacketProperty.REASON_STRING, reasonString)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.put(AuthenticateReasonCode.SUCCESS.value)
@@ -32,10 +32,10 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
         packet.userProperties() == userProperties
     when:
         propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(PacketProperty.REASON_STRING, reasonString)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
-          it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
+          it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
         }
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.put(AuthenticateReasonCode.CONTINUE_AUTHENTICATION.value)
@@ -53,8 +53,8 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
         packet.userProperties() == userProperties
     when:
         propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(PacketProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
         }
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.put(AuthenticateReasonCode.CONTINUE_AUTHENTICATION.value)

@@ -1,9 +1,9 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
@@ -25,7 +25,7 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
   PublishDeliveringService publishDeliveringService;
 
   @Override
-  public void handle(MqttClient client, PublishMqttInMessage packet) {
+  public void handle(MqttClient client, Publish packet) {
     if (!expectedClient.isInstance(client)) {
       log.warning(client, "Not expected client:[%s]"::formatted);
       return;
@@ -33,23 +33,21 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     handleImpl(expectedClient.cast(client), packet);
   }
 
-  protected void handleImpl(C client, PublishMqttInMessage packet) {
-    TopicName topicName = packet.topicName();
-    if (!subscriptionService.isValid(topicName)) {
-      handleInvalidTopic(client, packet.messageId(), topicName);
-      return;
-    }
-
+  protected void handleImpl(C client, Publish publish) {
+    TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
-      handleEmptySubscriptions(client, packet.messageId(), topicName);
+      log.debug(client.clientId(), publish, "[%s] Not found any subscriber for publish: [%s]"::formatted);
+      handleEmptySubscriptions(client, publish);
       return;
     }
 
     for (SingleSubscriber subscriber : subscribers) {
-      PublishHandlingResult checkResult = checkSubscriber(client, packet, subscriber);
+      PublishHandlingResult checkResult = checkSubscriber(client, publish, subscriber);
       if (checkResult.error()) {
-        handleError(client, packet.messageId(), checkResult);
+        log.debug(client.clientId(), checkResult, subscriber,
+            "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
+        handleError(client, publish, checkResult);
         return;
       }
     }
@@ -57,7 +55,7 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     int count = 0;
     PublishHandlingResult errorResult = null;
     for (SingleSubscriber subscriber : subscribers) {
-      PublishHandlingResult result = startDelivering(client, packet, subscriber);
+      PublishHandlingResult result = startDelivering(client, publish, subscriber);
       if (result.error()) {
         errorResult = result;
       } else if(result == PublishHandlingResult.SUCCESS) {
@@ -66,28 +64,30 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
     }
 
     if (errorResult != null) {
-      handleError(client, packet.messageId(), errorResult);
+      log.debug(client.clientId(), errorResult,
+          "[%s] Found final error:[%s] during processing publish"::formatted);
+      handleError(client, publish, errorResult);
     } else {
-      handleSuccessfulResult(client, packet, count);
+      log.debug(client.clientId(), count,
+          "[%s] Successfully started delivering publish to [%s] subscribers"::formatted);
+      handleSuccessfulResult(client, publish, count);
     }
   }
 
-  protected void handleInvalidTopic(C client, int messageId, TopicName topicName) {}
+  protected void handleEmptySubscriptions(C client, Publish publish) {}
 
-  protected void handleEmptySubscriptions(C client, int messageId, TopicName topicName) {}
+  protected void handleError(C client, Publish publish, PublishHandlingResult handlingResult) {}
 
-  protected void handleError(C client, int messageId, PublishHandlingResult handlingResult) {}
-
-  protected void handleSuccessfulResult(C client, PublishMqttInMessage packet, int subscribers) {}
+  protected void handleSuccessfulResult(C client, Publish publish, int subscribers) {}
 
   protected PublishHandlingResult checkSubscriber(
       C client,
-      PublishMqttInMessage packet,
+      Publish publish,
       SingleSubscriber subscriber) {
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected PublishHandlingResult startDelivering(C client, PublishMqttInMessage packet, SingleSubscriber subscriber) {
-    return publishDeliveringService.startDelivering(packet, subscriber);
+  protected PublishHandlingResult startDelivering(C client, Publish publish, SingleSubscriber subscriber) {
+    return publishDeliveringService.startDelivering(publish, subscriber);
   }
 }

@@ -27,6 +27,7 @@ import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.UnsubscribeAckMqtt5OutMessage;
 import javasabr.rlib.collections.array.Array;
+import org.jspecify.annotations.Nullable;
 
 public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
@@ -70,7 +71,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
@@ -79,10 +80,10 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       byte[] payload,
       boolean stringPayload,
       String responseTopic,
-      byte[] correlationData,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
     return new PublishMqtt5OutMessage(
-        packetId,
+        messageId,
         qos,
         retained,
         duplicate,
@@ -97,29 +98,29 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newPublishAck(
-      int packetId,
+      int messageId,
       PublishAckReasonCode reasonCode,
       String reason,
       Array<StringPair> userProperties) {
-    return new PublishAckMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishAckMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newSubscribeAck(
-      int packetId,
+      int messageId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
       Array<StringPair> userProperties) {
-    return new SubscribeAckMqtt5OutMessage(packetId, reasonCodes, userProperties, reason);
+    return new SubscribeAckMqtt5OutMessage(messageId, reasonCodes, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newUnsubscribeAck(
-      int packetId,
+      int messageId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason) {
-    return new UnsubscribeAckMqtt5OutMessage(packetId, reasonCodes, userProperties, reason);
+    return new UnsubscribeAckMqtt5OutMessage(messageId, reasonCodes, userProperties, reason);
   }
 
   @Override
@@ -150,28 +151,28 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newPublishRelease(
-      int packetId,
+      int messageId,
       PublishReleaseReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReleaseMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishReleaseMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newPublishReceived(
-      int packetId,
+      int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReceivedMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishReceivedMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
   @Override
   public MqttOutMessage newPublishCompleted(
-      int packetId,
+      int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishCompleteMqtt5OutMessage(packetId, reasonCode, userProperties, reason);
+    return new PublishCompleteMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 }

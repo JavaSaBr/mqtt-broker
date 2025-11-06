@@ -55,7 +55,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
   @Override
   public PublishMqttOutMessage newPublish(
-      int packetId,
+      int messageId,
       QoS qos,
       boolean retained,
       boolean duplicate,
@@ -66,34 +66,34 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
       String responseTopic,
       byte[] correlationData,
       Array<StringPair> userProperties) {
-    return new PublishMqtt311OutMessage(packetId, qos, retained, duplicate, topicName, payload);
+    return new PublishMqtt311OutMessage(messageId, qos, retained, duplicate, topicName, payload);
   }
 
   @Override
   public MqttOutMessage newPublishAck(
-      int packetId,
+      int messageId,
       PublishAckReasonCode reasonCode,
       String reason,
       Array<StringPair> userProperties) {
-    return new PublishAckMqtt311OutMessage(packetId);
+    return new PublishAckMqtt311OutMessage(messageId);
   }
 
   @Override
   public MqttOutMessage newSubscribeAck(
-      int packetId,
+      int messageId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
       Array<StringPair> userProperties) {
-    return new SubscribeAckMqtt311OutMessage(reasonCodes, packetId);
+    return new SubscribeAckMqtt311OutMessage(messageId, reasonCodes);
   }
 
   @Override
   public MqttOutMessage newUnsubscribeAck(
-      int packetId,
+      int messageId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason) {
-    return new UnsubscribeAckMqtt311OutMessage(packetId);
+    return new UnsubscribeAckMqtt311OutMessage(messageId);
   }
 
   @Override
@@ -128,28 +128,28 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
   @Override
   public MqttOutMessage newPublishRelease(
-      int packetId,
+      int messageId,
       PublishReleaseReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReleaseMqtt311OutMessage(packetId);
+    return new PublishReleaseMqtt311OutMessage(messageId);
   }
 
   @Override
   public MqttOutMessage newPublishReceived(
-      int packetId,
+      int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishReceivedMqtt311OutMessage(packetId);
+    return new PublishReceivedMqtt311OutMessage(messageId);
   }
 
   @Override
   public MqttOutMessage newPublishCompleted(
-      int packetId,
+      int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason) {
-    return new PublishCompleteMqtt311OutMessage(packetId);
+    return new PublishCompleteMqtt311OutMessage(messageId);
   }
 }

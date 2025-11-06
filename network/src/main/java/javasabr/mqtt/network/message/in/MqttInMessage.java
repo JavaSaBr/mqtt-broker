@@ -9,12 +9,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.exception.MalformedPacketMqttException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.exception.MqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -37,7 +37,8 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     DebugUtils.registerIncludedFields("userProperties");
   }
 
-  private static final Array<StringPair> EMPTY_PROPERTIES = Array.empty(StringPair.class);
+  protected static final Array<StringPair> EMPTY_PROPERTIES = Array.empty(StringPair.class);
+  protected static final Array<String> EMPTY_STRINGS = Array.empty(String.class);
 
   private record Utf8Decoder(CharsetDecoder decoder, ByteBuffer inBuffer, CharBuffer outBuffer) {}
 
@@ -109,7 +110,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {}
 
-  protected void readProperties(MqttConnection connection, ByteBuffer buffer, Set<PacketProperty> availableProperties) {
+  protected void readProperties(MqttConnection connection, ByteBuffer buffer, Set<MqttMessageProperty> availableProperties) {
 
     int propertiesLength = MqttDataUtils.readMbi(buffer);
     if (propertiesLength == MqttDataUtils.UNKNOWN_LENGTH) {
@@ -122,7 +123,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     MqttServerConnectionConfig serverConnectionConfig = connection.serverConnectionConfig();
 
     while (buffer.position() < lastPositionInBuffer) {
-      PacketProperty property = PacketProperty.byId(readByteUnsigned(buffer));
+      MqttMessageProperty property = MqttMessageProperty.byId(readByteUnsigned(buffer));
       if (!availableProperties.contains(property)) {
         throw new IllegalStateException("Property:[" + property + "] is not available for packet:[" + this + "]");
       }
@@ -164,17 +165,17 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     }
   }
 
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return Collections.emptySet();
   }
 
-  protected void applyProperty(PacketProperty property, long value) {}
+  protected void applyProperty(MqttMessageProperty property, long value) {}
 
-  protected void applyProperty(PacketProperty property, String value) {}
+  protected void applyProperty(MqttMessageProperty property, String value) {}
 
-  protected void applyProperty(PacketProperty property, byte[] value) {}
+  protected void applyProperty(MqttMessageProperty property, byte[] value) {}
 
-  protected void applyProperty(PacketProperty property, StringPair value) {
+  protected void applyProperty(MqttMessageProperty property, StringPair value) {
     switch (property) {
       case USER_PROPERTY:
         if (userProperties == null) {
@@ -193,7 +194,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
     int stringLength = readShortUnsigned(buffer);
     if (stringLength > inBuffer.capacity() || stringLength > maxLength) {
-      throw new MalformedPacketMqttException();
+      throw new MalformedProtocolMqttException();
     }
 
     inBuffer.clear();
@@ -211,7 +212,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
     CoderResult result = decoder.decode(inBuffer, outBuffer, true);
     if (result.isError()) {
-      throw new MalformedPacketMqttException();
+      throw new MalformedProtocolMqttException();
     }
 
     return outBuffer
@@ -241,8 +242,8 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     return data;
   }
 
-  protected void unexpectedProperty(PacketProperty property) {
-    throw new IllegalArgumentException("Unsupported property:[" + property + "]");
+  protected void unexpectedProperty(MqttMessageProperty property) {
+    throw new MalformedProtocolMqttException("Unsupported property:[" + property + "]");
   }
 
   @Override

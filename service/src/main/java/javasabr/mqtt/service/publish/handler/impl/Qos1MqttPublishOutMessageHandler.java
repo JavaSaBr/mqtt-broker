@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.HasMessageId;
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -21,7 +21,7 @@ public class Qos1MqttPublishOutMessageHandler extends PersistedMqttPublishOutMes
   }
 
   @Override
-  protected boolean handleReceivedResponse(MqttClient client, HasMessageId response) {
+  protected boolean handleReceivedResponse(MqttClient client, TrackableMessage response) {
     if (!(response instanceof PublishAckMqttInMessage)) {
       throw new IllegalStateException("Unexpected response: " + response);
     }

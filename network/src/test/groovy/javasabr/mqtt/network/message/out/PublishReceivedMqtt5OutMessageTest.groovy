@@ -9,7 +9,7 @@ class PublishReceivedMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write packet correctly"() {
     given:
         def packet = new PublishReceivedMqtt5OutMessage(
-            packetId,
+            messageId,
             PublishReceivedReasonCode.UNSPECIFIED_ERROR,
             userProperties,
             reasonString)
@@ -22,7 +22,7 @@ class PublishReceivedMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCode() == PublishReceivedReasonCode.UNSPECIFIED_ERROR
-        reader.messageId() == packetId
+        reader.messageId() == messageId
         reader.userProperties() == userProperties
         reader.reason() == reasonString
   }

@@ -3,8 +3,8 @@ package javasabr.mqtt.network.message.in;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PacketProperty;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
@@ -28,7 +28,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
 
-  private static final Set<PacketProperty> AVAILABLE_PROPERTIES = EnumSet.of(
+  private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by the UTF-8 Encoded String representing the reason associated with this response. This
         Reason String is a human readable string designed for diagnostics and SHOULD NOT be parsed by the
@@ -39,7 +39,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
         specified by the Client [MQTT-3.11.2-1]. It is a Protocol Error to include the Reason String more than
         once.
        */
-      PacketProperty.REASON_STRING,
+      MqttMessageProperty.REASON_STRING,
       /*
         Followed by UTF-8 String Pair. This property can be used to provide additional diagnostic or other
         information. The Server MUST NOT send this property if it would increase the size of the UNSUBACK
@@ -47,7 +47,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
         allowed to appear multiple times to represent multiple name, value pairs. The same name is allowed to
         appear more than once.
        */
-      PacketProperty.USER_PROPERTY);
+      MqttMessageProperty.USER_PROPERTY);
 
   private static final Array<UnsubscribeAckReasonCode> EMPTY_REASON_CODES = Array.empty(UnsubscribeAckReasonCode.class);
 
@@ -90,7 +90,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected Set<PacketProperty> availableProperties() {
+  protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
 
@@ -99,7 +99,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected void applyProperty(PacketProperty property, String value) {
+  protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
       case REASON_STRING -> reason = value;
       default -> unexpectedProperty(property);

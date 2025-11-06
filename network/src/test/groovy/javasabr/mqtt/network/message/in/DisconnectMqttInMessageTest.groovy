@@ -1,53 +1,53 @@
 package javasabr.mqtt.network.message.in
 
-import javasabr.mqtt.model.PacketProperty
+import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class DisconnectMqttInMessageTest extends BaseMqttInMessageTest {
 
-  def "should read packet correctly as mqtt 5.0"() {
+  def 'should read message correctly as mqtt 5.0'() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
-          it.putProperty(PacketProperty.REASON_STRING, reasonString)
-          it.putProperty(PacketProperty.SERVER_REFERENCE, serverReference)
-          it.putProperty(PacketProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
+          it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
+          it.putProperty(MqttMessageProperty.SERVER_REFERENCE, serverReference)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.put(DisconnectReasonCode.QUOTA_EXCEEDED.value)
+          it.putByte(DisconnectReasonCode.QUOTA_EXCEEDED.code())
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new DisconnectMqttInMessage(0b1110_0000 as byte)
-        def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new DisconnectMqttInMessage(0b1110_0000 as byte)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reason == reasonString
-        packet.serverReference == serverReference
-        packet.reasonCode == DisconnectReasonCode.QUOTA_EXCEEDED
-        packet.sessionExpiryInterval == sessionExpiryInterval
-        packet.userProperties() == userProperties
+        inMessage.reason() == reasonString
+        inMessage.serverReference() == serverReference
+        inMessage.reasonCode() == DisconnectReasonCode.QUOTA_EXCEEDED
+        inMessage.sessionExpiryInterval() == sessionExpiryInterval
+        inMessage.userProperties() == userProperties
     when:
         propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(PacketProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
-          it.putProperty(PacketProperty.SERVER_REFERENCE, serverReference)
+          it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
+          it.putProperty(MqttMessageProperty.SERVER_REFERENCE, serverReference)
         }
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.put(DisconnectReasonCode.PACKET_TOO_LARGE.value)
+          it.putByte(DisconnectReasonCode.PACKET_TOO_LARGE.code())
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
-        packet = new DisconnectMqttInMessage(0b1110_0000 as byte)
-        result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        inMessage = new DisconnectMqttInMessage(0b1110_0000 as byte)
+        result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reason == ""
-        packet.serverReference == serverReference
-        packet.reasonCode == DisconnectReasonCode.PACKET_TOO_LARGE
-        packet.sessionExpiryInterval == sessionExpiryInterval
-        packet.userProperties() == Array.empty()
+        inMessage.reason() == ""
+        inMessage.serverReference() == serverReference
+        inMessage.reasonCode() == DisconnectReasonCode.PACKET_TOO_LARGE
+        inMessage.sessionExpiryInterval() == sessionExpiryInterval
+        inMessage.userProperties() == Array.empty()
   }
 }

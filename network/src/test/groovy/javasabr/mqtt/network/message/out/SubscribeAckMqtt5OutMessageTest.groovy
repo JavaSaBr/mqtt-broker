@@ -8,7 +8,7 @@ class SubscribeAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write packet correctly"() {
     given:
         def packet = new SubscribeAckMqtt5OutMessage(
-            packetId,
+            messageId,
             subscribeAckReasonCodes,
             userProperties,
             reasonString)
@@ -21,7 +21,7 @@ class SubscribeAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCodes == subscribeAckReasonCodes
-        reader.messageId == packetId
+        reader.messageId == messageId
         reader.userProperties() == userProperties
         reader.reason == reasonString
   }

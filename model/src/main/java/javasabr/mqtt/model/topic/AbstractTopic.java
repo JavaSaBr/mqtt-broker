@@ -1,41 +1,42 @@
 package javasabr.mqtt.model.topic;
 
 import javasabr.mqtt.base.util.DebugUtils;
-import javasabr.mqtt.model.util.TopicUtils;
+import javasabr.rlib.common.util.StringUtils;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @EqualsAndHashCode(of = "rawTopic")
+@Accessors(fluent = true, chain = false)
+@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
+
+  public static final String DELIMITER = "/";
+  public static final char DELIMITER_CHAR = '/';
+
 
   static {
     DebugUtils.registerIncludedFields("rawTopic");
   }
 
-  private static final String[] EMPTY_ARRAY = new String[0];
-  private static final String EMPTY = "";
-  private final String[] segments;
-  private final String rawTopic;
-  private final int length;
+  String[] segments;
+  String rawTopic;
+  int length;
 
-  protected AbstractTopic() {
-    length = 0;
-    segments = EMPTY_ARRAY;
-    rawTopic = EMPTY;
+  protected AbstractTopic(String rawTopicName) {
+    length = rawTopicName.length();
+    segments = splitTopic(rawTopicName);
+    rawTopic = rawTopicName;
   }
 
-  protected AbstractTopic(String topicName) {
-    length = topicName.length();
-    segments = TopicUtils.splitTopic(topicName);
-    rawTopic = topicName;
-  }
-
-  String getSegment(int level) {
+  public String segment(int level) {
     return segments[level];
   }
 
-  int levelsCount() {
+  public int levelsCount() {
     return segments.length;
   }
 
@@ -43,8 +44,38 @@ public abstract class AbstractTopic {
     return segments[segments.length - 1];
   }
 
+  public boolean isInvalid() {
+    return false;
+  }
+
   @Override
   public String toString() {
     return rawTopic;
+  }
+
+  protected static String[] splitTopic(String topic) {
+    int segmentCount = countOccurrencesOf(topic, AbstractTopic.DELIMITER) + 1;
+    var segments = new String[segmentCount];
+    int i = 0, pos = 0, end;
+    while ((end = topic.indexOf(AbstractTopic.DELIMITER, pos)) >= 0) {
+      segments[i++] = topic.substring(pos, end);
+      pos = end + 1;
+    }
+    segments[i] = topic.substring(pos);
+    return segments;
+  }
+
+  protected static int countOccurrencesOf(String str, String sub) {
+    if (StringUtils.isEmpty(str)) {
+      return 0;
+    }
+    int count = 0;
+    int pos = 0;
+    int idx;
+    while ((idx = str.indexOf(sub, pos)) != -1) {
+      ++count;
+      pos = idx + sub.length();
+    }
+    return count;
   }
 }
