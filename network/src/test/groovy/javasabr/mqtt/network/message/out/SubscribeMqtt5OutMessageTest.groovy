@@ -20,6 +20,7 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             .minimal("topic/name1", QoS.AT_LEAST_ONCE)
         def subscription2 = new Subscription(
             TopicFilter.valueOf("topic/name2"),
+            15,
             QoS.EXACTLY_ONCE,
             SubscribeRetainHandling.DO_NOT_SEND,
             false,
@@ -49,5 +50,22 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         inMessage.subscriptions() == requestedSubscriptions
         inMessage.userProperties() == userProperties
         inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
+    when:
+        outMessage = new SubscribeMqtt5OutMessage(
+            25,
+            subscriptions,
+            userProperties,
+            35)
+        dataBuffer = BufferUtils.prepareBuffer(512) {
+          outMessage.write(defaultMqtt5Connection, it)
+        }
+        inMessage = new SubscribeMqttInMessage(0b1000_0000 as byte)
+        result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        result
+        inMessage.messageId() == 25
+        inMessage.subscriptions() == requestedSubscriptions
+        inMessage.userProperties() == userProperties
+        inMessage.subscriptionId() == 35
   }
 }

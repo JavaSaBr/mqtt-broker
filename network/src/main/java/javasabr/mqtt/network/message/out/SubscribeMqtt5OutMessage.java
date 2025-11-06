@@ -37,13 +37,12 @@ public class SubscribeMqtt5OutMessage extends SubscribeMqtt311OutMessage {
         name is allowed to appear more than once.
        */
       MqttMessageProperty.USER_PROPERTY);
-
   // properties
   Array<StringPair> userProperties;
   int subscriptionId;
 
   public SubscribeMqtt5OutMessage(int messageId, Array<Subscription> subscriptions) {
-    this(messageId, subscriptions, Array.empty(StringPair.class), MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
+    this(messageId, subscriptions, EMPTY_USER_PROPERTIES, MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
   }
 
   public SubscribeMqtt5OutMessage(

@@ -33,11 +33,11 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.wildcardSubscriptionAvailable == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
         packet.subscriptionIdAvailable == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
         packet.responseInformation == ""
-        packet.maxPacketSize == MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED
+        packet.maxMessageSize == MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED
         packet.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
         packet.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
         packet.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
-        packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_UNDEFINED
+        packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
   }
 
   def "should read packet correctly as mqtt 5.0"() {
@@ -48,9 +48,9 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, mqtt311ClientId)
           it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
           it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(MqttMessageProperty.MAXIMUM_PACKET_SIZE, maxPacketSize)
+          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, maxPacketSize)
           it.putProperty(MqttMessageProperty.MAXIMUM_QOS, QoS.AT_LEAST_ONCE.ordinal())
-          it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH, receiveMaxPublishes)
+          it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMaxPublishes)
           it.putProperty(MqttMessageProperty.RETAIN_AVAILABLE, retainAvailable)
           it.putProperty(MqttMessageProperty.RESPONSE_INFORMATION, responseInformation)
           it.putProperty(MqttMessageProperty.SERVER_KEEP_ALIVE, serverKeepAlive)
@@ -78,7 +78,7 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.assignedClientId == mqtt311ClientId
         packet.authenticationData == authData
         packet.authenticationMethod == authMethod
-        packet.maxPacketSize == maxPacketSize
+        packet.maxMessageSize == maxPacketSize
         packet.maximumQos == QoS.AT_LEAST_ONCE
         packet.receiveMaxPublishes == receiveMaxPublishes
         packet.retainAvailable == retainAvailable

@@ -52,7 +52,7 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         inMessage.retainAvailable() == retainAvailable
         inMessage.sessionExpiryInterval() == 240
         inMessage.receiveMaxPublishes() == 250
-        inMessage.maxPacketSize() == maxPacketSize
+        inMessage.maxMessageSize() == maxPacketSize
         inMessage.assignedClientId() == mqtt311ClientId
         inMessage.topicAliasMaxValue() == 300
         inMessage.reason() == reasonString

@@ -272,9 +272,9 @@ public class MqttBrokerSpringConfig {
     return new MqttServerConnectionConfig(
         QoS.ofCode(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
         env.getProperty(
-            "mqtt.external.connection.max.packet.size",
+            "mqtt.external.connection.max.message.size",
             int.class,
-            MqttProperties.MAXIMUM_PACKET_SIZE_DEFAULT),
+            MqttProperties.MAXIMUM_MESSAGE_SIZE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.max.string.length",
             int.class,
@@ -294,11 +294,11 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.receive.maximum",
             int.class,
-            MqttProperties.RECEIVE_MAXIMUM_DEFAULT),
+            MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.topic.alias.maximum",
             int.class,
-            MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED),
+            MqttProperties.TOPIC_ALIAS_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,

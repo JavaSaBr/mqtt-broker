@@ -53,7 +53,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
         The value of Receive Maximum applies only to the current Network Connection. If the Receive Maximum
         value is absent then its value defaults to 65,535.
        */
-      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH,
+      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
       /*
         Followed by a Four Byte Integer representing the Maximum Packet Size the Client is willing to accept. If
         the Maximum Packet Size is not present, no limit on the packet size is imposed beyond the limitations in
@@ -62,7 +62,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
         It is a Protocol Error to include the Maximum Packet Size more than once, or for the value to be set to
         zero.
        */
-      MqttMessageProperty.MAXIMUM_PACKET_SIZE,
+      MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
       /*
         Followed by the Two Byte Integer representing the Topic Alias Maximum value. It is a Protocol Error to
         include the Topic Alias Maximum value more than once. If the Topic Alias Maximum property is absent,
@@ -215,8 +215,8 @@ public class ConnectMqttInMessage extends MqttInMessage {
   byte[] authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
 
   long sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-  int receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
-  int maxPacketSize = MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
+  int receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
+  int maxPacketSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
   int topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
   boolean requestResponseInformation = false;
   boolean requestProblemInformation = false;
@@ -368,10 +368,10 @@ public class ConnectMqttInMessage extends MqttInMessage {
     switch (property) {
       case REQUEST_RESPONSE_INFORMATION -> requestResponseInformation = NumberUtils.toBoolean(value);
       case REQUEST_PROBLEM_INFORMATION -> requestProblemInformation = NumberUtils.toBoolean(value);
-      case RECEIVE_MAXIMUM_PUBLISH -> receiveMaxPublishes = NumberUtils.validate(
+      case RECEIVE_MAXIMUM_PUBLISHES -> receiveMaxPublishes = NumberUtils.validate(
           (int) value,
-          MqttProperties.RECEIVE_MAXIMUM_MIN,
-          MqttProperties.RECEIVE_MAXIMUM_MAX);
+          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN,
+          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX);
       case TOPIC_ALIAS_MAXIMUM -> topicAliasMaxValue = NumberUtils.validate(
           (int) value,
           MqttProperties.TOPIC_ALIAS_MIN,
@@ -380,10 +380,10 @@ public class ConnectMqttInMessage extends MqttInMessage {
           value,
           MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
           MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
-      case MAXIMUM_PACKET_SIZE -> maxPacketSize = NumberUtils.validate(
+      case MAXIMUM_MESSAGE_SIZE -> maxPacketSize = NumberUtils.validate(
           (int) value,
-          MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
-          MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
+          MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
+          MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
       default -> unexpectedProperty(property);
     }
   }

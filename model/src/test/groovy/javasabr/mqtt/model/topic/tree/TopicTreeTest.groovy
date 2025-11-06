@@ -1,5 +1,6 @@
 package javasabr.mqtt.model.topic.tree
 
+import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.subscriber.SingleSubscriber
@@ -545,6 +546,7 @@ class TopicTreeTest extends UnitSpecification {
   static def makeSubscription(String topicFilter) {
     return new Subscription(
         TopicFilter.valueOf(topicFilter),
+        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
         QoS.AT_LEAST_ONCE,
         SubscribeRetainHandling.SEND,
         true,
@@ -554,6 +556,7 @@ class TopicTreeTest extends UnitSpecification {
   static def makeSharedSubscription(String topicFilter) {
     return new Subscription(
         SharedTopicFilter.valueOf(topicFilter),
+        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
         QoS.AT_LEAST_ONCE,
         SubscribeRetainHandling.SEND,
         true,
@@ -563,6 +566,7 @@ class TopicTreeTest extends UnitSpecification {
   static def makeSubscription(String topicFilter, int qos) {
     return new Subscription(
         TopicFilter.valueOf(topicFilter),
+        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
         QoS.ofCode(qos),
         SubscribeRetainHandling.SEND,
         true,

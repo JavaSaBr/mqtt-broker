@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
-import static javasabr.mqtt.model.MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
-import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
 import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
@@ -143,14 +143,14 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
     }
 
     // select result receive max
-    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_UNDEFINED
+    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
                               ? serverConfig.receiveMaxPublishes()
                               : Math.min(packet.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
     // select result maximum packet size
-    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_PACKET_SIZE_UNDEFINED
-                            ? serverConfig.maxPacketSize()
-                            : Math.min(packet.maxPacketSize(), serverConfig.maxPacketSize());
+    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_UNDEFINED
+                            ? serverConfig.maxMessageSize()
+                            : Math.min(packet.maxPacketSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
     var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_UNDEFINED

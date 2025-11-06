@@ -42,7 +42,7 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         The value of Receive Maximum applies only to the current Network Connection. If the Receive Maximum
         value is absent then its value defaults to 65,535.
        */
-      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH,
+      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
       /*
         Followed by a Four Byte Integer representing the Maximum Packet Size the Client is willing to accept. If
         the Maximum Packet Size is not present, no limit on the packet size is imposed beyond the limitations in
@@ -51,7 +51,7 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         It is a Protocol Error to include the Maximum Packet Size more than once, or for the value to be set to
         zero.
        */
-      MqttMessageProperty.MAXIMUM_PACKET_SIZE,
+      MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
       /*
         Followed by the Two Byte Integer representing the Topic Alias Maximum value. It is a Protocol Error to
         include the Topic Alias Maximum value more than once. If the Topic Alias Maximum property is absent,
@@ -208,8 +208,8 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         StringUtils.EMPTY,
         ArrayUtils.EMPTY_BYTE_ARRAY,
         MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED,
-        MqttProperties.RECEIVE_MAXIMUM_UNDEFINED,
-        MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED,
+        MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED,
+        MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED,
         MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED,
         false,
         false);
@@ -282,7 +282,7 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
     writeNotEmptyProperty(buffer, MqttMessageProperty.AUTHENTICATION_DATA, authenticationData);
     writeProperty(buffer, MqttMessageProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation, false);
     writeProperty(buffer, MqttMessageProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation, false);
-    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH, receiveMax, MqttProperties.RECEIVE_MAXIMUM_UNDEFINED);
+    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMax, MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED);
     writeProperty(
         buffer,
         MqttMessageProperty.TOPIC_ALIAS_MAXIMUM,
@@ -295,9 +295,9 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED);
     writeProperty(
         buffer,
-        MqttMessageProperty.MAXIMUM_PACKET_SIZE,
+        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
         maximumPacketSize,
-        MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED);
+        MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED);
   }
 
   protected void writeWillProperties(ByteBuffer buffer) {}

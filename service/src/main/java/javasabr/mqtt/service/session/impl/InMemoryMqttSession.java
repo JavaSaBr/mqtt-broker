@@ -12,6 +12,7 @@ import javasabr.mqtt.network.MqttSession.UnsafeMqttSession;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
+import javasabr.rlib.collections.array.MutableArray;
 import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,6 +25,8 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(of = "clientId")
 @Accessors(fluent = true, chain = false)
 public class InMemoryMqttSession implements UnsafeMqttSession {
+
+  private static final Array<Subscription> EMPTY_SUBSCRIPTIONS = Array.empty(Subscription.class);
 
   private record PendingPublish(Publish publish, PendingMessageHandler handler) {}
 
@@ -197,7 +200,34 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
 
   @Override
   public Array<Subscription> storedSubscriptions() {
-    return subscriptions;
+    if (subscriptions.isEmpty()) {
+      return EMPTY_SUBSCRIPTIONS;
+    }
+    long stamp = subscriptions.readLock();
+    try {
+      return Array.copyOf(subscriptions);
+    } finally {
+      subscriptions.readUnlock(stamp);
+    }
+  }
+
+  @Override
+  public Array<Subscription> findStoredSubscriptionWithId(int subscriptionId) {
+    if (subscriptions.isEmpty()) {
+      return EMPTY_SUBSCRIPTIONS;
+    }
+    MutableArray<Subscription> result = ArrayFactory.mutableArray(Subscription.class);
+    long stamp = subscriptions.readLock();
+    try {
+      for (Subscription subscription : subscriptions) {
+        if (subscription.subscriptionId() == subscriptionId) {
+          result.add(subscription);
+        }
+      }
+    } finally {
+      subscriptions.readUnlock(stamp);
+    }
+    return result;
   }
 
   @Override

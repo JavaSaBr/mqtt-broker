@@ -57,7 +57,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
       MqttClient client,
       Array<Subscription> subscriptions) {
 
-    MutableArray<SubscribeAckReasonCode> result = ArrayFactory.mutableArray(
+    MutableArray<SubscribeAckReasonCode> subscribeResults = ArrayFactory.mutableArray(
         SubscribeAckReasonCode.class,
         subscriptions.size());
 
@@ -66,16 +66,16 @@ public class InMemorySubscriptionService implements SubscriptionService {
       // without session just fill error for each topic filter
       log.warning(client.clientId(), "[%s] Cannot add subscription for client without session"::formatted);
       for (int i = 0, length = subscriptions.size(); i < length; i++) {
-        result.add(SubscribeAckReasonCode.UNSPECIFIED_ERROR);
+        subscribeResults.add(SubscribeAckReasonCode.UNSPECIFIED_ERROR);
       }
-      return result;
+      return subscribeResults;
     }
 
     for (Subscription subscription : subscriptions) {
-      result.add(addSubscription(client, session, subscription));
+      subscribeResults.add(addSubscription(client, session, subscription));
     }
 
-    return result;
+    return subscribeResults;
   }
 
   private SubscribeAckReasonCode addSubscription(MqttClient client, MqttSession session, Subscription subscription) {
@@ -97,7 +97,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   @Override
   public Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient client, Array<TopicFilter> topicFilters) {
 
-    MutableArray<UnsubscribeAckReasonCode> result = ArrayFactory.mutableArray(
+    MutableArray<UnsubscribeAckReasonCode> unsubscribeResults = ArrayFactory.mutableArray(
         UnsubscribeAckReasonCode.class,
         topicFilters.size());
 
@@ -106,16 +106,16 @@ public class InMemorySubscriptionService implements SubscriptionService {
       // without session just fill error for each topic filter
       log.warning(client.clientId(), "[%s] Cannot add subscription for client without session"::formatted);
       for (int i = 0, length = topicFilters.size(); i < length; i++) {
-        result.add(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR);
+        unsubscribeResults.add(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR);
       }
-      return result;
+      return unsubscribeResults;
     }
 
     for (TopicFilter topicFilter : topicFilters) {
-      result.add(removeSubscription(client, session, topicFilter));
+      unsubscribeResults.add(removeSubscription(client, session, topicFilter));
     }
 
-    return result;
+    return unsubscribeResults;
   }
 
   private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttSession session, TopicFilter topicFilter) {

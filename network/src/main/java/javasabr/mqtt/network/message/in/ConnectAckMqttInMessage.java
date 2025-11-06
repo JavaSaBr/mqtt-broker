@@ -49,7 +49,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
 
         If the Receive Maximum value is absent, then its value defaults to 65,535.
        */
-      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH,
+      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
       /*
         Followed by a Byte with a value of either 0 or 1. It is a Protocol Error to include Maximum QoS more than
         once, or to have a value other than 0 or 1. If the Maximum QoS is absent, the Client uses a Maximum
@@ -104,7 +104,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         a Server receives a packet whose size exceeds this limit, this is a Protocol Error, the Server uses
         DISCONNECT with Reason Code 0x95 (Packet too large), as described in section 4.13.
        */
-      MqttMessageProperty.MAXIMUM_PACKET_SIZE,
+      MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
       /*
         Followed by the UTF-8 string which is the Assigned Client Identifier. It is a Protocol Error to include the
         Assigned Client Identifier more than once.
@@ -261,7 +261,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   long sessionExpiryInterval;
 
   int receiveMaxPublishes;
-  int maxPacketSize;
+  int maxMessageSize;
   int topicAliasMaxValue;
   int serverKeepAlive;
 
@@ -286,10 +286,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
     this.authenticationMethod = StringUtils.EMPTY;
     this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
     this.serverKeepAlive = MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED;
-    this.maxPacketSize = MqttProperties.MAXIMUM_PACKET_SIZE_UNDEFINED;
+    this.maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
     this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
     this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
-    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_UNDEFINED;
+    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
   }
 
   @Override
@@ -336,10 +336,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
       case SHARED_SUBSCRIPTION_AVAILABLE -> sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
       case SUBSCRIPTION_IDENTIFIER_AVAILABLE -> subscriptionIdAvailable = NumberUtils.toBoolean(value);
       case RETAIN_AVAILABLE -> retainAvailable = NumberUtils.toBoolean(value);
-      case RECEIVE_MAXIMUM_PUBLISH -> receiveMaxPublishes = (int) NumberUtils.validate(
+      case RECEIVE_MAXIMUM_PUBLISHES -> receiveMaxPublishes = (int) NumberUtils.validate(
           value,
-          MqttProperties.RECEIVE_MAXIMUM_MIN,
-          MqttProperties.RECEIVE_MAXIMUM_MAX);
+          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN,
+          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX);
       case MAXIMUM_QOS -> maximumQos = QoS.ofCode((int) value);
       case SERVER_KEEP_ALIVE -> serverKeepAlive = NumberUtils.validate(
           (int) value,
@@ -353,10 +353,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
           value,
           MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
           MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
-      case MAXIMUM_PACKET_SIZE -> maxPacketSize = NumberUtils.validate(
+      case MAXIMUM_MESSAGE_SIZE -> maxMessageSize = NumberUtils.validate(
           (int) value,
-          MqttProperties.MAXIMUM_PACKET_SIZE_MIN,
-          MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
+          MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
+          MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
       default -> unexpectedProperty(property);
     }
   }

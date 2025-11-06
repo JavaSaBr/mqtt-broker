@@ -39,7 +39,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final topicAlias = 252
   public static final receiveMaxPublishes = 10
   public static final maxPacketSize = 1024
-  public static final maxStringLength = 1024
+  public static final maxStringLength = 256
   public static final maxBinarySize = 1024
   public static final maxTopicLevels = 10
   public static final topicAliasMaxValue = 32
@@ -58,6 +58,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
   public static final topicFilter1Obj5 = new Subscription(
       TopicFilter.valueOf(topicFilter),
+      15,
       QoS.AT_LEAST_ONCE,
       SubscribeRetainHandling.DO_NOT_SEND,
       true,
@@ -67,6 +68,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final topicFilter2Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter2), QoS.EXACTLY_ONCE)
   public static final topicFilter2Obj5 = new Subscription(
       TopicFilter.valueOf(topicFilter2),
+      15,
       QoS.EXACTLY_ONCE,
       SubscribeRetainHandling.DO_NOT_SEND,
       true,

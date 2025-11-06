@@ -6,7 +6,7 @@ public record MqttClientConnectionConfig(
     MqttVersion mqttVersion,
     long sessionExpiryInterval,
     int receiveMaxPublishes,
-    int maxPacketSize,
+    int maxMessageSize,
     int topicAliasMaxValue,
     int keepAlive,
     boolean requestResponseInformation,

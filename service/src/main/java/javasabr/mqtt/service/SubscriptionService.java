@@ -43,7 +43,7 @@ public interface SubscriptionService {
    */
   Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient client, Array<TopicFilter> topicFilters);
 
-  void cleanSubscriptions(MqttClient mqttClient, MqttSession mqttSession);
+  void cleanSubscriptions(MqttClient client, MqttSession session);
 
-  void restoreSubscriptions(MqttClient mqttClient, MqttSession mqttSession);
+  void restoreSubscriptions(MqttClient client, MqttSession session);
 }

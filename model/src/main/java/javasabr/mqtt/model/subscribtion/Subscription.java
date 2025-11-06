@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.subscribtion;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -10,6 +11,10 @@ public record Subscription(
       The subscriber's topic filter.
      */
     TopicFilter topicFilter,
+    /*
+     * The associated ID for the subscription
+     */
+    int subscriptionId,
     /*
       Maximum QoS field. This gives the maximum QoS level at which the Server can send Application Messages to the
       Client.
@@ -36,6 +41,7 @@ public record Subscription(
   public static Subscription minimal(TopicFilter topicFilter, QoS qos) {
     return new Subscription(
         topicFilter,
+        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
         qos,
         SubscribeRetainHandling.SEND,
         true,

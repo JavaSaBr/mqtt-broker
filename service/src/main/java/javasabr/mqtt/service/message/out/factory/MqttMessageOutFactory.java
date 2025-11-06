@@ -128,23 +128,37 @@ public abstract class MqttMessageOutFactory {
   }
 
   public abstract MqttOutMessage newSubscribeAck(
-      int packetId,
+      int messageId,
       Array<SubscribeAckReasonCode> reasonCodes,
       String reason,
       Array<StringPair> userProperties);
 
-  public MqttOutMessage newSubscribeAck(int packetId, Array<SubscribeAckReasonCode> reasonCodes) {
-    return newSubscribeAck(packetId, reasonCodes, StringUtils.EMPTY, Array.empty(StringPair.class));
+  public MqttOutMessage newSubscribeAck(int messageId, Array<SubscribeAckReasonCode> reasonCodes) {
+    return newSubscribeAck(messageId, reasonCodes, StringUtils.EMPTY, Array.empty(StringPair.class));
+  }
+
+  public MqttOutMessage newSubscribeAck(
+      int messageId,
+      Array<SubscribeAckReasonCode> reasonCodes,
+      Array<StringPair> userProperties) {
+    return newSubscribeAck(messageId, reasonCodes, StringUtils.EMPTY, userProperties);
   }
 
   public abstract MqttOutMessage newUnsubscribeAck(
-      int packetId,
+      int messageId,
       Array<UnsubscribeAckReasonCode> reasonCodes,
       Array<StringPair> userProperties,
       String reason);
 
-  public MqttOutMessage newUnsubscribeAck(int packetId, Array<UnsubscribeAckReasonCode> reasonCodes) {
-    return newUnsubscribeAck(packetId, reasonCodes, Array.empty(StringPair.class), StringUtils.EMPTY);
+  public MqttOutMessage newUnsubscribeAck(int messageId, Array<UnsubscribeAckReasonCode> reasonCodes) {
+    return newUnsubscribeAck(messageId, reasonCodes, Array.empty(StringPair.class), StringUtils.EMPTY);
+  }
+
+  public MqttOutMessage newUnsubscribeAck(
+      int messageId,
+      Array<UnsubscribeAckReasonCode> reasonCodes,
+      Array<StringPair> userProperties) {
+    return newUnsubscribeAck(messageId, reasonCodes, userProperties, StringUtils.EMPTY);
   }
 
   public abstract MqttOutMessage newDisconnect(
@@ -159,6 +173,18 @@ public abstract class MqttMessageOutFactory {
         client,
         reasonCode,
         Array.empty(StringPair.class),
+        StringUtils.EMPTY,
+        StringUtils.EMPTY);
+  }
+
+  public MqttOutMessage newDisconnect(
+      MqttClient client,
+      DisconnectReasonCode reasonCode,
+      Array<StringPair> userProperties) {
+    return newDisconnect(
+        client,
+        reasonCode,
+        userProperties,
         StringUtils.EMPTY,
         StringUtils.EMPTY);
   }

@@ -44,7 +44,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
         If the Receive Maximum value is absent, then its value defaults to 65,535.
        */
-      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH,
+      MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
       /*
         Followed by a Byte with a value of either 0 or 1. It is a Protocol Error to include Maximum QoS more than
         once, or to have a value other than 0 or 1. If the Maximum QoS is absent, the Client uses a Maximum
@@ -99,7 +99,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
         a Server receives a packet whose size exceeds this limit, this is a Protocol Error, the Server uses
         DISCONNECT with Reason Code 0x95 (Packet too large), as described in section 4.13.
        */
-      MqttMessageProperty.MAXIMUM_PACKET_SIZE,
+      MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
       /*
         Followed by the UTF-8 string which is the Assigned Client Identifier. It is a Protocol Error to include the
         Assigned Client Identifier more than once.
@@ -319,12 +319,12 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
         connectionConfig.sessionExpiryInterval(),
         requestedSessionExpiryInterval);
     writeProperty(buffer, MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId, requestedClientId);
-    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISH, connectionConfig.receiveMaxPublishes(), requestedReceiveMax);
+    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, connectionConfig.receiveMaxPublishes(), requestedReceiveMax);
     writeProperty(
         buffer,
-        MqttMessageProperty.MAXIMUM_PACKET_SIZE,
-        connectionConfig.maxPacketSize(),
-        MqttProperties.MAXIMUM_PACKET_SIZE_MAX);
+        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
+        connectionConfig.maxMessageSize(),
+        MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
     writeProperty(
         buffer,
         MqttMessageProperty.TOPIC_ALIAS_MAXIMUM,

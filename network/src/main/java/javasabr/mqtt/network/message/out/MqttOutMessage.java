@@ -16,6 +16,8 @@ import org.jspecify.annotations.Nullable;
 @RequiredArgsConstructor
 public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttConnection> {
 
+  protected static final Array<StringPair> EMPTY_USER_PROPERTIES = Array.empty(StringPair.class);
+
   private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
       1024 * 1024));
 

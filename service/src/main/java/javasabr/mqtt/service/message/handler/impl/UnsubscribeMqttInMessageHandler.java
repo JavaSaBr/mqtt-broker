@@ -47,11 +47,11 @@ public class UnsubscribeMqttInMessageHandler
         .map(rawTopicFilter -> topicService.createTopicFilter(client, rawTopicFilter))
         .collect(ArrayCollectors.toArray(TopicFilter.class));
 
-    Array<UnsubscribeAckReasonCode> ackReasonCodes = subscriptionService
+    Array<UnsubscribeAckReasonCode> unsubscribeResults = subscriptionService
         .unsubscribe(client, topicFilters);
 
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newUnsubscribeAck(message.messageId(), ackReasonCodes));
+        .newUnsubscribeAck(message.messageId(), unsubscribeResults, message.userProperties()));
   }
 }

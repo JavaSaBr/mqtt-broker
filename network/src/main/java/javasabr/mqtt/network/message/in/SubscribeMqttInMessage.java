@@ -44,8 +44,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
         The Subscription Identifier is associated with any subscription created or modified as the result of this
         SUBSCRIBE packet. If there is a Subscription Identifier, it is stored with the subscription. If this
-        property is
-        not specified, then the absence of a Subscription Identifier is stored with the subscription.
+        property is not specified, then the absence of a Subscription Identifier is stored with the subscription.
        */
       MqttMessageProperty.SUBSCRIPTION_IDENTIFIER,
       /*
@@ -68,12 +67,6 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   public byte messageType() {
     return MESSAGE_TYPE;
-  }
-
-  @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718065
-    messageId = readShortUnsigned(buffer);
   }
 
   @Override
