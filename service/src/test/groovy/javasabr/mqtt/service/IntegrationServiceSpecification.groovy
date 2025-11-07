@@ -1,12 +1,7 @@
 package javasabr.mqtt.service
 
-import javasabr.mqtt.model.MqttClientConnectionConfig
-import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.MqttServerConnectionConfig
-import javasabr.mqtt.model.MqttVersion
-import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.*
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.MqttSession
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler
 import javasabr.mqtt.network.impl.ExternalMqttClient
 import javasabr.mqtt.service.impl.DefaultTopicService

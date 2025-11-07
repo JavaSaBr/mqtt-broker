@@ -539,6 +539,86 @@ class TopicTreeTest extends UnitSpecification {
         !id3WasUnsubscribed
   }
 
+  def "should replace the same subscriptions"() {
+    given:
+        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        def owner1 = makeOwner("id1")
+        def originalSub = makeSubscription('topic/name1')
+        def replacementSub = makeSubscription('topic/name1')
+        topicTree.subscribe(makeOwner("id2"), makeSubscription('topic/name1'))
+        topicTree.subscribe(makeOwner("id3"), makeSubscription('topic/name1'))
+    when:
+        def previous = topicTree.subscribe(owner1, originalSub)
+        def matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 3
+        previous == null;
+    when:
+        previous = topicTree.subscribe(owner1, replacementSub)
+        matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 3
+        matched.first().subscription() == replacementSub
+        previous != null
+        previous.subscription() == originalSub
+  }
+
+  def "should extend shared subscription group on multiply subscribing by the same topic"() {
+    given:
+        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        def owner1 = makeOwner("id1")
+        def owner2 = makeOwner("id2")
+        topicTree.subscribe(owner1, makeSharedSubscription('$share/group1/topic/name1'))
+        topicTree.subscribe(owner2, makeSharedSubscription('$share/group1/topic/name1'))
+    when:
+        def matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 1
+        matched.first().owner() == owner2
+    when:
+        matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 1
+        matched.first().owner() == owner1
+    when:
+        matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 1
+        matched.first().owner() == owner2
+    when:
+        topicTree.subscribe(owner1, makeSharedSubscription('$share/group1/topic/name1'))
+        matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 1
+        matched.first().owner() == owner2
+    when:
+        matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 1
+        matched.first().owner() == owner1
+    when:
+        matched = topicTree
+            .matches(TopicName.valueOf("topic/name1"))
+            .toSet()
+    then:
+        matched.size() == 1
+        matched.first().owner() == owner1
+  }
+
   static def makeOwner(String id) {
     return new TestSubscriptionOwner(id)
   }

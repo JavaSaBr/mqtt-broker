@@ -35,13 +35,16 @@ class TopicNode extends TopicTreeBase {
   @Nullable
   volatile LockableArray<Subscriber> subscribers;
 
-  public void subscribe(int level, SubscriptionOwner owner, Subscription subscription, TopicFilter topicFilter) {
+  /**
+   * @return the previous subscription from the same owner
+   */
+  @Nullable
+  public SingleSubscriber subscribe(int level, SubscriptionOwner owner, Subscription subscription, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
-      addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
-      return;
+      return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
     TopicNode childNode = getOrCreateChildNode(topicFilter.segment(level));
-    childNode.subscribe(level + 1, owner, subscription, topicFilter);
+    return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
   public boolean unsubscribe(int level, SubscriptionOwner owner, TopicFilter topicFilter) {

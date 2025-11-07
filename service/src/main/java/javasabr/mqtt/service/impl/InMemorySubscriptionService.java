@@ -89,8 +89,11 @@ public class InMemorySubscriptionService implements SubscriptionService {
     } else if (!serverConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
       return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     }
+    SingleSubscriber previous = topicTree.subscribe(client, subscription);
+    if (previous != null) {
+      session.removeSubscription(previous.subscription());
+    }
     session.storeSubscription(subscription);
-    topicTree.subscribe(client, subscription);
     return subscription.qos().subscribeAckReasonCode();
   }
 

@@ -20,7 +20,11 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 abstract class TopicTreeBase {
 
-  protected static void addSubscriber(
+  /**
+   * @return previous subscriber with the same owner
+   */
+  @Nullable
+  protected static SingleSubscriber addSubscriber(
       LockableArray<Subscriber> subscribers,
       SubscriptionOwner owner,
       Subscription subscription,
@@ -29,12 +33,28 @@ abstract class TopicTreeBase {
     try {
       if (topicFilter instanceof SharedTopicFilter stf) {
         addSharedSubscriber(subscribers, owner, subscription, stf);
+        return null;
       } else {
+        SingleSubscriber previous = removePreviousIfExist(subscribers, owner);
         subscribers.add(new SingleSubscriber(owner, subscription));
+        return previous;
       }
     } finally {
       subscribers.writeUnlock(stamp);
     }
+  }
+
+  @Nullable
+  private static SingleSubscriber removePreviousIfExist(
+      LockableArray<Subscriber> subscribers,
+      SubscriptionOwner owner) {
+    int index = subscribers.indexOf(Subscriber::resolveOwner, owner);
+    if (index < 0) {
+      return null;
+    }
+    return subscribers
+        .remove(index)
+        .resolveSingle();
   }
 
   private static void addSharedSubscriber(

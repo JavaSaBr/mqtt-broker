@@ -60,6 +60,8 @@ public interface MqttSession {
 
   void removeSubscription(TopicFilter subscribe);
 
+  void removeSubscription(Subscription subscription);
+
   Array<Subscription> storedSubscriptions();
 
   Array<Subscription> findStoredSubscriptionWithId(int subscriptionId);

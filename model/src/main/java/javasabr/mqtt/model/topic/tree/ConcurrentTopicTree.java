@@ -10,6 +10,7 @@ import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.ThreadSafe;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConcurrentTopicTree implements ThreadSafe {
@@ -20,8 +21,9 @@ public class ConcurrentTopicTree implements ThreadSafe {
     this.rootNode = new TopicNode();
   }
 
-  public void subscribe(SubscriptionOwner owner, Subscription subscription) {
-    rootNode.subscribe(0, owner, subscription, subscription.topicFilter());
+  @Nullable
+  public SingleSubscriber subscribe(SubscriptionOwner owner, Subscription subscription) {
+    return rootNode.subscribe(0, owner, subscription, subscription.topicFilter());
   }
 
   public boolean unsubscribe(SubscriptionOwner owner, TopicFilter topicFilter) {

@@ -199,6 +199,16 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
+  public void removeSubscription(Subscription subscription) {
+    long stamp = subscriptions.writeLock();
+    try {
+      subscriptions.remove(subscription);
+    } finally {
+      subscriptions.writeUnlock(stamp);
+    }
+  }
+
+  @Override
   public Array<Subscription> storedSubscriptions() {
     if (subscriptions.isEmpty()) {
       return EMPTY_SUBSCRIPTIONS;
