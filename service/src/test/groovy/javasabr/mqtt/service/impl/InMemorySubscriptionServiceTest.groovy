@@ -1,4 +1,4 @@
-package javasabr.mqtt.service
+package javasabr.mqtt.service.impl
 
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
@@ -6,7 +6,8 @@ import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.mqtt.model.subscribtion.Subscription
-import javasabr.mqtt.service.impl.InMemorySubscriptionService
+import javasabr.mqtt.service.IntegrationServiceSpecification
+import javasabr.mqtt.service.SubscriptionService
 import javasabr.rlib.collections.array.Array
 
 class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
@@ -48,7 +49,8 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true,
                 true))
     when:
-        def result = subscriptionService.subscribe(mqttClient, subscriptions)
+        def result = subscriptionService
+            .subscribe(mqttClient, mqttClient.session(), subscriptions)
     then:
         result.size() == 4
         result == Array.of(
@@ -102,7 +104,8 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true,
                 true))
     when:
-        def result = subscriptionService.subscribe(mqttClient, subscriptions)
+        def result = subscriptionService
+            .subscribe(mqttClient, mqttClient.session(), subscriptions)
     then:
         result.size() == 5
         result == Array.of(
@@ -150,7 +153,8 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             true)
         def subscriptions = Array.of(sub1, sub2, sub3, sub4)
     when:
-        def result = subscriptionService.subscribe(mqttClient, subscriptions)
+        def result = subscriptionService
+            .subscribe(mqttClient, mqttClient.session(), subscriptions)
     then:
         result.size() == 4
         result == Array.of(
@@ -196,14 +200,15 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 SubscribeRetainHandling.SEND,
                 true,
                 true))
-        subscriptionService.subscribe(mqttClient, subscriptions)
+        subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions)
         def topicsToUnsubscribe = Array.of(
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/1"),
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/3"),
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/notexist"),
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/invalid##"))
     when:
-        def result = subscriptionService.unsubscribe(mqttClient, topicsToUnsubscribe)
+        def result = subscriptionService
+            .unsubscribe(mqttClient, mqttClient.session(), topicsToUnsubscribe)
     then:
         result.size() == 4
         result == Array.of(
@@ -245,13 +250,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/1"),
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/3"))
     when:
-        subscriptionService.subscribe(mqttClient, subscriptions)
+        subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions)
         def storedSubscriptions = mqttSession.storedSubscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
-        subscriptionService.unsubscribe(mqttClient, topicsToUnsubscribe)
+        subscriptionService.unsubscribe(mqttClient, mqttClient.session(), topicsToUnsubscribe)
         storedSubscriptions = mqttSession.storedSubscriptions()
     then:
         storedSubscriptions.size() == 1
@@ -306,13 +311,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             subscriptions.get(1),
             subscriptions2.get(1))
     when:
-        subscriptionService.subscribe(mqttClient, subscriptions)
+        subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions)
         def storedSubscriptions = mqttSession.storedSubscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
-        subscriptionService.subscribe(mqttClient, subscriptions2)
+        subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions2)
         storedSubscriptions = mqttSession.storedSubscriptions()
     then:
         storedSubscriptions.size() == 3

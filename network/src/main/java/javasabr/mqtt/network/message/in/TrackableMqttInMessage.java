@@ -22,7 +22,7 @@ public abstract class TrackableMqttInMessage extends MqttInMessage {
 
   public TrackableMqttInMessage(byte info) {
     super(info);
-    this.messageId = MqttProperties.MESSAGE_ID_UNDEFINED;
+    this.messageId = MqttProperties.MESSAGE_ID_IS_NOT_SET;
   }
 
   @Override

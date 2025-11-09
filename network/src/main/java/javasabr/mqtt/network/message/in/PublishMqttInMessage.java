@@ -306,7 +306,7 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
     rawTopicName = readString(buffer, Integer.MAX_VALUE);
-    messageId = qos != QoS.AT_MOST_ONCE ? readShortUnsigned(buffer) : 0;
+    messageId = qos != QoS.AT_MOST_ONCE ? readShortUnsigned(buffer) : MqttProperties.MESSAGE_ID_IS_NOT_SET;
   }
 
   @Override

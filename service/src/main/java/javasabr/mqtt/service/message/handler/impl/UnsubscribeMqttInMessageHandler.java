@@ -48,7 +48,7 @@ public class UnsubscribeMqttInMessageHandler
         .collect(ArrayCollectors.toArray(TopicFilter.class));
 
     Array<UnsubscribeAckReasonCode> unsubscribeResults = subscriptionService
-        .unsubscribe(client, topicFilters);
+        .unsubscribe(client, client.session(), topicFilters);
 
     client.send(messageOutFactoryService
         .resolveFactory(client)

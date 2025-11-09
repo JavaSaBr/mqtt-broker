@@ -5,6 +5,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.MqttSession;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -32,7 +33,13 @@ public interface MqttClient extends SubscriptionOwner {
 
   void send(MqttOutMessage message);
 
+  /**
+   * @return the feature with result of delivering the message
+   */
   CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage message);
 
-  void closeWithReason(MqttOutMessage message);
+  /**
+   * @return the feature with result of delivering the reason before closing
+   */
+  CompletableFuture<Boolean> closeWithReason(MqttOutMessage message);
 }

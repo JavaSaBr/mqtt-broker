@@ -6,10 +6,10 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.MqttSession;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -61,9 +61,12 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   }
 
   @Override
-  public void closeWithReason(MqttOutMessage message) {
-    sendWithFeedback(message)
-        .thenAccept(_ -> connection.close());
+  public CompletableFuture<Boolean> closeWithReason(MqttOutMessage message) {
+    return sendWithFeedback(message)
+        .thenApply(sent -> {
+          connection.close();
+          return sent;
+        });
   }
 
   @Override

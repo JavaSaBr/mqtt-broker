@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.impl;
 
-import javasabr.mqtt.model.MqttServerConnectionConfig;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
@@ -52,10 +52,7 @@ public class DefaultTopicService implements TopicService {
     }
 
     SharedTopicFilter sharedTopicFilter = SharedTopicFilter.valueOf(rawTopicFilter);
-    MqttServerConnectionConfig connectionConfig = client
-        .connectionConfig()
-        .server();
-
+    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     if (sharedTopicFilter.levelsCount() > connectionConfig.maxTopicLevels()) {
       log.warning(client.clientId(), rawTopicFilter, "[%s] Too deep shared topic filter:[%s]"::formatted);
       return TopicFilter.INVALID_TOPIC_FILTER;
@@ -71,10 +68,7 @@ public class DefaultTopicService implements TopicService {
     }
 
     TopicFilter topicFilter = TopicFilter.valueOf(rawTopicFilter);
-    MqttServerConnectionConfig connectionConfig = client
-        .connectionConfig()
-        .server();
-
+    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     if (topicFilter.levelsCount() > connectionConfig.maxTopicLevels()) {
       log.warning(client.clientId(), rawTopicFilter, "[%s] Too deep topic filter:[%s]"::formatted);
       return TopicFilter.INVALID_TOPIC_FILTER;

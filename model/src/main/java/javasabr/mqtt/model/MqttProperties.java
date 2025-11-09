@@ -47,7 +47,6 @@ public interface MqttProperties {
 
   int SUBSCRIPTION_ID_UNDEFINED = 0;
 
-  int MESSAGE_ID_UNDEFINED = -1;
   int MESSAGE_ID_IS_NOT_SET = 0;
 
   boolean SESSIONS_ENABLED_DEFAULT = true;
