@@ -42,7 +42,7 @@ public class PublishMqtt311OutMessage extends PublishMqttOutMessage {
   }
 
   @Override
-  protected byte packetFlags() {
+  protected byte messageFlags() {
 
     byte info = (byte) (qos.ordinal() << 1);
 

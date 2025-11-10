@@ -24,7 +24,7 @@ public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
   }
 
   @Override
-  protected byte packetFlags() {
+  protected byte messageFlags() {
     return 0b0000_0010;
   }
 

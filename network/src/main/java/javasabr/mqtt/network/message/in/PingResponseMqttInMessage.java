@@ -9,8 +9,8 @@ public class PingResponseMqttInMessage extends MqttInMessage {
 
   public static final byte MESSAGE_TYPE = (byte) MqttMessageType.PING_RESPONSE.ordinal();
 
-  public PingResponseMqttInMessage(byte info) {
-    super(info);
+  public PingResponseMqttInMessage(byte messageFlags) {
+    super(messageFlags);
   }
 
   @Override

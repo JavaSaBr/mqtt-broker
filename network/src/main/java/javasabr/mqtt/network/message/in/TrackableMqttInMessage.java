@@ -20,8 +20,8 @@ public abstract class TrackableMqttInMessage extends MqttInMessage {
 
   int messageId;
 
-  public TrackableMqttInMessage(byte info) {
-    super(info);
+  public TrackableMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.messageId = MqttProperties.MESSAGE_ID_IS_NOT_SET;
   }
 

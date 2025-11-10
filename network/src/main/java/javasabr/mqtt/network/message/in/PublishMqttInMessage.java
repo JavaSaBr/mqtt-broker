@@ -285,11 +285,11 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   int topicAlias;
   PayloadFormat payloadFormat;
 
-  public PublishMqttInMessage(byte info) {
-    super(info);
-    this.qos = QoS.ofCode((info & 0b0110) >> 1);
-    this.retained = (info & 0b0001) != 0;
-    this.duplicate = (info & 0b1000) != 0;
+  public PublishMqttInMessage(byte messageFlags) {
+    super(messageFlags);
+    this.qos = QoS.ofCode((messageFlags & 0b0110) >> 1);
+    this.retained = (messageFlags & 0b0001) != 0;
+    this.duplicate = (messageFlags & 0b1000) != 0;
     this.rawTopicName = StringUtils.EMPTY;
     this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
     this.messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;

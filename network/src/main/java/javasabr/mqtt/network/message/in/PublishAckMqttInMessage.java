@@ -56,8 +56,8 @@ public class PublishAckMqttInMessage extends MqttInMessage implements TrackableM
   // properties
   String reason;
 
-  public PublishAckMqttInMessage(byte info) {
-    super(info);
+  public PublishAckMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reasonCode = PublishAckReasonCode.SUCCESS;
     this.reason = "";
   }

@@ -30,7 +30,7 @@ public class SubscribeMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   @Override
-  protected byte packetFlags() {
+  protected byte messageFlags() {
     return 0b0000_0010;
   }
 

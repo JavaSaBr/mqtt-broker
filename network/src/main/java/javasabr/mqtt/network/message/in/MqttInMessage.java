@@ -68,7 +68,15 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
   @Nullable
   Exception exception;
 
-  protected MqttInMessage(byte info) {}
+  protected MqttInMessage(byte messageFlags) {
+    if (!validMessageFlags(messageFlags)) {
+      exception = new MalformedProtocolMqttException("Unexpected flags bits:" + MqttDataUtils.toUnsignedBinary(messageFlags));
+    }
+  }
+
+  protected boolean validMessageFlags(byte messageFlags) {
+    return true;
+  }
 
   public abstract byte messageType();
 

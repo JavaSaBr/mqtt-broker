@@ -8,7 +8,6 @@ import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -42,16 +41,18 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
   @Nullable
   MutableArray<String> rawTopicFilters;
 
-  public UnsubscribeMqttInMessage(byte info) {
-    super(info);
-    if (info != 0b0000_0010) {
-      exception = new MalformedProtocolMqttException("Unexpected info bits:" + MqttDataUtils.toUnsignedBinary(info));
-    }
+  public UnsubscribeMqttInMessage(byte messageFlags) {
+    super(messageFlags);
   }
 
   @Override
   public byte messageType() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == 0b0000_0010;
   }
 
   @Override

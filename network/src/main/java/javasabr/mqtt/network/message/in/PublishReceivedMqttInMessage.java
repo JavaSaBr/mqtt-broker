@@ -57,8 +57,8 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
   // properties
   String reason;
 
-  public PublishReceivedMqttInMessage(byte info) {
-    super(info);
+  public PublishReceivedMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reasonCode = PublishReceivedReasonCode.SUCCESS;
     this.reason = StringUtils.EMPTY;
   }

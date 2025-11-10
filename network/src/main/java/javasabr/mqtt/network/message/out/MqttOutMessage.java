@@ -44,9 +44,9 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
 
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {}
 
-  public final int packetTypeAndFlags() {
+  public final int messageTypeAndFlags() {
     byte type = messageType();
-    byte controlFlags = packetFlags();
+    byte controlFlags = messageFlags();
     return NumberUtils.setHighByteBits(controlFlags, type);
   }
 
@@ -54,7 +54,7 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
     throw new UnsupportedOperationException();
   }
 
-  protected byte packetFlags() {
+  protected byte messageFlags() {
     return 0;
   }
 

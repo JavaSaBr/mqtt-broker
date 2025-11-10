@@ -39,7 +39,7 @@ class MqttMockClient {
     dataBuffer.flip()
 
     def finalBuffer = ByteBuffer.allocate(1024)
-    finalBuffer.put((byte) packet.packetTypeAndFlags())
+    finalBuffer.put((byte) packet.messageTypeAndFlags())
 
     MqttDataUtils.writeMbi(dataBuffer.remaining(), finalBuffer)
 

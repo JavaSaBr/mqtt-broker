@@ -270,8 +270,8 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   boolean sharedSubscriptionAvailable;
   boolean subscriptionIdAvailable;
 
-  public ConnectAckMqttInMessage(byte info) {
-    super(info);
+  public ConnectAckMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.userProperties = MutableArray.ofType(StringPair.class);
     this.reasonCode = ConnectAckReasonCode.SUCCESS;
     this.maximumQos = QoS.EXACTLY_ONCE;

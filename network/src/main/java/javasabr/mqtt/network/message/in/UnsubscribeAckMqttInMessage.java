@@ -58,8 +58,8 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
   // properties
   String reason = StringUtils.EMPTY;
 
-  public UnsubscribeAckMqttInMessage(byte info) {
-    super(info);
+  public UnsubscribeAckMqttInMessage(byte messageFlags) {
+    super(messageFlags);
   }
 
   @Override

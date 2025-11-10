@@ -57,7 +57,7 @@ public class MqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutMessag
 
     writeBuffer
         .position(offset)
-        .put((byte) packet.packetTypeAndFlags());
+        .put((byte) packet.messageTypeAndFlags());
 
     MqttDataUtils
         .writeMbi(dataLength, writeBuffer)
