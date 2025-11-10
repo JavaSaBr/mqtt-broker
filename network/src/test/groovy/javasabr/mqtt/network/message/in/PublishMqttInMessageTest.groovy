@@ -4,8 +4,6 @@ import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.data.type.StringPair
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.common.util.BufferUtils
 
@@ -32,7 +30,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.correlationData() == null
         message.payload() == publishPayload
         message.messageId() == messageId
-        message.userProperties() == Array.empty()
+        message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
         message.topicAlias() == MqttProperties.TOPIC_ALIAS_UNDEFINED
         message.payloadFormat() == PayloadFormat.UNDEFINED
@@ -95,7 +93,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.correlationData() == null
         message.payload() == publishPayload
         message.messageId() == messageId
-        message.userProperties() == Array.empty(StringPair)
+        message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
         message.topicAlias() == MqttProperties.TOPIC_ALIAS_UNDEFINED
         message.payloadFormat() == PayloadFormat.UNDEFINED

@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishCompleteMqtt311OutMessageTest extends BaseMqttOutMessageTest {
@@ -20,7 +19,7 @@ class PublishCompleteMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         result
         reader.reasonCode() == PublishCompletedReasonCode.SUCCESS
         reader.messageId() == messageId
-        reader.userProperties() == Array.empty()
+        reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         reader.reason() == ""
   }
 }

@@ -121,7 +121,6 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def serverConfig = defaultExternalServerConnectionConfig
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
         def mqttClient = mqttConnection.client()
-
         def sub1 = new Subscription(
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/1"),
             15,
@@ -163,9 +162,10 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             SubscribeAckReasonCode.GRANTED_QOS_2,
             SubscribeAckReasonCode.GRANTED_QOS_2)
     when:
-        def session = mqttClient.session()
-        def subsWithId15 = session.findStoredSubscriptionWithId(15)
-        def subsWithId30 = session.findStoredSubscriptionWithId(30)
+        def mqttSession = mqttClient.session()
+        def activeSubscriptions = mqttSession.activeSubscriptions()
+        def subsWithId15 = activeSubscriptions.findBySubscriptionId(15)
+        def subsWithId30 = activeSubscriptions.findBySubscriptionId(30)
     then:
         subsWithId15.size() == 2
         subsWithId30.size() == 2
@@ -224,6 +224,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
         def mqttClient = mqttConnection.client()
         def mqttSession = mqttClient.session()
+        def activeSubscriptions = mqttSession.activeSubscriptions()
         def subscriptions = Array.of(
             new Subscription(
                 defaultTopicService.createTopicFilter(mqttClient, "topic/filter/1"),
@@ -251,13 +252,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             defaultTopicService.createTopicFilter(mqttClient, "topic/filter/3"))
     when:
         subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions)
-        def storedSubscriptions = mqttSession.storedSubscriptions()
+        def storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
         subscriptionService.unsubscribe(mqttClient, mqttClient.session(), topicsToUnsubscribe)
-        storedSubscriptions = mqttSession.storedSubscriptions()
+        storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 1
         storedSubscriptions.get(0) == subscriptions.get(1)
@@ -269,6 +270,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
         def mqttClient = mqttConnection.client()
         def mqttSession = mqttClient.session()
+        def activeSubscriptions = mqttSession.activeSubscriptions()
         def subscriptions = Array.of(
             new Subscription(
                 defaultTopicService.createTopicFilter(mqttClient, "topic/filter/1"),
@@ -312,13 +314,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             subscriptions2.get(1))
     when:
         subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions)
-        def storedSubscriptions = mqttSession.storedSubscriptions()
+        def storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
         subscriptionService.subscribe(mqttClient, mqttClient.session(), subscriptions2)
-        storedSubscriptions = mqttSession.storedSubscriptions()
+        storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions ==~ resultSubscriptions

@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
@@ -78,6 +77,6 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.reasonCodes().get(1) == SubscribeAckReasonCode.GRANTED_QOS_2
         inMessage.reasonCodes().get(2) == SubscribeAckReasonCode.GRANTED_QOS_1
         inMessage.reasonCodes().get(3) == SubscribeAckReasonCode.UNSPECIFIED_ERROR
-        inMessage.userProperties() == Array.empty()
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

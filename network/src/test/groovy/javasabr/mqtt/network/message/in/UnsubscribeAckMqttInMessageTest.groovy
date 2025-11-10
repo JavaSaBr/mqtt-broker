@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
@@ -19,7 +18,7 @@ class UnsubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
         result
         packet.reason() == ""
         packet.messageId() == messageId
-        packet.reasonCodes() == Array.empty()
+        packet.reasonCodes() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
   def "should read packet correctly as mqtt 5.0"() {
@@ -66,6 +65,6 @@ class UnsubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.reasonCodes().size() == 2
         packet.reasonCodes().get(0) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
         packet.reasonCodes().get(1) == UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

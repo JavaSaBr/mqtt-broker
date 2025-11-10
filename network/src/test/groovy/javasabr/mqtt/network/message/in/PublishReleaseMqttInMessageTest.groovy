@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
@@ -20,7 +19,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
         packet.reason() == ""
         packet.messageId() == messageId
         packet.reasonCode() == PublishReleaseReasonCode.SUCCESS
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
   def "should read packet correctly as mqtt 5.0"() {
@@ -57,6 +56,6 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
         packet.reason() == ""
         packet.messageId() == messageId
         packet.reasonCode() == PublishReleaseReasonCode.SUCCESS
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

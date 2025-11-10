@@ -4,7 +4,6 @@ import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
@@ -35,7 +34,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         message.subscriptions().get(1).retainAsPublished()
         message.subscriptions().get(1).retainHandling() == SubscribeRetainHandling.SEND
         message.messageId() == messageId
-        message.userProperties() == Array.empty()
+        message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         message.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }
 
@@ -98,7 +97,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         !message.subscriptions().get(1).retainAsPublished()
         message.subscriptions().get(1).retainHandling() == SubscribeRetainHandling.SEND
         message.messageId() == messageId
-        message.userProperties() == Array.empty()
+        message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         message.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
   }
 }

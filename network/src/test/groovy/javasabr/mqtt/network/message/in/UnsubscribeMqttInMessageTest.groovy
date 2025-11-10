@@ -1,7 +1,6 @@
 package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
@@ -18,11 +17,11 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters.size() == 2
-        packet.rawTopicFilters.get(0).toString() == topicFilter
-        packet.rawTopicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters().size() == 2
+        packet.rawTopicFilters().get(0).toString() == topicFilter
+        packet.rawTopicFilters().get(1).toString() == topicFilter2
         packet.messageId == messageId
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
   def "should read packet correctly as mqtt 5.0"() {
@@ -42,9 +41,9 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters.size() == 2
-        packet.rawTopicFilters.get(0).toString() == topicFilter
-        packet.rawTopicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters().size() == 2
+        packet.rawTopicFilters().get(0).toString() == topicFilter
+        packet.rawTopicFilters().get(1).toString() == topicFilter2
         packet.messageId == messageId
         packet.userProperties() == userProperties
     when:
@@ -62,6 +61,6 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         packet.rawTopicFilters.get(0).toString() == topicFilter
         packet.rawTopicFilters.get(1).toString() == topicFilter2
         packet.messageId == messageId
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }
