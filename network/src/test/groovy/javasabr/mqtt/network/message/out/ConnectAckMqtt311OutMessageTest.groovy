@@ -3,7 +3,6 @@ package javasabr.mqtt.network.message.out
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
 
@@ -22,23 +21,23 @@ class ConnectAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
-        reader.sessionPresent == sessionPresent
-        reader.assignedClientId == ""
-        reader.reason == ""
-        reader.userProperties() == Array.empty()
-        reader.retainAvailable == MqttProperties.RETAIN_AVAILABLE_DEFAULT
-        reader.wildcardSubscriptionAvailable == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
-        reader.subscriptionIdAvailable == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
-        reader.sharedSubscriptionAvailable == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
-        reader.responseInformation == ""
-        reader.serverReference == ""
-        reader.authenticationData == ArrayUtils.EMPTY_BYTE_ARRAY
-        reader.authenticationMethod == ""
-        reader.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
-        reader.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
-        reader.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
-        reader.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
-        reader.maxMessageSize == MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED
+        reader.reasonCode() == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+        reader.sessionPresent() == sessionPresent
+        reader.assignedClientId() == ""
+        reader.reason() == ""
+        reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        reader.retainAvailable() == MqttProperties.RETAIN_AVAILABLE_DEFAULT
+        reader.wildcardSubscriptionAvailable() == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
+        reader.subscriptionIdAvailable() == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
+        reader.sharedSubscriptionAvailable() == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
+        reader.responseInformation() == ""
+        reader.serverReference() == ""
+        reader.authenticationData() == ArrayUtils.EMPTY_BYTE_ARRAY
+        reader.authenticationMethod() == ""
+        reader.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
+        reader.serverKeepAlive() == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
+        reader.receiveMaxPublishes() == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
+        reader.sessionExpiryInterval() == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
+        reader.maxMessageSize() == MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED
   }
 }

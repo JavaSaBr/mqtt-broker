@@ -54,8 +54,8 @@ public class SubscribeAckMqttInMessage extends MqttInMessage {
   // properties
   String reason;
 
-  public SubscribeAckMqttInMessage(byte info) {
-    super(info);
+  public SubscribeAckMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reason = StringUtils.EMPTY;
   }
 

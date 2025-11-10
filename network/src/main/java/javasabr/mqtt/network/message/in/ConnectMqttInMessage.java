@@ -221,8 +221,8 @@ public class ConnectMqttInMessage extends MqttInMessage {
   boolean requestResponseInformation = false;
   boolean requestProblemInformation = false;
 
-  public ConnectMqttInMessage(byte info) {
-    super(info);
+  public ConnectMqttInMessage(byte messageFlags) {
+    super(messageFlags);
   }
 
   @Override

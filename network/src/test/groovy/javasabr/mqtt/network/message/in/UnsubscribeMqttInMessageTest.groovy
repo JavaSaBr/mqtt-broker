@@ -1,7 +1,6 @@
 package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
@@ -14,15 +13,15 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
         }
     when:
-        def packet = new UnsubscribeMqttInMessage(0b1011_0000 as byte)
+        def packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters.size() == 2
-        packet.rawTopicFilters.get(0).toString() == topicFilter
-        packet.rawTopicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters().size() == 2
+        packet.rawTopicFilters().get(0).toString() == topicFilter
+        packet.rawTopicFilters().get(1).toString() == topicFilter2
         packet.messageId == messageId
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
   def "should read packet correctly as mqtt 5.0"() {
@@ -38,13 +37,13 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
         }
     when:
-        def packet = new UnsubscribeMqttInMessage(0b1011_0000 as byte)
+        def packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters.size() == 2
-        packet.rawTopicFilters.get(0).toString() == topicFilter
-        packet.rawTopicFilters.get(1).toString() == topicFilter2
+        packet.rawTopicFilters().size() == 2
+        packet.rawTopicFilters().get(0).toString() == topicFilter
+        packet.rawTopicFilters().get(1).toString() == topicFilter2
         packet.messageId == messageId
         packet.userProperties() == userProperties
     when:
@@ -54,7 +53,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter)
           it.putString(topicFilter2)
         }
-        packet = new UnsubscribeMqttInMessage(0b1011_0000 as byte)
+        packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -62,6 +61,6 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         packet.rawTopicFilters.get(0).toString() == topicFilter
         packet.rawTopicFilters.get(1).toString() == topicFilter2
         packet.messageId == messageId
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

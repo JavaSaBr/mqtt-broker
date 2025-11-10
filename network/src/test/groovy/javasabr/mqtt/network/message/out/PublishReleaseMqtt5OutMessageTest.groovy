@@ -17,7 +17,7 @@ class PublishReleaseMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishReleaseMqttInMessage(0b0110_0000 as byte)
+        def reader = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

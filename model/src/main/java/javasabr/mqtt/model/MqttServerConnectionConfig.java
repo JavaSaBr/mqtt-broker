@@ -126,4 +126,23 @@ public record MqttServerConnectionConfig(
         subscriptionIdAvailable,
         sharedSubscriptionAvailable);
   }
+
+  public MqttServerConnectionConfig withSubscriptionIdAvailable(boolean subscriptionIdAvailable) {
+    return new MqttServerConnectionConfig(
+        maxQos,
+        maxMessageSize,
+        maxStringLength,
+        maxBinarySize,
+        maxTopicLevels,
+        minKeepAliveTime,
+        receiveMaxPublishes,
+        topicAliasMaxValue,
+        defaultSessionExpiryInterval,
+        keepAliveEnabled,
+        sessionsEnabled,
+        retainAvailable,
+        wildcardSubscriptionAvailable,
+        subscriptionIdAvailable,
+        sharedSubscriptionAvailable);
+  }
 }

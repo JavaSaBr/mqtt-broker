@@ -24,27 +24,38 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public void processReceived(MqttConnection connection, MqttInMessage message) {
+  public void processReceivedValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     MqttClient client = connection.client();
     if (!expectedClient.isInstance(client)) {
       log.warning(client, "Received not expected client:[%s]"::formatted);
       return;
-    } else if (!expectedNetworkPacket.isInstance(message)) {
-      log.warning(message, "Received not expected network packet:[%s]"::formatted);
+    } else if (!expectedNetworkPacket.isInstance(mqttInMessage)) {
+      log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
       return;
     }
-
     C castedClient = expectedClient.cast(client);
-    M castedMessage = expectedNetworkPacket.cast(message);
-    if (checkMessageException(connection, castedClient, castedMessage)) {
-      return;
-    }
-    processReceived(connection, castedClient, castedMessage);
+    M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
+    processReceivedValidMessage(connection, castedClient, castedMessage);
   }
 
-  protected abstract void processReceived(MqttConnection connection, C client, M message);
+  @Override
+  public void processReceivedInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
+    MqttClient client = connection.client();
+    if (!expectedClient.isInstance(client)) {
+      log.warning(client, "Received not expected client:[%s]"::formatted);
+      return;
+    } else if (!expectedNetworkPacket.isInstance(mqttInMessage)) {
+      log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
+      return;
+    }
+    C castedClient = expectedClient.cast(client);
+    M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
+    processReceivedInvalidMessage(connection, castedClient, castedMessage);
+  }
 
-  protected boolean checkMessageException(MqttConnection connection, C client, M message) {
+  protected abstract void processReceivedValidMessage(MqttConnection connection, C client, M message);
+
+  protected boolean processReceivedInvalidMessage(MqttConnection connection, C client, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
       // send feedback and close connection

@@ -30,6 +30,11 @@ public class SubscribeMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   @Override
+  protected byte messageFlags() {
+    return 0b0000_0010;
+  }
+
+  @Override
   protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
     for (Subscription subscribedTopic : subscriptions) {

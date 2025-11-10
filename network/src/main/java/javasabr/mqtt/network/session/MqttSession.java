@@ -1,10 +1,8 @@
-package javasabr.mqtt.network;
+package javasabr.mqtt.network.session;
 
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
-import javasabr.mqtt.model.subscribtion.Subscription;
-import javasabr.mqtt.model.topic.TopicFilter;
-import javasabr.rlib.collections.array.Array;
+import javasabr.mqtt.network.MqttClient;
 
 public interface MqttSession {
 
@@ -40,6 +38,11 @@ public interface MqttSession {
 
   void resendPendingPackets(MqttClient client);
 
+  MessageTacker inMessageTracker();
+  MessageTacker outMessageTracker();
+
+  ActiveSubscriptions activeSubscriptions();
+
   boolean hasOutPending();
 
   boolean hasInPending();
@@ -55,12 +58,4 @@ public interface MqttSession {
   void updateOutPendingPacket(MqttClient client, TrackableMessage response);
 
   void updateInPendingPacket(MqttClient client, TrackableMessage response);
-
-  void storeSubscription(Subscription subscription);
-
-  void removeSubscription(TopicFilter subscribe);
-
-  Array<Subscription> storedSubscriptions();
-
-  Array<Subscription> findStoredSubscriptionWithId(int subscriptionId);
 }

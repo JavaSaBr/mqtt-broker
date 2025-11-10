@@ -51,9 +51,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       String authenticationMethod,
       byte[] authenticationData,
       Array<StringPair> userProperties) {
-    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     return new ConnectAckMqtt5OutMessage(
-        connectionConfig,
         reasonCode,
         sessionPresent,
         client.clientId(),

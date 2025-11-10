@@ -6,10 +6,10 @@ import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttSession;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
+import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
@@ -36,7 +36,7 @@ public class PublishMqttInMessageHandler
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       PublishMqttInMessage message) {

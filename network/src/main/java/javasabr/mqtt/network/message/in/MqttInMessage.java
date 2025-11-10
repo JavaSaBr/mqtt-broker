@@ -37,7 +37,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     DebugUtils.registerIncludedFields("userProperties");
   }
 
-  protected static final Array<StringPair> EMPTY_PROPERTIES = Array.empty(StringPair.class);
+  public static final Array<StringPair> EMPTY_USER_PROPERTIES = Array.empty(StringPair.class);
   protected static final Array<String> EMPTY_STRINGS = Array.empty(String.class);
 
   private record Utf8Decoder(CharsetDecoder decoder, ByteBuffer inBuffer, CharBuffer outBuffer) {}
@@ -68,12 +68,28 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
   @Nullable
   Exception exception;
 
-  protected MqttInMessage(byte info) {}
+  protected MqttInMessage(byte messageFlags) {
+    if (!validMessageFlags(messageFlags)) {
+      exception = new MalformedProtocolMqttException("Unexpected flags bits:" + MqttDataUtils.toUnsignedBinary(messageFlags));
+    }
+  }
+
+  protected boolean validMessageFlags(byte messageFlags) {
+    return true;
+  }
 
   public abstract byte messageType();
 
   public Array<StringPair> userProperties() {
-    return userProperties == null ? EMPTY_PROPERTIES : userProperties;
+    return userProperties == null ? EMPTY_USER_PROPERTIES : userProperties;
+  }
+
+  @Override
+  public boolean read(MqttConnection connection, ByteBuffer buffer, int remainingDataLength) {
+    if (exception != null) {
+      return false;
+    }
+    return super.read(connection, buffer, remainingDataLength);
   }
 
   @Override

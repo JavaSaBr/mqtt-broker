@@ -21,7 +21,7 @@ public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       DisconnectMqttInMessage message) {

@@ -42,7 +42,7 @@ public class SubscribeMqtt5OutMessage extends SubscribeMqtt311OutMessage {
   int subscriptionId;
 
   public SubscribeMqtt5OutMessage(int messageId, Array<Subscription> subscriptions) {
-    this(messageId, subscriptions, EMPTY_USER_PROPERTIES, MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
+    this(messageId, subscriptions, EMPTY_USER_PROPERTIES, MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET);
   }
 
   public SubscribeMqtt5OutMessage(
@@ -90,6 +90,6 @@ public class SubscribeMqtt5OutMessage extends SubscribeMqtt311OutMessage {
         buffer,
         MqttMessageProperty.SUBSCRIPTION_IDENTIFIER,
         subscriptionId,
-        MqttProperties.SUBSCRIPTION_ID_UNDEFINED);
+        MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET);
   }
 }

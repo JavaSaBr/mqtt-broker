@@ -8,7 +8,7 @@ import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.MqttSession;
+import javasabr.mqtt.network.session.MqttSession;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
 
@@ -32,7 +32,7 @@ public interface SubscriptionService {
    * @param subscriptions the list of request to subscribe topics
    * @return array of subscribe ack reason codes
    */
-  Array<SubscribeAckReasonCode> subscribe(MqttClient client, Array<Subscription> subscriptions);
+  Array<SubscribeAckReasonCode> subscribe(MqttClient client, MqttSession session, Array<Subscription> subscriptions);
 
   /**
    * Removes MQTT client from listening to the topics.
@@ -41,7 +41,7 @@ public interface SubscriptionService {
    * @param topicFilters topic filters
    * @return array of unsubscribe ack reason codes
    */
-  Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient client, Array<TopicFilter> topicFilters);
+  Array<UnsubscribeAckReasonCode> unsubscribe(MqttClient client, MqttSession session, Array<TopicFilter> topicFilters);
 
   void cleanSubscriptions(MqttClient client, MqttSession session);
 

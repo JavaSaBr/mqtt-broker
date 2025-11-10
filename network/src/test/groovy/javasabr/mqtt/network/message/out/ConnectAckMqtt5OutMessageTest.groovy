@@ -20,12 +20,15 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             30,
             false,
             false);
+        def connection = mqttConnection(
+            defaultServerConnectionConfig(),
+            clientConfig,
+            mqtt5ClientId)
         def requestedClientId = "-1"
         def requestedSessionExpireInterval = 360
         def requestedKeepAlive = 120
         def requestedReceiveMaxPublishes = 500
         def outMessage = new ConnectAckMqtt5OutMessage(
-            clientConfig,
             ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD,
             sessionPresent,
             mqtt311ClientId,
@@ -41,10 +44,10 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             userProperties)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          outMessage.write(defaultMqtt5Connection, it)
+          outMessage.write(connection, it)
         }
         def inMessage = new ConnectAckMqttInMessage(0b0010_0000 as byte)
-        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def result = inMessage.read(connection, dataBuffer, dataBuffer.limit())
     then:
         result
         inMessage.reasonCode() == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD

@@ -7,11 +7,15 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * Subscribe acknowledgement.
  */
+@Getter
+@Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeAckMqtt311OutMessage extends TrackableMqttOutMessage {
 

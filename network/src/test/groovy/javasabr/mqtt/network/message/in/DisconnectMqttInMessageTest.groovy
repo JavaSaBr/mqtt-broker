@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class DisconnectMqttInMessageTest extends BaseMqttInMessageTest {
@@ -48,6 +47,6 @@ class DisconnectMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.serverReference() == serverReference
         inMessage.reasonCode() == DisconnectReasonCode.PACKET_TOO_LARGE
         inMessage.sessionExpiryInterval() == sessionExpiryInterval
-        inMessage.userProperties() == Array.empty()
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

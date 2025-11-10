@@ -7,7 +7,6 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -231,8 +230,6 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
   String clientId;
 
-  MqttClientConnectionConfig connectionConfig;
-
   String responseInformation;
   String reason;
   String serverReference;
@@ -248,7 +245,6 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
   Array<StringPair> userProperties;
 
   public ConnectAckMqtt5OutMessage(
-      MqttClientConnectionConfig connectionConfig,
       ConnectAckReasonCode reasonCode,
       boolean sessionPresent,
       String clientId,
@@ -263,7 +259,6 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
       byte[] authenticationData,
       Array<StringPair> userProperties) {
     super(reasonCode, sessionPresent);
-    this.connectionConfig = connectionConfig;
     this.clientId = clientId;
     this.requestedClientId = requestedClientId;
     this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
@@ -294,8 +289,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
   @Override
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
-
-    MqttServerConnectionConfig serverConfig = connectionConfig.server();
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901080
     writeNotEmptyProperty(buffer, MqttMessageProperty.REASON_STRING, reason);
     writeNotEmptyProperty(buffer, MqttMessageProperty.RESPONSE_INFORMATION, responseInformation);
@@ -311,7 +305,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
     writeProperty(
         buffer,
         MqttMessageProperty.RETAIN_AVAILABLE,
-        serverConfig.retainAvailable(),
+        connectionConfig.retainAvailable(),
         MqttProperties.RETAIN_AVAILABLE_DEFAULT);
     writeProperty(
         buffer,
@@ -333,17 +327,17 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
     writeProperty(
         buffer,
         MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,
-        serverConfig.wildcardSubscriptionAvailable(),
+        connectionConfig.wildcardSubscriptionAvailable(),
         MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT);
     writeProperty(
         buffer,
         MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE,
-        serverConfig.subscriptionIdAvailable(),
+        connectionConfig.subscriptionIdAvailable(),
         MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT);
     writeProperty(
         buffer,
         MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE,
-        serverConfig.sharedSubscriptionAvailable(),
+        connectionConfig.sharedSubscriptionAvailable(),
         MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT);
     writeProperty(buffer, MqttMessageProperty.SERVER_KEEP_ALIVE, connectionConfig.keepAlive(), requestedKeepAlive);
   }

@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.session;
 
-import javasabr.mqtt.network.MqttSession;
+import javasabr.mqtt.network.session.MqttSession;
 import reactor.core.publisher.Mono;
 
 public interface MqttSessionService {

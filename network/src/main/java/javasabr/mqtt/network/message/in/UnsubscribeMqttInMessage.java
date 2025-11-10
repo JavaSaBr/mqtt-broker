@@ -41,13 +41,18 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
   @Nullable
   MutableArray<String> rawTopicFilters;
 
-  public UnsubscribeMqttInMessage(byte info) {
-    super(info);
+  public UnsubscribeMqttInMessage(byte messageFlags) {
+    super(messageFlags);
   }
 
   @Override
   public byte messageType() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == 0b0000_0010;
   }
 
   @Override

@@ -36,7 +36,7 @@ public class UnsubscribeMqttInMessageHandler
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       UnsubscribeMqttInMessage message) {
@@ -48,7 +48,7 @@ public class UnsubscribeMqttInMessageHandler
         .collect(ArrayCollectors.toArray(TopicFilter.class));
 
     Array<UnsubscribeAckReasonCode> unsubscribeResults = subscriptionService
-        .unsubscribe(client, topicFilters);
+        .unsubscribe(client, client.session(), topicFilters);
 
     client.send(messageOutFactoryService
         .resolveFactory(client)

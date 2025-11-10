@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
@@ -69,6 +68,6 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
         packet.authenticationMethod == authMethod
         packet.authenticationData == authData
         packet.reason == ""
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

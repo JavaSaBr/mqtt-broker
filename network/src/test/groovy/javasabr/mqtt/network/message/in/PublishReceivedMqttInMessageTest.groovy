@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
@@ -20,7 +19,7 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         packet.reason() == ""
         packet.messageId() == messageId
         packet.reasonCode() == PublishReceivedReasonCode.SUCCESS
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
   def "should read packet correctly as mqtt 5.0"() {
@@ -31,7 +30,7 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishReceivedReasonCode.QUOTA_EXCEEDED.value)
+          it.put(PublishReceivedReasonCode.QUOTA_EXCEEDED.value())
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -47,7 +46,7 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value)
+          it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value())
           it.putMbi(0)
         }
         packet = new PublishReceivedMqttInMessage(0b0101_0000 as byte)
@@ -57,6 +56,6 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         packet.reason() == ""
         packet.messageId() == messageId
         packet.reasonCode() == PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
-        packet.userProperties() == Array.empty()
+        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 }

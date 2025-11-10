@@ -10,11 +10,15 @@ import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * Subscribe acknowledgement.
  */
+@Getter
+@Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeAckMqtt5OutMessage extends SubscribeAckMqtt311OutMessage {
 

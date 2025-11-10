@@ -70,8 +70,8 @@ public class DisconnectMqttInMessage extends MqttInMessage {
 
   long sessionExpiryInterval;
 
-  public DisconnectMqttInMessage(byte info) {
-    super(info);
+  public DisconnectMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reasonCode = DisconnectReasonCode.NORMAL_DISCONNECTION;
     this.reason = StringUtils.EMPTY;
     this.serverReference = StringUtils.EMPTY;

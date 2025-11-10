@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
 
 class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
@@ -30,7 +29,7 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         inMessage.duplicate()
         inMessage.payload() == publishPayload
         inMessage.rawTopicName() == publishTopic.rawTopic()
-        inMessage.userProperties() == Array.empty()
+        inMessage.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
     when:
         outMessage = new PublishMqtt311OutMessage(
             messageId,
@@ -52,6 +51,6 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         !inMessage.duplicate()
         inMessage.payload() == publishPayload
         inMessage.rawTopicName() == publishTopic.rawTopic()
-        inMessage.userProperties() == Array.empty()
+        inMessage.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
   }
 }

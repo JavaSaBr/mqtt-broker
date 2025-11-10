@@ -27,7 +27,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Getter
 @Accessors(fluent = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
@@ -61,12 +61,17 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   public SubscribeMqttInMessage(byte info) {
     super(info);
     this.subscriptions = ArrayFactory.mutableArray(RequestedSubscription.class);
-    this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_UNDEFINED;
+    this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET;
   }
 
   @Override
   public byte messageType() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == 0b0000_0010;
   }
 
   @Override
@@ -127,6 +132,10 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   public Array<RequestedSubscription> subscriptions() {
     return subscriptions;
+  }
+
+  public int subscriptionsCount() {
+    return subscriptions.size();
   }
 
   private static void validateMqtt311Options(int options) {

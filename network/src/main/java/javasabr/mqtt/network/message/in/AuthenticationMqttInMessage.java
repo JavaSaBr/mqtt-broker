@@ -63,8 +63,8 @@ public class AuthenticationMqttInMessage extends MqttInMessage {
 
   byte[] authenticationData;
 
-  public AuthenticationMqttInMessage(byte info) {
-    super(info);
+  public AuthenticationMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reasonCode = AuthenticateReasonCode.SUCCESS;
     this.reason = StringUtils.EMPTY;
     this.authenticationMethod = StringUtils.EMPTY;

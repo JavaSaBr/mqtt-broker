@@ -82,4 +82,12 @@ public class MqttDataUtils {
 
     return sizeInBytes;
   }
+
+  public static String toUnsignedBinary(byte value) {
+    String binary = Integer.toString(Byte.toUnsignedInt(value), 2);
+    if (binary.length() < 8) {
+      binary = "0".repeat(8 - binary.length()) + binary;
+    }
+    return "0b" + binary.substring(0, 4) + "_" + binary.substring(4);
+  }
 }

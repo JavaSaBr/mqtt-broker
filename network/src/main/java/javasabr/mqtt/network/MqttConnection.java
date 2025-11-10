@@ -83,7 +83,8 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return new MqttMessageReader(
         this,
         this::updateLastActivity,
-        this::handleReceivedPacket,
+        this::handleReceivedValidPacket,
+        this::handleReceivedInvalidPacket,
         maxPacketsByRead);
   }
 

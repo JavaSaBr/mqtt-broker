@@ -53,8 +53,8 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements Tracka
   // properties
   String reason;
 
-  public PublishReleaseMqttInMessage(byte info) {
-    super(info);
+  public PublishReleaseMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reasonCode = PublishReleaseReasonCode.SUCCESS;
     this.reason = "";
   }
@@ -62,6 +62,11 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements Tracka
   @Override
   public byte messageType() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == 0b0000_0010;
   }
 
   @Override

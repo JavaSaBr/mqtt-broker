@@ -1,6 +1,8 @@
 package javasabr.mqtt.model;
 
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.rlib.common.util.NumberedEnum;
+import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,22 +13,28 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum QoS {
+public enum QoS implements NumberedEnum<QoS> {
   AT_MOST_ONCE(0, SubscribeAckReasonCode.GRANTED_QOS_0),
   AT_LEAST_ONCE(1, SubscribeAckReasonCode.GRANTED_QOS_1),
   EXACTLY_ONCE(2, SubscribeAckReasonCode.GRANTED_QOS_2),
   INVALID(3, SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR);
 
-  private static final QoS[] VALUES = values();
+  private static final NumberedEnumMap<QoS> NUMBERED_MAP =
+      new NumberedEnumMap<>(QoS.class);
 
   public static QoS ofCode(int level) {
-    if (level < 0 || level > EXACTLY_ONCE.ordinal()) {
-      return INVALID;
-    } else {
-      return VALUES[level];
-    }
+    return NUMBERED_MAP.resolve(level, QoS.INVALID);
   }
 
   int level;
   SubscribeAckReasonCode subscribeAckReasonCode;
+
+  @Override
+  public int number() {
+    return level;
+  }
+
+  public QoS lower(QoS alternative) {
+    return level > alternative.level ? alternative : this;
+  }
 }

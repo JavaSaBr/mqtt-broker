@@ -10,4 +10,29 @@ public record MqttClientConnectionConfig(
     int topicAliasMaxValue,
     int keepAlive,
     boolean requestResponseInformation,
-    boolean requestProblemInformation) {}
+    boolean requestProblemInformation) {
+
+  public boolean subscriptionIdAvailable() {
+    return server.subscriptionIdAvailable();
+  }
+
+  public boolean retainAvailable() {
+    return server.retainAvailable();
+  }
+
+  public boolean wildcardSubscriptionAvailable() {
+    return server.wildcardSubscriptionAvailable();
+  }
+
+  public boolean sharedSubscriptionAvailable() {
+    return server.sharedSubscriptionAvailable();
+  }
+
+  public boolean sessionsEnabled() {
+    return server.sessionsEnabled();
+  }
+
+  public int maxTopicLevels() {
+    return server.maxTopicLevels();
+  }
+}

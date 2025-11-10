@@ -285,11 +285,11 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   int topicAlias;
   PayloadFormat payloadFormat;
 
-  public PublishMqttInMessage(byte info) {
-    super(info);
-    this.qos = QoS.ofCode((info & 0b0110) >> 1);
-    this.retained = (info & 0b0001) != 0;
-    this.duplicate = (info & 0b1000) != 0;
+  public PublishMqttInMessage(byte messageFlags) {
+    super(messageFlags);
+    this.qos = QoS.ofCode((messageFlags & 0b0110) >> 1);
+    this.retained = (messageFlags & 0b0001) != 0;
+    this.duplicate = (messageFlags & 0b1000) != 0;
     this.rawTopicName = StringUtils.EMPTY;
     this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
     this.messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
@@ -306,7 +306,7 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
     rawTopicName = readString(buffer, Integer.MAX_VALUE);
-    messageId = qos != QoS.AT_MOST_ONCE ? readShortUnsigned(buffer) : 0;
+    messageId = qos != QoS.AT_MOST_ONCE ? readShortUnsigned(buffer) : MqttProperties.MESSAGE_ID_IS_NOT_SET;
   }
 
   @Override

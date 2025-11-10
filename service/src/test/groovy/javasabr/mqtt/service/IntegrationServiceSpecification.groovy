@@ -1,18 +1,17 @@
 package javasabr.mqtt.service
 
-import javasabr.mqtt.model.MqttClientConnectionConfig
-import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.MqttServerConnectionConfig
-import javasabr.mqtt.model.MqttVersion
-import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.*
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.MqttSession
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler
-import javasabr.mqtt.network.impl.ExternalMqttClient
+import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultTopicService
+import javasabr.mqtt.service.impl.InMemorySubscriptionService
+import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
+import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService
-import javasabr.rlib.network.BufferAllocator
 import javasabr.rlib.network.Network
+import javasabr.rlib.network.ServerNetworkConfig.SimpleServerNetworkConfig
+import javasabr.rlib.network.impl.DefaultBufferAllocator
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -26,6 +25,18 @@ class IntegrationServiceSpecification extends Specification {
 
   @Shared
   def defaultTopicService = new DefaultTopicService()
+
+  @Shared
+  def defaultSubscriptionService = new InMemorySubscriptionService()
+
+  @Shared
+  def defaultMessageOutFactoryService = new DefaultMessageOutFactoryService([
+      new Mqtt311MessageOutFactory(),
+      new Mqtt5MessageOutFactory()
+  ])
+
+  @Shared
+  def defaultBufferAllocator = new DefaultBufferAllocator(SimpleServerNetworkConfig.builder().build())
 
   @Shared
   def defaultMqttSessionService = new InMemoryMqttSessionService(60_000);
@@ -48,21 +59,24 @@ class IntegrationServiceSpecification extends Specification {
       true,
       true)
 
-  def mockedExternalConnection(
-      MqttServerConnectionConfig serverConnectionConfig,
-      MqttVersion mqttVersion) {
+  def mockedExternalConnection(MqttVersion mqttVersion) {
+    return mockedExternalConnection(defaultExternalServerConnectionConfig, mqttVersion)
+  }
+
+  def mockedExternalConnection(MqttServerConnectionConfig serverConnectionConfig, MqttVersion mqttVersion) {
 
     def connection = new MqttConnection(
         Mock(Network),
         Mock(AsynchronousSocketChannel),
-        Mock(BufferAllocator),
+        defaultBufferAllocator,
         100,
         serverConnectionConfig,
-        { MqttConnection connection ->
-          def client = new ExternalMqttClient(connection, Mock(MqttClientReleaseHandler))
-          def clientId = "mockedClient_${clientIdGenerator.incrementAndGet()}"
-          client.clientId(clientId)
-          client.session(defaultMqttSessionService.create(clientId).block())
+        { MqttConnection ownedConnection ->
+          def generatedClientId = "mockedClient_${clientIdGenerator.incrementAndGet()}"
+          def createdSession = defaultMqttSessionService.create(generatedClientId).block()
+          def client = new TestExternalMqttClient(ownedConnection, Mock(MqttClientReleaseHandler))
+          client.session(createdSession)
+          client.clientId(generatedClientId)
           return client
         })
 
@@ -78,6 +92,6 @@ class IntegrationServiceSpecification extends Specification {
         false,
         false))
 
-    return connection
+    return Spy(connection)
   }
 }

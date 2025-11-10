@@ -56,8 +56,8 @@ public class PublishCompleteMqttInMessage extends MqttInMessage implements Track
   // properties
   String reason;
 
-  public PublishCompleteMqttInMessage(byte info) {
-    super(info);
+  public PublishCompleteMqttInMessage(byte messageFlags) {
+    super(messageFlags);
     this.reasonCode = PublishCompletedReasonCode.SUCCESS;
     this.reason = "";
   }
