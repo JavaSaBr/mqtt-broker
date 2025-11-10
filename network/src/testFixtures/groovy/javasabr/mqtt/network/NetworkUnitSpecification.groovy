@@ -73,6 +73,8 @@ class NetworkUnitSpecification extends UnitSpecification {
       SubscribeRetainHandling.DO_NOT_SEND,
       true,
       false)
+  public static final topicFilter3 = "topic/Filter3"
+  public static final topicFilter4 = "topic/Filter4"
 
   public static final serverReference = "serverReference"
   public static final contentType = "application/json"
