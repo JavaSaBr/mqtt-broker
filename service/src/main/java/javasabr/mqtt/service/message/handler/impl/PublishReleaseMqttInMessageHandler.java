@@ -20,7 +20,7 @@ public class PublishReleaseMqttInMessageHandler
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       PublishReleaseMqttInMessage message) {

@@ -33,7 +33,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         mqttClient.session(null)
     when:
         def subscribeMessage = new SubscribeMqttInMessage(0 as byte)
-        messageHandler.processReceived(mqttConnection, mqttClient, subscribeMessage)
+        messageHandler.processReceivedValidMessage(mqttConnection, mqttClient, subscribeMessage)
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
@@ -59,7 +59,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processReceived(mqttConnection, mqttClient, subscribeMessage)
+        messageHandler.processReceivedValidMessage(mqttConnection, mqttClient, subscribeMessage)
     then:
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -88,7 +88,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processReceived(mqttConnection, mqttClient, subscribeMessage)
+        messageHandler.processReceivedValidMessage(mqttConnection, mqttClient, subscribeMessage)
     then:
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -117,7 +117,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processReceived(mqttConnection, mqttClient, subscribeMessage)
+        messageHandler.processReceivedValidMessage(mqttConnection, mqttClient, subscribeMessage)
     then:
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -145,7 +145,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1/#", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2/+", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processReceived(mqttConnection, mqttClient, subscribeMessage)
+        messageHandler.processReceivedValidMessage(mqttConnection, mqttClient, subscribeMessage)
     then:
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -177,7 +177,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("\$share/group1/topic1/#", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("\$share/group1/topic2/+", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processReceived(mqttConnection, mqttClient, subscribeMessage)
+        messageHandler.processReceivedValidMessage(mqttConnection, mqttClient, subscribeMessage)
     then:
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()

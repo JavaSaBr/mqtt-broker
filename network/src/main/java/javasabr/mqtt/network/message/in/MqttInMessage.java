@@ -77,6 +77,14 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
   }
 
   @Override
+  public boolean read(MqttConnection connection, ByteBuffer buffer, int remainingDataLength) {
+    if (exception != null) {
+      return false;
+    }
+    return super.read(connection, buffer, remainingDataLength);
+  }
+
+  @Override
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
     readVariableHeader(connection, buffer);
 

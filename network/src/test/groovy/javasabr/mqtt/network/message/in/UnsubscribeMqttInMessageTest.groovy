@@ -13,7 +13,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
         }
     when:
-        def packet = new UnsubscribeMqttInMessage(0b1011_0000 as byte)
+        def packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -37,7 +37,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
         }
     when:
-        def packet = new UnsubscribeMqttInMessage(0b1011_0000 as byte)
+        def packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -53,7 +53,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter)
           it.putString(topicFilter2)
         }
-        packet = new UnsubscribeMqttInMessage(0b1011_0000 as byte)
+        packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

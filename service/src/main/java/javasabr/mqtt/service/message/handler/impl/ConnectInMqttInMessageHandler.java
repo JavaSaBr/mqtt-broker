@@ -15,7 +15,6 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
@@ -37,7 +36,8 @@ import reactor.core.publisher.Mono;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<ExternalMqttClient, ConnectMqttInMessage> {
+public class ConnectInMqttInMessageHandler
+    extends AbstractMqttInMessageHandler<ExternalMqttClient, ConnectMqttInMessage> {
 
   ClientIdRegistry clientIdRegistry;
   AuthenticationService authenticationService;
@@ -63,7 +63,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       ConnectMqttInMessage message) {
@@ -218,7 +218,7 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
   }
 
   @Override
-  protected boolean checkMessageException(
+  protected boolean processReceivedInvalidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       ConnectMqttInMessage message) {
@@ -227,19 +227,9 @@ public class ConnectInMqttInMessageHandler extends AbstractMqttInMessageHandler<
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
           .newConnectAck(client, cre.getReasonCode());
-      client
-          .sendWithFeedback(feedback)
-          .thenAccept(_ -> connection.close());
-      return true;
-    } else if (exception instanceof MalformedProtocolMqttException) {
-      MqttOutMessage feedback = messageOutFactoryService
-          .resolveFactory(client)
-          .newConnectAck(client, ConnectAckReasonCode.MALFORMED_PACKET);
-      client
-          .sendWithFeedback(feedback)
-          .thenAccept(_ -> connection.close());
+      client.closeWithReason(feedback);
       return true;
     }
-    return super.checkMessageException(connection, client, message);
+    return super.processReceivedInvalidMessage(connection, client, message);
   }
 }

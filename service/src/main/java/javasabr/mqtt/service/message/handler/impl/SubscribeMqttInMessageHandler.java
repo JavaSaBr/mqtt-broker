@@ -57,7 +57,7 @@ public class SubscribeMqttInMessageHandler extends
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       SubscribeMqttInMessage subscribeMessage) {
@@ -81,7 +81,7 @@ public class SubscribeMqttInMessageHandler extends
     messageTacker.add(subscribeMessage.messageId());
 
     int subscriptionId = subscribeMessage.subscriptionId();
-    if (subscriptionId != MqttProperties.SUBSCRIPTION_ID_UNDEFINED) {
+    if (subscriptionId != MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET) {
       if (!connectionConfig.subscriptionIdAvailable()) {
         log.warning(client.clientId(), subscriptionId,
             "[%s] Provided subscription id:[%d] but server doesn't allow it"::formatted);

@@ -44,29 +44,55 @@ public class DefaultConnectionService implements ConnectionService {
   @Override
   public void processAcceptedConnection(MqttConnection connection) {
     log.info(connection.remoteAddress(), "Accept new connection:[%s]"::formatted);
-    connection.onReceive(this::processReceivedMessage);
+    connection.onReceiveValidPacket(this::processReceivedValidMessage);
+    connection.onReceiveInvalidPacket(this::processReceivedInvalidMessage);
   }
 
-  protected void processReceivedMessage(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ReadableNetworkPacket<MqttConnection> networkPacket) {
 
-    if (!(networkPacket instanceof MqttInMessage mrp)) {
+    if (!(networkPacket instanceof MqttInMessage mqttInMessage)) {
       log.warning(networkPacket, "Received not processable network packet:[%s]"::formatted);
       return;
     }
 
     log.debug(
         connection.client().clientId(),
-        networkPacket.name(),
-        networkPacket,
-        "[%s] Received from client message:[%s] %s"::formatted);
+        mqttInMessage.name(),
+        mqttInMessage,
+        "[%s] Received from client valid message:[%s] %s"::formatted);
 
     try {
+      MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageType()];
       //noinspection DataFlowIssue
-      inMessageHandlers[mrp.messageType()].processReceived(connection, mrp);
+      messageHandler.processReceivedValidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(mrp, "Received not supported MQTT message:[%s]"::formatted);
+      log.warning(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
+    }
+  }
+
+  protected void processReceivedInvalidMessage(
+      MqttConnection connection,
+      ReadableNetworkPacket<MqttConnection> networkPacket) {
+
+    if (!(networkPacket instanceof MqttInMessage mqttInMessage)) {
+      log.warning(networkPacket, "Received not processable network packet:[%s]"::formatted);
+      return;
+    }
+
+    log.warning(
+        connection.client().clientId(),
+        mqttInMessage.name(),
+        mqttInMessage,
+        "[%s] Received from client invalid message:[%s] %s"::formatted);
+
+    try {
+      MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageType()];
+      //noinspection DataFlowIssue
+      messageHandler.processReceivedInvalidMessage(connection, mqttInMessage);
+    } catch (IndexOutOfBoundsException | NullPointerException ex) {
+      log.warning(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
     }
   }
 

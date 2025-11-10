@@ -41,7 +41,7 @@ public record Subscription(
   public static Subscription minimal(TopicFilter topicFilter, QoS qos) {
     return new Subscription(
         topicFilter,
-        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
+        MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET,
         qos,
         SubscribeRetainHandling.SEND,
         true,

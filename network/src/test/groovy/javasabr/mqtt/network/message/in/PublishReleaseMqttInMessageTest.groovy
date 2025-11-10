@@ -12,7 +12,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.putShort(messageId)
         }
     when:
-        def packet = new PublishReleaseMqttInMessage(0b0110_0000 as byte)
+        def packet = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -35,7 +35,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new PublishReleaseMqttInMessage(0b0110_0000 as byte)
+        def packet = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
         def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -49,7 +49,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(PublishReleaseReasonCode.SUCCESS.value)
           it.putMbi(0)
         }
-        packet = new PublishReleaseMqttInMessage(0b0110_0000 as byte)
+        packet = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

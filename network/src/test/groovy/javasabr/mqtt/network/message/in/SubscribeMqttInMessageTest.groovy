@@ -13,29 +13,30 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putString(topicFilter)
-          it.put(0b0000_0001 as byte)
+          it.put(0b0000_0001 as byte) // QoS.AT_LEAST_ONCE
           it.putString(topicFilter2)
-          it.put(0b0000_0010 as byte)
+          it.put(0b0000_0010 as byte) // QoS.EXACTLY_ONCE
         }
     when:
-        def message = new SubscribeMqttInMessage(0b1000_0000 as byte)
-        def result = message.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def successful = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
-        result
-        message.subscriptions().size() == 2
-        message.subscriptions().get(0).qos() == QoS.AT_LEAST_ONCE
-        message.subscriptions().get(0).rawTopicFilter() == topicFilter
-        message.subscriptions().get(0).noLocal()
-        message.subscriptions().get(0).retainAsPublished()
-        message.subscriptions().get(0).retainHandling() == SubscribeRetainHandling.SEND
-        message.subscriptions().get(1).qos() == QoS.EXACTLY_ONCE
-        message.subscriptions().get(1).rawTopicFilter().toString() == topicFilter2
-        message.subscriptions().get(1).noLocal()
-        message.subscriptions().get(1).retainAsPublished()
-        message.subscriptions().get(1).retainHandling() == SubscribeRetainHandling.SEND
-        message.messageId() == messageId
-        message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
-        message.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
+        successful
+        def subscriptions = inMessage.subscriptions()
+        subscriptions.size() == 2
+        subscriptions.get(0).qos() == QoS.AT_LEAST_ONCE
+        subscriptions.get(0).rawTopicFilter() == topicFilter
+        subscriptions.get(0).noLocal()
+        subscriptions.get(0).retainAsPublished()
+        subscriptions.get(0).retainHandling() == SubscribeRetainHandling.SEND
+        subscriptions.get(1).qos() == QoS.EXACTLY_ONCE
+        subscriptions.get(1).rawTopicFilter().toString() == topicFilter2
+        subscriptions.get(1).noLocal()
+        subscriptions.get(1).retainAsPublished()
+        subscriptions.get(1).retainHandling() == SubscribeRetainHandling.SEND
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
 
   def "should read message correctly as mqtt 5.0"() {
@@ -49,29 +50,30 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.putString(topicFilter)
-          it.put(0b0000_1001 as byte)
+          it.put(0b0000_1001 as byte)  // QoS.AT_LEAST_ONCE
           it.putString(topicFilter2)
-          it.put(0b0001_0110 as byte)
+          it.put(0b0001_0110 as byte)  // QoS.AT_LEAST_ONCE
         }
     when:
-        def message = new SubscribeMqttInMessage(0b0110_0000 as byte)
-        def result = message.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def successful = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def subscriptions = inMessage.subscriptions()
     then:
-        result
-        message.subscriptions().size() == 2
-        message.subscriptions().get(0).qos() == QoS.AT_LEAST_ONCE
-        message.subscriptions().get(0).rawTopicFilter().toString() == topicFilter
-        !message.subscriptions().get(0).noLocal()
-        message.subscriptions().get(0).retainAsPublished()
-        message.subscriptions().get(0).retainHandling() == SubscribeRetainHandling.SEND
-        message.subscriptions().get(1).qos() == QoS.EXACTLY_ONCE
-        message.subscriptions().get(1).rawTopicFilter().toString() == topicFilter2
-        message.subscriptions().get(1).noLocal()
-        !message.subscriptions().get(1).retainAsPublished()
-        message.subscriptions().get(1).retainHandling() == SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
-        message.messageId() == messageId
-        message.userProperties() == userProperties
-        message.subscriptionId() == subscriptionId
+        successful
+        subscriptions.size() == 2
+        subscriptions.get(0).qos() == QoS.AT_LEAST_ONCE
+        subscriptions.get(0).rawTopicFilter() == topicFilter
+        !subscriptions.get(0).noLocal()
+        subscriptions.get(0).retainAsPublished()
+        subscriptions.get(0).retainHandling() == SubscribeRetainHandling.SEND
+        subscriptions.get(1).qos() == QoS.EXACTLY_ONCE
+        subscriptions.get(1).rawTopicFilter() == topicFilter2
+        subscriptions.get(1).noLocal()
+        !subscriptions.get(1).retainAsPublished()
+        subscriptions.get(1).retainHandling() == SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == userProperties
+        inMessage.subscriptionId() == subscriptionId
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -81,23 +83,24 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
           it.put(0b0000_0010 as byte)
         }
-        message = new SubscribeMqttInMessage(0b0110_0000 as byte)
-        result = message.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        successful = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        subscriptions = inMessage.subscriptions()
     then:
-        result
-        message.subscriptions().size() == 2
-        message.subscriptions().get(0).qos() == QoS.AT_LEAST_ONCE
-        message.subscriptions().get(0).rawTopicFilter().toString() == topicFilter
-        !message.subscriptions().get(0).noLocal()
-        !message.subscriptions().get(0).retainAsPublished()
-        message.subscriptions().get(0).retainHandling() == SubscribeRetainHandling.SEND
-        message.subscriptions().get(1).qos() == QoS.EXACTLY_ONCE
-        message.subscriptions().get(1).rawTopicFilter().toString() == topicFilter2
-        !message.subscriptions().get(1).noLocal()
-        !message.subscriptions().get(1).retainAsPublished()
-        message.subscriptions().get(1).retainHandling() == SubscribeRetainHandling.SEND
-        message.messageId() == messageId
-        message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
-        message.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
+        successful
+        subscriptions.size() == 2
+        subscriptions.get(0).qos() == QoS.AT_LEAST_ONCE
+        subscriptions.get(0).rawTopicFilter() == topicFilter
+        !subscriptions.get(0).noLocal()
+        !subscriptions.get(0).retainAsPublished()
+        subscriptions.get(0).retainHandling() == SubscribeRetainHandling.SEND
+        subscriptions.get(1).qos() == QoS.EXACTLY_ONCE
+        subscriptions.get(1).rawTopicFilter() == topicFilter2
+        !subscriptions.get(1).noLocal()
+        !subscriptions.get(1).retainAsPublished()
+        subscriptions.get(1).retainHandling() == SubscribeRetainHandling.SEND
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
 }

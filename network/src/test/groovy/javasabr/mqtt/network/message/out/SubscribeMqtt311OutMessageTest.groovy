@@ -29,13 +29,13 @@ class SubscribeMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt311Connection, it)
         }
-        def inMessage = new SubscribeMqttInMessage(0b1000_0000 as byte)
+        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
         def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         inMessage.messageId() == 1
         inMessage.subscriptions() == requestedSubscriptions
         inMessage.userProperties() == Array.empty(StringPair)
-        inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_UNDEFINED
+        inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
 }

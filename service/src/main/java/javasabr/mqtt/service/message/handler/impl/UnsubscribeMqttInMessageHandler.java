@@ -36,7 +36,7 @@ public class UnsubscribeMqttInMessageHandler
   }
 
   @Override
-  protected void processReceived(
+  protected void processReceivedValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
       UnsubscribeMqttInMessage message) {

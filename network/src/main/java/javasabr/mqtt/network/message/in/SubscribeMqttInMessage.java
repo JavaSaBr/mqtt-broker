@@ -14,6 +14,7 @@ import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.subscribtion.RequestedSubscription;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -60,8 +61,11 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   public SubscribeMqttInMessage(byte info) {
     super(info);
+    if (info != 0b0000_0010) {
+      exception = new MalformedProtocolMqttException("Unexpected info bits:" + MqttDataUtils.toUnsignedBinary(info));
+    }
     this.subscriptions = ArrayFactory.mutableArray(RequestedSubscription.class);
-    this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_UNDEFINED;
+    this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET;
   }
 
   @Override

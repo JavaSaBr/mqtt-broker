@@ -626,7 +626,7 @@ class TopicTreeTest extends UnitSpecification {
   static def makeSubscription(String topicFilter) {
     return new Subscription(
         TopicFilter.valueOf(topicFilter),
-        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
+        MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET,
         QoS.AT_LEAST_ONCE,
         SubscribeRetainHandling.SEND,
         true,
@@ -636,7 +636,7 @@ class TopicTreeTest extends UnitSpecification {
   static def makeSharedSubscription(String topicFilter) {
     return new Subscription(
         SharedTopicFilter.valueOf(topicFilter),
-        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
+        MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET,
         QoS.AT_LEAST_ONCE,
         SubscribeRetainHandling.SEND,
         true,
@@ -646,7 +646,7 @@ class TopicTreeTest extends UnitSpecification {
   static def makeSubscription(String topicFilter, int qos) {
     return new Subscription(
         TopicFilter.valueOf(topicFilter),
-        MqttProperties.SUBSCRIPTION_ID_UNDEFINED,
+        MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET,
         QoS.ofCode(qos),
         SubscribeRetainHandling.SEND,
         true,

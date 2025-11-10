@@ -56,9 +56,10 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
   public MqttMessageReader(
       MqttConnection connection,
       Runnable updateActivityFunction,
-      Consumer<MqttInMessage> readPacketHandler,
+      Consumer<MqttInMessage> validPacketHandler,
+      Consumer<MqttInMessage> invalidPacketHandler,
       int maxPacketsByRead) {
-    super(connection, updateActivityFunction, readPacketHandler, maxPacketsByRead);
+    super(connection, updateActivityFunction, validPacketHandler, invalidPacketHandler, maxPacketsByRead);
   }
 
   @Override
@@ -89,12 +90,10 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
       int startPacketPosition,
       int packetLength,
       int dataLength) {
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901021
     int firstByte = Byte.toUnsignedInt(buffer.get(startPacketPosition));
     byte type = NumberUtils.getHighByteBits(firstByte);
     byte info = NumberUtils.getLowByteBits(firstByte);
-
     try {
       return PACKET_FACTORIES[type].apply(info);
     } catch (NoSuchElementException | NullPointerException e) {

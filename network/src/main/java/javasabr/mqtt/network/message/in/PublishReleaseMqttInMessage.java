@@ -7,9 +7,11 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -55,6 +57,9 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements Tracka
 
   public PublishReleaseMqttInMessage(byte info) {
     super(info);
+    if (info != 0b0000_0010) {
+      exception = new MalformedProtocolMqttException("Unexpected info bits:" + MqttDataUtils.toUnsignedBinary(info));
+    }
     this.reasonCode = PublishReleaseReasonCode.SUCCESS;
     this.reason = "";
   }
