@@ -63,9 +63,10 @@ public class ConnectInMqttInMessageHandler
   }
 
   @Override
-  protected void processReceivedValidMessage(
+  protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
+      MqttSession session,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(client, message);
     authenticationService
@@ -218,9 +219,10 @@ public class ConnectInMqttInMessageHandler
   }
 
   @Override
-  protected boolean processReceivedInvalidMessage(
+  protected boolean processInvalidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
+      MqttSession session,
       ConnectMqttInMessage message) {
     Exception exception = message.exception();
     if (exception instanceof ConnectionRejectException cre) {
@@ -230,6 +232,6 @@ public class ConnectInMqttInMessageHandler
       client.closeWithReason(feedback);
       return true;
     }
-    return super.processReceivedInvalidMessage(connection, client, message);
+    return super.processInvalidMessage(connection, client, session, message);
   }
 }

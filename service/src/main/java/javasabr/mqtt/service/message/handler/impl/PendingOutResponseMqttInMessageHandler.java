@@ -17,10 +17,11 @@ public abstract class PendingOutResponseMqttInMessageHandler<P extends MqttInMes
   }
 
   @Override
-  protected void processReceivedValidMessage(MqttConnection connection, ExternalMqttClient client, P message) {
-    MqttSession session = client.session();
-    if (session != null) {
-      session.updateOutPendingPacket(client, message);
-    }
+  protected void processValidMessage(
+      MqttConnection connection,
+      ExternalMqttClient client,
+      MqttSession session,
+      P message) {
+    session.updateOutPendingPacket(client, message);
   }
 }

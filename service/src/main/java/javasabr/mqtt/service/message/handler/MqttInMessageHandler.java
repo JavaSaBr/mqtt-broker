@@ -8,7 +8,7 @@ public interface MqttInMessageHandler {
 
   MqttMessageType messageType();
 
-  void processReceivedValidMessage(MqttConnection connection, MqttInMessage mqttInMessage);
+  void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage);
 
-  void processReceivedInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage);
+  void processInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage);
 }

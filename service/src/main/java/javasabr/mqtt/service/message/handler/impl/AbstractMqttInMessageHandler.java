@@ -6,6 +6,8 @@ import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.util.ExtraErrorReasons;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import lombok.AccessLevel;
@@ -24,7 +26,7 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public void processReceivedValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
+  public void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     MqttClient client = connection.client();
     if (!expectedClient.isInstance(client)) {
       log.warning(client, "Received not expected client:[%s]"::formatted);
@@ -33,13 +35,19 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
       log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
       return;
     }
+    MqttSession session = client.session();
+    if (session == null) {
+      log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
+      handleSessionIsAlreadyClosed(client);
+      return;
+    }
     C castedClient = expectedClient.cast(client);
     M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
-    processReceivedValidMessage(connection, castedClient, castedMessage);
+    processValidMessage(connection, castedClient, session, castedMessage);
   }
 
   @Override
-  public void processReceivedInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
+  public void processInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     MqttClient client = connection.client();
     if (!expectedClient.isInstance(client)) {
       log.warning(client, "Received not expected client:[%s]"::formatted);
@@ -48,25 +56,41 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
       log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
       return;
     }
+    MqttSession session = client.session();
+    if (session == null) {
+      log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
+      handleSessionIsAlreadyClosed(client);
+      return;
+    }
     C castedClient = expectedClient.cast(client);
     M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
-    processReceivedInvalidMessage(connection, castedClient, castedMessage);
+    processInvalidMessage(connection, castedClient, session, castedMessage);
   }
 
-  protected abstract void processReceivedValidMessage(MqttConnection connection, C client, M message);
+  protected abstract void processValidMessage(MqttConnection connection, C client, MqttSession session, M message);
 
-  protected boolean processReceivedInvalidMessage(MqttConnection connection, C client, M message) {
+  protected boolean processInvalidMessage(MqttConnection connection, C client, MqttSession session, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
       // send feedback and close connection
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newDisconnect(client, DisconnectReasonCode.MALFORMED_PACKET);
+          .newDisconnect(client, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
       client
           .sendWithFeedback(feedback)
           .thenAccept(_ -> connection.close());
       return true;
     }
     return false;
+  }
+
+  protected void handleSessionIsAlreadyClosed(MqttClient client) {
+    MqttOutMessage response = messageOutFactoryService
+        .resolveFactory(client)
+        .newDisconnect(
+            client,
+            DisconnectReasonCode.UNSPECIFIED_ERROR,
+            ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED);
+    client.closeWithReason(response);
   }
 }

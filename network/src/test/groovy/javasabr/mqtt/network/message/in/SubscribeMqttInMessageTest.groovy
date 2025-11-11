@@ -1,9 +1,6 @@
 package javasabr.mqtt.network.message.in
 
-import javasabr.mqtt.model.MqttMessageProperty
-import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.SubscribeRetainHandling
+import javasabr.mqtt.model.*
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
 import javasabr.rlib.common.util.BufferUtils
 
@@ -139,7 +136,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful2
         inMessage2.exception() instanceof MalformedProtocolMqttException
-        inMessage2.exception().message == 'Unsupported qos or retain handling'
+        inMessage2.exception().message == MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING
     when:
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -150,6 +147,6 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful3
         inMessage3.exception() instanceof MalformedProtocolMqttException
-        inMessage3.exception().message == 'No any topic filters'
+        inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
   }
 }
