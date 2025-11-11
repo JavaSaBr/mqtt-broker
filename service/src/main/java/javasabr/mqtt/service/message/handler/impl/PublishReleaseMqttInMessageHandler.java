@@ -20,13 +20,11 @@ public class PublishReleaseMqttInMessageHandler
   }
 
   @Override
-  protected void processReceivedValidMessage(
+  protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
+      MqttSession session,
       PublishReleaseMqttInMessage message) {
-    MqttSession session = client.session();
-    if (session != null) {
-      session.updateInPendingPacket(client, message);
-    }
+    session.updateInPendingPacket(client, message);
   }
 }

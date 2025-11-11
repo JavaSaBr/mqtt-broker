@@ -36,19 +36,13 @@ public class PublishMqttInMessageHandler
   }
 
   @Override
-  protected void processReceivedValidMessage(
+  protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
+      MqttSession session,
       PublishMqttInMessage message) {
 
-    MqttSession session = client.session();
-    if (session == null) {
-      log.warning(client.clientId(), "[%s] Client has no any session..."::formatted);
-      return;
-    }
-
     int messageId = message.messageId();
-
     if (messageId > 0 && session.hasInPending(messageId)) {
       client.send(messageOutFactoryService
           .resolveFactory(client)

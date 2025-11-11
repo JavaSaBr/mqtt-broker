@@ -66,7 +66,7 @@ public class DefaultConnectionService implements ConnectionService {
     try {
       MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageType()];
       //noinspection DataFlowIssue
-      messageHandler.processReceivedValidMessage(connection, mqttInMessage);
+      messageHandler.processValidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
     }
@@ -90,7 +90,7 @@ public class DefaultConnectionService implements ConnectionService {
     try {
       MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageType()];
       //noinspection DataFlowIssue
-      messageHandler.processReceivedInvalidMessage(connection, mqttInMessage);
+      messageHandler.processInvalidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
     }

@@ -19,7 +19,6 @@ import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession;
-import javasabr.mqtt.network.util.ExtraErrorReasons;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -57,23 +56,17 @@ public class SubscribeMqttInMessageHandler extends
   }
 
   @Override
-  protected void processReceivedValidMessage(
+  protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
+      MqttSession session,
       SubscribeMqttInMessage subscribeMessage) {
 
     MqttClientConnectionConfig connectionConfig = client.connectionConfig();
-    MqttSession session = client.session();
-    if (session == null) {
-      log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
-      handleSessionIsAlreadyClosed(client);
-      return;
-    }
-
     int messageId = subscribeMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
     if (messageTacker.isInUse(messageId)) {
-      log.warning(client.clientId(), messageId, "[%s] Message id:[%d] is already in use"::formatted);
+      log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
       handleMessageIdIsInUse(client, subscribeMessage);
       return;
     }
@@ -84,7 +77,7 @@ public class SubscribeMqttInMessageHandler extends
     if (subscriptionId != MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET) {
       if (!connectionConfig.subscriptionIdAvailable()) {
         log.warning(client.clientId(), subscriptionId,
-            "[%s] Provided subscription id:[%d] but server doesn't allow it"::formatted);
+            "[%s] Provided subscriptionId:[%d] but server doesn't allow it"::formatted);
         handleSubscriptionIdNotSupported(client, session, subscribeMessage);
         return;
       }
@@ -95,12 +88,12 @@ public class SubscribeMqttInMessageHandler extends
         client,
         subscribeMessage.subscriptions(), subscriptionId);
 
-    Array<SubscribeAckReasonCode> subscriptionResults = subscriptionService
+    Array<SubscribeAckReasonCode> subscribeResults = subscriptionService
         .subscribe(client, session, subscriptions);
 
-    sendSubscriptionResults(client, session, subscribeMessage, subscriptionResults);
+    sendSubscribeResults(client, session, subscribeMessage, subscribeResults);
 
-    SubscribeAckReasonCode anyReasonToDisconnect = subscriptionResults
+    SubscribeAckReasonCode anyReasonToDisconnect = subscribeResults
         .iterations()
         .reversedArgs()
         .findAny(DISCONNECT_CASES, Set::contains);
@@ -139,53 +132,43 @@ public class SubscribeMqttInMessageHandler extends
     return subscriptions;
   }
 
-  private void handleSessionIsAlreadyClosed(ExternalMqttClient client) {
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(
-            client,
-            DisconnectReasonCode.UNSPECIFIED_ERROR,
-            ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED);
-    client.closeWithReason(response);
-  }
-
   private void handleMessageIdIsInUse(
       ExternalMqttClient client,
       SubscribeMqttInMessage subscribeMessage) {
-    Array<SubscribeAckReasonCode> subscriptionResults = Array.repeated(
+    Array<SubscribeAckReasonCode> subscribeResults = Array.repeated(
         SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE,
         subscribeMessage.subscriptionsCount());
     client.send(messageOutFactoryService
         .resolveFactory(client)
-        .newSubscribeAck(subscribeMessage.messageId(), subscriptionResults));
+        .newSubscribeAck(subscribeMessage.messageId(), subscribeResults));
   }
 
   private void handleSubscriptionIdNotSupported(
       ExternalMqttClient client,
       MqttSession session,
       SubscribeMqttInMessage subscribeMessage) {
-    Array<SubscribeAckReasonCode> subscriptionResults = Array.repeated(
+    Array<SubscribeAckReasonCode> subscribeResults = Array.repeated(
         SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
         subscribeMessage.subscriptionsCount());
     int messageId = subscribeMessage.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newSubscribeAck(messageId, subscriptionResults);
+        .newSubscribeAck(messageId, subscribeResults);
     client.sendWithFeedback(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
   }
 
-  private void sendSubscriptionResults(
+  private void sendSubscribeResults(
       ExternalMqttClient client,
       MqttSession session,
       SubscribeMqttInMessage subscribeMessage,
-      Array<SubscribeAckReasonCode> subscriptionResults) {
+      Array<SubscribeAckReasonCode> subscribeResults) {
     int messageId = subscribeMessage.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newSubscribeAck(messageId, subscriptionResults);
+        .newSubscribeAck(messageId, subscribeResults);
     client.sendWithFeedback(response)
         .thenAccept(_ -> session
             .inMessageTracker()

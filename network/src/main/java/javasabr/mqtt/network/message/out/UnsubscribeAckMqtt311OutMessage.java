@@ -4,12 +4,16 @@ import java.nio.ByteBuffer;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * Unsubscribe acknowledgement.
  */
+@Getter
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class UnsubscribeAckMqtt311OutMessage extends MqttOutMessage {

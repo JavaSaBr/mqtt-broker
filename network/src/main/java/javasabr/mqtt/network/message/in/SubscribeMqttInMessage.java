@@ -4,9 +4,10 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.MqttServerConnectionConfig;
+import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
@@ -21,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Subscribe request.
@@ -30,7 +32,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
+  private static final Array<RequestedSubscription> EMPTY_SUBSCRIPTIONS = Array.empty(RequestedSubscription.class);
+
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
+  public static final byte MESSAGE_FLAGS = 0b0000_0010;
 
   static {
     DebugUtils.registerIncludedFields("subscriptions");
@@ -53,14 +58,14 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  final MutableArray<RequestedSubscription> subscriptions;
+  @Nullable
+  MutableArray<RequestedSubscription> subscriptions;
 
   // properties
   int subscriptionId;
 
   public SubscribeMqttInMessage(byte info) {
     super(info);
-    this.subscriptions = ArrayFactory.mutableArray(RequestedSubscription.class);
     this.subscriptionId = MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET;
   }
 
@@ -71,22 +76,25 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   @Override
   protected boolean validMessageFlags(byte messageFlags) {
-    return messageFlags == 0b0000_0010;
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (buffer.remaining() < 1) {
-      throw new MalformedProtocolMqttException("No any topic filters");
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
     }
 
-    MqttServerConnectionConfig severConnConfig = connection.serverConnectionConfig();
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
+    int maxStringLength = connectionConfig.maxStringLength();
     boolean isMqtt5 = connection.isSupported(MqttVersion.MQTT_5);
+
+    subscriptions = ArrayFactory.mutableArray(RequestedSubscription.class);
 
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718066
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901168
     while (buffer.hasRemaining()) {
-      String topicFilter = readString(buffer, severConnConfig.maxStringLength());
+      String topicFilter = readString(buffer, maxStringLength);
 
       int options = readByteUnsigned(buffer);
       int qosLevel = options & 0b0000_0011;
@@ -105,7 +113,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
       QoS qos = QoS.ofCode(qosLevel);
       if (qos == QoS.INVALID || retainHandling == SubscribeRetainHandling.INVALID) {
-        throw new MalformedProtocolMqttException("Unsupported qos or retain handling");
+        throw new MalformedProtocolMqttException(MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING);
       }
 
       subscriptions.add(new RequestedSubscription(
@@ -131,11 +139,11 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   }
 
   public Array<RequestedSubscription> subscriptions() {
-    return subscriptions;
+    return subscriptions == null ? EMPTY_SUBSCRIPTIONS : subscriptions;
   }
 
   public int subscriptionsCount() {
-    return subscriptions.size();
+    return subscriptions().size();
   }
 
   private static void validateMqtt311Options(int options) {

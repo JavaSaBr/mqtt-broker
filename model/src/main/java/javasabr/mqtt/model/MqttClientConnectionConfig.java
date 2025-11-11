@@ -35,4 +35,8 @@ public record MqttClientConnectionConfig(
   public int maxTopicLevels() {
     return server.maxTopicLevels();
   }
+
+  public int maxStringLength() {
+    return server.maxStringLength();
+  }
 }
