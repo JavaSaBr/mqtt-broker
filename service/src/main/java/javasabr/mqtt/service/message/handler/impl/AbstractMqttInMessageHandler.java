@@ -25,6 +25,10 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
   Class<M> expectedNetworkPacket;
   MessageOutFactoryService messageOutFactoryService;
 
+  protected boolean requireSession() {
+    return true;
+  }
+
   @Override
   public void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     MqttClient client = connection.client();
@@ -35,15 +39,19 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
       log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
       return;
     }
-    MqttSession session = client.session();
-    if (session == null) {
-      log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
-      handleSessionIsAlreadyClosed(client);
-      return;
-    }
     C castedClient = expectedClient.cast(client);
     M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
-    processValidMessage(connection, castedClient, session, castedMessage);
+    if (requireSession()) {
+      MqttSession session = client.session();
+      if (session == null) {
+        log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
+        handleSessionIsAlreadyClosed(client);
+        return;
+      }
+      processValidMessage(connection, castedClient, session, castedMessage);
+    } else {
+      processValidMessage(connection, castedClient, castedMessage);
+    }
   }
 
   @Override
@@ -56,32 +64,51 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
       log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
       return;
     }
-    MqttSession session = client.session();
-    if (session == null) {
-      log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
-      handleSessionIsAlreadyClosed(client);
-      return;
-    }
     C castedClient = expectedClient.cast(client);
     M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
-    processInvalidMessage(connection, castedClient, session, castedMessage);
+    if (requireSession()) {
+      MqttSession session = client.session();
+      if (session == null) {
+        log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
+        handleSessionIsAlreadyClosed(client);
+        return;
+      }
+      processInvalidMessage(connection, castedClient, session, castedMessage);
+    } else {
+      processInvalidMessage(connection, castedClient, castedMessage);
+    }
   }
 
-  protected abstract void processValidMessage(MqttConnection connection, C client, MqttSession session, M message);
+  protected void processValidMessage(MqttConnection connection, C client, M message) {}
+
+  protected void processValidMessage(MqttConnection connection, C client, MqttSession session, M message) {}
+
+  protected boolean processInvalidMessage(MqttConnection connection, C client, M message) {
+    Exception exception = message.exception();
+    if (exception instanceof MalformedProtocolMqttException) {
+      malformedProtocolError(connection, client, exception);
+      return true;
+    }
+    return false;
+  }
 
   protected boolean processInvalidMessage(MqttConnection connection, C client, MqttSession session, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
-      // send feedback and close connection
-      MqttOutMessage feedback = messageOutFactoryService
-          .resolveFactory(client)
-          .newDisconnect(client, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
-      client
-          .sendWithFeedback(feedback)
-          .thenAccept(_ -> connection.close());
+      malformedProtocolError(connection, client, exception);
       return true;
     }
     return false;
+  }
+
+  protected void malformedProtocolError(MqttConnection connection, C client, Exception exception) {
+    // send feedback and close connection
+    MqttOutMessage feedback = messageOutFactoryService
+        .resolveFactory(client)
+        .newDisconnect(client, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
+    client
+        .sendWithFeedback(feedback)
+        .thenAccept(_ -> connection.close());
   }
 
   protected void handleSessionIsAlreadyClosed(MqttClient client) {

@@ -1,6 +1,11 @@
 package javasabr.mqtt.network
 
-import javasabr.mqtt.model.*
+
+import javasabr.mqtt.model.MqttClientConnectionConfig
+import javasabr.mqtt.model.MqttServerConnectionConfig
+import javasabr.mqtt.model.MqttVersion
+import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode

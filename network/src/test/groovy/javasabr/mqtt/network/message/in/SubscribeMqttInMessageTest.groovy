@@ -1,6 +1,11 @@
 package javasabr.mqtt.network.message.in
 
-import javasabr.mqtt.model.*
+
+import javasabr.mqtt.model.MqttMessageProperty
+import javasabr.mqtt.model.MqttProperties
+import javasabr.mqtt.model.MqttProtocolErrors
+import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
 import javasabr.rlib.common.util.BufferUtils
 

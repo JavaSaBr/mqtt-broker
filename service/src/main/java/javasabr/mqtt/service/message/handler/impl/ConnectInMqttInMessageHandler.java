@@ -63,10 +63,14 @@ public class ConnectInMqttInMessageHandler
   }
 
   @Override
+  protected boolean requireSession() {
+    return false;
+  }
+
+  @Override
   protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
-      MqttSession session,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(client, message);
     authenticationService
