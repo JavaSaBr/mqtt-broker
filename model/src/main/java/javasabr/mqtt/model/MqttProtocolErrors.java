@@ -4,6 +4,8 @@ public interface MqttProtocolErrors {
   String NO_ANY_TOPIC_FILTER = "Not provided any information about TopicFilters";
   String NO_ANY_TOPIC_NANE = "Not provided any information about TopicName";
   String INVALID_TOPIC_ALIAS = "Provided invalid TopicAlias";
+  String INVALID_PAYLOAD_FORMAT = "Provided invalid PayloadFormat";
+  String INVALID_MESSAGE_EXPIRY_INTERVAL = "Provided invalid MessageExpiryInterval";
   String INVALID_RESPONSE_TOPIC_NAME = "Provided invalid ResponseTopicName";
   String UNSUPPORTED_QOS_OR_RETAIN_HANDLING = "Unsupported 'QoS' or 'RetainHandling'";
   String MISSED_REQUIRED_MESSAGE_ID = "'Packet Identifier' must be presented'";

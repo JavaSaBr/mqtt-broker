@@ -21,7 +21,6 @@ import javasabr.mqtt.network.session.TopicNameMapping;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
-import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -56,35 +55,11 @@ public class PublishMqttInMessageHandler
       MqttSession session,
       PublishMqttInMessage publishMessage) {
 
-    int messageId = publishMessage.messageId();
-    QoS requestedQos = publishMessage.qos();
-
     MessageTacker messageTacker = session.inMessageTracker();
-    if (messageId > 0 && messageTacker.isInUse(messageId)) {
-      log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
-      handleMessageIdIsInUse(client, publishMessage);
-      return;
-    } else if (messageId == MqttProperties.MESSAGE_ID_IS_NOT_SET && QoS.AT_MOST_ONCE != requestedQos) {
-      log.warning(client.clientId(), messageId, "[%s] Missed MessageId"::formatted);
-      handleMissedMessageId(client);
+    if (validateMessageId(client, publishMessage, messageTacker)
+        && validateBaseFields(connection, client, publishMessage)) {
       return;
     }
-
-    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    if (connectionConfig.maxQos().isLower(requestedQos)) {
-      log.warning(client.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
-      handleNotSupportedQos(client);
-      return;
-    }
-    boolean retain = publishMessage.retain();
-    if (retain && !connectionConfig.retainAvailable()) {
-      log.warning(client.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
-      handleNotSupportedRetain(client);
-      return;
-    }
-    PayloadFormat payloadFormat = publishMessage.payloadFormat();
-    byte[] payload = publishMessage.payload();
-    long messageExpiryInterval = publishMessage.messageExpiryInterval();
 
     String rawResponseTopicName = publishMessage.rawResponseTopicName();
     TopicName responseTopicName = null;
@@ -97,6 +72,7 @@ public class PublishMqttInMessageHandler
       responseTopicName = topicService.createTopicName(client, rawResponseTopicName);
     }
 
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     int topicAliasMaxValue = connectionConfig.topicAliasMaxValue();
     TopicNameMapping topicNameMapping = session.topicNameMapping();
     TopicName topicNameByAlias = null;
@@ -123,6 +99,7 @@ public class PublishMqttInMessageHandler
       }
     }
 
+    int messageId = publishMessage.messageId();
     if (messageId > 0) {
       messageTacker.add(messageId);
     }
@@ -136,10 +113,16 @@ public class PublishMqttInMessageHandler
         return;
       }
       topicName = topicService.createTopicName(client, rawTopicName);
+      if (topicAlias != MqttProperties.TOPIC_ALIAS_NOT_SET) {
+        topicNameMapping.update(topicAlias, topicName);
+      }
     } else {
       topicName = topicNameByAlias;
     }
 
+    byte[] payload = publishMessage.payload();
+
+    //noinspection DataFlowIssue everything is already validated
     publishReceivingService.processPublish(client, new Publish(
         messageId,
         publishMessage.qos(),
@@ -147,13 +130,74 @@ public class PublishMqttInMessageHandler
         responseTopicName,
         payload,
         publishMessage.duplicate(),
-        retain,
+        publishMessage.retain(),
         publishMessage.contentType(),
         publishMessage.subscriptionIds(),
-        publishMessage.correlationData(), messageExpiryInterval,
+        publishMessage.correlationData(),
+        publishMessage.messageExpiryInterval(),
         topicAlias,
-        payloadFormat,
+        publishMessage.payloadFormat(),
         publishMessage.userProperties()));
+  }
+
+  private boolean validateMessageId(
+      ExternalMqttClient client,
+      PublishMqttInMessage publishMessage,
+      MessageTacker messageTacker) {
+    int messageId = publishMessage.messageId();
+    QoS requestedQos = publishMessage.qos();
+    if (messageId > 0 && messageTacker.isInUse(messageId)) {
+      log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
+      handleMessageIdIsInUse(client, publishMessage);
+      return true;
+    } else if (messageId == MqttProperties.MESSAGE_ID_IS_NOT_SET && QoS.AT_MOST_ONCE != requestedQos) {
+      log.warning(client.clientId(), messageId, "[%s] Missed MessageId"::formatted);
+      handleMissedMessageId(client);
+      return true;
+    }
+    return false;
+  }
+
+  private boolean validateBaseFields(
+      MqttConnection connection,
+      ExternalMqttClient client,
+      PublishMqttInMessage publishMessage) {
+    byte[] payload = publishMessage.payload();
+    if (payload == null) {
+      log.warning(client.clientId(), "[%s] Unexpected missed payload"::formatted);
+      return false;
+    }
+
+    QoS requestedQos = publishMessage.qos();
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
+    if (connectionConfig.maxQos().isLower(requestedQos)) {
+      log.warning(client.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
+      handleNotSupportedQos(client);
+      return false;
+    }
+
+    boolean retain = publishMessage.retain();
+    if (retain && !connectionConfig.retainAvailable()) {
+      log.warning(client.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
+      handleNotSupportedRetain(client);
+      return false;
+    }
+
+    PayloadFormat payloadFormat = publishMessage.payloadFormat();
+    if (payloadFormat == PayloadFormat.INVALID) {
+      log.warning(client.clientId(), "[%s] Provided invalid PayloadFormat"::formatted);
+      handleInvalidPayloadFormat(client);
+      return false;
+    }
+
+    long messageExpiryInterval = publishMessage.messageExpiryInterval();
+    if (messageExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
+        && messageExpiryInterval < MqttProperties.MESSAGE_EXPIRY_INTERVAL_MIN) {
+      log.warning(client.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
+      handleInvalidMessageExpiryInterval(client);
+      return false;
+    }
+    return true;
   }
 
   private void handleMessageIdIsInUse(ExternalMqttClient client, PublishMqttInMessage publishMessage) {
@@ -194,7 +238,14 @@ public class PublishMqttInMessageHandler
   private void handleInvalidTopicAlias(ExternalMqttClient client) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_TOPIC_ALIAS);
+        .newDisconnect(client, DisconnectReasonCode.TOPIC_ALIAS_INVALID, MqttProtocolErrors.INVALID_TOPIC_ALIAS);
+    client.closeWithReason(response);
+  }
+
+  private void handleInvalidPayloadFormat(ExternalMqttClient client) {
+    MqttOutMessage response = messageOutFactoryService
+        .resolveFactory(client)
+        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_PAYLOAD_FORMAT);
     client.closeWithReason(response);
   }
 
@@ -202,6 +253,13 @@ public class PublishMqttInMessageHandler
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
         .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_RESPONSE_TOPIC_NAME);
+    client.closeWithReason(response);
+  }
+
+  private void handleInvalidMessageExpiryInterval(ExternalMqttClient client) {
+    MqttOutMessage response = messageOutFactoryService
+        .resolveFactory(client)
+        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_MESSAGE_EXPIRY_INTERVAL);
     client.closeWithReason(response);
   }
 
@@ -213,11 +271,17 @@ public class PublishMqttInMessageHandler
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
         .newPublishAck(messagedId, PublishAckReasonCode.TOPIC_NAME_INVALID);
+
+    // without messageId we don't need to wait for delivering the response
+    if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
+      client.send(response);
+      return;
+    }
+
     client
         .sendWithFeedback(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messagedId));
   }
-
 }

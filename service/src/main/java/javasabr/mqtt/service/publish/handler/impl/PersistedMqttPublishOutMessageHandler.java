@@ -48,7 +48,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
         session.nextMessageId(),
         qos(),
         false,
-        MqttProperties.TOPIC_ALIAS_UNDEFINED);
+        MqttProperties.TOPIC_ALIAS_NOT_SET);
   }
 
   @Override

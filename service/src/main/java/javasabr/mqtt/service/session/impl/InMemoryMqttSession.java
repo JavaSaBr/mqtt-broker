@@ -9,6 +9,7 @@ import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.session.ActiveSubscriptions;
 import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession.UnsafeMqttSession;
+import javasabr.mqtt.network.session.TopicNameMapping;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import lombok.AccessLevel;
@@ -81,6 +82,8 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   final MessageTacker outMessageTracker;
   @Getter
   final ActiveSubscriptions activeSubscriptions;
+  @Getter
+  final TopicNameMapping topicNameMapping;
 
   @Getter
   @Setter
@@ -94,6 +97,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
     this.activeSubscriptions = new InMemoryActiveSubscriptions();
+    this.topicNameMapping = new InMemoryTopicNameMapping();
   }
 
   @Override

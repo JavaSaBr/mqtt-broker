@@ -47,7 +47,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos(),
         false,
-        MqttProperties.TOPIC_ALIAS_UNDEFINED);
+        MqttProperties.TOPIC_ALIAS_NOT_SET);
   }
 
   protected abstract PublishHandlingResult handleImpl(Publish publish, C client) ;

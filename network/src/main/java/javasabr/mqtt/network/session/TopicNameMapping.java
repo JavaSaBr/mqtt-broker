@@ -5,6 +5,8 @@ import org.jspecify.annotations.Nullable;
 
 public interface TopicNameMapping {
 
+  void update(int topicAlias, TopicName topicName);
+
   @Nullable
   TopicName resolve(int topicAlias);
 }

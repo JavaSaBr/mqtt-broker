@@ -7,7 +7,6 @@ public class TopicName extends AbstractTopic {
     public boolean isInvalid() {
       return true;
     }
-
   };
 
   public static final TopicName EMPTY_TOPIC_NAME = new TopicName("") {
