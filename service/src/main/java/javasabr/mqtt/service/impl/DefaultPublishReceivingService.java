@@ -44,7 +44,7 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
   }
 
   @Override
-  public void processReceivedPublish(MqttClient client, Publish publish) {
+  public void processPublish(MqttClient client, Publish publish) {
     log.debug(client.clientId(), publish, "[%s] Processing received publish: [%s]"::formatted);
     QoS qos = publish.qos();
     try {

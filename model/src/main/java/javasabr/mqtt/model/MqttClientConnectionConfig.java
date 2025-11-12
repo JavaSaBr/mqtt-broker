@@ -39,4 +39,8 @@ public record MqttClientConnectionConfig(
   public int maxStringLength() {
     return server.maxStringLength();
   }
+
+  public int maxBinarySize() {
+    return server.maxBinarySize();
+  }
 }

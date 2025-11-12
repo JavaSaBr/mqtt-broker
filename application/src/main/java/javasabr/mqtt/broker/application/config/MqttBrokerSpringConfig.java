@@ -9,6 +9,7 @@ import javasabr.mqtt.network.MqttClientFactory;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
+import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
@@ -193,8 +194,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  ConnectionService mqttConnectionService(Collection<? extends MqttInMessageHandler> inMessageHandlers) {
-    return new DefaultConnectionService(inMessageHandlers);
+  ConnectionService externalMqttConnectionService(Collection<? extends MqttInMessageHandler> inMessageHandlers) {
+    return new DefaultConnectionService(ExternalMqttClient.class, inMessageHandlers);
   }
 
   @Bean

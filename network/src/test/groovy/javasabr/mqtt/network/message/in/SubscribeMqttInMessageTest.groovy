@@ -1,6 +1,5 @@
 package javasabr.mqtt.network.message.in
 
-
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttProtocolErrors
@@ -11,7 +10,7 @@ import javasabr.rlib.common.util.BufferUtils
 
 class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
 
-  def "should read message correctly as mqtt 3.1.1"() {
+  def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -21,7 +20,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(0b0000_0010 as byte) // QoS.EXACTLY_ONCE
         }
     when:
-        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         def successful = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         successful
@@ -42,7 +41,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
 
-  def "should read message correctly as mqtt 5.0"() {
+  def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, subscriptionId)
@@ -60,7 +59,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(0b0010_0100 as byte)  // QoS.AT_MOST_ONCE, no local, retainAsPublished, SubscribeRetainHandling.DO_NOT_SEND
         }
     when:
-        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         def successful = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
         def subscriptions = inMessage.subscriptions()
     then:
@@ -93,7 +92,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
           it.put(0b0000_0010 as byte)
         }
-        inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        inMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         successful = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
         subscriptions = inMessage.subscriptions()
     then:
@@ -114,7 +113,81 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
 
-  def "should not read invalid message as mqtt 5.0"() {
+  def "should not read invalid message as MQTT 3.1.1"() {
+    given:
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putString(topicFilter)
+          it.put(0b0000_0001 as byte)
+        }
+    when:
+        def inMessage = new SubscribeMqttInMessage(0b0000_0000 as byte)
+        def successful = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !successful
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
+    when:
+        def dataBuffer2 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putString(topicFilter)
+          it.put(0b0000_0011 as byte)
+        }
+        def inMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful2 = inMessage2.read(defaultMqtt311Connection, dataBuffer2, dataBuffer2.limit())
+    then:
+        !successful2
+        inMessage2.exception() instanceof MalformedProtocolMqttException
+        inMessage2.exception().message == MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING
+    when:
+        def dataBuffer3 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+        }
+        def inMessage3 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful3 = inMessage3.read(defaultMqtt311Connection, dataBuffer3, dataBuffer3.limit())
+    then:
+        !successful3
+        inMessage3.exception() instanceof MalformedProtocolMqttException
+        inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
+    when:
+        def dataBuffer4 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putString(topicFilter)
+          it.put(0b0000_0100 as byte)
+        }
+        def inMessage4 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful4 = inMessage4.read(defaultMqtt311Connection, dataBuffer4, dataBuffer4.limit())
+    then:
+        !successful4
+        inMessage4.exception() instanceof MalformedProtocolMqttException
+        inMessage4.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_NO_LOCAL_OPTION
+    when:
+        def dataBuffer5 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putString(topicFilter)
+          it.put(0b0000_1000 as byte)
+        }
+        def inMessage5 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful5 = inMessage5.read(defaultMqtt311Connection, dataBuffer5, dataBuffer5.limit())
+    then:
+        !successful5
+        inMessage5.exception() instanceof MalformedProtocolMqttException
+        inMessage5.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_AS_PUBLISH_OPTION
+    when:
+        def dataBuffer6 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putString(topicFilter)
+          it.put(0b0011_0000 as byte)
+        }
+        def inMessage6 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful6 = inMessage6.read(defaultMqtt311Connection, dataBuffer6, dataBuffer6.limit())
+    then:
+        !successful6
+        inMessage6.exception() instanceof MalformedProtocolMqttException
+        inMessage6.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_HANDLING_OPTION
+  }
+
+  def "should not read invalid message as MQTT 5.0"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -136,7 +209,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter)
           it.put(0b0011_1001 as byte)
         }
-        def inMessage2 = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def inMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         def successful2 = inMessage2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
     then:
         !successful2
@@ -147,11 +220,26 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putShort(messageId)
           it.putMbi(0)
         }
-        def inMessage3 = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def inMessage3 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         def successful3 = inMessage3.read(defaultMqtt5Connection, dataBuffer3, dataBuffer3.limit())
     then:
         !successful3
         inMessage3.exception() instanceof MalformedProtocolMqttException
         inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
+    when:
+        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
+          it.putProperty(MqttMessageProperty.SERVER_REFERENCE, "reference")
+        }
+        def dataBuffer4 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(propertiesBuffer.limit())
+          it.put(propertiesBuffer)
+        }
+        def inMessage4 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful4 = inMessage4.read(defaultMqtt5Connection, dataBuffer4, dataBuffer4.limit())
+    then:
+        !successful4
+        inMessage4.exception() instanceof MalformedProtocolMqttException
+        inMessage4.exception().message == "Property:[SERVER_REFERENCE] is not available for packet:[SubscribeMqttInMessage]"
   }
 }

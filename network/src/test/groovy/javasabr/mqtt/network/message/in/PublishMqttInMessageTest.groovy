@@ -23,7 +23,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         result
         message.qos() == QoS.AT_LEAST_ONCE
         !message.duplicate()
-        message.retained()
+        message.retain()
         message.rawResponseTopicName() == null
         message.subscriptionIds() == IntArray.empty()
         message.contentType() == null
@@ -31,7 +31,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.payload() == publishPayload
         message.messageId() == messageId
         message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
-        message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
+        message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
         message.topicAlias() == MqttProperties.TOPIC_ALIAS_UNDEFINED
         message.payloadFormat() == PayloadFormat.UNDEFINED
   }
@@ -62,7 +62,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         result
         message.qos() == QoS.AT_LEAST_ONCE
         !message.duplicate()
-        message.retained()
+        message.retain()
         message.rawResponseTopicName() == responseTopic
         message.subscriptionIds() == subscriptionIds
         message.contentType() == contentType
@@ -86,7 +86,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         result
         message.qos() == QoS.AT_LEAST_ONCE
         !message.duplicate()
-        message.retained()
+        message.retain()
         message.rawResponseTopicName() == null
         message.subscriptionIds() == IntArray.empty()
         message.contentType() == null
@@ -94,7 +94,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.payload() == publishPayload
         message.messageId() == messageId
         message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
-        message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED
+        message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
         message.topicAlias() == MqttProperties.TOPIC_ALIAS_UNDEFINED
         message.payloadFormat() == PayloadFormat.UNDEFINED
   }

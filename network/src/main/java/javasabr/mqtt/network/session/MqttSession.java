@@ -43,6 +43,8 @@ public interface MqttSession {
 
   ActiveSubscriptions activeSubscriptions();
 
+  TopicNameMapping topicNameMapping();
+
   boolean hasOutPending();
 
   boolean hasInPending();

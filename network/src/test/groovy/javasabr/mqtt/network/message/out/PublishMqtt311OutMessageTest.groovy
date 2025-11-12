@@ -25,7 +25,7 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         result
         inMessage.messageId() == messageId
         inMessage.qos() == QoS.EXACTLY_ONCE
-        inMessage.retained()
+        inMessage.retain()
         inMessage.duplicate()
         inMessage.payload() == publishPayload
         inMessage.rawTopicName() == publishTopic.rawTopic()
@@ -47,7 +47,7 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         result
         inMessage.messageId() == 0
         inMessage.qos() == QoS.AT_MOST_ONCE
-        !inMessage.retained()
+        !inMessage.retain()
         !inMessage.duplicate()
         inMessage.payload() == publishPayload
         inMessage.rawTopicName() == publishTopic.rawTopic()

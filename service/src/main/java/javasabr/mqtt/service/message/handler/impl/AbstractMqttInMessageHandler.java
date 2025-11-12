@@ -25,6 +25,11 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
   Class<M> expectedNetworkPacket;
   MessageOutFactoryService messageOutFactoryService;
 
+  @Override
+  public Class<? extends MqttClient> expectedClientType() {
+    return expectedClient;
+  }
+
   protected boolean requireSession() {
     return true;
   }

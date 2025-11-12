@@ -5,5 +5,5 @@ import javasabr.mqtt.network.MqttClient;
 
 public interface PublishReceivingService {
 
-  void processReceivedPublish(MqttClient client, Publish publish);
+  void processPublish(MqttClient client, Publish publish);
 }

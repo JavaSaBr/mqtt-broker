@@ -9,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
@@ -130,18 +130,18 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
     int propertiesLength = MqttDataUtils.readMbi(buffer);
     if (propertiesLength == MqttDataUtils.UNKNOWN_LENGTH) {
-      throw new IllegalStateException("Can't read properties length.");
+      throw new MalformedProtocolMqttException("Can't read properties length");
     } else if (propertiesLength == 0) {
       return;
     }
 
     int lastPositionInBuffer = buffer.position() + propertiesLength;
-    MqttServerConnectionConfig serverConnectionConfig = connection.serverConnectionConfig();
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
 
     while (buffer.position() < lastPositionInBuffer) {
       MqttMessageProperty property = MqttMessageProperty.byId(readByteUnsigned(buffer));
       if (!availableProperties.contains(property)) {
-        throw new IllegalStateException("Property:[" + property + "] is not available for packet:[" + this + "]");
+        throw new MalformedProtocolMqttException("Property:[" + property + "] is not available for packet:[" + name() + "]");
       }
       switch (property.dataType()) {
         case BYTE: {
@@ -161,21 +161,21 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
           break;
         }
         case UTF_8_STRING: {
-          applyProperty(property, readString(buffer, serverConnectionConfig.maxStringLength()));
+          applyProperty(property, readString(buffer, connectionConfig.maxStringLength()));
           break;
         }
         case UTF_8_STRING_PAIR: {
-          String name = readString(buffer, serverConnectionConfig.maxStringLength());
-          String value = readString(buffer, serverConnectionConfig.maxStringLength());
+          String name = readString(buffer, connectionConfig.maxStringLength());
+          String value = readString(buffer, connectionConfig.maxStringLength());
           applyProperty(property, new StringPair(name, value));
           break;
         }
         case BINARY: {
-          applyProperty(property, readBytes(buffer, serverConnectionConfig.maxBinarySize()));
+          applyProperty(property, readBytes(buffer, connectionConfig.maxBinarySize()));
           break;
         }
         default: {
-          throw new IllegalArgumentException("Unsupported data type: " + property.dataType());
+          throw new MalformedProtocolMqttException("Unsupported data type: " + property.dataType());
         }
       }
     }
@@ -228,7 +228,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
     CoderResult result = decoder.decode(inBuffer, outBuffer, true);
     if (result.isError()) {
-      throw new MalformedProtocolMqttException();
+      throw new MalformedProtocolMqttException("Can't decode UTF8 string");
     }
 
     return outBuffer

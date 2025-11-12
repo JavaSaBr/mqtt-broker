@@ -186,7 +186,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         buffer,
         MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL,
         0,
-        MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED);
+        MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET);
     writeProperty(buffer, MqttMessageProperty.TOPIC_ALIAS, topicAlias, MqttProperties.TOPIC_ALIAS_UNDEFINED);
     writeNotEmptyProperty(buffer, MqttMessageProperty.RESPONSE_TOPIC, responseTopic);
     writeNotEmptyProperty(buffer, MqttMessageProperty.CORRELATION_DATA, correlationData);

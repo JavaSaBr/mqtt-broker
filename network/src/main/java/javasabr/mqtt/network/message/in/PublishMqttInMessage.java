@@ -4,17 +4,17 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.array.MutableIntArray;
-import javasabr.rlib.common.util.ArrayUtils;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -28,6 +28,8 @@ import org.jspecify.annotations.Nullable;
 @Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PublishMqttInMessage extends TrackableMqttInMessage {
+
+  public static final IntArray EMPTY_SUBSCRIPTION_IDS = IntArray.empty();
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH.ordinal();
 
@@ -235,7 +237,7 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
    * received PUBLISH packet [MQTT-3.3.1-12]. • If the value of Retain As Published subscription option is set to 1, the
    * Server MUST set the RETAIN flag equal to the RETAIN flag in the received PUBLISH packet
    */
-  final boolean retained;
+  final boolean retain;
 
   /**
    * The Topic Name identifies the information channel to which Payload data is published.
@@ -253,14 +255,8 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
    * To reduce the size of the PUBLISH packet the sender can use a Topic Alias. The Topic Alias is described in section
    * 3.3.2.3.4. It is a Protocol Error if the Topic Name is zero length and there is no Topic Alias.
    */
+  @Nullable
   String rawTopicName;
-
-  /**
-   * The Packet Identifier field is only present in PUBLISH packets where the QoS level is 1 or 2. Section 2.2.1
-   * provides more information about Packet Identifiers.
-   * {@link TrackableMqttInMessage#messageId}
-   */
-  // int messageId;
 
   /**
    * The Payload contains the Application Message that is being published.
@@ -269,32 +265,29 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
    * from the Remaining Length field that is in the Fixed Header. It is valid
    * for a PUBLISH packet to contain a zero length Payload.
    */
-  byte[] payload;
+  byte @Nullable [] payload;
 
   // properties
   @Nullable
   String rawResponseTopicName;
   @Nullable
   String contentType;
-
   @Nullable
   MutableIntArray subscriptionIds;
-
+  @Nullable
+  PayloadFormat payloadFormat;
   byte @Nullable [] correlationData;
+
   long messageExpiryInterval;
   int topicAlias;
-  PayloadFormat payloadFormat;
 
   public PublishMqttInMessage(byte messageFlags) {
     super(messageFlags);
     this.qos = QoS.ofCode((messageFlags & 0b0110) >> 1);
-    this.retained = (messageFlags & 0b0001) != 0;
+    this.retain = (messageFlags & 0b0001) != 0;
     this.duplicate = (messageFlags & 0b1000) != 0;
-    this.rawTopicName = StringUtils.EMPTY;
-    this.payload = ArrayUtils.EMPTY_BYTE_ARRAY;
-    this.messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_UNDEFINED;
-    this.topicAlias = MqttProperties.TOPIC_ALIAS_UNDEFINED;
-    this.payloadFormat = PayloadFormat.UNDEFINED;
+    this.messageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET;
+    this.topicAlias = MqttProperties.TOPIC_ALIAS_NOT_SET;
   }
 
   @Override
@@ -304,8 +297,9 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
-    rawTopicName = readString(buffer, Integer.MAX_VALUE);
+    rawTopicName = readString(buffer, connectionConfig.maxStringLength());
     messageId = qos != QoS.AT_MOST_ONCE ? readShortUnsigned(buffer) : MqttProperties.MESSAGE_ID_IS_NOT_SET;
   }
 
@@ -321,14 +315,23 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   }
 
   public IntArray subscriptionIds() {
-    return subscriptionIds == null ? IntArray.empty() : subscriptionIds;
+    return subscriptionIds == null ? EMPTY_SUBSCRIPTION_IDS : subscriptionIds;
+  }
+
+  public PayloadFormat payloadFormat() {
+    return payloadFormat == null ? PayloadFormat.UNDEFINED : payloadFormat;
   }
 
   @Override
   protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
       case PAYLOAD_FORMAT_INDICATOR -> payloadFormat = PayloadFormat.fromCode(value);
-      case TOPIC_ALIAS -> topicAlias = Math.toIntExact(value);
+      case TOPIC_ALIAS -> {
+        if (topicAlias != MqttProperties.TOPIC_ALIAS_NOT_SET) {
+          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+        }
+        topicAlias = Math.toIntExact(value);
+      }
       case MESSAGE_EXPIRY_INTERVAL -> messageExpiryInterval = value;
       case SUBSCRIPTION_IDENTIFIER -> {
         if (subscriptionIds == null) {
@@ -343,8 +346,18 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case RESPONSE_TOPIC -> rawResponseTopicName = value;
-      case CONTENT_TYPE -> contentType = value;
+      case RESPONSE_TOPIC -> {
+        if (rawResponseTopicName != null) {
+          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+        }
+        rawResponseTopicName = value;
+      }
+      case CONTENT_TYPE -> {
+        if (contentType != null) {
+          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+        }
+        contentType = value;
+      }
       default -> unexpectedProperty(property);
     }
   }
@@ -352,7 +365,12 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
-      case CORRELATION_DATA -> correlationData = value;
+      case CORRELATION_DATA -> {
+        if (correlationData != null) {
+          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+        }
+        correlationData = value;
+      }
       default -> unexpectedProperty(property);
     }
   }
