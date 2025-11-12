@@ -32,7 +32,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.messageId() == messageId
         message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
-        message.topicAlias() == MqttProperties.TOPIC_ALIAS_UNDEFINED
+        message.topicAlias() == MqttProperties.TOPIC_ALIAS_NOT_SET
         message.payloadFormat() == PayloadFormat.UNDEFINED
   }
 
@@ -95,7 +95,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.messageId() == messageId
         message.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         message.messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
-        message.topicAlias() == MqttProperties.TOPIC_ALIAS_UNDEFINED
+        message.topicAlias() == MqttProperties.TOPIC_ALIAS_NOT_SET
         message.payloadFormat() == PayloadFormat.UNDEFINED
   }
 }

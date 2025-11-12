@@ -32,6 +32,7 @@ moquette-broker = "0.17"
 # https://mvnrepository.com/artifact/tools.jackson.core/jackson-core
 jackson = "3.0.1"
 
+
 [libraries]
 rlib-network = { module = "javasabr.rlib:rlib-network", version.ref = "rlib" }
 rlib-logger-api = { module = "javasabr.rlib:rlib-logger-api", version.ref = "rlib" }

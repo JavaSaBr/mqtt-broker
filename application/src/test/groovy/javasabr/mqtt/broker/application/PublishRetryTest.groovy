@@ -40,14 +40,15 @@ class PublishRetryTest extends IntegrationSpecification {
         subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
+        connectAck.reasonCode() == ConnectAckReasonCode.SUCCESS
     when:
         subscriber.send(new SubscribeMqtt311OutMessage(
             1,
             Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.AT_LEAST_ONCE))))
         def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
     then:
-        subscribeAck.reasonCodes.stream()
+        subscribeAck.reasonCodes()
+            .stream()
             .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_1 })
     when:
         publisher.publishWith()
@@ -58,7 +59,7 @@ class PublishRetryTest extends IntegrationSpecification {
             .join()
         def receivedPublish = subscriber.readNext() as PublishMqttInMessage
     then:
-        receivedPublish.payload == publishPayload
+        receivedPublish.payload() == publishPayload
     when:
         subscriber.disconnect()
         Thread.sleep(1_000)
