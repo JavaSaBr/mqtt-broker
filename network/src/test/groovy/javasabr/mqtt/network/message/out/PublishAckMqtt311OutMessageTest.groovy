@@ -6,12 +6,12 @@ import javasabr.rlib.common.util.BufferUtils
 
 class PublishAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishAckMqtt311OutMessage(messageId)
+        def outMessage = new PublishAckMqtt311OutMessage(messageId)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt311Connection, it)
+          outMessage.write(defaultMqtt311Connection, it)
         }
         def reader = new PublishAckMqttInMessage(0b0100_0000 as byte)
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())

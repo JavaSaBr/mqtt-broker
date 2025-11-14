@@ -41,7 +41,7 @@ public interface MqttProperties {
   int SERVER_KEEP_ALIVE_MAX = 0xFFFF;
 
   int TOPIC_ALIAS_MIN = 1;
-  int TOPIC_ALIAS_DEFAULT = 10;
+  int TOPIC_ALIAS_MAX_DEFAULT = 10;
   int TOPIC_ALIAS_MAX = 0xFFFF;
   int TOPIC_ALIAS_NOT_SET = Integer.MIN_VALUE;
   int TOPIC_ALIAS_INVALID = 0;

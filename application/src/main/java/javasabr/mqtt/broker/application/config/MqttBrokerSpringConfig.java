@@ -299,7 +299,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.topic.alias.maximum",
             int.class,
-            MqttProperties.TOPIC_ALIAS_DEFAULT),
+            MqttProperties.TOPIC_ALIAS_MAX_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,

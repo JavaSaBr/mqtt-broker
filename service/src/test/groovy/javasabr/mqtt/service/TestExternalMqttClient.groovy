@@ -52,4 +52,8 @@ class TestExternalMqttClient extends ExternalMqttClient {
   <M extends MqttOutMessage> M nextSentMessage(Class<M> type) {
     return type.cast(sentMessages.remove(0))
   }
+
+  boolean isEmpty() {
+    return sentMessages.isEmpty()
+  }
 }

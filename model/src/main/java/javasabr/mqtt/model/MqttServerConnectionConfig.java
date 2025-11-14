@@ -1,7 +1,9 @@
 package javasabr.mqtt.model;
 
 import javasabr.rlib.common.util.NumberUtils;
+import lombok.Builder;
 
+@Builder(toBuilder = true)
 public record MqttServerConnectionConfig(
     QoS maxQos,
     int maxMessageSize,
@@ -71,78 +73,32 @@ public record MqttServerConnectionConfig(
   }
 
   public MqttServerConnectionConfig withMaxQos(QoS maxQos) {
-    return new MqttServerConnectionConfig(
-        maxQos,
-        maxMessageSize,
-        maxStringLength,
-        maxBinarySize,
-        maxTopicLevels,
-        minKeepAliveTime,
-        receiveMaxPublishes,
-        topicAliasMaxValue,
-        defaultSessionExpiryInterval,
-        keepAliveEnabled,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable);
+    return toBuilder()
+        .maxQos(maxQos)
+        .build();
   }
 
   public MqttServerConnectionConfig withWildcardSubscriptionAvailable(boolean wildcardSubscriptionAvailable) {
-    return new MqttServerConnectionConfig(
-        maxQos,
-        maxMessageSize,
-        maxStringLength,
-        maxBinarySize,
-        maxTopicLevels,
-        minKeepAliveTime,
-        receiveMaxPublishes,
-        topicAliasMaxValue,
-        defaultSessionExpiryInterval,
-        keepAliveEnabled,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable);
+    return toBuilder()
+        .wildcardSubscriptionAvailable(wildcardSubscriptionAvailable)
+        .build();
   }
 
   public MqttServerConnectionConfig withSharedSubscriptionAvailable(boolean sharedSubscriptionAvailable) {
-    return new MqttServerConnectionConfig(
-        maxQos,
-        maxMessageSize,
-        maxStringLength,
-        maxBinarySize,
-        maxTopicLevels,
-        minKeepAliveTime,
-        receiveMaxPublishes,
-        topicAliasMaxValue,
-        defaultSessionExpiryInterval,
-        keepAliveEnabled,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable);
+    return toBuilder()
+        .sharedSubscriptionAvailable(sharedSubscriptionAvailable)
+        .build();
   }
 
   public MqttServerConnectionConfig withSubscriptionIdAvailable(boolean subscriptionIdAvailable) {
-    return new MqttServerConnectionConfig(
-        maxQos,
-        maxMessageSize,
-        maxStringLength,
-        maxBinarySize,
-        maxTopicLevels,
-        minKeepAliveTime,
-        receiveMaxPublishes,
-        topicAliasMaxValue,
-        defaultSessionExpiryInterval,
-        keepAliveEnabled,
-        sessionsEnabled,
-        retainAvailable,
-        wildcardSubscriptionAvailable,
-        subscriptionIdAvailable,
-        sharedSubscriptionAvailable);
+    return toBuilder()
+        .subscriptionIdAvailable(subscriptionIdAvailable)
+        .build();
+  }
+
+  public MqttServerConnectionConfig withRetainAvailable(boolean retainAvailable) {
+    return toBuilder()
+        .retainAvailable(retainAvailable)
+        .build();
   }
 }

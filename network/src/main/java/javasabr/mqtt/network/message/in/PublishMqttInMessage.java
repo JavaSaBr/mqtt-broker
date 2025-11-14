@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
  */
 @Getter
 @Accessors(fluent = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class PublishMqttInMessage extends TrackableMqttInMessage {
 
   public static final IntArray EMPTY_SUBSCRIPTION_IDS = IntArray.empty();

@@ -56,8 +56,8 @@ public class PublishMqttInMessageHandler
       PublishMqttInMessage publishMessage) {
 
     MessageTacker messageTacker = session.inMessageTracker();
-    if (validateMessageId(client, publishMessage, messageTacker)
-        && validateBaseFields(connection, client, publishMessage)) {
+    if (!validateMessageId(client, publishMessage, messageTacker)
+        || !validateBaseFields(connection, client, publishMessage)) {
       return;
     }
 
@@ -65,7 +65,7 @@ public class PublishMqttInMessageHandler
     TopicName responseTopicName = null;
     if (rawResponseTopicName != null) {
       if (!TopicValidator.validateTopicName(rawResponseTopicName)) {
-        log.warning(client.clientId(), rawResponseTopicName, "[%s] Provided invalid response TopicName:[%d]"::formatted);
+        log.warning(client.clientId(), rawResponseTopicName, "[%s] Provided invalid response TopicName:[%s]"::formatted);
         handleInvalidResponseTopicName(client);
         return;
       }
@@ -149,13 +149,13 @@ public class PublishMqttInMessageHandler
     if (messageId > 0 && messageTacker.isInUse(messageId)) {
       log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
       handleMessageIdIsInUse(client, publishMessage);
-      return true;
+      return false;
     } else if (messageId == MqttProperties.MESSAGE_ID_IS_NOT_SET && QoS.AT_MOST_ONCE != requestedQos) {
       log.warning(client.clientId(), messageId, "[%s] Missed MessageId"::formatted);
       handleMissedMessageId(client);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   private boolean validateBaseFields(
@@ -238,7 +238,7 @@ public class PublishMqttInMessageHandler
   private void handleInvalidTopicAlias(ExternalMqttClient client) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.TOPIC_ALIAS_INVALID, MqttProtocolErrors.INVALID_TOPIC_ALIAS);
+        .newDisconnect(client, DisconnectReasonCode.TOPIC_ALIAS_INVALID);
     client.closeWithReason(response);
   }
 

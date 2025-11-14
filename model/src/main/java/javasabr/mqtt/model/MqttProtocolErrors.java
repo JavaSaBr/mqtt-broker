@@ -3,7 +3,7 @@ package javasabr.mqtt.model;
 public interface MqttProtocolErrors {
   String NO_ANY_TOPIC_FILTER = "Not provided any information about TopicFilters";
   String NO_ANY_TOPIC_NANE = "Not provided any information about TopicName";
-  String INVALID_TOPIC_ALIAS = "Provided invalid TopicAlias";
+  //String INVALID_TOPIC_ALIAS = "Provided invalid TopicAlias";
   String INVALID_PAYLOAD_FORMAT = "Provided invalid PayloadFormat";
   String INVALID_MESSAGE_EXPIRY_INTERVAL = "Provided invalid MessageExpiryInterval";
   String INVALID_RESPONSE_TOPIC_NAME = "Provided invalid ResponseTopicName";
