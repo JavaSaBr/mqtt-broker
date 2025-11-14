@@ -41,4 +41,8 @@ public enum QoS implements NumberedEnum<QoS> {
   public boolean isLower(QoS another) {
     return level < another.level;
   }
+
+  public boolean isHigher(QoS another) {
+    return level > another.level;
+  }
 }

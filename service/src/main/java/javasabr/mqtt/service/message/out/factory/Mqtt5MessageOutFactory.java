@@ -2,6 +2,7 @@ package javasabr.mqtt.service.message.out.factory;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
@@ -13,6 +14,7 @@ import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.AuthenticationMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt5OutMessage;
@@ -21,7 +23,6 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.PublishCompleteMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage;
-import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
 import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage;
@@ -68,27 +69,27 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   }
 
   @Override
-  public PublishMqttOutMessage newPublish(
+  public MqttOutMessage newPublish(
       int messageId,
       QoS qos,
-      boolean retained,
+      boolean retain,
       boolean duplicate,
-      String topicName,
+      TopicName topicName,
       int topicAlias,
       byte[] payload,
-      boolean stringPayload,
-      String responseTopic,
+      PayloadFormat payloadFormat,
+      @Nullable TopicName responseTopic,
       byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
     return new PublishMqtt5OutMessage(
         messageId,
         qos,
-        retained,
+        retain,
         duplicate,
         topicName,
         payload,
         topicAlias,
-        stringPayload,
+        payloadFormat,
         responseTopic,
         correlationData,
         userProperties);

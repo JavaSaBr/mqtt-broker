@@ -1,7 +1,9 @@
 package javasabr.mqtt.service.message.out.factory;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
@@ -13,9 +15,9 @@ import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
@@ -85,37 +87,37 @@ public abstract class MqttMessageOutFactory {
         MutableArray.ofType(StringPair.class));
   }
 
-  public PublishMqttOutMessage newPublish(
+  public MqttOutMessage newPublish(
       int messageId,
       QoS qos,
-      boolean retained,
+      boolean retain,
       boolean duplicate,
-      String topicName,
+      TopicName topicName,
       byte[] payload) {
     return newPublish(
         messageId,
         qos,
-        retained,
+        retain,
         duplicate,
         topicName,
-        0,
+        MqttProperties.TOPIC_ALIAS_NOT_SET,
         payload,
-        false,
-        StringUtils.EMPTY,
-        ArrayUtils.EMPTY_BYTE_ARRAY,
+        PayloadFormat.UNDEFINED,
+        null,
+        null,
         MutableArray.ofType(StringPair.class));
   }
 
-  public abstract PublishMqttOutMessage newPublish(
+  public abstract MqttOutMessage newPublish(
       int messageId,
       QoS qos,
-      boolean retained,
+      boolean retain,
       boolean duplicate,
-      String topicName,
+      TopicName topicName,
       int topicAlias,
       byte[] payload,
-      boolean stringPayload,
-      @Nullable String responseTopic,
+      PayloadFormat payloadFormat,
+      @Nullable TopicName responseTopic,
       byte @Nullable [] correlationData,
       Array<StringPair> userProperties);
 

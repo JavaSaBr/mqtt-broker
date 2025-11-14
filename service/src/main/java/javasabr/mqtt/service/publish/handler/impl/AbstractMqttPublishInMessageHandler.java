@@ -25,12 +25,12 @@ public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
   PublishDeliveringService publishDeliveringService;
 
   @Override
-  public void handle(MqttClient client, Publish packet) {
+  public void handle(MqttClient client, Publish publish) {
     if (!expectedClient.isInstance(client)) {
       log.warning(client, "Not expected client:[%s]"::formatted);
       return;
     }
-    handleImpl(expectedClient.cast(client), packet);
+    handleImpl(expectedClient.cast(client), publish);
   }
 
   protected void handleImpl(C client, Publish publish) {

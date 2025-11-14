@@ -101,9 +101,10 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         def publishMessage = new PublishMqttInMessage(0b0110_0010 as byte)
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def publishAck = mqttClient.nextSentMessage(PublishAckMqtt5OutMessage)
-        publishAck.reasonCode() == PublishAckReasonCode.UNSPECIFIED_ERROR
-            && publishAck.reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
+        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
+            && disconnectReason.reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
+            && disconnectReason.serverReference() == ""
   }
 
   def "should response that message id is already in use"() {
@@ -358,8 +359,9 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def publishAck = mqttClient.nextSentMessage(PublishAckMqtt5OutMessage)
-        publishAck.reasonCode() == PublishAckReasonCode.TOPIC_NAME_INVALID
-            && publishAck.reason() == ""
+        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        disconnectReason.reasonCode() == DisconnectReasonCode.TOPIC_NAME_INVALID
+            && disconnectReason.reason() == ""
+            && disconnectReason.serverReference() == ""
   }
 }

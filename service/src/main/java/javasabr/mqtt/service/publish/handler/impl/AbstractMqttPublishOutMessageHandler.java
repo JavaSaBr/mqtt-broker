@@ -1,12 +1,10 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
@@ -53,19 +51,18 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends MqttClient>
   protected abstract PublishHandlingResult handleImpl(Publish publish, C client) ;
 
   protected void startDelivering(MqttClient client, Publish publish) {
-    TopicName responseTopicName = publish.responseTopicName();
-    PublishMqttOutMessage outMessage = messageOutFactoryService
+    MqttOutMessage outMessage = messageOutFactoryService
         .resolveFactory(client)
         .newPublish(
             publish.messageId(),
             qos(),
             publish.retained(),
             publish.duplicated(),
-            publish.topicName().toString(),
+            publish.topicName(),
             publish.topicAlias(),
             publish.payload(),
-            publish.payloadFormat() == PayloadFormat.UTF8_STRING,
-            responseTopicName == null ? null : responseTopicName.toString(),
+            publish.payloadFormat(),
+            publish.responseTopicName(),
             publish.correlationData(),
             publish.userProperties());
     client.send(outMessage);

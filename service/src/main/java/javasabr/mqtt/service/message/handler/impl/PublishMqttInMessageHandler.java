@@ -209,11 +209,8 @@ public class PublishMqttInMessageHandler
   private void handleMissedMessageId(ExternalMqttClient client) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(
-            MqttProperties.MESSAGE_ID_IS_NOT_SET,
-            PublishAckReasonCode.UNSPECIFIED_ERROR,
-            MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
-    client.send(response);
+        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
+    client.closeWithReason(response);
   }
 
   private void handleNotSupportedQos(ExternalMqttClient client) {
@@ -270,16 +267,14 @@ public class PublishMqttInMessageHandler
     int messagedId = publishMessage.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(messagedId, PublishAckReasonCode.TOPIC_NAME_INVALID);
-
-    // without messageId we don't need to wait for delivering the response
+        .newDisconnect(client, DisconnectReasonCode.TOPIC_NAME_INVALID);
+    // without messageId we do not need to clean it
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      client.send(response);
+      client.closeWithReason(response);
       return;
     }
-
     client
-        .sendWithFeedback(response)
+        .closeWithReason(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messagedId));
