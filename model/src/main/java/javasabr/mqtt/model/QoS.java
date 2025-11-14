@@ -37,4 +37,8 @@ public enum QoS implements NumberedEnum<QoS> {
   public QoS lower(QoS alternative) {
     return level > alternative.level ? alternative : this;
   }
+
+  public boolean isLower(QoS another) {
+    return level < another.level;
+  }
 }

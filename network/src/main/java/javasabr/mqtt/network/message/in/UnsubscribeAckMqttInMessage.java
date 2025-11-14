@@ -49,7 +49,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  private static final Array<UnsubscribeAckReasonCode> EMPTY_REASON_CODES = Array.empty(UnsubscribeAckReasonCode.class);
+  public static final Array<UnsubscribeAckReasonCode> EMPTY_REASON_CODES = Array.empty(UnsubscribeAckReasonCode.class);
 
   @Nullable
   MutableArray<UnsubscribeAckReasonCode> reasonCodes;

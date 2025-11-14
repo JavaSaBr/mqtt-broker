@@ -81,7 +81,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
-    if (buffer.remaining() < 1) {
+    if (!buffer.hasRemaining()) {
       throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
     }
 
@@ -149,11 +149,11 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   private static void validateMqtt311Options(int options) {
     // for MQTT 3.1.1 these bits must be zero
     if ((options & 0b0000_0100) != 0) {
-      throw new MalformedProtocolMqttException("No local option is not available on this protocol level");
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_NO_LOCAL_OPTION);
     } else if ((options & 0b0000_1000) != 0) {
-      throw new MalformedProtocolMqttException("Retain as published option is not available on this protocol level");
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_AS_PUBLISH_OPTION);
     } else if (((options & 0b0011_0000) >> 4) != 0) {
-      throw new MalformedProtocolMqttException("Retain level option is not available on this protocol level");
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_HANDLING_OPTION);
     }
   }
 }

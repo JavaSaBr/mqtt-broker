@@ -1,11 +1,13 @@
 package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
+import javasabr.mqtt.model.MqttProtocolErrors
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
 
-  def "should read packet correctly as mqtt 3.1.1"() {
+  def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -13,18 +15,18 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
         }
     when:
-        def packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
-        def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters().size() == 2
-        packet.rawTopicFilters().get(0).toString() == topicFilter
-        packet.rawTopicFilters().get(1).toString() == topicFilter2
-        packet.messageId == messageId
-        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        inMessage.rawTopicFilters().size() == 2
+        inMessage.rawTopicFilters().get(0).toString() == topicFilter
+        inMessage.rawTopicFilters().get(1).toString() == topicFilter2
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
-  def "should read packet correctly as mqtt 5.0"() {
+  def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
@@ -37,15 +39,15 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter2)
         }
     when:
-        def packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
-        def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters().size() == 2
-        packet.rawTopicFilters().get(0).toString() == topicFilter
-        packet.rawTopicFilters().get(1).toString() == topicFilter2
-        packet.messageId == messageId
-        packet.userProperties() == userProperties
+        inMessage.rawTopicFilters().size() == 2
+        inMessage.rawTopicFilters().get(0).toString() == topicFilter
+        inMessage.rawTopicFilters().get(1).toString() == topicFilter2
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == userProperties
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -53,14 +55,80 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter)
           it.putString(topicFilter2)
         }
-        packet = new UnsubscribeMqttInMessage(0b0000_0010 as byte)
-        result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        inMessage = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
+        result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.rawTopicFilters.size() == 2
-        packet.rawTopicFilters.get(0).toString() == topicFilter
-        packet.rawTopicFilters.get(1).toString() == topicFilter2
-        packet.messageId == messageId
-        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        inMessage.rawTopicFilters().size() == 2
+        inMessage.rawTopicFilters().get(0).toString() == topicFilter
+        inMessage.rawTopicFilters().get(1).toString() == topicFilter2
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+  }
+
+  def "should not read invalid message as MQTT 3.1.1"() {
+    given:
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putString(topicFilter)
+        }
+    when:
+        def inMessage = new UnsubscribeMqttInMessage(0b0000_0000 as byte)
+        def successful = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !successful
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
+    when:
+        def dataBuffer2 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+        }
+        def inMessage2 = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful2 = inMessage2.read(defaultMqtt311Connection, dataBuffer2, dataBuffer2.limit())
+    then:
+        !successful2
+        inMessage2.exception() instanceof MalformedProtocolMqttException
+        inMessage2.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
+  }
+
+  def "should not read invalid message as MQTT 5.0"() {
+    given:
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(0)
+        }
+    when:
+        def inMessage = new UnsubscribeMqttInMessage(0b0000_0000 as byte)
+        def successful = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !successful
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
+    when:
+        def dataBuffer2 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(0)
+        }
+        def inMessage2 = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful2 = inMessage2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
+    then:
+        !successful2
+        inMessage2.exception() instanceof MalformedProtocolMqttException
+        inMessage2.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
+    when:
+        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
+          it.putProperty(MqttMessageProperty.SERVER_REFERENCE, "reference")
+        }
+        def dataBuffer3 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(propertiesBuffer.limit())
+          it.put(propertiesBuffer)
+        }
+        def inMessage3 = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful3 = inMessage3.read(defaultMqtt5Connection, dataBuffer3, dataBuffer3.limit())
+    then:
+        !successful3
+        inMessage3.exception() instanceof MalformedProtocolMqttException
+        inMessage3.exception().message == "Property:[SERVER_REFERENCE] is not available for packet:[UnsubscribeMqttInMessage]"
   }
 }

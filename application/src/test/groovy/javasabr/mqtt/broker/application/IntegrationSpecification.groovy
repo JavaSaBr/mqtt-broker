@@ -152,6 +152,7 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_5) >> true
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       serverConnectionConfig() >> serverConnConfig
+      clientConnectionConfig() >> clientConnConfig
       client() >> Stub(UnsafeMqttClient) {
         connectionConfig() >> clientConnConfig
         connection() >> connectionRef.get()
@@ -179,6 +180,7 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_5) >> false
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       serverConnectionConfig() >> serverConnConfig
+      clientConnectionConfig() >> clientConnConfig
       client() >> Stub(UnsafeMqttClient) {
         connectionConfig() >> clientConnConfig
         connection() >> connectionRef.get()

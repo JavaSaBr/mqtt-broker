@@ -9,11 +9,15 @@ import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * Publish acknowledgement.
  */
+@Getter
+@Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
 

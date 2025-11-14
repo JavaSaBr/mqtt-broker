@@ -1,5 +1,6 @@
 package javasabr.mqtt.model.topic;
 
+import java.util.Objects;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -51,6 +52,20 @@ public abstract class AbstractTopic {
   @Override
   public String toString() {
     return rawTopic;
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    var that = (AbstractTopic) object;
+    return Objects.equals(rawTopic, that.rawTopic);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(rawTopic);
   }
 
   protected static String[] splitTopic(String topic) {

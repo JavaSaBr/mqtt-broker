@@ -1,11 +1,9 @@
 package javasabr.mqtt.network.message.out;
 
-import java.nio.ByteBuffer;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
@@ -14,13 +12,14 @@ import lombok.experimental.FieldDefaults;
  */
 @Getter
 @Accessors(fluent = true)
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public class UnsubscribeAckMqtt311OutMessage extends MqttOutMessage {
+public class UnsubscribeAckMqtt311OutMessage extends TrackableMqttOutMessage {
 
-  private static final byte PACKET_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
 
-  int messageId;
+  public UnsubscribeAckMqtt311OutMessage(int messageId) {
+    super(messageId);
+  }
 
   @Override
   public int expectedLength(MqttConnection connection) {
@@ -29,12 +28,6 @@ public class UnsubscribeAckMqtt311OutMessage extends MqttOutMessage {
 
   @Override
   protected byte messageType() {
-    return PACKET_TYPE;
-  }
-
-  @Override
-  protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718074
-    writeShort(buffer, messageId);
+    return MESSAGE_TYPE;
   }
 }

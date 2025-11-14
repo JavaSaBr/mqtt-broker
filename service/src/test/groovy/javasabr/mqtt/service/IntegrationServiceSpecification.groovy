@@ -9,10 +9,18 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
+import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
+import javasabr.mqtt.service.impl.DefaultPublishReceivingService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
+import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler
+import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishOutMessageHandler
+import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler
+import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandler
+import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler
+import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService
 import javasabr.rlib.network.Network
 import javasabr.rlib.network.ServerNetworkConfig.SimpleServerNetworkConfig
@@ -41,6 +49,26 @@ class IntegrationServiceSpecification extends Specification {
   ])
 
   @Shared
+  def publishDeliveringService = new DefaultPublishDeliveringService([
+      new Qos0MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
+      new Qos1MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
+      new Qos2MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService)
+  ])
+
+  @Shared
+  def publishReceivingService = new DefaultPublishReceivingService([
+      new Qos0MqttPublishInMessageHandler(defaultSubscriptionService, publishDeliveringService),
+      new Qos1MqttPublishInMessageHandler(
+          defaultSubscriptionService,
+          publishDeliveringService,
+          defaultMessageOutFactoryService),
+      new Qos2MqttPublishInMessageHandler(
+          defaultSubscriptionService,
+          publishDeliveringService,
+          defaultMessageOutFactoryService)
+  ])
+
+  @Shared
   def defaultBufferAllocator = new DefaultBufferAllocator(SimpleServerNetworkConfig.builder().build())
 
   @Shared
@@ -55,7 +83,7 @@ class IntegrationServiceSpecification extends Specification {
       MqttProperties.MAXIMUM_TOPIC_LEVELS,
       MqttProperties.SERVER_KEEP_ALIVE_DEFAULT,
       MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT,
-      MqttProperties.TOPIC_ALIAS_DEFAULT,
+      MqttProperties.TOPIC_ALIAS_MAX_DEFAULT,
       0,
       true,
       true,

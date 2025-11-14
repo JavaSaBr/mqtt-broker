@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
+import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.MqttInMessage;
@@ -16,12 +17,16 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DefaultConnectionService implements ConnectionService {
 
+  Class<? extends MqttClient> expectedClientType;
   @Nullable
   MqttInMessageHandler[] inMessageHandlers;
 
-  public DefaultConnectionService(Collection<? extends MqttInMessageHandler> knownInMessageHandlers) {
+  public DefaultConnectionService(Class<? extends MqttClient> expectedClientType,
+                                  Collection<? extends MqttInMessageHandler> knownInMessageHandlers) {
+    this.expectedClientType = expectedClientType;
     int highestPacketType = knownInMessageHandlers
         .stream()
+        .filter(handler -> expectedClientType.isAssignableFrom(handler.expectedClientType()))
         .map(MqttInMessageHandler::messageType)
         .mapToInt(MqttMessageType::typeIndex)
         .max()
@@ -30,6 +35,10 @@ public class DefaultConnectionService implements ConnectionService {
     var inMessageHandlers = new MqttInMessageHandler[highestPacketType + 1];
 
     for (MqttInMessageHandler knownInMessageHandler : knownInMessageHandlers) {
+      Class<? extends MqttClient> clientType = knownInMessageHandler.expectedClientType();
+      if (!expectedClientType.isAssignableFrom(clientType)) {
+        continue;
+      }
       MqttMessageType messageType = knownInMessageHandler.messageType();
       if (inMessageHandlers[messageType.typeIndex()] != null) {
         throw new IllegalArgumentException("Found duplicate MqttInMessageHandler:[" + knownInMessageHandler + "]");
@@ -38,7 +47,7 @@ public class DefaultConnectionService implements ConnectionService {
     }
 
     this.inMessageHandlers = inMessageHandlers;
-    log.info(inMessageHandlers, DefaultConnectionService::buildServiceDescription);
+    log.info(expectedClientType, inMessageHandlers, DefaultConnectionService::buildServiceDescription);
   }
 
   @Override
@@ -96,7 +105,9 @@ public class DefaultConnectionService implements ConnectionService {
     }
   }
 
-  private static String buildServiceDescription(@Nullable MqttInMessageHandler[] inMessageHandlers) {
+  private static String buildServiceDescription(
+      Class<? extends MqttClient> expectedClientType,
+      @Nullable MqttInMessageHandler[] inMessageHandlers) {
     var builder = new StringBuilder();
     builder.append("{\n");
     int count = 0;
@@ -119,6 +130,7 @@ public class DefaultConnectionService implements ConnectionService {
         .delete(builder.length() - 2, builder.length())
         .append("\n}");
 
-    return "Registered [%s] MqttInMessageHandlers: %s".formatted(count, builder);
+    return "Registered [%d] for [%s] MqttInMessageHandlers: %s"
+        .formatted(count, expectedClientType.getSimpleName(), builder);
   }
 }

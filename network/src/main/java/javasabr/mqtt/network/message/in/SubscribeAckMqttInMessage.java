@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
+import javasabr.mqtt.model.MqttProtocolErrors;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
@@ -23,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 @Getter
 @Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SubscribeAckMqttInMessage extends MqttInMessage {
+public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE_ACK.ordinal();
 
@@ -49,7 +51,6 @@ public class SubscribeAckMqttInMessage extends MqttInMessage {
 
   @Nullable
   MutableArray<SubscribeAckReasonCode> reasonCodes;
-  int messageId;
 
   // properties
   String reason;
@@ -65,16 +66,10 @@ public class SubscribeAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718070
-    messageId = readShortUnsigned(buffer);
-  }
-
-  @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718071
-    if (buffer.remaining() < 1) {
-      throw new IllegalStateException("No any topic filters.");
+    if (!buffer.hasRemaining()) {
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
     }
 
     reasonCodes = ArrayFactory.mutableArray(SubscribeAckReasonCode.class, buffer.remaining());

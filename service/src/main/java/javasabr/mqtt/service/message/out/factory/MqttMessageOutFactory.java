@@ -125,8 +125,12 @@ public abstract class MqttMessageOutFactory {
       String reason,
       Array<StringPair> userProperties);
 
-  public MqttOutMessage newPublishAck(int packetId, PublishAckReasonCode reasonCode) {
-    return newPublishAck(packetId, reasonCode, StringUtils.EMPTY, EMPTY_USER_PROPERTIES);
+  public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode) {
+    return newPublishAck(messageId, reasonCode, StringUtils.EMPTY, EMPTY_USER_PROPERTIES);
+  }
+
+  public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode, String reason) {
+    return newPublishAck(messageId, reasonCode, reason, EMPTY_USER_PROPERTIES);
   }
 
   public abstract MqttOutMessage newSubscribeAck(
