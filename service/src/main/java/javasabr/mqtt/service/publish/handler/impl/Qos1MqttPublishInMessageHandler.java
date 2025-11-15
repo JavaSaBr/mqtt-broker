@@ -4,6 +4,8 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -32,29 +34,43 @@ public class Qos1MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void handleEmptySubscriptions(ExternalMqttClient client, Publish publish) {
-    super.handleEmptySubscriptions(client, publish);
-    log.debug(client.clientId(), "[%s] Send PUBACK after not found any subscriber..."::formatted);
-    client.send(messageOutFactoryService
+  protected void handleNoMatchedSubscribers(
+      ExternalMqttClient client,
+      MqttSession session,
+      Publish publish) {
+    super.handleNoMatchedSubscribers(client, session, publish);
+    int messageId = publish.messageId();
+    MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(publish.messageId(), PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS));
+        .newPublishAck(messageId, PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS);
+    sendFeedback(client, session, response, messageId);
   }
 
   @Override
-  protected void handleError(ExternalMqttClient client, Publish publish, PublishHandlingResult handlingResult) {
-    super.handleError(client, publish, handlingResult);
-    log.debug(client.clientId(), "[%s] Send PUBACK after failed processing publish..."::formatted);
-    client.send(messageOutFactoryService
+  protected void handleError(
+      ExternalMqttClient client,
+      MqttSession session,
+      Publish publish,
+      PublishHandlingResult handlingResult) {
+    super.handleError(client, session, publish, handlingResult);
+    int messageId = publish.messageId();
+    MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(publish.messageId(), handlingResult.ackReasonCode()));
+        .newPublishAck(publish.messageId(), handlingResult.ackReasonCode());
+    sendFeedback(client, session, response, messageId);
   }
 
   @Override
-  protected void handleSuccessfulResult(ExternalMqttClient client, Publish publish, int subscribers) {
-    super.handleSuccessfulResult(client, publish, subscribers);
-    log.debug(client.clientId(), "[%s] Send PUBACK after successful processing publish..."::formatted);
-    client.send(messageOutFactoryService
+  protected void handleSuccess(
+      ExternalMqttClient client,
+      MqttSession session,
+      Publish publish,
+      int matchedSubscribers) {
+    super.handleSuccess(client, session, publish, matchedSubscribers);
+    int messageId = publish.messageId();
+    MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(publish.messageId(), PublishAckReasonCode.SUCCESS));
+        .newPublishAck(messageId, PublishAckReasonCode.SUCCESS);
+    sendFeedback(client, session, response, messageId);
   }
 }

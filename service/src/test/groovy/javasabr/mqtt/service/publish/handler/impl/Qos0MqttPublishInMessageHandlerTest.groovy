@@ -11,7 +11,7 @@ import javasabr.rlib.collections.array.Array
 
 class Qos0MqttPublishInMessageHandlerTest extends IntegrationServiceSpecification {
 
-  def "should not provide any feedback for accepted publish"() {
+  def "should not provide any feedback for accepted publish with subscribers"() {
     given:
         def publishInHandler = new Qos0MqttPublishInMessageHandler(
             defaultSubscriptionService,
@@ -41,5 +41,19 @@ class Qos0MqttPublishInMessageHandlerTest extends IntegrationServiceSpecificatio
         message1.topicName() == topicName
         def message2 = client2.nextSentMessage(PublishMqtt5OutMessage)
         message2.topicName() == topicName
+  }
+
+  def "should not provide any feedback for accepted publish without any subscriber"() {
+    given:
+        def publishInHandler = new Qos0MqttPublishInMessageHandler(
+            defaultSubscriptionService,
+            defaultPublishDeliveringService)
+        def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
+        def client = publisher.client() as TestExternalMqttClient
+        def topicName = defaultTopicService.createTopicName(client, "Qos0MqttPublishInMessageHandlerTest/2")
+    when:
+        publishInHandler.handle(client, Publish.minimal(QoS.AT_MOST_ONCE, topicName, testPayload))
+    then: 'sender should not have any feedback'
+        client.isEmpty()
   }
 }

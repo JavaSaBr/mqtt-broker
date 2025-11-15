@@ -40,11 +40,7 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
   }
 
   @Override
-  protected void handleImpl(ExternalMqttClient client, Publish publish) {
-    MqttSession session = client.session();
-    if (session == null) {
-      return;
-    }
+  protected void handleImpl(ExternalMqttClient client, MqttSession session, Publish publish) {
     // if this packet is re-try from client
     if (publish.duplicated()) {
       // if this packet was accepted before then we can skip it
@@ -52,32 +48,28 @@ public class Qos2MqttPublishInMessageHandler extends Qos0MqttPublishInMessageHan
         return;
       }
     }
-    super.handleImpl(client, publish);
+    super.handleImpl(client, session, publish);
   }
 
   @Override
-  protected void handleEmptySubscriptions(ExternalMqttClient client, Publish publish) {
-    super.handleEmptySubscriptions(client, publish);
+  protected void handleNoMatchedSubscribers(ExternalMqttClient client, MqttSession session, Publish publish) {
+    super.handleNoMatchedSubscribers(client, session, publish);
     client.send(messageOutFactoryService
         .resolveFactory(client)
         .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS));
   }
 
   @Override
-  protected void handleError(ExternalMqttClient client, Publish publish, PublishHandlingResult handlingResult) {
-    super.handleError(client, publish, handlingResult);
+  protected void handleError(ExternalMqttClient client, MqttSession session, Publish publish, PublishHandlingResult handlingResult) {
+    super.handleError(client, session, publish, handlingResult);
     client.send(messageOutFactoryService
         .resolveFactory(client)
         .newPublishReceived(publish.messageId(), handlingResult.receivedReasonCode()));
   }
 
   @Override
-  protected void handleSuccessfulResult(ExternalMqttClient client, Publish publish, int subscribers) {
-    super.handleSuccessfulResult(client, publish, subscribers);
-    MqttSession session = client.session();
-    if (session == null) {
-      return;
-    }
+  protected void handleSuccess(ExternalMqttClient client, MqttSession session, Publish publish, int matchedSubscribers) {
+    super.handleSuccess(client, session, publish, matchedSubscribers);
     session.registerInPublish(publish, pendingMessageHandler);
     client.send(messageOutFactoryService
         .resolveFactory(client)

@@ -6,6 +6,7 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -56,7 +57,7 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
 
   @Override
   protected byte messageFlags() {
-    byte info = (byte) (qos.ordinal() << 0b0110);
+    byte info = (byte) (qos.ordinal() << 1);
     if (retain) {
       info |= 0b0001;
     }

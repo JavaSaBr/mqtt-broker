@@ -123,7 +123,7 @@ public class PublishMqttInMessageHandler
     byte[] payload = publishMessage.payload();
 
     //noinspection DataFlowIssue everything is already validated
-    publishReceivingService.processPublish(client, new Publish(
+    Publish publish = new Publish(
         messageId,
         publishMessage.qos(),
         topicName,
@@ -137,7 +137,9 @@ public class PublishMqttInMessageHandler
         publishMessage.messageExpiryInterval(),
         topicAlias,
         publishMessage.payloadFormat(),
-        publishMessage.userProperties()));
+        publishMessage.userProperties());
+
+    publishReceivingService.processPublish(client, publish);
   }
 
   private boolean validateMessageId(

@@ -33,9 +33,9 @@ public record Publish(
     DebugUtils.registerIncludedFields("topicName", "messageId", "qos", "topicAlias", "payloadFormat");
   }
 
-  public static Publish minimal(QoS qos, TopicName topicName, byte[] payload) {
+  public static Publish minimal(int messageId, QoS qos, TopicName topicName, byte[] payload) {
     return new Publish(
-        MqttProperties.MESSAGE_ID_IS_NOT_SET,
+        messageId,
         qos,
         topicName,
         null,
@@ -49,6 +49,10 @@ public record Publish(
         MqttProperties.TOPIC_ALIAS_NOT_SET,
         PayloadFormat.BINARY,
         EMPTY_USER_PROPERTIES);
+  }
+
+  public static Publish minimal(QoS qos, TopicName topicName, byte[] payload) {
+    return minimal(MqttProperties.MESSAGE_ID_IS_NOT_SET, qos, topicName, payload);
   }
 
   public Publish withDuplicated() {

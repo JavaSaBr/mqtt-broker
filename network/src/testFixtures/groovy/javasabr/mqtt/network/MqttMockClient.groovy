@@ -76,26 +76,19 @@ class MqttMockClient {
     def info = NumberUtils.getLowByteBits(startByte)
     def dataSize = MqttDataUtils.readMbi(received)
 
-    MqttInMessage packet
+    def messageType = MqttMessageType.fromByte(type)
 
-    switch (MqttMessageType.fromByte(type)) {
-      case MqttMessageType.CONNECT_ACK:
-        packet = new ConnectAckMqttInMessage(info)
-        break
-      case MqttMessageType.SUBSCRIBE_ACK:
-        packet = new SubscribeAckMqttInMessage(info)
-        break
-      case MqttMessageType.PUBLISH:
-        packet = new PublishMqttInMessage(info)
-        break
-      case MqttMessageType.PUBLISH_RELEASED:
-        packet = new PublishReleaseMqttInMessage(info)
-        break
-      default:
-        throw new IllegalStateException("Unknown packet of type: $type")
+    MqttInMessage inMessage = switch (messageType) {
+      case MqttMessageType.CONNECT_ACK -> new ConnectAckMqttInMessage(info)
+      case MqttMessageType.SUBSCRIBE_ACK -> new SubscribeAckMqttInMessage(info)
+      case MqttMessageType.PUBLISH -> new PublishMqttInMessage(info)
+      case MqttMessageType.PUBLISH_RELEASED -> new PublishReleaseMqttInMessage(info)
+      default -> {
+        throw new IllegalStateException("Unknown packet of type:$messageType")
+      }
     }
 
-    packet.read(connection, received, dataSize)
+    inMessage.read(connection, received, dataSize)
 
     if (received.hasRemaining()) {
       received.compact()
@@ -103,7 +96,7 @@ class MqttMockClient {
       received.clear()
     }
 
-    return packet
+    return inMessage
   }
 
   def disconnect() {

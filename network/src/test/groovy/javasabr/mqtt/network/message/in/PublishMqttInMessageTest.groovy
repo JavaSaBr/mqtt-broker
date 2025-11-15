@@ -45,7 +45,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR, 1)
           it.putProperty(MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL, messageExpiryInterval)
           it.putProperty(MqttMessageProperty.TOPIC_ALIAS, topicAlias)
-          it.putProperty(MqttMessageProperty.RESPONSE_TOPIC, responseTopic)
+          it.putProperty(MqttMessageProperty.RESPONSE_TOPIC, responseTopic.rawTopic())
           it.putProperty(MqttMessageProperty.CORRELATION_DATA, correlationData)
           it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, subscriptionIds)
@@ -66,7 +66,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         message.qos() == QoS.AT_LEAST_ONCE
         !message.duplicate()
         message.retain()
-        message.rawResponseTopicName() == responseTopic
+        message.rawResponseTopicName() == responseTopic.rawTopic()
         message.subscriptionIds() == subscriptionIds
         message.contentType() == contentType
         message.correlationData() == correlationData
