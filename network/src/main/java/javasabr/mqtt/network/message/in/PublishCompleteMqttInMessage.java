@@ -7,9 +7,9 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -23,7 +23,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PublishCompleteMqttInMessage extends MqttInMessage implements TrackableMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETED.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETE.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "messageId");

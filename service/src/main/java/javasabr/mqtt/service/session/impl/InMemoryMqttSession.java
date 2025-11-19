@@ -5,11 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.ActiveSubscriptions;
+import javasabr.mqtt.model.session.MessageTacker;
+import javasabr.mqtt.model.session.PendingPublishers;
+import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.session.ActiveSubscriptions;
-import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession.UnsafeMqttSession;
-import javasabr.mqtt.network.session.TopicNameMapping;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import lombok.AccessLevel;
@@ -81,6 +82,10 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   @Getter
   final MessageTacker outMessageTracker;
   @Getter
+  final PendingPublishers inPendingPublishers;
+  @Getter
+  final PendingPublishers outPendingPublishers;
+  @Getter
   final ActiveSubscriptions activeSubscriptions;
   @Getter
   final TopicNameMapping topicNameMapping;
@@ -96,6 +101,8 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
     this.messageIdGenerator = new AtomicInteger(0);
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
+    this.inPendingPublishers = new InMemoryPendingPublishers(this);
+    this.outPendingPublishers = new InMemoryPendingPublishers(this);
     this.activeSubscriptions = new InMemoryActiveSubscriptions();
     this.topicNameMapping = new InMemoryTopicNameMapping();
   }

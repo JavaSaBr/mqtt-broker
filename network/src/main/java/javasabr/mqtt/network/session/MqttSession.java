@@ -2,6 +2,10 @@ package javasabr.mqtt.network.session;
 
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.ActiveSubscriptions;
+import javasabr.mqtt.model.session.MessageTacker;
+import javasabr.mqtt.model.session.PendingPublishers;
+import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.network.MqttClient;
 
 public interface MqttSession {
@@ -40,6 +44,9 @@ public interface MqttSession {
 
   MessageTacker inMessageTracker();
   MessageTacker outMessageTracker();
+
+  PendingPublishers inPendingPublishers();
+  PendingPublishers outPendingPublishers();
 
   ActiveSubscriptions activeSubscriptions();
 

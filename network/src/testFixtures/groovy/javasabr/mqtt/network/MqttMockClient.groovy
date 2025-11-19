@@ -1,6 +1,6 @@
 package javasabr.mqtt.network
 
-import javasabr.mqtt.network.message.MqttMessageType
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
 import javasabr.mqtt.network.message.in.MqttInMessage
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
@@ -82,7 +82,7 @@ class MqttMockClient {
       case MqttMessageType.CONNECT_ACK -> new ConnectAckMqttInMessage(info)
       case MqttMessageType.SUBSCRIBE_ACK -> new SubscribeAckMqttInMessage(info)
       case MqttMessageType.PUBLISH -> new PublishMqttInMessage(info)
-      case MqttMessageType.PUBLISH_RELEASED -> new PublishReleaseMqttInMessage(info)
+      case MqttMessageType.PUBLISH_RELEASE -> new PublishReleaseMqttInMessage(info)
       default -> {
         throw new IllegalStateException("Unknown packet of type:$messageType")
       }

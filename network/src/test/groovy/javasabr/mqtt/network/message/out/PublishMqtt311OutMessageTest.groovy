@@ -1,7 +1,7 @@
 package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.network.message.MqttMessageType
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.network.message.in.PublishMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
 import javasabr.rlib.common.util.NumberUtils

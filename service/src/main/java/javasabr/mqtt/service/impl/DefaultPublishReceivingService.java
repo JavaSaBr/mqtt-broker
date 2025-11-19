@@ -55,6 +55,7 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
     }
   }
 
+
   private static String buildServiceDescription(
       @Nullable MqttPublishInMessageHandler[] publishInMessageHandlers) {
     var builder = new StringBuilder();

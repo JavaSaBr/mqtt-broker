@@ -242,13 +242,13 @@ public abstract class MqttMessageOutFactory {
   }
 
   public abstract MqttOutMessage newPublishReceived(
-      int packetId,
+      int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason);
 
-  public MqttOutMessage newPublishReceived(int packetId, PublishReceivedReasonCode reasonCode) {
-    return newPublishReceived(packetId, reasonCode, EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
+  public MqttOutMessage newPublishReceived(int messageId, PublishReceivedReasonCode reasonCode) {
+    return newPublishReceived(messageId, reasonCode, EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
   }
 
   public abstract MqttOutMessage newPublishCompleted(

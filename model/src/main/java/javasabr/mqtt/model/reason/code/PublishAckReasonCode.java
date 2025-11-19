@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum PublishAckReasonCode {
+public enum PublishAckReasonCode implements ReasonCode {
   /**
    * The message is accepted. Publication of the QoS 1 message proceeds.
    */

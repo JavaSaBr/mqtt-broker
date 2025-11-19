@@ -7,17 +7,17 @@ import java.util.Set;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
+import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.subscribtion.RequestedSubscription;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -65,13 +65,13 @@ public class SubscribeMqttInMessageHandler extends
     MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     int messageId = subscribeMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
-    if (messageTacker.isInUse(messageId)) {
+    if (messageTacker.stored(messageId) != null) {
       log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
       handleMessageIdIsInUse(client, subscribeMessage);
       return;
     }
 
-    messageTacker.add(subscribeMessage.messageId());
+    messageTacker.add(subscribeMessage.messageId(), MqttMessageType.SUBSCRIBE);
 
     int subscriptionId = subscribeMessage.subscriptionId();
     if (subscriptionId != MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET) {

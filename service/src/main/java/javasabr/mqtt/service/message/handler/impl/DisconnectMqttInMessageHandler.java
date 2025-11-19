@@ -1,9 +1,9 @@
 package javasabr.mqtt.service.message.handler.impl;
 
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.DisconnectMqttInMessage;
 import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;

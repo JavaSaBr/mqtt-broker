@@ -9,6 +9,7 @@ public interface MqttProtocolErrors {
   String INVALID_RESPONSE_TOPIC_NAME = "Provided invalid ResponseTopicName";
   String UNSUPPORTED_QOS_OR_RETAIN_HANDLING = "Unsupported 'QoS' or 'RetainHandling'";
   String MISSED_REQUIRED_MESSAGE_ID = "'Packet Identifier' must be presented'";
+  String NOT_EXPECTED_MESSAGE_ID = "'Packet Identifier' must be zero'";
   String PROTOCOL_LEVEL_UNSUPPORTED_NO_LOCAL_OPTION = "'NoLocal' option is not available on this protocol level";
   String PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_AS_PUBLISH_OPTION = "'RetainAsPublished' option is not available on this protocol level";
   String PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_HANDLING_OPTION = "'RetainHandling' option is not available on this protocol level";

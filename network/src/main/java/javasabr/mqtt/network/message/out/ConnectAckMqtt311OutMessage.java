@@ -2,9 +2,9 @@ package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

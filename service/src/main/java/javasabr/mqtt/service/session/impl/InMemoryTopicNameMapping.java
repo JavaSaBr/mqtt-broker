@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.session.impl;
 
 import java.util.concurrent.locks.StampedLock;
+import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.network.session.TopicNameMapping;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
 import lombok.AccessLevel;
