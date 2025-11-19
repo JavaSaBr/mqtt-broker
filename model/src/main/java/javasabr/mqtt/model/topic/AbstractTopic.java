@@ -41,7 +41,7 @@ public abstract class AbstractTopic {
     return segments.length;
   }
 
-  String lastSegment() {
+  public String lastSegment() {
     return segments[segments.length - 1];
   }
 

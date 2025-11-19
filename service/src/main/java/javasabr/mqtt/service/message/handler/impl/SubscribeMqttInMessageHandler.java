@@ -194,23 +194,27 @@ public class SubscribeMqttInMessageHandler extends
       RequestedSubscription requestedSubscription = subscriptions.get(i);
       SubscribeAckReasonCode subscribeAckReasonCode = subscribeResults.get(i);
       Subscription subscription = subs.get(i);
-      if (subscribeAckReasonCode.ordinal() < 3) {
-        TopicFilter topicFilter = TopicFilter.valueOf(requestedSubscription.rawTopicFilter());
-        SingleSubscriber singleSubscriber = new SingleSubscriber(client, subscription);
-        PublishHandlingResult result = publishDeliveringService.deliverRetainedMessages(topicFilter, singleSubscriber);
+      if (subscribeAckReasonCode.ordinal() > 2) {
+        // TODO handle error
+        continue;
+      }
+      TopicFilter topicFilter = TopicFilter.valueOf(requestedSubscription.rawTopicFilter());
+      SingleSubscriber singleSubscriber = new SingleSubscriber(client, subscription);
+      var results = publishDeliveringService.deliverRetainedMessages(topicFilter, singleSubscriber);
+      for (PublishHandlingResult result : results) {
         if (result.error()) {
           errorResult = result;
-        } else if(result == PublishHandlingResult.SUCCESS) {
+        } else if (result == PublishHandlingResult.SUCCESS) {
           count++;
         }
         if (errorResult != null) {
           log.debug(client.clientId(), errorResult,
               "[%s] Found final error:[%s] during sending retained messages"::formatted);
-          // handleError(client, publish, errorResult);
+          // TODO handleError(client, publish, errorResult);
         } else {
           log.debug(client.clientId(), count,
               "[%s] Successfully started delivering retained messages to [%s] subscribers"::formatted);
-          // handleSuccessfulResult(client, publish, count);
+          // TODO handleSuccessfulResult(client, publish, count);
         }
       }
     }

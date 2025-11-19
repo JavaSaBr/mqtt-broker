@@ -9,6 +9,8 @@ import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +22,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
 
   @Nullable
   MqttPublishOutMessageHandler[] publishOutMessageHandlers;
-  ConcurrentRetainedMessageTree topicTree;
+  ConcurrentRetainedMessageTree retainedMessageTree;
 
   public DefaultPublishDeliveringService(
       Collection<? extends MqttPublishOutMessageHandler> knownPublishOutHandlers) {
@@ -42,7 +44,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
       }
       handlers[qos.level()] = knownPublishOutHandler;
     }
-    this.topicTree = new ConcurrentRetainedMessageTree();
+    this.retainedMessageTree = new ConcurrentRetainedMessageTree();
     this.publishOutMessageHandlers = handlers;
     log.info(publishOutMessageHandlers, DefaultPublishDeliveringService::buildServiceDescription);
   }
@@ -50,9 +52,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   @Override
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
     try {
-      if (publish.retained()) {
-        topicTree.retainMessage(publish);
-      }
+      retainedMessageTree.retainMessage(publish);
       //noinspection DataFlowIssue
       return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
@@ -62,9 +62,13 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   }
 
   @Override
-  public PublishHandlingResult deliverRetainedMessages(TopicFilter topicFilter, SingleSubscriber subscriber) {
-    Publish retainedMessage = topicTree.getRetainedMessage(topicFilter);
-    return startDelivering(retainedMessage, subscriber);
+  public Array<PublishHandlingResult> deliverRetainedMessages(TopicFilter topicFilter, SingleSubscriber subscriber) {
+    Array<Publish> retainedMessage = retainedMessageTree.getRetainedMessage(topicFilter);
+    MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
+    for (Publish message : retainedMessage) {
+      result.add(startDelivering(message, subscriber));
+    }
+    return result;
   }
 
   private static String buildServiceDescription(
