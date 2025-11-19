@@ -5,6 +5,7 @@ import java.util.Collection;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
 import javasabr.mqtt.network.MqttClientFactory;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
@@ -178,8 +179,9 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler subscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
-    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
+      TopicService topicService,
+      PublishDeliveringService publishDeliveringService) {
+    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService, publishDeliveringService);
   }
 
   @Bean

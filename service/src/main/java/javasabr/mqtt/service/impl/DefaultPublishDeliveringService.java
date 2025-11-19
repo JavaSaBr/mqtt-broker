@@ -4,6 +4,8 @@ import java.util.Collection;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -18,6 +20,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
 
   @Nullable
   MqttPublishOutMessageHandler[] publishOutMessageHandlers;
+  ConcurrentRetainedMessageTree topicTree;
 
   public DefaultPublishDeliveringService(
       Collection<? extends MqttPublishOutMessageHandler> knownPublishOutHandlers) {
@@ -39,7 +42,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
       }
       handlers[qos.level()] = knownPublishOutHandler;
     }
-
+    this.topicTree = new ConcurrentRetainedMessageTree();
     this.publishOutMessageHandlers = handlers;
     log.info(publishOutMessageHandlers, DefaultPublishDeliveringService::buildServiceDescription);
   }
@@ -47,12 +50,21 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   @Override
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
     try {
+      if (publish.retained()) {
+        topicTree.retainMessage(publish);
+      }
       //noinspection DataFlowIssue
       return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
       return PublishHandlingResult.UNSPECIFIED_ERROR;
     }
+  }
+
+  @Override
+  public PublishHandlingResult deliverRetainedMessages(TopicFilter topicFilter, SingleSubscriber subscriber) {
+    Publish retainedMessage = topicTree.getRetainedMessage(topicFilter);
+    return startDelivering(retainedMessage, subscriber);
   }
 
   private static String buildServiceDescription(

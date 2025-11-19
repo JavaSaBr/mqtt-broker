@@ -6,6 +6,7 @@ import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscribtion.Subscription
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner
+import javasabr.mqtt.model.subscribtion.tree.ConcurrentSubscriptionTree
 import javasabr.mqtt.model.subscription.TestSubscriptionOwner
 import javasabr.mqtt.model.topic.SharedTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter
@@ -20,7 +21,7 @@ class TopicTreeTest extends UnitSpecification {
       String topicName,
       List<SubscriptionOwner> expectedOwners) {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           topicTree.subscribe(owners.get(i), subscription)
         }
@@ -108,7 +109,7 @@ class TopicTreeTest extends UnitSpecification {
       String topicName,
       List<SubscriptionOwner> expectedOwners) {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           topicTree.subscribe(owners.get(i), subscription)
         }
@@ -213,7 +214,7 @@ class TopicTreeTest extends UnitSpecification {
       String topicName,
       List<SubscriptionOwner> expectedOwners) {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           topicTree.subscribe(owners.get(i), subscription)
         }
@@ -327,7 +328,7 @@ class TopicTreeTest extends UnitSpecification {
       String topicName,
       List<SingleSubscriber> expectedSubscribers) {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           topicTree.subscribe(owners.get(i), subscription)
         }
@@ -434,7 +435,7 @@ class TopicTreeTest extends UnitSpecification {
     given:
         def group1 = ["id1", "id2", "id3", "id4", "id5"]
         def group2 = ["id6", "id7", "id8", "id9", "id10"]
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         topicTree.subscribe(makeOwner("id1"), makeSharedSubscription('$share/group1/topic/name1'))
         topicTree.subscribe(makeOwner("id2"), makeSharedSubscription('$share/group1/topic/name1'))
         topicTree.subscribe(makeOwner("id3"), makeSharedSubscription('$share/group1/topic/name1'))
@@ -467,7 +468,7 @@ class TopicTreeTest extends UnitSpecification {
 
   def "should subscribe and unsubscribe simple topic correctly correctly"() {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         topicTree.subscribe(makeOwner("id1"), makeSubscription('topic/name1'))
         topicTree.subscribe(makeOwner("id2"), makeSubscription('topic/name1'))
         topicTree.subscribe(makeOwner("id3"), makeSubscription('topic/name1'))
@@ -504,7 +505,7 @@ class TopicTreeTest extends UnitSpecification {
 
   def "should subscribe and unsubscribe shared topic correctly correctly"() {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         topicTree.subscribe(makeOwner("id1"), makeSharedSubscription('$share/group1/topic/name1'))
         topicTree.subscribe(makeOwner("id2"), makeSharedSubscription('$share/group1/topic/name1'))
         topicTree.subscribe(makeOwner("id3"), makeSharedSubscription('$share/group1/topic/name1'))
@@ -541,7 +542,7 @@ class TopicTreeTest extends UnitSpecification {
 
   def "should replace the same subscriptions"() {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         def owner1 = makeOwner("id1")
         def originalSub = makeSubscription('topic/name1')
         def replacementSub = makeSubscription('topic/name1')
@@ -569,7 +570,7 @@ class TopicTreeTest extends UnitSpecification {
 
   def "should extend shared subscription group on multiply subscribing by the same topic"() {
     given:
-        ConcurrentTopicTree topicTree = new ConcurrentTopicTree()
+        ConcurrentSubscriptionTree topicTree = new ConcurrentSubscriptionTree()
         def owner1 = makeOwner("id1")
         def owner2 = makeOwner("id2")
         topicTree.subscribe(owner1, makeSharedSubscription('$share/group1/topic/name1'))

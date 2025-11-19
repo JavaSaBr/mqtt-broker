@@ -12,7 +12,7 @@ import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.model.topic.tree.ConcurrentTopicTree;
+import javasabr.mqtt.model.subscribtion.tree.ConcurrentSubscriptionTree;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.session.ActiveSubscriptions;
 import javasabr.mqtt.network.session.MqttSession;
@@ -25,16 +25,16 @@ import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 
 /**
- * In memory subscription service based on {@link ConcurrentTopicTree}
+ * In memory subscription service based on {@link ConcurrentSubscriptionTree}
  */
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
-  ConcurrentTopicTree topicTree;
+  ConcurrentSubscriptionTree topicTree;
 
   public InMemorySubscriptionService() {
-    this.topicTree = new ConcurrentTopicTree();
+    this.topicTree = new ConcurrentSubscriptionTree();
   }
 
   @Override

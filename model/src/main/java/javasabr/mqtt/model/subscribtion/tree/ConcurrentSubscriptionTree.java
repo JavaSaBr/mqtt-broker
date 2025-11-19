@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.topic.tree;
+package javasabr.mqtt.model.subscribtion.tree;
 
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscribtion.Subscription;
@@ -13,12 +13,12 @@ import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ConcurrentTopicTree implements ThreadSafe {
+public class ConcurrentSubscriptionTree implements ThreadSafe {
 
-  TopicNode rootNode;
+  TopicFilterNode rootNode;
 
-  public ConcurrentTopicTree() {
-    this.rootNode = new TopicNode();
+  public ConcurrentSubscriptionTree() {
+    this.rootNode = new TopicFilterNode();
   }
 
   @Nullable
