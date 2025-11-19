@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.subscribtion.tree;
+package javasabr.mqtt.model.subscriber.tree;
 
 import java.util.Objects;
 import javasabr.mqtt.model.QoS;
@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-abstract class TopicFilterTreeBase {
+abstract class SubscriberTreeBase {
 
   /**
    * @return previous subscriber with the same owner
@@ -66,7 +66,7 @@ abstract class TopicFilterTreeBase {
     String group = sharedTopicFilter.shareName();
     SharedSubscriber sharedSubscriber = (SharedSubscriber) subscribers
         .iterations()
-        .findAny(group, TopicFilterTreeBase::isSharedSubscriberWithGroup);
+        .findAny(group, SubscriberTreeBase::isSharedSubscriberWithGroup);
 
     if (sharedSubscriber == null) {
       sharedSubscriber = new SharedSubscriber(sharedTopicFilter);
@@ -76,8 +76,8 @@ abstract class TopicFilterTreeBase {
     sharedSubscriber.addSubscriber(new SingleSubscriber(owner, subscription));
   }
 
-  protected static void appendSubscribersTo(MutableArray<SingleSubscriber> result, TopicFilterNode topicFilterNode) {
-    LockableArray<Subscriber> subscribers = topicFilterNode.subscribers();
+  protected static void appendSubscribersTo(MutableArray<SingleSubscriber> result, SubscriberNode subscriberNode) {
+    LockableArray<Subscriber> subscribers = subscriberNode.subscribers();
     if (subscribers == null) {
       return;
     }
@@ -125,7 +125,7 @@ abstract class TopicFilterTreeBase {
     String group = sharedTopicFilter.shareName();
     SharedSubscriber sharedSubscriber = (SharedSubscriber) subscribers
         .iterations()
-        .findAny(group, TopicFilterTreeBase::isSharedSubscriberWithGroup);
+        .findAny(group, SubscriberTreeBase::isSharedSubscriberWithGroup);
     if (sharedSubscriber != null) {
       boolean removed = sharedSubscriber.removeSubscriberWithOwner(owner);
       if (sharedSubscriber.isEmpty()) {
