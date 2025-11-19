@@ -31,10 +31,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
-  ConcurrentSubscriberTree topicTree;
+  ConcurrentSubscriberTree subscriberTree;
 
   public InMemorySubscriptionService() {
-    this.topicTree = new ConcurrentSubscriberTree();
+    this.subscriberTree = new ConcurrentSubscriberTree();
   }
 
   @Override
@@ -47,7 +47,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public Array<SingleSubscriber> findSubscribersTo(MutableArray<SingleSubscriber> container, TopicName topicName) {
-    Array<SingleSubscriber> matched = topicTree.matches(topicName);
+    Array<SingleSubscriber> matched = subscriberTree.matches(topicName);
     container.addAll(matched);
     return container;
   }
@@ -80,7 +80,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber previous = topicTree.subscribe(client, subscription);
+    SingleSubscriber previous = subscriberTree.subscribe(client, subscription);
     if (previous != null) {
       activeSubscriptions.remove(previous.subscription());
     }
@@ -108,7 +108,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttSession session, TopicFilter topicFilter) {
     if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
-    } else if (topicTree.unsubscribe(client, topicFilter)) {
+    } else if (subscriberTree.unsubscribe(client, topicFilter)) {
       session
           .activeSubscriptions()
           .removeByTopicFilter(topicFilter);
@@ -124,7 +124,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      topicTree.unsubscribe(client, subscription.topicFilter());
+      subscriberTree.unsubscribe(client, subscription.topicFilter());
     }
   }
 
@@ -134,7 +134,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      topicTree.subscribe(client, subscription);
+      subscriberTree.subscribe(client, subscription);
     }
   }
 }
