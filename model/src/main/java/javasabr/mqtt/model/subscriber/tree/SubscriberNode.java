@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.topic.tree;
+package javasabr.mqtt.model.subscriber.tree;
 
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
@@ -22,16 +22,16 @@ import org.jspecify.annotations.Nullable;
 @Getter(AccessLevel.PACKAGE)
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-class TopicNode extends TopicTreeBase {
+class SubscriberNode extends SubscriberTreeBase {
 
-  private final static Supplier<TopicNode> TOPIC_NODE_FACTORY = TopicNode::new;
+  private final static Supplier<SubscriberNode> SUBSCRIBER_NODE_FACTORY = SubscriberNode::new;
 
   static {
     DebugUtils.registerIncludedFields("childNodes", "subscribers");
   }
 
   @Nullable
-  volatile LockableRefToRefDictionary<String, TopicNode> childNodes;
+  volatile LockableRefToRefDictionary<String, SubscriberNode> childNodes;
   @Nullable
   volatile LockableArray<Subscriber> subscribers;
 
@@ -43,7 +43,7 @@ class TopicNode extends TopicTreeBase {
     if (level == topicFilter.levelsCount()) {
       return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
-    TopicNode childNode = getOrCreateChildNode(topicFilter.segment(level));
+    SubscriberNode childNode = getOrCreateChildNode(topicFilter.segment(level));
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
@@ -51,7 +51,7 @@ class TopicNode extends TopicTreeBase {
     if (level == topicFilter.levelsCount()) {
       return removeSubscriber(subscribers(), owner, topicFilter);
     }
-    TopicNode childNode = getOrCreateChildNode(topicFilter.segment(level));
+    SubscriberNode childNode = getOrCreateChildNode(topicFilter.segment(level));
     return childNode.unsubscribe(level + 1, owner, topicFilter);
   }
 
@@ -67,14 +67,14 @@ class TopicNode extends TopicTreeBase {
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
     String segment = topicName.segment(level);
-    TopicNode topicNode = childNode(segment);
-    if (topicNode == null) {
+    SubscriberNode subscriberNode = childNode(segment);
+    if (subscriberNode == null) {
       return;
     }
     if (level == lastLevel) {
-      appendSubscribersTo(result, topicNode);
+      appendSubscribersTo(result, subscriberNode);
     } else if (level < lastLevel) {
-      topicNode.matchesTo(level + 1, topicName, lastLevel, result);
+      subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
     }
   }
 
@@ -83,31 +83,31 @@ class TopicNode extends TopicTreeBase {
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-    TopicNode topicNode = childNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
-    if (topicNode == null) {
+    SubscriberNode subscriberNode = childNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
+    if (subscriberNode == null) {
       return;
     }
     if (level == lastLevel) {
-      appendSubscribersTo(result, topicNode);
+      appendSubscribersTo(result, subscriberNode);
     } else if (level < lastLevel) {
-      topicNode.matchesTo(level + 1, topicName, lastLevel, result);
+      subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
     }
   }
 
   private void multiWildcardTopicMatch(MutableArray<SingleSubscriber> result) {
-    TopicNode topicNode = childNode(TopicFilter.MULTI_LEVEL_WILDCARD);
-    if (topicNode != null) {
-      appendSubscribersTo(result, topicNode);
+    SubscriberNode subscriberNode = childNode(TopicFilter.MULTI_LEVEL_WILDCARD);
+    if (subscriberNode != null) {
+      appendSubscribersTo(result, subscriberNode);
     }
   }
 
-  private TopicNode getOrCreateChildNode(String segment) {
-    LockableRefToRefDictionary<String, TopicNode> childNodes = getOrCreateChildNodes();
+  private SubscriberNode getOrCreateChildNode(String segment) {
+    LockableRefToRefDictionary<String, SubscriberNode> childNodes = getOrCreateChildNodes();
     long stamp = childNodes.readLock();
     try {
-      TopicNode topicNode = childNodes.get(segment);
-      if (topicNode != null) {
-        return topicNode;
+      SubscriberNode subscriberNode = childNodes.get(segment);
+      if (subscriberNode != null) {
+        return subscriberNode;
       }
     } finally {
       childNodes.readUnlock(stamp);
@@ -115,15 +115,15 @@ class TopicNode extends TopicTreeBase {
     stamp = childNodes.writeLock();
     try {
       //noinspection DataFlowIssue
-      return childNodes.getOrCompute(segment, TOPIC_NODE_FACTORY);
+      return childNodes.getOrCompute(segment, SUBSCRIBER_NODE_FACTORY);
     } finally {
       childNodes.writeUnlock(stamp);
     }
   }
 
   @Nullable
-  private TopicNode childNode(String segment) {
-    LockableRefToRefDictionary<String, TopicNode> childNodes = childNodes();
+  private SubscriberNode childNode(String segment) {
+    LockableRefToRefDictionary<String, SubscriberNode> childNodes = childNodes();
     if (childNodes == null) {
       return null;
     }
@@ -135,7 +135,7 @@ class TopicNode extends TopicTreeBase {
     }
   }
 
-  private LockableRefToRefDictionary<String, TopicNode> getOrCreateChildNodes() {
+  private LockableRefToRefDictionary<String, SubscriberNode> getOrCreateChildNodes() {
     if (childNodes == null) {
       synchronized (this) {
         if (childNodes == null) {
