@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
-import javasabr.mqtt.model.subscriber.tree.SubscriberTreeBase;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -44,7 +43,6 @@ class SubscriberNode extends SubscriberTreeBase {
     if (level == topicFilter.levelsCount()) {
       return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
-
     SubscriberNode childNode = getOrCreateChildNode(topicFilter.segment(level));
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
@@ -53,7 +51,6 @@ class SubscriberNode extends SubscriberTreeBase {
     if (level == topicFilter.levelsCount()) {
       return removeSubscriber(subscribers(), owner, topicFilter);
     }
-
     SubscriberNode childNode = getOrCreateChildNode(topicFilter.segment(level));
     return childNode.unsubscribe(level + 1, owner, topicFilter);
   }
@@ -86,7 +83,6 @@ class SubscriberNode extends SubscriberTreeBase {
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-
     SubscriberNode subscriberNode = childNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
     if (subscriberNode == null) {
       return;
@@ -99,7 +95,6 @@ class SubscriberNode extends SubscriberTreeBase {
   }
 
   private void multiWildcardTopicMatch(MutableArray<SingleSubscriber> result) {
-
     SubscriberNode subscriberNode = childNode(TopicFilter.MULTI_LEVEL_WILDCARD);
     if (subscriberNode != null) {
       appendSubscribersTo(result, subscriberNode);

@@ -11,9 +11,9 @@ import lombok.experimental.FieldDefaults;
 public class TopicFilter extends AbstractTopic {
 
   public static final String MULTI_LEVEL_WILDCARD = "#";
-  public static final char MULTI_LEVEL_WILDCARD_CHAR = MULTI_LEVEL_WILDCARD.charAt(0);
+  public static final char MULTI_LEVEL_WILDCARD_CHAR = '#';
   public static final String SINGLE_LEVEL_WILDCARD = "+";
-  public static final char SINGLE_LEVEL_WILDCARD_CHAR = SINGLE_LEVEL_WILDCARD.charAt(0);
+  public static final char SINGLE_LEVEL_WILDCARD_CHAR = '+';
   public static final String SPECIAL = "$";
 
   public static final TopicFilter INVALID_TOPIC_FILTER = new TopicFilter("$invalid$") {

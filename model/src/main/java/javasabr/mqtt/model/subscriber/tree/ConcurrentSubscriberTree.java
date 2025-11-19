@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-
 public class ConcurrentSubscriberTree implements ThreadSafe {
 
   SubscriberNode rootNode;
