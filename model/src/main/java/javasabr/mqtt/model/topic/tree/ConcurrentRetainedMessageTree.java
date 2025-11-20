@@ -25,7 +25,7 @@ public class ConcurrentRetainedMessageTree implements ThreadSafe {
 
   public Array<Publish> getRetainedMessage(TopicFilter topicFilter) {
     var resultArray = MutableArray.ofType(Publish.class);
-    rootNode.collectRetainedMessages(0, topicFilter, topicFilter.levelsCount() - 1, resultArray);
+    rootNode.collectRetainedMessages(0, topicFilter, resultArray);
     return resultArray;
   }
 }

@@ -3,6 +3,7 @@ package javasabr.mqtt.model.topic.tree;
 import static javasabr.mqtt.model.topic.TopicFilter.MULTI_LEVEL_WILDCARD;
 import static javasabr.mqtt.model.topic.TopicFilter.SINGLE_LEVEL_WILDCARD;
 
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -37,19 +38,22 @@ class RetainedMessageNode {
   final AtomicReference<@Nullable Publish> retainedMessage = new AtomicReference<>();
 
   public void retainMessage(int level, Publish message, TopicName topicName) {
-    if (level + 1 == topicName.levelsCount()) {
-      retainedMessage.set(message.payload().length == 0 ? null : message);
-      return;
+    var child = getOrCreateChildNode(topicName.segment(level));
+    boolean isLeaf = (level + 1 == topicName.levelsCount());
+    if (isLeaf) {
+      if (Objects.equals(message.topicName().lastSegment(), topicName.lastSegment())) {
+        child.retainedMessage.set(message.payload().length == 0 ? null : message);
+      }
+    } else {
+      child.retainMessage(level + 1, message, topicName);
     }
-    RetainedMessageNode childNode = getOrCreateChildNode(topicName.segment(level));
-    childNode.retainMessage(level + 1, message, topicName);
   }
 
-  public void collectRetainedMessages(int level, TopicFilter topicFilter, int lastLevel, MutableArray<Publish> result) {
+  public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
     String segment = topicFilter.segment(level);
-    Publish publish = retainedMessage.get();
     if (Objects.equals(segment, MULTI_LEVEL_WILDCARD)) {
       collectAllMessages(this, result);
+      return;
     } else if (Objects.equals(segment, SINGLE_LEVEL_WILDCARD)) {
       var childNodes = childNodes();
       if (childNodes == null) {
@@ -57,25 +61,32 @@ class RetainedMessageNode {
       }
       long stamp = childNodes.readLock();
       try {
-        for (RetainedMessageNode n : childNodes) {
-          n.collectRetainedMessages(level + 1, topicFilter, lastLevel, result);
+        for (RetainedMessageNode childNode : childNodes) {
+          childNode.collectRetainedMessages(level + 1, topicFilter, result);
         }
       } finally {
         childNodes.readUnlock(stamp);
       }
-    } else if (level == lastLevel && publish != null && Objects.equals(segment, publish.topicName().lastSegment())) {
-      result.add(publish);
-    } else {
-      RetainedMessageNode topicFilterNode = childNode(segment);
-      if (topicFilterNode == null) {
-        return;
+      return;
+    }
+    int lastLevel = topicFilter.levelsCount() - 1;
+    RetainedMessageNode retainedMessageNode = childNode(segment);
+    if (retainedMessageNode == null || level > lastLevel) {
+      return;
+    }
+    boolean isLeaf = (level == lastLevel);
+    if (isLeaf) {
+      Publish publish = retainedMessageNode.retainedMessage.get();
+      if(publish != null && Objects.equals(segment, publish.topicName().lastSegment())){
+        result.add(publish);
       }
-      topicFilterNode.collectRetainedMessages(level + 1, topicFilter, lastLevel, result);
+    } else {
+      retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
     }
   }
 
   private void collectAllMessages(RetainedMessageNode node, MutableArray<Publish> result) {
-    Queue<RetainedMessageNode> queue = new PriorityQueue<>();
+    Queue<RetainedMessageNode> queue = new LinkedList<>();
     queue.add(node);
     while (!queue.isEmpty()) {
       RetainedMessageNode poll = queue.poll();
