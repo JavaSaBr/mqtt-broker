@@ -99,8 +99,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService() {
-    return new InMemorySubscriptionService();
+  SubscriptionService subscriptionService(PublishDeliveringService publishDeliveringService) {
+    return new InMemorySubscriptionService(publishDeliveringService);
   }
 
   @Bean
@@ -179,9 +179,8 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler subscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService,
-      PublishDeliveringService publishDeliveringService) {
-    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService, publishDeliveringService);
+      TopicService topicService) {
+    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
   }
 
   @Bean

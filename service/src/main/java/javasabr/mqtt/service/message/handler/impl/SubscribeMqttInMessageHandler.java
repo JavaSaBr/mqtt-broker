@@ -9,7 +9,6 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
-import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscribtion.RequestedSubscription;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -21,10 +20,8 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -41,19 +38,16 @@ public class SubscribeMqttInMessageHandler extends
       SHARED_SUBSCRIPTIONS_NOT_SUPPORTED,
       WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
 
-  PublishDeliveringService publishDeliveringService;
   SubscriptionService subscriptionService;
   TopicService topicService;
 
   public SubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService,
-      PublishDeliveringService publishDeliveringService) {
+      TopicService topicService) {
     super(ExternalMqttClient.class, SubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
     this.topicService = topicService;
-    this.publishDeliveringService = publishDeliveringService;
   }
 
   @Override
@@ -98,7 +92,6 @@ public class SubscribeMqttInMessageHandler extends
         .subscribe(client, session, subscriptions);
 
     sendSubscribeResults(client, session, subscribeMessage, subscribeResults);
-    sendRetainedMessages(client, subscribeMessage, subscribeResults, subscriptions);
 
     SubscribeAckReasonCode anyReasonToDisconnect = subscribeResults
         .iterations()
@@ -180,43 +173,5 @@ public class SubscribeMqttInMessageHandler extends
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
-  }
-
-  private void sendRetainedMessages(
-      ExternalMqttClient client,
-      SubscribeMqttInMessage subscribeMessage,
-      Array<SubscribeAckReasonCode> subscribeResults,
-      Array<Subscription> subs) {
-    int count = 0;
-    PublishHandlingResult errorResult = null;
-    Array<RequestedSubscription> subscriptions = subscribeMessage.subscriptions();
-    for (int i = 0; i < subscribeMessage.subscriptionsCount(); i++) {
-      RequestedSubscription requestedSubscription = subscriptions.get(i);
-      SubscribeAckReasonCode subscribeAckReasonCode = subscribeResults.get(i);
-      Subscription subscription = subs.get(i);
-      if (subscribeAckReasonCode.ordinal() > 2) {
-        // TODO handle error
-        continue;
-      }
-      TopicFilter topicFilter = TopicFilter.valueOf(requestedSubscription.rawTopicFilter());
-      SingleSubscriber singleSubscriber = new SingleSubscriber(client, subscription);
-      var results = publishDeliveringService.deliverRetainedMessages(topicFilter, singleSubscriber);
-      for (PublishHandlingResult result : results) {
-        if (result.error()) {
-          errorResult = result;
-        } else if (result == PublishHandlingResult.SUCCESS) {
-          count++;
-        }
-        if (errorResult != null) {
-          log.debug(client.clientId(), errorResult,
-              "[%s] Found final error:[%s] during sending retained messages"::formatted);
-          // TODO handleError(client, publish, errorResult);
-        } else {
-          log.debug(client.clientId(), count,
-              "[%s] Successfully started delivering retained messages to [%s] subscribers"::formatted);
-          // TODO handleSuccessfulResult(client, publish, count);
-        }
-      }
-    }
   }
 }

@@ -1,5 +1,7 @@
 package javasabr.mqtt.service.impl;
 
+import static javasabr.mqtt.model.SubscribeRetainHandling.SEND;
+import static javasabr.mqtt.model.SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 
@@ -8,15 +10,17 @@ import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.session.ActiveSubscriptions;
 import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -31,10 +35,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
+  PublishDeliveringService publishDeliveringService;
   ConcurrentSubscriberTree subscriberTree;
 
-  public InMemorySubscriptionService() {
+  public InMemorySubscriptionService(PublishDeliveringService publishDeliveringService) {
     this.subscriberTree = new ConcurrentSubscriberTree();
+    this.publishDeliveringService = publishDeliveringService;
   }
 
   @Override
@@ -83,6 +89,10 @@ public class InMemorySubscriptionService implements SubscriptionService {
     SingleSubscriber previous = subscriberTree.subscribe(client, subscription);
     if (previous != null) {
       activeSubscriptions.remove(previous.subscription());
+    }
+    if ((subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous != null)
+        || subscription.retainHandling() == SEND) {
+      sendRetainedMessages(client, subscription);
     }
     activeSubscriptions.add(subscription);
     return subscription.qos().subscribeAckReasonCode();
@@ -135,6 +145,41 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .subscriptions();
     for (Subscription subscription : subscriptions) {
       subscriberTree.subscribe(client, subscription);
+    }
+  }
+
+  private void sendRetainedMessages(MqttClient client, Subscription subscription) {
+    int count = 0;
+    PublishHandlingResult errorResult = null;
+    if (subscription
+        .qos()
+        .subscribeAckReasonCode()
+        .ordinal() > 2) {
+      // TODO handle error ?
+      return;
+    }
+    SingleSubscriber singleSubscriber = new SingleSubscriber(client, subscription);
+    var results = publishDeliveringService.deliverRetainedMessages(subscription.topicFilter(), singleSubscriber);
+    for (PublishHandlingResult result : results) {
+      if (result.error()) {
+        errorResult = result;
+      } else if (result == PublishHandlingResult.SUCCESS) {
+        count++;
+      }
+      if (errorResult != null) {
+        log.debug(
+            client.clientId(),
+            errorResult,
+            "[%s] Found final error:[%s] during sending retained messages"::formatted);
+        // TODO handleError(client, publish, errorResult);
+      } else {
+        log.debug(
+            client.clientId(),
+            count,
+            "[%s] Successfully started delivering retained messages to [%s] subscribers"::formatted);
+        // TODO handleSuccessfulResult(client, publish, count);
+      }
+
     }
   }
 }
