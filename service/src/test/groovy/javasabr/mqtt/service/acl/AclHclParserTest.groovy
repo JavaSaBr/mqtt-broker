@@ -1,31 +1,33 @@
 package javasabr.mqtt.service.acl
 
+import javasabr.mqtt.model.acl.AclRoot
 import javasabr.mqtt.test.support.UnitSpecification
 
 class AclHclParserTest extends UnitSpecification {
 
-  def "should parse HCL-file"() {
+  def "should parse Groovy DSL config"() {
     given:
-        def aclConfigFile = "acl.hcl";
+        def aclConfigFile = "acl.groovy";
     when:
-        def parsedConfig = AclHclParser.parse(aclConfigFile)
+        AclRoot root = AclDslMapper.load(aclConfigFile)
     then:
-        parsedConfig.get("acl") != null
-        parsedConfig.get("acl").get("version") == 1.0
+        root != null
+        root.acl() != null
+        root.acl().version() == 1
 
-        parsedConfig.get("user") != null
-        parsedConfig.get("user").get("dashboard") != null
-        parsedConfig.get("user").get("sensor1") != null
+        root.user() != null
+        root.user().size() == 2
+        root.user()[0].name() == "dashboard"
+        root.user()[1].name() == "sensor1"
 
-        parsedConfig.get("group") != null
-        parsedConfig.get("group").get("admins") != null
-        parsedConfig.get("group").get("sensors") != null
+        root.group() != null
+        root.group().size() == 2
+        root.group()[0].name() == "admins"
+        root.group()[1].name() == "sensors"
 
-        parsedConfig.get("rule") != null
-        parsedConfig.get("rule").get("sys_dashboard_sub") != null
-        parsedConfig.get("rule").get("sys_dashboard_sub_2") != null
-        parsedConfig.get("rule").get("pub_temperature") != null
-        parsedConfig.get("rule").get("ip_pubsub") != null
-        parsedConfig.get("rule").get("deny_all_sys_and_hash_sub") != null
+        root.rule() != null
+        root.rule().size() == 2
+        root.rule()[0].name() == "sys_dashboard_sub"
+        root.rule()[1].name() == "deny_all"
   }
 }
