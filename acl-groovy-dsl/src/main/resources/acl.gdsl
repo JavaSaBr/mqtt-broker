@@ -1,7 +1,5 @@
 contributor(context(scope: scriptScope())) {
 
-  delegateTo 'javasabr.mqtt.service.acl.AclBuilder'
-
   property name: 'ALLOW', type: 'javasabr.mqtt.model.acl.Permission'
   property name: 'DENY', type: 'javasabr.mqtt.model.acl.Permission'
   property name: 'PUBLISH', type: 'javasabr.mqtt.model.acl.Action'
@@ -12,37 +10,37 @@ contributor(context(scope: scriptScope())) {
 
   method name: 'rule',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ name: String, config: Closure ],
+      params: [ name: 'String', config: 'Closure<javasabr.mqtt.service.acl.AclBuilder.RuleBuilder>' ],
       doc: 'Define a rule'
   method name: 'permission',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBuilder',
       params: [ string: 'javasabr.mqtt.model.acl.Permission' ],
       doc: 'Applied if the rule is successfully hit'
   method name: 'action',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBuilder',
       params: [ string: 'javasabr.mqtt.model.acl.Action' ],
-      doc: 'Type of MQTT event this rule applies to'
+      doc: 'Action this rule applies to'
   method name: 'topics',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
-      params: [ string: 'java.lang.String...' ]
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBuilder',
+      params: [ string: 'String...' ]
   method name: 'clients',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
-      params: [ config: 'groovy.lang.Closure' ]
+      type: 'void',
+      params: [ config: 'Closure<javasabr.mqtt.service.acl.AclBuilder.ClientsBuilder>' ]
 
   method name: 'operator',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBuilder',
       params: [ string: 'javasabr.mqtt.model.acl.Operator' ],
-      doc: 'Conjunction or disjunction of client expressions. Default: OR'
+      doc: 'Conjunction (AND) or disjunction (OR) of client specs. Default: OR'
   method name: 'username',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
-      params: [ string: 'java.lang.String...' ]
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBuilder',
+      params: [ string: 'String...' ]
   method name: 'clientId',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
-      params: [ string: 'java.lang.String...' ]
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBuilder',
+      params: [ string: 'String...' ]
   method name: 'clientAttr',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
-      params: [ string: 'java.lang.String...' ]
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBuilder',
+      params: [ string: 'String...' ]
   method name: 'ipaddr',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
-      params: [ string: 'java.lang.String...' ]
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBuilder',
+      params: [ string: 'String...' ]
 }

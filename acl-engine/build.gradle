@@ -5,8 +5,9 @@ plugins {
 }
 
 dependencies {
-  api projects.network
-  api projects.aclEngine
+  api projects.aclGroovyDsl
+  api projects.model
+  api libs.groovy.all
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl

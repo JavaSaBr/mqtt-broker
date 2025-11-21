@@ -5,10 +5,9 @@ plugins {
 }
 
 dependencies {
-  api projects.network
-  api projects.aclEngine
+  implementation libs.groovy.all
+  api projects.model
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
-  testImplementation testFixtures(projects.network)
 }

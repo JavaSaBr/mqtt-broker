@@ -7,13 +7,11 @@ import static javasabr.mqtt.model.acl.Action.PUBLISH
 import static javasabr.mqtt.model.acl.Operator.OR
 import static javasabr.mqtt.model.acl.Permission.ALLOW
 
-class AclHclParserTest extends UnitSpecification {
+class AclLoaderTest extends UnitSpecification {
 
   def "should parse Groovy DSL config"() {
-    given:
-        def aclConfigFile = "acl.groovy";
     when:
-        List<Rule> rules = AclRulesLoader.load(aclConfigFile)
+        List<Rule> rules = new AclLoader().load()
     then:
         verifyAll(rules) {
           size() == 3

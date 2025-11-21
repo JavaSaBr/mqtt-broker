@@ -12,7 +12,7 @@ import static groovy.lang.Closure.DELEGATE_FIRST
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.Rule} from ACL configuration
  */
-class AclRulesBuilder {
+class AclBuilder {
 
   private Map root = [
       acl  : [:],
@@ -25,10 +25,10 @@ class AclRulesBuilder {
     mapRules(root.rule)
   }
 
-  AclRulesBuilder rule(
+  AclBuilder rule(
       String name,
-      @DelegatesTo(strategy = DELEGATE_FIRST, value = RuleBlock) Closure c) {
-    def block = new RuleBlock(name)
+      @DelegatesTo(strategy = DELEGATE_FIRST, value = RuleBuilder) Closure c) {
+    def block = new RuleBuilder(name)
     c.delegate = block
     c.resolveStrategy = DELEGATE_FIRST
     c()
@@ -36,25 +36,26 @@ class AclRulesBuilder {
     this
   }
 
-  static class RuleBlock {
+  static class RuleBuilder {
     String name
     Permission permission
     Action action
     List<String> topics = []
-    ClientsBlock clients = new ClientsBlock()
+    ClientsBuilder clients = new ClientsBuilder()
 
-    RuleBlock(String n) { name = n }
+    RuleBuilder(String n) { name = n }
 
-    void permission(Permission p) { permission = p }
+    RuleBuilder permission(Permission p) { permission = p; this }
 
-    void action(Action a) { action = a }
+    RuleBuilder action(Action a) { action = a; this }
 
-    void topics(String... t) { topics.addAll(t) }
+    RuleBuilder topics(String... t) { topics.addAll(t); this }
 
-    void clients(@DelegatesTo(strategy = DELEGATE_FIRST, value = ClientsBlock) Closure c) {
+    RuleBuilder clients(@DelegatesTo(strategy = DELEGATE_FIRST, value = ClientsBuilder) Closure c) {
       c.delegate = clients
       c.resolveStrategy = DELEGATE_FIRST
       c()
+      this
     }
 
     Map toMap() {
@@ -68,22 +69,22 @@ class AclRulesBuilder {
     }
   }
 
-  static class ClientsBlock {
+  static class ClientsBuilder {
     Operator operator = Operator.OR
     List<String> usernames = []
     List<String> clientIds = []
     List<String> clientAttrs = []
     List<String> ipAddresses = []
 
-    void operator(Operator op) { operator = op }
+    ClientsBuilder operator(Operator op) { operator = op; this }
 
-    void username(String... u) { usernames.addAll(u) }
+    ClientsBuilder username(String... u) { usernames.addAll(u); this }
 
-    void clientId(String... u) { clientIds.addAll(u) }
+    ClientsBuilder clientId(String... u) { clientIds.addAll(u); this }
 
-    void clientAttr(String... u) { clientAttrs.addAll(u) }
+    ClientsBuilder clientAttr(String... u) { clientAttrs.addAll(u); this }
 
-    void ipaddr(String... ips) { ipAddresses.addAll(ips) }
+    ClientsBuilder ipaddr(String... ips) { ipAddresses.addAll(ips); this }
 
     Map toMap() {
       [
