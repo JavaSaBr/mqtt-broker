@@ -2,17 +2,17 @@
 package javasabr.mqtt.service.acl
 
 import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.Clients
 import javasabr.mqtt.model.acl.Operator
 import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
-import javasabr.mqtt.model.acl.Clients
 
 import static groovy.lang.Closure.DELEGATE_FIRST
 
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.Rule} from ACL configuration
  */
-class AclBuilder {
+class AclRulesBuilder {
 
   private Map root = [
       acl  : [:],
@@ -25,7 +25,7 @@ class AclBuilder {
     mapRules(root.rule)
   }
 
-  AclBuilder rule(
+  AclRulesBuilder rule(
       String name,
       @DelegatesTo(strategy = DELEGATE_FIRST, value = RuleBlock) Closure c) {
     def block = new RuleBlock(name)
@@ -57,13 +57,15 @@ class AclBuilder {
       c()
     }
 
-    Map toMap() { [
-        name: name,
-        permission: permission,
-        action: action,
-        topics: topics,
-        clients: clients.toMap()
-    ] }
+    Map toMap() {
+      [
+          name      : name,
+          permission: permission,
+          action    : action,
+          topics    : topics,
+          clients   : clients.toMap()
+      ]
+    }
   }
 
   static class ClientsBlock {
@@ -83,13 +85,15 @@ class AclBuilder {
 
     void ipaddr(String... ips) { ipAddresses.addAll(ips) }
 
-    Map toMap() { [
-        operator: operator,
-        usernames: usernames,
-        clientIds: clientIds,
-        clientAttrs: clientAttrs,
-        ipAddresses: ipAddresses
-    ] }
+    Map toMap() {
+      [
+          operator   : operator,
+          usernames  : usernames,
+          clientIds  : clientIds,
+          clientAttrs: clientAttrs,
+          ipAddresses: ipAddresses
+      ]
+    }
   }
 
   private static List<Rule> mapRules(List<Map> raw) {

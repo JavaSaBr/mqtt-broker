@@ -13,6 +13,7 @@ configurations.all {
 
 dependencies {
   api projects.network
+  api libs.groovy.all
   implementation "com.bertramlabs.plugins:hcl4j:0.9.8"
 
   testImplementation projects.testSupport

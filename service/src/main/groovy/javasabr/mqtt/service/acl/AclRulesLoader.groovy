@@ -5,13 +5,13 @@ import javasabr.mqtt.model.acl.Rule
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
-class AclDslMapper {
+class AclRulesLoader {
 
   static List<Rule> load(String file) {
     if (!Objects.equals(file, "acl.groovy")) {
       return null;
     }
-    def uri = AclDslMapper.class.getClassLoader().getResource(file).toURI()
+    def uri = AclRulesLoader.class.getClassLoader().getResource(file).toURI()
     evaluateDsl(uri)
   }
 
@@ -25,10 +25,7 @@ class AclDslMapper {
     config.addCompilationCustomizers(ic)
 
     def shell = new GroovyShell(config)
-    def builder = new AclBuilder()
-    shell.setVariable("acl", builder.&acl)
-    shell.setVariable("user", builder.&user)
-    shell.setVariable("group", builder.&group)
+    def builder = new AclRulesBuilder()
     shell.setVariable("rule", builder.&rule)
     shell.evaluate(file)
 
