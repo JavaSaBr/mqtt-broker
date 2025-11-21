@@ -44,7 +44,7 @@ public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMes
   String reason;
 
   public PublishCompleteMqtt5OutMessage(int messageId, PublishCompletedReasonCode reasonCode) {
-    this(messageId, reasonCode, Array.empty(StringPair.class), StringUtils.EMPTY);
+    this(messageId, reasonCode, MqttOutMessage.EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
   }
 
   public PublishCompleteMqtt5OutMessage(
@@ -67,7 +67,7 @@ public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMes
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.writeVariableHeader(connection, buffer);
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
-    writeByte(buffer, reasonCode.getValue());
+    writeByte(buffer, reasonCode.code());
   }
 
   @Override

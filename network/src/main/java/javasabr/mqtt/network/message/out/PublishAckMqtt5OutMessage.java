@@ -66,7 +66,7 @@ public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.writeVariableHeader(connection, buffer);
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
-    writeByte(buffer, reasonCode.value());
+    writeByte(buffer, reasonCode.code());
   }
 
   @Override

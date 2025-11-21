@@ -66,20 +66,6 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected void handleError(
-      ExternalMqttClient client,
-      MqttSession session,
-      Publish publish,
-      PublishHandlingResult handlingResult) {
-    super.handleError(client, session, publish, handlingResult);
-    int messageId = publish.messageId();
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newPublishAck(publish.messageId(), handlingResult.ackReasonCode());
-    sendFeedback(client, session, response, messageId);
-  }
-
-  @Override
   protected void handleSuccess(
       ExternalMqttClient client,
       MqttSession session,
@@ -90,6 +76,20 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
         .newPublishAck(messageId, PublishAckReasonCode.SUCCESS);
+    sendFeedback(client, session, response, messageId);
+  }
+
+  @Override
+  protected void handleError(
+      ExternalMqttClient client,
+      MqttSession session,
+      Publish publish,
+      PublishHandlingResult handlingResult) {
+    super.handleError(client, session, publish, handlingResult);
+    int messageId = publish.messageId();
+    MqttOutMessage response = messageOutFactoryService
+        .resolveFactory(client)
+        .newPublishAck(publish.messageId(), handlingResult.ackReasonCode());
     sendFeedback(client, session, response, messageId);
   }
 

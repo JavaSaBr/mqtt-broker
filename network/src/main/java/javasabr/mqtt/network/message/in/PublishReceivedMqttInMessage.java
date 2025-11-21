@@ -72,7 +72,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReceivedReasonCode.ofValue(readByteUnsigned(buffer));
+      reasonCode = PublishReceivedReasonCode.ofCode(readByteUnsigned(buffer));
     }
   }
 
