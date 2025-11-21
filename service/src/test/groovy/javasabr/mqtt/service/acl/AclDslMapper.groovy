@@ -1,17 +1,21 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.AclRoot
+
+import javasabr.mqtt.model.acl.Rule
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 class AclDslMapper {
 
-  static AclRoot load(String file) {
+  static List<Rule> load(String file) {
+    if (!Objects.equals(file, "acl.groovy")) {
+      return null;
+    }
     def uri = AclDslMapper.class.getClassLoader().getResource(file).toURI()
-    return evaluateDsl(uri)
+    evaluateDsl(uri)
   }
 
-  private static AclRoot evaluateDsl(URI file) {
+  private static List<Rule> evaluateDsl(URI file) {
     def ic = new ImportCustomizer()
     ic.addStaticStars('javasabr.mqtt.model.acl.Permission')
     ic.addStaticStars('javasabr.mqtt.model.acl.Action')
@@ -28,7 +32,7 @@ class AclDslMapper {
     shell.setVariable("rule", builder.&rule)
     shell.evaluate(file)
 
-    return builder.result()
+    builder.result()
   }
 }
 

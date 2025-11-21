@@ -1,6 +1,10 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.AclRoot
+
+import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.Operator
+import javasabr.mqtt.model.acl.Permission
+import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.test.support.UnitSpecification
 
 class AclHclParserTest extends UnitSpecification {
@@ -9,29 +13,26 @@ class AclHclParserTest extends UnitSpecification {
     given:
         def aclConfigFile = "acl.groovy";
     when:
-        AclRoot root = AclDslMapper.load(aclConfigFile)
+        List<Rule> rules = AclDslMapper.load(aclConfigFile)
     then:
-        root != null
-        root.acl() != null
-        root.acl().version() == 1
+        verifyAll(rules) {
+          size() == 3
+          with(get(0)) {
+            name() == "sys_dashboard_sub"
+            action() == Action.PUBLISH
+            permission() == Permission.ALLOW
+            with(clients()) {
+              operator() == Operator.OR
+              usernames().containsAll("sensor1", "sensor10", "/^sensor1/", "/sensor10\$/")
+              clientIds().containsAll("sensor1", "sensor10", "/^sensor1/", "/sensor10\$/")
+              clientAttrs().containsAll("attr_name1", "attr_value1", "attr_name2", "/attr_value\$/")
+              ipAddresses().containsAll("10.56.0.3", "127.0.0.1")
+            }
+            topics().containsAll("/topic1/#", "/topic2/+/temp")
+          }
 
-        root.user() != null
-        root.user().size() == 2
-        root.user()[0].name() == "dashboard"
-        root.user()[0].groups().size() == 2
-        root.user()[0].groups()[0] == "admin"
-        root.user()[0].groups()[1] == "viewer"
-        root.user()[1].name() == "sensor1"
-
-        root.group() != null
-        root.group().size() == 3
-        root.group()[0].name() == "admin"
-        root.group()[1].name() == "viewer"
-        root.group()[2].name() == "sensor"
-
-        root.rule() != null
-        root.rule().size() == 2
-        root.rule()[0].name() == "sys_dashboard_sub"
-        root.rule()[1].name() == "deny_all"
+          get(1).name() == "deny_subscribe_all"
+          get(2).name() == "allow_all"
+        }
   }
 }

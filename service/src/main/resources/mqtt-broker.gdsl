@@ -6,27 +6,9 @@ contributor(context(scope: scriptScope())) {
   property name: 'DENY', type: 'javasabr.mqtt.model.acl.Permission'
   property name: 'PUBLISH', type: 'javasabr.mqtt.model.acl.Action'
   property name: 'SUBSCRIBE', type: 'javasabr.mqtt.model.acl.Action'
+  property name: 'ALL', type: 'javasabr.mqtt.model.acl.Action'
   property name: 'OR', type: 'javasabr.mqtt.model.acl.Operator'
   property name: 'AND', type: 'javasabr.mqtt.model.acl.Operator'
-
-  method name: 'user',
-      type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ name: String, config: Closure ],
-      doc: 'Define a user info 1'
-  method name: 'password',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock',
-      params: [ string: 'java.lang.String' ]
-  method name: 'groups',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock',
-      params: [ string: 'java.lang.String...' ]
-
-  method name: 'group',
-      type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ name: String, config: Closure ],
-      doc: 'Define a group'
-  method name: 'users',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.GroupBlock',
-      params: [ string: 'java.lang.String...' ]
 
   method name: 'rule',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
@@ -51,18 +33,16 @@ contributor(context(scope: scriptScope())) {
       type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
       params: [ string: 'javasabr.mqtt.model.acl.Operator' ],
       doc: 'Conjunction or disjunction of client expressions. Default: OR'
-  method name: 'users',
+  method name: 'username',
       type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
       params: [ string: 'java.lang.String...' ]
-  method name: 'ipAddresses',
+  method name: 'clientId',
       type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
       params: [ string: 'java.lang.String...' ]
-
-  method name: 'acl',
-      type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ config: Closure ],
-      doc: 'Defines ACL metadata'
-  method name: 'version',
-      type: 'javasabr.mqtt.service.acl.AclBuilder.AclBlock',
-      params: [ int: int ]
+  method name: 'clientAttr',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
+      params: [ string: 'java.lang.String...' ]
+  method name: 'ipaddr',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
+      params: [ string: 'java.lang.String...' ]
 }
