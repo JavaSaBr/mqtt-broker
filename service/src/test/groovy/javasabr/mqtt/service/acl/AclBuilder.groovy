@@ -4,8 +4,8 @@ package javasabr.mqtt.service.acl
 import groovy.transform.CompileStatic
 import javasabr.mqtt.model.acl.AclConfig
 import javasabr.mqtt.model.acl.AclRoot
-import javasabr.mqtt.model.acl.Group
 import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.Group
 import javasabr.mqtt.model.acl.Operator
 import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
@@ -32,14 +32,6 @@ class AclBuilder {
         mapRules(root.rule)
     )
   }
-
-  /*def invokeMethod(String name, args) {
-    if (name in ['acl', 'user', 'group', 'rule'] && args) {
-      this."$name"(*args)
-    } else {
-      throw new MissingMethodException(name, this.class, args)
-    }
-  }*/
 
   /**
    * Defines ACL metadata

@@ -2,10 +2,17 @@ contributor(context(scope: scriptScope())) {
 
   delegateTo 'javasabr.mqtt.service.acl.AclBuilder'
 
+  property name: 'ALLOW', type: 'javasabr.mqtt.model.acl.Permission'
+  property name: 'DENY', type: 'javasabr.mqtt.model.acl.Permission'
+  property name: 'PUBLISH', type: 'javasabr.mqtt.model.acl.Action'
+  property name: 'SUBSCRIBE', type: 'javasabr.mqtt.model.acl.Action'
+  property name: 'OR', type: 'javasabr.mqtt.model.acl.Operator'
+  property name: 'AND', type: 'javasabr.mqtt.model.acl.Operator'
+
   method name: 'user',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
       params: [ name: String, config: Closure ],
-      doc: 'Define a user info'
+      doc: 'Define a user info 1'
   method name: 'password',
       type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock',
       params: [ string: 'java.lang.String' ]

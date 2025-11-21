@@ -1,7 +1,3 @@
-import static javasabr.mqtt.model.acl.Action.*
-import static javasabr.mqtt.model.acl.Operator.*
-import static javasabr.mqtt.model.acl.Permission.*
-
 acl {
   version 1
 }
