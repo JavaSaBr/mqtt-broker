@@ -60,7 +60,10 @@ class IntegrationServiceSpecification extends Specification {
   ])
 
   @Shared
-  def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(defaultSubscriptionService, defaultPublishDeliveringService);
+  def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(
+      defaultSubscriptionService,
+      defaultPublishDeliveringService,
+      defaultMessageOutFactoryService);
 
   @Shared
   def publishReceivingService = new DefaultPublishReceivingService([

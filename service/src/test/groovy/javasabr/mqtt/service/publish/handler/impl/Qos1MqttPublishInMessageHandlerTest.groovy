@@ -40,7 +40,6 @@ class Qos1MqttPublishInMessageHandlerTest extends IntegrationServiceSpecificatio
         def inMessageTracker = client3
             .session()
             .inMessageTracker()
-        inMessageTracker.add(expectedMessageId)
     when:
         publishInHandler.handle(client3, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should have feedback'
@@ -49,7 +48,7 @@ class Qos1MqttPublishInMessageHandlerTest extends IntegrationServiceSpecificatio
         publishAck.messageId() == expectedMessageId
         publishAck.reason() == ""
         publishAck.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        !inMessageTracker.isInUse(expectedMessageId)
+        inMessageTracker.stored(expectedMessageId) == null
     then: 'subscribers should receive the publish'
         def message1 = client1.nextSentMessage(PublishMqtt5OutMessage)
         message1.topicName() == topicName
@@ -67,10 +66,8 @@ class Qos1MqttPublishInMessageHandlerTest extends IntegrationServiceSpecificatio
         def client = publisher.client() as TestExternalMqttClient
         def topicName = defaultTopicService.createTopicName(client, "Qos1MqttPublishInMessageHandlerTest/2")
         def expectedMessageId = 35
-        def inMessageTracker = client
-            .session()
-            .inMessageTracker()
-        inMessageTracker.add(expectedMessageId)
+        def session = client.session()
+        def inMessageTracker = session.inMessageTracker()
     when:
         publishInHandler.handle(client, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should have feedback that no matched subscribers'
@@ -79,6 +76,6 @@ class Qos1MqttPublishInMessageHandlerTest extends IntegrationServiceSpecificatio
         publishAck.messageId() == expectedMessageId
         publishAck.reason() == ""
         publishAck.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        !inMessageTracker.isInUse(expectedMessageId)
+        inMessageTracker.stored(expectedMessageId) == null
   }
 }

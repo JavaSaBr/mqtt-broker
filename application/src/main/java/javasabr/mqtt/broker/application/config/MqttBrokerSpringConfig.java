@@ -165,10 +165,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttInMessageHandler publishReleaseMqttInMessageHandler(
-      MessageOutFactoryService messageOutFactoryService,
-      PublishReceivingService publishReceivingService) {
-    return new PublishReleaseMqttInMessageHandler(messageOutFactoryService, publishReceivingService);
+  MqttInMessageHandler publishReleaseMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new PublishReleaseMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean

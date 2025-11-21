@@ -30,7 +30,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishAckReasonCode.PAYLOAD_FORMAT_INVALID.value)
+          it.put(PublishAckReasonCode.PAYLOAD_FORMAT_INVALID.code() as byte)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -46,7 +46,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishAckReasonCode.UNSPECIFIED_ERROR.value)
+          it.put(PublishAckReasonCode.UNSPECIFIED_ERROR.code() as byte)
           it.putMbi(0)
         }
         packet = new PublishAckMqttInMessage(0b0100_0000 as byte)

@@ -30,7 +30,7 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishReceivedReasonCode.QUOTA_EXCEEDED.value())
+          it.put(PublishReceivedReasonCode.QUOTA_EXCEEDED.code() as byte)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -46,7 +46,7 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value())
+          it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.code() as byte)
           it.putMbi(0)
         }
         packet = new PublishReceivedMqttInMessage(0b0101_0000 as byte)

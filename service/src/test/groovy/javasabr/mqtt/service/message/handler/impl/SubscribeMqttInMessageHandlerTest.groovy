@@ -2,8 +2,10 @@ package javasabr.mqtt.service.message.handler.impl
 
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
+import javasabr.mqtt.model.session.MessageTacker
 import javasabr.mqtt.model.subscribtion.RequestedSubscription
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
@@ -39,8 +41,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
-            && disconnectReason.reason() == ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED
-            && disconnectReason.serverReference() == ""
+        disconnectReason.reason() == ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED
+        disconnectReason.serverReference() == ""
   }
 
   def "should response that message id is in use"() {
@@ -53,7 +55,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def expectedMessageId = 15
         def mqttClient = mqttConnection.client() as TestExternalMqttClient
         def session = mqttClient.session()
-        session.inMessageTracker().add(expectedMessageId)
+        def inMessageTracker = session.inMessageTracker()
+        inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -67,9 +70,9 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
-            && reasonCodes.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
-            && reasonCodes.get(1) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
+        reasonCodes.get(1) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
+        subscribeAck.messageId() == expectedMessageId
   }
 
   def "should response that subscription id is not supported"() {
@@ -97,9 +100,9 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
-            && reasonCodes.get(0) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
-            && reasonCodes.get(1) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
+        reasonCodes.get(1) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
+        subscribeAck.messageId() == expectedMessageId
   }
 
   def "should subscribe with lower QoS by server limitation"() {
@@ -127,9 +130,9 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
-            && reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
-            && reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_0
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
+        reasonCodes.get(1) == SubscribeAckReasonCode.GRANTED_QOS_0
+        subscribeAck.messageId() == expectedMessageId
   }
 
   def "should close connection by trying to subscribe not supported wildcard topic filter"() {
@@ -156,13 +159,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
-            && reasonCodes.get(0) == SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
-            && reasonCodes.get(1) == SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
+        reasonCodes.get(1) == SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
+        subscribeAck.messageId() == expectedMessageId
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
-            && disconnectReason.reason() == ""
-            && disconnectReason.serverReference() == ""
+        disconnectReason.reason() == ""
+        disconnectReason.serverReference() == ""
   }
 
   def "should close connection by trying to subscribe not supported shared topic filter"() {
@@ -189,13 +192,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
-            && reasonCodes.get(0) == SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
-            && reasonCodes.get(1) == SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
+        reasonCodes.get(1) == SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
+        subscribeAck.messageId() == expectedMessageId
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
-            && disconnectReason.reason() == ""
-            && disconnectReason.serverReference() == ""
+        disconnectReason.reason() == ""
+        disconnectReason.serverReference() == ""
   }
 
   def "should close connection by reason MQTT protocol error"() {
@@ -212,8 +215,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
-            && disconnectReason.reason() == "Unexpected flags bits:0b0000_0000"
-            && disconnectReason.serverReference() == ""
+        disconnectReason.reason() == "Unexpected flags bits:0b0000_0000"
+        disconnectReason.serverReference() == ""
   }
 
   def "should reuse the same message if from previous request"() {
@@ -236,8 +239,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 1
-            && reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
+        subscribeAck.messageId() == expectedMessageId
     when:
         ThreadUtils.sleep(300)
         def subscribeMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
@@ -250,8 +253,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck2 = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes2 = subscribeAck2.reasonCodes()
         reasonCodes2.size() == 1
-            && reasonCodes2.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
-            && subscribeAck2.messageId() == expectedMessageId
+        reasonCodes2.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
+        subscribeAck2.messageId() == expectedMessageId
   }
 
   def "should response that message id is in use because previous is still in progress"() {
@@ -275,8 +278,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 1
-            && reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
-            && subscribeAck.messageId() == expectedMessageId
+        reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
+        subscribeAck.messageId() == expectedMessageId
     when:
         ThreadUtils.sleep(300)
         def subscribeMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
@@ -289,7 +292,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def subscribeAck2 = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes2 = subscribeAck2.reasonCodes()
         reasonCodes2.size() == 1
-            && reasonCodes2.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
-            && subscribeAck2.messageId() == expectedMessageId
+        reasonCodes2.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
+        subscribeAck2.messageId() == expectedMessageId
   }
 }

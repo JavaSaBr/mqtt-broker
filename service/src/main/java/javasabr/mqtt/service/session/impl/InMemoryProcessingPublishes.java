@@ -59,4 +59,15 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
       lock.unlockWrite(stamp);
     }
   }
+
+  @Override
+  public boolean remove(TrackableMessage message) {
+    long stamp = lock.writeLock();
+    try {
+      InProcessPublish inProcessPublish = processing.remove(message.messageId());
+      return inProcessPublish != null;
+    } finally {
+      lock.unlockWrite(stamp);
+    }
+  }
 }

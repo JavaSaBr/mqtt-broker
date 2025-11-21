@@ -12,4 +12,9 @@ public interface ProcessingPublishes {
    * @return true if was found some callback for this message
    */
   boolean apply(MqttUser user, TrackableMessage message);
+
+  /**
+   * @return true if was found some callback for this message
+   */
+  boolean remove(TrackableMessage message);
 }
