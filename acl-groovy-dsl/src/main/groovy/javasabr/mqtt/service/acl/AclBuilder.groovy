@@ -7,7 +7,7 @@ import javasabr.mqtt.model.acl.Operator
 import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
 
-import static groovy.lang.Closure.DELEGATE_FIRST
+import static groovy.lang.Closure.DELEGATE_ONLY
 
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.Rule} from ACL configuration
@@ -27,10 +27,10 @@ class AclBuilder {
 
   AclBuilder rule(
       String name,
-      @DelegatesTo(strategy = DELEGATE_FIRST, value = RuleBuilder) Closure c) {
+      @DelegatesTo(strategy = DELEGATE_ONLY, value = RuleBuilder) Closure c) {
     def block = new RuleBuilder(name)
     c.delegate = block
-    c.resolveStrategy = DELEGATE_FIRST
+    c.resolveStrategy = DELEGATE_ONLY
     c()
     root.rule << block.toMap()
     this
@@ -51,9 +51,9 @@ class AclBuilder {
 
     RuleBuilder topics(String... t) { topics.addAll(t); this }
 
-    RuleBuilder clients(@DelegatesTo(strategy = DELEGATE_FIRST, value = ClientsBuilder) Closure c) {
+    RuleBuilder clients(@DelegatesTo(strategy = DELEGATE_ONLY, value = ClientsBuilder) Closure c) {
       c.delegate = clients
-      c.resolveStrategy = DELEGATE_FIRST
+      c.resolveStrategy = DELEGATE_ONLY
       c()
       this
     }
