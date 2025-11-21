@@ -4,17 +4,9 @@ plugins {
   id("groovy")
 }
 
-configurations.all {
-  resolutionStrategy {
-    force "commons-beanutils:commons-beanutils:1.11.0"
-    force "commons-codec:commons-codec:1.20.0"
-  }
-}
-
 dependencies {
   api projects.network
   api libs.groovy.all
-  implementation "com.bertramlabs.plugins:hcl4j:0.9.8"
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
