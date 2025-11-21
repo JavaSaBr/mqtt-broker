@@ -13,7 +13,7 @@ import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.model.topic.tree.ConcurrentTopicTree;
+import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.SubscriptionService;
@@ -25,16 +25,16 @@ import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 
 /**
- * In memory subscription service based on {@link ConcurrentTopicTree}
+ * In memory subscription service based on {@link ConcurrentSubscriberTree}
  */
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
-  ConcurrentTopicTree topicTree;
+  ConcurrentSubscriberTree subscriberTree;
 
   public InMemorySubscriptionService() {
-    this.topicTree = new ConcurrentTopicTree();
+    this.subscriberTree = new ConcurrentSubscriberTree();
   }
 
   @Override
@@ -47,7 +47,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public Array<SingleSubscriber> findSubscribersTo(MutableArray<SingleSubscriber> container, TopicName topicName) {
-    Array<SingleSubscriber> matched = topicTree.matches(topicName);
+    Array<SingleSubscriber> matched = subscriberTree.matches(topicName);
     container.addAll(matched);
     return container;
   }
@@ -80,7 +80,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber previous = topicTree.subscribe(client, subscription);
+    SingleSubscriber previous = subscriberTree.subscribe(client, subscription);
     if (previous != null) {
       activeSubscriptions.remove(previous.subscription());
     }
@@ -108,7 +108,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttSession session, TopicFilter topicFilter) {
     if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
-    } else if (topicTree.unsubscribe(client, topicFilter)) {
+    } else if (subscriberTree.unsubscribe(client, topicFilter)) {
       session
           .activeSubscriptions()
           .removeByTopicFilter(topicFilter);
@@ -124,7 +124,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      topicTree.unsubscribe(client, subscription.topicFilter());
+      subscriberTree.unsubscribe(client, subscription.topicFilter());
     }
   }
 
@@ -134,7 +134,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      topicTree.subscribe(client, subscription);
+      subscriberTree.subscribe(client, subscription);
     }
   }
 }
