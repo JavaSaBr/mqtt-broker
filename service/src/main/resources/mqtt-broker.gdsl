@@ -1,64 +1,61 @@
-contributor(context(containingClass: 'javasabr.mqtt.service.acl.AclBuilder')) {
+contributor(context(scope: scriptScope())) {
 
-  // user()
+  delegateTo 'javasabr.mqtt.service.acl.AclBuilder'
+
   method name: 'user',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ 'java.lang.String', 'groovy.lang.Closure' ],
-      doc: 'Define a user info 1'
+      params: [ name: String, config: Closure ],
+      doc: 'Define a user info'
+  method name: 'password',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock',
+      params: [ string: 'java.lang.String' ]
+  method name: 'groups',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock',
+      params: [ string: 'java.lang.String...' ]
 
-  closureDelegate type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock',
-      strategy: Closure.DELEGATE_FIRST,
-      onMethodCall: 'user'
-
-  method name: 'password', type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock', params: ['java.lang.String']
-  method name: 'groups', type: 'javasabr.mqtt.service.acl.AclBuilder.UserBlock', params: ['java.lang.String[]']
-
-  // group()
   method name: 'group',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ 'java.lang.String', 'groovy.lang.Closure' ],
+      params: [ name: String, config: Closure ],
       doc: 'Define a group'
+  method name: 'users',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.GroupBlock',
+      params: [ string: 'java.lang.String...' ]
 
-  closureDelegate type: 'javasabr.mqtt.service.acl.AclBuilder.GroupBlock',
-      strategy: Closure.DELEGATE_FIRST,
-      onMethodCall: 'group'
-
-  method name: 'users', type: 'javasabr.mqtt.service.acl.AclBuilder.GroupBlock', params: ['java.lang.String...']
-
-  // rule()
   method name: 'rule',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ 'java.lang.String', 'groovy.lang.Closure' ],
+      params: [ name: String, config: Closure ],
       doc: 'Define a rule'
+  method name: 'permission',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
+      params: [ string: 'javasabr.mqtt.model.acl.Permission' ],
+      doc: 'Applied if the rule is successfully hit'
+  method name: 'action',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
+      params: [ string: 'javasabr.mqtt.model.acl.Action' ],
+      doc: 'Type of MQTT event this rule applies to'
+  method name: 'topics',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
+      params: [ string: 'java.lang.String...' ]
+  method name: 'clients',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
+      params: [ config: 'groovy.lang.Closure' ]
 
-  closureDelegate type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock',
-      strategy: Closure.DELEGATE_FIRST,
-      onMethodCall: 'rule'
+  method name: 'operator',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
+      params: [ string: 'javasabr.mqtt.model.acl.Operator' ],
+      doc: 'Conjunction or disjunction of client expressions. Default: OR'
+  method name: 'users',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
+      params: [ string: 'java.lang.String...' ]
+  method name: 'ipAddresses',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
+      params: [ string: 'java.lang.String...' ]
 
-  method name: 'priority', type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock', params: ['int']
-  method name: 'effect', type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock', params: ['java.lang.String']
-  method name: 'event', type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock', params: ['java.lang.String']
-  method name: 'topics', type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock', params: ['java.lang.String...']
-  method name: 'clients', type: 'javasabr.mqtt.service.acl.AclBuilder.RuleBlock', params: ['groovy.lang.Closure']
-
-  // методы ClientsBlock (для clients { ... })
-  closureDelegate type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock',
-      strategy: Closure.DELEGATE_FIRST,
-      onMethodCall: 'clients'
-  method name: 'users', type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock', params: ['java.lang.String...']
-  method name: 'ipAddresses', type: 'javasabr.mqtt.service.acl.AclBuilder.ClientsBlock', params: ['java.lang.String...']
-
-  // ------------------------
-  // acl(Closure)
-  // ------------------------
   method name: 'acl',
       type: 'javasabr.mqtt.service.acl.AclBuilder',
-      params: [ 'groovy.lang.Closure' ],
-      doc: 'Define acl block'
-
-  closureDelegate type: 'javasabr.mqtt.service.acl.AclBuilder.AclBlock',
-      strategy: Closure.DELEGATE_FIRST,
-      onMethodCall: 'acl'
-
-  method name: 'version', type: 'javasabr.mqtt.service.acl.AclBuilder.AclBlock', params: ['int']
+      params: [ config: Closure ],
+      doc: 'Defines ACL metadata'
+  method name: 'version',
+      type: 'javasabr.mqtt.service.acl.AclBuilder.AclBlock',
+      params: [ int: int ]
 }

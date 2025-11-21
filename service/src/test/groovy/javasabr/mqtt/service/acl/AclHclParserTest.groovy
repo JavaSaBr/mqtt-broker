@@ -18,12 +18,16 @@ class AclHclParserTest extends UnitSpecification {
         root.user() != null
         root.user().size() == 2
         root.user()[0].name() == "dashboard"
+        root.user()[0].groups().size() == 2
+        root.user()[0].groups()[0] == "admin"
+        root.user()[0].groups()[1] == "viewer"
         root.user()[1].name() == "sensor1"
 
         root.group() != null
-        root.group().size() == 2
-        root.group()[0].name() == "admins"
-        root.group()[1].name() == "sensors"
+        root.group().size() == 3
+        root.group()[0].name() == "admin"
+        root.group()[1].name() == "viewer"
+        root.group()[2].name() == "sensor"
 
         root.rule() != null
         root.rule().size() == 2

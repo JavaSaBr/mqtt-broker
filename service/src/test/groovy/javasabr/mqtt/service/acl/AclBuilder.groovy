@@ -1,19 +1,24 @@
+//file:noinspection unused
 package javasabr.mqtt.service.acl
 
 import groovy.transform.CompileStatic
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.FirstParam
 import javasabr.mqtt.model.acl.AclConfig
 import javasabr.mqtt.model.acl.AclRoot
 import javasabr.mqtt.model.acl.Group
+import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.Operator
+import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.RuleClients
 import javasabr.mqtt.model.acl.User
 
+/**
+ * Builds {@link javasabr.mqtt.model.acl.AclRoot} from ACL configuration
+ */
 class AclBuilder {
 
   private Map root = [
-      acl  : null,
+      acl  : [:],
       user : [],
       group: [],
       rule : []
@@ -28,59 +33,62 @@ class AclBuilder {
     )
   }
 
-  def invokeMethod(String name, args) {
+  /*def invokeMethod(String name, args) {
     if (name in ['acl', 'user', 'group', 'rule'] && args) {
       this."$name"(*args)
     } else {
       throw new MissingMethodException(name, this.class, args)
     }
-  }
+  }*/
 
-  // ---------------------------
-  // ACL block
-  // ---------------------------
-  void acl(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = AclBlock) Closure c) {
+  /**
+   * Defines ACL metadata
+   *
+   * @param version of ACL config
+   * @return
+   */
+  AclBuilder acl(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = AclBlock) Closure c) {
     def block = new AclBlock()
     c.delegate = block
     c.resolveStrategy = Closure.DELEGATE_FIRST
     c()
     root.acl = block.toMap()
+    this
   }
 
-  // ---------------------------
-  // Named blocks
-  // ---------------------------
-  void user(
+  AclBuilder user(
       String name,
-      @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = UserBlock)
-      @ClosureParams(FirstParam.FirstGenericType) Closure<?> c
-  ) {
+      @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = UserBlock) Closure<?> c) {
     def block = new UserBlock(name)
     c.delegate = block
     c.resolveStrategy = Closure.DELEGATE_FIRST
     c(block)
     root.user << block.toMap()
+    this
   }
 
-  void group(String name, @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = GroupBlock) Closure c) {
+  AclBuilder group(
+      String name,
+      @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = GroupBlock) Closure c) {
     def block = new GroupBlock(name)
     c.delegate = block
     c.resolveStrategy = Closure.DELEGATE_FIRST
     c()
     root.group << block.toMap()
+    this
   }
 
-  void rule(String name, @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = RuleBlock) Closure c) {
+  AclBuilder rule(
+      String name,
+      @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = RuleBlock) Closure c) {
     def block = new RuleBlock(name)
     c.delegate = block
     c.resolveStrategy = Closure.DELEGATE_FIRST
     c()
     root.rule << block.toMap()
+    this
   }
 
-  // ---------------------------
-  // DSL block classes
-  // ---------------------------
   static class AclBlock {
     int version = 0
 
@@ -99,9 +107,7 @@ class AclBuilder {
 
     void password(String pw) { password = pw }
 
-    void groups(String... gs) { if (gs) groups.addAll(gs as List) }
-
-    void groups(Collection<String> gs) { if (gs) groups.addAll(gs) }
+    void groups(String... gs) { groups.addAll(gs) }
 
     Map toMap() { [name: name, password: password, groups: groups] }
   }
@@ -119,19 +125,16 @@ class AclBuilder {
 
   static class RuleBlock {
     String name
-    int priority
-    String effect
-    String event
+    Permission permission
+    Action action
     List<String> topics = []
     ClientsBlock clients = new ClientsBlock()
 
     RuleBlock(String n) { name = n }
 
-    void priority(int p) { priority = p }
+    void permission(Permission p) { permission = p }
 
-    void effect(String e) { effect = e }
-
-    void event(String ev) { event = ev }
+    void action(Action a) { action = a }
 
     void topics(String... t) { topics.addAll(t) }
 
@@ -142,13 +145,16 @@ class AclBuilder {
     }
 
     Map toMap() {
-      [name: name, priority: priority, effect: effect, event: event, topics: topics, clients: clients.toMap()]
+      [name: name, permission: permission, action: action, topics: topics, clients: clients.toMap()]
     }
   }
 
   static class ClientsBlock {
+    Operator operator = Operator.OR
     List<String> users = []
     List<String> ipAddresses = []
+
+    void operator(Operator op) { operator = op }
 
     void users(String... u) { users.addAll(u) }
 
@@ -157,25 +163,21 @@ class AclBuilder {
     Map toMap() { [users: users, ipAddresses: ipAddresses] }
   }
 
-  // ---------------------------
-  // Mapping to Java records
-  // ---------------------------
-  private static List<User> mapUsers(List<Map> raw) {
+  private static List<User> mapUsers(List<Map<String, String>> raw) {
     raw.collect { m -> new User(m.name, m.password ?: null, toStrList(m.groups)) }
   }
 
-  private static List<Group> mapGroups(List<Map> raw) {
+  private static List<Group> mapGroups(List<Map<String, String>> raw) {
     raw.collect { m -> new Group(m.name, toStrList(m.users)) }
   }
 
   private static List<Rule> mapRules(List<Map> raw) {
     raw.collect { m ->
       new Rule(
-          m.name,
-          (m.priority ?: 0) as int,
-          m.effect,
-          m.event,
-          mapClients(m.clients),
+          m.name as String,
+          m.permission as Permission,
+          m.action as Action,
+          mapClients(m.clients as Map),
           toStrList(m.topics)
       )
     }

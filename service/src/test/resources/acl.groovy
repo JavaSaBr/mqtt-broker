@@ -1,40 +1,48 @@
+import static javasabr.mqtt.model.acl.Action.*
+import static javasabr.mqtt.model.acl.Operator.*
+import static javasabr.mqtt.model.acl.Permission.*
+
 acl {
   version 1
 }
 
 user("dashboard") {
-  groups "admins"
+  groups "admin", "viewer"
 }
 
-user("sensor1") {
+user "sensor1", {
   password "\$bcrypt:..."
-  groups "sensors"
+  groups "sensor", "2nd-floor"
 }
 
-group("admins") {
+group("admin") {
+  users "dashboard", "root"
+}
+
+group("viewer") {
   users "dashboard"
 }
 
-group("sensors") {
-  users "sensor1"
+group("sensor") {
+  users "sensor1", "sensor2"
 }
 
 rule("sys_dashboard_sub") {
-  priority 100
-  effect "allow"
-  event "sub"
+  permission ALLOW
+  action PUBLISH
 
   clients {
+    operator OR
     users "dashboard"
+    ipAddresses "10.56.0.3", "120.10.60.60"
   }
 
-  topics "\$SYS/#"
+  topics "/topic1/#", "/topic2/+/temp"
 }
 
 rule("deny_all") {
-  priority 0
-  effect "deny"
-  event "sub"
+  permission DENY
+  action SUBSCRIBE
   topics "\$SYS/#"
   topics "#"
 }
