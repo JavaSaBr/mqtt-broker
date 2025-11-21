@@ -46,7 +46,7 @@ public enum UnsubscribeAckReasonCode {
 
     var maxId = Stream
         .of(values())
-        .mapToInt(UnsubscribeAckReasonCode::getValue)
+        .mapToInt(UnsubscribeAckReasonCode::value)
         .map(value -> Byte.toUnsignedInt((byte) value))
         .max()
         .orElse(0);

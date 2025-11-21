@@ -56,6 +56,6 @@ public class ConnectAckMqtt311OutMessage extends MqttOutMessage {
   }
 
   protected byte reasonCodeValue() {
-    return reasonCode.getMqtt311();
+    return reasonCode.mqtt311();
   }
 }

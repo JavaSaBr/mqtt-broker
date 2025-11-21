@@ -70,7 +70,7 @@ public class AuthenticationMqtt5OutMessage extends MqttOutMessage {
   @Override
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
-    writeByte(buffer, reasonCode.getValue());
+    writeByte(buffer, reasonCode.value());
   }
 
   @Override

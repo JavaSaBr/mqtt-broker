@@ -232,7 +232,7 @@ public class ConnectInMqttInMessageHandler
     if (exception instanceof ConnectionRejectException cre) {
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newConnectAck(client, cre.getReasonCode());
+          .newConnectAck(client, cre.reasonCode());
       client.closeWithReason(feedback);
       return true;
     }

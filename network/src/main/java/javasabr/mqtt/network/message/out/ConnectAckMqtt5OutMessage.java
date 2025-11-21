@@ -279,7 +279,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
   @Override
   protected byte reasonCodeValue() {
-    return reasonCode.getMqtt5();
+    return reasonCode.mqtt5();
   }
 
   @Override

@@ -24,7 +24,7 @@ public enum PublishReleaseReasonCode {
 
     var maxId = Stream
         .of(values())
-        .mapToInt(PublishReleaseReasonCode::getValue)
+        .mapToInt(PublishReleaseReasonCode::value)
         .map(value -> Byte.toUnsignedInt((byte) value))
         .max()
         .orElse(0);
