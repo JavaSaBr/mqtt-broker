@@ -10,8 +10,8 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
+@Accessors
 @RequiredArgsConstructor
-@Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum QoS implements NumberedEnum<QoS> {
   AT_MOST_ONCE(0, SubscribeAckReasonCode.GRANTED_QOS_0),
@@ -38,11 +38,11 @@ public enum QoS implements NumberedEnum<QoS> {
     return level > alternative.level ? alternative : this;
   }
 
-  public boolean isLower(QoS another) {
+  public boolean isLowerThan(QoS another) {
     return level < another.level;
   }
 
-  public boolean isHigher(QoS another) {
+  public boolean isHigherThan(QoS another) {
     return level > another.level;
   }
 }

@@ -14,11 +14,11 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryMessageTacker implements MessageTacker {
 
-  MutableIntToRefDictionary<InMemoryTrackedMessageMeta> usedMessageIds;
+  MutableIntToRefDictionary<InMemoryTrackedMessageMeta> messageIdToMeta;
   StampedLock lock;
 
   public InMemoryMessageTacker() {
-    this.usedMessageIds = DictionaryFactory.mutableIntToRefDictionary();
+    this.messageIdToMeta = DictionaryFactory.mutableIntToRefDictionary();
     this.lock = new StampedLock();
   }
 
@@ -27,7 +27,7 @@ public class InMemoryMessageTacker implements MessageTacker {
   public TrackedMessageMeta stored(int messageId) {
     long stamp = lock.readLock();
     try {
-      return usedMessageIds.get(messageId);
+      return messageIdToMeta.get(messageId);
     } finally {
       lock.unlockRead(stamp);
     }
@@ -42,7 +42,7 @@ public class InMemoryMessageTacker implements MessageTacker {
   public void add(int messageId, MqttMessageType messageType, @Nullable ReasonCode reasonCode) {
     long stamp = lock.writeLock();
     try {
-      usedMessageIds.put(messageId, new InMemoryTrackedMessageMeta(messageType, reasonCode));
+      messageIdToMeta.put(messageId, new InMemoryTrackedMessageMeta(messageType, reasonCode));
     } finally {
       lock.unlockWrite(stamp);
     }
@@ -52,13 +52,13 @@ public class InMemoryMessageTacker implements MessageTacker {
   public boolean update(int messageId, MqttMessageType messageType, @Nullable ReasonCode reasonCode) {
     long stamp = lock.writeLock();
     try {
-      InMemoryTrackedMessageMeta current = usedMessageIds.get(messageId);
+      InMemoryTrackedMessageMeta current = messageIdToMeta.get(messageId);
       if (current != null) {
         current.messageType(messageType);
         current.reasonCode(reasonCode);
         return false;
       }
-      usedMessageIds.put(messageId, new InMemoryTrackedMessageMeta(messageType, reasonCode));
+      messageIdToMeta.put(messageId, new InMemoryTrackedMessageMeta(messageType, reasonCode));
       return true;
     } finally {
       lock.unlockWrite(stamp);
@@ -70,7 +70,7 @@ public class InMemoryMessageTacker implements MessageTacker {
   public TrackedMessageMeta remove(int messageId) {
     long stamp = lock.writeLock();
     try {
-      return usedMessageIds.remove(messageId);
+      return messageIdToMeta.remove(messageId);
     } finally {
       lock.unlockWrite(stamp);
     }

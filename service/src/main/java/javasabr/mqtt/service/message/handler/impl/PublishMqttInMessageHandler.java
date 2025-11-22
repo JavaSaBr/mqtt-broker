@@ -145,7 +145,7 @@ public class PublishMqttInMessageHandler
 
     QoS requestedQos = publishMessage.qos();
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    if (connectionConfig.maxQos().isLower(requestedQos)) {
+    if (connectionConfig.maxQos().isLowerThan(requestedQos)) {
       log.warning(client.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
       handleNotSupportedQos(client);
       return false;

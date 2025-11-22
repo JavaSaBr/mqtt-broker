@@ -222,13 +222,13 @@ public abstract class MqttMessageOutFactory {
   public abstract MqttOutMessage newPingResponse();
 
   public abstract MqttOutMessage newPublishRelease(
-      int packetId,
+      int messageId,
       PublishReleaseReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason);
 
-  public MqttOutMessage newPublishRelease(int packetId, PublishReleaseReasonCode reasonCode) {
-    return newPublishRelease(packetId, reasonCode, EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
+  public MqttOutMessage newPublishRelease(int messageId, PublishReleaseReasonCode reasonCode) {
+    return newPublishRelease(messageId, reasonCode, EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
   }
 
   public abstract MqttOutMessage newPublishReceived(
@@ -242,12 +242,12 @@ public abstract class MqttMessageOutFactory {
   }
 
   public abstract MqttOutMessage newPublishCompleted(
-      int packetId,
+      int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
       @Nullable String reason);
 
-  public MqttOutMessage newPublishCompleted(int packetId, PublishCompletedReasonCode reasonCode) {
-    return newPublishCompleted(packetId, reasonCode, EMPTY_USER_PROPERTIES, null);
+  public MqttOutMessage newPublishCompleted(int messageId, PublishCompletedReasonCode reasonCode) {
+    return newPublishCompleted(messageId, reasonCode, EMPTY_USER_PROPERTIES, null);
   }
 }

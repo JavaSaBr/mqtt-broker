@@ -70,7 +70,7 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc384800412
     writeString(buffer, topicName.rawTopic());
-    if (qos.isHigher(QoS.AT_MOST_ONCE)) {
+    if (qos.isHigherThan(QoS.AT_MOST_ONCE)) {
       writeShort(buffer, messageId);
     }
   }
