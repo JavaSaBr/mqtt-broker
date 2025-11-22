@@ -1,8 +1,8 @@
 package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASED.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASE.ordinal();
 
   int messageId;
 

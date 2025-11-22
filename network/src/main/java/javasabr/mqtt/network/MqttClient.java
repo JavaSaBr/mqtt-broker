@@ -2,6 +2,7 @@ package javasabr.mqtt.network;
 
 import java.util.concurrent.CompletableFuture;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
@@ -9,7 +10,7 @@ import javasabr.mqtt.network.session.MqttSession;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-public interface MqttClient extends SubscriptionOwner {
+public interface MqttClient extends SubscriptionOwner, MqttUser {
 
   interface UnsafeMqttClient extends MqttClient {
 

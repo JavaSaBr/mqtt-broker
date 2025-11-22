@@ -5,11 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.ActiveSubscriptions;
+import javasabr.mqtt.model.session.MessageTacker;
+import javasabr.mqtt.model.session.ProcessingPublishes;
+import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.session.ActiveSubscriptions;
-import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession.UnsafeMqttSession;
-import javasabr.mqtt.network.session.TopicNameMapping;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import lombok.AccessLevel;
@@ -74,12 +75,15 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   final String clientId;
   final AtomicInteger messageIdGenerator;
   final LockableArray<PendingPublish> pendingOutPublishes;
-  final LockableArray<PendingPublish> pendingInPublishes;
 
   @Getter
   final MessageTacker inMessageTracker;
   @Getter
   final MessageTacker outMessageTracker;
+  @Getter
+  final ProcessingPublishes inProcessingPublishes;
+  @Getter
+  final ProcessingPublishes outProcessingPublishes;
   @Getter
   final ActiveSubscriptions activeSubscriptions;
   @Getter
@@ -92,10 +96,11 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   public InMemoryMqttSession(String clientId) {
     this.clientId = clientId;
     this.pendingOutPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
-    this.pendingInPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.messageIdGenerator = new AtomicInteger(0);
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
+    this.inProcessingPublishes = new InMemoryProcessingPublishes(this);
+    this.outProcessingPublishes = new InMemoryProcessingPublishes(this);
     this.activeSubscriptions = new InMemoryActiveSubscriptions();
     this.topicNameMapping = new InMemoryTopicNameMapping();
   }
@@ -124,18 +129,8 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void registerInPublish(Publish publish, PendingMessageHandler handler) {
-    registerPublish(publish, handler, pendingInPublishes);
-  }
-
-  @Override
   public boolean hasOutPending() {
     return !pendingOutPublishes.isEmpty();
-  }
-
-  @Override
-  public boolean hasInPending() {
-    return !pendingInPublishes.isEmpty();
   }
 
   @Override
@@ -147,18 +142,6 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
           .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId) != null;
     } finally {
       pendingOutPublishes.readUnlock(stamp);
-    }
-  }
-
-  @Override
-  public boolean hasInPending(int messageId) {
-    long stamp = pendingInPublishes.readLock();
-    try {
-      return pendingInPublishes
-          .iterations()
-          .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId) != null;
-    } finally {
-      pendingInPublishes.readUnlock(stamp);
     }
   }
 
@@ -182,15 +165,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void updateInPendingPacket(MqttClient client, TrackableMessage response) {
-    updatePendingPacket(client, response, pendingInPublishes, clientId);
-  }
-
-  @Override
   public void clear() {
-    pendingInPublishes
-        .operations()
-        .inWriteLock(Collection::clear);
     pendingOutPublishes
         .operations()
         .inWriteLock(Collection::clear);
@@ -198,9 +173,6 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
 
   @Override
   public void onPersisted() {
-    pendingInPublishes
-        .operations()
-        .inWriteLock(Collection::clear);
   }
 
   @Override

@@ -34,7 +34,7 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
   private static final int PACKET_LENGTH_START_BYTE = 2;
 
   private static final ByteFunction<MqttInMessage>[] PACKET_FACTORIES = ArrayUtils.array(
-      info -> {
+      _ -> {
         throw new NoSuchElementException("Unknown MQTT message with id:[0]");
       },
       ConnectMqttInMessage::new,

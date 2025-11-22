@@ -7,23 +7,27 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish release (QoS 2 delivery part 2).
  */
 @Getter
-@Accessors(fluent = true, chain = false)
-public class PublishReleaseMqttInMessage extends MqttInMessage implements TrackableMessage {
+@Accessors
+@FieldDefaults(level = AccessLevel.PROTECTED)
+public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implements TrackableMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASED.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASE.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("reasonCode", "messageId");
+    DebugUtils.registerIncludedFields("reasonCode");
   }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -47,16 +51,14 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements Tracka
        */
       MqttMessageProperty.USER_PROPERTY);
 
+  @Nullable
   PublishReleaseReasonCode reasonCode;
-  int messageId;
-
   // properties
+  @Nullable
   String reason;
 
   public PublishReleaseMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.reasonCode = PublishReleaseReasonCode.SUCCESS;
-    this.reason = "";
   }
 
   @Override
@@ -72,13 +74,11 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements Tracka
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.readVariableHeader(connection, buffer);
-
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718055
-    messageId = readShortUnsigned(buffer);
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
       reasonCode = PublishReleaseReasonCode.of(readByteUnsigned(buffer));
+    } else {
+      reasonCode = PublishReleaseReasonCode.SUCCESS;
     }
   }
 

@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.message.out.factory;
 
 import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
@@ -12,6 +13,7 @@ import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.DisconnectMqtt311OutMessage;
@@ -21,12 +23,12 @@ import javasabr.mqtt.network.message.out.PingResponseMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.PublishAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.PublishCompleteMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.PublishMqtt311OutMessage;
-import javasabr.mqtt.network.message.out.PublishMqttOutMessage;
 import javasabr.mqtt.network.message.out.PublishReceivedMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.PublishReleaseMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.UnsubscribeAckMqtt311OutMessage;
 import javasabr.rlib.collections.array.Array;
+import org.jspecify.annotations.Nullable;
 
 public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
@@ -54,26 +56,26 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
   }
 
   @Override
-  public PublishMqttOutMessage newPublish(
+  public MqttOutMessage newPublish(
       int messageId,
       QoS qos,
-      boolean retained,
+      boolean retain,
       boolean duplicate,
-      String topicName,
+      TopicName topicName,
       int topicAlias,
       byte[] payload,
-      boolean stringPayload,
-      String responseTopic,
-      byte[] correlationData,
+      PayloadFormat payloadFormat,
+      @Nullable TopicName responseTopic,
+      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
-    return new PublishMqtt311OutMessage(messageId, qos, retained, duplicate, topicName, payload);
+    return new PublishMqtt311OutMessage(messageId, qos, retain, duplicate, topicName, payload);
   }
 
   @Override
   public MqttOutMessage newPublishAck(
       int messageId,
       PublishAckReasonCode reasonCode,
-      String reason,
+      @Nullable String reason,
       Array<StringPair> userProperties) {
     return new PublishAckMqtt311OutMessage(messageId);
   }
@@ -140,7 +142,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
       int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     return new PublishReceivedMqtt311OutMessage(messageId);
   }
 
@@ -149,7 +151,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
       int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     return new PublishCompleteMqtt311OutMessage(messageId);
   }
 }

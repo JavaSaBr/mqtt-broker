@@ -5,19 +5,17 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
-import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
+import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession;
-import javasabr.mqtt.network.session.TopicNameMapping;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
@@ -55,9 +53,7 @@ public class PublishMqttInMessageHandler
       MqttSession session,
       PublishMqttInMessage publishMessage) {
 
-    MessageTacker messageTacker = session.inMessageTracker();
-    if (!validateMessageId(client, publishMessage, messageTacker)
-        || !validateBaseFields(connection, client, publishMessage)) {
+    if (!validateBaseFields(connection, client, publishMessage)) {
       return;
     }
 
@@ -99,11 +95,6 @@ public class PublishMqttInMessageHandler
       }
     }
 
-    int messageId = publishMessage.messageId();
-    if (messageId > 0) {
-      messageTacker.add(messageId);
-    }
-
     TopicName topicName;
 
     if (providedRawTopicName) {
@@ -123,8 +114,8 @@ public class PublishMqttInMessageHandler
     byte[] payload = publishMessage.payload();
 
     //noinspection DataFlowIssue everything is already validated
-    publishReceivingService.processPublish(client, new Publish(
-        messageId,
+    Publish publish = new Publish(
+        publishMessage.messageId(),
         publishMessage.qos(),
         topicName,
         responseTopicName,
@@ -137,25 +128,9 @@ public class PublishMqttInMessageHandler
         publishMessage.messageExpiryInterval(),
         topicAlias,
         publishMessage.payloadFormat(),
-        publishMessage.userProperties()));
-  }
+        publishMessage.userProperties());
 
-  private boolean validateMessageId(
-      ExternalMqttClient client,
-      PublishMqttInMessage publishMessage,
-      MessageTacker messageTacker) {
-    int messageId = publishMessage.messageId();
-    QoS requestedQos = publishMessage.qos();
-    if (messageId > 0 && messageTacker.isInUse(messageId)) {
-      log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
-      handleMessageIdIsInUse(client, publishMessage);
-      return false;
-    } else if (messageId == MqttProperties.MESSAGE_ID_IS_NOT_SET && QoS.AT_MOST_ONCE != requestedQos) {
-      log.warning(client.clientId(), messageId, "[%s] Missed MessageId"::formatted);
-      handleMissedMessageId(client);
-      return false;
-    }
-    return true;
+    publishReceivingService.processPublish(client, publish);
   }
 
   private boolean validateBaseFields(
@@ -170,7 +145,7 @@ public class PublishMqttInMessageHandler
 
     QoS requestedQos = publishMessage.qos();
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    if (connectionConfig.maxQos().isLower(requestedQos)) {
+    if (connectionConfig.maxQos().isLowerThan(requestedQos)) {
       log.warning(client.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
       handleNotSupportedQos(client);
       return false;
@@ -198,22 +173,6 @@ public class PublishMqttInMessageHandler
       return false;
     }
     return true;
-  }
-
-  private void handleMessageIdIsInUse(ExternalMqttClient client, PublishMqttInMessage publishMessage) {
-    client.send(messageOutFactoryService
-        .resolveFactory(client)
-        .newPublishAck(publishMessage.messageId(), PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
-  }
-
-  private void handleMissedMessageId(ExternalMqttClient client) {
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newPublishAck(
-            MqttProperties.MESSAGE_ID_IS_NOT_SET,
-            PublishAckReasonCode.UNSPECIFIED_ERROR,
-            MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
-    client.send(response);
   }
 
   private void handleNotSupportedQos(ExternalMqttClient client) {
@@ -270,16 +229,14 @@ public class PublishMqttInMessageHandler
     int messagedId = publishMessage.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newPublishAck(messagedId, PublishAckReasonCode.TOPIC_NAME_INVALID);
-
-    // without messageId we don't need to wait for delivering the response
+        .newDisconnect(client, DisconnectReasonCode.TOPIC_NAME_INVALID);
+    // without messageId we do not need to clean it
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      client.send(response);
+      client.closeWithReason(response);
       return;
     }
-
     client
-        .sendWithFeedback(response)
+        .closeWithReason(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messagedId));

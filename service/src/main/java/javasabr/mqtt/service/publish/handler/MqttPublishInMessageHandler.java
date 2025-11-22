@@ -8,5 +8,5 @@ public interface MqttPublishInMessageHandler {
 
   QoS qos();
 
-  void handle(MqttClient client, Publish packet);
+  void handle(MqttClient client, Publish publish);
 }

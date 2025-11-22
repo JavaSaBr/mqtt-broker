@@ -1,9 +1,9 @@
 package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;

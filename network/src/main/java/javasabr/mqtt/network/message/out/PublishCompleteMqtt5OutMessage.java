@@ -10,11 +10,16 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
+@Getter
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMessage {
 
@@ -41,17 +46,18 @@ public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMes
 
   Array<StringPair> userProperties;
   PublishCompletedReasonCode reasonCode;
+  @Nullable
   String reason;
 
   public PublishCompleteMqtt5OutMessage(int messageId, PublishCompletedReasonCode reasonCode) {
-    this(messageId, reasonCode, Array.empty(StringPair.class), StringUtils.EMPTY);
+    this(messageId, reasonCode, MqttOutMessage.EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
   }
 
   public PublishCompleteMqtt5OutMessage(
       int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     super(messageId);
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;
@@ -67,7 +73,7 @@ public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMes
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.writeVariableHeader(connection, buffer);
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
-    writeByte(buffer, reasonCode.getValue());
+    writeByte(buffer, reasonCode.code());
   }
 
   @Override

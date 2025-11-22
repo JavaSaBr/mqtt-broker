@@ -7,9 +7,9 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -75,7 +75,7 @@ public class PublishAckMqttInMessage extends MqttInMessage implements TrackableM
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishAckReasonCode.ofValue(readByteUnsigned(buffer));
+      reasonCode = PublishAckReasonCode.ofCode(readByteUnsigned(buffer));
     }
   }
 

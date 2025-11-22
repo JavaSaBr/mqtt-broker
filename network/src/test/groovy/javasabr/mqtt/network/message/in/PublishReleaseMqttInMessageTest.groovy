@@ -16,7 +16,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
         def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reason() == ""
+        packet.reason() == null
         packet.messageId() == messageId
         packet.reasonCode() == PublishReleaseReasonCode.SUCCESS
         packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
@@ -30,7 +30,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
+          it.put(PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value())
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -46,14 +46,14 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishReleaseReasonCode.SUCCESS.value)
+          it.put(PublishReleaseReasonCode.SUCCESS.value())
           it.putMbi(0)
         }
         packet = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
         result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reason() == ""
+        packet.reason() == null
         packet.messageId() == messageId
         packet.reasonCode() == PublishReleaseReasonCode.SUCCESS
         packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES

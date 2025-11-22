@@ -5,9 +5,9 @@ import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationMqtt5OutMessage extends MqttOutMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.AUTHENTICATE.ordinal();
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.AUTHENTICATION.ordinal();
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -70,7 +70,7 @@ public class AuthenticationMqtt5OutMessage extends MqttOutMessage {
   @Override
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
-    writeByte(buffer, reasonCode.getValue());
+    writeByte(buffer, reasonCode.value());
   }
 
   @Override

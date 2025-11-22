@@ -7,9 +7,9 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -57,7 +57,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
   // properties
   String reason;
 
-  public PublishReceivedMqttInMessage(byte messageFlags) {
+  public  PublishReceivedMqttInMessage(byte messageFlags) {
     super(messageFlags);
     this.reasonCode = PublishReceivedReasonCode.SUCCESS;
     this.reason = StringUtils.EMPTY;
@@ -72,7 +72,7 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
 
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReceivedReasonCode.ofValue(readByteUnsigned(buffer));
+      reasonCode = PublishReceivedReasonCode.ofCode(readByteUnsigned(buffer));
     }
   }
 
