@@ -3,6 +3,7 @@ package javasabr.mqtt.network
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.data.type.MqttDataType
 import javasabr.mqtt.model.data.type.StringPair
+import javasabr.mqtt.model.reason.code.ReasonCode
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.util.MqttDataUtils
 import javasabr.rlib.collections.array.Array
@@ -55,6 +56,11 @@ class SpecificationNetworkExtensions extends Specification {
 
   static ByteBuffer putBytes(ByteBuffer self, byte[] value) {
     writer.writeBytes(self, value)
+    return self
+  }
+
+  static ByteBuffer put(ByteBuffer self, ReasonCode reasonCode) {
+    self.put((byte) reasonCode.code())
     return self
   }
 

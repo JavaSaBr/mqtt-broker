@@ -102,7 +102,7 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
       case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 }

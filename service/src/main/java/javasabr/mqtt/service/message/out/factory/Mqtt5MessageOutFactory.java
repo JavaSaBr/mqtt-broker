@@ -101,7 +101,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       PublishAckReasonCode reasonCode,
       @Nullable String reason,
       Array<StringPair> userProperties) {
-    return new PublishAckMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
+    return new PublishAckMqtt5OutMessage(messageId, reasonCode, reason, userProperties);
   }
 
   @Override

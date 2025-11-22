@@ -134,7 +134,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
       case SUBSCRIPTION_IDENTIFIER -> subscriptionId = (int) value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 

@@ -29,6 +29,6 @@ class PublishAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         reader.reasonCode() == PublishAckReasonCode.SUCCESS
         reader.messageId() == messageId
         reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        reader.reason() == ""
+        reader.reason() == null
   }
 }

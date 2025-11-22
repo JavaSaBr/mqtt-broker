@@ -1,23 +1,31 @@
 package javasabr.mqtt.network.message.out
 
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.NumberUtils
 
 class PublishCompleteMqtt5OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishCompleteMqtt5OutMessage(
+        def outMessage = new PublishCompleteMqtt5OutMessage(
             messageId,
             PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
             userProperties,
             reasonString)
     when:
+        def typeAndFlags = outMessage.messageTypeAndFlags()
+        byte type = NumberUtils.getHighByteBits(typeAndFlags);
+        byte info = NumberUtils.getLowByteBits(typeAndFlags);
+    then:
+        MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_COMPLETE
+    when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt5Connection, it)
+          outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishCompleteMqttInMessage(0b0111_0000 as byte)
+        def reader = new PublishCompleteMqttInMessage(0 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

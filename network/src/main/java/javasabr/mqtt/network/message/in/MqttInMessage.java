@@ -258,8 +258,12 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     return data;
   }
 
-  protected void unexpectedProperty(MqttMessageProperty property) {
-    throw new MalformedProtocolMqttException("Unsupported property:[" + property + "]");
+  protected void unsupportedProperty(MqttMessageProperty property) {
+    throw new MalformedProtocolMqttException("Unsupported property:[%s]".formatted(property));
+  }
+
+  protected void alreadyPresentedProperty(MqttMessageProperty property) {
+    throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
   }
 
   @Override

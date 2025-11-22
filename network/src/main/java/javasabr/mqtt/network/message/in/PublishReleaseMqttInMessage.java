@@ -51,7 +51,6 @@ public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implemen
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  @Nullable
   PublishReleaseReasonCode reasonCode;
   // properties
   @Nullable
@@ -59,6 +58,7 @@ public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implemen
 
   public PublishReleaseMqttInMessage(byte messageFlags) {
     super(messageFlags);
+    reasonCode = PublishReleaseReasonCode.SUCCESS;
   }
 
   @Override
@@ -76,9 +76,7 @@ public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implemen
     super.readVariableHeader(connection, buffer);
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReleaseReasonCode.of(readByteUnsigned(buffer));
-    } else {
-      reasonCode = PublishReleaseReasonCode.SUCCESS;
+      reasonCode = PublishReleaseReasonCode.ofCode(readByteUnsigned(buffer));
     }
   }
 
@@ -96,8 +94,13 @@ public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implemen
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 }
