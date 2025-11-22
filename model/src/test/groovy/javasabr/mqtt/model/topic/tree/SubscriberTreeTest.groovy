@@ -4,9 +4,9 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.subscriber.SingleSubscriber
+import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree
 import javasabr.mqtt.model.subscribtion.Subscription
 import javasabr.mqtt.model.subscribtion.SubscriptionOwner
-import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree
 import javasabr.mqtt.model.subscription.TestSubscriptionOwner
 import javasabr.mqtt.model.topic.SharedTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter
