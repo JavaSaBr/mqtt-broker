@@ -14,7 +14,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
           it.putShort(messageId)
         }
     when:
-        def inMessage = new PublishCompleteMqttInMessage(0 as byte)
+        def inMessage = new PublishCompleteMqttInMessage(PublishCompleteMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -37,7 +37,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def inMessage = new PublishCompleteMqttInMessage(0 as byte)
+        def inMessage = new PublishCompleteMqttInMessage(PublishCompleteMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -51,7 +51,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND)
           it.putMbi(0)
         }
-        inMessage = new PublishCompleteMqttInMessage(0 as byte)
+        inMessage = new PublishCompleteMqttInMessage(PublishCompleteMqttInMessage.MESSAGE_FLAGS)
         result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -74,7 +74,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def inMessage = new PublishCompleteMqttInMessage(0 as byte)
+        def inMessage = new PublishCompleteMqttInMessage(PublishCompleteMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result

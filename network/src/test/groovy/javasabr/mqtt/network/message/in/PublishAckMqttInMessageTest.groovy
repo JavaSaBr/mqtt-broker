@@ -13,7 +13,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putShort(messageId)
         }
     when:
-        def inMessage = new PublishAckMqttInMessage(0 as byte)
+        def inMessage = new PublishAckMqttInMessage(PublishAckMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -37,7 +37,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def inMessage = new PublishAckMqttInMessage(0 as byte)
+        def inMessage = new PublishAckMqttInMessage(PublishAckMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -52,7 +52,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(PublishAckReasonCode.UNSPECIFIED_ERROR)
           it.putMbi(0)
         }
-        def inMessage2 = new PublishAckMqttInMessage(0 as byte)
+        def inMessage2 = new PublishAckMqttInMessage(PublishAckMqttInMessage.MESSAGE_FLAGS)
         def result2 = inMessage2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
     then:
         result2
@@ -76,7 +76,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def inMessage = new PublishAckMqttInMessage(0 as byte)
+        def inMessage = new PublishAckMqttInMessage(PublishAckMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result

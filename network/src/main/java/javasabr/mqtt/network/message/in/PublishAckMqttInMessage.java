@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 public class PublishAckMqttInMessage extends TrackableMqttInMessage implements TrackableMessage {
 
   private static final int MESSAGE_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "messageId");
@@ -68,7 +69,7 @@ public class PublishAckMqttInMessage extends TrackableMqttInMessage implements T
 
   @Override
   protected boolean validMessageFlags(byte messageFlags) {
-    return messageFlags == 0b0000_0000;
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override

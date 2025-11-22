@@ -14,7 +14,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.putShort(messageId)
         }
     when:
-        def inMessage = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new PublishReleaseMqttInMessage(PublishReleaseMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -37,7 +37,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def inMessage = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new PublishReleaseMqttInMessage(PublishReleaseMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -51,7 +51,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(PublishReleaseReasonCode.SUCCESS)
           it.putMbi(0)
         }
-        inMessage = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
+        inMessage = new PublishReleaseMqttInMessage(PublishReleaseMqttInMessage.MESSAGE_FLAGS)
         result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
@@ -74,7 +74,7 @@ class PublishReleaseMqttInMessageTest extends BaseMqttInMessageTest {
           it.put(propertiesBuffer)
         }
     when:
-        def inMessage = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new PublishReleaseMqttInMessage(PublishReleaseMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result
