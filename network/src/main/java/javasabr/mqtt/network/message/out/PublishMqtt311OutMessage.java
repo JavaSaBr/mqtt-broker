@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
 

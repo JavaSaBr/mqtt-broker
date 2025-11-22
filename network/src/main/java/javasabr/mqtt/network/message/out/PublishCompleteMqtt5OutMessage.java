@@ -10,11 +10,16 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
+@Getter
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMessage {
 
@@ -41,6 +46,7 @@ public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMes
 
   Array<StringPair> userProperties;
   PublishCompletedReasonCode reasonCode;
+  @Nullable
   String reason;
 
   public PublishCompleteMqtt5OutMessage(int messageId, PublishCompletedReasonCode reasonCode) {
@@ -51,7 +57,7 @@ public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMes
       int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     super(messageId);
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;

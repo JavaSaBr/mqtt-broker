@@ -42,7 +42,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
         disconnectReason.reason() == ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED
-        disconnectReason.serverReference() == ""
+        disconnectReason.serverReference() == null
   }
 
   def "should response that message id is in use"() {
@@ -164,8 +164,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         subscribeAck.messageId() == expectedMessageId
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
-        disconnectReason.reason() == ""
-        disconnectReason.serverReference() == ""
+        disconnectReason.reason() == null
+        disconnectReason.serverReference() == null
   }
 
   def "should close connection by trying to subscribe not supported shared topic filter"() {
@@ -197,8 +197,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         subscribeAck.messageId() == expectedMessageId
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
-        disconnectReason.reason() == ""
-        disconnectReason.serverReference() == ""
+        disconnectReason.reason() == null
+        disconnectReason.serverReference() == null
   }
 
   def "should close connection by reason MQTT protocol error"() {
@@ -216,7 +216,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
         disconnectReason.reason() == "Unexpected flags bits:0b0000_0000"
-        disconnectReason.serverReference() == ""
+        disconnectReason.serverReference() == null
   }
 
   def "should reuse the same message if from previous request"() {

@@ -99,7 +99,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   public MqttOutMessage newPublishAck(
       int messageId,
       PublishAckReasonCode reasonCode,
-      String reason,
+      @Nullable String reason,
       Array<StringPair> userProperties) {
     return new PublishAckMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
@@ -162,7 +162,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     return new PublishReceivedMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 
@@ -171,7 +171,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       int messageId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     return new PublishCompleteMqtt5OutMessage(messageId, reasonCode, userProperties, reason);
   }
 }

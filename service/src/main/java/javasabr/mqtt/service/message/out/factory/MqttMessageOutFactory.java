@@ -124,14 +124,14 @@ public abstract class MqttMessageOutFactory {
   public abstract MqttOutMessage newPublishAck(
       int messageId,
       PublishAckReasonCode reasonCode,
-      String reason,
+      @Nullable String reason,
       Array<StringPair> userProperties);
 
   public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode) {
-    return newPublishAck(messageId, reasonCode, StringUtils.EMPTY, EMPTY_USER_PROPERTIES);
+    return newPublishAck(messageId, reasonCode, null, EMPTY_USER_PROPERTIES);
   }
 
-  public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode, String reason) {
+  public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode, @Nullable String reason) {
     return newPublishAck(messageId, reasonCode, reason, EMPTY_USER_PROPERTIES);
   }
 
@@ -173,40 +173,30 @@ public abstract class MqttMessageOutFactory {
       MqttClient client,
       DisconnectReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason,
-      String serverReference);
+      @Nullable String reason,
+      @Nullable String serverReference);
 
   public MqttOutMessage newDisconnect(MqttClient client, DisconnectReasonCode reasonCode) {
     return newDisconnect(
         client,
         reasonCode,
         EMPTY_USER_PROPERTIES,
-        StringUtils.EMPTY,
-        StringUtils.EMPTY);
+        null,
+        null);
   }
 
   public MqttOutMessage newDisconnect(
       MqttClient client,
       DisconnectReasonCode reasonCode,
       Array<StringPair> userProperties) {
-    return newDisconnect(
-        client,
-        reasonCode,
-        userProperties,
-        StringUtils.EMPTY,
-        StringUtils.EMPTY);
+    return newDisconnect(client, reasonCode, userProperties, null, null);
   }
 
   public MqttOutMessage newDisconnect(
       MqttClient client,
       DisconnectReasonCode reasonCode,
-      String reason) {
-    return newDisconnect(
-        client,
-        reasonCode,
-        EMPTY_USER_PROPERTIES,
-        reason,
-        StringUtils.EMPTY);
+      @Nullable String reason) {
+    return newDisconnect(client, reasonCode, EMPTY_USER_PROPERTIES, reason, null);
   }
 
   public abstract MqttOutMessage newAuthenticate(
@@ -245,19 +235,19 @@ public abstract class MqttMessageOutFactory {
       int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason);
+      @Nullable String reason);
 
   public MqttOutMessage newPublishReceived(int messageId, PublishReceivedReasonCode reasonCode) {
-    return newPublishReceived(messageId, reasonCode, EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
+    return newPublishReceived(messageId, reasonCode, EMPTY_USER_PROPERTIES, null);
   }
 
   public abstract MqttOutMessage newPublishCompleted(
       int packetId,
       PublishCompletedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason);
+      @Nullable String reason);
 
   public MqttOutMessage newPublishCompleted(int packetId, PublishCompletedReasonCode reasonCode) {
-    return newPublishCompleted(packetId, reasonCode, EMPTY_USER_PROPERTIES, StringUtils.EMPTY);
+    return newPublishCompleted(packetId, reasonCode, EMPTY_USER_PROPERTIES, null);
   }
 }

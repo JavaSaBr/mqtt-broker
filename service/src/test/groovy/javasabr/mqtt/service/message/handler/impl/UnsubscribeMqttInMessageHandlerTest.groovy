@@ -35,7 +35,7 @@ class UnsubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecificatio
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
         disconnectReason.reason() == ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED
-        disconnectReason.serverReference() == ""
+        disconnectReason.serverReference() == null
   }
 
   def "should response that message id is in use"() {
@@ -131,7 +131,7 @@ class UnsubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecificatio
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
         disconnectReason.reason() == "Unexpected flags bits:0b0000_0000"
-        disconnectReason.serverReference() == ""
+        disconnectReason.serverReference() == null
   }
 
   def "should reuse the same message if from previous request"() {

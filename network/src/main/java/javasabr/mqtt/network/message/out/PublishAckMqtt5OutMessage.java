@@ -12,12 +12,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
 
@@ -43,14 +44,15 @@ public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
       MqttMessageProperty.USER_PROPERTY);
 
   Array<StringPair> userProperties;
-  String reason;
   PublishAckReasonCode reasonCode;
+  @Nullable
+  String reason;
 
   public PublishAckMqtt5OutMessage(
       int messageId,
       PublishAckReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     super(messageId);
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;

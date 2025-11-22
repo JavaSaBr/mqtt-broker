@@ -10,8 +10,10 @@ import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.network.MqttConnection;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -19,6 +21,7 @@ import org.jspecify.annotations.Nullable;
  */
 @Getter
 @Accessors
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASE.ordinal();

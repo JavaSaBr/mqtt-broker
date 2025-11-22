@@ -13,8 +13,8 @@ import org.jspecify.annotations.Nullable;
 
 @Getter
 @Setter
+@Accessors
 @AllArgsConstructor
-@Accessors(fluent = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
 

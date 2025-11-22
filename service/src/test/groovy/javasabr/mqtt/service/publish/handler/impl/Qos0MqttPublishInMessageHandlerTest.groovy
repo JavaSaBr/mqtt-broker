@@ -5,11 +5,10 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.subscribtion.Subscription
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
-import javasabr.mqtt.service.IntegrationServiceSpecification
 import javasabr.mqtt.service.TestExternalMqttClient
 import javasabr.rlib.collections.array.Array
 
-class Qos0MqttPublishInMessageHandlerTest extends IntegrationServiceSpecification {
+class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandlerTest {
 
   def "should not provide any feedback for accepted publish with subscribers"() {
     given:
