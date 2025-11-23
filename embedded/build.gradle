@@ -3,10 +3,10 @@ plugins {
   id("configure-java")
 }
 
-description = "The module to launch MQTT Broker as a part of another application"
+description = "The module to embed MQTT Broker as a part to another application"
 
 dependencies {
-  implementation projects.service
+  implementation projects.coreService
   implementation libs.rlib.logger.slf4j
 
   testImplementation projects.testSupport

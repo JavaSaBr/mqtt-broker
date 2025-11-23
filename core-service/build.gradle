@@ -4,10 +4,11 @@ plugins {
   id("groovy")
 }
 
+description = "Provides interfaces and minimal implementation of all required services for MQTT Broker"
+
 dependencies {
   api projects.network
 
   testImplementation projects.testSupport
-  testImplementation libs.rlib.logger.impl
   testImplementation testFixtures(projects.network)
 }

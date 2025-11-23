@@ -4,10 +4,11 @@ plugins {
   id("groovy")
 }
 
+description = "Define most of domain classes"
+
 dependencies {
   api projects.base
 
   testImplementation projects.testSupport
-  testImplementation libs.rlib.logger.impl
   testFixturesApi projects.testSupport
 }
