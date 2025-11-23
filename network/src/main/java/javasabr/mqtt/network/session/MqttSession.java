@@ -2,6 +2,10 @@ package javasabr.mqtt.network.session;
 
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.ActiveSubscriptions;
+import javasabr.mqtt.model.session.MessageTacker;
+import javasabr.mqtt.model.session.ProcessingPublishes;
+import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.network.MqttClient;
 
 public interface MqttSession {
@@ -41,23 +45,19 @@ public interface MqttSession {
   MessageTacker inMessageTracker();
   MessageTacker outMessageTracker();
 
+  ProcessingPublishes inProcessingPublishes();
+  ProcessingPublishes outProcessingPublishes();
+
   ActiveSubscriptions activeSubscriptions();
 
   TopicNameMapping topicNameMapping();
 
   boolean hasOutPending();
 
-  boolean hasInPending();
-
-  boolean hasInPending(int messageId);
 
   boolean hasOutPending(int messageId);
 
   void registerOutPublish(Publish publish, PendingMessageHandler handler);
 
-  void registerInPublish(Publish publish, PendingMessageHandler handler);
-
   void updateOutPendingPacket(MqttClient client, TrackableMessage response);
-
-  void updateInPendingPacket(MqttClient client, TrackableMessage response);
 }

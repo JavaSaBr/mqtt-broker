@@ -105,7 +105,7 @@ public enum ConnectAckReasonCode {
 
     var maxId = Stream
         .of(values())
-        .mapToInt(ConnectAckReasonCode::getMqtt5)
+        .mapToInt(ConnectAckReasonCode::mqtt5)
         .map(value -> Byte.toUnsignedInt((byte) value))
         .max()
         .orElse(0);

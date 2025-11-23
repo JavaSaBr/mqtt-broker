@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.session;
+package javasabr.mqtt.model.session;
 
 import javasabr.mqtt.model.topic.TopicName;
 import org.jspecify.annotations.Nullable;

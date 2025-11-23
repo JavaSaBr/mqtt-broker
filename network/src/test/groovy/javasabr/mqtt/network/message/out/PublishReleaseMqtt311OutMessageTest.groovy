@@ -22,6 +22,6 @@ class PublishReleaseMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         reader.reasonCode() == PublishReleaseReasonCode.SUCCESS
         reader.messageId() == messageId
         reader.userProperties() == Array.empty(StringPair)
-        reader.reason() == ""
+        reader.reason() == null
   }
 }

@@ -58,7 +58,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
   public static final publishTopic = TopicName.valueOf("publish/Topic")
-  public static final responseTopic = "response/Topic"
+  public static final responseTopic = TopicName.valueOf("response/Topic")
   public static final topicFilter = "topic/Filter"
   public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
   public static final topicFilter1Obj5 = new Subscription(

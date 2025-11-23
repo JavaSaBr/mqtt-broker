@@ -13,6 +13,7 @@ import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
+import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler
@@ -29,9 +30,13 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import java.nio.channels.AsynchronousSocketChannel
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 
-class IntegrationServiceSpecification extends Specification {
+abstract class IntegrationServiceSpecification extends Specification {
+
+  @Shared
+  def testPayload = "testpayload".getBytes(StandardCharsets.UTF_8)
 
   @Shared
   def clientIdGenerator = new AtomicInteger();
@@ -49,24 +54,33 @@ class IntegrationServiceSpecification extends Specification {
   ])
 
   @Shared
-  def publishDeliveringService = new DefaultPublishDeliveringService([
+  def defaultPublishDeliveringService = new DefaultPublishDeliveringService([
       new Qos0MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
       new Qos1MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
       new Qos2MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService)
   ])
 
   @Shared
+  def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(
+      defaultSubscriptionService,
+      defaultPublishDeliveringService,
+      defaultMessageOutFactoryService);
+
+  @Shared
   def publishReceivingService = new DefaultPublishReceivingService([
-      new Qos0MqttPublishInMessageHandler(defaultSubscriptionService, publishDeliveringService),
+      qos0MqttPublishInMessageHandler,
       new Qos1MqttPublishInMessageHandler(
           defaultSubscriptionService,
-          publishDeliveringService,
+          defaultPublishDeliveringService,
           defaultMessageOutFactoryService),
       new Qos2MqttPublishInMessageHandler(
           defaultSubscriptionService,
-          publishDeliveringService,
+          defaultPublishDeliveringService,
           defaultMessageOutFactoryService)
   ])
+
+  @Shared
+  def defaultPublishReleaseMqttInMessageHandler = new PublishReleaseMqttInMessageHandler(defaultMessageOutFactoryService);
 
   @Shared
   def defaultBufferAllocator = new DefaultBufferAllocator(SimpleServerNetworkConfig.builder().build())

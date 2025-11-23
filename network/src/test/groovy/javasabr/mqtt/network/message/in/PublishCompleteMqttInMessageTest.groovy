@@ -30,7 +30,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
+          it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.code() as byte)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -46,7 +46,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.value)
+          it.put(PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND.code() as byte)
           it.putMbi(0)
         }
         packet = new PublishCompleteMqttInMessage(0b0111_0000 as byte)

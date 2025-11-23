@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.message;
+package javasabr.mqtt.model.message;
 
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -41,12 +41,12 @@ public enum MqttMessageType {
   /**
    * A PUBREL Packet is the response to a PUBREC Packet. It is the third packet of the QoS 2 protocol exchange.
    */
-  PUBLISH_RELEASED(6),
+  PUBLISH_RELEASE(6),
   /**
    * The PUBCOMP packet is the response to a PUBREL packet. It is the fourth and final packet of the QoS 2 protocol
    * exchange.
    */
-  PUBLISH_COMPLETED(7),
+  PUBLISH_COMPLETE(7),
   /**
    * The SUBSCRIBE Packet is sent from the Client to the Server to create one or more Subscriptions. Each Subscription
    * registers a Client’s interest in one or more Topics. The Server sends PUBLISH Packets to the Client in order to
@@ -98,7 +98,7 @@ public enum MqttMessageType {
    * such as challenge / response authentication. It is a Protocol Error for the Client or Server to send an AUTH packet
    * if the CONNECT packet did not contain the same Authentication Method.
    */
-  AUTHENTICATE(15),
+  AUTHENTICATION(15),
 
   /**
    * Not supported
@@ -108,7 +108,7 @@ public enum MqttMessageType {
   private static final MqttMessageType[] VALUES = values();
 
   public static MqttMessageType fromByte(byte messageType) {
-    if (messageType < 0 || messageType > AUTHENTICATE.typeIndex()) {
+    if (messageType < 0 || messageType > AUTHENTICATION.typeIndex()) {
       log.warning(messageType, "Invalid message type:[%s]"::formatted);
       return INVALID;
     } else {

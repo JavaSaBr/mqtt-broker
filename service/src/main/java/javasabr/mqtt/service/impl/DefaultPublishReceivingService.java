@@ -45,15 +45,16 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
 
   @Override
   public void processPublish(MqttClient client, Publish publish) {
-    log.debug(client.clientId(), publish, "[%s] Processing received publish: [%s]"::formatted);
+    log.debug(client.clientId(), publish, "[%s] Start processing publish:%s"::formatted);
     QoS qos = publish.qos();
     try {
       //noinspection DataFlowIssue
       publishInHandlers[qos.level()].handle(client, publish);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(client.clientId(), publish, "[%s] Received not supported publish message:[%s]"::formatted);
+      log.warning(client.clientId(), publish, "[%s] Received not supported publish:%s"::formatted);
     }
   }
+
 
   private static String buildServiceDescription(
       @Nullable MqttPublishInMessageHandler[] publishInMessageHandlers) {

@@ -1,13 +1,13 @@
 package javasabr.mqtt.service.message.handler.impl;
 
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MessageTacker;
 import javasabr.mqtt.network.session.MqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -49,13 +49,13 @@ public class UnsubscribeMqttInMessageHandler
 
     int messageId = unsubscribeMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
-    if (messageTacker.isInUse(messageId)) {
+    if (messageTacker.stored(messageId) != null) {
       log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
       handleMessageIdIsInUse(client, unsubscribeMessage);
       return;
     }
 
-    messageTacker.add(messageId);
+    messageTacker.add(messageId, MqttMessageType.UNSUBSCRIBE);
 
     Array<TopicFilter> topicFilters = unsubscribeMessage
         .rawTopicFilters()

@@ -15,11 +15,11 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.MqttSession;
@@ -232,7 +232,7 @@ public class ConnectInMqttInMessageHandler
     if (exception instanceof ConnectionRejectException cre) {
       MqttOutMessage feedback = messageOutFactoryService
           .resolveFactory(client)
-          .newConnectAck(client, cre.getReasonCode());
+          .newConnectAck(client, cre.reasonCode());
       client.closeWithReason(feedback);
       return true;
     }

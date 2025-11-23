@@ -1,9 +1,9 @@
 package javasabr.mqtt.service.session.impl;
 
 import java.util.concurrent.locks.StampedLock;
+import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.subscribtion.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
-import javasabr.mqtt.network.session.ActiveSubscriptions;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;

@@ -27,7 +27,7 @@ public enum AuthenticateReasonCode {
 
     var maxId = Stream
         .of(values())
-        .mapToInt(AuthenticateReasonCode::getValue)
+        .mapToInt(AuthenticateReasonCode::value)
         .max()
         .orElse(0);
 

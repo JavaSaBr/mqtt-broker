@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.in;
 
-import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.model.message.MqttMessageType;
 
 /**
  * PING response.
