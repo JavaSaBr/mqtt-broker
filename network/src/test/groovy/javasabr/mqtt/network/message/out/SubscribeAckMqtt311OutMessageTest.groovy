@@ -29,6 +29,6 @@ class SubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         reader.reasonCodes() == subscribeAckReasonCodes
         reader.messageId() == messageId
         reader.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
-        reader.reason() == ""
+        reader.reason() == null
   }
 }
