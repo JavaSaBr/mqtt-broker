@@ -11,5 +11,4 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
-  testImplementation testFixtures(projects.network)
 }
