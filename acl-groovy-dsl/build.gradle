@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
   implementation libs.groovy.all
-  api projects.model
+  api libs.rlib.collections
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
