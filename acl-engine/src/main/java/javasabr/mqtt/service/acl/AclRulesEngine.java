@@ -37,7 +37,7 @@ public class AclRulesEngine {
 
   public boolean authorize(String username, String clientId, String ipAddress, Action action, String topic) {
     CallId callId = new CallId(username, clientId, ipAddress, action, topic);
-    return permissionCache.getInWriteLock(callId, (map, call) -> map.getOrCompute(call, this::getPermission));
+    return permissionCache.getInWriteLock(callId, this, (map, call, eng) -> map.getOrCompute(call, eng::getPermission));
   }
 
   private boolean getPermission(CallId callId) {
