@@ -130,7 +130,7 @@ class UnsubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecificatio
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
-        disconnectReason.reason() == "Unexpected flags bits:0b0000_0000"
+        disconnectReason.reason() == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.UNSUBSCRIBE]"
         disconnectReason.serverReference() == null
   }
 
