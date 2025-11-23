@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
 public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
 
   static {
-    DebugUtils.registerIncludedFields("rawTopicFilters");
+    DebugUtils.registerIncludedFields("rawTopicFilters", "messageId");
   }
 
   public static final byte MESSAGE_FLAGS = 0b0000_0010;

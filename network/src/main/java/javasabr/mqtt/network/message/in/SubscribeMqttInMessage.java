@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * Subscribe request.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 

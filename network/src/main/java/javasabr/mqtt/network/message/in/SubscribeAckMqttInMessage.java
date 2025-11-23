@@ -3,6 +3,7 @@ package javasabr.mqtt.network.message.in;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
@@ -28,6 +29,10 @@ public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
 
   public static final byte MESSAGE_FLAGS = 0b0000_0000;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE_ACK.ordinal();
+
+  static {
+    DebugUtils.registerIncludedFields("reasonCodes", "messageId");
+  }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*

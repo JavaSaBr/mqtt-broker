@@ -3,7 +3,6 @@ package javasabr.mqtt.network.message.in
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
 import javasabr.mqtt.model.message.MqttMessageType
-import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
 import javasabr.rlib.common.util.BufferUtils
 

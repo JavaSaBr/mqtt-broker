@@ -1,27 +1,29 @@
 package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
 
-  def "should read packet correctly as mqtt 3.1.1"() {
+  def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
         }
     when:
-        def packet = new UnsubscribeAckMqttInMessage(0b1011_0000 as byte)
-        def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new UnsubscribeAckMqttInMessage(UnsubscribeAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reason() == ""
-        packet.messageId() == messageId
-        packet.reasonCodes() == MqttInMessage.EMPTY_USER_PROPERTIES
+        inMessage.reason() == null
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
   }
 
-  def "should read packet correctly as mqtt 5.0"() {
+  def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
@@ -31,40 +33,81 @@ class UnsubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putShort(messageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
-          it.put(UnsubscribeAckReasonCode.SUCCESS.value)
-          it.put(UnsubscribeAckReasonCode.SUCCESS.value)
-          it.put(UnsubscribeAckReasonCode.NOT_AUTHORIZED.value)
-          it.put(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
+          it.put(UnsubscribeAckReasonCode.SUCCESS)
+          it.put(UnsubscribeAckReasonCode.SUCCESS)
+          it.put(UnsubscribeAckReasonCode.NOT_AUTHORIZED)
+          it.put(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR)
         }
     when:
-        def packet = new UnsubscribeAckMqttInMessage(0b1011_0000 as byte)
-        def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new UnsubscribeAckMqttInMessage(UnsubscribeAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reason() == reasonString
-        packet.messageId() == messageId
-        packet.reasonCodes().size() == 4
-        packet.reasonCodes().get(0) == UnsubscribeAckReasonCode.SUCCESS
-        packet.reasonCodes().get(1) == UnsubscribeAckReasonCode.SUCCESS
-        packet.reasonCodes().get(2) == UnsubscribeAckReasonCode.NOT_AUTHORIZED
-        packet.reasonCodes().get(3) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
-        packet.userProperties() == userProperties
+        inMessage.reason() == reasonString
+        inMessage.messageId() == messageId
+        inMessage.userProperties() == userProperties
+        def reasonCodes = inMessage.reasonCodes()
+        reasonCodes.size() == 4
+        reasonCodes.get(0) == UnsubscribeAckReasonCode.SUCCESS
+        reasonCodes.get(1) == UnsubscribeAckReasonCode.SUCCESS
+        reasonCodes.get(2) == UnsubscribeAckReasonCode.NOT_AUTHORIZED
+        reasonCodes.get(3) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
     when:
-        dataBuffer = BufferUtils.prepareBuffer(512) {
+        def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putMbi(0)
-          it.put(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR.value)
-          it.put(UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR.value)
+          it.put(UnsubscribeAckReasonCode.UNSPECIFIED_ERROR)
+          it.put(UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR)
         }
-        packet = new UnsubscribeAckMqttInMessage(0b1011_0000 as byte)
-        result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage2 = new UnsubscribeAckMqttInMessage(UnsubscribeAckMqttInMessage.MESSAGE_FLAGS)
+        def result2 = inMessage2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
     then:
-        result
-        packet.reason() == ""
-        packet.messageId() == messageId
-        packet.reasonCodes().size() == 2
-        packet.reasonCodes().get(0) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
-        packet.reasonCodes().get(1) == UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
-        packet.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        result2
+        inMessage2.reason() == null
+        inMessage2.messageId() == messageId
+        inMessage2.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        def reasonCodes2 = inMessage2.reasonCodes()
+        reasonCodes2.size() == 2
+        reasonCodes2.get(0) == UnsubscribeAckReasonCode.UNSPECIFIED_ERROR
+        reasonCodes2.get(1) == UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
+  }
+
+  def "should not allow to put reason 2 times"() {
+    given:
+        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
+          it.putProperty(MqttMessageProperty.REASON_STRING, "reason2")
+          it.putProperty(MqttMessageProperty.REASON_STRING, "reason1")
+        }
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(propertiesBuffer.limit())
+          it.put(propertiesBuffer)
+          it.put(UnsubscribeAckReasonCode.SUCCESS)
+          it.put(UnsubscribeAckReasonCode.SUCCESS)
+        }
+    when:
+        def inMessage = new UnsubscribeAckMqttInMessage(UnsubscribeAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !result
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == "Property:[$MqttMessageProperty.REASON_STRING] is already presented in message:[$MqttMessageType.UNSUBSCRIBE_ACK]"
+  }
+
+  def "should not allow invalid message flags"() {
+    given:
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(0)
+          it.put(UnsubscribeAckReasonCode.SUCCESS)
+          it.put(UnsubscribeAckReasonCode.SUCCESS)
+        }
+    when:
+        def inMessage = new UnsubscribeAckMqttInMessage(0b0101_0101 as byte)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !result
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == "Unexpected message flags:[0b0101_0101] in message:[$MqttMessageType.UNSUBSCRIBE_ACK]"
   }
 }
