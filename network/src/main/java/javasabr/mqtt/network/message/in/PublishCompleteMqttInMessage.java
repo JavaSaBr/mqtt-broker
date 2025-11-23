@@ -14,16 +14,18 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
 @Getter
-@Accessors(fluent = true, chain = false)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishCompleteMqttInMessage extends MqttInMessage implements TrackableMessage {
+public class PublishCompleteMqttInMessage extends TrackableMqttInMessage implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETE.ordinal();
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "messageId");
@@ -51,15 +53,14 @@ public class PublishCompleteMqttInMessage extends MqttInMessage implements Track
       MqttMessageProperty.USER_PROPERTY);
 
   PublishCompletedReasonCode reasonCode;
-  int messageId;
 
   // properties
+  @Nullable
   String reason;
 
   public PublishCompleteMqttInMessage(byte messageFlags) {
     super(messageFlags);
     this.reasonCode = PublishCompletedReasonCode.SUCCESS;
-    this.reason = "";
   }
 
   @Override
@@ -68,12 +69,13 @@ public class PublishCompleteMqttInMessage extends MqttInMessage implements Track
   }
 
   @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
+  }
+
+  @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.readVariableHeader(connection, buffer);
-
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718083
-    messageId = readShortUnsigned(buffer);
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
       reasonCode = PublishCompletedReasonCode.ofCode(readByteUnsigned(buffer));
@@ -94,8 +96,13 @@ public class PublishCompleteMqttInMessage extends MqttInMessage implements Track
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 }

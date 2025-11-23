@@ -117,7 +117,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
         break;
       }
       default: {
-        unexpectedProperty(property);
+        unsupportedProperty(property);
       }
     }
   }
@@ -134,7 +134,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
         break;
       }
       default: {
-        unexpectedProperty(property);
+        unsupportedProperty(property);
       }
     }
   }

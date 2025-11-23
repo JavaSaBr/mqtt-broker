@@ -10,21 +10,22 @@ import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish received (QoS 2 delivery part 1).
  */
 @Getter
-@Accessors(fluent = true, chain = false)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishReceivedMqttInMessage extends MqttInMessage implements TrackableMessage {
+public class PublishReceivedMqttInMessage extends TrackableMqttInMessage implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RECEIVED.ordinal();
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
 
   static {
     DebugUtils.registerIncludedFields("reasonCode", "messageId");
@@ -52,24 +53,29 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
       MqttMessageProperty.USER_PROPERTY);
 
   PublishReceivedReasonCode reasonCode;
-  int messageId;
 
   // properties
+  @Nullable
   String reason;
 
   public  PublishReceivedMqttInMessage(byte messageFlags) {
     super(messageFlags);
     this.reasonCode = PublishReceivedReasonCode.SUCCESS;
-    this.reason = StringUtils.EMPTY;
+  }
+
+  @Override
+  public byte messageType() {
+    return MESSAGE_TYPE;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.readVariableHeader(connection, buffer);
-
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718050
-    messageId = readShortUnsigned(buffer);
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
     if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
       reasonCode = PublishReceivedReasonCode.ofCode(readByteUnsigned(buffer));
@@ -83,11 +89,6 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
   }
 
   @Override
-  public byte messageType() {
-    return MESSAGE_TYPE;
-  }
-
-  @Override
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
@@ -95,8 +96,13 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 }

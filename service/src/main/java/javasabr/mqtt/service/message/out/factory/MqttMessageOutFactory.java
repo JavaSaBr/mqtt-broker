@@ -131,7 +131,7 @@ public abstract class MqttMessageOutFactory {
     return newPublishAck(messageId, reasonCode, null, EMPTY_USER_PROPERTIES);
   }
 
-  public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode, @Nullable String reason) {
+  public MqttOutMessage newPublishAck(int messageId, PublishAckReasonCode reasonCode, String reason) {
     return newPublishAck(messageId, reasonCode, reason, EMPTY_USER_PROPERTIES);
   }
 
