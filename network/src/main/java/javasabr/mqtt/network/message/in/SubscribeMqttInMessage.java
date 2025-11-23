@@ -34,8 +34,8 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   private static final Array<RequestedSubscription> EMPTY_SUBSCRIPTIONS = Array.empty(RequestedSubscription.class);
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
   public static final byte MESSAGE_FLAGS = 0b0000_0010;
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("subscriptions");
