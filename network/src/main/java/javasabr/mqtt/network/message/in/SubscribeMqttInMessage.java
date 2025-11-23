@@ -75,6 +75,11 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.SUBSCRIBE.name();
+  }
+
+  @Override
   protected boolean validMessageFlags(byte messageFlags) {
     return messageFlags == MESSAGE_FLAGS;
   }
