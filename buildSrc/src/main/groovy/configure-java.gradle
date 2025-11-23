@@ -23,19 +23,6 @@ test {
   failOnNoDiscoveredTests = false
 }
 
-sourceSets {
-  main {
-    java {
-      srcDirs 'src/main/groovy'
-    }
-  }
-  test {
-    java {
-      srcDirs 'src/test/groovy'
-    }
-  }
-}
-
 tasks.withType(Test).configureEach {
   maxParallelForks = 2
   forkEvery = 100
