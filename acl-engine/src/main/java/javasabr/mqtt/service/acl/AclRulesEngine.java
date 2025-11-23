@@ -18,22 +18,21 @@ import javasabr.rlib.collections.operation.LockableOperations;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.NonNull;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AclRulesEngine {
 
-  Array<@NonNull Rule> rules;
+  Array<Rule> rules;
 
-  LockableOperations<LockableRefToRefDictionary<@NonNull String, @NonNull Pattern>> patternCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<@NonNull String, @NonNull Pattern>().operations();
-  LockableOperations<LockableRefToRefDictionary<@NonNull String, @NonNull Matcher>> matcherCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<@NonNull String, @NonNull Matcher>().operations();
-  LockableOperations<LockableRefToRefDictionary<@NonNull CallId, @NonNull Boolean>> permissionCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<@NonNull CallId, @NonNull Boolean>().operations();
-  LockableOperations<LockableRefToRefDictionary<@NonNull String, @NonNull TopicFilter>> topicFilterCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<@NonNull String, @NonNull TopicFilter>().operations();
+  LockableOperations<LockableRefToRefDictionary<String, Pattern>> patternCache =
+      new StampedLockBasedHashBasedRefToRefDictionary<String, Pattern>().operations();
+  LockableOperations<LockableRefToRefDictionary<String, Matcher>> matcherCache =
+      new StampedLockBasedHashBasedRefToRefDictionary<String, Matcher>().operations();
+  LockableOperations<LockableRefToRefDictionary<CallId, Boolean>> permissionCache =
+      new StampedLockBasedHashBasedRefToRefDictionary<CallId, Boolean>().operations();
+  LockableOperations<LockableRefToRefDictionary<String, TopicFilter>> topicFilterCache =
+      new StampedLockBasedHashBasedRefToRefDictionary<String, TopicFilter>().operations();
 
   public boolean authorize(String username, String clientId, String ipAddress, Action action, String topic) {
     CallId callId = new CallId(username, clientId, ipAddress, action, topic);
@@ -113,12 +112,12 @@ public class AclRulesEngine {
         .contains(c.ipAddress());
   }
 
-  private static Pattern getPattern(LockableRefToRefDictionary<@NonNull String, @NonNull Pattern> map, String un) {
+  private static Pattern getPattern(LockableRefToRefDictionary<String, Pattern> map, String un) {
     return map.getOrCompute(un, u -> Pattern.compile(trimSlashes(u)));
   }
 
   private static Matcher getMatcher(
-      LockableRefToRefDictionary<@NonNull String, @NonNull Matcher> map,
+      LockableRefToRefDictionary<String, Matcher> map,
       String un,
       Pattern pattern) {
     return map.getOrCompute(un, pattern::matcher);
