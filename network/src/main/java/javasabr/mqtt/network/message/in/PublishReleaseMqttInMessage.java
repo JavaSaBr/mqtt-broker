@@ -68,6 +68,11 @@ public class PublishReleaseMqttInMessage extends TrackableMqttInMessage implemen
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.PUBLISH_RELEASE.name();
+  }
+
+  @Override
   protected boolean validMessageFlags(byte messageFlags) {
     return messageFlags == MESSAGE_FLAGS;
   }

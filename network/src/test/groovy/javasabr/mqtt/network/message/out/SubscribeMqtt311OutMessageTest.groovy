@@ -3,8 +3,8 @@ package javasabr.mqtt.network.message.out
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
-import javasabr.mqtt.model.subscribtion.RequestedSubscription
-import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.subscription.RequestedSubscription
+import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.rlib.collections.array.Array

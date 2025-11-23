@@ -2,6 +2,7 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
@@ -81,7 +82,7 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !result
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "[REASON_STRING] is already presented"
+        inMessage.exception().message == "Property:[$MqttMessageProperty.REASON_STRING] is already presented in message:[$MqttMessageType.PUBLISH_ACK]"
   }
 
   def "should not allow invalid message flags"() {
@@ -102,6 +103,6 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !result
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "Unexpected flags bits:0b0101_0101"
+        inMessage.exception().message == "Unexpected message flags:[0b0101_0101] in message:[$MqttMessageType.PUBLISH_ACK]"
   }
 }

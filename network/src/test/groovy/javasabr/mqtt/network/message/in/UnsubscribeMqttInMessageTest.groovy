@@ -3,6 +3,7 @@ package javasabr.mqtt.network.message.in
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProtocolErrors
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.rlib.common.util.BufferUtils
 
 class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
@@ -78,7 +79,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
+        inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.UNSUBSCRIBE]"
     when:
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -88,7 +89,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful2
         inMessage2.exception() instanceof MalformedProtocolMqttException
-        inMessage2.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
+        inMessage2.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTERS
   }
 
   def "should not read invalid message as MQTT 5.0"() {
@@ -103,7 +104,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
+        inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.UNSUBSCRIBE]"
     when:
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
@@ -114,7 +115,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful2
         inMessage2.exception() instanceof MalformedProtocolMqttException
-        inMessage2.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
+        inMessage2.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTERS
     when:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SERVER_REFERENCE, "reference")
@@ -129,6 +130,6 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful3
         inMessage3.exception() instanceof MalformedProtocolMqttException
-        inMessage3.exception().message == "Property:[SERVER_REFERENCE] is not available for packet:[UnsubscribeMqttInMessage]"
+        inMessage3.exception().message == "Property:[$MqttMessageProperty.SERVER_REFERENCE] is not available for message:[$MqttMessageType.UNSUBSCRIBE]"
   }
 }

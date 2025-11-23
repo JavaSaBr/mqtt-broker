@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.subscribtion;
+package javasabr.mqtt.model.subscription;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;

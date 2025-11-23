@@ -68,6 +68,11 @@ public class PublishAckMqttInMessage extends TrackableMqttInMessage implements T
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.PUBLISH_ACK.name();
+  }
+
+  @Override
   protected boolean validMessageFlags(byte messageFlags) {
     return messageFlags == MESSAGE_FLAGS;
   }

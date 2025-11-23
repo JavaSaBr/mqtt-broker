@@ -10,7 +10,7 @@ import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
-import javasabr.mqtt.model.subscribtion.Subscription;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;

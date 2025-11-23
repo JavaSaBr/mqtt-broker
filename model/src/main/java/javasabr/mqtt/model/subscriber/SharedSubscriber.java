@@ -2,7 +2,7 @@ package javasabr.mqtt.model.subscriber;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
+import javasabr.mqtt.model.subscription.SubscriptionOwner;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;

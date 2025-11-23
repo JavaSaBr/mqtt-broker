@@ -5,6 +5,7 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.common.util.BufferUtils
 
@@ -120,7 +121,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "Property:[SERVER_KEEP_ALIVE] is not available for packet:[PublishMqttInMessage]"
+        inMessage.exception().message == "Property:[$MqttMessageProperty.SERVER_KEEP_ALIVE] is not available for message:[$MqttMessageType.PUBLISH]"
     when: 'use 2 times topic alias'
         def propertiesBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.TOPIC_ALIAS, 55)
@@ -138,7 +139,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful2
         inMessage2.exception() instanceof MalformedProtocolMqttException
-        inMessage2.exception().message == "[TOPIC_ALIAS] is already presented"
+        inMessage2.exception().message == "Property:[$MqttMessageProperty.TOPIC_ALIAS] is already presented in message:[$MqttMessageType.PUBLISH]"
     when: 'use 2 times response topic'
         def propertiesBuffer3 = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.RESPONSE_TOPIC, "topic1")
@@ -156,7 +157,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful3
         inMessage3.exception() instanceof MalformedProtocolMqttException
-        inMessage3.exception().message == "[RESPONSE_TOPIC] is already presented"
+        inMessage3.exception().message == "Property:[$MqttMessageProperty.RESPONSE_TOPIC] is already presented in message:[$MqttMessageType.PUBLISH]"
     when: 'use 2 times content type'
         def propertiesBuffer4 = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.CONTENT_TYPE, "json")
@@ -174,7 +175,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful4
         inMessage4.exception() instanceof MalformedProtocolMqttException
-        inMessage4.exception().message == "[CONTENT_TYPE] is already presented"
+        inMessage4.exception().message == "Property:[$MqttMessageProperty.CONTENT_TYPE] is already presented in message:[$MqttMessageType.PUBLISH]"
     when: 'use 2 times correlation data'
         def propertiesBuffer5 = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.CORRELATION_DATA, "data".getBytes(StandardCharsets.UTF_8))
@@ -192,6 +193,6 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful5
         inMessage5.exception() instanceof MalformedProtocolMqttException
-        inMessage5.exception().message == "[CORRELATION_DATA] is already presented"
+        inMessage5.exception().message == "Property:[$MqttMessageProperty.CORRELATION_DATA] is already presented in message:[$MqttMessageType.PUBLISH]"
   }
 }

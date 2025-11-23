@@ -295,6 +295,11 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.PUBLISH.name();
+  }
+
+  @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039

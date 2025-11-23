@@ -61,7 +61,7 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (!buffer.hasRemaining()) {
-      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTERS);
     }
 
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
