@@ -37,7 +37,7 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
         packet.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
         packet.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
-        packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
+        packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
   }
 
   def "should read packet correctly as mqtt 5.0"() {

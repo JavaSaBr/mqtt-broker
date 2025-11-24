@@ -17,6 +17,7 @@ class PublishAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_ACK
+        info == PublishAckMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt311Connection, it)

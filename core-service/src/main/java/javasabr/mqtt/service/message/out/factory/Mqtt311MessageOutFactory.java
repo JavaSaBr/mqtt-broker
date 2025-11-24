@@ -111,10 +111,10 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
   @Override
   public MqttOutMessage newAuthenticate(
       AuthenticateReasonCode reasonCode,
-      String authenticateMethod,
-      byte[] authenticateData,
-      Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason,
+      @Nullable String authenticateMethod,
+      byte @Nullable [] authenticateData,
+      Array<StringPair> userProperties) {
     throw new UnsupportedOperationException();
   }
 

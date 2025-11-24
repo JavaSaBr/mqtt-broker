@@ -5,29 +5,29 @@ import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Acknowledge connection request.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConnectAckMqttInMessage extends MqttInMessage {
 
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT_ACK.ordinal();
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -252,6 +252,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
 
   // properties
   String assignedClientId;
+  @Nullable
   String reason;
   String responseInformation;
   String authenticationMethod;
@@ -272,24 +273,17 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
 
   public ConnectAckMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.userProperties = MutableArray.ofType(StringPair.class);
     this.reasonCode = ConnectAckReasonCode.SUCCESS;
     this.maximumQos = QoS.EXACTLY_ONCE;
     this.retainAvailable = MqttProperties.RETAIN_AVAILABLE_DEFAULT;
-    this.assignedClientId = StringUtils.EMPTY;
-    this.reason = StringUtils.EMPTY;
     this.sharedSubscriptionAvailable = MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT;
     this.wildcardSubscriptionAvailable = MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT;
     this.subscriptionIdAvailable = MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT;
-    this.responseInformation = StringUtils.EMPTY;
-    this.serverReference = StringUtils.EMPTY;
-    this.authenticationMethod = StringUtils.EMPTY;
-    this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
     this.serverKeepAlive = MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED;
     this.maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
     this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
     this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
-    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
+    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
   }
 
   @Override
@@ -298,10 +292,21 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.CONNECT_ACK.name();
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
+  }
+
+  @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035
-    sessionPresent = readByteUnsigned(buffer) == 1;
-    reasonCode = ConnectAckReasonCode.of(connection.isSupported(MqttVersion.MQTT_5), readByteUnsigned(buffer));
+    int connectAckFlags = readByteUnsigned(buffer);
+    sessionPresent = (connectAckFlags & 0b0000_0001) != 0;
+    reasonCode = ConnectAckReasonCode.ofCode(connection.isSupported(MqttVersion.MQTT_5), readByteUnsigned(buffer));
   }
 
   @Override
@@ -336,10 +341,15 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
       case SHARED_SUBSCRIPTION_AVAILABLE -> sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
       case SUBSCRIPTION_IDENTIFIER_AVAILABLE -> subscriptionIdAvailable = NumberUtils.toBoolean(value);
       case RETAIN_AVAILABLE -> retainAvailable = NumberUtils.toBoolean(value);
-      case RECEIVE_MAXIMUM_PUBLISHES -> receiveMaxPublishes = (int) NumberUtils.validate(
+      case RECEIVE_MAXIMUM_PUBLISHES -> {
+        if (receiveMaxPublishes != MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        }
+        receiveMaxPublishes = (int) NumberUtils.validate(
           value,
           MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN,
           MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX);
+      }
       case MAXIMUM_QOS -> maximumQos = QoS.ofCode((int) value);
       case SERVER_KEEP_ALIVE -> serverKeepAlive = NumberUtils.validate(
           (int) value,
@@ -349,10 +359,15 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
           (int) value,
           MqttProperties.TOPIC_ALIAS_MIN,
           MqttProperties.TOPIC_ALIAS_MAX);
-      case SESSION_EXPIRY_INTERVAL -> sessionExpiryInterval = NumberUtils.validate(
-          value,
-          MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
-          MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
+      case SESSION_EXPIRY_INTERVAL -> {
+        if (sessionExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.SESSION_EXPIRY_INTERVAL_MIN
+            || value > MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.INVALID_SESSION_EXPIRY_INTERVAL);
+        }
+        sessionExpiryInterval = value;
+      }
       case MAXIMUM_MESSAGE_SIZE -> maxMessageSize = NumberUtils.validate(
           (int) value,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,

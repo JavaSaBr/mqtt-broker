@@ -17,6 +17,7 @@ class SubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.SUBSCRIBE_ACK
+        info == SubscribeAckMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt311Connection, it)

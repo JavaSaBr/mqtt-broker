@@ -2,6 +2,7 @@ package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
+import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
 import javasabr.rlib.common.util.NumberUtils
@@ -21,11 +22,12 @@ class PublishReleaseMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_RELEASE
+        info == PublishReleaseMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
+        def reader = new PublishReleaseMqttInMessage(info)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

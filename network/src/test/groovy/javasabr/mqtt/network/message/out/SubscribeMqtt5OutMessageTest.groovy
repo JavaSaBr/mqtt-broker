@@ -7,6 +7,7 @@ import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.subscription.RequestedSubscription
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils
@@ -46,11 +47,12 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.SUBSCRIBE
+        info == SubscribeMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt5Connection, it)
         }
-        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new SubscribeMqttInMessage(info)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

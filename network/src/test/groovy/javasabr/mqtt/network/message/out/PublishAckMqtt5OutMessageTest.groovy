@@ -2,6 +2,7 @@ package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
+import javasabr.mqtt.network.message.in.AuthenticationMqttInMessage
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
 import javasabr.rlib.common.util.NumberUtils
@@ -21,6 +22,7 @@ class PublishAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_ACK
+        info == PublishAckMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt5Connection, it)

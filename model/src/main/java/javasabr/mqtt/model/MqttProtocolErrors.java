@@ -6,6 +6,7 @@ public interface MqttProtocolErrors {
   //String INVALID_TOPIC_ALIAS = "Provided invalid TopicAlias";
   String INVALID_PAYLOAD_FORMAT = "Provided invalid PayloadFormat";
   String INVALID_MESSAGE_EXPIRY_INTERVAL = "Provided invalid MessageExpiryInterval";
+  String INVALID_SESSION_EXPIRY_INTERVAL = "Provided invalid 'Session Expiry Interval'";
   String INVALID_RESPONSE_TOPIC_NAME = "Provided invalid ResponseTopicName";
   String UNSUPPORTED_QOS_OR_RETAIN_HANDLING = "Provided unsupported 'QoS' or 'RetainHandling'";
   String MISSED_REQUIRED_MESSAGE_ID = "'Packet Identifier' must be presented'";
