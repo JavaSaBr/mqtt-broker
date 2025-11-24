@@ -30,7 +30,7 @@ public class UnsubscribeAckMqttInMessage extends TrackableMqttInMessage {
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("reasonCodes", "messageId");
+    DebugUtils.registerIncludedFields("reasonCodes");
   }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -85,9 +85,7 @@ public class UnsubscribeAckMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901194
-    if (!connection.isSupported(MqttVersion.MQTT_5)) {
-      return;
-    } else if (!buffer.hasRemaining()) {
+    if (!connection.isSupported(MqttVersion.MQTT_5) || !buffer.hasRemaining()) {
       return;
     }
     reasonCodes = ArrayFactory.mutableArray(UnsubscribeAckReasonCode.class, buffer.remaining());

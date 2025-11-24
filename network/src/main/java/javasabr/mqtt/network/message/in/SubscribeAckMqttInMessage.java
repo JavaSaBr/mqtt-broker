@@ -31,7 +31,7 @@ public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE_ACK.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("reasonCodes", "messageId");
+    DebugUtils.registerIncludedFields("reasonCodes");
   }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
