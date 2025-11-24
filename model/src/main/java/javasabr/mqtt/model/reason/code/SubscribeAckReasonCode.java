@@ -2,17 +2,14 @@ package javasabr.mqtt.model.reason.code;
 
 import javasabr.rlib.common.util.NumberedEnum;
 import javasabr.rlib.common.util.NumberedEnumMap;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
 
 @Getter
+@Accessors
 @RequiredArgsConstructor
-@Accessors(fluent = true, chain = false)
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum SubscribeAckReasonCode implements NumberedEnum<SubscribeAckReasonCode> {
+public enum SubscribeAckReasonCode implements NumberedEnum<SubscribeAckReasonCode>, ReasonCode {
   /**
    * The subscription is accepted and the maximum QoS sent will be QoS 0. This might be a lower QoS than was requested.
    */
@@ -73,7 +70,7 @@ public enum SubscribeAckReasonCode implements NumberedEnum<SubscribeAckReasonCod
     return NUMBERED_MAP.require(code);
   }
 
-  int code;
+  private final int code;
 
   @Override
   public int number() {

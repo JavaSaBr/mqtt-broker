@@ -8,7 +8,7 @@ import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
-import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage

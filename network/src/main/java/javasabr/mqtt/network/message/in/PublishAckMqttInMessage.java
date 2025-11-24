@@ -1,35 +1,19 @@
 package javasabr.mqtt.network.message.in;
 
-import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
-import javasabr.mqtt.network.MqttConnection;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Publish acknowledgment (QoS 1).
  */
-@Getter
-@Accessors
-@FieldDefaults(level = AccessLevel.PROTECTED)
-public class PublishAckMqttInMessage extends TrackableMqttInMessage implements TrackableMessage {
+public class PublishAckMqttInMessage extends PublishControlMqttInMessage<PublishAckReasonCode>
+    implements TrackableMessage {
 
   private static final int MESSAGE_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
-  public static final byte MESSAGE_FLAGS = 0b0000_0000;
-
-  static {
-    DebugUtils.registerIncludedFields("reasonCode", "messageId");
-  }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -52,14 +36,8 @@ public class PublishAckMqttInMessage extends TrackableMqttInMessage implements T
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  PublishAckReasonCode reasonCode;
-  // properties
-  @Nullable
-  String reason;
-
   public PublishAckMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.reasonCode = PublishAckReasonCode.SUCCESS;
   }
 
   @Override
@@ -68,39 +46,22 @@ public class PublishAckMqttInMessage extends TrackableMqttInMessage implements T
   }
 
   @Override
-  protected boolean validMessageFlags(byte messageFlags) {
-    return messageFlags == MESSAGE_FLAGS;
+  public String name() {
+    return MqttMessageType.PUBLISH_ACK.name();
   }
 
   @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    super.readVariableHeader(connection, buffer);
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
-    if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishAckReasonCode.ofCode(readByteUnsigned(buffer));
-    }
+  protected PublishAckReasonCode defaultReasonCode() {
+    return PublishAckReasonCode.SUCCESS;
   }
 
   @Override
-  protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
-    return connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining();
+  protected PublishAckReasonCode readReasonCode(int unsignedByte) {
+    return PublishAckReasonCode.ofCode(unsignedByte);
   }
 
   @Override
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
-  }
-
-  @Override
-  protected void applyProperty(MqttMessageProperty property, String value) {
-    switch (property) {
-      case REASON_STRING -> {
-        if (reason != null) {
-          alreadyPresentedProperty(property);
-        }
-        reason = value;
-      }
-      default -> unsupportedProperty(property);
-    }
   }
 }

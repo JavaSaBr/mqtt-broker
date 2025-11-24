@@ -5,7 +5,7 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
-import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.service.IntegrationServiceSpecification
 import javasabr.mqtt.service.SubscriptionService
 import javasabr.rlib.collections.array.Array

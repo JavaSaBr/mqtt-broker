@@ -25,10 +25,9 @@ class UnsubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.exception() == null
         reader.reasonCodes() == UnsubscribeAckMqttInMessage.EMPTY_REASON_CODES
         reader.messageId() == messageId
         reader.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
-        reader.reason() == ""
+        reader.reason() == null
   }
 }

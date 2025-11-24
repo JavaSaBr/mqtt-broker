@@ -2,8 +2,8 @@ package javasabr.mqtt.model.subscriber;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.subscribtion.Subscription;
-import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
+import javasabr.mqtt.model.subscription.Subscription;
+import javasabr.mqtt.model.subscription.SubscriptionOwner;
 
 public record SingleSubscriber(SubscriptionOwner owner, Subscription subscription) implements Subscriber {
 

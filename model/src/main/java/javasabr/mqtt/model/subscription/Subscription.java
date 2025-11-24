@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.subscribtion;
+package javasabr.mqtt.model.subscription;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.MqttProperties;

@@ -47,6 +47,9 @@ public interface MqttProperties {
   int TOPIC_ALIAS_INVALID = 0;
 
   int SUBSCRIPTION_ID_IS_NOT_SET = 0;
+  int SUBSCRIPTION_ID_MIN = 1;
+  int SUBSCRIPTION_ID_MAX = 268_435_455;
+
   int MESSAGE_ID_IS_NOT_SET = 0;
 
   boolean SESSIONS_ENABLED_DEFAULT = true;

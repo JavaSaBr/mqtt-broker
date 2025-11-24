@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
+import javasabr.mqtt.model.subscription.SubscriptionOwner;
 
 public sealed interface Subscriber permits SingleSubscriber, SharedSubscriber {
 

@@ -28,7 +28,6 @@ class UnsubscribeAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.exception() == null
         reader.reasonCodes() == unsubscribeAckReasonCodes
         reader.messageId() == messageId
         reader.userProperties() == userProperties
