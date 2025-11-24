@@ -9,7 +9,7 @@ import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
-import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification

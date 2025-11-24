@@ -2,7 +2,7 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
-import javasabr.mqtt.model.reason.code.PublishAckReasonCode
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
@@ -69,7 +69,7 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishAckReasonCode.SUCCESS)
+          it.put(PublishCompletedReasonCode.SUCCESS)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -79,20 +79,15 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !result
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "[REASON_STRING] is already presented"
+        inMessage.exception().message == "Property:[$MqttMessageProperty.REASON_STRING] is already presented in message:[$MqttMessageType.PUBLISH_COMPLETE]"
   }
 
   def "should not allow invalid message flags"() {
     given:
-        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(MqttMessageProperty.REASON_STRING, "reason2")
-          it.putProperty(MqttMessageProperty.REASON_STRING, "reason1")
-        }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
-          it.put(PublishAckReasonCode.SUCCESS)
-          it.putMbi(propertiesBuffer.limit())
-          it.put(propertiesBuffer)
+          it.put(PublishCompletedReasonCode.SUCCESS)
+          it.putMbi(0)
         }
     when:
         def inMessage = new PublishCompleteMqttInMessage(0b0101_0101 as byte)
@@ -100,6 +95,6 @@ class PublishCompleteMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !result
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "Unexpected flags bits:0b0101_0101"
+        inMessage.exception().message == "Unexpected message flags:[0b0101_0101] in message:[$MqttMessageType.PUBLISH_COMPLETE]"
   }
 }

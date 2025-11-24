@@ -1,18 +1,17 @@
 package javasabr.mqtt.model.message;
 
-import lombok.AccessLevel;
+import javasabr.rlib.common.util.NumberedEnum;
+import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
 
 @Getter
 @CustomLog
-@Accessors(fluent = true)
+@Accessors
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum MqttMessageType {
+public enum MqttMessageType implements NumberedEnum<MqttMessageType> {
   RESERVED(0),
   /**
    * After a Network Connection is established by a Client to a Server, the first Packet sent from the Client to the
@@ -105,16 +104,17 @@ public enum MqttMessageType {
    */
   INVALID(16);
 
-  private static final MqttMessageType[] VALUES = values();
+  private static final NumberedEnumMap<MqttMessageType> NUMBERED_MAP =
+      new NumberedEnumMap<>(MqttMessageType.class);
 
-  public static MqttMessageType fromByte(byte messageType) {
-    if (messageType < 0 || messageType > AUTHENTICATION.typeIndex()) {
-      log.warning(messageType, "Invalid message type:[%s]"::formatted);
-      return INVALID;
-    } else {
-      return VALUES[messageType];
-    }
+  public static MqttMessageType fromByte(int messageType) {
+    return NUMBERED_MAP.resolve(messageType, MqttMessageType.INVALID);
   }
 
-  int typeIndex;
+  private final int typeIndex;
+
+  @Override
+  public int number() {
+    return typeIndex;
+  }
 }

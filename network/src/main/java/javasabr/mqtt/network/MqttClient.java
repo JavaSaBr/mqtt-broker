@@ -3,7 +3,7 @@ package javasabr.mqtt.network;
 import java.util.concurrent.CompletableFuture;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
+import javasabr.mqtt.model.subscription.SubscriptionOwner;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.MqttSession;

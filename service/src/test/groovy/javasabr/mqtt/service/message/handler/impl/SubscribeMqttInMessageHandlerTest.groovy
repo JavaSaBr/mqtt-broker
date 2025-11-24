@@ -5,7 +5,7 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
-import javasabr.mqtt.model.subscribtion.RequestedSubscription
+import javasabr.mqtt.model.subscription.RequestedSubscription
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage
@@ -214,7 +214,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
-        disconnectReason.reason() == "Unexpected flags bits:0b0000_0000"
+        disconnectReason.reason() == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.SUBSCRIBE]"
         disconnectReason.serverReference() == null
   }
 

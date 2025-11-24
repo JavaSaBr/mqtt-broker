@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.handler.impl
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.publishing.Publish
-import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalMqttClient
 import javasabr.rlib.collections.array.Array
