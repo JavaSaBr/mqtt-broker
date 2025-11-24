@@ -3,10 +3,12 @@ plugins {
   id("jacoco-report-aggregation")
 }
 
+description = "Aggreggate test coverages from all modules"
+
 dependencies {
   jacocoAggregation projects.base
   jacocoAggregation projects.application
   jacocoAggregation projects.model
   jacocoAggregation projects.network
-  jacocoAggregation projects.service
+  jacocoAggregation projects.coreService
 }
