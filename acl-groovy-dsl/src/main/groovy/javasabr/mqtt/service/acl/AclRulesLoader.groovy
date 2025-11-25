@@ -11,14 +11,8 @@ import java.nio.file.Path
 
 class AclRulesLoader {
 
-  private static final AclRulesBuilder newBuilder = new AclRulesBuilder()
+  private static final String[] MODEL_IMPORTS = ["javasabr.mqtt.model.acl.Permission", "javasabr.mqtt.model.acl.Action"]
 
-  private static final ImportCustomizer importCustomizer = new ImportCustomizer()
-      .addStaticStars("javasabr.mqtt.model.acl.Permission")
-      .addStaticStars("javasabr.mqtt.model.acl.Action")
-  private static final CompilerConfiguration config = new CompilerConfiguration()
-      .addCompilationCustomizers(importCustomizer)
-  private static final GroovyShell shell = new GroovyShell(config)
   private final Path aclConfigPath
 
   private AclRulesLoader(URI aclConfigUri) {
@@ -33,12 +27,15 @@ class AclRulesLoader {
   }
 
   Array<Rule> load() {
-    shell.setVariable("allowPublish", newBuilder.&allowPublish)
-    shell.setVariable("denyPublish", newBuilder.&denyPublish)
-    shell.setVariable("allowSubscribe", newBuilder.&allowSubscribe)
-    shell.setVariable("denySubscribe", newBuilder.&denySubscribe)
-    shell.evaluate(aclConfigPath.toFile())
-    return newBuilder.build()
+    ImportCustomizer importCustomizer = new ImportCustomizer().addStaticStars(MODEL_IMPORTS)
+    CompilerConfiguration compilerConfig = new CompilerConfiguration().addCompilationCustomizers(importCustomizer)
+    AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
+    GroovyShell groovyShell = new GroovyShell(compilerConfig)
+    groovyShell.setVariable("allowPublish", aclRulesBuilder.&allowPublish)
+    groovyShell.setVariable("denyPublish", aclRulesBuilder.&denyPublish)
+    groovyShell.setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
+    groovyShell.setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
+    groovyShell.evaluate(aclConfigPath.toFile())
+    return aclRulesBuilder.build()
   }
 }
-
