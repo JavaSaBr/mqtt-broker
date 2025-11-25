@@ -1,13 +1,13 @@
 plugins {
+  id("groovy")
   id("java-library")
   id("configure-java")
-  id("groovy")
 }
 
 dependencies {
   api projects.aclGroovyDsl
   api projects.model
-  api libs.groovy.all
+  api libs.groovy
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl

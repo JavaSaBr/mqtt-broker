@@ -1,11 +1,12 @@
 plugins {
+  id("groovy")
   id("java-library")
   id("configure-java")
-  id("groovy")
 }
 
 dependencies {
   implementation libs.groovy
+  api projects.model
   api libs.rlib.collections
 
   testImplementation projects.testSupport

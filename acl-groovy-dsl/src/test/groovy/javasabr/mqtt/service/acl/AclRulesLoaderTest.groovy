@@ -1,44 +1,94 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.Clients
+import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.ClientMatcher
+import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
+import static java.lang.reflect.Proxy.getInvocationHandler
 import static javasabr.mqtt.model.acl.Action.PUBLISH
-import static javasabr.mqtt.model.acl.Operator.OR
 import static javasabr.mqtt.model.acl.Permission.ALLOW
 
-class AclRulesLoaderTest extends UnitSpecification {
+class AclRulesLoaderTest extends UnitSpecification implements RegexComparatorBuilder, EqualsComparatorBuilder, ClientMatcherBuilder {
 
   @SuppressWarnings('GroovyAccessibility')
-  def "should parse Groovy DSL config"() {
+  def "should parse new Groovy DSL config"() {
     when:
-        Array<Rule> rules = AclRulesLoader.load()
+        def configAbsolutePath = Objects.requireNonNull(
+            getClass().getClassLoader().getResource("acl.groovy")
+        ).toURI()
+        Array<Rule> rules = new AclRulesLoader(configAbsolutePath).load()
     then:
         verifyAll(rules) {
-          size() == 4
+          size() == 2
+
           with(get(0)) {
-            name() == "sys_dashboard_sub"
             action() == PUBLISH
             permission() == ALLOW
             with(clients()) {
-              operator == OR
-              usernames.containsAll("sensor1", "sensor10")
-              clientIds.containsAll("clientId1", "sensor10", "/^sensor1/", "/sensor10\$/")
-              ipAddresses.containsAll("10.56.0.3", "127.0.0.1")
+              with(it['clientMatchers'] as Array<ClientMatcher>) {
+                with(it[0]) {
+                  getterName(it) == "username"
+                  with(ruleMatchers()) {
+                    it[0].rulePattern == "sensor1"
+                    it[1].rulePattern.pattern() == "/sensor10\$/"
+                  }
+                }
+                with(it[1]) {
+                  getterName(it) == "clientId"
+                  with(ruleMatchers()) {
+                    it[0].rulePattern == "clientId1"
+                    it[1].rulePattern.pattern() == "/^cliend/"
+                  }
+                }
+                with(it[2]) {
+                  getterName(it) == "ipAddress"
+                  with(ruleMatchers()) {
+                    it[0].rulePattern == "10.56.0.3"
+                    it[1].rulePattern == "127.0.0.1"
+                  }
+                }
+              }
+            }
+            topics().containsAll("/topic1", "/topic2/temp")
+          }
+
+          with(get(1)) {
+            action() == Action.SUBSCRIBE
+            permission() == Permission.DENY
+            with(clients()) {
+              with(it['clientMatchers'] as Array<ClientMatcher>) {
+                with(it[0]) {
+                  getterName(it) == "username"
+                  with(ruleMatchers()) {
+                    it[0].rulePattern == "sensor2"
+                    it[1].rulePattern.pattern() == "/sensor11\$/"
+                  }
+                }
+                with(it[1]) {
+                  getterName(it) == "clientId"
+                  with(ruleMatchers()) {
+                    it[0].rulePattern == "clientId2"
+                    it[1].rulePattern.pattern() == "/^cliend1/"
+                  }
+                }
+                with(it[2]) {
+                  getterName(it) == "ipAddress"
+                  with(ruleMatchers()) {
+                    it[0].rulePattern == "10.56.0.3"
+                    it[1].rulePattern == "127.0.0.1"
+                  }
+                }
+              }
             }
             topics().containsAll("/topic1/#", "/topic2/+/temp")
           }
-          with(get(1)) {
-            name() == "sys_dashboard_sub2"
-            action() == PUBLISH
-            permission() == ALLOW
-            clients() == Clients.ALL
-            topics().containsAll("/topic1/#", "/topic2/+/temp")
-          }
-          get(2).name() == "deny_subscribe_all"
-          get(3).name() == "allow_all"
         }
+  }
+
+  def getterName(def proxy) {
+    return getInvocationHandler(proxy.valueGetter()).delegate.method
   }
 }

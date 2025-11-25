@@ -2,13 +2,17 @@
 package javasabr.mqtt.service.acl
 
 import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.AllClients
+import javasabr.mqtt.model.acl.AnyClient
+import javasabr.mqtt.model.acl.CallId
+import javasabr.mqtt.model.acl.ClientComparator
 import javasabr.mqtt.model.acl.Clients
-import javasabr.mqtt.model.acl.Operator
 import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
 
+import static groovy.lang.Closure.DELEGATE_FIRST
 import static groovy.lang.Closure.DELEGATE_ONLY
 
 /**
@@ -22,60 +26,123 @@ class AclRulesBuilder {
     return Array.copyOf(rules)
   }
 
-  private AclRulesBuilder rule(String name, @DelegatesTo(strategy = DELEGATE_ONLY) Closure config) {
-    def block = new RuleBuilder(name)
+  AclRulesBuilder allowPublish(@DelegatesTo(strategy = DELEGATE_FIRST) Closure<?> config) {
+    return rule(Permission.ALLOW, PublishRuleBuilder.&new, config)
+  }
+
+  AclRulesBuilder denyPublish(@DelegatesTo(strategy = DELEGATE_FIRST) Closure<?> config) {
+    return rule(Permission.DENY, PublishRuleBuilder.&new, config)
+  }
+
+  AclRulesBuilder allowSubscribe(@DelegatesTo(strategy = DELEGATE_FIRST) Closure<?> config) {
+    return rule(Permission.ALLOW, SubscribeRuleBuilder.&new, config)
+  }
+
+  AclRulesBuilder denySubscribe(
+      @DelegatesTo(strategy = DELEGATE_FIRST) Closure<?> config) {
+    return rule(Permission.DENY, SubscribeRuleBuilder.&new, config)
+  }
+
+  private AclRulesBuilder rule(
+      Permission permission,
+      Closure<RuleBuilder> ruleBuilderConstructor,
+      @DelegatesTo(strategy = DELEGATE_FIRST) Closure<?> config) {
+    def block = ruleBuilderConstructor(permission)
     config.delegate = block
     config()
     rules << block.build()
     this
   }
 
-  private static class RuleBuilder {
-    private String name
-    private Permission permission
-    private Action action
-    private List<String> topics = []
-    private Clients clients
+  static class PublishRuleBuilder extends RuleBuilder {
+    private List<String> topicNames = []
 
-    private RuleBuilder(String name) { this.name = name }
+    private PublishRuleBuilder(Permission permission) { super(permission, Action.PUBLISH) }
 
-    private RuleBuilder permission(Permission permission) { this.permission = permission; this }
+    private PublishRuleBuilder topicName(String... topicName) { this.topicNames.addAll(topicName); this }
 
-    private RuleBuilder action(Action action) { this.action = action; this }
+    Rule build() { new Rule(permission, action, clients ?: AllClients.MATCH_ALL, topicNames) }
+  }
 
-    private RuleBuilder topics(String... topics) { this.topics.addAll(topics); this }
+  static class SubscribeRuleBuilder extends RuleBuilder {
+    private List<String> topicFilters = []
 
-    private RuleBuilder clients(Operator operator, @DelegatesTo(strategy = DELEGATE_ONLY) Closure config) {
+    private SubscribeRuleBuilder(Permission permission) { super(permission, Action.SUBSCRIBE) }
+
+    private SubscribeRuleBuilder topicFilter(String... topicFilter) { this.topicFilters.addAll(topicFilter); this }
+
+    Rule build() { new Rule(permission, action, clients ?: AllClients.MATCH_ALL, topicFilters) }
+  }
+
+  static abstract class RuleBuilder {
+    Permission permission
+    Action action
+    Clients clients
+
+    RuleBuilder(Permission permission, Action action) { this.permission = permission; this.action = action }
+
+    RuleBuilder allClients(@DelegatesTo(strategy = DELEGATE_ONLY) Closure config) {
+      return buildClients(AllClientsBuilder.&new, config)
+    }
+
+    RuleBuilder anyClient(@DelegatesTo(strategy = DELEGATE_ONLY) Closure config) {
+      return buildClients(AllClientsBuilder.&new, config)
+    }
+
+    private RuleBuilder buildClients(
+        Closure<ClientsBuilder> clientsBuilderConstructor,
+        @DelegatesTo(strategy = DELEGATE_ONLY) Closure config) {
       if (this.clients) throw new IllegalArgumentException("Only one clients section allowed")
-      ClientsBuilder clientBuilder = new ClientsBuilder(operator)
+      ClientsBuilder clientBuilder = clientsBuilderConstructor()
       config.delegate = clientBuilder
       config()
       this.clients = clientBuilder.build()
       return this
     }
 
-    private RuleBuilder clients(Operator operator) { this.clients = Clients.ALL; this }
+    RuleBuilder allClients() { this.clients = AllClients.MATCH_ALL; this }
 
-    private Rule build() { new Rule(name, permission, action, clients ?: Clients.ALL, topics) }
+    abstract Rule build()
   }
 
-  private static class ClientsBuilder {
-    private Operator operator = Operator.OR
-    private List<String> usernames = []
-    private List<String> clientIds = []
-    private Map<String, String> clientAttrs = [:]
-    private List<String> ipAddresses = []
+  static abstract class ClientsBuilder implements RegexComparatorBuilder, EqualsComparatorBuilder, ClientMatcherBuilder {
+    protected List<ClientComparator> usernames = []
+    protected List<ClientComparator> clientIds = []
+    protected Map<String, String> clientAttrs = [:]
+    protected List<ClientComparator> ipAddresses = []
 
-    private ClientsBuilder(Operator operator) { this.operator = operator }
+    ClientsBuilder username(ClientComparator... username) { this.usernames.addAll(username); this }
 
-    private ClientsBuilder username(String... usernames) { this.usernames.addAll(usernames); this }
+    ClientsBuilder clientId(ClientComparator... clientId) { this.clientIds.addAll(clientId); this }
 
-    private ClientsBuilder clientId(String... clientIds) { this.clientIds.addAll(clientIds); this }
+    ClientsBuilder clientAttr(Map<String, String> clientAttrs) { this.clientAttrs.putAll(clientAttrs); this }
 
-    private ClientsBuilder clientAttr(Map<String, String> clientAttrs) { this.clientAttrs.putAll(clientAttrs); this }
+    ClientsBuilder ipaddr(ClientComparator... ipAddress) { this.ipAddresses.addAll(ipAddress); this }
 
-    private ClientsBuilder ipaddr(String... ipAddresses) { this.ipAddresses.addAll(ipAddresses); this }
+    abstract Clients build()
+  }
 
-    private Clients build() { new Clients(operator, usernames, clientIds, ipAddresses) }
+  static class AllClientsBuilder extends ClientsBuilder {
+    Clients build() {
+      new AllClients(
+          Array.of(
+              match(CallId::username, Array.of(usernames.toArray(ClientComparator[]::new))),
+              match(CallId::clientId, Array.of(clientIds.toArray(ClientComparator[]::new))),
+              match(CallId::ipAddress, Array.of(ipAddresses.toArray(ClientComparator[]::new)))
+          )
+      )
+    }
+  }
+
+  static class AnyClientBuilder extends ClientsBuilder {
+    Clients build() {
+      new AnyClient(
+          Array.of(
+              match(CallId::username, Array.of(usernames.toArray(ClientComparator[]::new))),
+              match(CallId::clientId, Array.of(clientIds.toArray(ClientComparator[]::new))),
+              match(CallId::ipAddress, Array.of(ipAddresses.toArray(ClientComparator[]::new)))
+          )
+      )
+    }
   }
 }

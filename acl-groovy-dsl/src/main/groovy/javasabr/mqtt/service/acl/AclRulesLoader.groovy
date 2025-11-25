@@ -6,47 +6,39 @@ import javasabr.rlib.collections.array.Array
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 class AclRulesLoader {
 
-  private static final AclRulesBuilder builder = new AclRulesBuilder()
+  private static final AclRulesBuilder newBuilder = new AclRulesBuilder()
 
   private static final ImportCustomizer importCustomizer = new ImportCustomizer()
       .addStaticStars("javasabr.mqtt.model.acl.Permission")
-      .addStaticStars("javasabr.mqtt.model.acl.Operator")
       .addStaticStars("javasabr.mqtt.model.acl.Action")
   private static final CompilerConfiguration config = new CompilerConfiguration()
       .addCompilationCustomizers(importCustomizer)
   private static final GroovyShell shell = new GroovyShell(config)
+  private final Path aclConfigPath
 
-  static {
-    shell.setVariable("rule", builder.&rule)
+  private AclRulesLoader(URI aclConfigUri) {
+    this.aclConfigPath = Path.of(aclConfigUri)
+    if (Files.notExists(this.aclConfigPath)) {
+      throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(aclConfigPath))
+    }
   }
 
-  private AclRulesLoader() {}
-
-  private static File getAclRulesFile() {
-    URL resource = AclRulesLoader.class
-        .getClassLoader()
-        .getResource("acl.groovy")
-    if (resource == null) {
-      throw new AclConfigurationException("Class loader unable to load resource: acl.groovy")
-    }
-    File file
-    try {
-      file = new File(resource.toURI())
-    } catch (URISyntaxException e) {
-      throw new AclConfigurationException(e)
-    }
-    if (!file.exists()) {
-      throw new AclConfigurationException("File not exists: acl.groovy")
-    }
-    return file
+  private AclRulesLoader(String aclConfigPath) {
+    this(URI.create(aclConfigPath))
   }
 
-  static Array<Rule> load() {
-    File file = getAclRulesFile()
-    shell.evaluate(file)
-    return builder.build()
+  Array<Rule> load() {
+    shell.setVariable("allowPublish", newBuilder.&allowPublish)
+    shell.setVariable("denyPublish", newBuilder.&denyPublish)
+    shell.setVariable("allowSubscribe", newBuilder.&allowSubscribe)
+    shell.setVariable("denySubscribe", newBuilder.&denySubscribe)
+    shell.evaluate(aclConfigPath.toFile())
+    return newBuilder.build()
   }
 }
 

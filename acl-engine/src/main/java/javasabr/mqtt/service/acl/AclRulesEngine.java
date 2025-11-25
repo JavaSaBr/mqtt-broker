@@ -1,11 +1,7 @@
 package javasabr.mqtt.service.acl;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javasabr.mqtt.model.acl.Action;
+import javasabr.mqtt.model.acl.AllClients;
 import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.Clients;
 import javasabr.mqtt.model.acl.Permission;
@@ -25,21 +21,16 @@ public class AclRulesEngine {
 
   Array<Rule> rules;
 
-  LockableOperations<LockableRefToRefDictionary<String, Pattern>> patternCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<String, Pattern>().operations();
-  LockableOperations<LockableRefToRefDictionary<String, Matcher>> matcherCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<String, Matcher>().operations();
   LockableOperations<LockableRefToRefDictionary<CallId, Boolean>> permissionCache =
       new StampedLockBasedHashBasedRefToRefDictionary<CallId, Boolean>().operations();
   LockableOperations<LockableRefToRefDictionary<String, TopicFilter>> topicFilterCache =
       new StampedLockBasedHashBasedRefToRefDictionary<String, TopicFilter>().operations();
 
-  public boolean authorize(String username, String clientId, String ipAddress, Action action, String topic) {
-    CallId callId = new CallId(username, clientId, ipAddress, action, topic);
-    return permissionCache.getInWriteLock(callId, this, (map, call, eng) -> map.getOrCompute(call, eng::getPermission));
+  public boolean authorize(CallId callId) {
+    return permissionCache.getInWriteLock(callId, this, (map, call, eng) -> map.getOrCompute(call, eng::isAllowed));
   }
 
-  private boolean getPermission(CallId callId) {
+  private boolean isAllowed(CallId callId) {
     for (Rule rule : rules) {
       if (rule.action() != callId.action()) {
         continue;
@@ -56,71 +47,7 @@ public class AclRulesEngine {
   }
 
   private boolean matchesClient(Clients clients, CallId callId) {
-    if (clients == Clients.ALL) {
-      return true;
-    }
-    switch (clients.operator()) {
-      case AND -> {
-        return checkUsername(clients, callId) && checkClientId(clients, callId) && checkIpAddress(clients, callId)
-            && checkAttributes(clients, callId);
-      }
-      case OR -> {
-        return checkUsername(clients, callId) || checkClientId(clients, callId) || checkIpAddress(clients, callId)
-            || checkAttributes(clients, callId);
-      }
-      default -> {
-        return false;
-      }
-    }
-  }
-
-  private boolean checkMatches(
-      Clients clients,
-      CallId c,
-      Function<Clients, List<String>> ruleValueGetter,
-      Function<CallId, String> requestedValueGetter) {
-    for (String ruleValue : ruleValueGetter.apply(clients)) {
-      if (isRegex(ruleValue)) {
-        Pattern pattern = patternCache.getInWriteLock(ruleValue, AclRulesEngine::getPattern);
-        Matcher matcher = matcherCache.getInWriteLock(
-            requestedValueGetter.apply(c),
-            pattern,
-            AclRulesEngine::getMatcher);
-        if (matcher.matches()) {
-          return true;
-        }
-      } else {
-        if (Objects.equals(requestedValueGetter.apply(c), ruleValue)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  private boolean checkUsername(Clients clients, CallId c) {
-    return checkMatches(clients, c, Clients::usernames, CallId::username);
-  }
-
-  private boolean checkClientId(Clients clients, CallId c) {
-    return checkMatches(clients, c, Clients::clientIds, CallId::clientId);
-  }
-
-  private boolean checkIpAddress(Clients clients, CallId c) {
-    return clients
-        .ipAddresses()
-        .contains(c.ipAddress());
-  }
-
-  private static Pattern getPattern(LockableRefToRefDictionary<String, Pattern> map, String un) {
-    return map.getOrCompute(un, u -> Pattern.compile(trimSlashes(u)));
-  }
-
-  private static Matcher getMatcher(
-      LockableRefToRefDictionary<String, Matcher> map,
-      String un,
-      Pattern pattern) {
-    return map.getOrCompute(un, pattern::matcher);
+    return clients == AllClients.MATCH_ALL || clients.match(callId);
   }
 
   private boolean checkAttributes(Clients clients, CallId c) {
@@ -131,16 +58,8 @@ public class AclRulesEngine {
     return true;
   }
 
-  private static boolean isRegex(String string) {
-    return string.length() > 1 && string.startsWith("/") && string.endsWith("/");
-  }
-
-  private static String trimSlashes(String regex) {
-    return regex.substring(1, regex.length() - 2);
-  }
-
   private boolean matchesTopic(List<String> ruleTopicFilters, String requestedTopicName) {
-    if (ruleTopicFilters == null || ruleTopicFilters.isEmpty()) {
+    if (ruleTopicFilters.isEmpty()) {
       return false;
     }
     for (String ruleTopicFilter : ruleTopicFilters) {

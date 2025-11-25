@@ -1,60 +1,68 @@
 contributor(context(scope: scriptScope())) {
 
-  property name: 'ALLOW', type: 'javasabr.mqtt.model.acl.Permission'
-  property name: 'DENY', type: 'javasabr.mqtt.model.acl.Permission'
-  property name: 'PUBLISH', type: 'javasabr.mqtt.model.acl.Action'
-  property name: 'SUBSCRIBE', type: 'javasabr.mqtt.model.acl.Action'
-  property name: 'ALL', type: 'javasabr.mqtt.model.acl.Action'
-  property name: 'ANY', type: 'javasabr.mqtt.model.acl.Operator'
-  property name: 'OR', type: 'javasabr.mqtt.model.acl.Operator'
-  property name: 'AND', type: 'javasabr.mqtt.model.acl.Operator'
-
-  method name: 'rule',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.RuleBuilder',
-      params: [name: 'String', config: 'Closure'],
-      delegateType: 'javasabr.mqtt.service.acl.AclRulesBuilder.RuleBuilder',
+  method name: 'allowPublish',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder',
       doc: 'Define a rule'
-  method name: 'permission',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.RuleBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.Permission'],
-      doc: 'Set permission for the rule'
-  method name: 'action',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.RuleBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.Action'],
-      doc: 'Set action for the rule'
-  method name: 'topics',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.RuleBuilder',
+  method name: 'denyPublish',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder',
+      doc: 'Define a rule'
+  method name: 'allowSubscribe',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder',
+      doc: 'Define a rule'
+  method name: 'denySubscribe',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder',
+      doc: 'Define a rule'
+
+  method name: 'topicName',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder',
       params: [string: 'String...'],
       doc: 'Set topics for the rule'
-  method name: 'clients',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
-      params: [operator: 'javasabr.mqtt.model.acl.Operator', config: 'Closure'],
-      delegateType: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
+  method name: 'topicFilter',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder',
+      params: [string: 'String...'],
+      doc: 'Set topics for the rule'
+  method name: 'allClients',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
+      params: [config: 'Closure'],
+      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
       doc: 'Define clients filter for this rule'
-  method name: 'clients',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
-      params: [operator: 'javasabr.mqtt.model.acl.Operator'],
-      delegateType: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
+  method name: 'anyClient',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
+      params: [config: 'Closure'],
+      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
       doc: 'Define clients filter for this rule'
 
-  method name: 'operator',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.Operator'],
-      doc: 'Conjunction/disjunction of client expressions'
   method name: 'username',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
-      params: [string: 'String...'],
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
+      params: [string: 'javasabr.mqtt.model.acl.ClientComparator...'],
       doc: 'Filter by username'
   method name: 'clientId',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
-      params: [string: 'String...'],
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
+      params: [string: 'javasabr.mqtt.model.acl.ClientComparator...'],
       doc: 'Filter by clientId'
   method name: 'clientAttr',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
       params: [string: 'Map<String, String>'],
       doc: 'Filter by client attributes'
   method name: 'ipaddr',
-      type: 'javasabr.mqtt.service.acl.AclRulesBuilder.ClientsBuilder',
-      params: [string: 'String...'],
+      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
+      params: [string: 'javasabr.mqtt.model.acl.ClientComparator...'],
       doc: 'Filter by IP address'
+
+  method name: 'eq',
+      type: 'javasabr.mqtt.model.acl.ClientComparator',
+      params: [string: 'String'],
+      doc: 'Checks strict equality of strings'
+  method name: 'regex',
+      type: 'javasabr.mqtt.model.acl.ClientComparator',
+      params: [string: 'String'],
+      doc: 'Checks strings for Regex matching'
 }
