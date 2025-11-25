@@ -84,7 +84,7 @@ public class DisconnectMqtt5OutMessage extends DisconnectMqtt311OutMessage {
     writeStringPairProperties(buffer, MqttMessageProperty.USER_PROPERTY, userProperties);
     writeNotEmptyProperty(buffer, MqttMessageProperty.REASON_STRING, reason);
     writeNotEmptyProperty(buffer, MqttMessageProperty.SERVER_REFERENCE, serverReference);
-    if (sessionExpiryInterval != MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+    if (sessionExpiryInterval != MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
       writeProperty(
           buffer,
           MqttMessageProperty.SESSION_EXPIRY_INTERVAL,

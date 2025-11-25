@@ -214,10 +214,10 @@ public class ConnectMqttInMessage extends MqttInMessage {
   String authenticationMethod = StringUtils.EMPTY;
   byte[] authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
 
-  long sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+  long sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
   int receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
-  int maxPacketSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
-  int topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+  int maxPacketSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
+  int topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
   boolean requestResponseInformation = false;
   boolean requestProblemInformation = false;
 

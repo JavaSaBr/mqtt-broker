@@ -7,7 +7,6 @@ import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.subscription.RequestedSubscription
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.topic.TopicFilter
-import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.common.util.BufferUtils

@@ -127,7 +127,6 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
     }
   }
 
-
   public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, byte @Nullable [] value) {
     if (value != null && value.length > 0) {
       writeProperty(buffer, property, value);

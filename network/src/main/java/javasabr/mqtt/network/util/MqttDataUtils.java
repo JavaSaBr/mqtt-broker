@@ -90,4 +90,8 @@ public class MqttDataUtils {
     }
     return "0b" + binary.substring(0, 4) + "_" + binary.substring(4);
   }
+
+  public static boolean isValidBoolean(long value) {
+    return value == 0 || value == 1;
+  }
 }

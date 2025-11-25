@@ -27,16 +27,16 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.assignedClientId == ""
         packet.authenticationData == ArrayUtils.EMPTY_BYTE_ARRAY
         packet.authenticationMethod == ""
-        packet.maximumQos == QoS.EXACTLY_ONCE
+        packet.maxQos == QoS.EXACTLY_ONCE
         packet.retainAvailable == MqttProperties.RETAIN_AVAILABLE_DEFAULT
         packet.sharedSubscriptionAvailable == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
         packet.wildcardSubscriptionAvailable == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
         packet.subscriptionIdAvailable == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
         packet.responseInformation == ""
-        packet.maxMessageSize == MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED
-        packet.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
-        packet.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
-        packet.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
+        packet.maxMessageSize == MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
+        packet.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET
+        packet.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
+        packet.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
         packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
   }
 
@@ -79,7 +79,7 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         packet.authenticationData == authData
         packet.authenticationMethod == authMethod
         packet.maxMessageSize == maxPacketSize
-        packet.maximumQos == QoS.AT_LEAST_ONCE
+        packet.maxQos == QoS.AT_LEAST_ONCE
         packet.receiveMaxPublishes == receiveMaxPublishes
         packet.retainAvailable == retainAvailable
         packet.responseInformation == responseInformation

@@ -12,7 +12,7 @@ import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.rlib.common.util.NumberUtils;
+import javasabr.mqtt.network.util.MqttDataUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -240,7 +240,9 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
    * it MUST then close the Network Connection
    */
   ConnectAckReasonCode reasonCode;
-  QoS maximumQos;
+
+  @Nullable
+  QoS maxQos;
 
   /**
    * The Session Present flag informs the Client whether the Server is using Session State from a previous connection
@@ -251,13 +253,17 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   boolean sessionPresent;
 
   // properties
+  @Nullable
   String assignedClientId;
   @Nullable
   String reason;
+  @Nullable
   String responseInformation;
-  String authenticationMethod;
+  @Nullable
   String serverReference;
-  byte[] authenticationData;
+  @Nullable
+  String authenticationMethod;
+  byte @Nullable [] authenticationData;
 
   long sessionExpiryInterval;
 
@@ -266,24 +272,23 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   int topicAliasMaxValue;
   int serverKeepAlive;
 
-  boolean retainAvailable;
-  boolean wildcardSubscriptionAvailable;
-  boolean sharedSubscriptionAvailable;
-  boolean subscriptionIdAvailable;
+  int retainAvailable;
+  int wildcardSubscriptionAvailable;
+  int subscriptionIdAvailable;
+  int sharedSubscriptionAvailable;
 
   public ConnectAckMqttInMessage(byte messageFlags) {
     super(messageFlags);
     this.reasonCode = ConnectAckReasonCode.SUCCESS;
-    this.maximumQos = QoS.EXACTLY_ONCE;
-    this.retainAvailable = MqttProperties.RETAIN_AVAILABLE_DEFAULT;
-    this.sharedSubscriptionAvailable = MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT;
-    this.wildcardSubscriptionAvailable = MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT;
-    this.subscriptionIdAvailable = MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT;
-    this.serverKeepAlive = MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED;
-    this.maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
-    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-    this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
     this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
+    this.retainAvailable = MqttProperties.RETAIN_AVAILABLE_IS_NOT_SET;
+    this.maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
+    this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
+    this.wildcardSubscriptionAvailable = MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_IS_NOT_SET;
+    this.subscriptionIdAvailable = MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_IS_NOT_SET;
+    this.sharedSubscriptionAvailable = MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IS_NOT_SET;
+    this.serverKeepAlive = MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET;
   }
 
   @Override
@@ -317,7 +322,12 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
-      case AUTHENTICATION_DATA -> authenticationData = value;
+      case AUTHENTICATION_DATA -> {
+        if (authenticationData != null) {
+          alreadyPresentedProperty(property);
+        }
+        authenticationData = value;
+      }
       default -> unsupportedProperty(property);
     }
   }
@@ -325,11 +335,36 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      case ASSIGNED_CLIENT_IDENTIFIER -> assignedClientId = value;
-      case RESPONSE_INFORMATION -> responseInformation = value;
-      case AUTHENTICATION_METHOD -> authenticationMethod = value;
-      case SERVER_REFERENCE -> serverReference = value;
+      case ASSIGNED_CLIENT_IDENTIFIER ->{
+        if (assignedClientId != null) {
+          alreadyPresentedProperty(property);
+        }
+        assignedClientId = value;
+      }
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      case RESPONSE_INFORMATION -> {
+        if (responseInformation != null) {
+          alreadyPresentedProperty(property);
+        }
+        responseInformation = value;
+      }
+      case AUTHENTICATION_METHOD -> {
+        if (authenticationMethod != null) {
+          alreadyPresentedProperty(property);
+        }
+        authenticationMethod = value;
+      }
+      case SERVER_REFERENCE -> {
+        if (serverReference != null) {
+          alreadyPresentedProperty(property);
+        }
+        serverReference = value;
+      }
       default -> unsupportedProperty(property);
     }
   }
@@ -337,41 +372,89 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
-      case WILDCARD_SUBSCRIPTION_AVAILABLE -> wildcardSubscriptionAvailable = NumberUtils.toBoolean(value);
-      case SHARED_SUBSCRIPTION_AVAILABLE -> sharedSubscriptionAvailable = NumberUtils.toBoolean(value);
-      case SUBSCRIPTION_IDENTIFIER_AVAILABLE -> subscriptionIdAvailable = NumberUtils.toBoolean(value);
-      case RETAIN_AVAILABLE -> retainAvailable = NumberUtils.toBoolean(value);
+      case WILDCARD_SUBSCRIPTION_AVAILABLE -> {
+        if (wildcardSubscriptionAvailable != MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (!MqttDataUtils.isValidBoolean(value)) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_WILDCARD_SUBSCRIPTION_AVAILABLE);
+        }
+        wildcardSubscriptionAvailable = (int) value;
+      }
+      case SHARED_SUBSCRIPTION_AVAILABLE -> {
+        if (sharedSubscriptionAvailable != MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (!MqttDataUtils.isValidBoolean(value)) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_SHARED_SUBSCRIPTION_AVAILABLE);
+        }
+        sharedSubscriptionAvailable = (int) value;
+      }
+      case SUBSCRIPTION_IDENTIFIER_AVAILABLE -> {
+        if (subscriptionIdAvailable != MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (!MqttDataUtils.isValidBoolean(value)) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_SUBSCRIPTION_IDENTIFIERS_AVAILABLE);
+        }
+        subscriptionIdAvailable = (int) value;
+      }
+      case RETAIN_AVAILABLE -> {
+        if (retainAvailable != MqttProperties.RETAIN_AVAILABLE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (!MqttDataUtils.isValidBoolean(value)) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_RETAIN_AVAILABLE);
+        }
+        retainAvailable = (int) value;
+      }
       case RECEIVE_MAXIMUM_PUBLISHES -> {
         if (receiveMaxPublishes != MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET) {
           alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN
+            || value > MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_RECEIVED_MAX_PUBLISHES);
         }
-        receiveMaxPublishes = (int) NumberUtils.validate(
-          value,
-          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN,
-          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX);
+        receiveMaxPublishes = (int) value;
       }
-      case MAXIMUM_QOS -> maximumQos = QoS.ofCode((int) value);
-      case SERVER_KEEP_ALIVE -> serverKeepAlive = NumberUtils.validate(
-          (int) value,
-          MqttProperties.SERVER_KEEP_ALIVE_MIN,
-          MqttProperties.SERVER_KEEP_ALIVE_MAX);
-      case TOPIC_ALIAS_MAXIMUM -> topicAliasMaxValue = NumberUtils.validate(
-          (int) value,
-          MqttProperties.TOPIC_ALIAS_MIN,
-          MqttProperties.TOPIC_ALIAS_MAX);
+      case MAXIMUM_QOS -> {
+        if (maxQos != null) {
+          alreadyPresentedProperty(property);
+        } else if (value < QoS.AT_LEAST_ONCE.level() || value > QoS.EXACTLY_ONCE.level()) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_MAX_QOS);
+        }
+        maxQos = QoS.ofCode((int) value);
+      }
+      case SERVER_KEEP_ALIVE -> {
+        if (serverKeepAlive != MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.SERVER_KEEP_ALIVE_MIN || value > MqttProperties.SERVER_KEEP_ALIVE_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_SERVER_KEEP_ALIVE);
+        }
+        serverKeepAlive = (int) value;
+      }
+      case TOPIC_ALIAS_MAXIMUM -> {
+        if (topicAliasMaxValue != MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value > MqttProperties.TOPIC_ALIAS_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_TOPIC_ALIAS_MAX);
+        }
+        topicAliasMaxValue = (int) value;
+      }
       case SESSION_EXPIRY_INTERVAL -> {
         if (sessionExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET) {
           alreadyPresentedProperty(property);
         } else if (value < MqttProperties.SESSION_EXPIRY_INTERVAL_MIN
             || value > MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY) {
-          throw new MalformedProtocolMqttException(MqttProtocolErrors.INVALID_SESSION_EXPIRY_INTERVAL);
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_SESSION_EXPIRY_INTERVAL);
         }
         sessionExpiryInterval = value;
       }
-      case MAXIMUM_MESSAGE_SIZE -> maxMessageSize = NumberUtils.validate(
-          (int) value,
-          MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
-          MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
+      case MAXIMUM_MESSAGE_SIZE -> {
+        if (maxMessageSize != MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN
+            || value > MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_MAX_MESSAGE_SIZE);
+        }
+        maxMessageSize = (int) value;
+      }
       default -> unsupportedProperty(property);
     }
   }

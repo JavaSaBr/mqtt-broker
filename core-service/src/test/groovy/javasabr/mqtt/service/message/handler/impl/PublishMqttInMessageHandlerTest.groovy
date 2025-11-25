@@ -221,7 +221,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
-        disconnectReason.reason() == MqttProtocolErrors.INVALID_PAYLOAD_FORMAT
+        disconnectReason.reason() == MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT
         disconnectReason.serverReference() == null
   }
 
@@ -244,7 +244,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
     then:
         def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
-        disconnectReason.reason() == MqttProtocolErrors.INVALID_MESSAGE_EXPIRY_INTERVAL
+        disconnectReason.reason() == MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL
         disconnectReason.serverReference() == null
   }
 

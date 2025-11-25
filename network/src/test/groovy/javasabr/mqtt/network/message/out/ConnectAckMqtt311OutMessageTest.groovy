@@ -34,10 +34,10 @@ class ConnectAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         reader.serverReference() == ""
         reader.authenticationData() == ArrayUtils.EMPTY_BYTE_ARRAY
         reader.authenticationMethod() == ""
-        reader.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED
-        reader.serverKeepAlive() == MqttProperties.SERVER_KEEP_ALIVE_UNDEFINED
+        reader.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
+        reader.serverKeepAlive() == MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET
         reader.receiveMaxPublishes() == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
-        reader.sessionExpiryInterval() == MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED
-        reader.maxMessageSize() == MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED
+        reader.sessionExpiryInterval() == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
+        reader.maxMessageSize() == MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
   }
 }

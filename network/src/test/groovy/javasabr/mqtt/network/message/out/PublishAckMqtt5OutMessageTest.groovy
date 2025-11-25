@@ -2,7 +2,6 @@ package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
-import javasabr.mqtt.network.message.in.AuthenticationMqttInMessage
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
 import javasabr.rlib.common.util.NumberUtils

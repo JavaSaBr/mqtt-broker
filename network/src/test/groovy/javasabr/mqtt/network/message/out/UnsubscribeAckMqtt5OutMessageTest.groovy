@@ -1,7 +1,6 @@
 package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.message.MqttMessageType
-import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.mqtt.network.message.in.UnsubscribeAckMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
 import javasabr.rlib.common.util.NumberUtils

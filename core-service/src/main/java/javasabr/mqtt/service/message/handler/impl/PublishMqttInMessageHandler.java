@@ -204,7 +204,7 @@ public class PublishMqttInMessageHandler
   private void handleInvalidPayloadFormat(ExternalMqttClient client) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_PAYLOAD_FORMAT);
+        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT);
     client.closeWithReason(response);
   }
 
@@ -218,7 +218,7 @@ public class PublishMqttInMessageHandler
   private void handleInvalidMessageExpiryInterval(ExternalMqttClient client) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_MESSAGE_EXPIRY_INTERVAL);
+        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL);
     client.closeWithReason(response);
   }
 
