@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.session;
 
-import javasabr.mqtt.model.subscribtion.Subscription;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.Array;
 

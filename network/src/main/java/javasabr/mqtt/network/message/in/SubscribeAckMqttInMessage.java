@@ -3,6 +3,7 @@ package javasabr.mqtt.network.message.in;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
@@ -12,7 +13,6 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -23,11 +23,16 @@ import org.jspecify.annotations.Nullable;
  * Subscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
 
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE_ACK.ordinal();
+
+  static {
+    DebugUtils.registerIncludedFields("reasonCodes");
+  }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -53,11 +58,11 @@ public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
   MutableArray<SubscribeAckReasonCode> reasonCodes;
 
   // properties
+  @Nullable
   String reason;
 
   public SubscribeAckMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.reason = StringUtils.EMPTY;
   }
 
   @Override
@@ -66,12 +71,21 @@ public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.SUBSCRIBE_ACK.name();
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
+  }
+
+  @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718071
     if (!buffer.hasRemaining()) {
-      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTERS);
     }
-
     reasonCodes = ArrayFactory.mutableArray(SubscribeAckReasonCode.class, buffer.remaining());
     while (buffer.hasRemaining()) {
       reasonCodes.add(SubscribeAckReasonCode.ofCode(readByteUnsigned(buffer)));
@@ -90,8 +104,13 @@ public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 }

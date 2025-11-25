@@ -351,7 +351,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
       case AUTHENTICATION_DATA -> authenticationData = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -359,7 +359,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
       case AUTHENTICATION_METHOD -> authenticationMethod = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -384,7 +384,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
           (int) value,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 }

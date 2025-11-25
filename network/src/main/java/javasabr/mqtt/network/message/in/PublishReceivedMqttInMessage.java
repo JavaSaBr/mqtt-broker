@@ -1,34 +1,19 @@
 package javasabr.mqtt.network.message.in;
 
-import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.rlib.common.util.StringUtils;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Publish received (QoS 2 delivery part 1).
  */
-@Getter
-@Accessors(fluent = true, chain = false)
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishReceivedMqttInMessage extends MqttInMessage implements TrackableMessage {
+public class PublishReceivedMqttInMessage extends PublishControlMqttInMessage<PublishReceivedReasonCode>
+    implements TrackableMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RECEIVED.ordinal();
-
-  static {
-    DebugUtils.registerIncludedFields("reasonCode", "messageId");
-  }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -51,35 +36,8 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  PublishReceivedReasonCode reasonCode;
-  int messageId;
-
-  // properties
-  String reason;
-
   public  PublishReceivedMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.reasonCode = PublishReceivedReasonCode.SUCCESS;
-    this.reason = StringUtils.EMPTY;
-  }
-
-  @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    super.readVariableHeader(connection, buffer);
-
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718050
-    messageId = readShortUnsigned(buffer);
-
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
-    if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReceivedReasonCode.ofCode(readByteUnsigned(buffer));
-    }
-  }
-
-  @Override
-  protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901144
-    return super.isPropertiesSupported(connection, buffer) && buffer.hasRemaining();
   }
 
   @Override
@@ -88,15 +46,22 @@ public class PublishReceivedMqttInMessage extends MqttInMessage implements Track
   }
 
   @Override
-  protected Set<MqttMessageProperty> availableProperties() {
-    return AVAILABLE_PROPERTIES;
+  public String name() {
+    return MqttMessageType.PUBLISH_RECEIVED.name();
   }
 
   @Override
-  protected void applyProperty(MqttMessageProperty property, String value) {
-    switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
-    }
+  protected PublishReceivedReasonCode defaultReasonCode() {
+    return PublishReceivedReasonCode.SUCCESS;
+  }
+
+  @Override
+  protected PublishReceivedReasonCode readReasonCode(int unsignedByte) {
+    return PublishReceivedReasonCode.ofCode(unsignedByte);
+  }
+
+  @Override
+  protected Set<MqttMessageProperty> availableProperties() {
+    return AVAILABLE_PROPERTIES;
   }
 }

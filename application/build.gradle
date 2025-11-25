@@ -5,8 +5,10 @@ plugins {
   id("org.springframework.boot")
 }
 
+description = "Standard configuration of standalone version of MQTT Broker"
+
 dependencies {
-  implementation projects.service
+  implementation projects.coreService
   implementation libs.rlib.logger.slf4j
   implementation libs.springboot.starter.core
   implementation libs.springboot.starter.log4j2

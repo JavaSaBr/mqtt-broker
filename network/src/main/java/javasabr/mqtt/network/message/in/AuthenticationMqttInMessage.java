@@ -91,7 +91,7 @@ public class AuthenticationMqttInMessage extends MqttInMessage {
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
       case AUTHENTICATION_DATA -> authenticationData = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -100,7 +100,7 @@ public class AuthenticationMqttInMessage extends MqttInMessage {
     switch (property) {
       case REASON_STRING -> reason = value;
       case AUTHENTICATION_METHOD -> authenticationMethod = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 }

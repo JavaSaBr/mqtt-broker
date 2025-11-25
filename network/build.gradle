@@ -4,6 +4,8 @@ plugins {
   id("groovy")
 }
 
+description = "Implementation of network layer for MQTT Protocol"
+
 dependencies {
   api projects.model
   api libs.project.reactor.core

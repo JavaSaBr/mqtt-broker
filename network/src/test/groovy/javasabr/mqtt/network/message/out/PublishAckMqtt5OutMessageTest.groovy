@@ -13,8 +13,8 @@ class PublishAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def outMessage = new PublishAckMqtt5OutMessage(
             messageId,
             PublishAckReasonCode.NOT_AUTHORIZED,
-            userProperties,
-            reasonString)
+            reasonString,
+            userProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);

@@ -9,7 +9,6 @@ import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -296,6 +295,11 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
+  public String name() {
+    return MqttMessageType.PUBLISH.name();
+  }
+
+  @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718039
@@ -328,7 +332,7 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
       case PAYLOAD_FORMAT_INDICATOR -> payloadFormat = PayloadFormat.fromCode(value);
       case TOPIC_ALIAS -> {
         if (topicAlias != MqttProperties.TOPIC_ALIAS_NOT_SET) {
-          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+          alreadyPresentedProperty(property);
         }
         topicAlias = Math.toIntExact(value);
       }
@@ -339,7 +343,7 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
         }
         subscriptionIds.add((int) value);
       }
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -348,17 +352,17 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
     switch (property) {
       case RESPONSE_TOPIC -> {
         if (rawResponseTopicName != null) {
-          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+          alreadyPresentedProperty(property);
         }
         rawResponseTopicName = value;
       }
       case CONTENT_TYPE -> {
         if (contentType != null) {
-          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+          alreadyPresentedProperty(property);
         }
         contentType = value;
       }
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -367,11 +371,11 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
     switch (property) {
       case CORRELATION_DATA -> {
         if (correlationData != null) {
-          throw new MalformedProtocolMqttException("[%s] is already presented".formatted(property));
+          alreadyPresentedProperty(property);
         }
         correlationData = value;
       }
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 }

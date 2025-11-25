@@ -1,23 +1,31 @@
 package javasabr.mqtt.network.message.out
 
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
 import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.NumberUtils
 
 class PublishReceivedMqtt5OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishReceivedMqtt5OutMessage(
+        def outMessage = new PublishReceivedMqtt5OutMessage(
             messageId,
             PublishReceivedReasonCode.UNSPECIFIED_ERROR,
             userProperties,
             reasonString)
     when:
+        def typeAndFlags = outMessage.messageTypeAndFlags()
+        byte type = NumberUtils.getHighByteBits(typeAndFlags);
+        byte info = NumberUtils.getLowByteBits(typeAndFlags);
+    then:
+        MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_RECEIVED
+    when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt5Connection, it)
+          outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishReceivedMqttInMessage(0b0101_0000 as byte)
+        def reader = new PublishReceivedMqttInMessage(0 as byte)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

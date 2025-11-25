@@ -43,16 +43,17 @@ public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  Array<StringPair> userProperties;
   PublishAckReasonCode reasonCode;
   @Nullable
   String reason;
 
+  Array<StringPair> userProperties;
+
   public PublishAckMqtt5OutMessage(
       int messageId,
       PublishAckReasonCode reasonCode,
-      Array<StringPair> userProperties,
-      @Nullable String reason) {
+      @Nullable String reason,
+      Array<StringPair> userProperties) {
     super(messageId);
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;
