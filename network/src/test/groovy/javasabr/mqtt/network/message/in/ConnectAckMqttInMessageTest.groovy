@@ -9,38 +9,38 @@ import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
 
-  def "should read packet correctly as mqtt 3.1.1"() {
+  def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
-          it.put(ConnectAckReasonCode.NOT_AUTHORIZED.mqtt311)
+          it.putByte(ConnectAckReasonCode.NOT_AUTHORIZED.mqtt311())
         }
     when:
-        def packet = new ConnectAckMqttInMessage(0b0010_0000 as byte)
-        def result = packet.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new ConnectAckMqttInMessage(ConnectAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reasonCode == ConnectAckReasonCode.NOT_AUTHORIZED
-        packet.sessionPresent == sessionPresent
-        packet.serverReference == ""
-        packet.reason == ""
-        packet.assignedClientId == ""
-        packet.authenticationData == ArrayUtils.EMPTY_BYTE_ARRAY
-        packet.authenticationMethod == ""
-        packet.maxQos == QoS.EXACTLY_ONCE
-        packet.retainAvailable == MqttProperties.RETAIN_AVAILABLE_DEFAULT
-        packet.sharedSubscriptionAvailable == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT
-        packet.wildcardSubscriptionAvailable == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT
-        packet.subscriptionIdAvailable == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT
-        packet.responseInformation == ""
-        packet.maxMessageSize == MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
-        packet.serverKeepAlive == MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET
-        packet.sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
-        packet.topicAliasMaxValue == MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
-        packet.receiveMaxPublishes == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
+        inMessage.reasonCode() == ConnectAckReasonCode.NOT_AUTHORIZED
+        inMessage.sessionPresent() == sessionPresent
+        inMessage.serverReference() == null
+        inMessage.reason() == null
+        inMessage.assignedClientId() == null
+        inMessage.authenticationData() == null
+        inMessage.authenticationMethod() == null
+        inMessage.responseInformation() == null
+        inMessage.maxQos() == null
+        inMessage.retainAvailable() == MqttProperties.RETAIN_AVAILABLE_IS_NOT_SET
+        inMessage.sharedSubscriptionAvailable() == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IS_NOT_SET
+        inMessage.wildcardSubscriptionAvailable() == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_IS_NOT_SET
+        inMessage.subscriptionIdAvailable() == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_IS_NOT_SET
+        inMessage.maxMessageSize() == MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
+        inMessage.serverKeepAlive() == MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET
+        inMessage.sessionExpiryInterval() == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
+        inMessage.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
+        inMessage.receiveMaxPublishes() == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
   }
 
-  def "should read packet correctly as mqtt 5.0"() {
+  def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
@@ -62,53 +62,53 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
-          it.put(ConnectAckReasonCode.PAYLOAD_FORMAT_INVALID.mqtt5)
+          it.putByte(ConnectAckReasonCode.PAYLOAD_FORMAT_INVALID.mqtt5())
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
     when:
-        def packet = new ConnectAckMqttInMessage(0b0010_0000 as byte)
-        def result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage = new ConnectAckMqttInMessage(ConnectAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        packet.reasonCode == ConnectAckReasonCode.PAYLOAD_FORMAT_INVALID
-        packet.sessionPresent == sessionPresent
-        packet.serverReference == serverReference
-        packet.reason == reasonString
-        packet.assignedClientId == mqtt311ClientId
-        packet.authenticationData == authData
-        packet.authenticationMethod == authMethod
-        packet.maxMessageSize == maxPacketSize
-        packet.maxQos == QoS.AT_LEAST_ONCE
-        packet.receiveMaxPublishes == receiveMaxPublishes
-        packet.retainAvailable == retainAvailable
-        packet.responseInformation == responseInformation
-        packet.serverKeepAlive == serverKeepAlive
-        packet.sessionExpiryInterval == sessionExpiryInterval
-        packet.sharedSubscriptionAvailable == sharedSubscriptionAvailable
-        packet.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
-        packet.subscriptionIdAvailable == subscriptionIdAvailable
-        packet.topicAliasMaxValue == topicAliasMaxValue
+        inMessage.reasonCode() == ConnectAckReasonCode.PAYLOAD_FORMAT_INVALID
+        inMessage.sessionPresent() == sessionPresent
+        inMessage.serverReference() == serverReference
+        inMessage.reason() == reasonString
+        inMessage.assignedClientId() == mqtt311ClientId
+        inMessage.authenticationData() == authData
+        inMessage.authenticationMethod() == authMethod
+        inMessage.maxMessageSize() == maxPacketSize
+        inMessage.maxQos() == QoS.AT_LEAST_ONCE
+        inMessage.receiveMaxPublishes() == receiveMaxPublishes
+        (inMessage.retainAvailable() == 1) == retainAvailable
+        inMessage.responseInformation() == responseInformation
+        inMessage.serverKeepAlive() == serverKeepAlive
+        inMessage.sessionExpiryInterval() == sessionExpiryInterval
+        (inMessage.sharedSubscriptionAvailable() == 1) == sharedSubscriptionAvailable
+        (inMessage.wildcardSubscriptionAvailable() == 1) == wildcardSubscriptionAvailable
+        (inMessage.subscriptionIdAvailable() == 1) == subscriptionIdAvailable
+        inMessage.topicAliasMaxValue() == topicAliasMaxValue
 
     when:
-        propertiesBuffer = BufferUtils.prepareBuffer(512) {
+        def propertiesBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
           it.putProperty(MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, wildcardSubscriptionAvailable)
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, subscriptionIdAvailable)
         }
-        dataBuffer = BufferUtils.prepareBuffer(512) {
+        def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
-          it.put(ConnectAckReasonCode.PACKET_TOO_LARGE.mqtt5)
-          it.putMbi(propertiesBuffer.limit())
-          it.put(propertiesBuffer)
+          it.putByte(ConnectAckReasonCode.PACKET_TOO_LARGE.mqtt5())
+          it.putMbi(propertiesBuffer2.limit())
+          it.put(propertiesBuffer2)
         }
-        packet = new ConnectAckMqttInMessage(0b0010_0000 as byte)
-        result = packet.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+        def inMessage2 = new ConnectAckMqttInMessage(ConnectAckMqttInMessage.MESSAGE_FLAGS)
+        def result2 = inMessage2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
     then:
-        result
-        packet.reasonCode == ConnectAckReasonCode.PACKET_TOO_LARGE
-        packet.sharedSubscriptionAvailable == sharedSubscriptionAvailable
-        packet.wildcardSubscriptionAvailable == wildcardSubscriptionAvailable
-        packet.subscriptionIdAvailable == subscriptionIdAvailable
+        result2
+        inMessage2.reasonCode() == ConnectAckReasonCode.PACKET_TOO_LARGE
+        (inMessage2.sharedSubscriptionAvailable() == 1) == sharedSubscriptionAvailable
+        (inMessage2.wildcardSubscriptionAvailable() == 1) == wildcardSubscriptionAvailable
+        (inMessage2.subscriptionIdAvailable() == 1) == subscriptionIdAvailable
   }
 }
