@@ -1,11 +1,10 @@
 package javasabr.mqtt.service.acl;
 
-import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.Action;
+import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.Rule;
-import javasabr.mqtt.model.acl.matcher.TopicMatcher;
 import javasabr.mqtt.model.acl.condition.Condition;
-import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.acl.matcher.TopicMatcher;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.impl.StampedLockBasedHashBasedRefToRefDictionary;
@@ -22,8 +21,6 @@ public class AclRulesEngine {
 
   LockableOperations<LockableRefToRefDictionary<CallId, Boolean>> permissionCache =
       new StampedLockBasedHashBasedRefToRefDictionary<CallId, Boolean>().operations();
-  LockableOperations<LockableRefToRefDictionary<String, TopicFilter>> topicFilterCache =
-      new StampedLockBasedHashBasedRefToRefDictionary<String, TopicFilter>().operations();
 
   public boolean authorize(CallId callId) {
     return permissionCache.getInWriteLock(callId, this, (map, call, eng) -> map.getOrCompute(call, eng::isAllowed));
@@ -47,14 +44,6 @@ public class AclRulesEngine {
 
   private boolean matchesClient(Condition clients, CallId callId) {
     return clients.test(callId);
-  }
-
-  private boolean checkAttributes(Condition clients, CallId c) {
-    return matchesAttributes(clients, c);
-  }
-
-  private boolean matchesAttributes(Condition clients, CallId callId) {
-    return true;
   }
 
   private boolean matchesTopic(Array<TopicMatcher<String>> ruleTopicFilters, String requestedTopicName) {
