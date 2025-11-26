@@ -43,7 +43,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final messageExpiryInterval = 60
   public static final topicAlias = 252
   public static final receiveMaxPublishes = 10
-  public static final maxPacketSize = 1024
+  public static final maxMessageSize = 1024
   public static final maxStringLength = 256
   public static final maxBinarySize = 1024
   public static final maxTopicLevels = 10
@@ -127,7 +127,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   MqttServerConnectionConfig defaultServerConnectionConfig() {
     return serverConnectionConfig(
         maxQos,
-        maxPacketSize,
+        maxMessageSize,
         maxStringLength,
         maxBinarySize,
         maxTopicLevels,
@@ -150,7 +150,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         MqttVersion.MQTT_3_1_1,
         sessionExpiryInterval,
         receiveMaxPublishes,
-        maxPacketSize,
+        maxMessageSize,
         topicAliasMaxValue,
         keepAlive,
         false,
@@ -164,7 +164,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         MqttVersion.MQTT_5,
         sessionExpiryInterval,
         receiveMaxPublishes,
-        maxPacketSize,
+        maxMessageSize,
         topicAliasMaxValue,
         keepAlive,
         false,

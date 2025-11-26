@@ -2,9 +2,12 @@ package javasabr.mqtt.network.message.in
 
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.MqttProperties
+import javasabr.mqtt.model.MqttProtocolErrors
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.rlib.common.util.ArrayUtils
+import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.rlib.common.util.BufferUtils
 
 class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
@@ -48,7 +51,7 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, mqtt311ClientId)
           it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
           it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, maxPacketSize)
+          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, maxMessageSize)
           it.putProperty(MqttMessageProperty.MAXIMUM_QOS, QoS.AT_LEAST_ONCE.ordinal())
           it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMaxPublishes)
           it.putProperty(MqttMessageProperty.RETAIN_AVAILABLE, retainAvailable)
@@ -78,7 +81,7 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.assignedClientId() == mqtt311ClientId
         inMessage.authenticationData() == authData
         inMessage.authenticationMethod() == authMethod
-        inMessage.maxMessageSize() == maxPacketSize
+        inMessage.maxMessageSize() == maxMessageSize
         inMessage.maxQos() == QoS.AT_LEAST_ONCE
         inMessage.receiveMaxPublishes() == receiveMaxPublishes
         (inMessage.retainAvailable() == 1) == retainAvailable
@@ -110,5 +113,95 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         (inMessage2.sharedSubscriptionAvailable() == 1) == sharedSubscriptionAvailable
         (inMessage2.wildcardSubscriptionAvailable() == 1) == wildcardSubscriptionAvailable
         (inMessage2.subscriptionIdAvailable() == 1) == subscriptionIdAvailable
+  }
+
+  def "should not allow duplicated properties in message"(MqttMessageProperty property, Object value) {
+    given:
+        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
+          it.putProperty(property, value)
+          it.putProperty(property, value)
+        }
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putBoolean(false)
+          it.putByte(ConnectAckReasonCode.SUCCESS.mqtt5())
+          it.putMbi(propertiesBuffer.limit())
+          it.put(propertiesBuffer)
+        }
+    when:
+        def inMessage = new ConnectAckMqttInMessage(ConnectAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !result
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == "Property:[$property] is already presented in message:[$MqttMessageType.CONNECT_ACK]"
+    where:
+        property                                              | value
+        MqttMessageProperty.AUTHENTICATION_DATA               | authData
+        MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER        | mqtt5ClientId
+        MqttMessageProperty.REASON_STRING                     | reasonString
+        MqttMessageProperty.RESPONSE_INFORMATION              | responseInformation
+        MqttMessageProperty.AUTHENTICATION_METHOD             | authMethod
+        MqttMessageProperty.SERVER_REFERENCE                  | serverReference
+        MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE   | wildcardSubscriptionAvailable
+        MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE     | sharedSubscriptionAvailable
+        MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE | subscriptionIdAvailable
+        MqttMessageProperty.RETAIN_AVAILABLE                  | retainAvailable
+        MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES         | receiveMaxPublishes
+        MqttMessageProperty.MAXIMUM_QOS                       | QoS.EXACTLY_ONCE.level()
+        MqttMessageProperty.SERVER_KEEP_ALIVE                 | serverKeepAlive
+        MqttMessageProperty.TOPIC_ALIAS_MAXIMUM               | topicAliasMaxValue
+        MqttMessageProperty.SESSION_EXPIRY_INTERVAL           | sessionExpiryInterval
+        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE              | maxMessageSize
+  }
+
+  def "should validate invalid properties in message"(MqttMessageProperty property, Object value, String expectedMessage) {
+    given:
+        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
+          it.putProperty(property, value)
+        }
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putBoolean(false)
+          it.putByte(ConnectAckReasonCode.SUCCESS.mqtt5())
+          it.putMbi(propertiesBuffer.limit())
+          it.put(propertiesBuffer)
+        }
+    when:
+        def inMessage = new ConnectAckMqttInMessage(ConnectAckMqttInMessage.MESSAGE_FLAGS)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !result
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == expectedMessage
+    where:
+        property                                              | value             | expectedMessage
+        MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE   | 2                 | MqttProtocolErrors.PROVIDED_INVALID_WILDCARD_SUBSCRIPTION_AVAILABLE
+        MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE   | -1                | MqttProtocolErrors.PROVIDED_INVALID_WILDCARD_SUBSCRIPTION_AVAILABLE
+        MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE     | 3                 | MqttProtocolErrors.PROVIDED_INVALID_SHARED_SUBSCRIPTION_AVAILABLE
+        MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE     | -2                | MqttProtocolErrors.PROVIDED_INVALID_SHARED_SUBSCRIPTION_AVAILABLE
+        MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE | 4                 | MqttProtocolErrors.PROVIDED_INVALID_SUBSCRIPTION_IDENTIFIERS_AVAILABLE
+        MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE | -3                | MqttProtocolErrors.PROVIDED_INVALID_SUBSCRIPTION_IDENTIFIERS_AVAILABLE
+        MqttMessageProperty.RETAIN_AVAILABLE                  | 5                 | MqttProtocolErrors.PROVIDED_INVALID_RETAIN_AVAILABLE
+        MqttMessageProperty.RETAIN_AVAILABLE                  | -4                | MqttProtocolErrors.PROVIDED_INVALID_RETAIN_AVAILABLE
+        MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES         | 0                 | MqttProtocolErrors.PROVIDED_INVALID_RECEIVED_MAX_PUBLISHES
+        MqttMessageProperty.MAXIMUM_QOS                       | 3                 | MqttProtocolErrors.PROVIDED_INVALID_MAX_QOS
+        MqttMessageProperty.MAXIMUM_QOS                       | -1                | MqttProtocolErrors.PROVIDED_INVALID_MAX_QOS
+        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE              | 1                 | MqttProtocolErrors.PROVIDED_INVALID_MAX_MESSAGE_SIZE
+        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE              | 300 * 1024 * 1024 | MqttProtocolErrors.PROVIDED_INVALID_MAX_MESSAGE_SIZE
+  }
+
+  def "should not allow invalid message flags"() {
+    given:
+        def dataBuffer = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.put(PublishAckReasonCode.SUCCESS)
+          it.putMbi(0)
+        }
+    when:
+        def inMessage = new ConnectAckMqttInMessage(0b0101_0101 as byte)
+        def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
+    then:
+        !result
+        inMessage.exception() instanceof MalformedProtocolMqttException
+        inMessage.exception().message == "Unexpected message flags:[0b0101_0101] in message:[$MqttMessageType.CONNECT_ACK]"
   }
 }
