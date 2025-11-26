@@ -1,12 +1,11 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.CallId
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
-import javasabr.mqtt.model.acl.condition.ClientIdCondition
-import javasabr.mqtt.model.acl.condition.IpAddressCondition
+import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsClientMatcher
 import javasabr.mqtt.model.acl.matcher.RegexClientMatcher
@@ -17,31 +16,37 @@ import javasabr.rlib.collections.array.MutableArray
 
 import java.util.regex.Pattern
 
+import static javasabr.mqtt.model.acl.Action.ALLOW
+import static javasabr.mqtt.model.acl.Action.DENY
 import static javasabr.mqtt.model.acl.Operation.ALL
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
-import static javasabr.mqtt.model.acl.Action.ALLOW
-import static javasabr.mqtt.model.acl.Action.DENY
 
 class AclRulesEngineTest extends UnitSpecification {
 
-  def "should"(String username, String clientId, String ipAddress, Operation action, String topic) {
+  static Condition userNameEquals(String value) { new UserNameCondition(new EqualsClientMatcher(value)) }
+  static Condition userNameRegex(String value) { new UserNameCondition(new RegexClientMatcher(Pattern.compile(value))) }
+  static Condition clientIdEquals(String value) { new UserNameCondition(new EqualsClientMatcher(value)) }
+  static Condition clientIdRegex(String value) { new UserNameCondition(new RegexClientMatcher(Pattern.compile(value))) }
+  static Condition ipAddressEquals(String value) { new UserNameCondition(new EqualsClientMatcher(value)) }
+  static Condition ipAddressRegex(String value) { new UserNameCondition(new RegexClientMatcher(Pattern.compile(value))) }
+
+  def "should allow or deny according rules"(
+      String username, String clientId, String ipAddress, Operation action, String topic) {
     given:
         Array<Rule> rules = MutableArray.ofType(Rule.class)
         rules << new Rule(ALLOW, PUBLISH,
             new AnyOfCondition(Array.of(
-                new UserNameCondition(new EqualsClientMatcher("sensor1")),
-                new UserNameCondition(new EqualsClientMatcher("sensor10")),
-                new UserNameCondition(new RegexClientMatcher(Pattern.compile("^sensor1/"))),
-                new UserNameCondition(new RegexClientMatcher(Pattern.compile("/sensor10\$"))),
-
-                new ClientIdCondition(new EqualsClientMatcher("clientId1")),
-                new ClientIdCondition(new EqualsClientMatcher("sensor10")),
-                new ClientIdCondition(new RegexClientMatcher(Pattern.compile("/^sensor1/"))),
-                new ClientIdCondition(new RegexClientMatcher(Pattern.compile("/sensor10\$"))),
-
-                new IpAddressCondition(new EqualsClientMatcher("10.56.0.3")),
-                new IpAddressCondition(new EqualsClientMatcher("127.0.0.1"))
+                userNameEquals("sensor1"),
+                userNameEquals("sensor10"),
+                userNameRegex("^sensor1/"),
+                userNameRegex("/sensor10\$"),
+                clientIdEquals("clientId1"),
+                clientIdEquals("sensor10"),
+                clientIdRegex("/^sensor1/"),
+                clientIdRegex("/sensor10\$"),
+                ipAddressEquals("10.56.0.3"),
+                ipAddressRegex("127.0.0.1")
             )),
             Array.of(
                 new TopicNameMatcher("/topic1/#"),
