@@ -11,6 +11,7 @@ import javasabr.mqtt.model.acl.matcher.EqualsClientMatcher
 import javasabr.mqtt.model.acl.matcher.RegexClientMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
 import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
+import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
@@ -100,8 +101,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               }
             }
             topics().containsAll(
-                new TopicFilterMatcher("/topic1/#"),
-                new TopicFilterMatcher("/topic2/+/temp")
+                new TopicFilterMatcher(TopicFilter.valueOf("/topic1/#")),
+                new TopicFilterMatcher(TopicFilter.valueOf("/topic2/+/temp"))
             )
           }
         }

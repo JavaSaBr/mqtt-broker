@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.topic;
 
 import java.util.Objects;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -34,36 +35,6 @@ public class TopicFilter extends AbstractTopic {
   public static TopicFilter valueOf(String rawTopicFilter) {
     return new TopicFilter(rawTopicFilter);
   }
-
-  public boolean matches(String topic) {
-    int topicLength = topic.length();
-    int topicPosition = 0;
-
-    for (int i = 0; i < segments.length; i++) {
-      if (Objects.equals(segments[i], MULTI_LEVEL_WILDCARD)) {
-        return i == segments.length - 1;
-      }
-      if (topicPosition > topicLength) return false;
-      if (topicPosition == topicLength) return false;
-      int segmentEnd = topicPosition;
-      while (segmentEnd < topicLength && topic.charAt(segmentEnd) != DELIMITER_CHAR) {
-        segmentEnd++;
-      }
-      int segmentLength = segmentEnd - topicPosition;
-      if (Objects.equals(segments[i], SINGLE_LEVEL_WILDCARD)) {
-        topicPosition = (segmentEnd == topicLength ? topicLength : segmentEnd + 1);
-        continue;
-      }
-      String filterSeg = segments[i];
-      if (filterSeg.length() != segmentLength) return false;
-      for (int k = 0; k < segmentLength; k++) {
-        if (filterSeg.charAt(k) != topic.charAt(topicPosition + k)) {
-          return false;
-        }
-      }
-      topicPosition = (segmentEnd == topicLength ? topicLength : segmentEnd + 1);
-    }
-    return topicPosition == topicLength;
-  }
+  
 }
 

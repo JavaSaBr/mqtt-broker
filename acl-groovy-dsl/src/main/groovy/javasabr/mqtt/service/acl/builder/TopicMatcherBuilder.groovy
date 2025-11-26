@@ -4,6 +4,7 @@ package javasabr.mqtt.service.acl.builder
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
 import javasabr.mqtt.model.acl.matcher.TopicMatcher
 import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
+import javasabr.mqtt.model.topic.TopicFilter
 
 interface TopicMatcherBuilder {
 
@@ -12,6 +13,6 @@ interface TopicMatcherBuilder {
   }
 
   default TopicMatcher<String> match(String string) {
-    return new TopicFilterMatcher(string);
+    return new TopicFilterMatcher(TopicFilter.valueOf(string));
   }
 }
