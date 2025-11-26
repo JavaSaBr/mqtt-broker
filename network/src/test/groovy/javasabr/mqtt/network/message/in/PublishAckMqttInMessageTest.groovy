@@ -87,15 +87,10 @@ class PublishAckMqttInMessageTest extends BaseMqttInMessageTest {
 
   def "should not allow invalid message flags"() {
     given:
-        def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(MqttMessageProperty.REASON_STRING, "reason2")
-          it.putProperty(MqttMessageProperty.REASON_STRING, "reason1")
-        }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.put(PublishAckReasonCode.SUCCESS)
-          it.putMbi(propertiesBuffer.limit())
-          it.put(propertiesBuffer)
+          it.putMbi(0)
         }
     when:
         def inMessage = new PublishAckMqttInMessage(0b0101_0101 as byte)
