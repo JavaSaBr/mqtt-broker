@@ -3,7 +3,7 @@ package javasabr.mqtt.service.acl;
 import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.Rule;
-import javasabr.mqtt.model.acl.value.matcher.TopicMatcher;
+import javasabr.mqtt.model.acl.matcher.TopicMatcher;
 import javasabr.mqtt.model.acl.condition.Condition;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.Array;

@@ -8,9 +8,9 @@ import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
-import javasabr.mqtt.model.acl.value.matcher.EqualsValueMatcher
-import javasabr.mqtt.model.acl.value.matcher.RegexValueMatcher
-import javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher
+import javasabr.mqtt.model.acl.matcher.EqualsClientMatcher
+import javasabr.mqtt.model.acl.matcher.RegexClientMatcher
+import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
@@ -30,29 +30,31 @@ class AclRulesEngineTest extends UnitSpecification {
         Array<Rule> rules = MutableArray.ofType(Rule.class)
         rules << new Rule(ALLOW, PUBLISH,
             new AnyOfCondition(Array.of(
-                new UserNameCondition(new EqualsValueMatcher("sensor1")),
-                new UserNameCondition(new EqualsValueMatcher("sensor10")),
-                    new UserNameCondition(new RegexValueMatcher(Pattern.compile("^sensor1/"))),
-                        new UserNameCondition(new RegexValueMatcher(Pattern.compile("/sensor10\$"))),
-                new ClientIdCondition(new EqualsValueMatcher("clientId1")),
-                new ClientIdCondition(new EqualsValueMatcher("sensor10")),
-                new ClientIdCondition(new RegexValueMatcher(Pattern.compile("/^sensor1/"))),
-                    new ClientIdCondition(new RegexValueMatcher(Pattern.compile("/sensor10\$"))),
-                new IpAddressCondition(new EqualsValueMatcher("10.56.0.3")),
-                    new IpAddressCondition(new EqualsValueMatcher("127.0.0.1"))
+                new UserNameCondition(new EqualsClientMatcher("sensor1")),
+                new UserNameCondition(new EqualsClientMatcher("sensor10")),
+                new UserNameCondition(new RegexClientMatcher(Pattern.compile("^sensor1/"))),
+                new UserNameCondition(new RegexClientMatcher(Pattern.compile("/sensor10\$"))),
+
+                new ClientIdCondition(new EqualsClientMatcher("clientId1")),
+                new ClientIdCondition(new EqualsClientMatcher("sensor10")),
+                new ClientIdCondition(new RegexClientMatcher(Pattern.compile("/^sensor1/"))),
+                new ClientIdCondition(new RegexClientMatcher(Pattern.compile("/sensor10\$"))),
+
+                new IpAddressCondition(new EqualsClientMatcher("10.56.0.3")),
+                new IpAddressCondition(new EqualsClientMatcher("127.0.0.1"))
             )),
             Array.of(
-                new TopicNameValueMatcher("/topic1/#"),
-                new TopicNameValueMatcher("/topic2/+/temp")
+                new TopicNameMatcher("/topic1/#"),
+                new TopicNameMatcher("/topic2/+/temp")
             )
         )
         rules << new Rule(ALLOW, PUBLISH, new AnyCondition(), Array.of(
-            new TopicNameValueMatcher("/topic1/#"),
-            new TopicNameValueMatcher("/topic2/+/temp")
+            new TopicNameMatcher("/topic1/#"),
+            new TopicNameMatcher("/topic2/+/temp")
         ))
         rules << new Rule(DENY, SUBSCRIBE, new AnyCondition(), Array.of(
-            new TopicNameValueMatcher("\$SYS/#"),
-            new TopicNameValueMatcher("#")
+            new TopicNameMatcher("\$SYS/#"),
+            new TopicNameMatcher("#")
         ))
         rules << new Rule(ALLOW, ALL)
         AclRulesEngine engine = new AclRulesEngine(rules)

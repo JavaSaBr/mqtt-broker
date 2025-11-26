@@ -6,7 +6,7 @@ import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
-import javasabr.mqtt.model.acl.value.matcher.ClientMatcher
+import javasabr.mqtt.model.acl.matcher.ClientMatcher
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 

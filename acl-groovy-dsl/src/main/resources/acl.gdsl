@@ -87,16 +87,32 @@ contributor(context(scope: scriptScope())) {
         doc: 'Define clients filter for this rule'
   }
 
-  method name: 'userName',
-      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
-      doc: 'Filter by username'
-  method name: 'clientId',
-      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
-      doc: 'Filter by clientId'
-  method name: 'ipAddress',
-      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
-      doc: 'Filter by IP address'
+  if (enclosingCall("allOf")) {
+    method name: 'userName',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>'],
+        doc: 'Filter by username'
+    method name: 'clientId',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>'],
+        doc: 'Filter by clientId'
+    method name: 'ipAddress',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>'],
+        doc: 'Filter by IP address'
+  }
+  if (enclosingCall("anyOf") && !enclosingCall("allOf")) {
+    method name: 'userName',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
+        doc: 'Filter by username'
+    method name: 'clientId',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
+        doc: 'Filter by clientId'
+    method name: 'ipAddress',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
+        doc: 'Filter by IP address'
+  }
 }

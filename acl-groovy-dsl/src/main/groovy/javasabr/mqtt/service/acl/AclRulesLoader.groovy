@@ -16,15 +16,11 @@ class AclRulesLoader {
 
   private final Path aclConfigPath
 
-  private AclRulesLoader(URI aclConfigUri) {
-    this.aclConfigPath = Path.of(aclConfigUri)
-    if (Files.notExists(this.aclConfigPath)) {
-      throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(aclConfigPath))
-    }
-  }
-
   private AclRulesLoader(String aclConfigPath) {
-    this(URI.create(aclConfigPath))
+    this.aclConfigPath = Path.of(aclConfigPath)
+    if (Files.notExists(this.aclConfigPath)) {
+      throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(this.aclConfigPath))
+    }
   }
 
   Array<Rule> load() {

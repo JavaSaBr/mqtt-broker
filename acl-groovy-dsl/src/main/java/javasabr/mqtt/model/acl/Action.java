@@ -1,5 +1,5 @@
 package javasabr.mqtt.model.acl;
 
-enum Action {
+public enum Action {
   ALLOW, DENY
 }

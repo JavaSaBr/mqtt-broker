@@ -1,12 +1,12 @@
 package javasabr.mqtt.model.exception;
 
-public class AclConfigurationException extends RuntimeException {
+class AclConfigurationException extends RuntimeException {
 
-  public AclConfigurationException(String message) {
+  AclConfigurationException(String message) {
     super(message);
   }
 
-  public AclConfigurationException(Throwable cause) {
+  AclConfigurationException(Throwable cause) {
     super(cause);
   }
 }

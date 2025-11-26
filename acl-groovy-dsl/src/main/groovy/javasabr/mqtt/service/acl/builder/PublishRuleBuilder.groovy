@@ -4,8 +4,8 @@ package javasabr.mqtt.service.acl.builder
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Action
 import javasabr.mqtt.model.acl.Rule
-import javasabr.mqtt.model.acl.value.matcher.TopicMatcher
-import javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher
+import javasabr.mqtt.model.acl.matcher.TopicMatcher
+import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
@@ -14,7 +14,7 @@ class PublishRuleBuilder extends RuleBuilder {
 
   private PublishRuleBuilder(Action permission) { super(permission, Operation.PUBLISH) }
 
-  private PublishRuleBuilder topicName(TopicNameValueMatcher... topicName) { this.topicNames.addAll(topicName); this }
+  private PublishRuleBuilder topicName(TopicNameMatcher... topicName) { this.topicNames.addAll(topicName); this }
 
   Rule build() { new Rule(permission, action, condition, topicNames) }
 }

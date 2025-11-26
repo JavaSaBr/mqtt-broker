@@ -4,7 +4,7 @@ package javasabr.mqtt.service.acl.builder
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Action
 import javasabr.mqtt.model.acl.Rule
-import javasabr.mqtt.model.acl.value.matcher.TopicMatcher
+import javasabr.mqtt.model.acl.matcher.TopicMatcher
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 

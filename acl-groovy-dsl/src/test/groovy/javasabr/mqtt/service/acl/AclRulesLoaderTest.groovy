@@ -7,10 +7,10 @@ import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
-import javasabr.mqtt.model.acl.value.matcher.EqualsValueMatcher
-import javasabr.mqtt.model.acl.value.matcher.RegexValueMatcher
-import javasabr.mqtt.model.acl.value.matcher.TopicFilterValueMatcher
-import javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher
+import javasabr.mqtt.model.acl.matcher.EqualsClientMatcher
+import javasabr.mqtt.model.acl.matcher.RegexClientMatcher
+import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
@@ -26,7 +26,7 @@ class AclRulesLoaderTest extends UnitSpecification {
     when:
         def configAbsolutePath = Objects.requireNonNull(
             getClass().getClassLoader().getResource("acl.groovy")
-        ).toURI()
+        ).getFile()
         Array<Rule> rules = new AclRulesLoader(configAbsolutePath).load()
     then:
         verifyAll(rules) {
@@ -37,41 +37,41 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(condition as AnyOfCondition) {
               with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor1" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "sensor1" }
                 }
                 with(get(1) as UserNameCondition) {
-                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/sensor10\$/" }
+                  with(clientMatcher as RegexClientMatcher) { pattern.pattern() == "sensor10\$" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "clientId1" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "clientId1" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/^cliend/" }
+                  with(clientMatcher as RegexClientMatcher) { pattern.pattern() == "^cliend" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "10.56.0.3" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "127.0.0.1" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "127.0.0.1" }
                 }
                 with(get(6) as AllOfCondition) {
                   with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
-                      with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor2" }
+                      with(clientMatcher as EqualsClientMatcher) { expectedValue == "sensor2" }
                     }
                     with(get(1) as ClientIdCondition) {
-                      with(clientMatcher as EqualsValueMatcher) { expectedValue == "clientId2" }
+                      with(clientMatcher as EqualsClientMatcher) { expectedValue == "clientId2" }
                     }
                     with(get(2) as IpAddressCondition) {
-                      with(clientMatcher as EqualsValueMatcher) { expectedValue == "10.56.0.3" }
+                      with(clientMatcher as EqualsClientMatcher) { expectedValue == "10.56.0.3" }
                     }
                   }
                 }
               }
             }
             topics().containsAll(
-                new TopicNameValueMatcher("/topic1"),
-                new TopicNameValueMatcher("/topic2/temp")
+                new TopicNameMatcher("/topic1"),
+                new TopicNameMatcher("/topic2/temp")
             )
           }
           with(get(1)) {
@@ -80,28 +80,28 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(condition as AllOfCondition) {
               with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor2" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "sensor2" }
                 }
                 with(get(1) as UserNameCondition) {
-                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/sensor11\$/" }
+                  with(clientMatcher as RegexClientMatcher) { pattern.pattern() == "sensor11\$" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "clientId2" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "clientId2" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/^cliend1/" }
+                  with(clientMatcher as RegexClientMatcher) { pattern.pattern() == "^cliend1" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "10.56.0.3" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "127.0.0.1" }
+                  with(clientMatcher as EqualsClientMatcher) { expectedValue == "127.0.0.1" }
                 }
               }
             }
             topics().containsAll(
-                new TopicFilterValueMatcher("/topic1/#"),
-                new TopicFilterValueMatcher("/topic2/+/temp")
+                new TopicFilterMatcher("/topic1/#"),
+                new TopicFilterMatcher("/topic2/+/temp")
             )
           }
         }
