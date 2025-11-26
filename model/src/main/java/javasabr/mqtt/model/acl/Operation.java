@@ -1,5 +1,5 @@
 package javasabr.mqtt.model.acl;
 
-public enum Action {
+public enum Operation {
     PUBLISH, SUBSCRIBE, ALL
 }

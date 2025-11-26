@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.acl.value.matcher;
 
-public interface TopicMatcher<T> {
+interface TopicMatcher<T> {
 
-  boolean test(T value);
+  boolean test(T value)
 }

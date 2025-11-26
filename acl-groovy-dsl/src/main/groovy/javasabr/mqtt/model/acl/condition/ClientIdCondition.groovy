@@ -1,11 +1,13 @@
-package javasabr.mqtt.model.acl.condition;
+package javasabr.mqtt.model.acl.condition
 
+import groovy.transform.ImmutableOptions;
 import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.value.matcher.ClientMatcher;
 
-public record ClientIdCondition(ClientMatcher<String> clientMatcher) implements Condition {
+@ImmutableOptions(knownImmutableClasses = ClientMatcher)
+record ClientIdCondition(ClientMatcher<String> clientMatcher) implements Condition {
   @Override
-  public boolean test(CallId callId) {
-    return clientMatcher.test(callId.clientId());
+  boolean test(CallId callId) {
+    return clientMatcher.test(callId.clientId())
   }
 }

@@ -1,16 +1,16 @@
 package javasabr.mqtt.service.acl.builder
 
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Action
-import javasabr.mqtt.model.acl.Permission
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.condition.Condition
 
 abstract class RuleBuilder implements TopicMatcherBuilder {
-  Permission permission
-  Action action
+  Action permission
+  Operation action
   Condition condition
 
-  RuleBuilder(Permission permission, Action action) { this.permission = permission; this.action = action }
+  RuleBuilder(Action permission, Operation action) { this.permission = permission; this.action = action }
 
   RuleBuilder allOf(Closure<?> config) {
     if (this.condition) throw new IllegalArgumentException("Only one clients section allowed")

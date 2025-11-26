@@ -1,10 +1,10 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.CallId
 import javasabr.mqtt.model.acl.Rule
-import javasabr.mqtt.model.acl.condition.Any
-import javasabr.mqtt.model.acl.condition.AnyOf
+import javasabr.mqtt.model.acl.condition.AnyCondition
+import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
@@ -17,19 +17,19 @@ import javasabr.rlib.collections.array.MutableArray
 
 import java.util.regex.Pattern
 
-import static javasabr.mqtt.model.acl.Action.ALL
-import static javasabr.mqtt.model.acl.Action.PUBLISH
-import static javasabr.mqtt.model.acl.Action.SUBSCRIBE
-import static javasabr.mqtt.model.acl.Permission.ALLOW
-import static javasabr.mqtt.model.acl.Permission.DENY
+import static javasabr.mqtt.model.acl.Operation.ALL
+import static javasabr.mqtt.model.acl.Operation.PUBLISH
+import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
+import static javasabr.mqtt.model.acl.Action.ALLOW
+import static javasabr.mqtt.model.acl.Action.DENY
 
 class AclRulesEngineTest extends UnitSpecification {
 
-  def "should"(String username, String clientId, String ipAddress, Action action, String topic) {
+  def "should"(String username, String clientId, String ipAddress, Operation action, String topic) {
     given:
         Array<Rule> rules = MutableArray.ofType(Rule.class)
         rules << new Rule(ALLOW, PUBLISH,
-            new AnyOf(Array.of(
+            new AnyOfCondition(Array.of(
                 new UserNameCondition(new EqualsValueMatcher("sensor1")),
                 new UserNameCondition(new EqualsValueMatcher("sensor10")),
                     new UserNameCondition(new RegexValueMatcher(Pattern.compile("^sensor1/"))),
@@ -46,11 +46,11 @@ class AclRulesEngineTest extends UnitSpecification {
                 new TopicNameValueMatcher("/topic2/+/temp")
             )
         )
-        rules << new Rule(ALLOW, PUBLISH, new Any(), Array.of(
+        rules << new Rule(ALLOW, PUBLISH, new AnyCondition(), Array.of(
             new TopicNameValueMatcher("/topic1/#"),
             new TopicNameValueMatcher("/topic2/+/temp")
         ))
-        rules << new Rule(DENY, SUBSCRIBE, new Any(), Array.of(
+        rules << new Rule(DENY, SUBSCRIBE, new AnyCondition(), Array.of(
             new TopicNameValueMatcher("\$SYS/#"),
             new TopicNameValueMatcher("#")
         ))

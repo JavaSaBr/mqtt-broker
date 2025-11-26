@@ -1,7 +1,7 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.condition.Any
+import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
@@ -12,7 +12,7 @@ import javasabr.rlib.collections.array.MutableArray
 
 abstract class ConditionBuilder implements ValueMatcherBuilder {
 
-  private static final Condition MATCH_ANY = new Any()
+  private static final Condition MATCH_ANY = new AnyCondition()
 
   protected MutableArray<Condition> conditions = ArrayFactory.mutableArray(Condition)
 

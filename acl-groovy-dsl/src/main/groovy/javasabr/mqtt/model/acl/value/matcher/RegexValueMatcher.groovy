@@ -1,11 +1,14 @@
-package javasabr.mqtt.model.acl.value.matcher;
+package javasabr.mqtt.model.acl.value.matcher
 
-import java.util.regex.Pattern;
+import groovy.transform.ImmutableOptions
 
-public record RegexValueMatcher(Pattern pattern) implements ClientMatcher<String> {
+import java.util.regex.Pattern
+
+@ImmutableOptions(knownImmutableClasses = Pattern)
+record RegexValueMatcher(Pattern pattern) implements ClientMatcher<String> {
 
   @Override
-  public boolean test(String value) {
-    return pattern.matcher(value).matches();
+  boolean test(String value) {
+    return pattern.matcher(value).matches()
   }
 }

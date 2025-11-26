@@ -1,3 +1,3 @@
 package javasabr.mqtt.model.acl;
 
-public record CallId(String username, String clientId, String ipAddress, Action action, String topic) {}
+public record CallId(String username, String clientId, String ipAddress, Operation operation, String topic) {}

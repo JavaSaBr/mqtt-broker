@@ -1,13 +1,13 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.Permission
+import javasabr.mqtt.model.acl.Action
 import javasabr.mqtt.model.acl.Rule
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
 
-import static javasabr.mqtt.model.acl.Permission.ALLOW
-import static javasabr.mqtt.model.acl.Permission.DENY
+import static javasabr.mqtt.model.acl.Action.ALLOW
+import static javasabr.mqtt.model.acl.Action.DENY
 
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.Rule} from ACL configuration
@@ -37,10 +37,10 @@ class AclRulesBuilder {
   }
 
   private AclRulesBuilder rule(
-      Permission permission,
+      Action action,
       Closure<RuleBuilder> ruleBuilderConstructor,
       Closure<?> ruleConfigurator) {
-    def ruleBuilder = ruleBuilderConstructor(permission)
+    def ruleBuilder = ruleBuilderConstructor(action)
     ruleConfigurator.delegate = ruleBuilder
     ruleConfigurator()
     rules << ruleBuilder.build()

@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.acl;
 
 import javasabr.mqtt.model.acl.CallId;
-import javasabr.mqtt.model.acl.Permission;
+import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.Rule;
 import javasabr.mqtt.model.acl.value.matcher.TopicMatcher;
 import javasabr.mqtt.model.acl.condition.Condition;
@@ -31,7 +31,7 @@ public class AclRulesEngine {
 
   private boolean isAllowed(CallId callId) {
     for (Rule rule : rules) {
-      if (rule.action() != callId.action()) {
+      if (rule.operation() != callId.operation()) {
         continue;
       }
       if (!matchesTopic(rule.topics(), callId.topic())) {
@@ -40,7 +40,7 @@ public class AclRulesEngine {
       if (!matchesClient(rule.condition(), callId)) {
         continue;
       }
-      return rule.permission() == Permission.ALLOW;
+      return rule.action() == Action.ALLOW;
     }
     return false;
   }

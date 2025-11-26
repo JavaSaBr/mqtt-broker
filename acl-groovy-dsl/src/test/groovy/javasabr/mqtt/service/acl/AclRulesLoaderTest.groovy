@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.condition.AllOf
-import javasabr.mqtt.model.acl.condition.AnyOf
+import javasabr.mqtt.model.acl.condition.AllOfCondition
+import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
@@ -14,10 +14,10 @@ import javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
-import static javasabr.mqtt.model.acl.Action.PUBLISH
-import static javasabr.mqtt.model.acl.Action.SUBSCRIBE
-import static javasabr.mqtt.model.acl.Permission.ALLOW
-import static javasabr.mqtt.model.acl.Permission.DENY
+import static javasabr.mqtt.model.acl.Operation.PUBLISH
+import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
+import static javasabr.mqtt.model.acl.Action.ALLOW
+import static javasabr.mqtt.model.acl.Action.DENY
 
 class AclRulesLoaderTest extends UnitSpecification {
 
@@ -32,9 +32,9 @@ class AclRulesLoaderTest extends UnitSpecification {
         verifyAll(rules) {
           size() == 2
           with(get(0)) {
-            action == PUBLISH
-            permission == ALLOW
-            with(condition as AnyOf) {
+            operation == PUBLISH
+            action == ALLOW
+            with(condition as AnyOfCondition) {
               with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
                   with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor1" }
@@ -54,7 +54,7 @@ class AclRulesLoaderTest extends UnitSpecification {
                 with(get(5) as IpAddressCondition) {
                   with(clientMatcher as EqualsValueMatcher) { expectedValue == "127.0.0.1" }
                 }
-                with(get(6) as AllOf) {
+                with(get(6) as AllOfCondition) {
                   with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
                       with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor2" }
@@ -75,9 +75,9 @@ class AclRulesLoaderTest extends UnitSpecification {
             )
           }
           with(get(1)) {
-            action == SUBSCRIBE
-            permission == DENY
-            with(condition as AllOf) {
+            operation == SUBSCRIBE
+            action == DENY
+            with(condition as AllOfCondition) {
               with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
                   with(clientMatcher as EqualsValueMatcher) {

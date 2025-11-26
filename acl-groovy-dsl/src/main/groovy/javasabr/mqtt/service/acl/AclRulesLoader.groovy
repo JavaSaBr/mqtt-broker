@@ -12,7 +12,7 @@ import java.nio.file.Path
 
 class AclRulesLoader {
 
-  private static final String[] MODEL_IMPORTS = ["javasabr.mqtt.model.acl.Permission", "javasabr.mqtt.model.acl.Action"]
+  private static final String[] MODEL_IMPORTS = ["javasabr.mqtt.model.acl.Operation", "javasabr.mqtt.model.acl.Action"]
 
   private final Path aclConfigPath
 
