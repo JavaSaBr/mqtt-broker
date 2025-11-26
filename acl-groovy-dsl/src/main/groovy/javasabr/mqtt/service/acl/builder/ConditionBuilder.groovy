@@ -12,7 +12,7 @@ import javasabr.rlib.collections.array.MutableArray
 
 abstract class ConditionBuilder implements ValueMatcherBuilder {
 
-  private static final Condition MATCH_ANY = new AnyCondition()
+  public static final Condition MATCH_ANY = new AnyCondition()
 
   protected MutableArray<Condition> conditions = ArrayFactory.mutableArray(Condition)
 

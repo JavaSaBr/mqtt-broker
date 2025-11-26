@@ -1,9 +1,12 @@
+//file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.condition.Condition
+
+import static javasabr.mqtt.service.acl.builder.ConditionBuilder.MATCH_ANY
 
 abstract class RuleBuilder implements TopicMatcherBuilder {
   Action permission

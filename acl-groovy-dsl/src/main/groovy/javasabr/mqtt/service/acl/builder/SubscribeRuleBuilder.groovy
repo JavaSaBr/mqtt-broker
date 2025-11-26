@@ -1,3 +1,4 @@
+//file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.Operation
@@ -16,5 +17,5 @@ class SubscribeRuleBuilder extends RuleBuilder {
     this.topicFilters.addAll(topicFilter); this
   }
 
-  Rule build() { new Rule(permission, action, condition/* ?: MATCH_ANY*/, topicFilters) }
+  Rule build() { new Rule(permission, action, condition, topicFilters) }
 }

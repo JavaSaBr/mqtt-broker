@@ -1,3 +1,4 @@
+//file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.Operation
@@ -15,5 +16,5 @@ class PublishRuleBuilder extends RuleBuilder {
 
   private PublishRuleBuilder topicName(TopicNameValueMatcher... topicName) { this.topicNames.addAll(topicName); this }
 
-  Rule build() { new Rule(permission, action, condition/* ?: MATCH_ANY*/, topicNames) }
+  Rule build() { new Rule(permission, action, condition, topicNames) }
 }

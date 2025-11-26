@@ -1,11 +1,11 @@
 package javasabr.mqtt.service.acl
 
+import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
-import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.value.matcher.EqualsValueMatcher
 import javasabr.mqtt.model.acl.value.matcher.RegexValueMatcher
@@ -14,10 +14,10 @@ import javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
-import static javasabr.mqtt.model.acl.Operation.PUBLISH
-import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 import static javasabr.mqtt.model.acl.Action.ALLOW
 import static javasabr.mqtt.model.acl.Action.DENY
+import static javasabr.mqtt.model.acl.Operation.PUBLISH
+import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
 class AclRulesLoaderTest extends UnitSpecification {
 
@@ -80,34 +80,22 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(condition as AllOfCondition) {
               with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsValueMatcher) {
-                    expectedValue == "sensor2"
-                  }
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor2" }
                 }
                 with(get(1) as UserNameCondition) {
-                  with(clientMatcher as RegexValueMatcher) {
-                    pattern.pattern() == "/sensor11\$/"
-                  }
+                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/sensor11\$/" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(clientMatcher as EqualsValueMatcher) {
-                    expectedValue == "clientId2"
-                  }
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "clientId2" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(clientMatcher as RegexValueMatcher) {
-                    pattern.pattern() == "/^cliend1/"
-                  }
+                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/^cliend1/" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(clientMatcher as EqualsValueMatcher) {
-                    expectedValue == "10.56.0.3"
-                  }
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(clientMatcher as EqualsValueMatcher) {
-                    expectedValue == "127.0.0.1"
-                  }
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "127.0.0.1" }
                 }
               }
             }

@@ -56,7 +56,12 @@ contributor(context(scope: scriptScope())) {
         doc: 'Checks strings for Regex matching'
   }
 
-  if (!enclosingCall("allOf") && !enclosingCall("anyOf") && (enclosingCall("allowPublish") || enclosingCall("denyPublish") || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe"))) {
+  if (!enclosingCall("allOf")
+      && !enclosingCall("anyOf")
+      && (enclosingCall("allowPublish")
+      || enclosingCall("denyPublish")
+      || enclosingCall("allowSubscribe")
+      || enclosingCall("denySubscribe"))) {
     method name: 'allOf',
         type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.RuleBuilder',
         params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder>'],
@@ -69,7 +74,7 @@ contributor(context(scope: scriptScope())) {
         doc: 'Define clients filter for this rule'
   }
 
-  if (enclosingCall("allOf") || enclosingCall("anyOf") ) {
+  if (enclosingCall("allOf") || enclosingCall("anyOf")) {
     method name: 'allOf',
         type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.AllOfBuilder',
         params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder>'],

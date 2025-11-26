@@ -46,7 +46,7 @@ public class AclRulesEngine {
   }
 
   private boolean matchesClient(Condition clients, CallId callId) {
-    return /*clients == AllOf.MATCH_ALL ||*/ clients.test(callId);
+    return clients.test(callId);
   }
 
   private boolean checkAttributes(Condition clients, CallId c) {

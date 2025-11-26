@@ -1,3 +1,4 @@
+//file:noinspection unused
 package javasabr.mqtt.service.acl.builder;
 
 import java.util.regex.Pattern;
