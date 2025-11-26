@@ -2,6 +2,7 @@ package javasabr.mqtt.service.acl
 
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
+import javasabr.mqtt.service.acl.builder.AclRulesBuilder
 import javasabr.rlib.collections.array.Array
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer

@@ -1,17 +1,25 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.Action
-import javasabr.mqtt.model.acl.ClientMatcher
-import javasabr.mqtt.model.acl.Permission
+import javasabr.mqtt.model.acl.condition.AllOf
+import javasabr.mqtt.model.acl.condition.AnyOf
+import javasabr.mqtt.model.acl.condition.ClientIdCondition
+import javasabr.mqtt.model.acl.condition.Condition
+import javasabr.mqtt.model.acl.condition.IpAddressCondition
 import javasabr.mqtt.model.acl.Rule
+import javasabr.mqtt.model.acl.condition.UserNameCondition
+import javasabr.mqtt.model.acl.value.matcher.EqualsValueMatcher
+import javasabr.mqtt.model.acl.value.matcher.RegexValueMatcher
+import javasabr.mqtt.model.acl.value.matcher.TopicFilterValueMatcher
+import javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
-import static java.lang.reflect.Proxy.getInvocationHandler
 import static javasabr.mqtt.model.acl.Action.PUBLISH
+import static javasabr.mqtt.model.acl.Action.SUBSCRIBE
 import static javasabr.mqtt.model.acl.Permission.ALLOW
+import static javasabr.mqtt.model.acl.Permission.DENY
 
-class AclRulesLoaderTest extends UnitSpecification implements RegexComparatorBuilder, EqualsComparatorBuilder, ClientMatcherBuilder {
+class AclRulesLoaderTest extends UnitSpecification {
 
   @SuppressWarnings('GroovyAccessibility')
   def "should parse new Groovy DSL config"() {
@@ -23,72 +31,91 @@ class AclRulesLoaderTest extends UnitSpecification implements RegexComparatorBui
     then:
         verifyAll(rules) {
           size() == 2
-
           with(get(0)) {
-            action() == PUBLISH
-            permission() == ALLOW
-            with(clients()) {
-              with(it['clientMatchers'] as Array<ClientMatcher>) {
-                with(it[0]) {
-                  getterName(it) == "username"
-                  with(ruleMatchers()) {
-                    it[0].rulePattern == "sensor1"
-                    it[1].rulePattern.pattern() == "/sensor10\$/"
-                  }
+            action == PUBLISH
+            permission == ALLOW
+            with(condition as AnyOf) {
+              with(conditions as Array<Condition>) {
+                with(get(0) as UserNameCondition) {
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor1" }
                 }
-                with(it[1]) {
-                  getterName(it) == "clientId"
-                  with(ruleMatchers()) {
-                    it[0].rulePattern == "clientId1"
-                    it[1].rulePattern.pattern() == "/^cliend/"
-                  }
+                with(get(1) as UserNameCondition) {
+                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/sensor10\$/" }
                 }
-                with(it[2]) {
-                  getterName(it) == "ipAddress"
-                  with(ruleMatchers()) {
-                    it[0].rulePattern == "10.56.0.3"
-                    it[1].rulePattern == "127.0.0.1"
+                with(get(2) as ClientIdCondition) {
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "clientId1" }
+                }
+                with(get(3) as ClientIdCondition) {
+                  with(clientMatcher as RegexValueMatcher) { pattern.pattern() == "/^cliend/" }
+                }
+                with(get(4) as IpAddressCondition) {
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "10.56.0.3" }
+                }
+                with(get(5) as IpAddressCondition) {
+                  with(clientMatcher as EqualsValueMatcher) { expectedValue == "127.0.0.1" }
+                }
+                with(get(6) as AllOf) {
+                  with(conditions as Array<Condition>) {
+                    with(get(0) as UserNameCondition) {
+                      with(clientMatcher as EqualsValueMatcher) { expectedValue == "sensor2" }
+                    }
+                    with(get(1) as ClientIdCondition) {
+                      with(clientMatcher as EqualsValueMatcher) { expectedValue == "clientId2" }
+                    }
+                    with(get(2) as IpAddressCondition) {
+                      with(clientMatcher as EqualsValueMatcher) { expectedValue == "10.56.0.3" }
+                    }
                   }
                 }
               }
             }
-            topics().containsAll("/topic1", "/topic2/temp")
+            topics().containsAll(
+                new TopicNameValueMatcher("/topic1"),
+                new TopicNameValueMatcher("/topic2/temp")
+            )
           }
-
           with(get(1)) {
-            action() == Action.SUBSCRIBE
-            permission() == Permission.DENY
-            with(clients()) {
-              with(it['clientMatchers'] as Array<ClientMatcher>) {
-                with(it[0]) {
-                  getterName(it) == "username"
-                  with(ruleMatchers()) {
-                    it[0].rulePattern == "sensor2"
-                    it[1].rulePattern.pattern() == "/sensor11\$/"
+            action == SUBSCRIBE
+            permission == DENY
+            with(condition as AllOf) {
+              with(conditions as Array<Condition>) {
+                with(get(0) as UserNameCondition) {
+                  with(clientMatcher as EqualsValueMatcher) {
+                    expectedValue == "sensor2"
                   }
                 }
-                with(it[1]) {
-                  getterName(it) == "clientId"
-                  with(ruleMatchers()) {
-                    it[0].rulePattern == "clientId2"
-                    it[1].rulePattern.pattern() == "/^cliend1/"
+                with(get(1) as UserNameCondition) {
+                  with(clientMatcher as RegexValueMatcher) {
+                    pattern.pattern() == "/sensor11\$/"
                   }
                 }
-                with(it[2]) {
-                  getterName(it) == "ipAddress"
-                  with(ruleMatchers()) {
-                    it[0].rulePattern == "10.56.0.3"
-                    it[1].rulePattern == "127.0.0.1"
+                with(get(2) as ClientIdCondition) {
+                  with(clientMatcher as EqualsValueMatcher) {
+                    expectedValue == "clientId2"
+                  }
+                }
+                with(get(3) as ClientIdCondition) {
+                  with(clientMatcher as RegexValueMatcher) {
+                    pattern.pattern() == "/^cliend1/"
+                  }
+                }
+                with(get(4) as IpAddressCondition) {
+                  with(clientMatcher as EqualsValueMatcher) {
+                    expectedValue == "10.56.0.3"
+                  }
+                }
+                with(get(5) as IpAddressCondition) {
+                  with(clientMatcher as EqualsValueMatcher) {
+                    expectedValue == "127.0.0.1"
                   }
                 }
               }
             }
-            topics().containsAll("/topic1/#", "/topic2/+/temp")
+            topics().containsAll(
+                new TopicFilterValueMatcher("/topic1/#"),
+                new TopicFilterValueMatcher("/topic2/+/temp")
+            )
           }
         }
-  }
-
-  def getterName(def proxy) {
-    return getInvocationHandler(proxy.valueGetter()).delegate.method
   }
 }

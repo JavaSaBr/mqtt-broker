@@ -1,29 +1,26 @@
 allowPublish {
-  anyClient {
-    username eq("sensor1"), regex("/sensor10\$/")
+  anyOf {
+    userName eq("sensor1"), regex("/sensor10\$/")
     clientId eq("clientId1"), regex("/^cliend/")
-    clientAttr(
-        attr_name1: "attr_value1",
-        attr_name2: "/attr_value\$/"
-    )
-    ipaddr eq("10.56.0.3"), eq("127.0.0.1")
+    ipAddress eq("10.56.0.3"), eq("127.0.0.1")
+    allOf {
+      userName eq("sensor2")
+      clientId eq("clientId2")
+      ipAddress eq("10.56.0.3")
+    }
   }
-  topicName "/topic1", "/topic2/temp"
+  topicName exact("/topic1"), exact("/topic2/temp")
 }
 
 denySubscribe {
-  allClients {
-    username eq("sensor2")
-    username regex("/sensor11\$/")
+  allOf {
+    userName eq("sensor2")
+    userName regex("/sensor11\$/")
     clientId eq("clientId2")
     clientId regex("/^cliend1/")
-    clientAttr(
-        attr_name1: "attr_value1",
-        attr_name2: "/attr_value\$/"
-    )
-    ipaddr eq("10.56.0.3")
-    ipaddr eq("127.0.0.1")
+    ipAddress eq("10.56.0.3")
+    ipAddress eq("127.0.0.1")
   }
-  topicFilter "/topic1/#"
-  topicFilter "/topic2/+/temp"
+  topicFilter match("/topic1/#")
+  topicFilter match("/topic2/+/temp")
 }

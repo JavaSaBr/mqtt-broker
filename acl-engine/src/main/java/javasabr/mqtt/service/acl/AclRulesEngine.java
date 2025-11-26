@@ -1,11 +1,10 @@
 package javasabr.mqtt.service.acl;
 
-import java.util.List;
-import javasabr.mqtt.model.acl.AllClients;
 import javasabr.mqtt.model.acl.CallId;
-import javasabr.mqtt.model.acl.Clients;
 import javasabr.mqtt.model.acl.Permission;
 import javasabr.mqtt.model.acl.Rule;
+import javasabr.mqtt.model.acl.value.matcher.TopicMatcher;
+import javasabr.mqtt.model.acl.condition.Condition;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
@@ -38,7 +37,7 @@ public class AclRulesEngine {
       if (!matchesTopic(rule.topics(), callId.topic())) {
         continue;
       }
-      if (!matchesClient(rule.clients(), callId)) {
+      if (!matchesClient(rule.condition(), callId)) {
         continue;
       }
       return rule.permission() == Permission.ALLOW;
@@ -46,28 +45,24 @@ public class AclRulesEngine {
     return false;
   }
 
-  private boolean matchesClient(Clients clients, CallId callId) {
-    return clients == AllClients.MATCH_ALL || clients.match(callId);
+  private boolean matchesClient(Condition clients, CallId callId) {
+    return /*clients == AllOf.MATCH_ALL ||*/ clients.test(callId);
   }
 
-  private boolean checkAttributes(Clients clients, CallId c) {
+  private boolean checkAttributes(Condition clients, CallId c) {
     return matchesAttributes(clients, c);
   }
 
-  private boolean matchesAttributes(Clients clients, CallId callId) {
+  private boolean matchesAttributes(Condition clients, CallId callId) {
     return true;
   }
 
-  private boolean matchesTopic(List<String> ruleTopicFilters, String requestedTopicName) {
+  private boolean matchesTopic(Array<TopicMatcher<String>> ruleTopicFilters, String requestedTopicName) {
     if (ruleTopicFilters.isEmpty()) {
       return false;
     }
-    for (String ruleTopicFilter : ruleTopicFilters) {
-      TopicFilter topicFilter = topicFilterCache.getInWriteLock(
-          ruleTopicFilter,
-          (map, filter) -> map.getOrCompute(filter, TopicFilter::valueOf));
-
-      if (topicFilter.matches(requestedTopicName)) {
+    for (TopicMatcher<String> ruleTopicFilter : ruleTopicFilters) {
+      if (ruleTopicFilter.test(requestedTopicName)) {
         return true;
       }
     }

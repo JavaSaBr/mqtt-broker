@@ -1,68 +1,97 @@
 contributor(context(scope: scriptScope())) {
 
   method name: 'allowPublish',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder',
-      doc: 'Define a rule'
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.PublishRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.PublishRuleBuilder',
+      doc: 'Define a rule '
   method name: 'denyPublish',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.PublishRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.PublishRuleBuilder',
       doc: 'Define a rule'
   method name: 'allowSubscribe',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.SubscribeRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.SubscribeRuleBuilder',
       doc: 'Define a rule'
   method name: 'denySubscribe',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.SubscribeRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.SubscribeRuleBuilder',
       doc: 'Define a rule'
 
-  method name: 'topicName',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.PublishRuleBuilder',
-      params: [string: 'String...'],
-      doc: 'Set topics for the rule'
-  method name: 'topicFilter',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.SubscribeRuleBuilder',
-      params: [string: 'String...'],
-      doc: 'Set topics for the rule'
-  method name: 'allClients',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      params: [config: 'Closure'],
-      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      doc: 'Define clients filter for this rule'
-  method name: 'anyClient',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      params: [config: 'Closure'],
-      delegateType: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      doc: 'Define clients filter for this rule'
+  if ((enclosingCall("allowPublish") || enclosingCall("allowPublish"))
+      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
+    method name: 'topicName',
+        type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.PublishRuleBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher...'],
+        doc: 'Set topics for the rule'
+    method name: 'exact',
+        type: 'javasabr.mqtt.model.acl.value.matcher.TopicNameValueMatcher',
+        params: [string: 'String'],
+        doc: 'Checks strict equality of strings'
+  }
 
-  method name: 'username',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.ClientComparator...'],
+  if ((enclosingCall("allowSubscribe") || enclosingCall("denySubscribe"))
+      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
+    method name: 'topicFilter',
+        type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.SubscribeRuleBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.value.matcher.TopicFilterValueMatcher...'],
+        doc: 'Set topics for the rule'
+    method name: 'match',
+        type: 'javasabr.mqtt.model.acl.value.matcher.TopicFilterValueMatcher',
+        params: [string: 'String'],
+        doc: 'Checks strings for Regex matching'
+  }
+
+  if (enclosingCall("allOf") || enclosingCall("anyOf")) {
+    method name: 'eq',
+        type: 'javasabr.mqtt.model.acl.value.matcher.EqualsValueMatcher',
+        params: [string: 'String'],
+        doc: 'Checks strict equality of strings'
+    method name: 'regex',
+        type: 'javasabr.mqtt.model.acl.value.matcher.RegexValueMatcher',
+        params: [string: 'String'],
+        doc: 'Checks strings for Regex matching'
+  }
+
+  if (!enclosingCall("allOf") && !enclosingCall("anyOf") && (enclosingCall("allowPublish") || enclosingCall("denyPublish") || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe"))) {
+    method name: 'allOf',
+        type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.RuleBuilder',
+        doc: 'Define clients filter for this rule'
+    method name: 'anyOf',
+        type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.RuleBuilder',
+        doc: 'Define clients filter for this rule'
+  }
+
+  if (enclosingCall("allOf") || enclosingCall("anyOf") ) {
+    method name: 'allOf',
+        type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.AllOfBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
+        doc: 'Define clients filter for this rule'
+    method name: 'anyOf',
+        type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.AnyOfBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
+        doc: 'Define clients filter for this rule'
+  }
+
+  method name: 'userName',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
+      params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
       doc: 'Filter by username'
   method name: 'clientId',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.ClientComparator...'],
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
+      params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
       doc: 'Filter by clientId'
-  method name: 'clientAttr',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      params: [string: 'Map<String, String>'],
-      doc: 'Filter by client attributes'
-  method name: 'ipaddr',
-      type: 'javasabr.mqtt.service.acl.NewAclRulesBuilder.ClientsBuilder',
-      params: [string: 'javasabr.mqtt.model.acl.ClientComparator...'],
+  method name: 'ipAddress',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder.ConditionBuilder',
+      params: [string: 'javasabr.mqtt.model.acl.value.matcher.ClientMatcher<String>...'],
       doc: 'Filter by IP address'
-
-  method name: 'eq',
-      type: 'javasabr.mqtt.model.acl.ClientComparator',
-      params: [string: 'String'],
-      doc: 'Checks strict equality of strings'
-  method name: 'regex',
-      type: 'javasabr.mqtt.model.acl.ClientComparator',
-      params: [string: 'String'],
-      doc: 'Checks strings for Regex matching'
 }
