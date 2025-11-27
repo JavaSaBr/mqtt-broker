@@ -2,10 +2,10 @@ package javasabr.mqtt.model.subscriber.tree;
 
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscription.Subscription;
-import javasabr.mqtt.model.subscription.SubscriptionOwner;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -39,7 +39,7 @@ class SubscriberNode extends SubscriberTreeBase {
    * @return the previous subscription from the same owner
    */
   @Nullable
-  public SingleSubscriber subscribe(int level, SubscriptionOwner owner, Subscription subscription, TopicFilter topicFilter) {
+  public SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
@@ -47,7 +47,7 @@ class SubscriberNode extends SubscriberTreeBase {
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
-  public boolean unsubscribe(int level, SubscriptionOwner owner, TopicFilter topicFilter) {
+  public boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return removeSubscriber(subscribers(), owner, topicFilter);
     }
@@ -114,7 +114,6 @@ class SubscriberNode extends SubscriberTreeBase {
     }
     stamp = childNodes.writeLock();
     try {
-      //noinspection DataFlowIssue
       return childNodes.getOrCompute(segment, SUBSCRIBER_NODE_FACTORY);
     } finally {
       childNodes.writeUnlock(stamp);

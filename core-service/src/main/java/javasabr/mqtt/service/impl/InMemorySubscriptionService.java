@@ -40,7 +40,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   @Override
   public MqttClient resolveClient(Subscriber subscriber) {
     if (subscriber instanceof SingleSubscriber single) {
-      return (MqttClient) single.owner();
+      return (MqttClient) single.user();
     }
     throw new IllegalArgumentException("Unexpected subscriber: " + subscriber);
   }

@@ -1,11 +1,11 @@
 package javasabr.mqtt.model.subscriber;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscription.Subscription;
-import javasabr.mqtt.model.subscription.SubscriptionOwner;
 
-public record SingleSubscriber(SubscriptionOwner owner, Subscription subscription) implements Subscriber {
+public record SingleSubscriber(MqttUser user, Subscription subscription) implements Subscriber {
 
   @Override
   public SingleSubscriber resolveSingle() {
@@ -19,6 +19,6 @@ public record SingleSubscriber(SubscriptionOwner owner, Subscription subscriptio
   @JsonValue
   @Override
   public String toString() {
-    return "[" + owner + "]->[" + subscription.topicFilter().rawTopic() + "|" + subscription.qos().level() + "]";
+    return "[" + user + "]->[" + subscription.topicFilter().rawTopic() + "|" + subscription.qos().level() + "]";
   }
 }

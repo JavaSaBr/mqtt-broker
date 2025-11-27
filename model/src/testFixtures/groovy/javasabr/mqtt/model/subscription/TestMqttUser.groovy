@@ -1,8 +1,9 @@
 package javasabr.mqtt.model.subscription
 
 import com.fasterxml.jackson.annotation.JsonValue
+import javasabr.mqtt.model.MqttUser
 
-record TestSubscriptionOwner(String id) implements SubscriptionOwner {
+record TestMqttUser(String id) implements MqttUser {
 
   @JsonValue
   @Override
