@@ -4,7 +4,7 @@ import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.Rule;
 import javasabr.mqtt.model.acl.condition.Condition;
-import javasabr.mqtt.model.acl.matcher.TopicMatcher;
+import javasabr.mqtt.model.acl.matcher.ValueMatcher;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.impl.StampedLockBasedHashBasedRefToRefDictionary;
@@ -46,11 +46,11 @@ public class AclRulesEngine {
     return clients.test(callId);
   }
 
-  private boolean matchesTopic(Array<TopicMatcher<String>> ruleTopicFilters, String requestedTopicName) {
+  private boolean matchesTopic(Array<ValueMatcher<String>> ruleTopicFilters, String requestedTopicName) {
     if (ruleTopicFilters.isEmpty()) {
       return false;
     }
-    for (TopicMatcher<String> ruleTopicFilter : ruleTopicFilters) {
+    for (ValueMatcher<String> ruleTopicFilter : ruleTopicFilters) {
       if (ruleTopicFilter.test(requestedTopicName)) {
         return true;
       }

@@ -7,9 +7,11 @@ import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
-import javasabr.mqtt.model.acl.matcher.EqualsClientMatcher
-import javasabr.mqtt.model.acl.matcher.RegexClientMatcher
-import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
+import javasabr.mqtt.model.acl.matcher.EqualsMatcher
+import javasabr.mqtt.model.acl.matcher.RegexMatcher
+import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.acl.matcher.ValueMatcher
+import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
@@ -18,18 +20,19 @@ import java.util.regex.Pattern
 
 import static javasabr.mqtt.model.acl.Action.ALLOW
 import static javasabr.mqtt.model.acl.Action.DENY
-import static javasabr.mqtt.model.acl.Operation.ALL
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
 class AclRulesEngineTest extends UnitSpecification {
 
-  static Condition userNameEquals(String value) { new UserNameCondition(new EqualsClientMatcher(value)) }
-  static Condition userNameRegex(String value) { new UserNameCondition(new RegexClientMatcher(Pattern.compile(value))) }
-  static Condition clientIdEquals(String value) { new UserNameCondition(new EqualsClientMatcher(value)) }
-  static Condition clientIdRegex(String value) { new UserNameCondition(new RegexClientMatcher(Pattern.compile(value))) }
-  static Condition ipAddressEquals(String value) { new UserNameCondition(new EqualsClientMatcher(value)) }
-  static Condition ipAddressRegex(String value) { new UserNameCondition(new RegexClientMatcher(Pattern.compile(value))) }
+  static Condition userNameEquals(String value) { new UserNameCondition(new EqualsMatcher(value)) }
+  static Condition userNameRegex(String value) { new UserNameCondition(new RegexMatcher(Pattern.compile(value))) }
+  static Condition clientIdEquals(String value) { new UserNameCondition(new EqualsMatcher(value)) }
+  static Condition clientIdRegex(String value) { new UserNameCondition(new RegexMatcher(Pattern.compile(value))) }
+  static Condition ipAddressEquals(String value) { new UserNameCondition(new EqualsMatcher(value)) }
+  static Condition ipAddressRegex(String value) { new UserNameCondition(new RegexMatcher(Pattern.compile(value))) }
+  static ValueMatcher<String> topicFilterMatcher(String value) { new TopicFilterMatcher(TopicFilter.valueOf(value)) }
+
 
   def "should allow or deny according rules"(
       String username, String clientId, String ipAddress, Operation action, String topic) {
@@ -49,19 +52,19 @@ class AclRulesEngineTest extends UnitSpecification {
                 ipAddressRegex("127.0.0.1")
             )),
             Array.of(
-                new TopicNameMatcher("/topic1/#"),
-                new TopicNameMatcher("/topic2/+/temp")
+                new EqualsMatcher("/topic1/#"),
+                new EqualsMatcher("/topic2/+/temp")
             )
         )
         rules << new Rule(ALLOW, PUBLISH, new AnyCondition(), Array.of(
-            new TopicNameMatcher("/topic1/#"),
-            new TopicNameMatcher("/topic2/+/temp")
+            new EqualsMatcher("/topic1/#"),
+            new EqualsMatcher("/topic2/+/temp")
         ))
         rules << new Rule(DENY, SUBSCRIBE, new AnyCondition(), Array.of(
-            new TopicNameMatcher("\$SYS/#"),
-            new TopicNameMatcher("#")
+            topicFilterMatcher("\$SYS/#"),
+            topicFilterMatcher("#")
         ))
-        rules << new Rule(ALLOW, ALL)
+//        rules << new Rule(ALLOW, ALL)
         AclRulesEngine engine = new AclRulesEngine(rules)
         CallId callId = new CallId(username, clientId, ipAddress, action, topic)
     when:
@@ -74,7 +77,6 @@ class AclRulesEngineTest extends UnitSpecification {
         "sensor1"  | "clientId2" | "60.50.0.1" | PUBLISH   | "/topic1/#" | true
         "sensor2"  | "clientId1" | "60.50.0.1" | PUBLISH   | "/topic1/#" | true
         "sensor2"  | "clientId2" | "127.0.0.1" | PUBLISH   | "/topic1/#" | true
-        "sensor1"  | "clientId1" | "127.0.0.1" | ALL       | "/topic1/#" | false
         "sensor2"  | "clientId2" | "127.0.0.2" | PUBLISH   | "/topic1/#" | true
         "sensor2"  | "clientId2" | "127.0.0.2" | PUBLISH   | "/topic/#"  | false
   }

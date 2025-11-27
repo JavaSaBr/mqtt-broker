@@ -2,12 +2,11 @@
 package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.Rule
-import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
-import javasabr.mqtt.model.acl.matcher.ClientMatcher
+import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
@@ -17,17 +16,17 @@ abstract class ConditionBuilder implements ValueMatcherBuilder {
 
   protected MutableArray<Condition> conditions = ArrayFactory.mutableArray(Condition)
 
-  ConditionBuilder userName(ClientMatcher<String>... username) {
+  ConditionBuilder userName(ValueMatcher<String>... username) {
     this.conditions.addAll(username.collect { new UserNameCondition(it) })
     return this
   }
 
-  ConditionBuilder clientId(ClientMatcher<String>... clientId) {
+  ConditionBuilder clientId(ValueMatcher<String>... clientId) {
     this.conditions.addAll(clientId.collect { new ClientIdCondition(it) })
     return this
   }
 
-  ConditionBuilder ipAddress(ClientMatcher<String>... ipAddress) {
+  ConditionBuilder ipAddress(ValueMatcher<String>... ipAddress) {
     this.conditions.addAll(ipAddress.collect { new IpAddressCondition(it) })
     this
   }
@@ -48,8 +47,6 @@ abstract class ConditionBuilder implements ValueMatcherBuilder {
     config()
     return this
   }
-
-  ConditionBuilder any() { this.conditions << MATCH_ANY; this }
 
   abstract Condition build()
 }

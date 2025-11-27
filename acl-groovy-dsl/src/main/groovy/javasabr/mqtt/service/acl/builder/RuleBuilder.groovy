@@ -8,7 +8,7 @@ import javasabr.mqtt.model.acl.condition.Condition
 
 import static javasabr.mqtt.service.acl.builder.ConditionBuilder.MATCH_ANY
 
-abstract class RuleBuilder implements TopicMatcherBuilder {
+abstract class RuleBuilder implements ValueMatcherBuilder {
   Action permission
   Operation action
   Condition condition
@@ -23,11 +23,9 @@ abstract class RuleBuilder implements TopicMatcherBuilder {
 
   RuleBuilder anyOf(Closure<?> config) {
     if (this.condition) throw new IllegalArgumentException("Only one clients section allowed")
-    this.condition = new AnyOfBuilder().buildCondition(config).build()
+    this.condition = config == null ? MATCH_ANY : new AnyOfBuilder().buildCondition(config).build()
     return this
   }
-
-  RuleBuilder any() { this.condition = MATCH_ANY; this }
 
   abstract Rule build()
 }

@@ -2,7 +2,7 @@ package javasabr.mqtt.model.acl.matcher;
 
 import java.util.regex.Pattern;
 
-public record RegexClientMatcher(Pattern pattern) implements ClientMatcher<String> {
+public record RegexMatcher(Pattern pattern) implements ValueMatcher<String> {
 
   @Override
   public boolean test(String value) {

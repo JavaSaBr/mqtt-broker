@@ -9,7 +9,7 @@ allowPublish {
       ipAddress eq("10.56.0.3")
     }
   }
-  topicName exact("/topic1"), exact("/topic2/temp")
+  topicName eq("/topic1"), eq("/topic2/temp")
 }
 
 denySubscribe {
@@ -25,3 +25,12 @@ denySubscribe {
   topicFilter match("/topic2/+/temp")
 }
 
+denyPublish {
+  anyOf()
+  topicName anyone()
+}
+
+denySubscribe {
+  anyOf()
+  topicFilter anyone()
+}

@@ -7,7 +7,7 @@ import static javasabr.mqtt.model.topic.TopicFilter.SINGLE_LEVEL_WILDCARD;
 import java.util.Objects;
 import javasabr.mqtt.model.topic.TopicFilter;
 
-public record TopicFilterMatcher(TopicFilter expectedValue) implements TopicMatcher<String> {
+public record TopicFilterMatcher(TopicFilter expectedValue) implements ValueMatcher<String> {
 
   @Override
   public boolean test(String incomingValue) {

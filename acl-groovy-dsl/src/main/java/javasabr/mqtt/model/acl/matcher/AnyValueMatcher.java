@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.acl.matcher;
 
-public record AnyTopic() implements TopicMatcher<String> {
+public record AnyValueMatcher() implements ValueMatcher<String> {
 
   @Override
   public boolean test(String value) {

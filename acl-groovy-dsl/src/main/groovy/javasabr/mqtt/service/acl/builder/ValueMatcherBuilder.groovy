@@ -1,18 +1,29 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.matcher.ClientMatcher
-import javasabr.mqtt.model.acl.matcher.EqualsClientMatcher
-import javasabr.mqtt.model.acl.matcher.RegexClientMatcher
+import javasabr.mqtt.model.acl.matcher.EqualsMatcher
+import javasabr.mqtt.model.acl.matcher.RegexMatcher
+import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.acl.matcher.ValueMatcher
+import javasabr.mqtt.model.topic.TopicFilter
 
 import java.util.regex.Pattern
 
 interface ValueMatcherBuilder {
-  default ClientMatcher<String> eq(String string) {
-    new EqualsClientMatcher(string)
+
+  default ValueMatcher<String> eq(String string) {
+    new EqualsMatcher(string)
   }
 
-  default ClientMatcher<String> regex(String string) {
-    new RegexClientMatcher(Pattern.compile(string))
+  default ValueMatcher<String> regex(String string) {
+    new RegexMatcher(Pattern.compile(string))
+  }
+
+  default ValueMatcher<String> match(String string) {
+    new TopicFilterMatcher(TopicFilter.valueOf(string));
+  }
+
+  default ValueMatcher<String> anyone() {
+    ValueMatcher.ANY
   }
 }
