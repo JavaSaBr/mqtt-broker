@@ -18,30 +18,46 @@ public record TopicFilterMatcher(TopicFilter expectedValue) implements ValueMatc
     int topicLength = topic.length();
     int topicPosition = 0;
 
+    final int totalLevels;
+    if (topicLength == 0) {
+      totalLevels = 1;
+    } else {
+      int slashCount = 0;
+      for (int i = 0; i < topicLength; i++) {
+        if (topic.charAt(i) == DELIMITER_CHAR) slashCount++;
+      }
+      totalLevels = 1 + slashCount;
+    }
+    int consumedLevels = 0;
+
     for (int i = 0; i < expectedValue.levelsCount(); i++) {
-      if (Objects.equals(expectedValue.segment(i), MULTI_LEVEL_WILDCARD)) {
+      String filterSegment = expectedValue.segment(i);
+      if (Objects.equals(filterSegment, MULTI_LEVEL_WILDCARD)) {
         return i == expectedValue.levelsCount() - 1;
       }
-      if (topicPosition > topicLength) return false;
-      if (topicPosition == topicLength) return false;
-      int segmentEnd = topicPosition;
-      while (segmentEnd < topicLength && topic.charAt(segmentEnd) != DELIMITER_CHAR) {
-        segmentEnd++;
+      if (consumedLevels >= totalLevels) {
+        return false;
       }
-      int segmentLength = segmentEnd - topicPosition;
-      if (Objects.equals(expectedValue.segment(i), SINGLE_LEVEL_WILDCARD)) {
-        topicPosition = (segmentEnd == topicLength ? topicLength : segmentEnd + 1);
-        continue;
-      }
-      String filterSeg = expectedValue.segment(i);
-      if (filterSeg.length() != segmentLength) return false;
-      for (int k = 0; k < segmentLength; k++) {
-        if (filterSeg.charAt(k) != topic.charAt(topicPosition + k)) {
-          return false;
+      int segmentStart = topicPosition;
+      int segmentEnd = segmentStart;
+      if (segmentStart != topicLength) {
+        while (segmentEnd < topicLength && topic.charAt(segmentEnd) != DELIMITER_CHAR) {
+          segmentEnd++;
         }
       }
-      topicPosition = (segmentEnd == topicLength ? topicLength : segmentEnd + 1);
+      int segmentLength = segmentEnd - segmentStart;
+      if (Objects.equals(filterSegment, SINGLE_LEVEL_WILDCARD)) {
+        consumedLevels++;
+        topicPosition = (segmentEnd < topicLength ? segmentEnd + 1 : topicLength);
+        continue;
+      }
+      if (filterSegment.length() != segmentLength) return false;
+      for (int k = 0; k < segmentLength; k++) {
+        if (filterSegment.charAt(k) != topic.charAt(segmentStart + k)) return false;
+      }
+      consumedLevels++;
+      topicPosition = (segmentEnd < topicLength ? segmentEnd + 1 : topicLength);
     }
-    return topicPosition == topicLength;
+    return consumedLevels == totalLevels;
   }
 }
