@@ -201,20 +201,21 @@ public abstract class MqttMessageOutFactory {
 
   public abstract MqttOutMessage newAuthenticate(
       AuthenticateReasonCode reasonCode,
-      String authenticateMethod,
-      byte[] authenticateData,
-      Array<StringPair> userProperties,
-      String reason);
+      @Nullable String reason,
+      @Nullable String authenticateMethod,
+      byte @Nullable [] authenticateData,
+      Array<StringPair> userProperties);
 
   public MqttOutMessage newAuthenticate(
       AuthenticateReasonCode reasonCode,
-      String authenticateMethod,
-      byte[] authenticateData) {
+      @Nullable String authenticateMethod,
+      byte @Nullable [] authenticateData) {
     return newAuthenticate(
         reasonCode,
+        null,
         authenticateMethod,
-        authenticateData, EMPTY_USER_PROPERTIES,
-        StringUtils.EMPTY);
+        authenticateData,
+        EMPTY_USER_PROPERTIES);
   }
 
   public abstract MqttOutMessage newPingRequest();

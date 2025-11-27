@@ -141,11 +141,16 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
   @Override
   public MqttOutMessage newAuthenticate(
       AuthenticateReasonCode reasonCode,
-      String authenticateMethod,
-      byte[] authenticateData,
-      Array<StringPair> userProperties,
-      String reason) {
-    return new AuthenticationMqtt5OutMessage(userProperties, reasonCode, reason, authenticateMethod, authenticateData);
+      @Nullable String reason,
+      @Nullable String authenticateMethod,
+      byte @Nullable [] authenticateData,
+      Array<StringPair> userProperties) {
+    return new AuthenticationMqtt5OutMessage(
+        reasonCode,
+        reason,
+        authenticateMethod,
+        authenticateData,
+        userProperties);
   }
 
   @Override
