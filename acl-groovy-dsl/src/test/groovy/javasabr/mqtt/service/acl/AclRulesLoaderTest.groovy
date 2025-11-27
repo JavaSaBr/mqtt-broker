@@ -31,6 +31,11 @@ class AclRulesLoaderTest extends UnitSpecification {
     then:
         def exception = thrown(AclConfigurationException)
         exception.message == 'Class loader unable to load resource: not/existed/path'
+    when:
+        new AclRulesLoader(null).load()
+    then:
+        exception = thrown(NullPointerException)
+        exception.message == null
   }
 
   @SuppressWarnings('GroovyAccessibility')
