@@ -8,7 +8,7 @@ public record AllOfCondition(Array<Condition> conditions) implements Condition {
   @Override
   public boolean test(CallId callId) {
     for (Condition condition : conditions) {
-      if(!condition.test(callId)) {
+      if (!condition.test(callId)) {
         return false;
       }
     }

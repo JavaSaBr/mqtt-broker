@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.acl;
 
+import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.rule.Rule;
 import javasabr.rlib.collections.array.Array;
@@ -26,7 +27,7 @@ public class AclRulesEngine {
   private boolean isAllowed(CallId callId) {
     for (Rule rule : rules) {
       if (rule.test(callId)) {
-        return true;
+        return rule.action() == Action.ALLOW;
       }
     }
     return false;

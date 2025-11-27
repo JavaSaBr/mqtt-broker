@@ -18,12 +18,6 @@ public interface Rule {
   AllOfCondition clientsAndTopics();
 
   default boolean test(CallId callId) {
-    if (operation() != callId.operation()) {
-      return false;
-    }
-    if (!clientsAndTopics().test(callId)) {
-      return false;
-    }
-    return action() == Action.ALLOW;
+    return operation() == callId.operation() && clientsAndTopics().test(callId);
   }
 }
