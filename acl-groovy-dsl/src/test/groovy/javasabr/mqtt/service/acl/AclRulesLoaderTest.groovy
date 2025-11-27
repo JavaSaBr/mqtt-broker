@@ -49,36 +49,40 @@ class AclRulesLoaderTest extends UnitSpecification {
           with(get(0)) {
             operation() == PUBLISH
             action() == ALLOW
-            with(clients() as AnyOfCondition) {
+            with(clientsAndTopics() as AllOfCondition) {
               with(conditions as Array<Condition>) {
-                with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "sensor1" }
-                }
-                with(get(1) as UserNameCondition) {
-                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
-                }
-                with(get(2) as ClientIdCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "clientId1" }
-                }
-                with(get(3) as ClientIdCondition) {
-                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
-                }
-                with(get(4) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                }
-                with(get(5) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
-                }
-                with(get(6) as AllOfCondition) {
+                with(get(0) as AnyOfCondition) {
                   with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "sensor1" }
                     }
-                    with(get(1) as ClientIdCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                    with(get(1) as UserNameCondition) {
+                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
                     }
-                    with(get(2) as IpAddressCondition) {
+                    with(get(2) as ClientIdCondition) {
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "clientId1" }
+                    }
+                    with(get(3) as ClientIdCondition) {
+                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
+                    }
+                    with(get(4) as IpAddressCondition) {
                       with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                    }
+                    with(get(5) as IpAddressCondition) {
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                    }
+                    with(get(6) as AllOfCondition) {
+                      with(conditions as Array<Condition>) {
+                        with(get(0) as UserNameCondition) {
+                          with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                        }
+                        with(get(1) as ClientIdCondition) {
+                          with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                        }
+                        with(get(2) as IpAddressCondition) {
+                          with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                        }
+                      }
                     }
                   }
                 }
@@ -92,25 +96,29 @@ class AclRulesLoaderTest extends UnitSpecification {
           with(get(1)) {
             operation() == SUBSCRIBE
             action() == DENY
-            with(clients() as AllOfCondition) {
+            with(clientsAndTopics() as AllOfCondition) {
               with(conditions as Array<Condition>) {
-                with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
-                }
-                with(get(1) as UserNameCondition) {
-                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor11\$" }
-                }
-                with(get(2) as ClientIdCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
-                }
-                with(get(3) as ClientIdCondition) {
-                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend1" }
-                }
-                with(get(4) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                }
-                with(get(5) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                with(get(0) as AllOfCondition) {
+                  with(conditions as Array<Condition>) {
+                    with(get(0) as UserNameCondition) {
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                    }
+                    with(get(1) as UserNameCondition) {
+                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor11\$" }
+                    }
+                    with(get(2) as ClientIdCondition) {
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                    }
+                    with(get(3) as ClientIdCondition) {
+                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend1" }
+                    }
+                    with(get(4) as IpAddressCondition) {
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                    }
+                    with(get(5) as IpAddressCondition) {
+                      with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                    }
+                  }
                 }
               }
             }

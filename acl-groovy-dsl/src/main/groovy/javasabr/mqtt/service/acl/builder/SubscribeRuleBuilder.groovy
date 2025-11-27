@@ -3,11 +3,13 @@ package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.Action
 import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.acl.rule.AllowSubscribeRule
 import javasabr.mqtt.model.acl.rule.DenySubscribeRule
 import javasabr.mqtt.model.acl.rule.Rule
+import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
@@ -24,7 +26,7 @@ class SubscribeRuleBuilder extends RuleBuilder {
 
   Rule build() {
     permission == ALLOW
-        ? new AllowSubscribeRule(condition, new TopicCondition(topicFilters))
-        : new DenySubscribeRule(condition, new TopicCondition(topicFilters))
+        ? new AllowSubscribeRule(new AllOfCondition(Array.of(clients, new TopicCondition(topicFilters))))
+        : new DenySubscribeRule(new AllOfCondition(Array.of(clients, new TopicCondition(topicFilters))))
   }
 }

@@ -3,6 +3,7 @@ package javasabr.mqtt.model.acl.rule;
 import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.CallId;
 import javasabr.mqtt.model.acl.Operation;
+import javasabr.mqtt.model.acl.condition.AllOfCondition;
 import javasabr.mqtt.model.acl.condition.AnyCondition;
 import javasabr.mqtt.model.acl.condition.Condition;
 
@@ -14,18 +15,13 @@ public interface Rule {
 
   Action action();
 
-  Condition clients();
-
-  Condition topics();
+  AllOfCondition clientsAndTopics();
 
   default boolean test(CallId callId) {
     if (operation() != callId.operation()) {
       return false;
     }
-    if (!clients().test(callId)) {
-      return false;
-    }
-    if (!topics().test(callId)) {
+    if (!clientsAndTopics().test(callId)) {
       return false;
     }
     return action() == Action.ALLOW;

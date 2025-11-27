@@ -2,6 +2,7 @@ package javasabr.mqtt.service.acl
 
 import javasabr.mqtt.model.acl.CallId
 import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
@@ -22,7 +23,7 @@ class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware
       String username, String clientId, String ipAddress, Operation action, String topic) {
     given:
         Array<Rule> rules = MutableArray.ofType(Rule.class)
-        rules << new AllowPublishRule(
+        rules << new AllowPublishRule(new AllOfCondition(Array.of(
             new AnyOfCondition(Array.of(
                 userNameEquals("sensor1"),
                 userNameEquals("sensor10"),
@@ -39,15 +40,15 @@ class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware
                 new EqualsMatcher("/topic1/#"),
                 new EqualsMatcher("/topic2/+/temp")
             ))
-        )
-        rules << new AllowPublishRule(new AnyCondition(), new TopicCondition(Array.of(
+        )))
+        rules << new AllowPublishRule(new AllOfCondition(Array.of(new AnyCondition(), new TopicCondition(Array.of(
             new EqualsMatcher("/topic1/#"),
             new EqualsMatcher("/topic2/+/temp")
-        )))
-        rules << new DenySubscribeRule(new AnyCondition(), new TopicCondition(Array.of(
+        )))))
+        rules << new DenySubscribeRule(new AllOfCondition(Array.of(new AnyCondition(), new TopicCondition(Array.of(
             topicFilterMatcher("\$SYS/#"),
             topicFilterMatcher("#")
-        )))
+        )))))
 //        rules << new Rule(ALLOW, ALL)
         AclRulesEngine engine = new AclRulesEngine(rules)
         CallId callId = new CallId(username, clientId, ipAddress, action, topic)

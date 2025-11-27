@@ -9,19 +9,19 @@ import javasabr.mqtt.model.acl.rule.Rule
 abstract class RuleBuilder implements ValueMatcherBuilder {
   Action permission
   Operation action
-  Condition condition
+  Condition clients
 
   RuleBuilder(Action permission, Operation action) { this.permission = permission; this.action = action }
 
   RuleBuilder allOf(Closure<?> config) {
-    if (this.condition) throw new IllegalArgumentException("Only one clients section allowed")
-    this.condition = new AllOfBuilder().buildCondition(config).build()
+    if (this.clients) throw new IllegalArgumentException("Only one clients section allowed")
+    this.clients = new AllOfBuilder().buildCondition(config).build()
     return this
   }
 
   RuleBuilder anyOf(Closure<?> config) {
-    if (this.condition) throw new IllegalArgumentException("Only one clients section allowed")
-    this.condition = config == null ? Rule.MATCH_ANY : new AnyOfBuilder().buildCondition(config).build()
+    if (this.clients) throw new IllegalArgumentException("Only one clients section allowed")
+    this.clients = config == null ? Rule.MATCH_ANY : new AnyOfBuilder().buildCondition(config).build()
     return this
   }
 

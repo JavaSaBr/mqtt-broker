@@ -2,11 +2,9 @@ package javasabr.mqtt.model.acl.rule;
 
 import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.Operation;
-import javasabr.mqtt.model.acl.condition.Condition;
-import javasabr.mqtt.model.acl.matcher.ValueMatcher;
-import javasabr.rlib.collections.array.Array;
+import javasabr.mqtt.model.acl.condition.AllOfCondition;
 
-public record DenySubscribeRule(Condition clients, Condition topics) implements Rule{
+public record DenySubscribeRule(AllOfCondition clientsAndTopics) implements Rule {
   @Override
   public Operation operation() {
     return Operation.SUBSCRIBE;

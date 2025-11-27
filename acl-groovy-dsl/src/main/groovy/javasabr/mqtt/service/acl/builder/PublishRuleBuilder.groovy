@@ -3,11 +3,13 @@ package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.Action
 import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.acl.rule.AllowPublishRule
 import javasabr.mqtt.model.acl.rule.DenyPublishRule
 import javasabr.mqtt.model.acl.rule.Rule
+import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
@@ -22,7 +24,7 @@ class PublishRuleBuilder extends RuleBuilder {
 
   Rule build() {
     permission == ALLOW
-        ? new AllowPublishRule(condition, new TopicCondition(topicNames))
-        : new DenyPublishRule(condition, new TopicCondition(topicNames))
+        ? new AllowPublishRule(new AllOfCondition(Array.of(clients, new TopicCondition(topicNames))))
+        : new DenyPublishRule(new AllOfCondition(Array.of(clients, new TopicCondition(topicNames))))
   }
 }
