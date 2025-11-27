@@ -1,7 +1,9 @@
 package javasabr.mqtt.service.acl;
 
+import java.util.EnumMap;
 import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.CallId;
+import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.acl.rule.Rule;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
@@ -15,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AclRulesEngine {
 
-  Array<Rule> rules;
+  EnumMap<Operation, Array<Rule>> ruleMap;
 
   LockableOperations<LockableRefToRefDictionary<CallId, Boolean>> permissionCache =
       new StampedLockBasedHashBasedRefToRefDictionary<CallId, Boolean>().operations();
@@ -25,6 +27,7 @@ public class AclRulesEngine {
   }
 
   private boolean isAllowed(CallId callId) {
+    Array<Rule> rules = ruleMap.get(callId.operation());
     for (Rule rule : rules) {
       if (rule.test(callId)) {
         return rule.action() == Action.ALLOW;

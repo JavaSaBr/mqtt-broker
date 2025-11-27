@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.acl
 
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.service.acl.builder.AclRulesBuilder
@@ -9,6 +10,11 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 import java.nio.file.Files
 import java.nio.file.Path
+
+import static java.util.stream.Collectors.collectingAndThen
+import static java.util.stream.Collectors.groupingBy
+import static java.util.stream.Collectors.toCollection
+import static javasabr.rlib.collections.array.ArrayFactory.mutableArray
 
 class AclRulesLoader {
 
@@ -23,7 +29,7 @@ class AclRulesLoader {
     }
   }
 
-  Array<Rule> load() {
+  EnumMap<Operation, Array<Rule>> load() {
     ImportCustomizer importCustomizer = new ImportCustomizer().addStaticStars(MODEL_IMPORTS)
     CompilerConfiguration compilerConfig = new CompilerConfiguration().addCompilationCustomizers(importCustomizer)
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
@@ -33,6 +39,11 @@ class AclRulesLoader {
     groovyShell.setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
     groovyShell.setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
     groovyShell.evaluate(aclConfigPath.toFile())
-    return aclRulesBuilder.build()
+    Map<Operation, Array<Rule>> map = aclRulesBuilder.build()
+        .stream()
+        .collect(groupingBy(
+            Rule::operation,
+            collectingAndThen(toCollection(() -> mutableArray(Rule.class)), Array::copyOf)));
+    return new EnumMap<>(map)
   }
 }

@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.acl
 
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
@@ -25,12 +26,12 @@ class AclRulesLoaderTest extends UnitSpecification {
     given:
         def notExistedPath = "not/existed/path";
     when:
-        new AclRulesLoader(notExistedPath).load()
+        new AclRulesLoader(notExistedPath)
     then:
         def exception = thrown(AclConfigurationException)
         exception.message == 'Class loader unable to load resource: not/existed/path'
     when:
-        new AclRulesLoader(null).load()
+        new AclRulesLoader(null)
     then:
         exception = thrown(NullPointerException)
         exception.message == null
@@ -42,10 +43,10 @@ class AclRulesLoaderTest extends UnitSpecification {
         def configAbsolutePath = Objects.requireNonNull(
             getClass().getClassLoader().getResource("acl.groovy")
         ).getFile()
-        Array<Rule> rules = new AclRulesLoader(configAbsolutePath).load()
+        EnumMap<Operation, Array<Rule>> rules = new AclRulesLoader(configAbsolutePath).load()
     then:
-        verifyAll(rules) {
-          size() == 4
+        verifyAll(rules.get(PUBLISH)) {
+          size() == 2
           with(get(0)) {
             operation() == PUBLISH
             action() == ALLOW
@@ -93,7 +94,9 @@ class AclRulesLoaderTest extends UnitSpecification {
 //                new EqualsMatcher("/topic2/temp")
 //            )
           }
-          with(get(1)) {
+        }
+        verifyAll(rules.get(SUBSCRIBE)) {
+          with(get(0)) {
             operation() == SUBSCRIBE
             action() == DENY
             with(clientsAndTopics() as AllOfCondition) {
