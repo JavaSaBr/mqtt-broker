@@ -9,6 +9,7 @@ import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.NumberUtils
 
 class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
 
@@ -84,15 +85,13 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.maxMessageSize() == maxMessageSize
         inMessage.maxQos() == QoS.AT_LEAST_ONCE
         inMessage.receiveMaxPublishes() == receiveMaxPublishes
-        (inMessage.retainAvailable() == 1) == retainAvailable
         inMessage.responseInformation() == responseInformation
         inMessage.serverKeepAlive() == serverKeepAlive
         inMessage.sessionExpiryInterval() == sessionExpiryInterval
-        (inMessage.sharedSubscriptionAvailable() == 1) == sharedSubscriptionAvailable
-        (inMessage.wildcardSubscriptionAvailable() == 1) == wildcardSubscriptionAvailable
-        (inMessage.subscriptionIdAvailable() == 1) == subscriptionIdAvailable
-        inMessage.topicAliasMaxValue() == topicAliasMaxValue
-
+        NumberUtils.toBoolean(inMessage.sharedSubscriptionAvailable()) == sharedSubscriptionAvailable
+        NumberUtils.toBoolean(inMessage.wildcardSubscriptionAvailable()) == wildcardSubscriptionAvailable
+        NumberUtils.toBoolean(inMessage.subscriptionIdAvailable()) == subscriptionIdAvailable
+        NumberUtils.toBoolean(inMessage.retainAvailable()) == retainAvailable
     when:
         def propertiesBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
@@ -110,9 +109,9 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result2
         inMessage2.reasonCode() == ConnectAckReasonCode.PACKET_TOO_LARGE
-        (inMessage2.sharedSubscriptionAvailable() == 1) == sharedSubscriptionAvailable
-        (inMessage2.wildcardSubscriptionAvailable() == 1) == wildcardSubscriptionAvailable
-        (inMessage2.subscriptionIdAvailable() == 1) == subscriptionIdAvailable
+        NumberUtils.toBoolean(inMessage2.sharedSubscriptionAvailable()) == sharedSubscriptionAvailable
+        NumberUtils.toBoolean(inMessage2.wildcardSubscriptionAvailable()) == wildcardSubscriptionAvailable
+        NumberUtils.toBoolean(inMessage2.subscriptionIdAvailable()) == subscriptionIdAvailable
   }
 
   def "should not allow duplicated properties in message"(MqttMessageProperty property, Object value) {
