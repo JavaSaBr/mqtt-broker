@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.Rule
+import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.service.acl.builder.AclRulesBuilder
 import javasabr.rlib.collections.array.Array

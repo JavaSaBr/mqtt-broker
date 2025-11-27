@@ -1,10 +1,7 @@
 package javasabr.mqtt.service.acl;
 
-import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.CallId;
-import javasabr.mqtt.model.acl.Rule;
-import javasabr.mqtt.model.acl.condition.Condition;
-import javasabr.mqtt.model.acl.matcher.ValueMatcher;
+import javasabr.mqtt.model.acl.rule.Rule;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.impl.StampedLockBasedHashBasedRefToRefDictionary;
@@ -28,30 +25,7 @@ public class AclRulesEngine {
 
   private boolean isAllowed(CallId callId) {
     for (Rule rule : rules) {
-      if (rule.operation() != callId.operation()) {
-        continue;
-      }
-      if (!matchesTopic(rule.topics(), callId.topic())) {
-        continue;
-      }
-      if (!matchesClient(rule.condition(), callId)) {
-        continue;
-      }
-      return rule.action() == Action.ALLOW;
-    }
-    return false;
-  }
-
-  private boolean matchesClient(Condition clients, CallId callId) {
-    return clients.test(callId);
-  }
-
-  private boolean matchesTopic(Array<ValueMatcher<String>> ruleTopicFilters, String requestedTopicName) {
-    if (ruleTopicFilters.isEmpty()) {
-      return false;
-    }
-    for (ValueMatcher<String> ruleTopicFilter : ruleTopicFilters) {
-      if (ruleTopicFilter.test(requestedTopicName)) {
+      if (rule.test(callId)) {
         return true;
       }
     }
