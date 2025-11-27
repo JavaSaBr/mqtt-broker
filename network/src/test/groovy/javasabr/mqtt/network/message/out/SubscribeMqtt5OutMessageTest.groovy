@@ -46,11 +46,12 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.SUBSCRIBE
+        info == SubscribeMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt5Connection, it)
         }
-        def inMessage = new SubscribeMqttInMessage(0b0000_0010 as byte)
+        def inMessage = new SubscribeMqttInMessage(info)
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

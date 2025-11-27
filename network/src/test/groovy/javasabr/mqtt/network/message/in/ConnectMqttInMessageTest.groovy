@@ -38,7 +38,7 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
           it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMaxPublishes)
-          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, maxPacketSize)
+          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, maxMessageSize)
           it.putProperty(MqttMessageProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaxValue)
           it.putProperty(MqttMessageProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation ? 1 : 0)
           it.putProperty(MqttMessageProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation ? 1 : 0)
@@ -67,7 +67,7 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
         packet.authenticationData() == authData
         packet.clientId() == mqtt311ClientId
         packet.mqttVersion() == MqttVersion.MQTT_5
-        packet.maxPacketSize() == maxPacketSize
+        packet.maxPacketSize() == maxMessageSize
         packet.password() == userPassword
         packet.username() == userName
         packet.topicAliasMaxValue() == topicAliasMaxValue

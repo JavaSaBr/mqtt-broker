@@ -21,11 +21,12 @@ class PublishReceivedMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_RECEIVED
+        info == PublishReceivedMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishReceivedMqttInMessage(0 as byte)
+        def reader = new PublishReceivedMqttInMessage(info)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

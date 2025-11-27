@@ -12,6 +12,7 @@ import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Authentication exchange.
@@ -53,14 +54,16 @@ public class AuthenticationMqtt5OutMessage extends MqttOutMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  Array<StringPair> userProperties;
-
   AuthenticateReasonCode reasonCode;
 
+  @Nullable
   String reason;
+  @Nullable
   String authenticateMethod;
 
-  byte[] authenticateData;
+  byte @Nullable [] authenticateData;
+
+  Array<StringPair> userProperties;
 
   @Override
   protected byte messageType() {
@@ -70,7 +73,7 @@ public class AuthenticationMqtt5OutMessage extends MqttOutMessage {
   @Override
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
-    writeByte(buffer, reasonCode.value());
+    writeByte(buffer, reasonCode.code());
   }
 
   @Override
