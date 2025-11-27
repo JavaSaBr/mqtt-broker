@@ -11,4 +11,5 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
+  testFixturesApi projects.testSupport
 }

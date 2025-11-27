@@ -10,6 +10,7 @@ import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
@@ -20,6 +21,17 @@ import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
 class AclRulesLoaderTest extends UnitSpecification {
+
+  @SuppressWarnings('GroovyAccessibility')
+  def "should parse new Groovy DSL config"() {
+    given:
+        def notExistedPath = "not/existed/path";
+    when:
+        new AclRulesLoader(notExistedPath).load()
+    then:
+        def exception = thrown(AclConfigurationException)
+        exception.message == 'Class loader unable to load resource: not/existed/path'
+  }
 
   @SuppressWarnings('GroovyAccessibility')
   def "should parse new Groovy DSL config"() {

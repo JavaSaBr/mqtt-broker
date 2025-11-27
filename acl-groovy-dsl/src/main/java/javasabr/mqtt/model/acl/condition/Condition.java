@@ -6,7 +6,7 @@ public interface Condition {
 
   boolean test(CallId callId);
 
-  default Condition not(Condition condition) {
-    return callId -> !condition.test(callId);
+  default Condition not() {
+    return callId -> !test(callId);
   }
 }

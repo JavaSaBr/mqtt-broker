@@ -5,34 +5,17 @@ import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.Rule
 import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
-import javasabr.mqtt.model.acl.condition.Condition
-import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
-import javasabr.mqtt.model.acl.matcher.RegexMatcher
-import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
-import javasabr.mqtt.model.acl.matcher.ValueMatcher
-import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
-
-import java.util.regex.Pattern
 
 import static javasabr.mqtt.model.acl.Action.ALLOW
 import static javasabr.mqtt.model.acl.Action.DENY
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
-class AclRulesEngineTest extends UnitSpecification {
-
-  static Condition userNameEquals(String value) { new UserNameCondition(new EqualsMatcher(value)) }
-  static Condition userNameRegex(String value) { new UserNameCondition(new RegexMatcher(Pattern.compile(value))) }
-  static Condition clientIdEquals(String value) { new UserNameCondition(new EqualsMatcher(value)) }
-  static Condition clientIdRegex(String value) { new UserNameCondition(new RegexMatcher(Pattern.compile(value))) }
-  static Condition ipAddressEquals(String value) { new UserNameCondition(new EqualsMatcher(value)) }
-  static Condition ipAddressRegex(String value) { new UserNameCondition(new RegexMatcher(Pattern.compile(value))) }
-  static ValueMatcher<String> topicFilterMatcher(String value) { new TopicFilterMatcher(TopicFilter.valueOf(value)) }
-
+class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware {
 
   def "should allow or deny according rules"(
       String username, String clientId, String ipAddress, Operation action, String topic) {
