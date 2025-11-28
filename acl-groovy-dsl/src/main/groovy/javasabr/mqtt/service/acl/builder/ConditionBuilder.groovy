@@ -12,30 +12,30 @@ import javasabr.rlib.collections.array.MutableArray
 abstract class ConditionBuilder implements ValueMatcherBuilder {
 
   protected MutableArray<Condition> conditions = ArrayFactory.mutableArray(Condition)
+  protected MutableArray<Condition> userNames = ArrayFactory.mutableArray(Condition)
+  protected MutableArray<Condition> clientIds = ArrayFactory.mutableArray(Condition)
+  protected MutableArray<Condition> ipAddresses = ArrayFactory.mutableArray(Condition)
+
 
   ConditionBuilder userName(ValueMatcher<String>... username) {
-    this.conditions.addAll(username.collect { new UserNameCondition(it) })
+    def collect = username.collect { new UserNameCondition(it) }
+    this.userNames.addAll(collect)
+    this.conditions.addAll(collect)
     return this
   }
 
   ConditionBuilder clientId(ValueMatcher<String>... clientId) {
-    this.conditions.addAll(clientId.collect { new ClientIdCondition(it) })
+    def collect = clientId.collect { new ClientIdCondition(it) }
+    this.clientIds.addAll(collect)
+    this.conditions.addAll(collect)
     return this
   }
 
   ConditionBuilder ipAddress(ValueMatcher<String>... ipAddress) {
-    this.conditions.addAll(ipAddress.collect { new IpAddressCondition(it) })
+    def collect = ipAddress.collect { new IpAddressCondition(it) }
+    this.clientIds.addAll(collect)
+    this.conditions.addAll(collect)
     this
-  }
-
-  ConditionBuilder allOf(Closure<?> config) {
-    this.conditions << new AllOfBuilder().buildCondition(config).build()
-    return this
-  }
-
-  ConditionBuilder anyOf(Closure<?> config) {
-    this.conditions << new AnyOfBuilder().buildCondition(config).build()
-    return this
   }
 
   ConditionBuilder buildCondition(Closure<?> config) {

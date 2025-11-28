@@ -79,7 +79,7 @@ contributor(context(scope: scriptScope())) {
         doc: 'Match any incoming client'
   }
 
-  if (enclosingCall("allOf") || enclosingCall("anyOf")) {
+  if (!enclosingCall("allOf") && enclosingCall("anyOf")) {
     method name: 'allOf',
         type: 'javasabr.mqtt.service.acl.builder.AllOfBuilder',
         params: [config: 'Closure<javasabr.mqtt.service.acl.builder.ConditionBuilder>'],

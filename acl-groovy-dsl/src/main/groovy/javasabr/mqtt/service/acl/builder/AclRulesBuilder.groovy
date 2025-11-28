@@ -3,7 +3,7 @@ package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.rlib.collections.array.Array
-import javasabr.rlib.collections.array.MutableArray
+import javasabr.rlib.collections.array.ArrayFactory
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
@@ -11,22 +11,18 @@ import java.util.concurrent.Executor
 import static java.lang.Runtime.getRuntime
 import static java.util.concurrent.CompletableFuture.supplyAsync
 import static java.util.concurrent.Executors.newFixedThreadPool
+import static javasabr.rlib.collections.array.ArrayFactory.mutableArray
 
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.rule.Rule} from ACL configuration
  */
 class AclRulesBuilder {
 
-  private final MutableArray<Rule> rules = MutableArray.ofType(Rule)
-  private final MutableArray<CompletableFuture<Rule>> ruleBuilderFutures = MutableArray.ofType(CompletableFuture)
+  private final List<CompletableFuture<Rule>> ruleBuilderFutures = []
   private final Executor executor = newFixedThreadPool(getRuntime().availableProcessors() * 2)
 
   Array<Rule> build() {
-    ruleBuilderFutures.stream()
-        .map(CompletableFuture::join)
-        .forEach(rules::add)
-    ruleBuilderFutures.clear()
-    return Array.copyOf(rules)
+    return ruleBuilderFutures.collect(mutableArray(Rule.class), CompletableFuture::join as Closure<? extends Rule>)
   }
 
   void allowPublish(Closure<?> config) {

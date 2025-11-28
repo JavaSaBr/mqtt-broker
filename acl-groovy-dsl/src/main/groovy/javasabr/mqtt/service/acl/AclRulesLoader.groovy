@@ -29,16 +29,18 @@ class AclRulesLoader {
   EnumMap<Operation, Array<Rule>> load() {
     CompilerConfiguration compilerConfig = new CompilerConfiguration()
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
-    GroovyShell groovyShell = new GroovyShell(compilerConfig)
-    groovyShell.setVariable("allowPublish", aclRulesBuilder.&allowPublish)
-    groovyShell.setVariable("denyPublish", aclRulesBuilder.&denyPublish)
-    groovyShell.setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
-    groovyShell.setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
-    groovyShell.evaluate(aclConfigPath.toFile())
+    new GroovyShell(compilerConfig).with {
+      setVariable("allowPublish", aclRulesBuilder.&allowPublish)
+      setVariable("denyPublish", aclRulesBuilder.&denyPublish)
+      setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
+      setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
+      evaluate(aclConfigPath.toFile())
+    }
     Map<Operation, Array<Rule>> map = aclRulesBuilder.build()
         .stream()
         .collect(groupingBy(
             Rule::operation,
+            { new LinkedHashMap<Operation, Array<Rule>>() },
             collectingAndThen(toCollection(() -> mutableArray(Rule.class)), Array::copyOf)));
     return new EnumMap<>(map)
   }

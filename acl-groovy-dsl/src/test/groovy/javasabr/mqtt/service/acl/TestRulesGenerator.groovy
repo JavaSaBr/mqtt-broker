@@ -34,11 +34,8 @@ class TestRulesGenerator {
                   denySubscribe {
                     allOf {
                       userName eq("user_${ruleNum}")
-                      userName regex("user_${ruleNum}\\\$")
                       clientId eq("client_${ruleNum}")
-                      clientId regex("^client_${ruleNum}")
                       ipAddress eq("${ip1}")
-                      ipAddress eq("${ip2}")
                     }
                     topicFilter match("/config/+/ ${ruleNum}"), match("/control/#")
                   }
@@ -46,9 +43,12 @@ class TestRulesGenerator {
           case 3 -> """
                   allowSubscribe {
                     anyOf {
-                      userName eq("user_${ruleNum}"), regex("user_${ruleNum}\\\$")
-                      clientId eq("client_${ruleNum}"), regex("^client_${ruleNum}")
-                      ipAddress eq("${ip1}"), eq("${ip2}")
+                      userName eq("user_${ruleNum}")
+                      userName regex("user_${ruleNum}\\\\\\\$")
+                      clientId eq("client_${ruleNum}")
+                      clientId regex("^client_${ruleNum}")
+                      ipAddress eq("${ip1}")
+                      ipAddress eq("${ip2}")
                     }
                     topicFilter match("/sensor/temp/${ruleNum}"), match("/sensor/+/log")
                   }

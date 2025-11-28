@@ -1,6 +1,5 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
@@ -11,10 +10,11 @@ import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
-import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
+
+import java.util.concurrent.CompletionException
 
 import static javasabr.mqtt.model.acl.Action.ALLOW
 import static javasabr.mqtt.model.acl.Action.DENY
@@ -49,13 +49,33 @@ class AclRulesLoaderTest extends UnitSpecification {
         exception.message == null
   }
 
+  def "should throw exception if config is invalid"(String invalidAclFileName, String errorMessage, Class<? extends Exception> exceptionClass) {
+    given:
+        def invalidAclPath = getAbsolutePath("acl/config/invalid/${invalidAclFileName}")
+        def rules = new AclRulesLoader(invalidAclPath)
+    when:
+        rules.load()
+    then:
+        def exception = thrown CompletionException
+        exceptionClass.isInstance exception.cause
+        exception.cause.message.startsWith errorMessage
+    where:
+        invalidAclFileName | exceptionClass            | errorMessage
+        "1.groovy"         | AclConfigurationException | 'Only one clients section allowed'
+        "2.groovy"         | AclConfigurationException | 'Only one clients section allowed'
+        "3.groovy"         | AclConfigurationException | 'AllOf condition can only have a single-matcher members'
+        "4.groovy"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.service.acl.builder.AllOfBuilder.allOf'
+  }
+
+  def getAbsolutePath(String fileName) {
+    Objects.requireNonNull(getClass().getClassLoader().getResource(fileName)).getFile()
+  }
+
   @SuppressWarnings('GroovyAccessibility')
   def "should parse new Groovy DSL config"() {
     when:
-        def configAbsolutePath = Objects.requireNonNull(
-            getClass().getClassLoader().getResource("acl.groovy")
-        ).getFile()
-        EnumMap<Operation, Array<Rule>> rules = new AclRulesLoader(configAbsolutePath).load()
+        def absolutePath = getAbsolutePath("acl/config/acl.groovy")
+        def rules = new AclRulesLoader(absolutePath).load()
     then:
         verifyAll(rules.get(PUBLISH)) {
           size() == 2
@@ -120,20 +140,11 @@ class AclRulesLoaderTest extends UnitSpecification {
                     with(get(0) as UserNameCondition) {
                       with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
                     }
-                    with(get(1) as UserNameCondition) {
-                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor11\$" }
-                    }
-                    with(get(2) as ClientIdCondition) {
+                    with(get(1) as ClientIdCondition) {
                       with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
                     }
-                    with(get(3) as ClientIdCondition) {
-                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend1" }
-                    }
-                    with(get(4) as IpAddressCondition) {
+                    with(get(2) as IpAddressCondition) {
                       with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                    }
-                    with(get(5) as IpAddressCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
                     }
                   }
                 }
