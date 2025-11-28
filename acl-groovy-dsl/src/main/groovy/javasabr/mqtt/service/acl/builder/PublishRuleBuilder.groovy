@@ -8,7 +8,7 @@ import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
 abstract class PublishRuleBuilder extends RuleBuilder {
-  private MutableArray<ValueMatcher<String>> topicNames = ArrayFactory.mutableArray(ValueMatcher)
+  protected MutableArray<ValueMatcher<String>> topicNames = ArrayFactory.mutableArray(ValueMatcher)
 
   PublishRuleBuilder(Action permission) { super(permission, Operation.PUBLISH) }
 

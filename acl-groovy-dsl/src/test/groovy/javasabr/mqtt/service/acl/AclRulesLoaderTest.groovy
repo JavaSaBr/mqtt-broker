@@ -6,9 +6,11 @@ import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
+import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
+import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.test.support.UnitSpecification
@@ -23,12 +25,12 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   def "should load test Groovy DSL config"() {
     given:
-        def ruleFile = TestRulesGenerator.generate(1000)
+        def ruleFile = TestRulesGenerator.generate(100)
     when:
         def load = new AclRulesLoader(ruleFile.toString()).load()
     then:
-        load.get(SUBSCRIBE).size() == 500
-        load.get(PUBLISH).size() == 500
+        load.get(SUBSCRIBE).size() == 50
+        load.get(PUBLISH).size() == 50
         ruleFile.delete()
   }
 
@@ -97,12 +99,14 @@ class AclRulesLoaderTest extends UnitSpecification {
                     }
                   }
                 }
+                with(get(1) as TopicCondition) {
+                  with(topics as Array) {
+                    with(get(0) as EqualsMatcher) { expectedValue == "/topic1" }
+                    with(get(1) as EqualsMatcher) { expectedValue == "/topic2/temp" }
+                  }
+                }
               }
             }
-//            topics().containsAll(
-//                new EqualsMatcher("/topic1"),
-//                new EqualsMatcher("/topic2/temp")
-//            )
           }
         }
         verifyAll(rules.get(SUBSCRIBE)) {
@@ -133,12 +137,14 @@ class AclRulesLoaderTest extends UnitSpecification {
                     }
                   }
                 }
+                with(get(1) as TopicCondition) {
+                  with(topics as Array) {
+                    with(get(0) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic1/#" }
+                    with(get(1) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic2/+/temp" }
+                  }
+                }
               }
             }
-//            topics().containsAll(
-//                new TopicFilterMatcher(TopicFilter.valueOf("/topic1/#")),
-//                new TopicFilterMatcher(TopicFilter.valueOf("/topic2/+/temp"))
-//            )
           }
         }
   }

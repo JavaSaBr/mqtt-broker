@@ -8,7 +8,7 @@ import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
 abstract class SubscribeRuleBuilder extends RuleBuilder {
-  private MutableArray<ValueMatcher<String>> topicFilters = ArrayFactory.mutableArray(ValueMatcher)
+  protected MutableArray<ValueMatcher<String>> topicFilters = ArrayFactory.mutableArray(ValueMatcher)
 
   SubscribeRuleBuilder(Action permission) { super(permission, Operation.SUBSCRIBE) }
 
