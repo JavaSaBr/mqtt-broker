@@ -4,7 +4,6 @@ import java.util.Collection;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
@@ -45,10 +44,7 @@ public class DefaultMessageOutFactoryService implements MessageOutFactoryService
 
   @Override
   public MqttMessageOutFactory resolveFactory(NetworkMqttUser user) {
-    if (user instanceof ConfigurableNetworkMqttUser configurableUser) {
-      return resolveFactory(configurableUser.connection());
-    }
-    throw new IllegalArgumentException("Unsupported user: " + user);
+    return resolveFactory(user.connection());
   }
 
   @Override

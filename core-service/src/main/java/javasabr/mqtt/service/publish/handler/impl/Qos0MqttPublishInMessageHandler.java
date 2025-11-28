@@ -5,9 +5,9 @@ import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -27,7 +27,7 @@ public class Qos0MqttPublishInMessageHandler extends AbstractMqttPublishInMessag
   }
 
   @Override
-  protected boolean validateImpl(ExternalNetworkMqttUser user, MqttNetworkSession session, Publish publish) {
+  protected boolean validateImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
     int messageId = publish.messageId();
     if (messageId != MqttProperties.MESSAGE_ID_IS_NOT_SET) {
       handleNotExpectedMessageId(user);

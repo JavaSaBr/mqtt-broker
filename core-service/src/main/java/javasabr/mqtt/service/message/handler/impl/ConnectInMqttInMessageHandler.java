@@ -18,10 +18,10 @@ import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
@@ -85,7 +85,7 @@ public class ConnectInMqttInMessageHandler
   }
 
   private void reject(ExternalNetworkMqttUser user, ConnectAckReasonCode connectAckReasonCode) {
-    user.send(messageOutFactoryService
+    user.sendAsync(messageOutFactoryService
         .resolveFactory(user)
         .newConnectAck(user, connectAckReasonCode));
   }
@@ -180,7 +180,7 @@ public class ConnectInMqttInMessageHandler
   private Mono<Boolean> onConnected(
       ConfigurableNetworkMqttUser user,
       ConnectMqttInMessage message,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       boolean sessionRestored) {
 
     MqttConnection connection = user.connection();
@@ -209,11 +209,11 @@ public class ConnectInMqttInMessageHandler
     subscriptionService.restoreSubscriptions(user, session);
 
     return Mono.fromFuture(user
-        .sendWithFeedback(connectAck)
+        .send(connectAck)
         .thenApply(result -> onSentConnAck(user, session, result)));
   }
 
-  private boolean onSentConnAck(ConfigurableNetworkMqttUser user, MqttNetworkSession session, boolean result) {
+  private boolean onSentConnAck(ConfigurableNetworkMqttUser user, NetworkMqttSession session, boolean result) {
 
     if (!result) {
       log.warning(user.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
@@ -228,7 +228,7 @@ public class ConnectInMqttInMessageHandler
   protected boolean processInvalidMessage(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       ConnectMqttInMessage message) {
     Exception exception = message.exception();
     if (exception instanceof ConnectionRejectException cre) {

@@ -1,14 +1,16 @@
 package javasabr.mqtt.network.impl;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.message.SendableMqttMessage;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -41,7 +43,7 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   @Setter
   @Getter
   @Nullable
-  volatile MqttNetworkSession session;
+  volatile NetworkMqttSession session;
 
   public AbstractNetworkMqttUser(MqttConnection connection, NetworkMqttUserReleaseHandler releaseHandler) {
     this.connection = connection;
@@ -56,20 +58,30 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   }
 
   @Override
-  public void send(MqttOutMessage message) {
+  public void sendAsync(SendableMqttMessage message) {
+    sendAsync((MqttOutMessage) message);
+  }
+
+  @Override
+  public void sendAsync(MqttOutMessage message) {
     log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
     connection.send(message);
   }
 
   @Override
-  public CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage message) {
+  public CompletionStage<Boolean> send(SendableMqttMessage message) {
+    return send((MqttOutMessage) message);
+  }
+
+  @Override
+  public CompletableFuture<Boolean> send(MqttOutMessage message) {
     log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
     return connection.sendWithFeedback(message);
   }
 
   @Override
   public CompletableFuture<Boolean> closeWithReason(MqttOutMessage message) {
-    return sendWithFeedback(message)
+    return send(message)
         .thenApply(sent -> {
           connection.close();
           return sent;

@@ -9,7 +9,7 @@ import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.TopicNameMapping;
-import javasabr.mqtt.network.MqttNetworkSession.UnsafeMqttNetworkSession;
+import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
@@ -27,7 +27,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(of = "clientId")
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
+public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
 
   private record PendingPublish(Publish publish, PendingMessageHandler handler) {}
 
@@ -42,7 +42,7 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   }
 
   private static void updatePendingPacket(
-      NetworkMqttUser client,
+      NetworkMqttUser user,
       TrackableMqttMessage response,
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
@@ -64,7 +64,7 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
       return;
     }
 
-    boolean shouldBeRemoved = pendingPublish.handler.handleResponse(client, response);
+    boolean shouldBeRemoved = pendingPublish.handler.handleResponse(user, response);
     if (shouldBeRemoved) {
       pendingPublishes
           .operations()
@@ -93,7 +93,7 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   @Setter
   volatile long expirationTime = -1;
 
-  public InMemoryMqttNetworkSession(String clientId) {
+  public InMemoryNetworkMqttSession(String clientId) {
     this.clientId = clientId;
     this.pendingOutPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.messageIdGenerator = new AtomicInteger(0);
@@ -126,23 +126,6 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   @Override
   public void registerOutPublish(Publish publish, PendingMessageHandler handler) {
     registerPublish(publish, handler, pendingOutPublishes);
-  }
-
-  @Override
-  public boolean hasOutPending() {
-    return !pendingOutPublishes.isEmpty();
-  }
-
-  @Override
-  public boolean hasOutPending(int messageId) {
-    long stamp = pendingOutPublishes.readLock();
-    try {
-      return pendingOutPublishes
-          .iterations()
-          .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId) != null;
-    } finally {
-      pendingOutPublishes.readUnlock(stamp);
-    }
   }
 
   @Override

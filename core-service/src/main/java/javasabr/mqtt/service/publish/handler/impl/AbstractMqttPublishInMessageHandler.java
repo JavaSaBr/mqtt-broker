@@ -5,8 +5,8 @@ import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
@@ -39,7 +39,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
       return;
     }
     U expectedUser = expectedUserType.cast(user);
-    MqttNetworkSession session = expectedUser.session();
+    NetworkMqttSession session = expectedUser.session();
     if (session == null) {
       log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
       return;
@@ -49,11 +49,11 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
     }
   }
 
-  protected boolean validateImpl(U user, MqttNetworkSession session, Publish publish) {
+  protected boolean validateImpl(U user, NetworkMqttSession session, Publish publish) {
     return true;
   }
 
-  protected void handleImpl(U user, MqttNetworkSession session, Publish publish) {
+  protected void handleImpl(U user, NetworkMqttSession session, Publish publish) {
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -84,17 +84,17 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
     }
   }
 
-  protected void handleNoMatchedSubscribers(U user, MqttNetworkSession session, Publish publish) {}
+  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, Publish publish) {}
 
   protected void handleSuccess(
       U user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       int matchedSubscribers) {}
 
   protected void handleError(
       U user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       PublishHandlingResult handlingResult) {}
 
@@ -107,14 +107,14 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
 
   protected PublishHandlingResult startDelivering(
       U user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       SingleSubscriber subscriber) {
     return publishDeliveringService.startDelivering(publish, subscriber);
   }
 
   protected void sendFeedback(U user, MqttOutMessage response) {
-    user.send(response);
+    user.sendAsync(response);
   }
 
   protected void sendFeedback(
@@ -123,7 +123,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
       MqttOutMessage response,
       int messageId) {
     MessageTacker messageTacker = session.inMessageTracker();
-    user.sendWithFeedback(response)
+    user.send(response)
         .thenAccept(_ -> messageTacker.remove(messageId));
   }
 }

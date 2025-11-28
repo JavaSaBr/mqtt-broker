@@ -6,7 +6,7 @@ import javasabr.mqtt.service.ClientIdRegistry
 import javasabr.mqtt.service.session.MqttSessionService
 import org.springframework.beans.factory.annotation.Autowired
 
-class MqttNetworkSessionServiceTest extends IntegrationSpecification {
+class NetworkMqttSessionServiceTest extends IntegrationSpecification {
 
   @Autowired
   ClientIdRegistry clientIdRegistry

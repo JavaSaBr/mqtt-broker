@@ -1,23 +1,12 @@
-package javasabr.mqtt.network;
+package javasabr.mqtt.network.session;
 
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 
-public interface MqttNetworkSession extends MqttSession {
-
-  interface UnsafeMqttNetworkSession extends MqttNetworkSession {
-
-    void expirationTime(long expirationTime);
-
-    void clear();
-
-    void onPersisted();
-
-    void onRestored();
-  }
-
+public interface NetworkMqttSession extends MqttSession {
+  
   interface PendingMessageHandler {
 
     /**
@@ -29,10 +18,6 @@ public interface MqttNetworkSession extends MqttSession {
   }
   
   void resendPendingPackets(NetworkMqttUser user);
-  
-  boolean hasOutPending();
-  
-  boolean hasOutPending(int messageId);
 
   void registerOutPublish(Publish publish, PendingMessageHandler handler);
 
