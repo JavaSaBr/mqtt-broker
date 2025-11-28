@@ -11,8 +11,6 @@ import java.util.concurrent.CompletableFuture
 
 import static java.lang.System.currentTimeMillis
 import static java.lang.System.out
-import static javasabr.mqtt.model.acl.Action.ALLOW
-import static javasabr.mqtt.model.acl.Action.DENY
 
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.rule.Rule} from ACL configuration
@@ -30,16 +28,16 @@ class AclRulesBuilder {
     return Array.copyOf(rules)
   }
 
-  void createTask(RuleBuilder builder, Closure<?> config) {
-    def ruleFuture = CompletableFuture.supplyAsync {
+  void startBuilderAsync(RuleBuilder builder, Closure<?> config) {
+    def applyConfigFuture = CompletableFuture.supplyAsync {
       return putConfigToBuilder(builder, config).build()
     }
     if (ruleParseTask == null) {
-      ruleParseTask = ruleFuture.thenAccept { rule ->
+      ruleParseTask = applyConfigFuture.thenAccept { rule ->
         lockableRules.inWriteLock(rule, (a, r) -> { a.add(r) })
       }
     } else {
-      ruleParseTask = ruleParseTask.thenCombine(ruleFuture, { _, r -> r })
+      ruleParseTask = ruleParseTask.thenCombine(applyConfigFuture, { _, r -> r })
           .thenAccept { rule ->
             lockableRules.inWriteLock(rule, (a, r) -> { a.add(r) })
           }
@@ -47,19 +45,19 @@ class AclRulesBuilder {
   }
 
   void allowPublish(Closure<?> config) {
-    createTask(new PublishRuleBuilder(ALLOW), config)
+    startBuilderAsync(new AllowPublishRuleBuilder(), config)
   }
 
   void denyPublish(Closure<?> config) {
-    createTask(new PublishRuleBuilder(DENY), config)
+    startBuilderAsync(new DenyPublishRuleBuilder(), config)
   }
 
   void allowSubscribe(Closure<?> config) {
-    createTask(new SubscribeRuleBuilder(ALLOW), config)
+    startBuilderAsync(new AllowSubscribeRuleBuilder(), config)
   }
 
   void denySubscribe(Closure<SubscribeRuleBuilder> config) {
-    createTask(new SubscribeRuleBuilder(DENY), config)
+    startBuilderAsync(new DenySubscribeRuleBuilder(), config)
   }
 
   private static RuleBuilder putConfigToBuilder(
