@@ -5,6 +5,10 @@ import javasabr.rlib.collections.array.Array;
 
 public record AnyOfCondition(Array<Condition> conditions) implements Condition {
 
+  public AnyOfCondition(Condition... conditions) {
+    this(Array.of(conditions));
+  }
+
   @Override
   public boolean test(CallId callId) {
     for (Condition condition : conditions) {

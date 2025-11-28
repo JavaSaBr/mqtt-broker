@@ -25,8 +25,8 @@ class AclRulesBuilder {
   private long creationTime = currentTimeMillis()
 
   Array<Rule> build() {
-    out.println("Rules parsing tasks are created in %s ms".formatted(currentTimeMillis() - creationTime))
     ruleParseTask.join()
+    out.println("ACL config is parsed in %s ms".formatted(currentTimeMillis() - creationTime))
     return Array.copyOf(rules)
   }
 

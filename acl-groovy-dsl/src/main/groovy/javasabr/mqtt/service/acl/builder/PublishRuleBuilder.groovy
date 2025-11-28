@@ -9,7 +9,6 @@ import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.acl.rule.AllowPublishRule
 import javasabr.mqtt.model.acl.rule.DenyPublishRule
 import javasabr.mqtt.model.acl.rule.Rule
-import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
@@ -24,7 +23,7 @@ class PublishRuleBuilder extends RuleBuilder {
 
   Rule build() {
     permission == ALLOW
-        ? new AllowPublishRule(new AllOfCondition(Array.of(clients, new TopicCondition(topicNames))))
-        : new DenyPublishRule(new AllOfCondition(Array.of(clients, new TopicCondition(topicNames))))
+        ? new AllowPublishRule(new AllOfCondition(clients, new TopicCondition(topicNames)))
+        : new DenyPublishRule(new AllOfCondition(clients, new TopicCondition(topicNames)))
   }
 }

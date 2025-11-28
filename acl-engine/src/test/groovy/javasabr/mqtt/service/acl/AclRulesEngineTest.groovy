@@ -27,8 +27,8 @@ class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware
     and:
         Array<Rule> publishRules = MutableArray.ofType(Rule.class)
         rulesEnumMap.put(PUBLISH, publishRules)
-        publishRules << new AllowPublishRule(new AllOfCondition(Array.of(
-            new AnyOfCondition(Array.of(
+        publishRules << new AllowPublishRule(new AllOfCondition(
+            new AnyOfCondition(
                 userNameEquals("sensor1"),
                 userNameEquals("sensor10"),
                 userNameRegex("^sensor1/"),
@@ -39,24 +39,24 @@ class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware
                 clientIdRegex("/sensor10\$"),
                 ipAddressEquals("10.56.0.3"),
                 ipAddressRegex("127.0.0.1")
-            )),
+            ),
             new TopicCondition(Array.of(
                 new EqualsMatcher("/topic1/#"),
                 new EqualsMatcher("/topic2/+/temp")
             ))
-        )))
-        publishRules << new AllowPublishRule(new AllOfCondition(Array.of(new AnyCondition(), new TopicCondition(Array.of(
+        ))
+        publishRules << new AllowPublishRule(new AllOfCondition(new AnyCondition(), new TopicCondition(Array.of(
             new EqualsMatcher("/topic1/#"),
             new EqualsMatcher("/topic2/+/temp")
-        )))))
+        ))))
     and:
         Array<Rule> subscribeRules = MutableArray.ofType(Rule.class)
         rulesEnumMap.put(SUBSCRIBE, subscribeRules)
-        subscribeRules << new DenySubscribeRule(new AllOfCondition(Array.of(new AnyCondition(), new TopicCondition(Array.of(
+        subscribeRules << new DenySubscribeRule(new AllOfCondition(new AnyCondition(), new TopicCondition(Array.of(
             topicFilterMatcher("\$SYS/#"),
             topicFilterMatcher("#")
-        )))))
-        subscribeRules << new AllowSubscribeRule(new AllOfCondition(Array.of(Rule.MATCH_ANY)))
+        ))))
+        subscribeRules << new AllowSubscribeRule(new AllOfCondition(Rule.MATCH_ANY))
     and:
         AclRulesEngine engine = new AclRulesEngine(rulesEnumMap)
         CallId callId = new CallId(username, clientId, ipAddress, action, topic)

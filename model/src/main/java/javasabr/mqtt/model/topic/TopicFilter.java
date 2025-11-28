@@ -33,6 +33,5 @@ public class TopicFilter extends AbstractTopic {
   public static TopicFilter valueOf(String rawTopicFilter) {
     return new TopicFilter(rawTopicFilter);
   }
-  
 }
 
