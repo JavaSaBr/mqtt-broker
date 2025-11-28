@@ -17,11 +17,12 @@ class PublishCompleteMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         byte info = NumberUtils.getLowByteBits(typeAndFlags);
     then:
         MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_COMPLETE
+        info == PublishCompleteMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt311Connection, it)
         }
-        def reader = new PublishCompleteMqttInMessage(0 as byte)
+        def reader = new PublishCompleteMqttInMessage(info)
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result

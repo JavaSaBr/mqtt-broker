@@ -1,13 +1,13 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
-import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
-import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
+import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
 import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
 import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
@@ -143,22 +143,22 @@ public class ConnectInMqttInMessageHandler
                                  ? packet.sessionExpiryInterval()
                                  : SESSION_EXPIRY_INTERVAL_DISABLED;
 
-    if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_UNDEFINED) {
+    if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
       sessionExpiryInterval = serverConfig.defaultSessionExpiryInterval();
     }
 
     // select result receive max
-    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED
+    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
                               ? serverConfig.receiveMaxPublishes()
                               : Math.min(packet.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
     // select result maximum packet size
-    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_UNDEFINED
+    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
                             ? serverConfig.maxMessageSize()
                             : Math.min(packet.maxPacketSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
-    var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_UNDEFINED
+    var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
                              ? TOPIC_ALIAS_MAXIMUM_DISABLED
                              : Math.min(packet.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
 
