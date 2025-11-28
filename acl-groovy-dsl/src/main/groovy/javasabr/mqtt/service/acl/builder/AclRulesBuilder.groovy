@@ -1,11 +1,16 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.rlib.collections.array.Array
-import javasabr.rlib.collections.array.MutableArray
+import javasabr.rlib.collections.array.ArrayFactory
+import javasabr.rlib.collections.array.LockableArray
+import javasabr.rlib.collections.operation.LockableOperations
 
+import java.util.concurrent.CompletableFuture
+
+import static java.lang.System.currentTimeMillis
+import static java.lang.System.out
 import static javasabr.mqtt.model.acl.Action.ALLOW
 import static javasabr.mqtt.model.acl.Action.DENY
 
@@ -14,38 +19,55 @@ import static javasabr.mqtt.model.acl.Action.DENY
  */
 class AclRulesBuilder {
 
-  private MutableArray<Rule> rules = MutableArray.ofType(Rule.class)
+  private LockableArray<Rule> rules = ArrayFactory.stampedLockBasedArray(Rule)
+  private LockableOperations<LockableArray<Rule>> lockableRules = rules.operations()
+  private CompletableFuture<Void> ruleParseTask = null
+  private long creationTime = currentTimeMillis()
 
   Array<Rule> build() {
+    out.println("Rules parsing tasks are created in %s ms".formatted(currentTimeMillis() - creationTime))
+    ruleParseTask.join()
     return Array.copyOf(rules)
   }
 
-  AclRulesBuilder allowPublish(Closure<?> config) {
-    def builder = new PublishRuleBuilder(ALLOW)
-    return rule(builder, config)
+  void createTask(RuleBuilder builder, Closure<?> config) {
+    def ruleFuture = CompletableFuture.supplyAsync {
+      return putConfigToBuilder(builder, config).build()
+    }
+    if (ruleParseTask == null) {
+      ruleParseTask = ruleFuture.thenAccept { rule ->
+        lockableRules.inWriteLock(rule, (a, r) -> { a.add(r) })
+      }
+    } else {
+      ruleParseTask = ruleParseTask.thenCombine(ruleFuture, { _, r -> r })
+          .thenAccept { rule ->
+            lockableRules.inWriteLock(rule, (a, r) -> { a.add(r) })
+          }
+    }
   }
 
-  AclRulesBuilder denyPublish(Closure<?> config) {
-    def builder = new PublishRuleBuilder(DENY)
-    return rule(builder, config)
+  void allowPublish(Closure<?> config) {
+    createTask(new PublishRuleBuilder(ALLOW), config)
   }
 
-  AclRulesBuilder allowSubscribe(Closure<?> config) {
-    def builder = new SubscribeRuleBuilder(ALLOW)
-    return rule(builder, config)
+  void denyPublish(Closure<?> config) {
+    createTask(new PublishRuleBuilder(DENY), config)
   }
 
-  AclRulesBuilder denySubscribe(Closure<SubscribeRuleBuilder> config) {
-    def builder = new SubscribeRuleBuilder(DENY)
-    return rule(builder, config)
+  void allowSubscribe(Closure<?> config) {
+    createTask(new SubscribeRuleBuilder(ALLOW), config)
   }
 
-  private AclRulesBuilder rule(
+  void denySubscribe(Closure<SubscribeRuleBuilder> config) {
+    createTask(new SubscribeRuleBuilder(DENY), config)
+  }
+
+  private static RuleBuilder putConfigToBuilder(
       RuleBuilder ruleBuilder,
       Closure<?> ruleConfigurator) {
     ruleConfigurator.delegate = ruleBuilder
+    ruleConfigurator.resolveStrategy = Closure.DELEGATE_ONLY
     ruleConfigurator()
-    rules << ruleBuilder.build()
-    this
+    ruleBuilder
   }
 }

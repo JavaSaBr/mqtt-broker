@@ -21,10 +21,20 @@ import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
 class AclRulesLoaderTest extends UnitSpecification {
 
-  @SuppressWarnings('GroovyAccessibility')
-  def "should parse new Groovy DSL config"() {
+  def "should load test Groovy DSL config"() {
     given:
-        def notExistedPath = "not/existed/path";
+        def ruleFile = TestRulesGenerator.generate(1000)
+    when:
+        def load = new AclRulesLoader(ruleFile.toString()).load()
+    then:
+        load.get(SUBSCRIBE).size() == 500
+        load.get(PUBLISH).size() == 500
+        ruleFile.delete()
+  }
+
+  def "should throw exception if config not exists"() {
+    given:
+        def notExistedPath = "not/existed/path"
     when:
         new AclRulesLoader(notExistedPath)
     then:

@@ -7,7 +7,7 @@ import javasabr.mqtt.model.acl.condition.AllOfCondition;
 import javasabr.mqtt.model.acl.condition.AnyCondition;
 import javasabr.mqtt.model.acl.condition.Condition;
 
-public interface Rule {
+public sealed interface Rule permits AllowPublishRule, AllowSubscribeRule, DenyPublishRule, DenySubscribeRule {
 
   Condition MATCH_ANY = new AnyCondition();
 
