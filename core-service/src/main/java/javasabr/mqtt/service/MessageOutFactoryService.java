@@ -6,7 +6,7 @@ import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 
 public interface MessageOutFactoryService {
 
-  MqttMessageOutFactory resolveFactory(NetworkMqttUser client);
+  MqttMessageOutFactory resolveFactory(NetworkMqttUser user);
 
   MqttMessageOutFactory resolveFactory(MqttConnection connection);
 }

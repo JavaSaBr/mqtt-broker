@@ -28,7 +28,7 @@ public interface MqttNetworkSession extends MqttSession {
     default void resend(NetworkMqttUser user, Publish publish) {}
   }
   
-  void resendPendingPackets(NetworkMqttUser client);
+  void resendPendingPackets(NetworkMqttUser user);
   
   boolean hasOutPending();
   
@@ -36,5 +36,5 @@ public interface MqttNetworkSession extends MqttSession {
 
   void registerOutPublish(Publish publish, PendingMessageHandler handler);
 
-  void updateOutPendingPacket(NetworkMqttUser client, TrackableMqttMessage response);
+  void updateOutPendingPacket(NetworkMqttUser user, TrackableMqttMessage response);
 }

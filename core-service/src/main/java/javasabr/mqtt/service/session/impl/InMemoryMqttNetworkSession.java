@@ -146,13 +146,13 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   }
 
   @Override
-  public void resendPendingPackets(NetworkMqttUser client) {
+  public void resendPendingPackets(NetworkMqttUser user) {
     long stamp = pendingOutPublishes.readLock();
     try {
       for (PendingPublish pending : pendingOutPublishes) {
         PendingMessageHandler handler = pending.handler;
         Publish publish = pending.publish;
-        handler.resend(client, publish);
+        handler.resend(user, publish);
       }
     } finally {
       pendingOutPublishes.readUnlock(stamp);
@@ -160,8 +160,8 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   }
 
   @Override
-  public void updateOutPendingPacket(NetworkMqttUser client, TrackableMqttMessage response) {
-    updatePendingPacket(client, response, pendingOutPublishes, clientId);
+  public void updateOutPendingPacket(NetworkMqttUser user, TrackableMqttMessage response) {
+    updatePendingPacket(user, response, pendingOutPublishes, clientId);
   }
 
   @Override

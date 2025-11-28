@@ -54,7 +54,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public Array<SubscribeAckReasonCode> subscribe(
-      NetworkMqttUser client,
+      NetworkMqttUser user,
       MqttNetworkSession session,
       Array<Subscription> subscriptions) {
 
@@ -63,14 +63,14 @@ public class InMemorySubscriptionService implements SubscriptionService {
         subscriptions.size());
 
     for (Subscription subscription : subscriptions) {
-      subscribeResults.add(addSubscription(client, session, subscription));
+      subscribeResults.add(addSubscription(user, session, subscription));
     }
 
     return subscribeResults;
   }
 
-  private SubscribeAckReasonCode addSubscription(NetworkMqttUser client, MqttNetworkSession session, Subscription subscription) {
-    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
+  private SubscribeAckReasonCode addSubscription(NetworkMqttUser user, MqttNetworkSession session, Subscription subscription) {
+    MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     TopicFilter topicFilter = subscription.topicFilter();
     if (topicFilter.isInvalid()) {
       return SubscribeAckReasonCode.TOPIC_FILTER_INVALID;
@@ -80,7 +80,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber previous = subscriberTree.subscribe(client, subscription);
+    SingleSubscriber previous = subscriberTree.subscribe(user, subscription);
     if (previous != null) {
       activeSubscriptions.remove(previous.subscription());
     }
@@ -90,7 +90,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public Array<UnsubscribeAckReasonCode> unsubscribe(
-      NetworkMqttUser client,
+      NetworkMqttUser user,
       MqttNetworkSession session,
       Array<TopicFilter> topicFilters) {
 
@@ -99,16 +99,16 @@ public class InMemorySubscriptionService implements SubscriptionService {
         topicFilters.size());
 
     for (TopicFilter topicFilter : topicFilters) {
-      unsubscribeResults.add(removeSubscription(client, session, topicFilter));
+      unsubscribeResults.add(removeSubscription(user, session, topicFilter));
     }
 
     return unsubscribeResults;
   }
 
-  private UnsubscribeAckReasonCode removeSubscription(NetworkMqttUser client, MqttNetworkSession session, TopicFilter topicFilter) {
+  private UnsubscribeAckReasonCode removeSubscription(NetworkMqttUser user, MqttNetworkSession session, TopicFilter topicFilter) {
     if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
-    } else if (subscriberTree.unsubscribe(client, topicFilter)) {
+    } else if (subscriberTree.unsubscribe(user, topicFilter)) {
       session
           .activeSubscriptions()
           .removeByTopicFilter(topicFilter);
@@ -119,22 +119,22 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public void cleanSubscriptions(NetworkMqttUser client, MqttNetworkSession session) {
+  public void cleanSubscriptions(NetworkMqttUser user, MqttNetworkSession session) {
     Array<Subscription> subscriptions = session
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      subscriberTree.unsubscribe(client, subscription.topicFilter());
+      subscriberTree.unsubscribe(user, subscription.topicFilter());
     }
   }
 
   @Override
-  public void restoreSubscriptions(NetworkMqttUser client, MqttNetworkSession session) {
+  public void restoreSubscriptions(NetworkMqttUser user, MqttNetworkSession session) {
     Array<Subscription> subscriptions = session
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      subscriberTree.subscribe(client, subscription);
+      subscriberTree.subscribe(user, subscription);
     }
   }
 }

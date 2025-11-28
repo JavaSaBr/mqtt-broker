@@ -4,7 +4,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.AbstractNetworkMqttUser;
-import javasabr.mqtt.network.user.NetworkMqttUser.UnsafeNetworkMqttUser;
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.session.MqttSessionService;
@@ -26,32 +26,32 @@ public abstract class AbstractNetworkMqttUserReleaseHandler<T extends AbstractNe
   SubscriptionService subscriptionService;
 
   @Override
-  public Mono<?> release(UnsafeNetworkMqttUser client) {
-    var clientId = client.clientId();
+  public Mono<?> release(ConfigurableNetworkMqttUser user) {
+    var clientId = user.clientId();
     //noinspection unchecked
-    return releaseImpl((T) client)
+    return releaseImpl((T) user)
         .doOnNext(_ -> log.info(clientId, "[%s] Client was released"::formatted));
   }
 
-  protected Mono<?> releaseImpl(T client) {
+  protected Mono<?> releaseImpl(T user) {
 
-    String clientId = client.clientId();
-    client.clientId(StringUtils.EMPTY);
+    String clientId = user.clientId();
+    user.clientId(StringUtils.EMPTY);
 
     if (StringUtils.isEmpty(clientId)) {
-      log.warning(client.clientId(), "[%s] This client is already released or rejected"::formatted);
+      log.warning(user.clientId(), "[%s] This client is already released or rejected"::formatted);
       return Mono.empty();
     }
 
-    MqttNetworkSession session = client.session();
+    MqttNetworkSession session = user.session();
     Mono<?> asyncActions = null;
 
     if (session != null) {
-      subscriptionService.cleanSubscriptions(client, session);
-      MqttClientConnectionConfig connectionConfig = client.connectionConfig();
+      subscriptionService.cleanSubscriptions(user, session);
+      MqttClientConnectionConfig connectionConfig = user.connectionConfig();
       if (connectionConfig.sessionsEnabled()) {
         asyncActions = sessionService.store(clientId, session, connectionConfig.sessionExpiryInterval());
-        client.session(null);
+        user.session(null);
       }
     }
 

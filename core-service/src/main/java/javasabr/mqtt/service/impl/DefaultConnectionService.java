@@ -17,16 +17,16 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DefaultConnectionService implements ConnectionService {
 
-  Class<? extends NetworkMqttUser> expectedClientType;
+  Class<? extends NetworkMqttUser> expectedUserType;
   @Nullable
   MqttInMessageHandler[] inMessageHandlers;
 
-  public DefaultConnectionService(Class<? extends NetworkMqttUser> expectedClientType,
+  public DefaultConnectionService(Class<? extends NetworkMqttUser> expectedUserType,
                                   Collection<? extends MqttInMessageHandler> knownInMessageHandlers) {
-    this.expectedClientType = expectedClientType;
+    this.expectedUserType = expectedUserType;
     int highestPacketType = knownInMessageHandlers
         .stream()
-        .filter(handler -> expectedClientType.isAssignableFrom(handler.expectedUserType()))
+        .filter(handler -> expectedUserType.isAssignableFrom(handler.expectedUserType()))
         .map(MqttInMessageHandler::messageType)
         .mapToInt(MqttMessageType::typeIndex)
         .max()
@@ -36,7 +36,7 @@ public class DefaultConnectionService implements ConnectionService {
 
     for (MqttInMessageHandler knownInMessageHandler : knownInMessageHandlers) {
       Class<? extends NetworkMqttUser> clientType = knownInMessageHandler.expectedUserType();
-      if (!expectedClientType.isAssignableFrom(clientType)) {
+      if (!expectedUserType.isAssignableFrom(clientType)) {
         continue;
       }
       MqttMessageType messageType = knownInMessageHandler.messageType();
@@ -47,7 +47,7 @@ public class DefaultConnectionService implements ConnectionService {
     }
 
     this.inMessageHandlers = inMessageHandlers;
-    log.info(expectedClientType, inMessageHandlers, DefaultConnectionService::buildServiceDescription);
+    log.info(expectedUserType, inMessageHandlers, DefaultConnectionService::buildServiceDescription);
   }
 
   @Override

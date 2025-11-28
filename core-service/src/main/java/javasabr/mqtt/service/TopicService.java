@@ -6,9 +6,9 @@ import javasabr.mqtt.network.user.NetworkMqttUser;
 
 public interface TopicService {
 
-  TopicFilter createTopicFilter(NetworkMqttUser client, String rawTopicFilter);
+  TopicFilter createTopicFilter(NetworkMqttUser user, String rawTopicFilter);
 
-  boolean isValidTopicFilter(NetworkMqttUser client, String rawTopicFilter);
+  boolean isValidTopicFilter(NetworkMqttUser user, String rawTopicFilter);
 
-  TopicName createTopicName(NetworkMqttUser client, String rawTopicName);
+  TopicName createTopicName(NetworkMqttUser user, String rawTopicName);
 }
