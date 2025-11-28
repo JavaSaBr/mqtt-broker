@@ -2,12 +2,12 @@ package javasabr.mqtt.service.session.impl;
 
 import java.util.concurrent.locks.StampedLock;
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
 import lombok.AccessLevel;
@@ -18,11 +18,11 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
 
   record InProcessPublish(Publish publish, TrackableMessageCallback callback, PublishRetryer retryer) {}
 
-  MqttSession session;
+  MqttNetworkSession session;
   MutableIntToRefDictionary<InProcessPublish> processing;
   StampedLock lock;
 
-  public InMemoryProcessingPublishes(MqttSession session) {
+  public InMemoryProcessingPublishes(MqttNetworkSession session) {
     this.session = session;
     this.processing = DictionaryFactory.mutableIntToRefDictionary();
     this.lock = new StampedLock();
@@ -43,7 +43,7 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
   }
 
   @Override
-  public boolean apply(MqttUser user, TrackableMessage message) {
+  public boolean apply(MqttUser user, TrackableMqttMessage message) {
     long stamp = lock.writeLock();
     try {
       InProcessPublish inProcessPublish = processing.get(message.messageId());
@@ -61,7 +61,7 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
   }
 
   @Override
-  public boolean remove(TrackableMessage message) {
+  public boolean remove(TrackableMqttMessage message) {
     long stamp = lock.writeLock();
     try {
       InProcessPublish inProcessPublish = processing.remove(message.messageId());

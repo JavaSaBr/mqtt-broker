@@ -68,13 +68,13 @@ public class UnsubscribeAckMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.UNSUBSCRIBE_ACK.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.UNSUBSCRIBE_ACK;
   }
 
   @Override

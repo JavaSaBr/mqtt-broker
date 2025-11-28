@@ -4,7 +4,6 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
@@ -25,7 +24,7 @@ public record Publish(
     long messageExpiryInterval,
     int topicAlias,
     PayloadFormat payloadFormat,
-    Array<StringPair> userProperties) implements TrackableMessage {
+    Array<StringPair> userProperties) {
 
   private static final Array<StringPair> EMPTY_USER_PROPERTIES = Array.empty(StringPair.class);
 

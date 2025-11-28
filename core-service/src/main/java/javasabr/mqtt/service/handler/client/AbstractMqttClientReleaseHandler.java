@@ -4,7 +4,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.network.impl.AbstractMqttClient;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.session.MqttSessionService;
@@ -43,7 +43,7 @@ public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttCli
       return Mono.empty();
     }
 
-    MqttSession session = client.session();
+    MqttNetworkSession session = client.session();
     Mono<?> asyncActions = null;
 
     if (session != null) {

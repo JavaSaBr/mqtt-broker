@@ -52,8 +52,13 @@ public class ConnectMqtt311OutMessage extends MqttOutMessage {
   }
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT;
   }
 
   @Override

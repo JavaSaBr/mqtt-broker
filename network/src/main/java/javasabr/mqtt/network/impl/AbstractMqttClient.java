@@ -9,7 +9,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -35,17 +35,24 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
 
   @Setter
   volatile String clientId;
+  @Setter
+  volatile String userName;
 
   @Setter
   @Getter
   @Nullable
-  volatile MqttSession session;
+  volatile MqttNetworkSession session;
 
   public AbstractMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
     this.connection = connection;
     this.releaseHandler = releaseHandler;
     this.released = new AtomicBoolean(false);
     this.clientId = connection.remoteAddress();
+  }
+
+  @Override
+  public String ipAddress() {
+    return connection.remoteAddress();
   }
 
   @Override

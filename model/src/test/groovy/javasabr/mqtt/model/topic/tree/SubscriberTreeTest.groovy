@@ -7,7 +7,6 @@ import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree
 import javasabr.mqtt.model.subscription.Subscription
-
 import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.model.topic.SharedTopicFilter
 import javasabr.mqtt.model.topic.TopicFilter

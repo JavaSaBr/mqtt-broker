@@ -15,7 +15,7 @@ import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -55,7 +55,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   @Override
   public Array<SubscribeAckReasonCode> subscribe(
       MqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       Array<Subscription> subscriptions) {
 
     MutableArray<SubscribeAckReasonCode> subscribeResults = ArrayFactory.mutableArray(
@@ -69,7 +69,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
     return subscribeResults;
   }
 
-  private SubscribeAckReasonCode addSubscription(MqttClient client, MqttSession session, Subscription subscription) {
+  private SubscribeAckReasonCode addSubscription(MqttClient client, MqttNetworkSession session, Subscription subscription) {
     MqttClientConnectionConfig connectionConfig = client.connectionConfig();
     TopicFilter topicFilter = subscription.topicFilter();
     if (topicFilter.isInvalid()) {
@@ -91,7 +91,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   @Override
   public Array<UnsubscribeAckReasonCode> unsubscribe(
       MqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       Array<TopicFilter> topicFilters) {
 
     MutableArray<UnsubscribeAckReasonCode> unsubscribeResults = ArrayFactory.mutableArray(
@@ -105,7 +105,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
     return unsubscribeResults;
   }
 
-  private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttSession session, TopicFilter topicFilter) {
+  private UnsubscribeAckReasonCode removeSubscription(MqttClient client, MqttNetworkSession session, TopicFilter topicFilter) {
     if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
     } else if (subscriberTree.unsubscribe(client, topicFilter)) {
@@ -119,7 +119,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public void cleanSubscriptions(MqttClient client, MqttSession session) {
+  public void cleanSubscriptions(MqttClient client, MqttNetworkSession session) {
     Array<Subscription> subscriptions = session
         .activeSubscriptions()
         .subscriptions();
@@ -129,7 +129,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public void restoreSubscriptions(MqttClient client, MqttSession session) {
+  public void restoreSubscriptions(MqttClient client, MqttNetworkSession session) {
     Array<Subscription> subscriptions = session
         .activeSubscriptions()
         .subscriptions();

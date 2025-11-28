@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
  * Unsubscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UnsubscribeAckMqtt5OutMessage extends UnsubscribeAckMqtt311OutMessage {
 

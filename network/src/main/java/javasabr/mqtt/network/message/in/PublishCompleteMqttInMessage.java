@@ -3,15 +3,15 @@ package javasabr.mqtt.network.message.in;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
 public class PublishCompleteMqttInMessage extends PublishControlMqttInMessage<PublishCompletedReasonCode>
-    implements TrackableMessage {
+    implements TrackableMqttMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETE.ordinal();
 
@@ -41,13 +41,13 @@ public class PublishCompleteMqttInMessage extends PublishControlMqttInMessage<Pu
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.PUBLISH_COMPLETE.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_COMPLETE;
   }
 
   @Override

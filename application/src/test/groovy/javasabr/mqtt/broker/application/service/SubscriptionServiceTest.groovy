@@ -12,7 +12,7 @@ import spock.lang.Unroll
 
 import java.util.concurrent.CompletionException
 
-class SubscribtionServiceTest extends IntegrationSpecification {
+class SubscriptionServiceTest extends IntegrationSpecification {
 
   @Autowired
   ClientIdRegistry clientIdRegistry
@@ -38,11 +38,11 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             .findSubscribers(topicName)
     then: "should find the subscriber"
         subscribers.size() == 1
-        subscribers.get(0).owner() instanceof MqttClient
+        subscribers.get(0).user() instanceof MqttClient
     when:
         def matchedSubscriber = subscribers.get(0)
         def subscription = matchedSubscriber.subscription()
-        def owner = matchedSubscriber.owner() as MqttClient
+        def owner = matchedSubscriber.user() as MqttClient
     then:
         owner.clientId() == clientId
         subscription.topicFilter().rawTopic() == topicFilter
@@ -61,11 +61,11 @@ class SubscribtionServiceTest extends IntegrationSpecification {
             .findSubscribers(topicName)
     then: "should find the reconnected subscriber"
         subscribers3.size() == 1
-        subscribers3.get(0).owner() instanceof MqttClient
+        subscribers3.get(0).user() instanceof MqttClient
     when:
         matchedSubscriber = subscribers3.get(0)
         subscription = matchedSubscriber.subscription()
-        owner = matchedSubscriber.owner() as MqttClient
+        owner = matchedSubscriber.user() as MqttClient
     then:
         owner.clientId() == clientId
         subscription.topicFilter().rawTopic() == topicFilter
@@ -147,8 +147,8 @@ class SubscribtionServiceTest extends IntegrationSpecification {
         def subscribers = subscriptionService.findSubscribers(TopicName.valueOf(topicName))
     then:
         subscribers.size() == targetCount
-        (subscribers[0].owner() as MqttClient).clientId() == clientId1
-        (subscribers[1].owner() as MqttClient).clientId() == clientId2
+        (subscribers[0].user() as MqttClient).clientId() == clientId1
+        (subscribers[1].user() as MqttClient).clientId() == clientId2
     cleanup:
         subscriber1.disconnect().join()
         subscriber2.disconnect().join()

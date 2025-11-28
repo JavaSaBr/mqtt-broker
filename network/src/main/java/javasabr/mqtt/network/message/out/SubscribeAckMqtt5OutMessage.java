@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
  * Subscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeAckMqtt5OutMessage extends SubscribeAckMqtt311OutMessage {
 

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.ReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import lombok.AccessLevel;
@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 @Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class PublishControlMqttInMessage<R extends ReasonCode> extends TrackableMqttInMessage
-    implements TrackableMessage {
+    implements TrackableMqttMessage {
 
   public static final byte MESSAGE_FLAGS = 0b0000_0000;
 

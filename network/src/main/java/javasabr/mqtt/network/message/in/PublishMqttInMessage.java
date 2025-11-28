@@ -290,15 +290,15 @@ public class PublishMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.PUBLISH.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH;
   }
-
+  
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();

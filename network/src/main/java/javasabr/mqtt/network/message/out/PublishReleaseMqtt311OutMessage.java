@@ -19,10 +19,15 @@ public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
   int messageId;
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_RELEASE;
+  }
+  
   @Override
   protected byte messageFlags() {
     return 0b0000_0010;
@@ -38,4 +43,5 @@ public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718055
     writeShort(buffer, messageId);
   }
+
 }
