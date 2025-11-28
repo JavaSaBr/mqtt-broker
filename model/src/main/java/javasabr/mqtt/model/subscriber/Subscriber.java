@@ -1,14 +1,14 @@
 package javasabr.mqtt.model.subscriber;
 
-import javasabr.mqtt.model.subscription.SubscriptionOwner;
+import javasabr.mqtt.model.MqttUser;
 
 public sealed interface Subscriber permits SingleSubscriber, SharedSubscriber {
 
   /**
    * Resolves the owner of a subscription to send a publishing.
    */
-  default SubscriptionOwner resolveOwner() {
-    return resolveSingle().owner();
+  default MqttUser resolveUser() {
+    return resolveSingle().user();
   }
 
   /**

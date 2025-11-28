@@ -16,7 +16,7 @@ import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.exception.MqttException;
-import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.MqttMessage;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.util.MqttDataUtils;
@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
 
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttConnection> {
+public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttConnection> 
+    implements MqttMessage {
 
   static {
     DebugUtils.registerIncludedFields("userProperties");
@@ -80,7 +81,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     return true;
   }
 
-  public abstract byte messageType();
+  public abstract byte messageTypeId();
 
   public Array<StringPair> userProperties() {
     return userProperties == null ? EMPTY_USER_PROPERTIES : userProperties;
@@ -273,7 +274,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
   @Override
   public String name() {
-    return MqttMessageType.fromByte(messageType()).name();
+    return messageType().name();
   }
 
   @Override

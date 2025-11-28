@@ -66,15 +66,15 @@ public class SubscribeAckMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.SUBSCRIBE_ACK.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.SUBSCRIBE_ACK;
   }
-
+  
   @Override
   protected boolean validMessageFlags(byte messageFlags) {
     return messageFlags == MESSAGE_FLAGS;

@@ -113,7 +113,7 @@ class UnsubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecificatio
     then:
         subscribers1.isEmpty()
         subscribers2.isEmpty()
-        subscribers3.size() == 1 && subscribers3.first().owner() == mqttClient
+        subscribers3.size() == 1 && subscribers3.first().user() == mqttClient
   }
 
   def "should close connection by reason MQTT protocol error"() {

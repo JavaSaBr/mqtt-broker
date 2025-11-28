@@ -6,7 +6,7 @@ import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.network.util.ExtraErrorReasons;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
@@ -47,7 +47,7 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
     C castedClient = expectedClient.cast(client);
     M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
     if (requireSession()) {
-      MqttSession session = client.session();
+      MqttNetworkSession session = client.session();
       if (session == null) {
         log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
         handleSessionIsAlreadyClosed(client);
@@ -72,7 +72,7 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
     C castedClient = expectedClient.cast(client);
     M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
     if (requireSession()) {
-      MqttSession session = client.session();
+      MqttNetworkSession session = client.session();
       if (session == null) {
         log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
         handleSessionIsAlreadyClosed(client);
@@ -86,7 +86,7 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
 
   protected void processValidMessage(MqttConnection connection, C client, M message) {}
 
-  protected void processValidMessage(MqttConnection connection, C client, MqttSession session, M message) {}
+  protected void processValidMessage(MqttConnection connection, C client, MqttNetworkSession session, M message) {}
 
   protected boolean processInvalidMessage(MqttConnection connection, C client, M message) {
     Exception exception = message.exception();
@@ -97,7 +97,7 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
     return false;
   }
 
-  protected boolean processInvalidMessage(MqttConnection connection, C client, MqttSession session, M message) {
+  protected boolean processInvalidMessage(MqttConnection connection, C client, MqttNetworkSession session, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
       malformedProtocolError(connection, client, exception);

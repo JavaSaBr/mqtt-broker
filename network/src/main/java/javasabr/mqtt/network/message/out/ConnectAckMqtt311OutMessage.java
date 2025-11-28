@@ -39,8 +39,13 @@ public class ConnectAckMqtt311OutMessage extends MqttOutMessage {
   boolean sessionPresent;
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT_ACK;
   }
 
   @Override

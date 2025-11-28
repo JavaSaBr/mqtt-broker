@@ -8,7 +8,7 @@ import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -32,7 +32,7 @@ public class PublishReleaseMqttInMessageHandler
   protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       PublishReleaseMqttInMessage releaseMessage) {
 
     int messageId = releaseMessage.messageId();

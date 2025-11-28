@@ -14,7 +14,12 @@ public class PingRequestMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.PING_REQUEST;
   }
 }

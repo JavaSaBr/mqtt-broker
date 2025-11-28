@@ -8,7 +8,7 @@ import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -34,7 +34,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected boolean validateImpl(ExternalMqttClient client, MqttSession session, Publish publish) {
+  protected boolean validateImpl(ExternalMqttClient client, MqttNetworkSession session, Publish publish) {
     if (!super.validateImpl(client, session, publish)) {
       return false;
     }
@@ -55,7 +55,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleNoMatchedSubscribers(
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       Publish publish) {
     super.handleNoMatchedSubscribers(client, session, publish);
     int messageId = publish.messageId();
@@ -68,7 +68,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleSuccess(
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       Publish publish,
       int matchedSubscribers) {
     super.handleSuccess(client, session, publish, matchedSubscribers);
@@ -82,7 +82,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleError(
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       Publish publish,
       PublishHandlingResult handlingResult) {
     super.handleError(client, session, publish, handlingResult);

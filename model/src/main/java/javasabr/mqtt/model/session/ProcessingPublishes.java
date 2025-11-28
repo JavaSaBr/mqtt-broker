@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.session;
 
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
 
 public interface ProcessingPublishes {
@@ -11,10 +11,10 @@ public interface ProcessingPublishes {
   /**
    * @return true if was found some callback for this message
    */
-  boolean apply(MqttUser user, TrackableMessage message);
+  boolean apply(MqttUser user, TrackableMqttMessage message);
 
   /**
    * @return true if was found some callback for this message
    */
-  boolean remove(TrackableMessage message);
+  boolean remove(TrackableMqttMessage message);
 }

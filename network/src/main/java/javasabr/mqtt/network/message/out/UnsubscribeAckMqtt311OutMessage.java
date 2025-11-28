@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
  * Unsubscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class UnsubscribeAckMqtt311OutMessage extends TrackableMqttOutMessage {
 
@@ -27,7 +27,12 @@ public class UnsubscribeAckMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.UNSUBSCRIBE_ACK;
   }
 }

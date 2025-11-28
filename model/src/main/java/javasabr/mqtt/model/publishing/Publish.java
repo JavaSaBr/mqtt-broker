@@ -4,8 +4,8 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.message.MqttMessage;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
@@ -25,9 +25,7 @@ public record Publish(
     long messageExpiryInterval,
     int topicAlias,
     PayloadFormat payloadFormat,
-    Array<StringPair> userProperties) implements TrackableMessage {
-
-  private static final Array<StringPair> EMPTY_USER_PROPERTIES = Array.empty(StringPair.class);
+    Array<StringPair> userProperties) {
 
   static {
     DebugUtils.registerIncludedFields("topicName", "messageId", "qos", "topicAlias", "payloadFormat");
@@ -47,8 +45,8 @@ public record Publish(
         null,
         MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET,
         MqttProperties.TOPIC_ALIAS_NOT_SET,
-        PayloadFormat.BINARY,
-        EMPTY_USER_PROPERTIES);
+        PayloadFormat.BINARY, 
+        MqttMessage.EMPTY_USER_PROPERTIES);
   }
 
   public static Publish minimal(QoS qos, TopicName topicName, byte[] payload) {

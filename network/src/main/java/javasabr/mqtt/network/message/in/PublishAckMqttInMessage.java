@@ -3,15 +3,15 @@ package javasabr.mqtt.network.message.in;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 
 /**
  * Publish acknowledgment (QoS 1).
  */
 public class PublishAckMqttInMessage extends PublishControlMqttInMessage<PublishAckReasonCode>
-    implements TrackableMessage {
+    implements TrackableMqttMessage {
 
   private static final int MESSAGE_TYPE = MqttMessageType.PUBLISH_ACK.ordinal();
 
@@ -41,15 +41,15 @@ public class PublishAckMqttInMessage extends PublishControlMqttInMessage<Publish
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return (byte) MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.PUBLISH_ACK.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_ACK;
   }
-
+  
   @Override
   protected PublishAckReasonCode defaultReasonCode() {
     return PublishAckReasonCode.SUCCESS;

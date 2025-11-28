@@ -22,7 +22,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -178,7 +178,7 @@ public class ConnectInMqttInMessageHandler
   private Mono<Boolean> onConnected(
       MqttClient.UnsafeMqttClient client,
       ConnectMqttInMessage packet,
-      MqttSession session,
+      MqttNetworkSession session,
       boolean sessionRestored) {
 
     MqttConnection connection = client.connection();
@@ -211,7 +211,7 @@ public class ConnectInMqttInMessageHandler
         .thenApply(result -> onSentConnAck(client, session, result)));
   }
 
-  private boolean onSentConnAck(MqttClient.UnsafeMqttClient client, MqttSession session, boolean result) {
+  private boolean onSentConnAck(MqttClient.UnsafeMqttClient client, MqttNetworkSession session, boolean result) {
 
     if (!result) {
       log.warning(client.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
@@ -226,7 +226,7 @@ public class ConnectInMqttInMessageHandler
   protected boolean processInvalidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       ConnectMqttInMessage message) {
     Exception exception = message.exception();
     if (exception instanceof ConnectionRejectException cre) {

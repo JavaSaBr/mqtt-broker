@@ -3,6 +3,7 @@ package javasabr.mqtt.network
 import javasabr.mqtt.model.MqttMessageProperty
 import javasabr.mqtt.model.data.type.MqttDataType
 import javasabr.mqtt.model.data.type.StringPair
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.ReasonCode
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.util.MqttDataUtils
@@ -18,6 +19,11 @@ class SpecificationNetworkExtensions extends Specification {
 
     @Override
     protected void writeImpl(MqttConnection connection, ByteBuffer buffer) {}
+
+    @Override
+    MqttMessageType messageType() {
+      return MqttMessageType.PUBLISH
+    }
   }
 
   static ByteBuffer putByte(ByteBuffer self, int value) {

@@ -45,8 +45,13 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH;
   }
 
   @Override

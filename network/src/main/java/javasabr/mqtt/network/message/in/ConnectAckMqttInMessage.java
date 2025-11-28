@@ -292,13 +292,13 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.CONNECT_ACK.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT_ACK;
   }
 
   @Override
