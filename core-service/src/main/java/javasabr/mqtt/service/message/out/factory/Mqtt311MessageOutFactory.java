@@ -14,7 +14,6 @@ import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.DisconnectMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
@@ -27,6 +26,7 @@ import javasabr.mqtt.network.message.out.PublishReceivedMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.PublishReleaseMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.UnsubscribeAckMqtt311OutMessage;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.rlib.collections.array.Array;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
   @Override
   public MqttOutMessage newConnectAck(
-      MqttClient client,
+      NetworkMqttUser user,
       ConnectAckReasonCode reasonCode,
       boolean sessionPresent,
       String requestedClientId,
@@ -100,7 +100,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
 
   @Override
   public MqttOutMessage newDisconnect(
-      MqttClient client,
+      NetworkMqttUser user,
       DisconnectReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason,

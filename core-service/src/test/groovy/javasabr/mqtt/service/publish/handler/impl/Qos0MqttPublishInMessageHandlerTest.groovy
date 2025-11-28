@@ -5,7 +5,7 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
-import javasabr.mqtt.service.TestExternalMqttClient
+import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
 class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandlerTest {
@@ -19,9 +19,9 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def subscriber1 = mockedExternalConnection(MqttVersion.MQTT_5)
         def subscriber2 = mockedExternalConnection(MqttVersion.MQTT_5)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
-        def client1 = subscriber1.client() as TestExternalMqttClient
-        def client2 = subscriber2.client() as TestExternalMqttClient
-        def client3 = publisher.client() as TestExternalMqttClient
+        def client1 = subscriber1.user() as TestExternalNetworkMqttUser
+        def client2 = subscriber2.user() as TestExternalNetworkMqttUser
+        def client3 = publisher.user() as TestExternalNetworkMqttUser
         def topicFilter = defaultTopicService.createTopicFilter(client1, "Qos0MqttPublishInMessageHandlerTest/1")
         def topicName = defaultTopicService.createTopicName(client1, "Qos0MqttPublishInMessageHandlerTest/1")
         defaultSubscriptionService.subscribe(
@@ -50,11 +50,11 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
-        def client = publisher.client() as TestExternalMqttClient
-        def topicName = defaultTopicService.createTopicName(client, "Qos0MqttPublishInMessageHandlerTest/2")
+        def user = publisher.user() as TestExternalNetworkMqttUser
+        def topicName = defaultTopicService.createTopicName(user, "Qos0MqttPublishInMessageHandlerTest/2")
     when:
-        publishInHandler.handle(client, Publish.minimal(QoS.AT_MOST_ONCE, topicName, testPayload))
+        publishInHandler.handle(user, Publish.minimal(QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should not have any feedback'
-        client.isEmpty()
+        user.isEmpty()
   }
 }

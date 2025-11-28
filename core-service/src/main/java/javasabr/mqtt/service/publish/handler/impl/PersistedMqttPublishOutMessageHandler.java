@@ -3,10 +3,10 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
-import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.session.MqttNetworkSession;
-import javasabr.mqtt.network.session.MqttNetworkSession.PendingMessageHandler;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.MqttNetworkSession.PendingMessageHandler;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -16,30 +16,30 @@ import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class PersistedMqttPublishOutMessageHandler extends
-    AbstractMqttPublishOutMessageHandler<ExternalMqttClient> {
+    AbstractMqttPublishOutMessageHandler<ExternalNetworkMqttUser> {
 
   PendingMessageHandler pendingMessageHandler;
 
   protected PersistedMqttPublishOutMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, subscriptionService, messageOutFactoryService);
+    super(ExternalNetworkMqttUser.class, subscriptionService, messageOutFactoryService);
     this.pendingMessageHandler = new PendingMessageHandler() {
       @Override
-      public boolean handleResponse(MqttClient client, TrackableMqttMessage response) {
-        return handleReceivedResponse(client, response);
+      public boolean handleResponse(NetworkMqttUser user, TrackableMqttMessage response) {
+        return handleReceivedResponse(user, response);
       }
       @Override
-      public void resend(MqttClient client, Publish publish) {
-        tryToDeliverAgain(client, publish);
+      public void resend(NetworkMqttUser user, Publish publish) {
+        tryToDeliverAgain(user, publish);
       }
     };
   }
 
   @Nullable
   @Override
-  protected Publish reconstruct(MqttClient client, Publish original) {
-    MqttNetworkSession session = client.session();
+  protected Publish reconstruct(NetworkMqttUser user, Publish original) {
+    MqttNetworkSession session = user.session();
     if (session == null) {
       return null;
     }
@@ -52,7 +52,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
   }
 
   @Override
-  protected PublishHandlingResult handleImpl(Publish publish, ExternalMqttClient client) {
+  protected PublishHandlingResult handleImpl(Publish publish, ExternalNetworkMqttUser client) {
 
     MqttNetworkSession session = client.session();
     if (session == null) {
@@ -67,11 +67,11 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected boolean handleReceivedResponse(MqttClient client, TrackableMqttMessage response) {
+  protected boolean handleReceivedResponse(NetworkMqttUser user, TrackableMqttMessage response) {
     return false;
   }
 
-  protected void tryToDeliverAgain(MqttClient client, Publish publish) {
+  protected void tryToDeliverAgain(NetworkMqttUser client, Publish publish) {
     startDelivering(client, publish.withDuplicated());
   }
 }

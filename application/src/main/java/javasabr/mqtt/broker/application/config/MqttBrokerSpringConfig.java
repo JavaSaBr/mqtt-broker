@@ -5,11 +5,11 @@ import java.util.Collection;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.network.MqttClientFactory;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
@@ -19,14 +19,14 @@ import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
-import javasabr.mqtt.service.handler.client.ExternalMqttClientReleaseHandler;
+import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
-import javasabr.mqtt.service.impl.ExternalMqttClientFactory;
+import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
@@ -195,7 +195,7 @@ public class MqttBrokerSpringConfig {
 
   @Bean
   ConnectionService externalMqttConnectionService(Collection<? extends MqttInMessageHandler> inMessageHandlers) {
-    return new DefaultConnectionService(ExternalMqttClient.class, inMessageHandlers);
+    return new DefaultConnectionService(ExternalNetworkMqttUser.class, inMessageHandlers);
   }
 
   @Bean
@@ -265,11 +265,11 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttClientReleaseHandler externalMqttClientReleaseHandler(
+  NetworkMqttUserReleaseHandler externalMqttClientReleaseHandler(
       ClientIdRegistry clientIdRegistry,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService) {
-    return new ExternalMqttClientReleaseHandler(clientIdRegistry, sessionService, subscriptionService);
+    return new ExternalNetworkMqttUserReleaseHandler(clientIdRegistry, sessionService, subscriptionService);
   }
 
   @Bean
@@ -352,14 +352,14 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttClientFactory externalClientFactory(MqttClientReleaseHandler externalMqttClientReleaseHandler) {
-    return new ExternalMqttClientFactory(externalMqttClientReleaseHandler);
+  NetworkMqttUserFactory externalClientFactory(NetworkMqttUserReleaseHandler externalNetworkMqttUserReleaseHandler) {
+    return new ExternalNetworkMqttUserFactory(externalNetworkMqttUserReleaseHandler);
   }
 
   @Bean
   MqttConnectionFactory externalConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
-      MqttClientFactory externalClientFactory,
+      NetworkMqttUserFactory externalClientFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead) {
     return new DefaultMqttConnectionFactory(externalServerConnectionConfig, externalClientFactory, maxPacketsByRead);
   }

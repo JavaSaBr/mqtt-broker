@@ -18,8 +18,6 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-import static javasabr.mqtt.network.MqttClient.UnsafeMqttClient
-
 @SpringJUnitConfig(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {
 
@@ -153,7 +151,7 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       serverConnectionConfig() >> serverConnConfig
       clientConnectionConfig() >> clientConnConfig
-      client() >> Stub(UnsafeMqttClient) {
+      user() >> Stub(UnsafeNetworkMqttUser) {
         connectionConfig() >> clientConnConfig
         connection() >> connectionRef.get()
         clientId() >> clientId
@@ -181,7 +179,7 @@ class IntegrationSpecification extends Specification {
       isSupported(MqttVersion.MQTT_3_1_1) >> true
       serverConnectionConfig() >> serverConnConfig
       clientConnectionConfig() >> clientConnConfig
-      client() >> Stub(UnsafeMqttClient) {
+      user() >> Stub(UnsafeNetworkMqttUser) {
         connectionConfig() >> clientConnConfig
         connection() >> connectionRef.get()
         clientId() >> clientId

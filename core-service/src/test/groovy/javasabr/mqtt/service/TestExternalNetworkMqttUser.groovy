@@ -1,8 +1,8 @@
 package javasabr.mqtt.service
 
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler
-import javasabr.mqtt.network.impl.ExternalMqttClient
+import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.rlib.collections.array.MutableArray
 
@@ -10,14 +10,14 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
-class TestExternalMqttClient extends ExternalMqttClient {
+class TestExternalNetworkMqttUser extends ExternalNetworkMqttUser {
 
   private static final Executor DELAYED_EXECUTOR = CompletableFuture.delayedExecutor(5000, TimeUnit.MILLISECONDS)
 
   private final MutableArray<MqttOutMessage> sentMessages
   private boolean returnCompletedFeatures = true;
 
-  TestExternalMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
+  TestExternalNetworkMqttUser(MqttConnection connection, NetworkMqttUserReleaseHandler releaseHandler) {
     super(connection, releaseHandler)
     this.sentMessages = MutableArray.ofType(MqttOutMessage)
   }

@@ -17,12 +17,12 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
-import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -37,7 +37,7 @@ import reactor.core.publisher.Mono;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConnectInMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalMqttClient, ConnectMqttInMessage> {
+    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, ConnectMqttInMessage> {
 
   ClientIdRegistry clientIdRegistry;
   AuthenticationService authenticationService;
@@ -50,7 +50,7 @@ public class ConnectInMqttInMessageHandler
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, ConnectMqttInMessage.class, messageOutFactoryService);
+    super(ExternalNetworkMqttUser.class, ConnectMqttInMessage.class, messageOutFactoryService);
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
@@ -70,34 +70,36 @@ public class ConnectInMqttInMessageHandler
   @Override
   protected void processValidMessage(
       MqttConnection connection,
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
-    resolveClientConnectionConfig(client, message);
+    resolveClientConnectionConfig(user, message);
     authenticationService
         .auth(message.username(), message.password())
-        .flatMap(ifTrue(client,
-            message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(client, connectAckReasonCode)))
-        .flatMap(ifTrue(client,
-            message, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(client, connectAckReasonCode)))
+        .flatMap(ifTrue(
+            user,
+            message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))
+        .flatMap(ifTrue(
+            user,
+            message, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(user, connectAckReasonCode)))
         .subscribe();
   }
 
-  private void reject(ExternalMqttClient client, ConnectAckReasonCode connectAckReasonCode) {
-    client.send(messageOutFactoryService
-        .resolveFactory(client)
-        .newConnectAck(client, connectAckReasonCode));
+  private void reject(ExternalNetworkMqttUser user, ConnectAckReasonCode connectAckReasonCode) {
+    user.send(messageOutFactoryService
+        .resolveFactory(user)
+        .newConnectAck(user, connectAckReasonCode));
   }
 
-  private Mono<Boolean> registerClient(ExternalMqttClient client, ConnectMqttInMessage networkPacket) {
+  private Mono<Boolean> registerClient(ExternalNetworkMqttUser user, ConnectMqttInMessage networkPacket) {
 
     String requestedClientId = networkPacket.clientId();
     if (StringUtils.isNotEmpty(requestedClientId)) {
       return clientIdRegistry
           .register(requestedClientId)
-          .map(ifTrue(requestedClientId, client::clientId));
+          .map(ifTrue(requestedClientId, user::clientId));
     }
 
-    MqttVersion mqttVersion = client
+    MqttVersion mqttVersion = user
         .connection()
         .clientConnectionConfig()
         .mqttVersion();
@@ -111,27 +113,27 @@ public class ConnectInMqttInMessageHandler
         .generate()
         .flatMap(newClientId -> clientIdRegistry
             .register(newClientId)
-            .map(ifTrue(newClientId, client::clientId)));
+            .map(ifTrue(newClientId, user::clientId)));
   }
 
-  private Mono<Boolean> restoreSession(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
+  private Mono<Boolean> restoreSession(ConfigurableNetworkMqttUser user, ConnectMqttInMessage packet) {
     if (packet.cleanStart()) {
       return sessionService
-          .create(client.clientId())
-          .flatMap(session -> onConnected(client, packet, session, false));
+          .create(user.clientId())
+          .flatMap(session -> onConnected(user, packet, session, false));
     } else {
       return sessionService
-          .restore(client.clientId())
-          .flatMap(session -> onConnected(client, packet, session, true))
+          .restore(user.clientId())
+          .flatMap(session -> onConnected(user, packet, session, true))
           .switchIfEmpty(Mono.defer(() -> sessionService
-              .create(client.clientId())
-              .flatMap(session -> onConnected(client, packet, session, false))));
+              .create(user.clientId())
+              .flatMap(session -> onConnected(user, packet, session, false))));
     }
   }
 
-  private void resolveClientConnectionConfig(MqttClient.UnsafeMqttClient client, ConnectMqttInMessage packet) {
+  private void resolveClientConnectionConfig(ConfigurableNetworkMqttUser user, ConnectMqttInMessage packet) {
 
-    MqttConnection connection = client.connection();
+    MqttConnection connection = user.connection();
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
 
     // select result keep alive time
@@ -176,66 +178,66 @@ public class ConnectInMqttInMessageHandler
   }
 
   private Mono<Boolean> onConnected(
-      MqttClient.UnsafeMqttClient client,
-      ConnectMqttInMessage packet,
+      ConfigurableNetworkMqttUser user,
+      ConnectMqttInMessage message,
       MqttNetworkSession session,
       boolean sessionRestored) {
 
-    MqttConnection connection = client.connection();
+    MqttConnection connection = user.connection();
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
     MqttClientConnectionConfig clientConfig = connection.clientConnectionConfig();
 
     // if it was closed in parallel
     if (connection.closed() && serverConfig.sessionsEnabled()) {
       // store the session again
-      return sessionService.store(client.clientId(), session, clientConfig.sessionExpiryInterval());
+      return sessionService.store(user.clientId(), session, clientConfig.sessionExpiryInterval());
     }
 
-    client.session(session);
+    user.session(session);
 
     var connectAck = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newConnectAck(
-            client,
+            user,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
-            packet.clientId(),
-            packet.sessionExpiryInterval(),
-            packet.keepAlive(),
-            packet.receiveMaxPublishes());
+            message.clientId(),
+            message.sessionExpiryInterval(),
+            message.keepAlive(),
+            message.receiveMaxPublishes());
 
-    subscriptionService.restoreSubscriptions(client, session);
+    subscriptionService.restoreSubscriptions(user, session);
 
-    return Mono.fromFuture(client
+    return Mono.fromFuture(user
         .sendWithFeedback(connectAck)
-        .thenApply(result -> onSentConnAck(client, session, result)));
+        .thenApply(result -> onSentConnAck(user, session, result)));
   }
 
-  private boolean onSentConnAck(MqttClient.UnsafeMqttClient client, MqttNetworkSession session, boolean result) {
+  private boolean onSentConnAck(ConfigurableNetworkMqttUser user, MqttNetworkSession session, boolean result) {
 
     if (!result) {
-      log.warning(client.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
+      log.warning(user.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
       return false;
     }
 
-    session.resendPendingPackets(client);
+    session.resendPendingPackets(user);
     return true;
   }
 
   @Override
   protected boolean processInvalidMessage(
       MqttConnection connection,
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       ConnectMqttInMessage message) {
     Exception exception = message.exception();
     if (exception instanceof ConnectionRejectException cre) {
       MqttOutMessage feedback = messageOutFactoryService
-          .resolveFactory(client)
-          .newConnectAck(client, cre.reasonCode());
-      client.closeWithReason(feedback);
+          .resolveFactory(user)
+          .newConnectAck(user, cre.reasonCode());
+      user.closeWithReason(feedback);
       return true;
     }
-    return super.processInvalidMessage(connection, client, session, message);
+    return super.processInvalidMessage(connection, user, session, message);
   }
 }

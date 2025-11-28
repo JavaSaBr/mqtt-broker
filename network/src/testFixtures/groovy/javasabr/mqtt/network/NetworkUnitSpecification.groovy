@@ -12,6 +12,8 @@ import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
+import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -113,10 +115,10 @@ class NetworkUnitSpecification extends UnitSpecification {
   MqttServerConnectionConfig defaultServerConnectionConfig = defaultServerConnectionConfig()
 
   @Shared
-  MqttClient defaultMqtt311Client = mqttClient(defaultMqtt311ClientConnectionConfig(), mqtt311ClientId)
+  NetworkMqttUser defaultMqtt311User = networkUser(defaultMqtt311ClientConnectionConfig(), mqtt311ClientId)
 
   @Shared
-  MqttClient defaultMqtt5Client = mqttClient(defaultMqtt5ClientConnectionConfig(), mqtt5ClientId)
+  NetworkMqttUser defaultMqtt5User = networkUser(defaultMqtt5ClientConnectionConfig(), mqtt5ClientId)
 
   @Shared
   MqttConnection defaultMqtt5Connection = mqtt5Connection();
@@ -253,23 +255,13 @@ class NetworkUnitSpecification extends UnitSpecification {
       }
       serverConnectionConfig() >> serverConfig
       clientConnectionConfig() >> clientConfig
-      client() >> mqttClient(clientConfig, clientId)
+      user() >> networkUser(clientConfig, clientId)
     }
   }
 
-  MqttClient mqttClient(MqttClientConnectionConfig clientConfig, String id) {
-    return Stub(MqttClient.UnsafeMqttClient) {
+  NetworkMqttUser networkUser(MqttClientConnectionConfig clientConfig, String id) {
+    return Stub(ConfigurableNetworkMqttUser) {
       connectionConfig() >> clientConfig
-      clientId() >> id
-      toString() >> id
-    }
-  }
-
-  MqttClient newMqtt311Client() {
-    def config = defaultMqtt311ClientConnectionConfig()
-    def id = "generatedClient_${clientIdGenerator.incrementAndGet()}"
-    return Stub(MqttClient.UnsafeMqttClient) {
-      connectionConfig() >> config
       clientId() >> id
       toString() >> id
     }

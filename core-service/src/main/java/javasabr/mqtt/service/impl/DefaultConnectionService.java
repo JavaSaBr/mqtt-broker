@@ -2,9 +2,9 @@ package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.in.MqttInMessage;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.rlib.network.packet.ReadableNetworkPacket;
@@ -17,16 +17,16 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DefaultConnectionService implements ConnectionService {
 
-  Class<? extends MqttClient> expectedClientType;
+  Class<? extends NetworkMqttUser> expectedClientType;
   @Nullable
   MqttInMessageHandler[] inMessageHandlers;
 
-  public DefaultConnectionService(Class<? extends MqttClient> expectedClientType,
+  public DefaultConnectionService(Class<? extends NetworkMqttUser> expectedClientType,
                                   Collection<? extends MqttInMessageHandler> knownInMessageHandlers) {
     this.expectedClientType = expectedClientType;
     int highestPacketType = knownInMessageHandlers
         .stream()
-        .filter(handler -> expectedClientType.isAssignableFrom(handler.expectedClientType()))
+        .filter(handler -> expectedClientType.isAssignableFrom(handler.expectedUserType()))
         .map(MqttInMessageHandler::messageType)
         .mapToInt(MqttMessageType::typeIndex)
         .max()
@@ -35,7 +35,7 @@ public class DefaultConnectionService implements ConnectionService {
     var inMessageHandlers = new MqttInMessageHandler[highestPacketType + 1];
 
     for (MqttInMessageHandler knownInMessageHandler : knownInMessageHandlers) {
-      Class<? extends MqttClient> clientType = knownInMessageHandler.expectedClientType();
+      Class<? extends NetworkMqttUser> clientType = knownInMessageHandler.expectedUserType();
       if (!expectedClientType.isAssignableFrom(clientType)) {
         continue;
       }
@@ -67,7 +67,7 @@ public class DefaultConnectionService implements ConnectionService {
     }
 
     log.debug(
-        connection.client().clientId(),
+        connection.user().clientId(),
         mqttInMessage.name(),
         mqttInMessage,
         "[%s] Received from client valid message:[%s] %s"::formatted);
@@ -91,7 +91,7 @@ public class DefaultConnectionService implements ConnectionService {
     }
 
     log.warning(
-        connection.client().clientId(),
+        connection.user().clientId(),
         mqttInMessage.name(),
         mqttInMessage,
         "[%s] Received from client invalid message:[%s] %s"::formatted);
@@ -106,7 +106,7 @@ public class DefaultConnectionService implements ConnectionService {
   }
 
   private static String buildServiceDescription(
-      Class<? extends MqttClient> expectedClientType,
+      Class<? extends NetworkMqttUser> expectedClientType,
       @Nullable MqttInMessageHandler[] inMessageHandlers) {
     var builder = new StringBuilder();
     builder.append("{\n");

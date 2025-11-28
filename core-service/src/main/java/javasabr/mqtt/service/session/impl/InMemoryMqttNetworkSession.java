@@ -9,8 +9,8 @@ import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.TopicNameMapping;
-import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.session.MqttNetworkSession.UnsafeMqttNetworkSession;
+import javasabr.mqtt.network.MqttNetworkSession.UnsafeMqttNetworkSession;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import lombok.AccessLevel;
@@ -42,7 +42,7 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   }
 
   private static void updatePendingPacket(
-      MqttClient client,
+      NetworkMqttUser client,
       TrackableMqttMessage response,
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
@@ -146,7 +146,7 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   }
 
   @Override
-  public void resendPendingPackets(MqttClient client) {
+  public void resendPendingPackets(NetworkMqttUser client) {
     long stamp = pendingOutPublishes.readLock();
     try {
       for (PendingPublish pending : pendingOutPublishes) {
@@ -160,7 +160,7 @@ public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
   }
 
   @Override
-  public void updateOutPendingPacket(MqttClient client, TrackableMqttMessage response) {
+  public void updateOutPendingPacket(NetworkMqttUser client, TrackableMqttMessage response) {
     updatePendingPacket(client, response, pendingOutPublishes, clientId);
   }
 

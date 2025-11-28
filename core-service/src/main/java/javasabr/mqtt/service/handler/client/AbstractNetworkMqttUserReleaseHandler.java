@@ -1,10 +1,10 @@
 package javasabr.mqtt.service.handler.client;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
-import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
-import javasabr.mqtt.network.impl.AbstractMqttClient;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
+import javasabr.mqtt.network.impl.AbstractNetworkMqttUser;
+import javasabr.mqtt.network.user.NetworkMqttUser.UnsafeNetworkMqttUser;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.session.MqttSessionService;
@@ -18,15 +18,15 @@ import reactor.core.publisher.Mono;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public abstract class AbstractMqttClientReleaseHandler<T extends AbstractMqttClient> implements
-    MqttClientReleaseHandler {
+public abstract class AbstractNetworkMqttUserReleaseHandler<T extends AbstractNetworkMqttUser> implements
+    NetworkMqttUserReleaseHandler {
 
   ClientIdRegistry clientIdRegistry;
   MqttSessionService sessionService;
   SubscriptionService subscriptionService;
 
   @Override
-  public Mono<?> release(UnsafeMqttClient client) {
+  public Mono<?> release(UnsafeNetworkMqttUser client) {
     var clientId = client.clientId();
     //noinspection unchecked
     return releaseImpl((T) client)

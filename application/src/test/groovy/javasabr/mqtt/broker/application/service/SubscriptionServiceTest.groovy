@@ -4,7 +4,7 @@ import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
 import javasabr.mqtt.broker.application.IntegrationSpecification
 import javasabr.mqtt.model.topic.TopicName
-import javasabr.mqtt.network.MqttClient
+import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.service.ClientIdRegistry
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,11 +38,11 @@ class SubscriptionServiceTest extends IntegrationSpecification {
             .findSubscribers(topicName)
     then: "should find the subscriber"
         subscribers.size() == 1
-        subscribers.get(0).user() instanceof MqttClient
+        subscribers.get(0).user() instanceof NetworkMqttUser
     when:
         def matchedSubscriber = subscribers.get(0)
         def subscription = matchedSubscriber.subscription()
-        def owner = matchedSubscriber.user() as MqttClient
+        def owner = matchedSubscriber.user() as NetworkMqttUser
     then:
         owner.clientId() == clientId
         subscription.topicFilter().rawTopic() == topicFilter
@@ -61,11 +61,11 @@ class SubscriptionServiceTest extends IntegrationSpecification {
             .findSubscribers(topicName)
     then: "should find the reconnected subscriber"
         subscribers3.size() == 1
-        subscribers3.get(0).user() instanceof MqttClient
+        subscribers3.get(0).user() instanceof NetworkMqttUser
     when:
         matchedSubscriber = subscribers3.get(0)
         subscription = matchedSubscriber.subscription()
-        owner = matchedSubscriber.user() as MqttClient
+        owner = matchedSubscriber.user() as NetworkMqttUser
     then:
         owner.clientId() == clientId
         subscription.topicFilter().rawTopic() == topicFilter
@@ -147,8 +147,8 @@ class SubscriptionServiceTest extends IntegrationSpecification {
         def subscribers = subscriptionService.findSubscribers(TopicName.valueOf(topicName))
     then:
         subscribers.size() == targetCount
-        (subscribers[0].user() as MqttClient).clientId() == clientId1
-        (subscribers[1].user() as MqttClient).clientId() == clientId2
+        (subscribers[0].user() as NetworkMqttUser).clientId() == clientId1
+        (subscribers[1].user() as NetworkMqttUser).clientId() == clientId2
     cleanup:
         subscriber1.disconnect().join()
         subscriber2.disconnect().join()
