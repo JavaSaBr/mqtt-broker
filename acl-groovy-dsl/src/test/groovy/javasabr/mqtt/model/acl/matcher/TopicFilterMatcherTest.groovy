@@ -4,9 +4,11 @@ package javasabr.mqtt.model.acl.matcher
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 
+import java.util.regex.Pattern
+
 class TopicFilterMatcherTest extends UnitSpecification {
 
-  def "should allow or deny according rules"(String topicFilter, String incomingValue, boolean expectedResult) {
+  def "should match topic filter"(String topicFilter, String incomingValue, boolean expectedResult) {
     given:
         def matcher = new TopicFilterMatcher(TopicFilter.valueOf(topicFilter))
     when:
@@ -55,5 +57,19 @@ class TopicFilterMatcherTest extends UnitSpecification {
         "/"                                    | "/"                      | true
         "/"                                    | "+"                      | false
         "/"                                    | "+/+"                    | true
+  }
+
+  def "should match topic filter"(String pattern, String incomingValue, boolean expectedResult) {
+    given:
+        def matcher = new RegexMatcher(Pattern.compile(pattern))
+    when:
+        boolean result = matcher.test(incomingValue)
+    then:
+        result == expectedResult
+    where:
+        pattern     | incomingValue | expectedResult
+        "^sensor\$" | "sensor"      | true
+        "^sensor\$" | "/sensor"     | false
+        "^sensor\$" | "sensor1"     | false
   }
 }

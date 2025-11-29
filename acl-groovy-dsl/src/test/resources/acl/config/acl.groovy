@@ -29,6 +29,16 @@ denySubscribe {
   topicFilter match("/topic2/+/temp")
 }
 
+allowSubscribe {
+  allOf {
+    userName eq("sensor2")
+    clientId eq("clientId2")
+    ipAddress eq("10.56.0.3")
+  }
+  topicFilter match("/topic1/#")
+  topicFilter match("/topic2/+/temp")
+}
+
 denyPublish {
   anyOf()
   topicName anyone()

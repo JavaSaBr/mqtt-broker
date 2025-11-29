@@ -5,10 +5,12 @@ import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
+import javasabr.mqtt.model.acl.condition.MqttUserCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
@@ -119,8 +121,15 @@ class AclRulesLoaderTest extends UnitSpecification {
               with(get(1) as EqualsMatcher) { expectedValue == "/topic2/temp" }
             }
           }
+          with(get(1)) {
+            operation() == PUBLISH
+            action() == DENY
+            clientCondition() == MqttUserCondition.MATCH_ANY
+            topicCondition().topics().get(0) == ValueMatcher.ANY
+          }
         }
         verifyAll(rules.get(SUBSCRIBE)) {
+          size() == 3
           with(get(0)) {
             operation() == SUBSCRIBE
             action() == DENY
@@ -141,6 +150,16 @@ class AclRulesLoaderTest extends UnitSpecification {
               with(get(0) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic1/#" }
               with(get(1) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic2/+/temp" }
             }
+          }
+          with(get(1)) {
+            operation() == SUBSCRIBE
+            action() == ALLOW
+          }
+          with(get(2)) {
+            operation() == SUBSCRIBE
+            action() == DENY
+            clientCondition() == MqttUserCondition.MATCH_ANY
+            topicCondition().topics().get(0) == ValueMatcher.ANY
           }
         }
   }

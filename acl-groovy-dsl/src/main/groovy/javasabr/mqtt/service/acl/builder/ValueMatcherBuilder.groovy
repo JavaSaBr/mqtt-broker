@@ -22,8 +22,4 @@ interface ValueMatcherBuilder {
   default ValueMatcher<String> match(String string) {
     new TopicFilterMatcher(TopicFilter.valueOf(string));
   }
-
-  default ValueMatcher<String> anyone() {
-    ValueMatcher.ANY
-  }
 }

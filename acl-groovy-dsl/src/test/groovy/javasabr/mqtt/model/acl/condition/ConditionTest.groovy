@@ -1,13 +1,14 @@
 package javasabr.mqtt.model.acl.condition
 
-import javasabr.mqtt.model.MqttUser
+
 import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.service.acl.ValueMatchersAware
 import javasabr.mqtt.test.support.UnitSpecification
+import javasabr.rlib.collections.array.Array
 
 class ConditionTest extends UnitSpecification implements ValueMatchersAware {
 
-  def "should test condition"(MqttUserCondition condition, MqttUser mqttUser, boolean expectedResult) {
+  def "should test condition"(MqttUserCondition condition, Object mqttUser, boolean expectedResult) {
     when:
         boolean result = condition.test(mqttUser)
     then:
@@ -23,24 +24,8 @@ class ConditionTest extends UnitSpecification implements ValueMatchersAware {
         new TestMqttUser("username", null, null)  | clientIdEquals("username1")                     | false
         new TestMqttUser(null, null, "username")  | ipAddressEquals("username1")                    | false
         new TestMqttUser(null, null, null)        | new AnyCondition()                              | true
-//        new CallId(null, null, null, null, "topic")    | new TopicCondition(new EqualsMatcher("topic"))  | true
-//        new CallId(null, null, null, null, "topic")    | new TopicCondition(new EqualsMatcher("topic1")) | false
-  }
-
-  def "should test any condition"() {
-    given:
-        def cond = new AnyCondition()
-    when:
-        boolean stringTestResult = cond.test("any_value")
-    then:
-        stringTestResult
-    when:
-        def mqttUserTestResult = cond.test(new TestMqttUser("any_id"))
-    then:
-        mqttUserTestResult
-    when:
-        def identityValue = cond.getIdentityValue(new TestMqttUser("id"))
-    then:
-        identityValue.isEmpty()
+        "topic"                                   | topicCondition("topic")                         | true
+        "topic"                                   | topicCondition("topic1")                        | false
+        "topic"                                   | new TopicCondition(Array.of())                  | false
   }
 }
