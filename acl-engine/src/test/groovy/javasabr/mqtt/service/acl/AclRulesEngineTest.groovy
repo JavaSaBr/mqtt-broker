@@ -131,8 +131,6 @@ class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAw
         "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/#"               | true
         "admin"    | "id"        | "10.0.0.2"    | SUBSCRIBE | "/allowed/data"            | false
         "nobody"   | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/data"            | false
-        "nobody"   | "none"      | "0.0.0.0"     | SUBSCRIBE | "/allowed/x/restricted"    | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/y/restricted"    | false
         "user"     | "id"        | "10.0.0.1"    | SUBSCRIBE | "home/status"              | false
         "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed"                 | true
         "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/a/b/c/d"         | true

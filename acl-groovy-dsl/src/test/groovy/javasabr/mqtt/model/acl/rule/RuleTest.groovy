@@ -20,14 +20,16 @@ class RuleTest extends UnitSpecification implements ConditionMatcherAware {
     then:
         result == expectedResult
     where:
-        operation | rule                                                          | expectedResult
-        PUBLISH   | new AllowPublishRule(clientIdEquals("clientId"), MATCH_ANY)   | true
-        SUBSCRIBE | new AllowPublishRule(clientIdEquals("clientId"), MATCH_ANY)   | false
-        PUBLISH   | new AllowSubscribeRule(clientIdEquals("clientId"), MATCH_ANY) | false
-        SUBSCRIBE | new AllowSubscribeRule(clientIdEquals("clientId"), MATCH_ANY) | true
-        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), MATCH_ANY)    | true
-        SUBSCRIBE | new DenyPublishRule(clientIdEquals("clientId"), MATCH_ANY)    | false
-        PUBLISH   | new DenySubscribeRule(clientIdEquals("clientId"), MATCH_ANY)  | false
-        SUBSCRIBE | new DenySubscribeRule(clientIdEquals("clientId"), MATCH_ANY)  | true
+        operation | rule                                                                            | expectedResult
+        PUBLISH   | new AllowPublishRule(clientIdEquals("clientId"), MATCH_ANY)                     | true
+        SUBSCRIBE | new AllowPublishRule(clientIdEquals("clientId"), MATCH_ANY)                     | false
+        PUBLISH   | new AllowSubscribeRule(clientIdEquals("clientId"), MATCH_ANY)                   | false
+        SUBSCRIBE | new AllowSubscribeRule(clientIdEquals("clientId"), MATCH_ANY)                   | true
+        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), MATCH_ANY)                      | true
+        SUBSCRIBE | new DenyPublishRule(clientIdEquals("clientId"), MATCH_ANY)                      | false
+        PUBLISH   | new DenySubscribeRule(clientIdEquals("clientId"), MATCH_ANY)                    | false
+        SUBSCRIBE | new DenySubscribeRule(clientIdEquals("clientId"), MATCH_ANY)                    | true
+        PUBLISH   | new AllowPublishRule(clientIdEquals("clientId"), topicCondition("other/topic")) | false
+        PUBLISH   | new AllowPublishRule(clientIdEquals("otherClientId"), MATCH_ANY)                | false
   }
 }

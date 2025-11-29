@@ -6,7 +6,7 @@ import javasabr.mqtt.test.support.UnitSpecification
 
 import java.util.regex.Pattern
 
-class TopicFilterMatcherTest extends UnitSpecification {
+class MatcherTest extends UnitSpecification {
 
   def "should match topic filter"(String topicFilter, String incomingValue, boolean expectedResult) {
     given:
@@ -57,6 +57,8 @@ class TopicFilterMatcherTest extends UnitSpecification {
         "/"                                    | "/"                      | true
         "/"                                    | "+"                      | false
         "/"                                    | "+/+"                    | true
+        "a/b/c"                                | "a/#/b"                  | false
+        "a/b"                                  | "aa/b"                   | false
   }
 
   def "should match topic filter"(String pattern, String incomingValue, boolean expectedResult) {
