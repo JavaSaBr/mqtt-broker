@@ -3,14 +3,13 @@ package javasabr.mqtt.network;
 import java.util.concurrent.CompletableFuture;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.subscription.SubscriptionOwner;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-public interface MqttClient extends SubscriptionOwner, MqttUser {
+public interface MqttClient extends MqttUser {
 
   interface UnsafeMqttClient extends MqttClient {
 
@@ -18,17 +17,16 @@ public interface MqttClient extends SubscriptionOwner, MqttUser {
 
     void clientId(String clientId);
 
-    void session(@Nullable MqttSession session);
+    void session(@Nullable MqttNetworkSession session);
 
     void reject(ConnectAckMqtt311OutMessage connectAsk);
 
     Mono<?> release();
   }
 
-  String clientId();
-
-  @Nullable
-  MqttSession session();
+  @Nullable 
+  @Override
+  MqttNetworkSession session();
 
   MqttClientConnectionConfig connectionConfig();
 

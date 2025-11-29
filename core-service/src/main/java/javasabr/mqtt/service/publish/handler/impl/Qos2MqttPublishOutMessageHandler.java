@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.handler.impl;
 import static javasabr.mqtt.model.reason.code.PublishReleaseReasonCode.SUCCESS;
 
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage;
 import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage;
@@ -24,7 +24,7 @@ public class Qos2MqttPublishOutMessageHandler extends PersistedMqttPublishOutMes
   }
 
   @Override
-  protected boolean handleReceivedResponse(MqttClient client, TrackableMessage response) {
+  protected boolean handleReceivedResponse(MqttClient client, TrackableMqttMessage response) {
     if (response instanceof PublishReceivedMqttInMessage) {
       client.send(messageOutFactoryService
           .resolveFactory(client)

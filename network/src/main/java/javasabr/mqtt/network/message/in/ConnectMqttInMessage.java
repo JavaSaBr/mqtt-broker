@@ -226,8 +226,13 @@ public class ConnectMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT;
   }
 
   @Override

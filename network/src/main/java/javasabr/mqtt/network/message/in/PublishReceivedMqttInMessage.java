@@ -3,15 +3,15 @@ package javasabr.mqtt.network.message.in;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 
 /**
  * Publish received (QoS 2 delivery part 1).
  */
 public class PublishReceivedMqttInMessage extends PublishControlMqttInMessage<PublishReceivedReasonCode>
-    implements TrackableMessage {
+    implements TrackableMqttMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RECEIVED.ordinal();
 
@@ -41,15 +41,15 @@ public class PublishReceivedMqttInMessage extends PublishControlMqttInMessage<Pu
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.PUBLISH_RECEIVED.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_RECEIVED;
   }
-
+  
   @Override
   protected PublishReceivedReasonCode defaultReasonCode() {
     return PublishReceivedReasonCode.SUCCESS;

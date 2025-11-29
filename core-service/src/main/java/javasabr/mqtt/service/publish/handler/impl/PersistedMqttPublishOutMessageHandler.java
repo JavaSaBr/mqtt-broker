@@ -1,12 +1,12 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
-import javasabr.mqtt.network.session.MqttSession;
-import javasabr.mqtt.network.session.MqttSession.PendingMessageHandler;
+import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.session.MqttNetworkSession.PendingMessageHandler;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -26,7 +26,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     super(ExternalMqttClient.class, subscriptionService, messageOutFactoryService);
     this.pendingMessageHandler = new PendingMessageHandler() {
       @Override
-      public boolean handleResponse(MqttClient client, TrackableMessage response) {
+      public boolean handleResponse(MqttClient client, TrackableMqttMessage response) {
         return handleReceivedResponse(client, response);
       }
       @Override
@@ -39,13 +39,13 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
   @Nullable
   @Override
   protected Publish reconstruct(MqttClient client, Publish original) {
-    MqttSession session = client.session();
+    MqttNetworkSession session = client.session();
     if (session == null) {
       return null;
     }
     return original.with(
         // generate new uniq packet id per client
-        session.nextMessageId(),
+        session.generateMessageId(),
         qos(),
         false,
         MqttProperties.TOPIC_ALIAS_NOT_SET);
@@ -54,7 +54,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
   @Override
   protected PublishHandlingResult handleImpl(Publish publish, ExternalMqttClient client) {
 
-    MqttSession session = client.session();
+    MqttNetworkSession session = client.session();
     if (session == null) {
       return PublishHandlingResult.SKIPPED;
     }
@@ -67,7 +67,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected boolean handleReceivedResponse(MqttClient client, TrackableMessage response) {
+  protected boolean handleReceivedResponse(MqttClient client, TrackableMqttMessage response) {
     return false;
   }
 

@@ -8,7 +8,7 @@ import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -25,7 +25,7 @@ public abstract class TrackableMqttPublishInMessageHandler<C extends MqttClient>
   }
 
   @Override
-  protected boolean validateImpl(C client, MqttSession session, Publish publish) {
+  protected boolean validateImpl(C client, MqttNetworkSession session, Publish publish) {
     int messagedId = publish.messageId();
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
       handleMissedMessageId(client);
@@ -35,7 +35,7 @@ public abstract class TrackableMqttPublishInMessageHandler<C extends MqttClient>
   }
 
   @Override
-  protected void handleImpl(C client, MqttSession session, Publish publish) {
+  protected void handleImpl(C client, MqttNetworkSession session, Publish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
     super.handleImpl(client, session, publish);

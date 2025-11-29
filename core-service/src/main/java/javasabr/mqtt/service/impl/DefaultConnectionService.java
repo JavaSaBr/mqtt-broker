@@ -73,7 +73,7 @@ public class DefaultConnectionService implements ConnectionService {
         "[%s] Received from client valid message:[%s] %s"::formatted);
 
     try {
-      MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageType()];
+      MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageTypeId()];
       //noinspection DataFlowIssue
       messageHandler.processValidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
@@ -97,7 +97,7 @@ public class DefaultConnectionService implements ConnectionService {
         "[%s] Received from client invalid message:[%s] %s"::formatted);
 
     try {
-      MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageType()];
+      MqttInMessageHandler messageHandler = inMessageHandlers[mqttInMessage.messageTypeId()];
       //noinspection DataFlowIssue
       messageHandler.processInvalidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {

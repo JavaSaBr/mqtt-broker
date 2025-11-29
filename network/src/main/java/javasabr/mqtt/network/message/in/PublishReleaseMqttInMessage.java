@@ -3,15 +3,15 @@ package javasabr.mqtt.network.message.in;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.TrackableMessage;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 
 /**
  * Publish release (QoS 2 delivery part 2).
  */
 public class PublishReleaseMqttInMessage extends PublishControlMqttInMessage<PublishReleaseReasonCode>
-    implements TrackableMessage {
+    implements TrackableMqttMessage {
 
   public static final byte MESSAGE_FLAGS = 0b0000_0010;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASE.ordinal();
@@ -42,15 +42,15 @@ public class PublishReleaseMqttInMessage extends PublishControlMqttInMessage<Pub
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.PUBLISH_RELEASE.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_RELEASE;
   }
-
+  
   @Override
   protected boolean validMessageFlags(byte messageFlags) {
     return messageFlags == MESSAGE_FLAGS;

@@ -70,13 +70,13 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  public String name() {
-    return MqttMessageType.SUBSCRIBE.name();
+  public MqttMessageType messageType() {
+    return MqttMessageType.SUBSCRIBE;
   }
 
   @Override

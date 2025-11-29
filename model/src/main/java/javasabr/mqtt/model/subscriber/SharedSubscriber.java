@@ -2,7 +2,7 @@ package javasabr.mqtt.model.subscriber;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import javasabr.mqtt.model.subscription.SubscriptionOwner;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -41,13 +41,13 @@ public final class SharedSubscriber implements Subscriber {
         .inWriteLock(subscriber, Collection::add);
   }
 
-  public boolean removeSubscriberWithOwner(SubscriptionOwner owner) {
+  public boolean removeSubscriberWithUser(MqttUser user) {
     if (subscribers.isEmpty()) {
       return false;
     }
     long stamp = subscribers.writeLock();
     try {
-      int index = subscribers.indexOf(SingleSubscriber::owner, owner);
+      int index = subscribers.indexOf(SingleSubscriber::user, user);
       if (index >= 0) {
         subscribers.remove(index);
         return true;

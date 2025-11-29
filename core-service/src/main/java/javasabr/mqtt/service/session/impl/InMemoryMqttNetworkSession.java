@@ -3,14 +3,14 @@ package javasabr.mqtt.service.session.impl;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.network.MqttClient;
-import javasabr.mqtt.network.session.MqttSession.UnsafeMqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession.UnsafeMqttNetworkSession;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(of = "clientId")
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InMemoryMqttSession implements UnsafeMqttSession {
+public class InMemoryMqttNetworkSession implements UnsafeMqttNetworkSession {
 
   private record PendingPublish(Publish publish, PendingMessageHandler handler) {}
 
@@ -43,7 +43,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
 
   private static void updatePendingPacket(
       MqttClient client,
-      TrackableMessage response,
+      TrackableMqttMessage response,
       LockableArray<PendingPublish> pendingPublishes,
       String clientId) {
 
@@ -93,7 +93,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   @Setter
   volatile long expirationTime = -1;
 
-  public InMemoryMqttSession(String clientId) {
+  public InMemoryMqttNetworkSession(String clientId) {
     this.clientId = clientId;
     this.pendingOutPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.messageIdGenerator = new AtomicInteger(0);
@@ -106,13 +106,13 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public int nextMessageId() {
+  public int generateMessageId() {
 
     int nextId = messageIdGenerator.incrementAndGet();
 
     if (nextId >= MqttProperties.MAXIMUM_PACKET_ID) {
       messageIdGenerator.compareAndSet(nextId, 0);
-      return nextMessageId();
+      return generateMessageId();
     }
 
     return nextId;
@@ -160,7 +160,7 @@ public class InMemoryMqttSession implements UnsafeMqttSession {
   }
 
   @Override
-  public void updateOutPendingPacket(MqttClient client, TrackableMessage response) {
+  public void updateOutPendingPacket(MqttClient client, TrackableMqttMessage response) {
     updatePendingPacket(client, response, pendingOutPublishes, clientId);
   }
 

@@ -8,7 +8,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -44,7 +44,7 @@ public class UnsubscribeMqttInMessageHandler
   protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       UnsubscribeMqttInMessage unsubscribeMessage) {
 
     int messageId = unsubscribeMessage.messageId();

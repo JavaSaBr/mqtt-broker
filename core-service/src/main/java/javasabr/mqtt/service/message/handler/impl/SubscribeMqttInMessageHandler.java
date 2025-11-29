@@ -18,7 +18,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalMqttClient;
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttSession;
+import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -59,7 +59,7 @@ public class SubscribeMqttInMessageHandler extends
   protected void processValidMessage(
       MqttConnection connection,
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       SubscribeMqttInMessage subscribeMessage) {
 
     MqttClientConnectionConfig connectionConfig = client.connectionConfig();
@@ -145,7 +145,7 @@ public class SubscribeMqttInMessageHandler extends
 
   private void handleSubscriptionIdNotSupported(
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       SubscribeMqttInMessage subscribeMessage) {
     Array<SubscribeAckReasonCode> subscribeResults = Array.repeated(
         SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
@@ -162,7 +162,7 @@ public class SubscribeMqttInMessageHandler extends
 
   private void sendSubscribeResults(
       ExternalMqttClient client,
-      MqttSession session,
+      MqttNetworkSession session,
       SubscribeMqttInMessage subscribeMessage,
       Array<SubscribeAckReasonCode> subscribeResults) {
     int messageId = subscribeMessage.messageId();

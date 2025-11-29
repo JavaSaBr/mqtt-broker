@@ -66,8 +66,13 @@ public class AuthenticationMqtt5OutMessage extends MqttOutMessage {
   Array<StringPair> userProperties;
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.AUTHENTICATION;
   }
 
   @Override
