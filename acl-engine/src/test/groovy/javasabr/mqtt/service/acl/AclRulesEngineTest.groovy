@@ -17,7 +17,7 @@ import javasabr.rlib.collections.array.MutableArray
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
-class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware {
+class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAware {
 
   def "should allow or deny according rules"(
       String username, String clientId, String ipAddress, Operation operation, String topic) {

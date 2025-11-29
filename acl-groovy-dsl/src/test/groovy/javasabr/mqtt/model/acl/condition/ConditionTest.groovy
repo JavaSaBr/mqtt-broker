@@ -2,11 +2,11 @@ package javasabr.mqtt.model.acl.condition
 
 
 import javasabr.mqtt.model.subscription.TestMqttUser
-import javasabr.mqtt.service.acl.ValueMatchersAware
+import javasabr.mqtt.service.acl.ConditionMatcherAware
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
-class ConditionTest extends UnitSpecification implements ValueMatchersAware {
+class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
 
   def "should test condition"(MqttUserCondition condition, Object mqttUser, boolean expectedResult) {
     when:

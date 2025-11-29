@@ -13,6 +13,7 @@ abstract class SubscribeRuleBuilder extends RuleBuilder {
   SubscribeRuleBuilder(Action permission) { super(permission, Operation.SUBSCRIBE) }
 
   SubscribeRuleBuilder topicFilter(ValueMatcher<String>... topicFilter) {
-    this.topicFilters.addAll(topicFilter); this
+    this.topicFilters.addAll(topicFilter)
+    return this
   }
 }

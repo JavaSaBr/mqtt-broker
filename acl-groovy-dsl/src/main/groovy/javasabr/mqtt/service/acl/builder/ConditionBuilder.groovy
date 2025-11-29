@@ -12,28 +12,21 @@ import javasabr.rlib.collections.array.MutableArray
 abstract class ConditionBuilder implements ValueMatcherBuilder {
 
   protected MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
-  protected MutableArray<MqttUserCondition> userNames = ArrayFactory.mutableArray(MqttUserCondition)
-  protected MutableArray<MqttUserCondition> clientIds = ArrayFactory.mutableArray(MqttUserCondition)
-  protected MutableArray<MqttUserCondition> ipAddresses = ArrayFactory.mutableArray(MqttUserCondition)
-
 
   ConditionBuilder userName(ValueMatcher<String>... username) {
     def collect = username.collect { new UserNameCondition(it) }
-    this.userNames.addAll(collect)
     this.conditions.addAll(collect)
     return this
   }
 
   ConditionBuilder clientId(ValueMatcher<String>... clientId) {
     def collect = clientId.collect { new ClientIdCondition(it) }
-    this.clientIds.addAll(collect)
     this.conditions.addAll(collect)
     return this
   }
 
   ConditionBuilder ipAddress(ValueMatcher<String>... ipAddress) {
     def collect = ipAddress.collect { new IpAddressCondition(it) }
-    this.clientIds.addAll(collect)
     this.conditions.addAll(collect)
     this
   }
