@@ -6,9 +6,9 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -19,13 +19,13 @@ import lombok.experimental.FieldDefaults;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessageHandler<ExternalMqttClient> {
+public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessageHandler<ExternalNetworkMqttUser> {
 
   public Qos1MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, subscriptionService, publishDeliveringService, messageOutFactoryService);
+    super(ExternalNetworkMqttUser.class, subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Override
@@ -34,8 +34,8 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected boolean validateImpl(ExternalMqttClient client, MqttNetworkSession session, Publish publish) {
-    if (!super.validateImpl(client, session, publish)) {
+  protected boolean validateImpl(ExternalNetworkMqttUser user, MqttNetworkSession session, Publish publish) {
+    if (!super.validateImpl(user, session, publish)) {
       return false;
     }
     int messagedId = publish.messageId();
@@ -46,7 +46,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
       if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
         return false;
       }
-      handleMessageIdIsInUse(client, messagedId);
+      handleMessageIdIsInUse(user, messagedId);
       return false;
     }
     return true;
@@ -54,48 +54,48 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
 
   @Override
   protected void handleNoMatchedSubscribers(
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       Publish publish) {
-    super.handleNoMatchedSubscribers(client, session, publish);
+    super.handleNoMatchedSubscribers(user, session, publish);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS);
-    sendFeedback(client, session, response, messageId);
+    sendFeedback(user, session, response, messageId);
   }
 
   @Override
   protected void handleSuccess(
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       Publish publish,
       int matchedSubscribers) {
-    super.handleSuccess(client, session, publish, matchedSubscribers);
+    super.handleSuccess(user, session, publish, matchedSubscribers);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.SUCCESS);
-    sendFeedback(client, session, response, messageId);
+    sendFeedback(user, session, response, messageId);
   }
 
   @Override
   protected void handleError(
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       Publish publish,
       PublishHandlingResult handlingResult) {
-    super.handleError(client, session, publish, handlingResult);
+    super.handleError(user, session, publish, handlingResult);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newPublishAck(publish.messageId(), handlingResult.ackReasonCode());
-    sendFeedback(client, session, response, messageId);
+    sendFeedback(user, session, response, messageId);
   }
 
-  private void handleMessageIdIsInUse(ExternalMqttClient client, int messageId) {
-    client.send(messageOutFactoryService
-        .resolveFactory(client)
+  private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
+    user.send(messageOutFactoryService
+        .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
   }
 }

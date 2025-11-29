@@ -11,7 +11,7 @@ import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage
 import javasabr.mqtt.network.util.ExtraErrorReasons
 import javasabr.mqtt.service.IntegrationServiceSpecification
-import javasabr.mqtt.service.TestExternalMqttClient
+import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
 import javasabr.rlib.common.util.ThreadUtils
@@ -32,13 +32,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultSubscriptionService,
             defaultMessageOutFactoryService,
             defaultTopicService)
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        mqttClient.session(null)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.session(null)
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
         disconnectReason.reason() == ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED
         disconnectReason.serverReference() == null
@@ -52,8 +52,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        def session = mqttClient.session()
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        def session = mqttUser.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
     when:
@@ -66,7 +66,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
         reasonCodes.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
@@ -84,7 +84,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -96,7 +96,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
         reasonCodes.get(0) == SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED
@@ -114,7 +114,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -126,7 +126,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
         reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
@@ -144,7 +144,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -155,13 +155,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
         reasonCodes.get(0) == SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
         reasonCodes.get(1) == SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
         subscribeAck.messageId() == expectedMessageId
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
         disconnectReason.reason() == null
         disconnectReason.serverReference() == null
@@ -177,7 +177,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -188,13 +188,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 2
         reasonCodes.get(0) == SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
         reasonCodes.get(1) == SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
         subscribeAck.messageId() == expectedMessageId
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED
         disconnectReason.reason() == null
         disconnectReason.serverReference() == null
@@ -207,12 +207,12 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultSubscriptionService,
             defaultMessageOutFactoryService,
             defaultTopicService)
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(0 as byte)
         messageHandler.processInvalidMessage(mqttConnection, subscribeMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
         disconnectReason.reason() == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.SUBSCRIBE]"
         disconnectReason.serverReference() == null
@@ -226,7 +226,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -235,7 +235,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 1
         reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
@@ -249,7 +249,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
-        def subscribeAck2 = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck2 = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes2 = subscribeAck2.reasonCodes()
         reasonCodes2.size() == 1
         reasonCodes2.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
@@ -264,8 +264,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        mqttClient.returnCompletedFeatures(false)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
           this.messageId = expectedMessageId
@@ -274,7 +274,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
-        def subscribeAck = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
         reasonCodes.size() == 1
         reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_2
@@ -288,7 +288,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
         messageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
-        def subscribeAck2 = mqttClient.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def subscribeAck2 = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes2 = subscribeAck2.reasonCodes()
         reasonCodes2.size() == 1
         reasonCodes2.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE

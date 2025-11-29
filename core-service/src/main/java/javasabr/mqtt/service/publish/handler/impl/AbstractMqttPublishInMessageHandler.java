@@ -2,11 +2,12 @@ package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.MessageTacker;
+import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -21,108 +22,108 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class AbstractMqttPublishInMessageHandler<C extends MqttClient>
+public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttUser>
     implements MqttPublishInMessageHandler {
 
-  Class<C> expectedClientType;
+  Class<U> expectedUserType;
   SubscriptionService subscriptionService;
   PublishDeliveringService publishDeliveringService;
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public void handle(MqttClient client, Publish publish) {
-    if (!expectedClientType.isInstance(client)) {
-      log.warning(client.clientId(), client.getClass(),
+  public void handle(NetworkMqttUser user, Publish publish) {
+    if (!expectedUserType.isInstance(user)) {
+      log.warning(
+          user.clientId(), user.getClass(),
           "[%s] Not expected client of type:[%s]"::formatted);
       return;
     }
-    C expectedClient = expectedClientType.cast(client);
-    MqttNetworkSession session = expectedClient.session();
+    U expectedUser = expectedUserType.cast(user);
+    MqttNetworkSession session = expectedUser.session();
     if (session == null) {
-      log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
+      log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
       return;
     }
-    if (validateImpl(expectedClient, session, publish)) {
-      handleImpl(expectedClient, session, publish);
+    if (validateImpl(expectedUser, session, publish)) {
+      handleImpl(expectedUser, session, publish);
     }
   }
 
-  protected boolean validateImpl(C client, MqttNetworkSession session, Publish publish) {
+  protected boolean validateImpl(U user, MqttNetworkSession session, Publish publish) {
     return true;
   }
 
-  protected void handleImpl(C client, MqttNetworkSession session, Publish publish) {
+  protected void handleImpl(U user, MqttNetworkSession session, Publish publish) {
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
-      log.debug(client.clientId(), publish, "[%s] Not found any subscriber for publish: [%s]"::formatted);
-      handleNoMatchedSubscribers(client, session, publish);
+      log.debug(user.clientId(), publish, "[%s] Not found any subscriber for publish: [%s]"::formatted);
+      handleNoMatchedSubscribers(user, session, publish);
       return;
     }
 
     int count = 0;
     for (SingleSubscriber subscriber : subscribers) {
-      PublishHandlingResult checkResult = checkSubscriber(client, publish, subscriber);
+      PublishHandlingResult checkResult = checkSubscriber(user, publish, subscriber);
       if (checkResult.error()) {
-        log.debug(client.clientId(), checkResult, subscriber,
+        log.debug(user.clientId(), checkResult, subscriber,
             "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
-        handleError(client, session, publish, checkResult);
+        handleError(user, session, publish, checkResult);
         return;
       } else if(checkResult == PublishHandlingResult.SUCCESS) {
         count++;
       }
     }
 
-    log.debug(client.clientId(), count,
+    log.debug(user.clientId(), count,
         "[%s] Started delivering publish to [%s] subscribers"::formatted);
-    handleSuccess(client, session, publish, count);
+    handleSuccess(user, session, publish, count);
 
     for (SingleSubscriber subscriber : subscribers) {
-      startDelivering(client, session, publish, subscriber);
+      startDelivering(user, session, publish, subscriber);
     }
   }
 
-  protected void handleNoMatchedSubscribers(C client, MqttNetworkSession session, Publish publish) {}
+  protected void handleNoMatchedSubscribers(U user, MqttNetworkSession session, Publish publish) {}
 
   protected void handleSuccess(
-      C client,
+      U user,
       MqttNetworkSession session,
       Publish publish,
       int matchedSubscribers) {}
 
   protected void handleError(
-      C client,
+      U user,
       MqttNetworkSession session,
       Publish publish,
       PublishHandlingResult handlingResult) {}
 
   protected PublishHandlingResult checkSubscriber(
-      C client,
+      U user,
       Publish publish,
       SingleSubscriber subscriber) {
     return PublishHandlingResult.SUCCESS;
   }
 
   protected PublishHandlingResult startDelivering(
-      C client,
+      U user,
       MqttNetworkSession session,
       Publish publish,
       SingleSubscriber subscriber) {
     return publishDeliveringService.startDelivering(publish, subscriber);
   }
 
-  protected void sendFeedback(C client, MqttOutMessage response) {
-    client.send(response);
+  protected void sendFeedback(U user, MqttOutMessage response) {
+    user.send(response);
   }
 
   protected void sendFeedback(
-      C client,
-      MqttNetworkSession session,
+      U user,
+      MqttSession session,
       MqttOutMessage response,
       int messageId) {
     MessageTacker messageTacker = session.inMessageTracker();
-    client
-        .sendWithFeedback(response)
+    user.sendWithFeedback(response)
         .thenAccept(_ -> messageTacker.remove(messageId));
   }
 }

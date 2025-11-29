@@ -5,10 +5,10 @@ import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -21,7 +21,7 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UnsubscribeMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalMqttClient, UnsubscribeMqttInMessage> {
+    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, UnsubscribeMqttInMessage> {
 
   SubscriptionService subscriptionService;
   TopicService topicService;
@@ -30,7 +30,7 @@ public class UnsubscribeMqttInMessageHandler
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    super(ExternalMqttClient.class, UnsubscribeMqttInMessage.class, messageOutFactoryService);
+    super(ExternalNetworkMqttUser.class, UnsubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
     this.topicService = topicService;
   }
@@ -43,15 +43,15 @@ public class UnsubscribeMqttInMessageHandler
   @Override
   protected void processValidMessage(
       MqttConnection connection,
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       UnsubscribeMqttInMessage unsubscribeMessage) {
 
     int messageId = unsubscribeMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
     if (messageTacker.stored(messageId) != null) {
-      log.warning(client.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
-      handleMessageIdIsInUse(client, unsubscribeMessage);
+      log.warning(user.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
+      handleMessageIdIsInUse(user, unsubscribeMessage);
       return;
     }
 
@@ -60,30 +60,31 @@ public class UnsubscribeMqttInMessageHandler
     Array<TopicFilter> topicFilters = unsubscribeMessage
         .rawTopicFilters()
         .stream()
-        .map(rawTopicFilter -> topicService.createTopicFilter(client, rawTopicFilter))
+        .map(rawTopicFilter -> topicService.createTopicFilter(user, rawTopicFilter))
         .collect(ArrayCollectors.toArray(TopicFilter.class));
 
     Array<UnsubscribeAckReasonCode> unsubscribeResults = subscriptionService
-        .unsubscribe(client, session, topicFilters);
+        .unsubscribe(user, session, topicFilters);
 
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newUnsubscribeAck(unsubscribeMessage.messageId(), unsubscribeResults);
 
-    client.sendWithFeedback(response)
+    user
+        .sendWithFeedback(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
   }
 
   private void handleMessageIdIsInUse(
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       UnsubscribeMqttInMessage unsubscribeMessage) {
     Array<UnsubscribeAckReasonCode> unsubscribeResults = Array.repeated(
         UnsubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE,
         unsubscribeMessage.topicFiltersCount());
-    client.send(messageOutFactoryService
-        .resolveFactory(client)
+    user.send(messageOutFactoryService
+        .resolveFactory(user)
         .newUnsubscribeAck(unsubscribeMessage.messageId(), unsubscribeResults));
   }
 }

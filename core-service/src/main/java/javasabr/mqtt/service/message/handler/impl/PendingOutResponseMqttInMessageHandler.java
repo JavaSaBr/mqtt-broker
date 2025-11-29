@@ -2,26 +2,26 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.MqttInMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 
 public abstract class PendingOutResponseMqttInMessageHandler<P extends MqttInMessage & TrackableMqttMessage>
-    extends AbstractMqttInMessageHandler<ExternalMqttClient, P> {
+    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, P> {
 
   protected PendingOutResponseMqttInMessageHandler(
       Class<P> expectedNetworkPacket,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalMqttClient.class, expectedNetworkPacket, messageOutFactoryService);
+    super(ExternalNetworkMqttUser.class, expectedNetworkPacket, messageOutFactoryService);
   }
 
   @Override
   protected void processValidMessage(
       MqttConnection connection,
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       P message) {
-    session.updateOutPendingPacket(client, message);
+    session.updateOutPendingPacket(user, message);
   }
 }

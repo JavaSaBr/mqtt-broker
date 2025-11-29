@@ -1,9 +1,9 @@
 package javasabr.mqtt.service;
 
 import javasabr.mqtt.model.publishing.Publish;
-import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 
 public interface PublishReceivingService {
 
-  void processPublish(MqttClient client, Publish publish);
+  void processPublish(NetworkMqttUser user, Publish publish);
 }

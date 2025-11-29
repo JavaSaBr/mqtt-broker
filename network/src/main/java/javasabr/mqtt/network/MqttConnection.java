@@ -4,9 +4,11 @@ import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.message.MqttMessageReader;
 import javasabr.mqtt.network.message.MqttMessageWriter;
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
+import javasabr.mqtt.network.user.NetworkMqttUser;
+import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.impl.AbstractConnection;
@@ -29,7 +31,7 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   @Getter(AccessLevel.PROTECTED)
   final NetworkPacketWriter packetWriter;
 
-  final UnsafeMqttClient client;
+  final ConfigurableNetworkMqttUser user;
   @Getter
   final MqttServerConnectionConfig serverConnectionConfig;
 
@@ -42,12 +44,12 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       BufferAllocator bufferAllocator,
       int maxPacketsByRead,
       MqttServerConnectionConfig serverConnectionConfig,
-      MqttClientFactory clientFactory) {
+      NetworkMqttUserFactory mqttUserFactory) {
     super(network, channel, bufferAllocator, maxPacketsByRead);
     this.serverConnectionConfig = serverConnectionConfig;
     this.packetReader = createPacketReader();
     this.packetWriter = createPacketWriter();
-    this.client = clientFactory.newClient(this);
+    this.user = mqttUserFactory.createNetworkUser(this);
   }
 
   public boolean isSupported(MqttVersion mqttVersion) {
@@ -75,8 +77,8 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return config;
   }
 
-  public MqttClient client() {
-    return client;
+  public NetworkMqttUser user() {
+    return user;
   }
 
   private NetworkPacketReader createPacketReader() {
@@ -104,7 +106,7 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
 
   @Override
   protected void doClose() {
-    client.release().subscribe();
+    user.release().subscribe();
     super.doClose();
   }
 }

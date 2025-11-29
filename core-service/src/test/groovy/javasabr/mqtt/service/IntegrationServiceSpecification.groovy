@@ -7,7 +7,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.MqttConnection
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler
+import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
@@ -121,10 +121,10 @@ abstract class IntegrationServiceSpecification extends Specification {
         { MqttConnection ownedConnection ->
           def generatedClientId = "mockedClient_${clientIdGenerator.incrementAndGet()}"
           def createdSession = defaultMqttSessionService.create(generatedClientId).block()
-          def client = new TestExternalMqttClient(ownedConnection, Mock(MqttClientReleaseHandler))
-          client.session(createdSession)
-          client.clientId(generatedClientId)
-          return client
+          def user = new TestExternalNetworkMqttUser(ownedConnection, Mock(NetworkMqttUserReleaseHandler))
+          user.session(createdSession)
+          user.clientId(generatedClientId)
+          return user
         })
 
     connection.configure(new MqttClientConnectionConfig(
