@@ -2,7 +2,6 @@ package javasabr.mqtt.model.acl.rule;
 
 import static javasabr.mqtt.model.acl.Action.DENY;
 import static javasabr.mqtt.model.acl.Operation.PUBLISH;
-import static javasabr.mqtt.model.acl.condition.TopicCondition.MATCH_ANY;
 
 import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.Operation;
@@ -10,14 +9,6 @@ import javasabr.mqtt.model.acl.condition.MqttUserCondition;
 import javasabr.mqtt.model.acl.condition.TopicCondition;
 
 public record DenyPublishRule(MqttUserCondition clientCondition, TopicCondition topicCondition) implements Rule {
-
-  public DenyPublishRule(MqttUserCondition clients) {
-    this(clients, MATCH_ANY);
-  }
-
-  public DenyPublishRule(TopicCondition topics) {
-    this(MqttUserCondition.MATCH_ANY, topics);
-  }
 
   @Override
   public Operation operation() {

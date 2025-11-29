@@ -7,6 +7,7 @@ import javasabr.mqtt.test.support.UnitSpecification
 
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
+import static javasabr.mqtt.model.acl.condition.TopicCondition.MATCH_ANY
 
 class RuleTest extends UnitSpecification implements ValueMatchersAware {
 
@@ -19,14 +20,14 @@ class RuleTest extends UnitSpecification implements ValueMatchersAware {
     then:
         result == expectedResult
     where:
-        operation | rule                                               | expectedResult
-        PUBLISH   | new AllowPublishRule(clientIdEquals("clientId"))   | true
-        SUBSCRIBE | new AllowPublishRule(clientIdEquals("clientId"))   | false
-        PUBLISH   | new AllowSubscribeRule(clientIdEquals("clientId")) | false
-        SUBSCRIBE | new AllowSubscribeRule(clientIdEquals("clientId")) | true
-        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"))    | true
-        SUBSCRIBE | new DenyPublishRule(clientIdEquals("clientId"))    | false
-        PUBLISH   | new DenySubscribeRule(clientIdEquals("clientId"))  | false
-        SUBSCRIBE | new DenySubscribeRule(clientIdEquals("clientId"))  | true
+        operation | rule                                                          | expectedResult
+        PUBLISH   | new AllowPublishRule(clientIdEquals("clientId"), MATCH_ANY)   | true
+        SUBSCRIBE | new AllowPublishRule(clientIdEquals("clientId"), MATCH_ANY)   | false
+        PUBLISH   | new AllowSubscribeRule(clientIdEquals("clientId"), MATCH_ANY) | false
+        SUBSCRIBE | new AllowSubscribeRule(clientIdEquals("clientId"), MATCH_ANY) | true
+        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), MATCH_ANY)    | true
+        SUBSCRIBE | new DenyPublishRule(clientIdEquals("clientId"), MATCH_ANY)    | false
+        PUBLISH   | new DenySubscribeRule(clientIdEquals("clientId"), MATCH_ANY)  | false
+        SUBSCRIBE | new DenySubscribeRule(clientIdEquals("clientId"), MATCH_ANY)  | true
   }
 }

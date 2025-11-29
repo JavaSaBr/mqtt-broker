@@ -3,6 +3,7 @@ package javasabr.mqtt.service.acl
 import javasabr.mqtt.model.MqttUser
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
+import javasabr.mqtt.model.acl.condition.MqttUserCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.rule.AllowPublishRule
@@ -43,18 +44,18 @@ class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware
                 new EqualsMatcher("/topic2/+/temp")
             ))
         )
-        publishRules << new AllowPublishRule(new TopicCondition(Array.of(
+        publishRules << new AllowPublishRule(MqttUserCondition.MATCH_ANY, new TopicCondition(Array.of(
             new EqualsMatcher("/topic1/#"),
             new EqualsMatcher("/topic2/+/temp")
         )))
     and:
         Array<Rule> subscribeRules = MutableArray.ofType(Rule.class)
         rulesEnumMap.put(SUBSCRIBE, subscribeRules)
-        subscribeRules << new DenySubscribeRule(new TopicCondition(Array.of(
+        subscribeRules << new DenySubscribeRule(MqttUserCondition.MATCH_ANY, new TopicCondition(Array.of(
             topicFilterMatcher("\$SYS/#"),
             topicFilterMatcher("#")
         )))
-        subscribeRules << new AllowSubscribeRule()
+        subscribeRules << new AllowSubscribeRule(MqttUserCondition.MATCH_ANY, TopicCondition.MATCH_ANY)
     and:
         AclRulesEngine engine = new AclRulesEngine(rulesEnumMap)
         MqttUser mqttUser = Mock(MqttUser)
