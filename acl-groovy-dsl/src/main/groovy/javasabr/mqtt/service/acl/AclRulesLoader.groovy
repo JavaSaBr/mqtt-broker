@@ -17,9 +17,12 @@ import static javasabr.rlib.collections.array.ArrayFactory.mutableArray
 
 class AclRulesLoader {
 
-  private final Path aclConfigPath
+  private Path aclConfigPath = null
 
   AclRulesLoader(String aclConfigPath) {
+    if (aclConfigPath == null) {
+      throw new AclConfigurationException("ACL config path is null")
+    }
     this.aclConfigPath = Path.of(aclConfigPath)
     if (Files.notExists(this.aclConfigPath)) {
       throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(this.aclConfigPath))

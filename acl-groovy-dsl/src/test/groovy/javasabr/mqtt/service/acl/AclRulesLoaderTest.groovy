@@ -5,7 +5,6 @@ import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
 import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
-import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
@@ -34,19 +33,16 @@ class AclRulesLoaderTest extends UnitSpecification {
         ruleFile.delete()
   }
 
-  def "should throw exception if config not exists"() {
-    given:
-        def notExistedPath = "not/existed/path"
+  def "should throw exception if config not exists"(String configPath, String errorMessage) {
     when:
-        new AclRulesLoader(notExistedPath)
+        new AclRulesLoader(configPath)
     then:
         def exception = thrown(AclConfigurationException)
-        exception.message == 'Class loader unable to load resource: not/existed/path'
-    when:
-        new AclRulesLoader(null)
-    then:
-        exception = thrown(NullPointerException)
-        exception.message == null
+        exception.message == errorMessage
+    where:
+        configPath         | errorMessage
+        "not/existed/path" | 'Class loader unable to load resource: not/existed/path'
+        null               | 'ACL config path is null'
   }
 
   def "should throw exception if config is invalid"(String invalidAclFileName, String errorMessage, Class<? extends Exception> exceptionClass) {
@@ -72,7 +68,7 @@ class AclRulesLoaderTest extends UnitSpecification {
   }
 
   @SuppressWarnings('GroovyAccessibility')
-  def "should parse new Groovy DSL config"() {
+  def "should parse Groovy DSL config"() {
     when:
         def absolutePath = getAbsolutePath("acl/config/acl.groovy")
         def rules = new AclRulesLoader(absolutePath).load()
@@ -82,60 +78,27 @@ class AclRulesLoaderTest extends UnitSpecification {
           with(get(0)) {
             operation() == PUBLISH
             action() == ALLOW
-            with(clientsAndTopics() as AllOfCondition) {
+            with(clientCondition() as AnyOfCondition) {
               with(conditions as Array<Condition>) {
-                with(get(0) as AnyOfCondition) {
-                  with(conditions as Array<Condition>) {
-                    with(get(0) as UserNameCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "sensor1" }
-                    }
-                    with(get(1) as UserNameCondition) {
-                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
-                    }
-                    with(get(2) as ClientIdCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "clientId1" }
-                    }
-                    with(get(3) as ClientIdCondition) {
-                      with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
-                    }
-                    with(get(4) as IpAddressCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                    }
-                    with(get(5) as IpAddressCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
-                    }
-                    with(get(6) as AllOfCondition) {
-                      with(conditions as Array<Condition>) {
-                        with(get(0) as UserNameCondition) {
-                          with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
-                        }
-                        with(get(1) as ClientIdCondition) {
-                          with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
-                        }
-                        with(get(2) as IpAddressCondition) {
-                          with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                        }
-                      }
-                    }
-                  }
+                with(get(0) as UserNameCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "sensor1" }
                 }
-                with(get(1) as TopicCondition) {
-                  with(topics as Array) {
-                    with(get(0) as EqualsMatcher) { expectedValue == "/topic1" }
-                    with(get(1) as EqualsMatcher) { expectedValue == "/topic2/temp" }
-                  }
+                with(get(1) as UserNameCondition) {
+                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
                 }
-              }
-            }
-          }
-        }
-        verifyAll(rules.get(SUBSCRIBE)) {
-          with(get(0)) {
-            operation() == SUBSCRIBE
-            action() == DENY
-            with(clientsAndTopics() as AllOfCondition) {
-              with(conditions as Array<Condition>) {
-                with(get(0) as AllOfCondition) {
+                with(get(2) as ClientIdCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "clientId1" }
+                }
+                with(get(3) as ClientIdCondition) {
+                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
+                }
+                with(get(4) as IpAddressCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                }
+                with(get(5) as IpAddressCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                }
+                with(get(6) as AllOfCondition) {
                   with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
                       with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
@@ -148,13 +111,34 @@ class AclRulesLoaderTest extends UnitSpecification {
                     }
                   }
                 }
-                with(get(1) as TopicCondition) {
-                  with(topics as Array) {
-                    with(get(0) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic1/#" }
-                    with(get(1) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic2/+/temp" }
-                  }
+              }
+            }
+            with(topicCondition().topics) {
+              with(get(0) as EqualsMatcher) { expectedValue == "/topic1" }
+              with(get(1) as EqualsMatcher) { expectedValue == "/topic2/temp" }
+            }
+          }
+        }
+        verifyAll(rules.get(SUBSCRIBE)) {
+          with(get(0)) {
+            operation() == SUBSCRIBE
+            action() == DENY
+            with(clientCondition() as AllOfCondition) {
+              with(conditions as Array<Condition>) {
+                with(get(0) as UserNameCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                }
+                with(get(1) as ClientIdCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                }
+                with(get(2) as IpAddressCondition) {
+                  with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
               }
+            }
+            with(topicCondition().topics) {
+              with(get(0) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic1/#" }
+              with(get(1) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic2/+/temp" }
             }
           }
         }

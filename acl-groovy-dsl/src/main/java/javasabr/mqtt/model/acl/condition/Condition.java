@@ -1,9 +1,8 @@
 package javasabr.mqtt.model.acl.condition;
 
-import javasabr.mqtt.model.acl.CallId;
+import org.jspecify.annotations.Nullable;
 
-public interface Condition {
+public interface Condition<T> {
 
-  boolean test(CallId callId);
-
+  boolean test(@Nullable T value);
 }

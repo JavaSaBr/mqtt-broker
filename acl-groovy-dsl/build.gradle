@@ -9,6 +9,7 @@ dependencies {
   api projects.model
   api libs.rlib.collections
 
+  testImplementation testFixtures(projects.model)
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
   testFixturesApi projects.testSupport

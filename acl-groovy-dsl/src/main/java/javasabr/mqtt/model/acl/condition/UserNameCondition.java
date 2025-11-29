@@ -1,11 +1,17 @@
 package javasabr.mqtt.model.acl.condition;
 
-import javasabr.mqtt.model.acl.CallId;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.acl.matcher.ValueMatcher;
+import org.jspecify.annotations.Nullable;
 
-public record UserNameCondition(ValueMatcher<String> clientMatcher) implements Condition {
+public record UserNameCondition(ValueMatcher<String> clientMatcher) implements MqttUserCondition {
   @Override
-  public boolean test(CallId callId) {
-    return clientMatcher.test(callId.username());
+  public @Nullable String getIdentityValue(MqttUser mqttUser) {
+    return mqttUser.userName();
+  }
+
+  @Override
+  public boolean test(String value) {
+    return clientMatcher.test(value);
   }
 }

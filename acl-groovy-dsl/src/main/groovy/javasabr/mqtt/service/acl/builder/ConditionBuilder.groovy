@@ -2,8 +2,8 @@
 package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
-import javasabr.mqtt.model.acl.condition.Condition
 import javasabr.mqtt.model.acl.condition.IpAddressCondition
+import javasabr.mqtt.model.acl.condition.MqttUserCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.rlib.collections.array.ArrayFactory
@@ -11,10 +11,10 @@ import javasabr.rlib.collections.array.MutableArray
 
 abstract class ConditionBuilder implements ValueMatcherBuilder {
 
-  protected MutableArray<Condition> conditions = ArrayFactory.mutableArray(Condition)
-  protected MutableArray<Condition> userNames = ArrayFactory.mutableArray(Condition)
-  protected MutableArray<Condition> clientIds = ArrayFactory.mutableArray(Condition)
-  protected MutableArray<Condition> ipAddresses = ArrayFactory.mutableArray(Condition)
+  protected MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
+  protected MutableArray<MqttUserCondition> userNames = ArrayFactory.mutableArray(MqttUserCondition)
+  protected MutableArray<MqttUserCondition> clientIds = ArrayFactory.mutableArray(MqttUserCondition)
+  protected MutableArray<MqttUserCondition> ipAddresses = ArrayFactory.mutableArray(MqttUserCondition)
 
 
   ConditionBuilder userName(ValueMatcher<String>... username) {
@@ -45,5 +45,5 @@ abstract class ConditionBuilder implements ValueMatcherBuilder {
     return this
   }
 
-  abstract Condition build()
+  abstract MqttUserCondition build()
 }

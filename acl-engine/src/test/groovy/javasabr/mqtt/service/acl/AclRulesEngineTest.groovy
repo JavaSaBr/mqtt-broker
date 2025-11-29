@@ -1,9 +1,7 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.CallId
+import javasabr.mqtt.model.MqttUser
 import javasabr.mqtt.model.acl.Operation
-import javasabr.mqtt.model.acl.condition.AllOfCondition
-import javasabr.mqtt.model.acl.condition.AnyCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
@@ -21,13 +19,13 @@ import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware {
 
   def "should allow or deny according rules"(
-      String username, String clientId, String ipAddress, Operation action, String topic) {
+      String username, String clientId, String ipAddress, Operation operation, String topic) {
     given:
         EnumMap<Operation, MutableArray<Rule>> rulesEnumMap = new EnumMap<>(Operation.class)
     and:
         Array<Rule> publishRules = MutableArray.ofType(Rule.class)
         rulesEnumMap.put(PUBLISH, publishRules)
-        publishRules << new AllowPublishRule(new AllOfCondition(
+        publishRules << new AllowPublishRule(
             new AnyOfCondition(
                 userNameEquals("sensor1"),
                 userNameEquals("sensor10"),
@@ -44,28 +42,32 @@ class AclRulesEngineTest extends UnitSpecification implements ValueMatchersAware
                 new EqualsMatcher("/topic1/#"),
                 new EqualsMatcher("/topic2/+/temp")
             ))
-        ))
-        publishRules << new AllowPublishRule(new AllOfCondition(new AnyCondition(), new TopicCondition(Array.of(
+        )
+        publishRules << new AllowPublishRule(new TopicCondition(Array.of(
             new EqualsMatcher("/topic1/#"),
             new EqualsMatcher("/topic2/+/temp")
-        ))))
+        )))
     and:
         Array<Rule> subscribeRules = MutableArray.ofType(Rule.class)
         rulesEnumMap.put(SUBSCRIBE, subscribeRules)
-        subscribeRules << new DenySubscribeRule(new AllOfCondition(new AnyCondition(), new TopicCondition(Array.of(
+        subscribeRules << new DenySubscribeRule(new TopicCondition(Array.of(
             topicFilterMatcher("\$SYS/#"),
             topicFilterMatcher("#")
-        ))))
-        subscribeRules << new AllowSubscribeRule(new AllOfCondition(Rule.MATCH_ANY))
+        )))
+        subscribeRules << new AllowSubscribeRule()
     and:
         AclRulesEngine engine = new AclRulesEngine(rulesEnumMap)
-        CallId callId = new CallId(username, clientId, ipAddress, action, topic)
+        MqttUser mqttUser = Mock(MqttUser)
+        mqttUser.userName() >> username
+        mqttUser.clientId() >> clientId
+        mqttUser.ipAddress() >> ipAddress
+
     when:
-        boolean result = engine.authorize(callId)
+        boolean result = engine.authorize(mqttUser, operation, topic)
     then:
         result == expectedResult
     where:
-        username   | clientId    | ipAddress   | action    | topic       | expectedResult
+        username   | clientId    | ipAddress   | operation | topic       | expectedResult
         "username" | "clientId"  | "127.0.0.1" | SUBSCRIBE | "/topic/#"  | false
         "sensor1"  | "clientId2" | "60.50.0.1" | PUBLISH   | "/topic1/#" | true
         "sensor2"  | "clientId1" | "60.50.0.1" | PUBLISH   | "/topic1/#" | true
