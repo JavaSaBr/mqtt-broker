@@ -61,6 +61,7 @@ class AclRulesLoaderTest extends UnitSpecification {
         "2.groovy"         | AclConfigurationException | 'Only one clients section allowed'
         "3.groovy"         | AclConfigurationException | 'AllOf condition can only have a single-matcher members'
         "4.groovy"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.service.acl.builder.AllOfBuilder.allOf'
+        "5.groovy"         | AclConfigurationException | 'AllOf condition can only have a single-matcher members'
   }
 
   def getAbsolutePath(String fileName) {
@@ -98,7 +99,7 @@ class AclRulesLoaderTest extends UnitSpecification {
                 with(get(5) as IpAddressCondition) {
                   with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
                 }
-                with(get(6) as AllOfCondition) {
+                with(get(7) as AllOfCondition) {
                   with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
                       with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }

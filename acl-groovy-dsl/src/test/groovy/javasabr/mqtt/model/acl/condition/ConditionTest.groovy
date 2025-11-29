@@ -26,4 +26,21 @@ class ConditionTest extends UnitSpecification implements ValueMatchersAware {
 //        new CallId(null, null, null, null, "topic")    | new TopicCondition(new EqualsMatcher("topic"))  | true
 //        new CallId(null, null, null, null, "topic")    | new TopicCondition(new EqualsMatcher("topic1")) | false
   }
+
+  def "should test any condition"() {
+    given:
+        def cond = new AnyCondition()
+    when:
+        boolean stringTestResult = cond.test("any_value")
+    then:
+        stringTestResult
+    when:
+        def mqttUserTestResult = cond.test(new TestMqttUser("any_id"))
+    then:
+        mqttUserTestResult
+    when:
+        def identityValue = cond.getIdentityValue(new TestMqttUser("id"))
+    then:
+        identityValue.isEmpty()
+  }
 }
