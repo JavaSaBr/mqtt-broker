@@ -6,12 +6,16 @@ import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.MqttUserCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
-import javasabr.mqtt.model.acl.matcher.EqualsMatcher
+import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
 import javasabr.mqtt.model.acl.rule.AllowPublishRule
 import javasabr.mqtt.model.acl.rule.AllowSubscribeRule
 import javasabr.mqtt.model.acl.rule.DenyPublishRule
 import javasabr.mqtt.model.acl.rule.DenySubscribeRule
 import javasabr.mqtt.model.acl.rule.Rule
+import javasabr.mqtt.model.topic.AbstractTopic
+import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicName
+import javasabr.mqtt.service.acl.builder.TopicMatcherBuilder
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
@@ -19,10 +23,10 @@ import javasabr.rlib.collections.array.MutableArray
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 
-class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAware {
+class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAware, TopicMatcherBuilder {
 
   def "should allow or deny according rules"(
-      String username, String clientId, String ipAddress, Operation operation, String topic) {
+      String username, String clientId, String ipAddress, Operation operation, AbstractTopic topic) {
     given:
         EnumMap<Operation, MutableArray<Rule>> rulesEnumMap = new EnumMap<>(Operation.class)
     and:
@@ -42,8 +46,8 @@ class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAw
                 ipAddressRegex("127.0.0.1")
             ),
             new TopicCondition(Array.of(
-                new EqualsMatcher("/topic1/#"),
-                new EqualsMatcher("/topic2/+/temp")
+                new TopicNameMatcher(TopicName.valueOf("/topic1/#")),
+                new TopicNameMatcher(TopicName.valueOf("/topic2/+/temp"))
             ))
         )
         publishRules << new DenyPublishRule(
@@ -53,7 +57,7 @@ class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAw
                 ipAddressEquals("12.30.0.117"),
             ),
             new TopicCondition(Array.of(
-                new EqualsMatcher("/topic/home/temp")
+                new TopicNameMatcher(TopicName.valueOf("/topic/home/temp"))
             ))
         )
         publishRules << new AllowPublishRule(
@@ -63,29 +67,29 @@ class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAw
                 ipAddressEquals("12.30.0.117"),
             ),
             new TopicCondition(Array.of(
-                new EqualsMatcher("/topic/home/temp")
+                new TopicNameMatcher(TopicName.valueOf("/topic/home/temp"))
             ))
         )
         publishRules << new AllowPublishRule(MqttUserCondition.MATCH_ANY, new TopicCondition(Array.of(
-            new EqualsMatcher("/topic1/#"),
-            new EqualsMatcher("/topic2/+/temp")
+            new TopicNameMatcher(TopicName.valueOf("/topic1/#")),
+            new TopicNameMatcher(TopicName.valueOf("/topic2/+/temp"))
         )))
     and:
         Array<Rule> subscribeRules = MutableArray.ofType(Rule.class)
         rulesEnumMap.put(SUBSCRIBE, subscribeRules)
         subscribeRules << new DenySubscribeRule(MqttUserCondition.MATCH_ANY, new TopicCondition(Array.of(
-            topicFilterMatcher("/allowed/+/restricted")
+            match("/allowed/+/restricted")
         )))
         subscribeRules << new AllowSubscribeRule(new AllOfCondition(
             userNameEquals("admin"),
             clientIdEquals("id"),
             ipAddressEquals("10.0.0.1"),
         ), new TopicCondition(Array.of(
-            topicFilterMatcher("/allowed/#")
+            match("/allowed/#")
         )))
         subscribeRules << new DenySubscribeRule(MqttUserCondition.MATCH_ANY, new TopicCondition(Array.of(
-            topicFilterMatcher("\$SYS/#"),
-            topicFilterMatcher("#")
+            match("\$SYS/#"),
+            match("#")
         )))
         subscribeRules << new AllowSubscribeRule(MqttUserCondition.MATCH_ANY, TopicCondition.MATCH_ANY)
     and:
@@ -99,41 +103,41 @@ class AclRulesEngineTest extends UnitSpecification implements ConditionMatcherAw
     then:
         result == expectedResult
     where:
-        username   | clientId    | ipAddress     | operation | topic                      | expectedResult
-        "sensor1"  | "clientId2" | "60.50.0.1"   | PUBLISH   | "/topic1/#"                | true
-        "sensor2"  | "clientId1" | "60.50.0.1"   | PUBLISH   | "/topic1/#"                | true
-        "sensor2"  | "clientId2" | "127.0.0.1"   | PUBLISH   | "/topic1/#"                | true
-        "sensor2"  | "clientId2" | "127.0.0.2"   | PUBLISH   | "/topic1/#"                | true
-        "sensor2"  | "clientId2" | "127.0.0.2"   | PUBLISH   | "/topic/#"                 | false
-        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | "/topic/home/temp"         | false
-        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | "/topic1/#"                | true
-        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | "/topic/home/temp"         | false
-        "user120"  | "clientId1" | "12.30.0.117" | PUBLISH   | "/topic/home/temp"         | true
-        "sensorX"  | "id"        | "1.1.1.1"     | PUBLISH   | "/topic1/data"             | false
-        "sensors1" | "id"        | "1.1.1.1"     | PUBLISH   | "/topic1/data"             | false
-        "sensor1"  | "id"        | "1.1.1.1"     | PUBLISH   | "/topic2/temp"             | false
-        "sensor1/" | "id"        | "1.1.1.1"     | PUBLISH   | "/topic1/#"                | true
-        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | "/topic/home/temp"         | false
-        "user10"   | "clientId2" | "12.30.0.117" | PUBLISH   | "/topic/home/temp"         | true
-        "nobody"   | "none"      | "0.0.0.0"     | PUBLISH   | "/unknown/topic"           | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "system/status"            | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "\$SYS/info"               | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/topic"           | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/topic/#"         | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/+"               | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/+/temp"          | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/sub1/restricted" | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/+/restricted"    | false
-        "username" | "clientId"  | "127.0.0.1"   | SUBSCRIBE | "/topic/#"                 | false
-        "user"     | "id"        | "10.0.0.10"   | SUBSCRIBE | "home/temp/status"         | false
-        "user"     | "id"        | "10.0.0.10"   | SUBSCRIBE | "\$SYS/info"               | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/data"            | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/#"               | true
-        "admin"    | "id"        | "10.0.0.2"    | SUBSCRIBE | "/allowed/data"            | false
-        "nobody"   | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/data"            | false
-        "user"     | "id"        | "10.0.0.1"    | SUBSCRIBE | "home/status"              | false
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed"                 | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/allowed/a/b/c/d"         | true
-        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | "/other/topic"             | false
+        username   | clientId    | ipAddress     | operation | topic                                           | expectedResult
+        "sensor1"  | "clientId2" | "60.50.0.1"   | PUBLISH   | TopicName.valueOf("/topic1/#")                  | true
+        "sensor2"  | "clientId1" | "60.50.0.1"   | PUBLISH   | TopicName.valueOf("/topic1/#")                  | true
+        "sensor2"  | "clientId2" | "127.0.0.1"   | PUBLISH   | TopicName.valueOf("/topic1/#")                  | true
+        "sensor2"  | "clientId2" | "127.0.0.2"   | PUBLISH   | TopicName.valueOf("/topic1/#")                  | true
+        "sensor2"  | "clientId2" | "127.0.0.2"   | PUBLISH   | TopicName.valueOf("/topic/#")                   | false
+        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | TopicName.valueOf("/topic/home/temp")           | false
+        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | TopicName.valueOf("/topic1/#")                  | true
+        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | TopicName.valueOf("/topic/home/temp")           | false
+        "user120"  | "clientId1" | "12.30.0.117" | PUBLISH   | TopicName.valueOf("/topic/home/temp")           | true
+        "sensorX"  | "id"        | "1.1.1.1"     | PUBLISH   | TopicName.valueOf("/topic1/data")               | false
+        "sensors1" | "id"        | "1.1.1.1"     | PUBLISH   | TopicName.valueOf("/topic1/data")               | false
+        "sensor1"  | "id"        | "1.1.1.1"     | PUBLISH   | TopicName.valueOf("/topic2/temp")               | false
+        "sensor1/" | "id"        | "1.1.1.1"     | PUBLISH   | TopicName.valueOf("/topic1/#")                  | true
+        "user10"   | "clientId1" | "12.30.0.117" | PUBLISH   | TopicName.valueOf("/topic/home/temp")           | false
+        "user10"   | "clientId2" | "12.30.0.117" | PUBLISH   | TopicName.valueOf("/topic/home/temp")           | true
+        "nobody"   | "none"      | "0.0.0.0"     | PUBLISH   | TopicName.valueOf("/unknown/topic")             | false
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("system/status")            | false
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("\$SYS/info")               | false
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/topic")           | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/topic/#")         | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/+")               | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/+/temp")          | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/sub1/restricted") | false
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/+/restricted")    | false
+        "username" | "clientId"  | "127.0.0.1"   | SUBSCRIBE | TopicFilter.valueOf("/topic/#")                 | false
+        "user"     | "id"        | "10.0.0.10"   | SUBSCRIBE | TopicFilter.valueOf("home/temp/status")         | false
+        "user"     | "id"        | "10.0.0.10"   | SUBSCRIBE | TopicFilter.valueOf("\$SYS/info")               | false
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/data")            | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/#")               | true
+        "admin"    | "id"        | "10.0.0.2"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/data")            | false
+        "nobody"   | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/data")            | false
+        "user"     | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("home/status")              | false
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed")                 | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/allowed/a/b/c/d")         | true
+        "admin"    | "id"        | "10.0.0.1"    | SUBSCRIBE | TopicFilter.valueOf("/other/topic")             | false
   }
 }

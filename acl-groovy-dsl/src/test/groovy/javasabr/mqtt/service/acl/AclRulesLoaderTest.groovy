@@ -11,6 +11,7 @@ import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
 import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.test.support.UnitSpecification
@@ -130,8 +131,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               }
             }
             with(topicCondition().topics) {
-              with(get(0) as EqualsMatcher) { expectedValue == "/topic1" }
-              with(get(1) as EqualsMatcher) { expectedValue == "/topic2/temp" }
+              with(get(0) as TopicNameMatcher) { expectedValue.rawTopic() == "/topic1" }
+              with(get(1) as TopicNameMatcher) { expectedValue.rawTopic() == "/topic2/temp" }
             }
           }
           with(get(1)) {
@@ -160,8 +161,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               }
             }
             with(topicCondition().topics) {
-              with(get(0) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic1/#" }
-              with(get(1) as TopicFilterMatcher) { expectedValue.rawTopic == "/topic2/+/temp" }
+              with(get(0) as TopicFilterMatcher) { expectedTopicFilter.rawTopic == "/topic1/#" }
+              with(get(1) as TopicFilterMatcher) { expectedTopicFilter.rawTopic == "/topic2/+/temp" }
             }
           }
           with(get(1)) {

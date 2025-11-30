@@ -2,11 +2,13 @@ package javasabr.mqtt.model.acl.condition
 
 
 import javasabr.mqtt.model.subscription.TestMqttUser
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.service.acl.ConditionMatcherAware
+import javasabr.mqtt.service.acl.builder.TopicMatcherBuilder
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
-class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
+class ConditionTest extends UnitSpecification implements ConditionMatcherAware, TopicMatcherBuilder {
 
   def "should test condition"(MqttUserCondition condition, Object mqttUser, boolean expectedResult) {
     when:
@@ -24,8 +26,8 @@ class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
         new TestMqttUser("username", null, null)  | clientIdEquals("username1")                     | false
         new TestMqttUser(null, null, "username")  | ipAddressEquals("username1")                    | false
         new TestMqttUser(null, null, null)        | new AnyCondition()                              | true
-        "topic"                                   | topicCondition("topic")                         | true
-        "topic"                                   | topicCondition("topic1")                        | false
-        "topic"                                   | new TopicCondition(Array.of())                  | false
+        TopicName.valueOf("topic")                | topicCondition("topic")                         | true
+        TopicName.valueOf("topic")                | topicCondition("topic1")                        | false
+        TopicName.valueOf("topic")                | new TopicCondition(Array.of())                  | false
   }
 }

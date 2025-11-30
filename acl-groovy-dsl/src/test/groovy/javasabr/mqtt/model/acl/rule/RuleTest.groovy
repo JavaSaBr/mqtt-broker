@@ -2,19 +2,21 @@ package javasabr.mqtt.model.acl.rule
 
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.subscription.TestMqttUser
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.service.acl.ConditionMatcherAware
+import javasabr.mqtt.service.acl.builder.TopicMatcherBuilder
 import javasabr.mqtt.test.support.UnitSpecification
 
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 import static javasabr.mqtt.model.acl.condition.TopicCondition.MATCH_ANY
 
-class RuleTest extends UnitSpecification implements ConditionMatcherAware {
+class RuleTest extends UnitSpecification implements ConditionMatcherAware, TopicMatcherBuilder {
 
   def "should test rule"(Rule rule, Operation operation, boolean expectedResult) {
     given:
         def user = new TestMqttUser("clientId")
-        def topic = "topic"
+        def topic = TopicName.valueOf("topic")
     when:
         boolean result = rule.test(user, operation, topic)
     then:

@@ -9,7 +9,7 @@ import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
-abstract class ConditionBuilder implements ValueMatcherBuilder {
+abstract class ConditionBuilder implements ClientMatcherBuilder {
 
   protected MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
 

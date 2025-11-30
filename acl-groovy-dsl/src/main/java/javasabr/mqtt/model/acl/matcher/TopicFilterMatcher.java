@@ -1,67 +1,34 @@
 package javasabr.mqtt.model.acl.matcher;
 
-import static javasabr.mqtt.model.topic.AbstractTopic.DELIMITER_CHAR;
-import static javasabr.mqtt.model.topic.TopicFilter.MULTI_LEVEL_WILDCARD;
-import static javasabr.mqtt.model.topic.TopicFilter.SINGLE_LEVEL_WILDCARD;
-
 import java.util.Objects;
+import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
 
-public record TopicFilterMatcher(TopicFilter expectedValue) implements ValueMatcher<String> {
+public record TopicFilterMatcher(AbstractTopic expectedTopicFilter) implements ValueMatcher<AbstractTopic> {
 
   @Override
-  public boolean test(String incomingValue) {
-    return matches(incomingValue);
+  public boolean test(AbstractTopic requestedTopicFilter) {
+    return matches(requestedTopicFilter);
   }
 
-  private boolean matches(String topic) {
-    final int topicLength = topic.length();
-    int topicPosition = 0;
-
-    final int totalLevels;
-    if (topicLength == 0) {
-      totalLevels = 1;
-    } else {
-      int slashCount = 0;
-      for (int i = 0; i < topicLength; i++) {
-        if (topic.charAt(i) == DELIMITER_CHAR) {
-          slashCount++;
-        }
-      }
-      totalLevels = 1 + slashCount;
-    }
-    int consumedLevels = 0;
-
-    for (int i = 0; i < expectedValue.levelsCount(); i++) {
-      String filterSegment = expectedValue.segment(i);
-      if (Objects.equals(filterSegment, MULTI_LEVEL_WILDCARD)) {
-        return i == expectedValue.levelsCount() - 1;
-      }
-      if (consumedLevels >= totalLevels) {
+  private boolean matches(AbstractTopic requestedTopicFilter) {
+    final int expectedFilterLevels = expectedTopicFilter.levelsCount();
+    final int incomingFilterLevels = requestedTopicFilter.levelsCount();
+    for (int i = 0; i < expectedFilterLevels; i++) {
+      String expectedSegment = expectedTopicFilter.segment(i);
+      if (Objects.equals(expectedSegment, TopicFilter.MULTI_LEVEL_WILDCARD)) {
+        return i == expectedFilterLevels - 1;
+      } else if (i >= incomingFilterLevels) {
         return false;
       }
-      final int segmentStart = topicPosition;
-      int segmentEnd = segmentStart;
-      while (segmentEnd < topicLength && topic.charAt(segmentEnd) != DELIMITER_CHAR) {
-        segmentEnd++;
-      }
-      final int segmentLength = segmentEnd - segmentStart;
-      if (Objects.equals(filterSegment, SINGLE_LEVEL_WILDCARD)) {
-        consumedLevels++;
-        topicPosition = (segmentEnd < topicLength ? segmentEnd + 1 : topicLength);
+      String requestedSegment = requestedTopicFilter.segment(i);
+      if (Objects.equals(expectedSegment, TopicFilter.SINGLE_LEVEL_WILDCARD)) {
         continue;
       }
-      if (filterSegment.length() != segmentLength) {
+      if (!Objects.equals(expectedSegment, requestedSegment)) {
         return false;
       }
-      for (int k = 0; k < segmentLength; k++) {
-        if (filterSegment.charAt(k) != topic.charAt(segmentStart + k)) {
-          return false;
-        }
-      }
-      consumedLevels++;
-      topicPosition = (segmentEnd < topicLength ? segmentEnd + 1 : topicLength);
     }
-    return consumedLevels == totalLevels;
+    return expectedFilterLevels == incomingFilterLevels;
   }
 }

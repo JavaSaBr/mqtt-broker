@@ -5,6 +5,7 @@ import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.acl.condition.MqttUserCondition;
 import javasabr.mqtt.model.acl.condition.TopicCondition;
+import javasabr.mqtt.model.topic.AbstractTopic;
 
 public sealed interface Rule permits AllowPublishRule, AllowSubscribeRule, DenyPublishRule, DenySubscribeRule {
 
@@ -16,7 +17,7 @@ public sealed interface Rule permits AllowPublishRule, AllowSubscribeRule, DenyP
 
   TopicCondition topicCondition();
 
-  default boolean test(MqttUser mqttUser, Operation operation, String topic) {
+  default boolean test(MqttUser mqttUser, Operation operation, AbstractTopic topic) {
     return operation() == operation && topicCondition().test(topic) && userCondition().test(mqttUser);
   }
 }

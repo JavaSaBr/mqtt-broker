@@ -8,7 +8,7 @@ import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 
-abstract class RuleBuilder implements ValueMatcherBuilder {
+abstract class RuleBuilder implements TopicMatcherBuilder {
   Action permission
   Operation action
   MqttUserCondition clients
@@ -27,7 +27,7 @@ abstract class RuleBuilder implements ValueMatcherBuilder {
     return this
   }
 
-  static ValueMatcher<String> anyone() {
+  static ValueMatcher<?> anyone() {
     return ValueMatcher.ANY
   }
 
