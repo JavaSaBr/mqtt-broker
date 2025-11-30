@@ -26,7 +26,7 @@ public class Qos2MqttPublishOutMessageHandler extends PersistedMqttPublishOutMes
   @Override
   protected boolean handleReceivedResponse(NetworkMqttUser user, TrackableMqttMessage response) {
     if (response instanceof PublishReceivedMqttInMessage) {
-      user.send(messageOutFactoryService
+      user.sendAsync(messageOutFactoryService
           .resolveFactory(user)
           .newPublishRelease(response.messageId(), SUCCESS));
       return false;

@@ -2,12 +2,12 @@ package javasabr.mqtt.service;
 
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
+import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
@@ -32,7 +32,7 @@ public interface SubscriptionService {
    * @param subscriptions the list of request to subscribe topics
    * @return array of subscribe ack reason codes
    */
-  Array<SubscribeAckReasonCode> subscribe(NetworkMqttUser user, MqttNetworkSession session, Array<Subscription> subscriptions);
+  Array<SubscribeAckReasonCode> subscribe(NetworkMqttUser user, MqttSession session, Array<Subscription> subscriptions);
 
   /**
    * Removes MQTT client from listening to the topics.
@@ -41,9 +41,9 @@ public interface SubscriptionService {
    * @param topicFilters topic filters
    * @return array of unsubscribe ack reason codes
    */
-  Array<UnsubscribeAckReasonCode> unsubscribe(NetworkMqttUser user, MqttNetworkSession session, Array<TopicFilter> topicFilters);
+  Array<UnsubscribeAckReasonCode> unsubscribe(NetworkMqttUser user, MqttSession session, Array<TopicFilter> topicFilters);
 
-  void cleanSubscriptions(NetworkMqttUser user, MqttNetworkSession session);
+  void cleanSubscriptions(NetworkMqttUser user, MqttSession session);
 
-  void restoreSubscriptions(NetworkMqttUser user, MqttNetworkSession session);
+  void restoreSubscriptions(NetworkMqttUser user, MqttSession session);
 }

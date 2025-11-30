@@ -13,10 +13,10 @@ import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -45,7 +45,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected boolean validateImpl(ExternalNetworkMqttUser user, MqttNetworkSession session, Publish publish) {
+  protected boolean validateImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
     if (!super.validateImpl(user, session, publish)) {
       return false;
     }
@@ -69,7 +69,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleNoMatchedSubscribers(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
     var reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
@@ -83,7 +83,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleSuccess(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       int matchedSubscribers) {
     super.handleSuccess(user, session, publish, matchedSubscribers);
@@ -95,7 +95,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
         .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.SUCCESS));
   }
 
-  private void updateSessionState(MqttNetworkSession session, Publish publish, PublishReceivedReasonCode reasonCode) {
+  private void updateSessionState(NetworkMqttSession session, Publish publish, PublishReceivedReasonCode reasonCode) {
     // store response reason code for duplicated publishes
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.update(publish.messageId(), MqttMessageType.PUBLISH, reasonCode);
@@ -107,7 +107,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleError(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       PublishHandlingResult handlingResult) {
     super.handleError(user, session, publish, handlingResult);
@@ -137,7 +137,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
-    user.send(messageOutFactoryService
+    user.sendAsync(messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
   }

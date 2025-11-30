@@ -1,8 +1,8 @@
 package javasabr.mqtt.service.session.impl;
 
 import java.io.Closeable;
-import javasabr.mqtt.network.MqttNetworkSession;
-import javasabr.mqtt.network.MqttNetworkSession.UnsafeMqttNetworkSession;
+import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
 
-  final LockableRefToRefDictionary<String, UnsafeMqttNetworkSession> storedSession;
+  final LockableRefToRefDictionary<String, ConfigurableNetworkMqttSession> storedSession;
   final Thread cleanThread;
 
   final int cleanIntervalInMs;
@@ -36,9 +36,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   }
 
   @Override
-  public Mono<MqttNetworkSession> restore(String clientId) {
+  public Mono<NetworkMqttSession> restore(String clientId) {
 
-    UnsafeMqttNetworkSession session = storedSession
+    ConfigurableNetworkMqttSession session = storedSession
         .operations()
         .getInWriteLock(clientId, MutableRefToRefDictionary::remove);
 
@@ -53,9 +53,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   }
 
   @Override
-  public Mono<MqttNetworkSession> create(String clientId) {
+  public Mono<NetworkMqttSession> create(String clientId) {
 
-    UnsafeMqttNetworkSession session = storedSession
+    ConfigurableNetworkMqttSession session = storedSession
         .operations()
         .getInWriteLock(clientId, MutableRefToRefDictionary::remove);
 
@@ -65,19 +65,19 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
     log.debug(clientId, "Created new session for client:[%s]"::formatted);
 
-    return Mono.just(new InMemoryMqttNetworkSession(clientId));
+    return Mono.just(new InMemoryNetworkMqttSession(clientId));
   }
 
   @Override
-  public Mono<Boolean> store(String clientId, MqttNetworkSession session, long expiryInterval) {
+  public Mono<Boolean> store(String clientId, NetworkMqttSession session, long expiryInterval) {
 
-    var unsafe = (UnsafeMqttNetworkSession) session;
-    unsafe.expirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
-    unsafe.onPersisted();
+    var configurable = (ConfigurableNetworkMqttSession) session;
+    configurable.expirationTime(System.currentTimeMillis() + (expiryInterval * 1000));
+    configurable.onPersisted();
 
     storedSession
         .operations()
-        .inWriteLock(clientId, unsafe, MutableRefToRefDictionary::put);
+        .inWriteLock(clientId, configurable, MutableRefToRefDictionary::put);
 
     log.debug(clientId, "Stored session for client:[%s]"::formatted);
 
@@ -86,8 +86,8 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   private void cleanup() {
 
-    var toCheck = ArrayFactory.mutableArray(UnsafeMqttNetworkSession.class);
-    var toRemove = ArrayFactory.mutableArray(UnsafeMqttNetworkSession.class);
+    var toCheck = ArrayFactory.mutableArray(ConfigurableNetworkMqttSession.class);
+    var toRemove = ArrayFactory.mutableArray(ConfigurableNetworkMqttSession.class);
 
     while (!closed) {
       ThreadUtils.sleep(cleanIntervalInMs);
@@ -110,15 +110,15 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   }
 
   private static void removeExpiredSessions(
-      LockableRefToRefDictionary<String, UnsafeMqttNetworkSession> sessions,
-      MutableArray<UnsafeMqttNetworkSession> expired) {
+      LockableRefToRefDictionary<String, ConfigurableNetworkMqttSession> sessions,
+      MutableArray<ConfigurableNetworkMqttSession> expired) {
     long time = System.currentTimeMillis();
-    for (UnsafeMqttNetworkSession session : expired) {
+    for (ConfigurableNetworkMqttSession session : expired) {
       if (session.expirationTime() <= time) {
         continue;
       }
 
-      UnsafeMqttNetworkSession removed = sessions.remove(session.clientId());
+      ConfigurableNetworkMqttSession removed = sessions.remove(session.clientId());
       log.debug(session.clientId(), "Removed expired session for client:[%]"::formatted);
 
       // if we already have new session under the same client id
@@ -130,11 +130,13 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     }
   }
 
-  private boolean findToRemove(MutableArray<UnsafeMqttNetworkSession> toCheck, MutableArray<UnsafeMqttNetworkSession> toRemove) {
+  private boolean findToRemove(
+      MutableArray<ConfigurableNetworkMqttSession> toCheck, 
+      MutableArray<ConfigurableNetworkMqttSession> toRemove) {
 
     var currentTime = System.currentTimeMillis();
 
-    for (UnsafeMqttNetworkSession session : toCheck) {
+    for (ConfigurableNetworkMqttSession session : toCheck) {
       if (session.expirationTime() > currentTime) {
         toRemove.add(session);
       }

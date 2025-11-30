@@ -5,10 +5,10 @@ import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -44,7 +44,7 @@ public class UnsubscribeMqttInMessageHandler
   protected void processValidMessage(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       UnsubscribeMqttInMessage unsubscribeMessage) {
 
     int messageId = unsubscribeMessage.messageId();
@@ -71,7 +71,7 @@ public class UnsubscribeMqttInMessageHandler
         .newUnsubscribeAck(unsubscribeMessage.messageId(), unsubscribeResults);
 
     user
-        .sendWithFeedback(response)
+        .send(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
@@ -83,7 +83,7 @@ public class UnsubscribeMqttInMessageHandler
     Array<UnsubscribeAckReasonCode> unsubscribeResults = Array.repeated(
         UnsubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE,
         unsubscribeMessage.topicFiltersCount());
-    user.send(messageOutFactoryService
+    user.sendAsync(messageOutFactoryService
         .resolveFactory(user)
         .newUnsubscribeAck(unsubscribeMessage.messageId(), unsubscribeResults));
   }

@@ -3,9 +3,9 @@ package javasabr.mqtt.service.message.handler.impl;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.network.util.ExtraErrorReasons;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -47,7 +47,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     U castedUser = expectedUser.cast(user);
     M castedMessage = expectedMessage.cast(mqttInMessage);
     if (requireSession()) {
-      MqttNetworkSession session = user.session();
+      NetworkMqttSession session = user.session();
       if (session == null) {
         log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
         handleSessionIsAlreadyClosed(user);
@@ -72,7 +72,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     U castedUser = expectedUser.cast(user);
     M castedMessage = expectedMessage.cast(mqttInMessage);
     if (requireSession()) {
-      MqttNetworkSession session = user.session();
+      NetworkMqttSession session = user.session();
       if (session == null) {
         log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
         handleSessionIsAlreadyClosed(user);
@@ -86,7 +86,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
 
   protected void processValidMessage(MqttConnection connection, U user, M message) {}
 
-  protected void processValidMessage(MqttConnection connection, U user, MqttNetworkSession session, M message) {}
+  protected void processValidMessage(MqttConnection connection, U user, NetworkMqttSession session, M message) {}
 
   protected boolean processInvalidMessage(MqttConnection connection, U user, M message) {
     Exception exception = message.exception();
@@ -97,7 +97,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     return false;
   }
 
-  protected boolean processInvalidMessage(MqttConnection connection, U user, MqttNetworkSession session, M message) {
+  protected boolean processInvalidMessage(MqttConnection connection, U user, NetworkMqttSession session, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
       malformedProtocolError(connection, user, exception);
@@ -111,7 +111,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     MqttOutMessage feedback = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
-    user.sendWithFeedback(feedback)
+    user.send(feedback)
         .thenAccept(_ -> connection.close());
   }
 
