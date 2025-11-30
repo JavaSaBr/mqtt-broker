@@ -10,6 +10,5 @@ dependencies {
   api libs.groovy
 
   testImplementation projects.testSupport
-  testImplementation libs.rlib.logger.impl
   testImplementation testFixtures(projects.aclGroovyDsl)
 }

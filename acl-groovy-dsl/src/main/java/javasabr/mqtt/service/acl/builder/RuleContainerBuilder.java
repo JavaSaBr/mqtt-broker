@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RuleContainerBuilder {
 
+  private static final Array<Rule> EMPTY_RULES = Array.empty(Rule.class);
+
   public static Map<Operation, Array<Rule>> groupRulesByOperation(Array<Rule> rules) {
 
     var intermediate = new EnumMap<Operation, MutableArray<Rule>>(Operation.class);
@@ -33,7 +35,7 @@ public final class RuleContainerBuilder {
   }
 
   static Array<Rule> emptyArray(Operation ignored) {
-    return Array.empty(Rule.class);
+    return EMPTY_RULES;
   }
 
   static MutableArray<Rule> newMutableArray(Operation ignored) {

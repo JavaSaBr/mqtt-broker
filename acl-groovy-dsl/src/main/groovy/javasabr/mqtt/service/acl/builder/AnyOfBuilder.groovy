@@ -8,14 +8,14 @@ import javasabr.rlib.collections.array.Array
 class AnyOfBuilder extends ConditionBuilder {
 
   ConditionBuilder allOf(Closure<?> config) {
-    this.conditions << new AllOfBuilder().buildCondition(config).build()
+    this.conditions.add(new AllOfBuilder().buildCondition(config).build())
     return this
   }
 
   ConditionBuilder anyOf(Closure<?> config) {
-    this.conditions << new AnyOfBuilder().buildCondition(config).build()
+    this.conditions.add(new AnyOfBuilder().buildCondition(config).build())
     return this
   }
 
-  MqttUserCondition build() { new AnyOfCondition(Array.copyOf(conditions)) }
+  MqttUserCondition build() { return new AnyOfCondition(Array.copyOf(conditions)) }
 }

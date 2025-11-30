@@ -28,7 +28,7 @@ abstract class RuleBuilder implements ValueMatcherBuilder {
   }
 
   static ValueMatcher<String> anyone() {
-    ValueMatcher.ANY
+    return ValueMatcher.ANY
   }
 
   abstract Rule build()

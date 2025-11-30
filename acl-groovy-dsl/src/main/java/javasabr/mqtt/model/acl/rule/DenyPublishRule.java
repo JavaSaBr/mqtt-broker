@@ -8,7 +8,7 @@ import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.acl.condition.MqttUserCondition;
 import javasabr.mqtt.model.acl.condition.TopicCondition;
 
-public record DenyPublishRule(MqttUserCondition clientCondition, TopicCondition topicCondition) implements Rule {
+public record DenyPublishRule(MqttUserCondition userCondition, TopicCondition topicCondition) implements Rule {
 
   @Override
   public Operation operation() {

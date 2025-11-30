@@ -27,16 +27,15 @@ class AclRulesLoader {
 
   Map<Operation, Array<Rule>> load() {
     CompilerConfiguration compilerConfig = new CompilerConfiguration()
-    try (AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()) {
-      new GroovyShell(compilerConfig).with {
-        setVariable("allowPublish", aclRulesBuilder.&allowPublish)
-        setVariable("denyPublish", aclRulesBuilder.&denyPublish)
-        setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
-        setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
-        evaluate(aclConfigPath.toFile())
-      }
-      def rules = aclRulesBuilder.build()
-      return RuleContainerBuilder.groupRulesByOperation(rules)
+    AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
+    new GroovyShell(compilerConfig).with {
+      setVariable("allowPublish", aclRulesBuilder.&allowPublish)
+      setVariable("denyPublish", aclRulesBuilder.&denyPublish)
+      setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
+      setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
+      evaluate(aclConfigPath.toFile())
     }
+    def rules = aclRulesBuilder.build()
+    return RuleContainerBuilder.groupRulesByOperation(rules)
   }
 }

@@ -12,11 +12,11 @@ public sealed interface Rule permits AllowPublishRule, AllowSubscribeRule, DenyP
 
   Action action();
 
-  MqttUserCondition clientCondition();
+  MqttUserCondition userCondition();
 
   TopicCondition topicCondition();
 
   default boolean test(MqttUser mqttUser, Operation operation, String topic) {
-    return operation() == operation && topicCondition().test(topic) && clientCondition().test(mqttUser);
+    return operation() == operation && topicCondition().test(topic) && userCondition().test(mqttUser);
   }
 }

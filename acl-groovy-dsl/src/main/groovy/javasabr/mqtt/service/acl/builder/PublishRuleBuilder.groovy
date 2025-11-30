@@ -12,5 +12,8 @@ abstract class PublishRuleBuilder extends RuleBuilder {
 
   PublishRuleBuilder(Action permission) { super(permission, Operation.PUBLISH) }
 
-  PublishRuleBuilder topicName(ValueMatcher<String>... topicName) { this.topicNames.addAll(topicName); this }
+  PublishRuleBuilder topicName(ValueMatcher<String>... topicName) {
+    this.topicNames.addAll(topicName)
+    return this
+  }
 }

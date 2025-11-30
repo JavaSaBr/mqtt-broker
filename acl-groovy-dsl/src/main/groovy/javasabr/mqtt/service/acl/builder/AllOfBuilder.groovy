@@ -17,18 +17,18 @@ class AllOfBuilder extends ConditionBuilder {
   @Override
   ConditionBuilder userName(ValueMatcher<String>... userNames) {
     requireSingleMatcher(Identity.USER_NAME, userNames)
-    super.userName(userNames)
+    return super.userName(userNames)
   }
 
   @Override
   ConditionBuilder clientId(ValueMatcher<String>... clientIds) {
     requireSingleMatcher(Identity.CLIENT_ID, clientIds)
-    super.clientId(clientIds)
+    return super.clientId(clientIds)
   }
 
   ConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
     requireSingleMatcher(Identity.IP_ADDRESS, ipAddresses)
-    super.ipAddress(ipAddresses)
+    return super.ipAddress(ipAddresses)
   }
 
   private void requireSingleMatcher(Identity identity, ValueMatcher<String>[] newMatchers) {
@@ -40,6 +40,6 @@ class AllOfBuilder extends ConditionBuilder {
   }
 
   MqttUserCondition build() {
-    new AllOfCondition(Array.copyOf(conditions))
+    return new AllOfCondition(Array.copyOf(conditions))
   }
 }

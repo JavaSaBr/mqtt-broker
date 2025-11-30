@@ -28,7 +28,7 @@ abstract class ConditionBuilder implements ValueMatcherBuilder {
   ConditionBuilder ipAddress(ValueMatcher<String>... ipAddress) {
     def collect = ipAddress.collect { new IpAddressCondition(it) }
     this.conditions.addAll(collect)
-    this
+    return this
   }
 
   ConditionBuilder buildCondition(Closure<?> config) {
