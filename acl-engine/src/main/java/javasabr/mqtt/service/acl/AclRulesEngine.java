@@ -8,6 +8,9 @@ import javasabr.mqtt.model.acl.rule.Rule;
 import javasabr.rlib.collections.array.Array;
 
 public record AclRulesEngine(EnumMap<Operation, Array<Rule>> ruleMap) {
+  public AclRulesEngine {
+    Operation.forEach(operation -> ruleMap.computeIfAbsent(operation, _ -> Array.of()));
+  }
 
   public boolean authorize(MqttUser mqttUser, Operation operation, String topic) {
     Array<Rule> rules = ruleMap.get(operation);
