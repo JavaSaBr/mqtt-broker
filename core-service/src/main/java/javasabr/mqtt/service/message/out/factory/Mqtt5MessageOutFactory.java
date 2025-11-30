@@ -15,7 +15,6 @@ import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.message.out.AuthenticationMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage;
@@ -27,6 +26,7 @@ import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage;
 import javasabr.mqtt.network.message.out.UnsubscribeAckMqtt5OutMessage;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.rlib.collections.array.Array;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newConnectAck(
-      MqttClient client,
+      NetworkMqttUser user,
       ConnectAckReasonCode reasonCode,
       boolean sessionPresent,
       String requestedClientId,
@@ -55,7 +55,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
     return new ConnectAckMqtt5OutMessage(
         reasonCode,
         sessionPresent,
-        client.clientId(),
+        user.clientId(),
         requestedClientId,
         requestedSessionExpiryInterval,
         requestedKeepAlive,
@@ -124,12 +124,12 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
 
   @Override
   public MqttOutMessage newDisconnect(
-      MqttClient client,
+      NetworkMqttUser user,
       DisconnectReasonCode reasonCode,
       Array<StringPair> userProperties,
       String reason,
       String serverReference) {
-    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
+    MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     return new DisconnectMqtt5OutMessage(
         reasonCode,
         userProperties,

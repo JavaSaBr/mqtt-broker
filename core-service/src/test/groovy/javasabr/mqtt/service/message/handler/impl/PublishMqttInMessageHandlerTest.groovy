@@ -13,7 +13,7 @@ import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage
 import javasabr.mqtt.network.util.ExtraErrorReasons
 import javasabr.mqtt.service.IntegrationServiceSpecification
-import javasabr.mqtt.service.TestExternalMqttClient
+import javasabr.mqtt.service.TestExternalNetworkMqttUser
 
 class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
 
@@ -26,8 +26,8 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultTopicService)
         def expectedMessageId = 15
         def expectedTopicAlias = 5
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        def expectedTopicName = defaultTopicService.createTopicName(mqttClient, "topic/name1")
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        def expectedTopicName = defaultTopicService.createTopicName(mqttUser, "topic/name1")
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -37,10 +37,10 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def publishAck = mqttClient.nextSentMessage(PublishAckMqtt5OutMessage)
+        def publishAck = mqttUser.nextSentMessage(PublishAckMqtt5OutMessage)
         publishAck.reasonCode() == PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS
         publishAck.reason() == null
-        mqttClient.session()
+        mqttUser.session()
             .topicNameMapping()
             .resolve(expectedTopicAlias) == expectedTopicName
   }
@@ -53,9 +53,9 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        mqttClient.returnCompletedFeatures(false)
-        def session = mqttClient.session()
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+        def session = mqttUser.session()
         def inMessageTracker = session.inMessageTracker()
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
@@ -65,7 +65,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def publishAck = mqttClient.nextSentMessage(PublishAckMqtt5OutMessage)
+        def publishAck = mqttUser.nextSentMessage(PublishAckMqtt5OutMessage)
         publishAck.reasonCode() == PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS
         publishAck.reason() == null
         inMessageTracker.stored(expectedMessageId) != null
@@ -78,13 +78,13 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService)
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        mqttClient.session(null)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.session(null)
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0010 as byte)
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
         disconnectReason.reason() == ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED
         disconnectReason.serverReference() == null
@@ -97,7 +97,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService)
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0010 as byte) {{
           payload = testPayload
@@ -105,7 +105,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
         disconnectReason.reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
         disconnectReason.serverReference() == null
@@ -119,8 +119,8 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
-        mqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser
             .session()
             .inMessageTracker()
             .add(expectedMessageId, MqttMessageType.PUBLISH)
@@ -132,7 +132,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def publishAck = mqttClient.nextSentMessage(PublishAckMqtt5OutMessage)
+        def publishAck = mqttUser.nextSentMessage(PublishAckMqtt5OutMessage)
         publishAck.reasonCode() == PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE
         publishAck.reason() == null
   }
@@ -146,12 +146,12 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService)
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0 as byte)
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        mqttClient.isEmpty()
+        mqttUser.isEmpty()
   }
 
   def "should response that requested QoS 1 is not supported"() {
@@ -164,7 +164,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -172,7 +172,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.QOS_NOT_SUPPORTED
         disconnectReason.reason() == null
         disconnectReason.serverReference() == null
@@ -188,7 +188,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -196,7 +196,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.RETAIN_NOT_SUPPORTED
         disconnectReason.reason() == null
         disconnectReason.serverReference() == null
@@ -210,7 +210,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -219,7 +219,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
         disconnectReason.reason() == MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT
         disconnectReason.serverReference() == null
@@ -233,7 +233,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -242,7 +242,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
         disconnectReason.reason() == MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL
         disconnectReason.serverReference() == null
@@ -256,7 +256,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -265,7 +265,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
         disconnectReason.reason() == MqttProtocolErrors.INVALID_RESPONSE_TOPIC_NAME
         disconnectReason.serverReference() == null
@@ -279,7 +279,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -287,7 +287,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
         disconnectReason.reason() == MqttProtocolErrors.NO_ANY_TOPIC_NANE
         disconnectReason.serverReference() == null
@@ -301,7 +301,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when: 'topic alias is too high'
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -310,7 +310,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.TOPIC_ALIAS_INVALID
         disconnectReason.reason() == null
         disconnectReason.serverReference() == null
@@ -322,7 +322,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage2)
     then:
-        def disconnectReason2 = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason2 = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason2.reasonCode() == DisconnectReasonCode.TOPIC_ALIAS_INVALID
         disconnectReason2.reason() == null
         disconnectReason2.serverReference() == null
@@ -336,7 +336,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -345,7 +345,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
         disconnectReason.reason() == MqttProtocolErrors.NO_ANY_TOPIC_NANE
         disconnectReason.serverReference() == null
@@ -359,7 +359,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             defaultMessageOutFactoryService,
             defaultTopicService)
         def expectedMessageId = 15
-        def mqttClient = mqttConnection.client() as TestExternalMqttClient
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0011 as byte) {{
           messageId = expectedMessageId
@@ -368,7 +368,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
         }}
         messageHandler.processValidMessage(mqttConnection, publishMessage)
     then:
-        def disconnectReason = mqttClient.nextSentMessage(DisconnectMqtt5OutMessage)
+        def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.TOPIC_NAME_INVALID
         disconnectReason.reason() == null
         disconnectReason.serverReference() == null

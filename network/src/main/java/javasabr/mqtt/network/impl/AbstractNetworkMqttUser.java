@@ -4,12 +4,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
-import javasabr.mqtt.network.MqttClient.UnsafeMqttClient;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.handler.MqttClientReleaseHandler;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.message.out.ConnectAckMqtt311OutMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -23,14 +23,14 @@ import reactor.core.publisher.Mono;
 @CustomLog
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class AbstractMqttClient implements UnsafeMqttClient {
+public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqttUser {
 
   static {
     DebugUtils.registerIncludedFields("clientId");
   }
 
   final MqttConnection connection;
-  final MqttClientReleaseHandler releaseHandler;
+  final NetworkMqttUserReleaseHandler releaseHandler;
   final AtomicBoolean released;
 
   @Setter
@@ -43,7 +43,7 @@ public abstract class AbstractMqttClient implements UnsafeMqttClient {
   @Nullable
   volatile MqttNetworkSession session;
 
-  public AbstractMqttClient(MqttConnection connection, MqttClientReleaseHandler releaseHandler) {
+  public AbstractNetworkMqttUser(MqttConnection connection, NetworkMqttUserReleaseHandler releaseHandler) {
     this.connection = connection;
     this.releaseHandler = releaseHandler;
     this.released = new AtomicBoolean(false);

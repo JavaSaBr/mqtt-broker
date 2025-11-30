@@ -7,7 +7,7 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
 import lombok.AccessLevel;

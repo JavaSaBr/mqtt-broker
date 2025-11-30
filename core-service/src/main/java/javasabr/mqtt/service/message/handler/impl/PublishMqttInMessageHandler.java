@@ -12,10 +12,10 @@ import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.impl.ExternalMqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
@@ -27,7 +27,7 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalMqttClient, PublishMqttInMessage> {
+    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, PublishMqttInMessage> {
 
   PublishReceivingService publishReceivingService;
   TopicService topicService;
@@ -36,7 +36,7 @@ public class PublishMqttInMessageHandler
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    super(ExternalMqttClient.class, PublishMqttInMessage.class, messageOutFactoryService);
+    super(ExternalNetworkMqttUser.class, PublishMqttInMessage.class, messageOutFactoryService);
     this.publishReceivingService = publishReceivingService;
     this.topicService = topicService;
   }
@@ -49,11 +49,11 @@ public class PublishMqttInMessageHandler
   @Override
   protected void processValidMessage(
       MqttConnection connection,
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       PublishMqttInMessage publishMessage) {
 
-    if (!validateBaseFields(connection, client, publishMessage)) {
+    if (!validateBaseFields(connection, user, publishMessage)) {
       return;
     }
 
@@ -61,11 +61,11 @@ public class PublishMqttInMessageHandler
     TopicName responseTopicName = null;
     if (rawResponseTopicName != null) {
       if (!TopicValidator.validateTopicName(rawResponseTopicName)) {
-        log.warning(client.clientId(), rawResponseTopicName, "[%s] Provided invalid response TopicName:[%s]"::formatted);
-        handleInvalidResponseTopicName(client);
+        log.warning(user.clientId(), rawResponseTopicName, "[%s] Provided invalid response TopicName:[%s]"::formatted);
+        handleInvalidResponseTopicName(user);
         return;
       }
-      responseTopicName = topicService.createTopicName(client, rawResponseTopicName);
+      responseTopicName = topicService.createTopicName(user, rawResponseTopicName);
     }
 
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
@@ -79,18 +79,18 @@ public class PublishMqttInMessageHandler
 
     if (!providedRawTopicName) {
       if (topicAlias == MqttProperties.TOPIC_ALIAS_NOT_SET) {
-        log.warning(client.clientId(), "[%s] Not provided any information about TopicName"::formatted);
-        handleNotProvidedTopicName(client);
+        log.warning(user.clientId(), "[%s] Not provided any information about TopicName"::formatted);
+        handleNotProvidedTopicName(user);
         return;
       } else if (topicAlias < MqttProperties.TOPIC_ALIAS_MIN || topicAlias > topicAliasMaxValue) {
-        log.warning(client.clientId(), topicAlias, "[%s] Provided invalid TopicAlias:[%d]"::formatted);
-        handleInvalidTopicAlias(client);
+        log.warning(user.clientId(), topicAlias, "[%s] Provided invalid TopicAlias:[%d]"::formatted);
+        handleInvalidTopicAlias(user);
         return;
       }
       topicNameByAlias = topicNameMapping.resolve(topicAlias);
       if (topicNameByAlias == null) {
-        log.warning(client.clientId(), topicAlias, "[%s] Unknown TopicAlias:[%d]"::formatted);
-        handleNotProvidedTopicName(client);
+        log.warning(user.clientId(), topicAlias, "[%s] Unknown TopicAlias:[%d]"::formatted);
+        handleNotProvidedTopicName(user);
         return;
       }
     }
@@ -99,11 +99,11 @@ public class PublishMqttInMessageHandler
 
     if (providedRawTopicName) {
       if (!TopicValidator.validateTopicName(rawTopicName)) {
-        handleInvalidTopicName(client, session, publishMessage);
-        log.warning(client.clientId(), publishMessage.rawTopicName(), "[%s] TopicName:[%s] is invalid"::formatted);
+        handleInvalidTopicName(user, session, publishMessage);
+        log.warning(user.clientId(), publishMessage.rawTopicName(), "[%s] TopicName:[%s] is invalid"::formatted);
         return;
       }
-      topicName = topicService.createTopicName(client, rawTopicName);
+      topicName = topicService.createTopicName(user, rawTopicName);
       if (topicAlias != MqttProperties.TOPIC_ALIAS_NOT_SET) {
         topicNameMapping.update(topicAlias, topicName);
       }
@@ -130,112 +130,112 @@ public class PublishMqttInMessageHandler
         publishMessage.payloadFormat(),
         publishMessage.userProperties());
 
-    publishReceivingService.processPublish(client, publish);
+    publishReceivingService.processPublish(user, publish);
   }
 
   private boolean validateBaseFields(
       MqttConnection connection,
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       PublishMqttInMessage publishMessage) {
     byte[] payload = publishMessage.payload();
     if (payload == null) {
-      log.warning(client.clientId(), "[%s] Unexpected missed payload"::formatted);
+      log.warning(user.clientId(), "[%s] Unexpected missed payload"::formatted);
       return false;
     }
 
     QoS requestedQos = publishMessage.qos();
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     if (connectionConfig.maxQos().isLowerThan(requestedQos)) {
-      log.warning(client.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
-      handleNotSupportedQos(client);
+      log.warning(user.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
+      handleNotSupportedQos(user);
       return false;
     }
 
     boolean retain = publishMessage.retain();
     if (retain && !connectionConfig.retainAvailable()) {
-      log.warning(client.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
-      handleNotSupportedRetain(client);
+      log.warning(user.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
+      handleNotSupportedRetain(user);
       return false;
     }
 
     PayloadFormat payloadFormat = publishMessage.payloadFormat();
     if (payloadFormat == PayloadFormat.INVALID) {
-      log.warning(client.clientId(), "[%s] Provided invalid PayloadFormat"::formatted);
-      handleInvalidPayloadFormat(client);
+      log.warning(user.clientId(), "[%s] Provided invalid PayloadFormat"::formatted);
+      handleInvalidPayloadFormat(user);
       return false;
     }
 
     long messageExpiryInterval = publishMessage.messageExpiryInterval();
     if (messageExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
         && messageExpiryInterval < MqttProperties.MESSAGE_EXPIRY_INTERVAL_MIN) {
-      log.warning(client.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
-      handleInvalidMessageExpiryInterval(client);
+      log.warning(user.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
+      handleInvalidMessageExpiryInterval(user);
       return false;
     }
     return true;
   }
 
-  private void handleNotSupportedQos(ExternalMqttClient client) {
-    client.closeWithReason(messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.QOS_NOT_SUPPORTED));
+  private void handleNotSupportedQos(ExternalNetworkMqttUser user) {
+    user.closeWithReason(messageOutFactoryService
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.QOS_NOT_SUPPORTED));
   }
 
-  private void handleNotSupportedRetain(ExternalMqttClient client) {
-    client.closeWithReason(messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.RETAIN_NOT_SUPPORTED));
+  private void handleNotSupportedRetain(ExternalNetworkMqttUser user) {
+    user.closeWithReason(messageOutFactoryService
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.RETAIN_NOT_SUPPORTED));
   }
 
-  private void handleNotProvidedTopicName(ExternalMqttClient client) {
+  private void handleNotProvidedTopicName(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NO_ANY_TOPIC_NANE);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NO_ANY_TOPIC_NANE);
+    user.closeWithReason(response);
   }
 
-  private void handleInvalidTopicAlias(ExternalMqttClient client) {
+  private void handleInvalidTopicAlias(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.TOPIC_ALIAS_INVALID);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.TOPIC_ALIAS_INVALID);
+    user.closeWithReason(response);
   }
 
-  private void handleInvalidPayloadFormat(ExternalMqttClient client) {
+  private void handleInvalidPayloadFormat(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT);
+    user.closeWithReason(response);
   }
 
-  private void handleInvalidResponseTopicName(ExternalMqttClient client) {
+  private void handleInvalidResponseTopicName(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_RESPONSE_TOPIC_NAME);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_RESPONSE_TOPIC_NAME);
+    user.closeWithReason(response);
   }
 
-  private void handleInvalidMessageExpiryInterval(ExternalMqttClient client) {
+  private void handleInvalidMessageExpiryInterval(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL);
+    user.closeWithReason(response);
   }
 
   private void handleInvalidTopicName(
-      ExternalMqttClient client,
+      ExternalNetworkMqttUser user,
       MqttNetworkSession session,
       PublishMqttInMessage publishMessage) {
     int messagedId = publishMessage.messageId();
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.TOPIC_NAME_INVALID);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.TOPIC_NAME_INVALID);
     // without messageId we do not need to clean it
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      client.closeWithReason(response);
+      user.closeWithReason(response);
       return;
     }
-    client
+    user
         .closeWithReason(response)
         .thenAccept(_ -> session
             .inMessageTracker()

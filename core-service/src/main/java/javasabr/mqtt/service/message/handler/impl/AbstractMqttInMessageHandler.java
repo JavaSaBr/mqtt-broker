@@ -2,11 +2,11 @@ package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
-import javasabr.mqtt.network.MqttClient;
 import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.network.util.ExtraErrorReasons;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
@@ -18,16 +18,16 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M extends MqttInMessage>
+public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M extends MqttInMessage>
     implements MqttInMessageHandler {
 
-  Class<C> expectedClient;
-  Class<M> expectedNetworkPacket;
+  Class<U> expectedUser;
+  Class<M> expectedMessage;
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public Class<? extends MqttClient> expectedClientType() {
-    return expectedClient;
+  public Class<? extends NetworkMqttUser> expectedUserType() {
+    return expectedUser;
   }
 
   protected boolean requireSession() {
@@ -36,93 +36,92 @@ public abstract class AbstractMqttInMessageHandler<C extends MqttClient, M exten
 
   @Override
   public void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
-    MqttClient client = connection.client();
-    if (!expectedClient.isInstance(client)) {
-      log.warning(client, "Received not expected client:[%s]"::formatted);
+    NetworkMqttUser user = connection.user();
+    if (!expectedUser.isInstance(user)) {
+      log.warning(user, "Received not expected user:[%s]"::formatted);
       return;
-    } else if (!expectedNetworkPacket.isInstance(mqttInMessage)) {
-      log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
+    } else if (!expectedMessage.isInstance(mqttInMessage)) {
+      log.warning(mqttInMessage, "Received not expected message:[%s]"::formatted);
       return;
     }
-    C castedClient = expectedClient.cast(client);
-    M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
+    U castedUser = expectedUser.cast(user);
+    M castedMessage = expectedMessage.cast(mqttInMessage);
     if (requireSession()) {
-      MqttNetworkSession session = client.session();
+      MqttNetworkSession session = user.session();
       if (session == null) {
-        log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
-        handleSessionIsAlreadyClosed(client);
+        log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+        handleSessionIsAlreadyClosed(user);
         return;
       }
-      processValidMessage(connection, castedClient, session, castedMessage);
+      processValidMessage(connection, castedUser, session, castedMessage);
     } else {
-      processValidMessage(connection, castedClient, castedMessage);
+      processValidMessage(connection, castedUser, castedMessage);
     }
   }
 
   @Override
   public void processInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
-    MqttClient client = connection.client();
-    if (!expectedClient.isInstance(client)) {
-      log.warning(client, "Received not expected client:[%s]"::formatted);
+    NetworkMqttUser user = connection.user();
+    if (!expectedUser.isInstance(user)) {
+      log.warning(user, "Received not expected user:[%s]"::formatted);
       return;
-    } else if (!expectedNetworkPacket.isInstance(mqttInMessage)) {
-      log.warning(mqttInMessage, "Received not expected network packet:[%s]"::formatted);
+    } else if (!expectedMessage.isInstance(mqttInMessage)) {
+      log.warning(mqttInMessage, "Received not expected message:[%s]"::formatted);
       return;
     }
-    C castedClient = expectedClient.cast(client);
-    M castedMessage = expectedNetworkPacket.cast(mqttInMessage);
+    U castedUser = expectedUser.cast(user);
+    M castedMessage = expectedMessage.cast(mqttInMessage);
     if (requireSession()) {
-      MqttNetworkSession session = client.session();
+      MqttNetworkSession session = user.session();
       if (session == null) {
-        log.warning(client.clientId(), "[%s] Session is already closed"::formatted);
-        handleSessionIsAlreadyClosed(client);
+        log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+        handleSessionIsAlreadyClosed(user);
         return;
       }
-      processInvalidMessage(connection, castedClient, session, castedMessage);
+      processInvalidMessage(connection, castedUser, session, castedMessage);
     } else {
-      processInvalidMessage(connection, castedClient, castedMessage);
+      processInvalidMessage(connection, castedUser, castedMessage);
     }
   }
 
-  protected void processValidMessage(MqttConnection connection, C client, M message) {}
+  protected void processValidMessage(MqttConnection connection, U user, M message) {}
 
-  protected void processValidMessage(MqttConnection connection, C client, MqttNetworkSession session, M message) {}
+  protected void processValidMessage(MqttConnection connection, U user, MqttNetworkSession session, M message) {}
 
-  protected boolean processInvalidMessage(MqttConnection connection, C client, M message) {
+  protected boolean processInvalidMessage(MqttConnection connection, U user, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
-      malformedProtocolError(connection, client, exception);
+      malformedProtocolError(connection, user, exception);
       return true;
     }
     return false;
   }
 
-  protected boolean processInvalidMessage(MqttConnection connection, C client, MqttNetworkSession session, M message) {
+  protected boolean processInvalidMessage(MqttConnection connection, U user, MqttNetworkSession session, M message) {
     Exception exception = message.exception();
     if (exception instanceof MalformedProtocolMqttException) {
-      malformedProtocolError(connection, client, exception);
+      malformedProtocolError(connection, user, exception);
       return true;
     }
     return false;
   }
 
-  protected void malformedProtocolError(MqttConnection connection, C client, Exception exception) {
+  protected void malformedProtocolError(MqttConnection connection, U user, Exception exception) {
     // send feedback and close connection
     MqttOutMessage feedback = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
-    client
-        .sendWithFeedback(feedback)
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
+    user.sendWithFeedback(feedback)
         .thenAccept(_ -> connection.close());
   }
 
-  protected void handleSessionIsAlreadyClosed(MqttClient client) {
+  protected void handleSessionIsAlreadyClosed(NetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newDisconnect(
-            client,
+            user,
             DisconnectReasonCode.UNSPECIFIED_ERROR,
             ExtraErrorReasons.SESSION_IS_ALREADY_CLOSED);
-    client.closeWithReason(response);
+    user.closeWithReason(response);
   }
 }

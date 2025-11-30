@@ -6,14 +6,14 @@ import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
-import javasabr.mqtt.network.MqttClient;
+import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.MqttNetworkSession;
+import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
 
-public abstract class TrackableMqttPublishInMessageHandler<C extends MqttClient>
+public abstract class TrackableMqttPublishInMessageHandler<C extends NetworkMqttUser>
     extends AbstractMqttPublishInMessageHandler<C> {
 
   public TrackableMqttPublishInMessageHandler(
@@ -25,20 +25,20 @@ public abstract class TrackableMqttPublishInMessageHandler<C extends MqttClient>
   }
 
   @Override
-  protected boolean validateImpl(C client, MqttNetworkSession session, Publish publish) {
+  protected boolean validateImpl(C user, MqttNetworkSession session, Publish publish) {
     int messagedId = publish.messageId();
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      handleMissedMessageId(client);
+      handleMissedMessageId(user);
       return false;
     }
-    return super.validateImpl(client, session, publish);
+    return super.validateImpl(user, session, publish);
   }
 
   @Override
-  protected void handleImpl(C client, MqttNetworkSession session, Publish publish) {
+  protected void handleImpl(C user, MqttNetworkSession session, Publish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
-    super.handleImpl(client, session, publish);
+    super.handleImpl(user, session, publish);
   }
 
   protected void handleMissedMessageId(C client) {
