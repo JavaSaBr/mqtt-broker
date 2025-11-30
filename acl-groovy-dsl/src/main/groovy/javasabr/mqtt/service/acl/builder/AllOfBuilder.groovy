@@ -33,7 +33,7 @@ class AllOfBuilder extends ConditionBuilder {
 
   private void requireSingleMatcher(Identity identity, ValueMatcher<String>[] newMatchers) {
     if (alreadySetIdentities.contains(identity) || newMatchers.length > 1) {
-      throw new AclConfigurationException("AllOf condition can only have a single-matcher members")
+      throw new AclConfigurationException("AllOf condition can only have single-matcher members")
     } else {
       alreadySetIdentities.add(identity)
     }

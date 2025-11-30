@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.acl
 
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
@@ -11,6 +12,7 @@ import javasabr.mqtt.model.acl.matcher.EqualsMatcher
 import javasabr.mqtt.model.acl.matcher.RegexMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
 import javasabr.mqtt.model.acl.matcher.ValueMatcher
+import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
@@ -47,6 +49,18 @@ class AclRulesLoaderTest extends UnitSpecification {
         null               | 'ACL config path is null'
   }
 
+  def "should work fine with only publish rules"() {
+    given:
+        def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.groovy")
+        def rules = new AclRulesLoader(onlyPublishRulesAclPath)
+    when:
+        def ruleMap = rules.load()
+    then:
+        noExceptionThrown()
+        !ruleMap.get(PUBLISH).isEmpty()
+        ruleMap.get(SUBSCRIBE).isEmpty()
+  }
+
   def "should throw exception if config is invalid"(String invalidAclFileName, String errorMessage, Class<? extends Exception> exceptionClass) {
     given:
         def invalidAclPath = getAbsolutePath("acl/config/invalid/${invalidAclFileName}")
@@ -61,9 +75,9 @@ class AclRulesLoaderTest extends UnitSpecification {
         invalidAclFileName | exceptionClass            | errorMessage
         "1.groovy"         | AclConfigurationException | 'Only one clients section allowed'
         "2.groovy"         | AclConfigurationException | 'Only one clients section allowed'
-        "3.groovy"         | AclConfigurationException | 'AllOf condition can only have a single-matcher members'
+        "3.groovy"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
         "4.groovy"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.service.acl.builder.AllOfBuilder.allOf'
-        "5.groovy"         | AclConfigurationException | 'AllOf condition can only have a single-matcher members'
+        "5.groovy"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
   }
 
   def getAbsolutePath(String fileName) {
