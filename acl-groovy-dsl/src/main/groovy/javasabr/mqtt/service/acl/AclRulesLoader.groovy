@@ -5,15 +5,12 @@ import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.service.acl.builder.AclRulesBuilder
 import javasabr.rlib.collections.array.Array
+import javasabr.rlib.collections.array.ArrayFactory
+import javasabr.rlib.collections.array.MutableArray
 import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.nio.file.Files
 import java.nio.file.Path
-
-import static java.util.stream.Collectors.collectingAndThen
-import static java.util.stream.Collectors.groupingBy
-import static java.util.stream.Collectors.toCollection
-import static javasabr.rlib.collections.array.ArrayFactory.mutableArray
 
 class AclRulesLoader {
 
@@ -29,22 +26,37 @@ class AclRulesLoader {
     }
   }
 
-  EnumMap<Operation, Array<Rule>> load() {
+  Map<Operation, Array<Rule>> load() {
     CompilerConfiguration compilerConfig = new CompilerConfiguration()
-    AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
-    new GroovyShell(compilerConfig).with {
-      setVariable("allowPublish", aclRulesBuilder.&allowPublish)
-      setVariable("denyPublish", aclRulesBuilder.&denyPublish)
-      setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
-      setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
-      evaluate(aclConfigPath.toFile())
+    try (AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()) {
+      new GroovyShell(compilerConfig).with {
+        setVariable("allowPublish", aclRulesBuilder.&allowPublish)
+        setVariable("denyPublish", aclRulesBuilder.&denyPublish)
+        setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
+        setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
+        evaluate(aclConfigPath.toFile())
+      }
+      def rules = aclRulesBuilder.build()
+      var intermediate = new EnumMap<Operation, MutableArray<Rule>>(Operation)
+      for (Rule rule : rules) {
+        intermediate.computeIfAbsent(rule.operation(), AclRulesLoader::newMutableArray).add(rule)
+      }
+      var finalMap = new EnumMap<Operation, Array<Rule>>(Operation);
+      for (var entry : intermediate.entrySet()) {
+        finalMap.put(entry.key, Array.copyOf(entry.value))
+      }
+      Operation.forEach(operation -> {
+        finalMap.computeIfAbsent(operation, AclRulesLoader::emptyArray)
+      })
+      return Collections.unmodifiableMap(finalMap)
     }
-    Map<Operation, Array<Rule>> map = aclRulesBuilder.build()
-        .stream()
-        .collect(groupingBy(
-            Rule::operation,
-            { new LinkedHashMap<Operation, Array<Rule>>() },
-            collectingAndThen(toCollection(() -> mutableArray(Rule.class)), Array::copyOf)));
-    return new EnumMap<>(map)
+  }
+
+  static <K, V> V emptyArray(K ignored) {
+    Array.of() as V
+  }
+
+  static MutableArray<Rule> newMutableArray(Operation ignored) {
+    ArrayFactory.mutableArray(Rule)
   }
 }

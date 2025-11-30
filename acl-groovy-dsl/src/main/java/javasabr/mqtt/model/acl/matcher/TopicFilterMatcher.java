@@ -15,7 +15,7 @@ public record TopicFilterMatcher(TopicFilter expectedValue) implements ValueMatc
   }
 
   private boolean matches(String topic) {
-    int topicLength = topic.length();
+    final int topicLength = topic.length();
     int topicPosition = 0;
 
     final int totalLevels;
@@ -24,7 +24,9 @@ public record TopicFilterMatcher(TopicFilter expectedValue) implements ValueMatc
     } else {
       int slashCount = 0;
       for (int i = 0; i < topicLength; i++) {
-        if (topic.charAt(i) == DELIMITER_CHAR) slashCount++;
+        if (topic.charAt(i) == DELIMITER_CHAR) {
+          slashCount++;
+        }
       }
       totalLevels = 1 + slashCount;
     }
@@ -38,22 +40,24 @@ public record TopicFilterMatcher(TopicFilter expectedValue) implements ValueMatc
       if (consumedLevels >= totalLevels) {
         return false;
       }
-      int segmentStart = topicPosition;
+      final int segmentStart = topicPosition;
       int segmentEnd = segmentStart;
-      if (segmentStart != topicLength) {
-        while (segmentEnd < topicLength && topic.charAt(segmentEnd) != DELIMITER_CHAR) {
-          segmentEnd++;
-        }
+      while (segmentEnd < topicLength && topic.charAt(segmentEnd) != DELIMITER_CHAR) {
+        segmentEnd++;
       }
-      int segmentLength = segmentEnd - segmentStart;
+      final int segmentLength = segmentEnd - segmentStart;
       if (Objects.equals(filterSegment, SINGLE_LEVEL_WILDCARD)) {
         consumedLevels++;
         topicPosition = (segmentEnd < topicLength ? segmentEnd + 1 : topicLength);
         continue;
       }
-      if (filterSegment.length() != segmentLength) return false;
+      if (filterSegment.length() != segmentLength) {
+        return false;
+      }
       for (int k = 0; k < segmentLength; k++) {
-        if (filterSegment.charAt(k) != topic.charAt(segmentStart + k)) return false;
+        if (filterSegment.charAt(k) != topic.charAt(segmentStart + k)) {
+          return false;
+        }
       }
       consumedLevels++;
       topicPosition = (segmentEnd < topicLength ? segmentEnd + 1 : topicLength);

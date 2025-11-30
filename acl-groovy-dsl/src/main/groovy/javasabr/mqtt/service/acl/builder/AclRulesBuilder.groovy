@@ -3,7 +3,6 @@ package javasabr.mqtt.service.acl.builder
 
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.rlib.collections.array.Array
-import javasabr.rlib.collections.array.ArrayFactory
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
@@ -16,13 +15,18 @@ import static javasabr.rlib.collections.array.ArrayFactory.mutableArray
 /**
  * Builds list of {@link javasabr.mqtt.model.acl.rule.Rule} from ACL configuration
  */
-class AclRulesBuilder {
+class AclRulesBuilder implements AutoCloseable {
 
   private final List<CompletableFuture<Rule>> ruleBuilderFutures = []
   private final Executor executor = newFixedThreadPool(getRuntime().availableProcessors() * 2)
 
   Array<Rule> build() {
-    return ruleBuilderFutures.collect(mutableArray(Rule.class), CompletableFuture::join as Closure<? extends Rule>)
+    return ruleBuilderFutures.collect(mutableArray(Rule.class), { it.join() })
+  }
+
+  @Override
+  void close() throws Exception {
+    executor.shutdown()
   }
 
   void allowPublish(Closure<?> config) {
