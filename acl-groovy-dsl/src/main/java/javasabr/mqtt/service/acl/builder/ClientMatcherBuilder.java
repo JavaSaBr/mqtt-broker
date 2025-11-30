@@ -15,4 +15,8 @@ public interface ClientMatcherBuilder {
   default ValueMatcher<String> regex(String string) {
     return new RegexMatcher(Pattern.compile(string));
   }
+
+  default ValueMatcher<?> anyone() {
+    return ValueMatcher.ANY;
+  }
 }

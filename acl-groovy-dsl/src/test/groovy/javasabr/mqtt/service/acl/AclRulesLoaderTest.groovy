@@ -1,6 +1,5 @@
 package javasabr.mqtt.service.acl
 
-
 import javasabr.mqtt.model.acl.condition.AllOfCondition
 import javasabr.mqtt.model.acl.condition.AnyOfCondition
 import javasabr.mqtt.model.acl.condition.ClientIdCondition
@@ -114,6 +113,11 @@ class AclRulesLoaderTest extends UnitSpecification {
                 }
                 with(get(5) as IpAddressCondition) {
                   with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                }
+                with(get(6) as AnyOfCondition) {
+                  with(conditions as Array<Condition>) {
+                    with(get(0) as UserNameCondition) { clientMatcher == ValueMatcher.ANY }
+                  }
                 }
                 with(get(7) as AllOfCondition) {
                   with(conditions as Array<Condition>) {

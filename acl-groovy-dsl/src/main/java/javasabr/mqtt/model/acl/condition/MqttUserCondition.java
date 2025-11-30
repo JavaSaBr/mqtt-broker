@@ -4,7 +4,7 @@ import javasabr.mqtt.model.MqttUser;
 
 public interface MqttUserCondition {
 
-  MqttUserCondition MATCH_ANY = new AnyCondition();
+  MqttUserCondition MATCH_ANY = new AnyUserCondition();
 
   boolean test(MqttUser value);
 }

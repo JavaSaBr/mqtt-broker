@@ -6,7 +6,7 @@ allowPublish {
     clientId eq("clientId1"), regex("^cliend")
     ipAddress eq("10.56.0.3"), eq("127.0.0.1")
     anyOf {
-      userName eq("sensor2")
+      userName anyone()
       clientId eq("clientId2")
       ipAddress eq("10.56.0.3")
     }
