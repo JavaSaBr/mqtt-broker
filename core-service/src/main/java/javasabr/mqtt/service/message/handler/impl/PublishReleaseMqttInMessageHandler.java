@@ -6,9 +6,9 @@ import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -32,7 +32,7 @@ public class PublishReleaseMqttInMessageHandler
   protected void processValidMessage(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       PublishReleaseMqttInMessage releaseMessage) {
 
     int messageId = releaseMessage.messageId();
@@ -52,7 +52,7 @@ public class PublishReleaseMqttInMessageHandler
   }
 
   private void handleUnknownMessageId(ExternalNetworkMqttUser client, int messageId) {
-    client.send(messageOutFactoryService
+    client.sendAsync(messageOutFactoryService
         .resolveFactory(client)
         .newPublishCompleted(messageId, PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND));
   }

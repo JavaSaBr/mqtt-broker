@@ -4,10 +4,11 @@ import java.util.concurrent.locks.StampedLock;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
-import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
 import lombok.AccessLevel;
@@ -18,11 +19,11 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
 
   record InProcessPublish(Publish publish, TrackableMessageCallback callback, PublishRetryer retryer) {}
 
-  MqttNetworkSession session;
+  MqttSession session;
   MutableIntToRefDictionary<InProcessPublish> processing;
   StampedLock lock;
 
-  public InMemoryProcessingPublishes(MqttNetworkSession session) {
+  public InMemoryProcessingPublishes(NetworkMqttSession session) {
     this.session = session;
     this.processing = DictionaryFactory.mutableIntToRefDictionary();
     this.lock = new StampedLock();

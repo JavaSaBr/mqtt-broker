@@ -15,10 +15,10 @@ import javasabr.mqtt.model.subscription.RequestedSubscription;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -59,7 +59,7 @@ public class SubscribeMqttInMessageHandler extends
   protected void processValidMessage(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       SubscribeMqttInMessage subscribeMessage) {
 
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
@@ -140,14 +140,14 @@ public class SubscribeMqttInMessageHandler extends
     Array<SubscribeAckReasonCode> subscribeResults = Array.repeated(
         SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE,
         subscribeMessage.subscriptionsCount());
-    user.send(messageOutFactoryService
+    user.sendAsync(messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(subscribeMessage.messageId(), subscribeResults));
   }
 
   private void handleSubscriptionIdNotSupported(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       SubscribeMqttInMessage subscribeMessage) {
     Array<SubscribeAckReasonCode> subscribeResults = Array.repeated(
         SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
@@ -156,7 +156,7 @@ public class SubscribeMqttInMessageHandler extends
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(messageId, subscribeResults);
-    user.sendWithFeedback(response)
+    user.send(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
@@ -164,14 +164,14 @@ public class SubscribeMqttInMessageHandler extends
 
   private void sendSubscribeResults(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       SubscribeMqttInMessage subscribeMessage,
       Array<SubscribeAckReasonCode> subscribeResults) {
     int messageId = subscribeMessage.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(messageId, subscribeResults);
-    user.sendWithFeedback(response)
+    user.send(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));

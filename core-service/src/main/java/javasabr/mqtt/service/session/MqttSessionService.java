@@ -1,13 +1,13 @@
 package javasabr.mqtt.service.session;
 
-import javasabr.mqtt.network.MqttNetworkSession;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import reactor.core.publisher.Mono;
 
 public interface MqttSessionService {
 
-  Mono<MqttNetworkSession> restore(String clientId);
+  Mono<NetworkMqttSession> restore(String clientId);
 
-  Mono<MqttNetworkSession> create(String clientId);
+  Mono<NetworkMqttSession> create(String clientId);
 
-  Mono<Boolean> store(String clientId, MqttNetworkSession session, long expiryInterval);
+  Mono<Boolean> store(String clientId, NetworkMqttSession session, long expiryInterval);
 }
