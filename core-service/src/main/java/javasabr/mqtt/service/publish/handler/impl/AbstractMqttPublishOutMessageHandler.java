@@ -18,17 +18,17 @@ import org.jspecify.annotations.Nullable;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class AbstractMqttPublishOutMessageHandler<C extends NetworkMqttUser>
+public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqttUser>
     implements MqttPublishOutMessageHandler {
 
-  Class<C> expectedClient;
+  Class<U> expectedUser;
   SubscriptionService subscriptionService;
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
   public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
     NetworkMqttUser user = subscriptionService.resolveClient(subscriber);
-    if (!expectedClient.isInstance(user)) {
+    if (!expectedUser.isInstance(user)) {
       log.warning(user, "Accepted not expected client:[%s]"::formatted);
       return PublishHandlingResult.NOT_EXPECTED_CLIENT;
     }
@@ -36,11 +36,11 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends NetworkMqtt
     if (publish == null) {
       return PublishHandlingResult.SKIPPED;
     }
-    return handleImpl(publish, expectedClient.cast(user));
+    return handleImpl(publish, expectedUser.cast(user));
   }
 
   @Nullable
-  protected Publish reconstruct(NetworkMqttUser client, Publish original) {
+  protected Publish reconstruct(NetworkMqttUser user, Publish original) {
     return original.with(
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos(),
@@ -48,11 +48,11 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends NetworkMqtt
         MqttProperties.TOPIC_ALIAS_NOT_SET);
   }
 
-  protected abstract PublishHandlingResult handleImpl(Publish publish, C client) ;
+  protected abstract PublishHandlingResult handleImpl(Publish publish, U client) ;
 
-  protected void startDelivering(NetworkMqttUser client, Publish publish) {
+  protected void startDelivering(NetworkMqttUser user, Publish publish) {
     MqttOutMessage outMessage = messageOutFactoryService
-        .resolveFactory(client)
+        .resolveFactory(user)
         .newPublish(
             publish.messageId(),
             qos(),
@@ -65,6 +65,6 @@ public abstract class AbstractMqttPublishOutMessageHandler<C extends NetworkMqtt
             publish.responseTopicName(),
             publish.correlationData(),
             publish.userProperties());
-    client.send(outMessage);
+    user.sendAsync(outMessage);
   }
 }

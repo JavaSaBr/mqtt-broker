@@ -68,10 +68,10 @@ public abstract class MqttMessageOutFactory {
         MutableArray.ofType(StringPair.class));
   }
 
-  public MqttOutMessage newConnectAck(NetworkMqttUser client, ConnectAckReasonCode reasonCode) {
-    MqttClientConnectionConfig connectionConfig = client.connectionConfig();
+  public MqttOutMessage newConnectAck(NetworkMqttUser user, ConnectAckReasonCode reasonCode) {
+    MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     return newConnectAck(
-        client,
+        user,
         reasonCode,
         false,
         StringUtils.EMPTY,
@@ -185,10 +185,10 @@ public abstract class MqttMessageOutFactory {
   }
 
   public MqttOutMessage newDisconnect(
-      NetworkMqttUser client,
+      NetworkMqttUser user,
       DisconnectReasonCode reasonCode,
       Array<StringPair> userProperties) {
-    return newDisconnect(client, reasonCode, userProperties, null, null);
+    return newDisconnect(user, reasonCode, userProperties, null, null);
   }
 
   public MqttOutMessage newDisconnect(

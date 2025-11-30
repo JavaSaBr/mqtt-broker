@@ -35,8 +35,8 @@ public class DefaultConnectionService implements ConnectionService {
     var inMessageHandlers = new MqttInMessageHandler[highestPacketType + 1];
 
     for (MqttInMessageHandler knownInMessageHandler : knownInMessageHandlers) {
-      Class<? extends NetworkMqttUser> clientType = knownInMessageHandler.expectedUserType();
-      if (!expectedUserType.isAssignableFrom(clientType)) {
+      Class<? extends NetworkMqttUser> userType = knownInMessageHandler.expectedUserType();
+      if (!expectedUserType.isAssignableFrom(userType)) {
         continue;
       }
       MqttMessageType messageType = knownInMessageHandler.messageType();
@@ -106,7 +106,7 @@ public class DefaultConnectionService implements ConnectionService {
   }
 
   private static String buildServiceDescription(
-      Class<? extends NetworkMqttUser> expectedClientType,
+      Class<? extends NetworkMqttUser> expectedUserType,
       @Nullable MqttInMessageHandler[] inMessageHandlers) {
     var builder = new StringBuilder();
     builder.append("{\n");
@@ -131,6 +131,6 @@ public class DefaultConnectionService implements ConnectionService {
         .append("\n}");
 
     return "Registered [%d] for [%s] MqttInMessageHandlers: %s"
-        .formatted(count, expectedClientType.getSimpleName(), builder);
+        .formatted(count, expectedUserType.getSimpleName(), builder);
   }
 }

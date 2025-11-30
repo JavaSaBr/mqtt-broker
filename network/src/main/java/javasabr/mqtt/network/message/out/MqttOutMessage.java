@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.data.type.StringPair;
-import javasabr.mqtt.model.message.MqttMessage;
+import javasabr.mqtt.model.message.SendableMqttMessage;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttConnection> 
-    implements MqttMessage {
+    implements SendableMqttMessage {
   
   private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER = ThreadLocal
       .withInitial(() -> ByteBuffer.allocate(1024 * 1024));

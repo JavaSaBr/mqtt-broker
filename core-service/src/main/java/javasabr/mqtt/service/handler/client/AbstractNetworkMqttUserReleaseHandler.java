@@ -1,9 +1,9 @@
 package javasabr.mqtt.service.handler.client;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.AbstractNetworkMqttUser;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.SubscriptionService;
@@ -43,7 +43,7 @@ public abstract class AbstractNetworkMqttUserReleaseHandler<T extends AbstractNe
       return Mono.empty();
     }
 
-    MqttNetworkSession session = user.session();
+    NetworkMqttSession session = user.session();
     Mono<?> asyncActions = null;
 
     if (session != null) {

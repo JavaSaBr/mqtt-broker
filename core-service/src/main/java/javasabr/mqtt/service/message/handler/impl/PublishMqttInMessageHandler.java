@@ -12,10 +12,10 @@ import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
@@ -50,7 +50,7 @@ public class PublishMqttInMessageHandler
   protected void processValidMessage(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       PublishMqttInMessage publishMessage) {
 
     if (!validateBaseFields(connection, user, publishMessage)) {
@@ -224,7 +224,7 @@ public class PublishMqttInMessageHandler
 
   private void handleInvalidTopicName(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       PublishMqttInMessage publishMessage) {
     int messagedId = publishMessage.messageId();
     MqttOutMessage response = messageOutFactoryService

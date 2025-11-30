@@ -6,9 +6,9 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -34,7 +34,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected boolean validateImpl(ExternalNetworkMqttUser user, MqttNetworkSession session, Publish publish) {
+  protected boolean validateImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
     if (!super.validateImpl(user, session, publish)) {
       return false;
     }
@@ -55,7 +55,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleNoMatchedSubscribers(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
     int messageId = publish.messageId();
@@ -68,7 +68,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleSuccess(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       int matchedSubscribers) {
     super.handleSuccess(user, session, publish, matchedSubscribers);
@@ -82,7 +82,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   @Override
   protected void handleError(
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       Publish publish,
       PublishHandlingResult handlingResult) {
     super.handleError(user, session, publish, handlingResult);
@@ -94,7 +94,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
-    user.send(messageOutFactoryService
+    user.sendAsync(messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
   }

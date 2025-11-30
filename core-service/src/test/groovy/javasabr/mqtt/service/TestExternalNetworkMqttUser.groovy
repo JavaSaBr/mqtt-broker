@@ -1,5 +1,6 @@
 package javasabr.mqtt.service
 
+import javasabr.mqtt.model.message.SendableMqttMessage
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser
@@ -7,6 +8,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.rlib.collections.array.MutableArray
 
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
@@ -27,12 +29,22 @@ class TestExternalNetworkMqttUser extends ExternalNetworkMqttUser {
   }
 
   @Override
-  void send(MqttOutMessage message) {
+  void sendAsync(SendableMqttMessage message) {
+    sendAsync((MqttOutMessage) message)
+  }
+
+  @Override
+  void sendAsync(MqttOutMessage message) {
     sentMessages.add(message)
   }
 
   @Override
-  CompletableFuture<Boolean> sendWithFeedback(MqttOutMessage message) {
+  CompletionStage<Boolean> send(SendableMqttMessage message) {
+    return send((MqttOutMessage) message)
+  }
+  
+  @Override
+  CompletableFuture<Boolean> send(MqttOutMessage message) {
     sentMessages.add(message)
     if (!returnCompletedFeatures) {
       return CompletableFuture.supplyAsync({ true }, DELAYED_EXECUTOR);

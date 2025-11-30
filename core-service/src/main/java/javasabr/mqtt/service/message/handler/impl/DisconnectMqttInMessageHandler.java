@@ -3,9 +3,9 @@ package javasabr.mqtt.service.message.handler.impl;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttNetworkSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.DisconnectMqttInMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import lombok.CustomLog;
 
@@ -25,7 +25,7 @@ public class DisconnectMqttInMessageHandler extends AbstractMqttInMessageHandler
   protected void processValidMessage(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
-      MqttNetworkSession session,
+      NetworkMqttSession session,
       DisconnectMqttInMessage message) {
     DisconnectReasonCode reasonCode = message.reasonCode();
     if (reasonCode == DisconnectReasonCode.NORMAL_DISCONNECTION) {
