@@ -17,5 +17,7 @@ class AnyOfBuilder extends ConditionBuilder {
     return this
   }
 
-  MqttUserCondition build() { return new AnyOfCondition(Array.copyOf(conditions)) }
+  MqttUserCondition build() {
+    return new AnyOfCondition(Array.copyOf(conditions))
+  }
 }

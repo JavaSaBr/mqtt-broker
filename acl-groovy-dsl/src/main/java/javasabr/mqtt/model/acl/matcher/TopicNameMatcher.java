@@ -4,10 +4,10 @@ import java.util.Objects;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicName;
 
-public record TopicNameMatcher(AbstractTopic expectedValue) implements ValueMatcher<AbstractTopic> {
+public record TopicNameMatcher(TopicName expectedTopic) implements ValueMatcher<AbstractTopic> {
 
   @Override
-  public boolean test(AbstractTopic value) {
-    return Objects.equals(expectedValue.rawTopic(), value.rawTopic());
+  public boolean test(AbstractTopic requestedTopic) {
+    return Objects.equals(expectedTopic.rawTopic(), requestedTopic.rawTopic());
   }
 }

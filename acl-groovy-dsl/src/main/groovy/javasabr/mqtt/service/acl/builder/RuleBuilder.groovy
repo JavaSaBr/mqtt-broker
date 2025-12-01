@@ -9,26 +9,33 @@ import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
 
 abstract class RuleBuilder implements TopicMatcherBuilder {
-  Action permission
-  Operation action
-  MqttUserCondition clients
+  Action action
+  Operation operation
+  MqttUserCondition userCondition
 
-  RuleBuilder(Action permission, Operation action) { this.permission = permission; this.action = action }
+  RuleBuilder(Action action, Operation operation) {
+    this.action = action
+    this.operation = operation
+  }
 
   RuleBuilder allOf(Closure<?> config) {
-    if (this.clients) throw new AclConfigurationException("Only one clients section allowed")
-    this.clients = new AllOfBuilder().buildCondition(config).build()
+    if (this.userCondition) {
+      throw new AclConfigurationException("Only one clients section allowed")
+    }
+    this.userCondition = new AllOfBuilder().buildCondition(config).build()
     return this
   }
 
   RuleBuilder anyOf(Closure<?> config) {
-    if (this.clients) throw new AclConfigurationException("Only one clients section allowed")
-    this.clients = config == null ? MqttUserCondition.MATCH_ANY : new AnyOfBuilder().buildCondition(config).build()
+    if (this.userCondition) {
+      throw new AclConfigurationException("Only one clients section allowed")
+    }
+    this.userCondition = config == null ? MqttUserCondition.MATCH_ANY : new AnyOfBuilder().buildCondition(config).build()
     return this
   }
 
   static ValueMatcher<?> anyone() {
-    return ValueMatcher.ANY
+    return ValueMatcher.MATCH_ANY
   }
 
   abstract Rule build()

@@ -6,6 +6,10 @@ import javasabr.mqtt.model.acl.condition.MqttUserCondition
 import javasabr.mqtt.model.acl.condition.TopicCondition
 import javasabr.mqtt.model.acl.condition.UserNameCondition
 import javasabr.mqtt.model.acl.matcher.EqualsMatcher
+import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
+import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
+import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.service.acl.builder.ClientMatcherBuilder
 import javasabr.rlib.collections.array.Array
 
@@ -22,4 +26,12 @@ interface ConditionMatcherAware extends ClientMatcherBuilder {
   default MqttUserCondition ipAddressEquals(String value) { new IpAddressCondition(new EqualsMatcher(value)) }
 
   default MqttUserCondition ipAddressRegex(String value) { new IpAddressCondition(regex(value)) }
+
+  default TopicCondition topicNameCondition(String value) {
+    return new TopicCondition(Array.of(new TopicNameMatcher(TopicName.valueOf(value))));
+  }
+
+  default TopicCondition topicFilterCondition(String value) {
+    return new TopicCondition(Array.of(new TopicFilterMatcher(TopicFilter.valueOf(value))));
+  }
 }

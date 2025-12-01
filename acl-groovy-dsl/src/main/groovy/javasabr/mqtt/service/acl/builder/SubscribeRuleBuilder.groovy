@@ -11,10 +11,10 @@ import javasabr.rlib.collections.array.MutableArray
 abstract class SubscribeRuleBuilder extends RuleBuilder {
   protected MutableArray<ValueMatcher<TopicFilter>> topicFilters = ArrayFactory.mutableArray(ValueMatcher)
 
-  SubscribeRuleBuilder(Action permission) { super(permission, Operation.SUBSCRIBE) }
+  SubscribeRuleBuilder(Action action) { super(action, Operation.SUBSCRIBE) }
 
-  SubscribeRuleBuilder topicFilter(ValueMatcher<TopicFilter>... topicFilter) {
-    this.topicFilters.addAll(topicFilter)
+  SubscribeRuleBuilder topicFilter(ValueMatcher<TopicFilter>... topicFilters) {
+    this.topicFilters.addAll(topicFilters)
     return this
   }
 }

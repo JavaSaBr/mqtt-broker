@@ -11,5 +11,4 @@ dependencies {
 
   testImplementation testFixtures(projects.model)
   testImplementation projects.testSupport
-  testFixturesApi projects.testSupport
 }

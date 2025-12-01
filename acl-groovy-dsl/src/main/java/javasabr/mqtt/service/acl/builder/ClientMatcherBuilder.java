@@ -17,6 +17,6 @@ public interface ClientMatcherBuilder {
   }
 
   default ValueMatcher<?> anyone() {
-    return ValueMatcher.ANY;
+    return ValueMatcher.MATCH_ANY;
   }
 }

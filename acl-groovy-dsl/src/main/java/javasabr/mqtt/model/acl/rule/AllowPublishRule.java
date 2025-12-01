@@ -7,8 +7,14 @@ import javasabr.mqtt.model.acl.Action;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.acl.condition.MqttUserCondition;
 import javasabr.mqtt.model.acl.condition.TopicCondition;
+import lombok.EqualsAndHashCode;
 
-public record AllowPublishRule(MqttUserCondition userCondition, TopicCondition topicCondition) implements Rule {
+@EqualsAndHashCode(callSuper = true)
+public final class AllowPublishRule extends AbstractRule {
+
+  public AllowPublishRule(MqttUserCondition userCondition, TopicCondition topicCondition) {
+    super(userCondition, topicCondition);
+  }
 
   @Override
   public Operation operation() {

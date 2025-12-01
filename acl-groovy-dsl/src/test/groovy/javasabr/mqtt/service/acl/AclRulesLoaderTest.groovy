@@ -12,6 +12,7 @@ import javasabr.mqtt.model.acl.matcher.RegexMatcher
 import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
 import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
 import javasabr.mqtt.model.acl.matcher.ValueMatcher
+import javasabr.mqtt.model.acl.rule.AbstractRule
 import javasabr.mqtt.model.exception.AclConfigurationException
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
@@ -72,11 +73,11 @@ class AclRulesLoaderTest extends UnitSpecification {
         exception.cause.message.startsWith errorMessage
     where:
         invalidAclFileName | exceptionClass            | errorMessage
-        "1.groovy"         | AclConfigurationException | 'Only one clients section allowed'
-        "2.groovy"         | AclConfigurationException | 'Only one clients section allowed'
-        "3.groovy"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
-        "4.groovy"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.service.acl.builder.AllOfBuilder.allOf'
-        "5.groovy"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "1.config"         | AclConfigurationException | 'Only one clients section allowed'
+        "2.config"         | AclConfigurationException | 'Only one clients section allowed'
+        "3.config"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "4.config"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.service.acl.builder.AllOfBuilder.allOf'
+        "5.config"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
   }
 
   def getAbsolutePath(String fileName) {
@@ -91,93 +92,93 @@ class AclRulesLoaderTest extends UnitSpecification {
     then:
         verifyAll(rules.get(PUBLISH)) {
           size() == 2
-          with(get(0)) {
+          with(get(0) as AbstractRule) {
             operation() == PUBLISH
             action() == ALLOW
             with(userCondition() as AnyOfCondition) {
-              with(conditions as Array<Condition>) {
+              with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "sensor1" }
+                  with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor1" }
                 }
                 with(get(1) as UserNameCondition) {
-                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
+                  with(userNameMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "clientId1" }
+                  with(expectedClientId as EqualsMatcher) { expectedValue == "clientId1" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(clientMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
+                  with(expectedClientId as RegexMatcher) { pattern.pattern() == "^cliend" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "127.0.0.1" }
                 }
                 with(get(6) as AnyOfCondition) {
-                  with(conditions as Array<Condition>) {
-                    with(get(0) as UserNameCondition) { clientMatcher == ValueMatcher.ANY }
+                  with(expectedUsers as Array<Condition>) {
+                    with(get(0) as UserNameCondition) { userNameMatcher == ValueMatcher.MATCH_ANY }
                   }
                 }
                 with(get(7) as AllOfCondition) {
-                  with(conditions as Array<Condition>) {
+                  with(expectedUsers as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                      with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
                     }
                     with(get(1) as ClientIdCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                      with(expectedClientId as EqualsMatcher) { expectedValue == "clientId2" }
                     }
                     with(get(2) as IpAddressCondition) {
-                      with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                      with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
                     }
                   }
                 }
               }
             }
-            with(topicCondition().topics) {
-              with(get(0) as TopicNameMatcher) { expectedValue.rawTopic() == "/topic1" }
-              with(get(1) as TopicNameMatcher) { expectedValue.rawTopic() == "/topic2/temp" }
+            with(topicCondition().expectedTopics) {
+              with(get(0) as TopicNameMatcher) { expectedTopic.rawTopic() == "/topic1" }
+              with(get(1) as TopicNameMatcher) { expectedTopic.rawTopic() == "/topic2/temp" }
             }
           }
-          with(get(1)) {
+          with(get(1) as AbstractRule) {
             operation() == PUBLISH
             action() == DENY
             userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().topics().get(0) == ValueMatcher.ANY
+            topicCondition().expectedTopics.get(0) == ValueMatcher.MATCH_ANY
           }
         }
         verifyAll(rules.get(SUBSCRIBE)) {
           size() == 3
-          with(get(0)) {
+          with(get(0) as AbstractRule) {
             operation() == SUBSCRIBE
             action() == DENY
             with(userCondition() as AllOfCondition) {
-              with(conditions as Array<Condition>) {
+              with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                  with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
                 }
                 with(get(1) as ClientIdCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                  with(expectedClientId as EqualsMatcher) { expectedValue == "clientId2" }
                 }
                 with(get(2) as IpAddressCondition) {
-                  with(clientMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
               }
             }
-            with(topicCondition().topics) {
-              with(get(0) as TopicFilterMatcher) { expectedTopicFilter.rawTopic == "/topic1/#" }
-              with(get(1) as TopicFilterMatcher) { expectedTopicFilter.rawTopic == "/topic2/+/temp" }
+            with(topicCondition().expectedTopics) {
+              with(get(0) as TopicFilterMatcher) { expectedTopic.rawTopic == "/topic1/#" }
+              with(get(1) as TopicFilterMatcher) { expectedTopic.rawTopic == "/topic2/+/temp" }
             }
           }
           with(get(1)) {
             operation() == SUBSCRIBE
             action() == ALLOW
           }
-          with(get(2)) {
+          with(get(2) as AbstractRule) {
             operation() == SUBSCRIBE
             action() == DENY
             userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().topics().get(0) == ValueMatcher.ANY
+            topicCondition().expectedTopics.get(0) == ValueMatcher.MATCH_ANY
           }
         }
   }

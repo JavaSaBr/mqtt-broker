@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.acl
 
+import groovy.transform.Field
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
@@ -13,7 +14,8 @@ import java.nio.file.Path
 
 class AclRulesLoader {
 
-  private Path aclConfigPath = null
+  @SuppressWarnings('GrFinalVariableAccess')
+  private final Path aclConfigPath
 
   AclRulesLoader(String aclConfigPath) {
     if (aclConfigPath == null) {
@@ -21,7 +23,7 @@ class AclRulesLoader {
     }
     this.aclConfigPath = Path.of(aclConfigPath)
     if (Files.notExists(this.aclConfigPath)) {
-      throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(this.aclConfigPath))
+      throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(aclConfigPath))
     }
   }
 

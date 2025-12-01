@@ -11,10 +11,12 @@ import javasabr.rlib.collections.array.MutableArray
 abstract class PublishRuleBuilder extends RuleBuilder {
   protected MutableArray<ValueMatcher<TopicName>> topicNames = ArrayFactory.mutableArray(ValueMatcher)
 
-  PublishRuleBuilder(Action permission) { super(permission, Operation.PUBLISH) }
+  PublishRuleBuilder(Action action) {
+    super(action, Operation.PUBLISH)
+  }
 
-  PublishRuleBuilder topicName(ValueMatcher<TopicName>... topicName) {
-    this.topicNames.addAll(topicName)
+  PublishRuleBuilder topicName(ValueMatcher<TopicName>... topicNames) {
+    this.topicNames.addAll(topicNames)
     return this
   }
 }

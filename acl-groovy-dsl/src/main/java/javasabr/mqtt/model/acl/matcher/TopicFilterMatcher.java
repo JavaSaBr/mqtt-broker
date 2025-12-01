@@ -4,18 +4,18 @@ import java.util.Objects;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
 
-public record TopicFilterMatcher(AbstractTopic expectedTopicFilter) implements ValueMatcher<AbstractTopic> {
+public record TopicFilterMatcher(TopicFilter expectedTopic) implements ValueMatcher<AbstractTopic> {
 
   @Override
-  public boolean test(AbstractTopic requestedTopicFilter) {
-    return matches(requestedTopicFilter);
+  public boolean test(AbstractTopic requestedTopic) {
+    return matches(requestedTopic);
   }
 
   private boolean matches(AbstractTopic requestedTopicFilter) {
-    final int expectedFilterLevels = expectedTopicFilter.levelsCount();
+    final int expectedFilterLevels = expectedTopic.levelsCount();
     final int incomingFilterLevels = requestedTopicFilter.levelsCount();
     for (int i = 0; i < expectedFilterLevels; i++) {
-      String expectedSegment = expectedTopicFilter.segment(i);
+      String expectedSegment = expectedTopic.segment(i);
       if (Objects.equals(expectedSegment, TopicFilter.MULTI_LEVEL_WILDCARD)) {
         return i == expectedFilterLevels - 1;
       } else if (i >= incomingFilterLevels) {

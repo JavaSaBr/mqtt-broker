@@ -13,20 +13,20 @@ abstract class ConditionBuilder implements ClientMatcherBuilder {
 
   protected MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
 
-  ConditionBuilder userName(ValueMatcher<String>... username) {
-    def collect = username.collect { new UserNameCondition(it) }
+  ConditionBuilder userName(ValueMatcher<String>... userNames) {
+    def collect = userNames.collect { new UserNameCondition(it) }
     this.conditions.addAll(collect)
     return this
   }
 
-  ConditionBuilder clientId(ValueMatcher<String>... clientId) {
-    def collect = clientId.collect { new ClientIdCondition(it) }
+  ConditionBuilder clientId(ValueMatcher<String>... clientIds) {
+    def collect = clientIds.collect { new ClientIdCondition(it) }
     this.conditions.addAll(collect)
     return this
   }
 
-  ConditionBuilder ipAddress(ValueMatcher<String>... ipAddress) {
-    def collect = ipAddress.collect { new IpAddressCondition(it) }
+  ConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
+    def collect = ipAddresses.collect { new IpAddressCondition(it) }
     this.conditions.addAll(collect)
     return this
   }

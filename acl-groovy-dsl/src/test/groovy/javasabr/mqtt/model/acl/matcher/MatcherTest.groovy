@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.acl.matcher
 
-import javasabr.mqtt.model.topic.AbstractTopic
+
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 
@@ -8,57 +8,57 @@ import java.util.regex.Pattern
 
 class MatcherTest extends UnitSpecification {
 
-  def "should match topic filter"(AbstractTopic topicFilter, AbstractTopic incomingValue, boolean expectedResult) {
+  def "should match topic filter"(String topicFilter, String incomingValue, boolean expectedResult) {
     given:
-        def matcher = new TopicFilterMatcher(topicFilter)
+        def matcher = new TopicFilterMatcher(TopicFilter.valueOf(topicFilter))
     when:
-        boolean result = matcher.test(incomingValue)
+        boolean result = matcher.test(TopicFilter.valueOf(incomingValue))
     then:
         result == expectedResult
     where:
-        incomingValue                                               | topicFilter                                   | expectedResult
-        TopicFilter.valueOf("topic1")                               | TopicFilter.valueOf("#")                      | true
-        TopicFilter.valueOf("sport")                                | TopicFilter.valueOf("sport/#")                | true
-        TopicFilter.valueOf("sport/tennis/player1")                 | TopicFilter.valueOf("sport/tennis/player1/#") | true
-        TopicFilter.valueOf("sport/tennis/player1/ranking")         | TopicFilter.valueOf("sport/tennis/player1/#") | true
-        TopicFilter.valueOf("sport/tennis/player1/score/wimbledon") | TopicFilter.valueOf("sport/tennis/player1/#") | true
-        TopicFilter.valueOf("/finance")                             | TopicFilter.valueOf("+/+")                    | true
-        TopicFilter.valueOf("/finance")                             | TopicFilter.valueOf("/+")                     | true
-        TopicFilter.valueOf("/finance")                             | TopicFilter.valueOf("+")                      | false
-        TopicFilter.valueOf("finance")                              | TopicFilter.valueOf("+")                      | true
-        TopicFilter.valueOf("finance/stocks")                       | TopicFilter.valueOf("+/stocks")               | true
-        TopicFilter.valueOf("finance/stocks")                       | TopicFilter.valueOf("finance/+")              | true
-        TopicFilter.valueOf("finance/stocks/value")                 | TopicFilter.valueOf("finance/+")              | false
-        TopicFilter.valueOf("a/b/c")                                | TopicFilter.valueOf("a/#")                    | true
-        TopicFilter.valueOf("a/b/c")                                | TopicFilter.valueOf("#")                      | true
-        TopicFilter.valueOf("")                                     | TopicFilter.valueOf("#")                      | true
-        TopicFilter.valueOf("a")                                    | TopicFilter.valueOf("a/#")                    | true
-        TopicFilter.valueOf("a/")                                   | TopicFilter.valueOf("a/#")                    | true
-        TopicFilter.valueOf("sport/tennis/player1")                 | TopicFilter.valueOf("sport/+/player1")        | true
-        TopicFilter.valueOf("sport/tennis/player1")                 | TopicFilter.valueOf("sport/+/player2")        | false
-        TopicFilter.valueOf("sport/tennis/")                        | TopicFilter.valueOf("sport/+/+")              | true
-        TopicFilter.valueOf("sport//player1")                       | TopicFilter.valueOf("sport/+/player1")        | true
-        TopicFilter.valueOf("sport//player1")                       | TopicFilter.valueOf("sport/+/+")              | true
-        TopicFilter.valueOf("sport///")                             | TopicFilter.valueOf("sport/+/+/#")            | true
-        TopicFilter.valueOf("///")                                  | TopicFilter.valueOf("+/+/+/+")                | true
-        TopicFilter.valueOf("///")                                  | TopicFilter.valueOf("+/+/+")                  | false
-        TopicFilter.valueOf("///")                                  | TopicFilter.valueOf("+/+")                    | false
-        TopicFilter.valueOf("sport/")                               | TopicFilter.valueOf("sport/+")                | true
-        TopicFilter.valueOf("sport/")                               | TopicFilter.valueOf("sport")                  | false
-        TopicFilter.valueOf("sport/")                               | TopicFilter.valueOf("sport/#")                | true
-        TopicFilter.valueOf("a/b")                                  | TopicFilter.valueOf("a/b/c")                  | false
-        TopicFilter.valueOf("a/b/c")                                | TopicFilter.valueOf("a/b")                    | false
-        TopicFilter.valueOf("a")                                    | TopicFilter.valueOf("+/+")                    | false
-        TopicFilter.valueOf("a/b/c")                                | TopicFilter.valueOf("a/b/c")                  | true
-        TopicFilter.valueOf("a/b/c")                                | TopicFilter.valueOf("a/b/d")                  | false
-        TopicFilter.valueOf("a")                                    | TopicFilter.valueOf("a/")                     | false
-        TopicFilter.valueOf("")                                     | TopicFilter.valueOf("+")                      | true
-        TopicFilter.valueOf("")                                     | TopicFilter.valueOf("/+")                     | false
-        TopicFilter.valueOf("/")                                    | TopicFilter.valueOf("/")                      | true
-        TopicFilter.valueOf("/")                                    | TopicFilter.valueOf("+")                      | false
-        TopicFilter.valueOf("/")                                    | TopicFilter.valueOf("+/+")                    | true
-        TopicFilter.valueOf("a/b/c")                                | TopicFilter.valueOf("a/#/b")                  | false
-        TopicFilter.valueOf("a/b")                                  | TopicFilter.valueOf("aa/b")                   | false
+        incomingValue                  | topicFilter              | expectedResult
+        "topic1"                       | "#"                      | true
+        "sport"                        | "sport/#"                | true
+        "sport/tennis/player1"         | "sport/tennis/player1/#" | true
+        "sport/tennis/player1/ranking" | "sport/tennis/player1/#" | true
+        "sport/tennis/player1/score/a" | "sport/tennis/player1/#" | true
+        "/finance"                     | "+/+"                    | true
+        "/finance"                     | "/+"                     | true
+        "/finance"                     | "+"                      | false
+        "finance"                      | "+"                      | true
+        "finance/stocks"               | "+/stocks"               | true
+        "finance/stocks"               | "finance/+"              | true
+        "finance/stocks/value"         | "finance/+"              | false
+        "a/b/c"                        | "a/#"                    | true
+        "a/b/c"                        | "#"                      | true
+        ""                             | "#"                      | true
+        "a"                            | "a/#"                    | true
+        "a/"                           | "a/#"                    | true
+        "sport/tennis/player1"         | "sport/+/player1"        | true
+        "sport/tennis/player1"         | "sport/+/player2"        | false
+        "sport/tennis/"                | "sport/+/+"              | true
+        "sport//player1"               | "sport/+/player1"        | true
+        "sport//player1"               | "sport/+/+"              | true
+        "sport///"                     | "sport/+/+/#"            | true
+        "///"                          | "+/+/+/+"                | true
+        "///"                          | "+/+/+"                  | false
+        "///"                          | "+/+"                    | false
+        "sport/"                       | "sport/+"                | true
+        "sport/"                       | "sport"                  | false
+        "sport/"                       | "sport/#"                | true
+        "a/b"                          | "a/b/c"                  | false
+        "a/b/c"                        | "a/b"                    | false
+        "a"                            | "+/+"                    | false
+        "a/b/c"                        | "a/b/c"                  | true
+        "a/b/c"                        | "a/b/d"                  | false
+        "a"                            | "a/"                     | false
+        ""                             | "+"                      | true
+        ""                             | "/+"                     | false
+        "/"                            | "/"                      | true
+        "/"                            | "+"                      | false
+        "/"                            | "+/+"                    | true
+        "a/b/c"                        | "a/#/b"                  | false
+        "a/b"                          | "aa/b"                   | false
   }
 
   def "should match topic filter"(String pattern, String incomingValue, boolean expectedResult) {
