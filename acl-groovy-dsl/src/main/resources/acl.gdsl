@@ -1,0 +1,128 @@
+contributor(context(scope: scriptScope())) {
+
+  method name: 'allowPublish',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.PublishRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.PublishRuleBuilder',
+      doc: 'Define Access Control List rule'
+  method name: 'denyPublish',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.PublishRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.PublishRuleBuilder',
+      doc: 'Define Access Control List rule'
+  method name: 'allowSubscribe',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.SubscribeRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.SubscribeRuleBuilder',
+      doc: 'Define Access Control List rule'
+  method name: 'denySubscribe',
+      type: 'javasabr.mqtt.service.acl.builder.AclRulesBuilder',
+      params: [config: 'Closure<javasabr.mqtt.service.acl.builder.SubscribeRuleBuilder>'],
+      delegateType: 'javasabr.mqtt.service.acl.builder.SubscribeRuleBuilder',
+      doc: 'Define Access Control List rule'
+
+  if ((enclosingCall("allowPublish") || enclosingCall("denyPublish"))
+      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
+    method name: 'topicName',
+        type: 'javasabr.mqtt.service.acl.builder.PublishRuleBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
+        doc: 'Set of topic names matching by rule'
+  }
+
+  if ((enclosingCall("allowSubscribe") || enclosingCall("denySubscribe"))
+      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
+    method name: 'topicFilter',
+        type: 'javasabr.mqtt.service.acl.builder.SubscribeRuleBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
+        doc: 'Set of topic filters matching by rule'
+    method name: 'match',
+        type: 'javasabr.mqtt.model.acl.matcher.TopicFilterMatcher',
+        params: [string: 'String'],
+        doc: 'Match incoming topic by topic filter'
+  }
+
+  if (enclosingCall("allowPublish") || enclosingCall("denyPublish")
+      || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe")) {
+    method name: 'eq',
+        type: 'javasabr.mqtt.model.acl.matcher.EqualsMatcher',
+        params: [string: 'String'],
+        doc: 'Match incoming value by strict equality'
+  }
+
+  if (enclosingCall("allOf") || enclosingCall("anyOf")) {
+    method name: 'regex',
+        type: 'javasabr.mqtt.model.acl.matcher.RegexMatcher',
+        params: [string: 'String'],
+        doc: 'Match incoming value by Regular Expression'
+  }
+
+  if (!enclosingCall("allOf")
+      && !enclosingCall("anyOf")
+      && (enclosingCall("allowPublish")
+      || enclosingCall("denyPublish")
+      || enclosingCall("allowSubscribe")
+      || enclosingCall("denySubscribe"))) {
+    method name: 'allOf',
+        type: 'javasabr.mqtt.service.acl.builder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.RuleBuilder',
+        doc: 'All of conditions match an incoming client'
+    method name: 'anyOf',
+        type: 'javasabr.mqtt.service.acl.builder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.RuleBuilder',
+        doc: 'At least one condition matches an incoming client'
+    method name: 'anyOf',
+        type: 'javasabr.mqtt.service.acl.builder.RuleBuilder',
+        params: [:],
+        delegateType: 'javasabr.mqtt.service.acl.builder.RuleBuilder',
+        doc: 'Match any incoming client'
+  }
+
+  if (!enclosingCall("allOf") && enclosingCall("anyOf")) {
+    method name: 'allOf',
+        type: 'javasabr.mqtt.service.acl.builder.AllOfBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        doc: 'All of conditions match an incoming client'
+    method name: 'anyOf',
+        type: 'javasabr.mqtt.service.acl.builder.AnyOfBuilder',
+        params: [config: 'Closure<javasabr.mqtt.service.acl.builder.ConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        doc: 'At least one condition matches an incoming client'
+  }
+
+  if (enclosingCall("allOf")) {
+    method name: 'userName',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>'],
+        doc: 'Match by username'
+    method name: 'clientId',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>'],
+        doc: 'Match by clientId'
+    method name: 'ipAddress',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>'],
+        doc: 'Match by IP address'
+  }
+  if (enclosingCall("anyOf") && !enclosingCall("allOf")) {
+    method name: 'userName',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
+        doc: 'Match by username'
+    method name: 'clientId',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
+        doc: 'Match by clientId'
+    method name: 'ipAddress',
+        type: 'javasabr.mqtt.service.acl.builder.ConditionBuilder',
+        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
+        doc: 'Match by IP address'
+  }
+
+  method name: 'anyone',
+      type: 'javasabr.mqtt.model.acl.matcher.AnyValueMatcher',
+      params: [:],
+      doc: 'Match any incoming value'
+}

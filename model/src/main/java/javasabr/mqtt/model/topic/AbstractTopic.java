@@ -54,20 +54,6 @@ public abstract class AbstractTopic {
     return rawTopic;
   }
 
-  @Override
-  public boolean equals(Object object) {
-    if (object == null || getClass() != object.getClass()) {
-      return false;
-    }
-    var that = (AbstractTopic) object;
-    return Objects.equals(rawTopic, that.rawTopic);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(rawTopic);
-  }
-
   protected static String[] splitTopic(String topic) {
     int segmentCount = countOccurrencesOf(topic, AbstractTopic.DELIMITER) + 1;
     var segments = new String[segmentCount];

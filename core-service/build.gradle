@@ -8,6 +8,7 @@ description = "Provides interfaces and minimal implementation of all required se
 
 dependencies {
   api projects.network
+  api projects.aclEngine
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
