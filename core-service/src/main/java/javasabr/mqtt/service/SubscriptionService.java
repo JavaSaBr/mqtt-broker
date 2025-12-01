@@ -4,7 +4,6 @@ import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
@@ -16,8 +15,6 @@ import javasabr.rlib.collections.array.MutableArray;
  * Subscription service
  */
 public interface SubscriptionService {
-
-  NetworkMqttUser resolveClient(Subscriber subscriber);
 
   default Array<SingleSubscriber> findSubscribers(TopicName topicName) {
     return findSubscribersTo(MutableArray.ofType(SingleSubscriber.class), topicName);

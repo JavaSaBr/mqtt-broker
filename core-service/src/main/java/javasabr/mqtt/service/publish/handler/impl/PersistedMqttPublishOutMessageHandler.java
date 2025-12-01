@@ -8,7 +8,6 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.session.NetworkMqttSession.PendingMessageHandler;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -20,15 +19,14 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
 
   PendingMessageHandler pendingMessageHandler;
 
-  protected PersistedMqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, subscriptionService, messageOutFactoryService);
+  protected PersistedMqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    super(ExternalNetworkMqttUser.class, messageOutFactoryService);
     this.pendingMessageHandler = new PendingMessageHandler() {
       @Override
       public boolean handleResponse(NetworkMqttUser user, TrackableMqttMessage response) {
         return handleReceivedResponse(user, response);
       }
+
       @Override
       public void resend(NetworkMqttUser user, Publish publish) {
         tryToDeliverAgain(user, publish);
@@ -45,10 +43,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     }
     return original.with(
         // generate new uniq packet id per client
-        session.generateMessageId(),
-        qos(),
-        false,
-        MqttProperties.TOPIC_ALIAS_NOT_SET);
+        session.generateMessageId(), qos(), false, MqttProperties.TOPIC_ALIAS_NOT_SET);
   }
 
   @Override

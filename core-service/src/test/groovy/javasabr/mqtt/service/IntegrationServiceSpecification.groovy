@@ -44,8 +44,7 @@ abstract class IntegrationServiceSpecification extends Specification {
   @Shared
   def defaultTopicService = new DefaultTopicService()
 
-  @Shared
-  def defaultSubscriptionService = new InMemorySubscriptionService()
+
 
   @Shared
   def defaultMessageOutFactoryService = new DefaultMessageOutFactoryService([
@@ -55,10 +54,13 @@ abstract class IntegrationServiceSpecification extends Specification {
 
   @Shared
   def defaultPublishDeliveringService = new DefaultPublishDeliveringService([
-      new Qos0MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
-      new Qos1MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
-      new Qos2MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService)
+      new Qos0MqttPublishOutMessageHandler(defaultMessageOutFactoryService),
+      new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService),
+      new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
   ])
+
+  @Shared
+  def defaultSubscriptionService = new InMemorySubscriptionService(defaultPublishDeliveringService)
 
   @Shared
   def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(

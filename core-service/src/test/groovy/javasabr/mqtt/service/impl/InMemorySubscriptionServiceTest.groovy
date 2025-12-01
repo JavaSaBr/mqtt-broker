@@ -12,8 +12,6 @@ import javasabr.rlib.collections.array.Array
 
 class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
 
-  SubscriptionService subscriptionService = new InMemorySubscriptionService()
-
   def "should subscribe with expected results in default settings"() {
     given:
         def serverConfig = defaultExternalServerConnectionConfig
@@ -49,7 +47,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true,
                 true))
     when:
-        def result = subscriptionService
+        def result = defaultSubscriptionService
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 4
@@ -104,7 +102,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true,
                 true))
     when:
-        def result = subscriptionService
+        def result = defaultSubscriptionService
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 5
@@ -152,7 +150,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             true)
         def subscriptions = Array.of(sub1, sub2, sub3, sub4)
     when:
-        def result = subscriptionService
+        def result = defaultSubscriptionService
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 4
@@ -200,14 +198,14 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 SubscribeRetainHandling.SEND,
                 true,
                 true))
-        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         def topicsToUnsubscribe = Array.of(
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/1"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/3"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/notexist"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/invalid##"))
     when:
-        def result = subscriptionService
+        def result = defaultSubscriptionService
             .unsubscribe(mqttUser, mqttUser.session(), topicsToUnsubscribe)
     then:
         result.size() == 4
@@ -251,13 +249,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/1"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/3"))
     when:
-        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         def storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
-        subscriptionService.unsubscribe(mqttUser, mqttUser.session(), topicsToUnsubscribe)
+        defaultSubscriptionService.unsubscribe(mqttUser, mqttUser.session(), topicsToUnsubscribe)
         storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 1
@@ -313,13 +311,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             subscriptions.get(1),
             subscriptions2.get(1))
     when:
-        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         def storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
-        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions2)
+        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions2)
         storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3

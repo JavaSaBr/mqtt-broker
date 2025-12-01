@@ -93,7 +93,8 @@ public class MqttBrokerSpringConfig {
   @Bean
   AuthenticationService authenticationService(
       CredentialSource credentialSource,
-      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth) {
+      @Value("${authentication.allow.anonymous:false}")
+      boolean allowAnonymousAuth) {
     return new SimpleAuthenticationService(credentialSource, allowAnonymousAuth);
   }
 
@@ -153,10 +154,7 @@ public class MqttBrokerSpringConfig {
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    return new PublishMqttInMessageHandler(
-        publishReceivingService,
-        messageOutFactoryService,
-        topicService);
+    return new PublishMqttInMessageHandler(publishReceivingService, messageOutFactoryService, topicService);
   }
 
   @Bean
@@ -187,10 +185,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    return new UnsubscribeMqttInMessageHandler(
-        subscriptionService,
-        messageOutFactoryService,
-        topicService);
+    return new UnsubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
   }
 
   @Bean
@@ -199,24 +194,18 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
+  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos0MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
+  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos1MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
+  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos2MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
@@ -230,10 +219,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService);
+    return new Qos0MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Bean
@@ -241,10 +227,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService);
+    return new Qos1MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Bean
@@ -252,10 +235,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService);
+    return new Qos2MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Bean
@@ -280,22 +260,10 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.max.message.size",
             int.class,
             MqttProperties.MAXIMUM_MESSAGE_SIZE_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.max.string.length",
-            int.class,
-            MqttProperties.MAXIMUM_STRING_LENGTH),
-        env.getProperty(
-            "mqtt.external.connection.max.binary.size",
-            int.class,
-            MqttProperties.MAXIMUM_BINARY_SIZE),
-        env.getProperty(
-            "mqtt.external.connection.max.topic.levels",
-            int.class,
-            MqttProperties.MAXIMUM_TOPIC_LEVELS),
-        env.getProperty(
-            "mqtt.external.connection.min.keep.alive",
-            int.class,
-            MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
+        env.getProperty("mqtt.external.connection.max.string.length", int.class, MqttProperties.MAXIMUM_STRING_LENGTH),
+        env.getProperty("mqtt.external.connection.max.binary.size", int.class, MqttProperties.MAXIMUM_BINARY_SIZE),
+        env.getProperty("mqtt.external.connection.max.topic.levels", int.class, MqttProperties.MAXIMUM_TOPIC_LEVELS),
+        env.getProperty("mqtt.external.connection.min.keep.alive", int.class, MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.receive.maximum",
             int.class,
@@ -360,7 +328,8 @@ public class MqttBrokerSpringConfig {
   MqttConnectionFactory externalConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
-      @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead) {
+      @Value("${mqtt.external.connection.max.packets.by.read:100}")
+      int maxPacketsByRead) {
     return new DefaultMqttConnectionFactory(externalServerConnectionConfig, mqttUserFactory, maxPacketsByRead);
   }
 

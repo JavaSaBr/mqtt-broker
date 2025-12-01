@@ -5,14 +5,11 @@ import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SubscriptionService;
 
 public class Qos1MqttPublishOutMessageHandler extends PersistedMqttPublishOutMessageHandler {
 
-  public Qos1MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(subscriptionService, messageOutFactoryService);
+  public Qos1MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    super(messageOutFactoryService);
   }
 
   @Override

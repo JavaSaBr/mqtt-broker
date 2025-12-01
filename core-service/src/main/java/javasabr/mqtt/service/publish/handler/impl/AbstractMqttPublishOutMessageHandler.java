@@ -3,10 +3,10 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -22,12 +22,18 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
     implements MqttPublishOutMessageHandler {
 
   Class<U> expectedUser;
-  SubscriptionService subscriptionService;
   MessageOutFactoryService messageOutFactoryService;
+
+  private static NetworkMqttUser resolveClient(Subscriber subscriber) {
+    if (subscriber instanceof SingleSubscriber single) {
+      return (NetworkMqttUser) single.user();
+    }
+    throw new IllegalArgumentException("Unexpected subscriber: " + subscriber);
+  }
 
   @Override
   public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
-    NetworkMqttUser user = subscriptionService.resolveClient(subscriber);
+    NetworkMqttUser user = resolveClient(subscriber);
     if (!expectedUser.isInstance(user)) {
       log.warning(user, "Accepted not expected client:[%s]"::formatted);
       return PublishHandlingResult.NOT_EXPECTED_CLIENT;
