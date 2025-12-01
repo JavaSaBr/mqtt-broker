@@ -2,9 +2,9 @@ package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
  * Subscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeAckMqtt311OutMessage extends TrackableMqttOutMessage {
 
@@ -41,8 +41,13 @@ public class SubscribeAckMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.SUBSCRIBE_ACK;
   }
 
   @Override

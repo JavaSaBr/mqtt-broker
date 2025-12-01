@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
  * Unsubscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UnsubscribeAckMqtt5OutMessage extends UnsubscribeAckMqtt311OutMessage {
 
@@ -73,7 +73,7 @@ public class UnsubscribeAckMqtt5OutMessage extends UnsubscribeAckMqtt311OutMessa
   protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901185
     for (var reasonCode : reasonCodes) {
-      writeByte(buffer, reasonCode.getValue());
+      writeByte(buffer, reasonCode.code());
     }
   }
 }

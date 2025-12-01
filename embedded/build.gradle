@@ -1,0 +1,17 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+}
+
+description = "The module to embed MQTT Broker as a part to another application"
+
+dependencies {
+  implementation projects.coreService
+  implementation libs.rlib.logger.slf4j
+
+  testImplementation projects.testSupport
+}
+
+tasks.withType(GroovyCompile).configureEach {
+  options.forkOptions.jvmArgs += "--enable-preview"
+}

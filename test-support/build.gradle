@@ -3,7 +3,10 @@ plugins {
   id("groovy")
 }
 
+description = "Provide all nesessary dependencies for writing tests"
+
 dependencies {
+  api libs.rlib.logger.impl
   api libs.hivemq.mqtt.client
   api libs.moquette.broker
   api libs.spring.test

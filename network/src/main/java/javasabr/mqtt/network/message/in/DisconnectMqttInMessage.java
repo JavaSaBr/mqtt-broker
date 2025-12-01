@@ -7,9 +7,9 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -79,8 +79,13 @@ public class DisconnectMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.DISCONNECT;
   }
 
   @Override
@@ -117,7 +122,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
         break;
       }
       default: {
-        unexpectedProperty(property);
+        unsupportedProperty(property);
       }
     }
   }
@@ -134,7 +139,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
         break;
       }
       default: {
-        unexpectedProperty(property);
+        unsupportedProperty(property);
       }
     }
   }

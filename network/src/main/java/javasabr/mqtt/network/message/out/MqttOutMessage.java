@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.message.SendableMqttMessage;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.collections.array.Array;
@@ -14,12 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
-public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttConnection> {
-
-  public static final Array<StringPair> EMPTY_USER_PROPERTIES = Array.empty(StringPair.class);
-
-  private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-      1024 * 1024));
+public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttConnection> 
+    implements SendableMqttMessage {
+  
+  private static final ThreadLocal<ByteBuffer> LOCAL_BUFFER = ThreadLocal
+      .withInitial(() -> ByteBuffer.allocate(1024 * 1024));
 
   protected static final int PACKET_ID_SIZE = 2;
 
@@ -45,12 +45,12 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {}
 
   public final int messageTypeAndFlags() {
-    byte type = messageType();
+    byte type = messageTypeId();
     byte controlFlags = messageFlags();
     return NumberUtils.setHighByteBits(controlFlags, type);
   }
 
-  protected byte messageType() {
+  protected byte messageTypeId() {
     throw new UnsupportedOperationException();
   }
 
@@ -126,7 +126,6 @@ public abstract class MqttOutMessage extends AbstractWritableNetworkPacket<MqttC
       writeProperty(buffer, property, value);
     }
   }
-
 
   public void writeNotEmptyProperty(ByteBuffer buffer, MqttMessageProperty property, byte @Nullable [] value) {
     if (value != null && value.length > 0) {

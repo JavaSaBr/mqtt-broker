@@ -3,8 +3,8 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -52,8 +52,13 @@ public class ConnectMqtt311OutMessage extends MqttOutMessage {
   }
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT;
   }
 
   @Override

@@ -12,12 +12,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish acknowledgement.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
 
@@ -42,15 +43,17 @@ public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  Array<StringPair> userProperties;
-  String reason;
   PublishAckReasonCode reasonCode;
+  @Nullable
+  String reason;
+
+  Array<StringPair> userProperties;
 
   public PublishAckMqtt5OutMessage(
       int messageId,
       PublishAckReasonCode reasonCode,
-      Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason,
+      Array<StringPair> userProperties) {
     super(messageId);
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;
@@ -66,7 +69,7 @@ public class PublishAckMqtt5OutMessage extends PublishAckMqtt311OutMessage {
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.writeVariableHeader(connection, buffer);
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901123
-    writeByte(buffer, reasonCode.value());
+    writeByte(buffer, reasonCode.code());
   }
 
   @Override

@@ -9,9 +9,11 @@ import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
-import javasabr.mqtt.model.subscribtion.Subscription
+import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
+import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -43,7 +45,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final messageExpiryInterval = 60
   public static final topicAlias = 252
   public static final receiveMaxPublishes = 10
-  public static final maxPacketSize = 1024
+  public static final maxMessageSize = 1024
   public static final maxStringLength = 256
   public static final maxBinarySize = 1024
   public static final maxTopicLevels = 10
@@ -58,7 +60,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
   public static final publishTopic = TopicName.valueOf("publish/Topic")
-  public static final responseTopic = "response/Topic"
+  public static final responseTopic = TopicName.valueOf("response/Topic")
   public static final topicFilter = "topic/Filter"
   public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
   public static final topicFilter1Obj5 = new Subscription(
@@ -113,10 +115,10 @@ class NetworkUnitSpecification extends UnitSpecification {
   MqttServerConnectionConfig defaultServerConnectionConfig = defaultServerConnectionConfig()
 
   @Shared
-  MqttClient defaultMqtt311Client = mqttClient(defaultMqtt311ClientConnectionConfig(), mqtt311ClientId)
+  NetworkMqttUser defaultMqtt311User = networkUser(defaultMqtt311ClientConnectionConfig(), mqtt311ClientId)
 
   @Shared
-  MqttClient defaultMqtt5Client = mqttClient(defaultMqtt5ClientConnectionConfig(), mqtt5ClientId)
+  NetworkMqttUser defaultMqtt5User = networkUser(defaultMqtt5ClientConnectionConfig(), mqtt5ClientId)
 
   @Shared
   MqttConnection defaultMqtt5Connection = mqtt5Connection();
@@ -127,7 +129,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   MqttServerConnectionConfig defaultServerConnectionConfig() {
     return serverConnectionConfig(
         maxQos,
-        maxPacketSize,
+        maxMessageSize,
         maxStringLength,
         maxBinarySize,
         maxTopicLevels,
@@ -150,7 +152,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         MqttVersion.MQTT_3_1_1,
         sessionExpiryInterval,
         receiveMaxPublishes,
-        maxPacketSize,
+        maxMessageSize,
         topicAliasMaxValue,
         keepAlive,
         false,
@@ -164,7 +166,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         MqttVersion.MQTT_5,
         sessionExpiryInterval,
         receiveMaxPublishes,
-        maxPacketSize,
+        maxMessageSize,
         topicAliasMaxValue,
         keepAlive,
         false,
@@ -253,23 +255,13 @@ class NetworkUnitSpecification extends UnitSpecification {
       }
       serverConnectionConfig() >> serverConfig
       clientConnectionConfig() >> clientConfig
-      client() >> mqttClient(clientConfig, clientId)
+      user() >> networkUser(clientConfig, clientId)
     }
   }
 
-  MqttClient mqttClient(MqttClientConnectionConfig clientConfig, String id) {
-    return Stub(MqttClient.UnsafeMqttClient) {
+  NetworkMqttUser networkUser(MqttClientConnectionConfig clientConfig, String id) {
+    return Stub(ConfigurableNetworkMqttUser) {
       connectionConfig() >> clientConfig
-      clientId() >> id
-      toString() >> id
-    }
-  }
-
-  MqttClient newMqtt311Client() {
-    def config = defaultMqtt311ClientConnectionConfig()
-    def id = "generatedClient_${clientIdGenerator.incrementAndGet()}"
-    return Stub(MqttClient.UnsafeMqttClient) {
-      connectionConfig() >> config
       clientId() >> id
       toString() >> id
     }

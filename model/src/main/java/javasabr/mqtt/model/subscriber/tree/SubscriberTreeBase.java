@@ -1,12 +1,12 @@
 package javasabr.mqtt.model.subscriber.tree;
 
 import java.util.Objects;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
-import javasabr.mqtt.model.subscribtion.Subscription;
-import javasabr.mqtt.model.subscribtion.SubscriptionOwner;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.LockableArray;
@@ -21,22 +21,22 @@ import org.jspecify.annotations.Nullable;
 abstract class SubscriberTreeBase {
 
   /**
-   * @return previous subscriber with the same owner
+   * @return previous subscriber with the same user
    */
   @Nullable
   protected static SingleSubscriber addSubscriber(
       LockableArray<Subscriber> subscribers,
-      SubscriptionOwner owner,
+      MqttUser user,
       Subscription subscription,
       TopicFilter topicFilter) {
     long stamp = subscribers.writeLock();
     try {
       if (topicFilter instanceof SharedTopicFilter stf) {
-        addSharedSubscriber(subscribers, owner, subscription, stf);
+        addSharedSubscriber(subscribers, user, subscription, stf);
         return null;
       } else {
-        SingleSubscriber previous = removePreviousIfExist(subscribers, owner);
-        subscribers.add(new SingleSubscriber(owner, subscription));
+        SingleSubscriber previous = removePreviousIfExist(subscribers, user);
+        subscribers.add(new SingleSubscriber(user, subscription));
         return previous;
       }
     } finally {
@@ -47,8 +47,8 @@ abstract class SubscriberTreeBase {
   @Nullable
   private static SingleSubscriber removePreviousIfExist(
       LockableArray<Subscriber> subscribers,
-      SubscriptionOwner owner) {
-    int index = subscribers.indexOf(Subscriber::resolveOwner, owner);
+      MqttUser user) {
+    int index = subscribers.indexOf(Subscriber::resolveUser, user);
     if (index < 0) {
       return null;
     }
@@ -59,7 +59,7 @@ abstract class SubscriberTreeBase {
 
   private static void addSharedSubscriber(
       LockableArray<Subscriber> subscribers,
-      SubscriptionOwner owner,
+      MqttUser user,
       Subscription subscription,
       SharedTopicFilter sharedTopicFilter) {
 
@@ -73,7 +73,7 @@ abstract class SubscriberTreeBase {
       subscribers.add(sharedSubscriber);
     }
 
-    sharedSubscriber.addSubscriber(new SingleSubscriber(owner, subscription));
+    sharedSubscriber.addSubscriber(new SingleSubscriber(user, subscription));
   }
 
   protected static void appendSubscribersTo(MutableArray<SingleSubscriber> result, SubscriberNode subscriberNode) {
@@ -96,7 +96,7 @@ abstract class SubscriberTreeBase {
 
   protected static boolean removeSubscriber(
       @Nullable LockableArray<Subscriber> subscribers,
-      SubscriptionOwner owner,
+      MqttUser user,
       TopicFilter topicFilter) {
     if (subscribers == null) {
       return false;
@@ -104,9 +104,9 @@ abstract class SubscriberTreeBase {
     long stamp = subscribers.writeLock();
     try {
       if (topicFilter instanceof SharedTopicFilter stf) {
-        return removeSharedSubscriber(subscribers, owner, stf);
+        return removeSharedSubscriber(subscribers, user, stf);
       } else {
-        int index = subscribers.indexOf(Subscriber::resolveOwner, owner);
+        int index = subscribers.indexOf(Subscriber::resolveUser, user);
         if (index >= 0) {
           subscribers.remove(index);
           return true;
@@ -120,14 +120,14 @@ abstract class SubscriberTreeBase {
 
   private static boolean removeSharedSubscriber(
       LockableArray<Subscriber> subscribers,
-      SubscriptionOwner owner,
+      MqttUser user,
       SharedTopicFilter sharedTopicFilter) {
     String group = sharedTopicFilter.shareName();
     SharedSubscriber sharedSubscriber = (SharedSubscriber) subscribers
         .iterations()
         .findAny(group, SubscriberTreeBase::isSharedSubscriberWithGroup);
     if (sharedSubscriber != null) {
-      boolean removed = sharedSubscriber.removeSubscriberWithOwner(owner);
+      boolean removed = sharedSubscriber.removeSubscriberWithUser(user);
       if (sharedSubscriber.isEmpty()) {
         // if it was last member
         subscribers.remove(sharedSubscriber);
@@ -144,7 +144,7 @@ abstract class SubscriberTreeBase {
   private static boolean removeDuplicateWithLowerQoS(
       MutableArray<SingleSubscriber> result, SingleSubscriber candidate) {
 
-    int found = result.indexOf(SingleSubscriber::owner, candidate.owner());
+    int found = result.indexOf(SingleSubscriber::user, candidate.user());
     if (found == -1) {
       return true;
     }

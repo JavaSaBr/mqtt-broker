@@ -1,6 +1,6 @@
 package javasabr.mqtt.network.message.in;
 
-import javasabr.mqtt.network.message.MqttMessageType;
+import javasabr.mqtt.model.message.MqttMessageType;
 
 /**
  * PING response.
@@ -14,7 +14,12 @@ public class PingResponseMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.PING_RESPONSE;
   }
 }

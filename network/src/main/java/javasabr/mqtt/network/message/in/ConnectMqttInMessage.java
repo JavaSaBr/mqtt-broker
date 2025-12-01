@@ -8,9 +8,9 @@ import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.common.util.StringUtils;
@@ -214,10 +214,10 @@ public class ConnectMqttInMessage extends MqttInMessage {
   String authenticationMethod = StringUtils.EMPTY;
   byte[] authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
 
-  long sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_UNDEFINED;
-  int receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_UNDEFINED;
-  int maxPacketSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_UNDEFINED;
-  int topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_UNDEFINED;
+  long sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
+  int receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
+  int maxPacketSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
+  int topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
   boolean requestResponseInformation = false;
   boolean requestProblemInformation = false;
 
@@ -226,8 +226,13 @@ public class ConnectMqttInMessage extends MqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT;
   }
 
   @Override
@@ -351,7 +356,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
       case AUTHENTICATION_DATA -> authenticationData = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -359,7 +364,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
       case AUTHENTICATION_METHOD -> authenticationMethod = value;
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 
@@ -384,7 +389,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
           (int) value,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
-      default -> unexpectedProperty(property);
+      default -> unsupportedProperty(property);
     }
   }
 }

@@ -16,6 +16,7 @@ import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.exception.MqttException;
+import javasabr.mqtt.model.message.ReceivableMqttMessage;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.util.MqttDataUtils;
@@ -31,7 +32,8 @@ import org.jspecify.annotations.Nullable;
 
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttConnection> {
+public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttConnection> 
+    implements ReceivableMqttMessage {
 
   static {
     DebugUtils.registerIncludedFields("userProperties");
@@ -70,7 +72,8 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
   protected MqttInMessage(byte messageFlags) {
     if (!validMessageFlags(messageFlags)) {
-      exception = new MalformedProtocolMqttException("Unexpected flags bits:" + MqttDataUtils.toUnsignedBinary(messageFlags));
+      exception = new MalformedProtocolMqttException("Unexpected message flags:[%s] in message:[%s]"
+          .formatted(MqttDataUtils.toUnsignedBinary(messageFlags), name()));
     }
   }
 
@@ -78,7 +81,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     return true;
   }
 
-  public abstract byte messageType();
+  public abstract byte messageTypeId();
 
   public Array<StringPair> userProperties() {
     return userProperties == null ? EMPTY_USER_PROPERTIES : userProperties;
@@ -141,7 +144,8 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     while (buffer.position() < lastPositionInBuffer) {
       MqttMessageProperty property = MqttMessageProperty.byId(readByteUnsigned(buffer));
       if (!availableProperties.contains(property)) {
-        throw new MalformedProtocolMqttException("Property:[" + property + "] is not available for packet:[" + name() + "]");
+        throw new MalformedProtocolMqttException(
+            "Property:[%s] is not available for message:[%s]".formatted(property, name()));
       }
       switch (property.dataType()) {
         case BYTE: {
@@ -258,8 +262,19 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     return data;
   }
 
-  protected void unexpectedProperty(MqttMessageProperty property) {
-    throw new MalformedProtocolMqttException("Unsupported property:[" + property + "]");
+  protected void unsupportedProperty(MqttMessageProperty property) {
+    throw new MalformedProtocolMqttException(
+        "Property:[%s] is not supported for message:[%s]".formatted(property, name()));
+  }
+
+  protected void alreadyPresentedProperty(MqttMessageProperty property) {
+    throw new MalformedProtocolMqttException(
+        "Property:[%s] is already presented in message:[%s]".formatted(property, name()));
+  }
+
+  @Override
+  public String name() {
+    return messageType().name();
   }
 
   @Override

@@ -1,33 +1,19 @@
 package javasabr.mqtt.network.message.in;
 
-import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Publish complete (QoS 2 delivery part 3).
  */
-@Getter
-@Accessors(fluent = true, chain = false)
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class PublishCompleteMqttInMessage extends MqttInMessage implements TrackableMessage {
+public class PublishCompleteMqttInMessage extends PublishControlMqttInMessage<PublishCompletedReasonCode>
+    implements TrackableMqttMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETED.ordinal();
-
-  static {
-    DebugUtils.registerIncludedFields("reasonCode", "messageId");
-  }
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_COMPLETE.ordinal();
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -50,52 +36,32 @@ public class PublishCompleteMqttInMessage extends MqttInMessage implements Track
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  PublishCompletedReasonCode reasonCode;
-  int messageId;
-
-  // properties
-  String reason;
-
   public PublishCompleteMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.reasonCode = PublishCompletedReasonCode.SUCCESS;
-    this.reason = "";
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    super.readVariableHeader(connection, buffer);
-
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718083
-    messageId = readShortUnsigned(buffer);
-
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
-    if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishCompletedReasonCode.of(readByteUnsigned(buffer));
-    }
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_COMPLETE;
   }
 
   @Override
-  protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901154
-    return super.isPropertiesSupported(connection, buffer) && buffer.hasRemaining();
+  protected PublishCompletedReasonCode defaultReasonCode() {
+    return PublishCompletedReasonCode.SUCCESS;
+  }
+
+  @Override
+  protected PublishCompletedReasonCode readReasonCode(int unsignedByte) {
+    return PublishCompletedReasonCode.ofCode(unsignedByte);
   }
 
   @Override
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
-  }
-
-  @Override
-  protected void applyProperty(MqttMessageProperty property, String value) {
-    switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
-    }
   }
 }

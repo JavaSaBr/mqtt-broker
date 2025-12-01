@@ -1,10 +1,10 @@
 package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
-import javasabr.mqtt.model.subscribtion.Subscription;
+import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -25,8 +25,13 @@ public class SubscribeMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.SUBSCRIBE;
   }
 
   @Override

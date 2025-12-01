@@ -1,8 +1,9 @@
 package javasabr.mqtt.model;
 
-import java.util.stream.Stream;
 import javasabr.mqtt.model.data.type.MqttDataType;
 import javasabr.rlib.common.util.ClassUtils;
+import javasabr.rlib.common.util.NumberedEnum;
+import javasabr.rlib.common.util.NumberedEnumMap;
 import javasabr.rlib.common.util.ObjectUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,9 +11,9 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
-@Accessors(fluent = true, chain = false)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum MqttMessageProperty {
+public enum MqttMessageProperty implements NumberedEnum<MqttMessageProperty> {
   PAYLOAD_FORMAT_INDICATOR(0x01, MqttDataType.BYTE),
   MESSAGE_EXPIRY_INTERVAL(0x02, MqttDataType.INTEGER),
   CONTENT_TYPE(0x03, MqttDataType.UTF_8_STRING),
@@ -41,38 +42,17 @@ public enum MqttMessageProperty {
   SUBSCRIPTION_IDENTIFIER_AVAILABLE(0x29, MqttDataType.BYTE),
   SHARED_SUBSCRIPTION_AVAILABLE(0x2A, MqttDataType.BYTE);
 
-  private static final MqttMessageProperty[] PROPERTIES;
-
-  static {
-
-    int maxId = Stream
-        .of(values())
-        .mapToInt(MqttMessageProperty::id)
-        .max()
-        .orElse(0);
-
-    var result = new MqttMessageProperty[maxId + 1];
-
-    Stream
-        .of(values())
-        .forEach(prop -> result[prop.id] = prop);
-
-    PROPERTIES = result;
-  }
+  private static final NumberedEnumMap<MqttMessageProperty> NUMBERED_MAP =
+      new NumberedEnumMap<>(MqttMessageProperty.class);
 
   public static MqttMessageProperty byId(int id) {
-    if (id < 0 || id >= PROPERTIES.length) {
-      throw new IllegalArgumentException("Unknown property with id: " + id);
-    } else {
-      return PROPERTIES[id];
-    }
+    return NUMBERED_MAP.require(id);
   }
 
   @Getter
   byte id;
   @Getter
   MqttDataType dataType;
-
   @Nullable
   Object defaultValue;
 
@@ -84,6 +64,11 @@ public enum MqttMessageProperty {
     this.id = (byte) id;
     this.dataType = dataType;
     this.defaultValue = defaultValue;
+  }
+
+  @Override
+  public int number() {
+    return id;
   }
 
   public <T> T defaultValue() {

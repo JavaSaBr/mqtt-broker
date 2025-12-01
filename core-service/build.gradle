@@ -1,0 +1,14 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+  id("groovy")
+}
+
+description = "Provides interfaces and minimal implementation of all required services for MQTT Broker"
+
+dependencies {
+  api projects.network
+
+  testImplementation projects.testSupport
+  testImplementation testFixtures(projects.network)
+}

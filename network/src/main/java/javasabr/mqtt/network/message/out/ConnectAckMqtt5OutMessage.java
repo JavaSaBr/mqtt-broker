@@ -13,6 +13,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Connect acknowledgment.
@@ -230,14 +231,18 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
   String clientId;
 
-  String responseInformation;
-  String reason;
-  String serverReference;
-
-  String authenticationMethod;
-  byte[] authenticationData;
-
+  @Nullable
   String requestedClientId;
+  @Nullable
+  String responseInformation;
+  @Nullable
+  String reason;
+  @Nullable
+  String serverReference;
+  @Nullable
+  String authenticationMethod;
+  byte @Nullable [] authenticationData;
+
   long requestedSessionExpiryInterval;
   int requestedKeepAlive;
   int requestedReceiveMax;
@@ -248,15 +253,15 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
       ConnectAckReasonCode reasonCode,
       boolean sessionPresent,
       String clientId,
-      String requestedClientId,
+      @Nullable String requestedClientId,
       long requestedSessionExpiryInterval,
       int requestedKeepAlive,
       int requestedReceiveMaxPublishes,
-      String reason,
-      String serverReference,
-      String responseInformation,
-      String authenticationMethod,
-      byte[] authenticationData,
+      @Nullable String reason,
+      @Nullable String serverReference,
+      @Nullable String responseInformation,
+      @Nullable String authenticationMethod,
+      byte @Nullable [] authenticationData,
       Array<StringPair> userProperties) {
     super(reasonCode, sessionPresent);
     this.clientId = clientId;
@@ -279,7 +284,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
   @Override
   protected byte reasonCodeValue() {
-    return reasonCode.getMqtt5();
+    return (byte) reasonCode.mqtt5();
   }
 
   @Override
@@ -312,8 +317,14 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
         MqttMessageProperty.SESSION_EXPIRY_INTERVAL,
         connectionConfig.sessionExpiryInterval(),
         requestedSessionExpiryInterval);
-    writeProperty(buffer, MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId, requestedClientId);
-    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, connectionConfig.receiveMaxPublishes(), requestedReceiveMax);
+    if (requestedClientId != null) {
+      writeProperty(buffer, MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId, requestedClientId);
+    }
+    writeProperty(
+        buffer,
+        MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
+        connectionConfig.receiveMaxPublishes(),
+        requestedReceiveMax);
     writeProperty(
         buffer,
         MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
@@ -339,6 +350,10 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
         MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE,
         connectionConfig.sharedSubscriptionAvailable(),
         MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_DEFAULT);
-    writeProperty(buffer, MqttMessageProperty.SERVER_KEEP_ALIVE, connectionConfig.keepAlive(), requestedKeepAlive);
+    writeProperty(
+        buffer,
+        MqttMessageProperty.SERVER_KEEP_ALIVE,
+        connectionConfig.keepAlive(),
+        requestedKeepAlive);
   }
 }

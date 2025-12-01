@@ -12,9 +12,9 @@ import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
-import javasabr.mqtt.model.subscribtion.RequestedSubscription;
+import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.subscription.RequestedSubscription;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -28,14 +28,14 @@ import org.jspecify.annotations.Nullable;
  * Subscribe request.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class SubscribeMqttInMessage extends TrackableMqttInMessage {
 
   private static final Array<RequestedSubscription> EMPTY_SUBSCRIPTIONS = Array.empty(RequestedSubscription.class);
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
   public static final byte MESSAGE_FLAGS = 0b0000_0010;
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.SUBSCRIBE.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("subscriptions");
@@ -70,8 +70,13 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.SUBSCRIBE;
   }
 
   @Override
@@ -82,7 +87,7 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (!buffer.hasRemaining()) {
-      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTERS);
     }
 
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
@@ -133,8 +138,15 @@ public class SubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, long value) {
     switch (property) {
-      case SUBSCRIPTION_IDENTIFIER -> subscriptionId = (int) value;
-      default -> unexpectedProperty(property);
+      case SUBSCRIPTION_IDENTIFIER -> {
+        if (value < MqttProperties.SUBSCRIPTION_ID_MIN || value > MqttProperties.SUBSCRIPTION_ID_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.INVALID_SUBSCRIPTION_ID);
+        } else if (subscriptionId != MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        }
+        subscriptionId = (int) value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 

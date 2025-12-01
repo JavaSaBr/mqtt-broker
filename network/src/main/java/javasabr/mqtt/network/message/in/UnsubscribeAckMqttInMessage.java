@@ -3,15 +3,15 @@ package javasabr.mqtt.network.message.in;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -22,11 +22,16 @@ import org.jspecify.annotations.Nullable;
  * Unsubscribe acknowledgement.
  */
 @Getter
-@Accessors(fluent = true, chain = false)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UnsubscribeAckMqttInMessage extends MqttInMessage {
+public class UnsubscribeAckMqttInMessage extends TrackableMqttInMessage {
 
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE_ACK.ordinal();
+
+  static {
+    DebugUtils.registerIncludedFields("reasonCodes");
+  }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -53,39 +58,39 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
 
   @Nullable
   MutableArray<UnsubscribeAckReasonCode> reasonCodes;
-  int messageId;
 
   // properties
-  String reason = StringUtils.EMPTY;
+  @Nullable
+  String reason;
 
   public UnsubscribeAckMqttInMessage(byte messageFlags) {
     super(messageFlags);
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718079
-    messageId = readShortUnsigned(buffer);
+  public MqttMessageType messageType() {
+    return MqttMessageType.UNSUBSCRIBE_ACK;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
-
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901194
-    if (!connection.isSupported(MqttVersion.MQTT_5)) {
-      return;
-    } else if (!buffer.hasRemaining()) {
+    if (!connection.isSupported(MqttVersion.MQTT_5) || !buffer.hasRemaining()) {
       return;
     }
-
     reasonCodes = ArrayFactory.mutableArray(UnsubscribeAckReasonCode.class, buffer.remaining());
     while (buffer.hasRemaining()) {
-      reasonCodes.add(UnsubscribeAckReasonCode.of(readByteUnsigned(buffer)));
+      reasonCodes.add(UnsubscribeAckReasonCode.ofCode(readByteUnsigned(buffer)));
     }
   }
 
@@ -101,8 +106,13 @@ public class UnsubscribeAckMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 }

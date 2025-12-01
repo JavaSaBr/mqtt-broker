@@ -1,30 +1,20 @@
 package javasabr.mqtt.network.message.in;
 
-import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
-import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.TrackableMessage;
+import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 /**
  * Publish release (QoS 2 delivery part 2).
  */
-@Getter
-@Accessors(fluent = true, chain = false)
-public class PublishReleaseMqttInMessage extends MqttInMessage implements TrackableMessage {
+public class PublishReleaseMqttInMessage extends PublishControlMqttInMessage<PublishReleaseReasonCode>
+    implements TrackableMqttMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASED.ordinal();
-
-  static {
-    DebugUtils.registerIncludedFields("reasonCode", "messageId");
-  }
+  public static final byte MESSAGE_FLAGS = 0b0000_0010;
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASE.ordinal();
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -47,57 +37,37 @@ public class PublishReleaseMqttInMessage extends MqttInMessage implements Tracka
        */
       MqttMessageProperty.USER_PROPERTY);
 
-  PublishReleaseReasonCode reasonCode;
-  int messageId;
-
-  // properties
-  String reason;
-
   public PublishReleaseMqttInMessage(byte messageFlags) {
     super(messageFlags);
-    this.reasonCode = PublishReleaseReasonCode.SUCCESS;
-    this.reason = "";
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
   }
 
   @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH_RELEASE;
+  }
+  
+  @Override
   protected boolean validMessageFlags(byte messageFlags) {
-    return messageFlags == 0b0000_0010;
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override
-  protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
-    super.readVariableHeader(connection, buffer);
-
-    // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718055
-    messageId = readShortUnsigned(buffer);
-
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
-    if (connection.isSupported(MqttVersion.MQTT_5) && buffer.hasRemaining()) {
-      reasonCode = PublishReleaseReasonCode.of(readByteUnsigned(buffer));
-    }
+  protected PublishReleaseReasonCode defaultReasonCode() {
+    return PublishReleaseReasonCode.SUCCESS;
   }
 
   @Override
-  protected boolean isPropertiesSupported(MqttConnection connection, ByteBuffer buffer) {
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
-    return super.isPropertiesSupported(connection, buffer) && buffer.hasRemaining();
+  protected PublishReleaseReasonCode readReasonCode(int unsignedByte) {
+    return PublishReleaseReasonCode.ofCode(unsignedByte);
   }
 
   @Override
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
-  }
-
-  @Override
-  protected void applyProperty(MqttMessageProperty property, String value) {
-    switch (property) {
-      case REASON_STRING -> reason = value;
-      default -> unexpectedProperty(property);
-    }
   }
 }

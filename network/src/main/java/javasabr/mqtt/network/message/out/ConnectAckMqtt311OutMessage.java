@@ -2,9 +2,9 @@ package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
 import javasabr.mqtt.base.util.DebugUtils;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,8 +39,13 @@ public class ConnectAckMqtt311OutMessage extends MqttOutMessage {
   boolean sessionPresent;
 
   @Override
-  protected byte messageType() {
+  protected byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.CONNECT_ACK;
   }
 
   @Override
@@ -56,6 +61,6 @@ public class ConnectAckMqtt311OutMessage extends MqttOutMessage {
   }
 
   protected byte reasonCodeValue() {
-    return reasonCode.getMqtt311();
+    return (byte) reasonCode.mqtt311();
   }
 }

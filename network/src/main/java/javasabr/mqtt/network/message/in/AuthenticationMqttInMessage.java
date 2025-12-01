@@ -3,26 +3,31 @@ package javasabr.mqtt.network.message.in;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
-import javasabr.rlib.common.util.ArrayUtils;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Authentication exchange.
  */
 @Getter
-@Accessors(fluent = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Accessors
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class AuthenticationMqttInMessage extends MqttInMessage {
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.AUTHENTICATE.ordinal();
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.AUTHENTICATION.ordinal();
+
+  static {
+    DebugUtils.registerIncludedFields("reasonCode");
+  }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -58,28 +63,37 @@ public class AuthenticationMqttInMessage extends MqttInMessage {
   AuthenticateReasonCode reasonCode;
 
   // properties
+  @Nullable
   String reason;
+  @Nullable
   String authenticationMethod;
 
-  byte[] authenticationData;
+  byte @Nullable [] authenticationData;
 
   public AuthenticationMqttInMessage(byte messageFlags) {
     super(messageFlags);
     this.reasonCode = AuthenticateReasonCode.SUCCESS;
-    this.reason = StringUtils.EMPTY;
-    this.authenticationMethod = StringUtils.EMPTY;
-    this.authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.AUTHENTICATION;
+  }
+  
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override
   protected void readVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901219
-    reasonCode = AuthenticateReasonCode.of(readByteUnsigned(buffer));
+    reasonCode = AuthenticateReasonCode.ofCode(readByteUnsigned(buffer));
   }
 
   @Override
@@ -90,17 +104,32 @@ public class AuthenticationMqttInMessage extends MqttInMessage {
   @Override
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
     switch (property) {
-      case AUTHENTICATION_DATA -> authenticationData = value;
-      default -> unexpectedProperty(property);
+      case AUTHENTICATION_DATA -> {
+        if (authenticationData != null) {
+          alreadyPresentedProperty(property);
+        }
+        authenticationData = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
     switch (property) {
-      case REASON_STRING -> reason = value;
-      case AUTHENTICATION_METHOD -> authenticationMethod = value;
-      default -> unexpectedProperty(property);
+      case REASON_STRING -> {
+        if (reason != null) {
+          alreadyPresentedProperty(property);
+        }
+        reason = value;
+      }
+      case AUTHENTICATION_METHOD -> {
+        if (authenticationMethod != null) {
+          alreadyPresentedProperty(property);
+        }
+        authenticationMethod = value;
+      }
+      default -> unsupportedProperty(property);
     }
   }
 }

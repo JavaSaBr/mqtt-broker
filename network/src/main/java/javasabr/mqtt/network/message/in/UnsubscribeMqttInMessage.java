@@ -8,8 +8,8 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
+import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttMessageType;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * Unsubscribe request.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
 
@@ -31,8 +31,8 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
     DebugUtils.registerIncludedFields("rawTopicFilters");
   }
 
-  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE.ordinal();
   public static final byte MESSAGE_FLAGS = 0b0000_0010;
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.UNSUBSCRIBE.ordinal();
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
@@ -49,8 +49,13 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
   }
 
   @Override
-  public byte messageType() {
+  public byte messageTypeId() {
     return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.UNSUBSCRIBE;
   }
 
   @Override
@@ -61,7 +66,7 @@ public class UnsubscribeMqttInMessage extends TrackableMqttInMessage {
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
     if (!buffer.hasRemaining()) {
-      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTER);
+      throw new MalformedProtocolMqttException(MqttProtocolErrors.NO_ANY_TOPIC_FILTERS);
     }
 
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();

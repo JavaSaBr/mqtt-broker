@@ -8,13 +8,17 @@ import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Publish received (QoS 2 delivery part 1).
  */
+@Getter
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishReceivedMqtt5OutMessage extends PublishReceivedMqtt311OutMessage {
 
@@ -41,17 +45,19 @@ public class PublishReceivedMqtt5OutMessage extends PublishReceivedMqtt311OutMes
 
   Array<StringPair> userProperties;
   PublishReceivedReasonCode reasonCode;
+
+  @Nullable
   String reason;
 
   public PublishReceivedMqtt5OutMessage(int messageId, PublishReceivedReasonCode reasonCode) {
-    this(messageId, reasonCode, Array.empty(StringPair.class), StringUtils.EMPTY);
+    this(messageId, reasonCode, EMPTY_USER_PROPERTIES, null);
   }
 
   public PublishReceivedMqtt5OutMessage(
       int messageId,
       PublishReceivedReasonCode reasonCode,
       Array<StringPair> userProperties,
-      String reason) {
+      @Nullable String reason) {
     super(messageId);
     this.reasonCode = reasonCode;
     this.userProperties = userProperties;
@@ -67,7 +73,7 @@ public class PublishReceivedMqtt5OutMessage extends PublishReceivedMqtt311OutMes
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     super.writeVariableHeader(connection, buffer);
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901143
-    writeByte(buffer, reasonCode.value());
+    writeByte(buffer, reasonCode.code());
   }
 
   @Override

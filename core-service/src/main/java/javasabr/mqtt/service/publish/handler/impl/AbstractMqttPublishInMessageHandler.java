@@ -1,0 +1,129 @@
+package javasabr.mqtt.service.publish.handler.impl;
+
+import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.MessageTacker;
+import javasabr.mqtt.model.session.MqttSession;
+import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
+import javasabr.mqtt.network.user.NetworkMqttUser;
+import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
+import javasabr.rlib.collections.array.Array;
+import lombok.AccessLevel;
+import lombok.CustomLog;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+@CustomLog
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
+public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttUser>
+    implements MqttPublishInMessageHandler {
+
+  Class<U> expectedUserType;
+  SubscriptionService subscriptionService;
+  PublishDeliveringService publishDeliveringService;
+  MessageOutFactoryService messageOutFactoryService;
+
+  @Override
+  public void handle(NetworkMqttUser user, Publish publish) {
+    if (!expectedUserType.isInstance(user)) {
+      log.warning(
+          user.clientId(), user.getClass(),
+          "[%s] Not expected client of type:[%s]"::formatted);
+      return;
+    }
+    U expectedUser = expectedUserType.cast(user);
+    NetworkMqttSession session = expectedUser.session();
+    if (session == null) {
+      log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+      return;
+    }
+    if (validateImpl(expectedUser, session, publish)) {
+      handleImpl(expectedUser, session, publish);
+    }
+  }
+
+  protected boolean validateImpl(U user, NetworkMqttSession session, Publish publish) {
+    return true;
+  }
+
+  protected void handleImpl(U user, NetworkMqttSession session, Publish publish) {
+    TopicName topicName = publish.topicName();
+    Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
+    if (subscribers.isEmpty()) {
+      log.debug(user.clientId(), publish, "[%s] Not found any subscriber for publish: [%s]"::formatted);
+      handleNoMatchedSubscribers(user, session, publish);
+      return;
+    }
+
+    int count = 0;
+    for (SingleSubscriber subscriber : subscribers) {
+      PublishHandlingResult checkResult = checkSubscriber(user, publish, subscriber);
+      if (checkResult.error()) {
+        log.debug(user.clientId(), checkResult, subscriber,
+            "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
+        handleError(user, session, publish, checkResult);
+        return;
+      } else if(checkResult == PublishHandlingResult.SUCCESS) {
+        count++;
+      }
+    }
+
+    log.debug(user.clientId(), count,
+        "[%s] Started delivering publish to [%s] subscribers"::formatted);
+    handleSuccess(user, session, publish, count);
+
+    for (SingleSubscriber subscriber : subscribers) {
+      startDelivering(user, session, publish, subscriber);
+    }
+  }
+
+  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, Publish publish) {}
+
+  protected void handleSuccess(
+      U user,
+      NetworkMqttSession session,
+      Publish publish,
+      int matchedSubscribers) {}
+
+  protected void handleError(
+      U user,
+      NetworkMqttSession session,
+      Publish publish,
+      PublishHandlingResult handlingResult) {}
+
+  protected PublishHandlingResult checkSubscriber(
+      U user,
+      Publish publish,
+      SingleSubscriber subscriber) {
+    return PublishHandlingResult.SUCCESS;
+  }
+
+  protected PublishHandlingResult startDelivering(
+      U user,
+      NetworkMqttSession session,
+      Publish publish,
+      SingleSubscriber subscriber) {
+    return publishDeliveringService.startDelivering(publish, subscriber);
+  }
+
+  protected void sendFeedback(U user, MqttOutMessage response) {
+    user.sendAsync(response);
+  }
+
+  protected void sendFeedback(
+      U user,
+      MqttSession session,
+      MqttOutMessage response,
+      int messageId) {
+    MessageTacker messageTacker = session.inMessageTracker();
+    user.send(response)
+        .thenAccept(_ -> messageTacker.remove(messageId));
+  }
+}

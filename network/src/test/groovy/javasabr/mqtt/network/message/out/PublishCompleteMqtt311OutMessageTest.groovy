@@ -1,25 +1,34 @@
 package javasabr.mqtt.network.message.out
 
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.NumberUtils
 
 class PublishCompleteMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishCompleteMqtt311OutMessage(messageId)
+        def outMessage = new PublishCompleteMqtt311OutMessage(messageId)
+    when:
+        def typeAndFlags = outMessage.messageTypeAndFlags()
+        byte type = NumberUtils.getHighByteBits(typeAndFlags);
+        byte info = NumberUtils.getLowByteBits(typeAndFlags);
+    then:
+        MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_COMPLETE
+        info == PublishCompleteMqttInMessage.MESSAGE_FLAGS
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt311Connection, it)
+          outMessage.write(defaultMqtt311Connection, it)
         }
-        def reader = new PublishCompleteMqttInMessage(0b0111_0000 as byte)
+        def reader = new PublishCompleteMqttInMessage(info)
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
         reader.reasonCode() == PublishCompletedReasonCode.SUCCESS
         reader.messageId() == messageId
         reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        reader.reason() == ""
+        reader.reason() == null
   }
 }

@@ -1,23 +1,32 @@
 package javasabr.mqtt.network.message.out
 
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
 import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage
 import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.NumberUtils
 
 class PublishReleaseMqtt5OutMessageTest extends BaseMqttOutMessageTest {
 
-  def "should write packet correctly"() {
+  def "should write message correctly"() {
     given:
-        def packet = new PublishReleaseMqtt5OutMessage(
+        def outMessage = new PublishReleaseMqtt5OutMessage(
             messageId,
             PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
             userProperties,
             reasonString)
     when:
+        def typeAndFlags = outMessage.messageTypeAndFlags()
+        byte type = NumberUtils.getHighByteBits(typeAndFlags);
+        byte info = NumberUtils.getLowByteBits(typeAndFlags);
+    then:
+        MqttMessageType.fromByte(type) == MqttMessageType.PUBLISH_RELEASE
+        info == PublishReleaseMqttInMessage.MESSAGE_FLAGS
+    when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          packet.write(defaultMqtt5Connection, it)
+          outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new PublishReleaseMqttInMessage(0b0000_0010 as byte)
+        def reader = new PublishReleaseMqttInMessage(info)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result

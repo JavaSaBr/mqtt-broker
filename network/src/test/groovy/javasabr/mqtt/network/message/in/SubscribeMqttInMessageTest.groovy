@@ -6,6 +6,7 @@ import javasabr.mqtt.model.MqttProtocolErrors
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.rlib.common.util.BufferUtils
 
 class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
@@ -120,14 +121,14 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter)
           it.put(0b0000_0001 as byte)
         }
-    when:
+    when: 'invalid message flags'
         def inMessage = new SubscribeMqttInMessage(0b0000_0000 as byte)
         def successful = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         !successful
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
-    when:
+        inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.SUBSCRIBE]"
+    when: 'invalid QoS or Retain Handling'
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putString(topicFilter)
@@ -139,7 +140,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         !successful2
         inMessage2.exception() instanceof MalformedProtocolMqttException
         inMessage2.exception().message == MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING
-    when:
+    when: 'not provided any topic filter'
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
         }
@@ -148,8 +149,8 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful3
         inMessage3.exception() instanceof MalformedProtocolMqttException
-        inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
-    when:
+        inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTERS
+    when: 'unsupported no local option'
         def dataBuffer4 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putString(topicFilter)
@@ -161,7 +162,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         !successful4
         inMessage4.exception() instanceof MalformedProtocolMqttException
         inMessage4.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_NO_LOCAL_OPTION
-    when:
+    when: 'unsupported retain as publish option'
         def dataBuffer5 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putString(topicFilter)
@@ -173,7 +174,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         !successful5
         inMessage5.exception() instanceof MalformedProtocolMqttException
         inMessage5.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_AS_PUBLISH_OPTION
-    when:
+    when: 'unsupported retain handling option'
         def dataBuffer6 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putString(topicFilter)
@@ -195,14 +196,14 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putString(topicFilter)
           it.put(0b0000_0001 as byte)
         }
-    when:
+    when: 'invalid message flags'
         def inMessage = new SubscribeMqttInMessage(0b0000_0000 as byte)
         def successful = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !successful
         inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == 'Unexpected flags bits:0b0000_0000'
-    when:
+        inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.SUBSCRIBE]"
+    when: 'invalid QoS or retain handling'
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putMbi(0)
@@ -215,7 +216,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         !successful2
         inMessage2.exception() instanceof MalformedProtocolMqttException
         inMessage2.exception().message == MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING
-    when:
+    when: 'no any topic filter'
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
           it.putShort(messageId)
           it.putMbi(0)
@@ -225,8 +226,8 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful3
         inMessage3.exception() instanceof MalformedProtocolMqttException
-        inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTER
-    when:
+        inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTERS
+    when: 'invalid property'
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SERVER_REFERENCE, "reference")
         }
@@ -240,6 +241,37 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         !successful4
         inMessage4.exception() instanceof MalformedProtocolMqttException
-        inMessage4.exception().message == "Property:[SERVER_REFERENCE] is not available for packet:[SubscribeMqttInMessage]"
+        inMessage4.exception().message == "Property:[$MqttMessageProperty.SERVER_REFERENCE] is not available for message:[$MqttMessageType.SUBSCRIBE]"
+    when: 'invalid subscription id'
+        def propertiesBuffer2 = BufferUtils.prepareBuffer(512) {
+          it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, -50)
+        }
+        def dataBuffer5 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(propertiesBuffer2.limit())
+          it.put(propertiesBuffer2)
+        }
+        def inMessage5 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful5 = inMessage5.read(defaultMqtt5Connection, dataBuffer5, dataBuffer5.limit())
+    then:
+        !successful5
+        inMessage5.exception() instanceof MalformedProtocolMqttException
+        inMessage5.exception().message == MqttProtocolErrors.INVALID_SUBSCRIPTION_ID
+    when: 'two times provided subscription id'
+        def propertiesBuffer3 = BufferUtils.prepareBuffer(512) {
+          it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, 90)
+          it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, 90)
+        }
+        def dataBuffer6 = BufferUtils.prepareBuffer(512) {
+          it.putShort(messageId)
+          it.putMbi(propertiesBuffer3.limit())
+          it.put(propertiesBuffer3)
+        }
+        def inMessage6 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
+        def successful6 = inMessage6.read(defaultMqtt5Connection, dataBuffer6, dataBuffer6.limit())
+    then:
+        !successful6
+        inMessage6.exception() instanceof MalformedProtocolMqttException
+        inMessage6.exception().message == "Property:[$MqttMessageProperty.SUBSCRIPTION_IDENTIFIER] is already presented in message:[$MqttMessageType.SUBSCRIBE]"
   }
 }

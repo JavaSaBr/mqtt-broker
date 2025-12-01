@@ -3,12 +3,20 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
+@Getter
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public class PublishMqtt311OutMessage extends PublishMqttOutMessage {
+public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
+
+  private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH.ordinal();
 
   static {
     DebugUtils.registerIncludedFields("qos", "topicName", "duplicate");
@@ -16,24 +24,34 @@ public class PublishMqtt311OutMessage extends PublishMqttOutMessage {
 
   QoS qos;
   byte[] payload;
-  String topicName;
+  TopicName topicName;
 
-  boolean retained;
+  boolean retain;
   boolean duplicate;
 
   public PublishMqtt311OutMessage(
       int messageId,
       QoS qos,
-      boolean retained,
+      boolean retain,
       boolean duplicate,
-      String topicName,
+      TopicName topicName,
       byte[] payload) {
     super(messageId);
     this.qos = qos;
-    this.retained = retained;
+    this.retain = retain;
     this.duplicate = duplicate;
     this.payload = payload;
     this.topicName = topicName;
+  }
+
+  @Override
+  protected byte messageTypeId() {
+    return MESSAGE_TYPE;
+  }
+
+  @Override
+  public MqttMessageType messageType() {
+    return MqttMessageType.PUBLISH;
   }
 
   @Override
@@ -43,25 +61,21 @@ public class PublishMqtt311OutMessage extends PublishMqttOutMessage {
 
   @Override
   protected byte messageFlags() {
-
     byte info = (byte) (qos.ordinal() << 1);
-
-    if (retained) {
-      info |= 0x01;
+    if (retain) {
+      info |= 0b0001;
     }
-
     if (duplicate) {
-      info |= 0x08;
+      info |= 0b1000;
     }
-
     return info;
   }
 
   @Override
   protected void writeVariableHeader(MqttConnection connection, ByteBuffer buffer) {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc384800412
-    writeString(buffer, topicName);
-    if (qos.ordinal() > QoS.AT_MOST_ONCE.ordinal()) {
+    writeString(buffer, topicName.rawTopic());
+    if (qos.isHigherThan(QoS.AT_MOST_ONCE)) {
       writeShort(buffer, messageId);
     }
   }
