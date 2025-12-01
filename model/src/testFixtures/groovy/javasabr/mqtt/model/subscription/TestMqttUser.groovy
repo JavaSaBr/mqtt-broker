@@ -4,31 +4,19 @@ import com.fasterxml.jackson.annotation.JsonValue
 import javasabr.mqtt.model.MqttUser
 import javasabr.mqtt.model.message.SendableMqttMessage
 import javasabr.mqtt.model.session.MqttSession
-
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 
-record TestMqttUser(String id) implements MqttUser {
+record TestMqttUser(String clientId, String userName, String ipAddress) implements MqttUser {
 
-  @Override
-  String clientId() {
-    return id
+  TestMqttUser(String id) {
+    this(id, null, "localhost")
   }
 
   @JsonValue
   @Override
   String toString() {
-    return id
-  }
-
-  @Override
-  String userName() {
-    return null
-  }
-
-  @Override
-  String ipAddress() {
-    return "localhost"
+    return clientId
   }
 
   @Override
