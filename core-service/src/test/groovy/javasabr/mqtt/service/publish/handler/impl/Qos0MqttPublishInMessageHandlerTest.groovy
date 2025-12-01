@@ -19,28 +19,30 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def subscriber1 = mockedExternalConnection(MqttVersion.MQTT_5)
         def subscriber2 = mockedExternalConnection(MqttVersion.MQTT_5)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
-        def client1 = subscriber1.user() as TestExternalNetworkMqttUser
-        def client2 = subscriber2.user() as TestExternalNetworkMqttUser
-        def client3 = publisher.user() as TestExternalNetworkMqttUser
-        def topicFilter = defaultTopicService.createTopicFilter(client1, "Qos0MqttPublishInMessageHandlerTest/1")
-        def topicName = defaultTopicService.createTopicName(client1, "Qos0MqttPublishInMessageHandlerTest/1")
+        def user1 = subscriber1.user() as TestExternalNetworkMqttUser
+        def user2 = subscriber2.user() as TestExternalNetworkMqttUser
+        def user3 = publisher.user() as TestExternalNetworkMqttUser
+        def topicFilter = defaultTopicService.createTopicFilter(user1, "Qos0MqttPublishInMessageHandlerTest/1")
+        def expectedTopicName = defaultTopicService.createTopicName(user1, "Qos0MqttPublishInMessageHandlerTest/1")
         defaultSubscriptionService.subscribe(
-            client1,
-            client1.session(),
+            user1,
+            user1.session(),
             Array.of(Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)))
         defaultSubscriptionService.subscribe(
-            client2,
-            client2.session(),
+            user2,
+            user2.session(),
             Array.of(Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)))
     when:
-        publishInHandler.handle(client3, Publish.minimal(QoS.AT_MOST_ONCE, topicName, testPayload))
+        publishInHandler.handle(user3, Publish.minimal(QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
     then: 'sender should not have any feedback'
-        client3.isEmpty()
+        user3.isEmpty()
     then: 'subscribers should receive the publish'
-        def message1 = client1.nextSentMessage(PublishMqtt5OutMessage)
-        message1.topicName() == topicName
-        def message2 = client2.nextSentMessage(PublishMqtt5OutMessage)
-        message2.topicName() == topicName
+        with(user1.nextSentMessage(PublishMqtt5OutMessage)) {
+          topicName() == expectedTopicName
+        }
+        with(user2.nextSentMessage(PublishMqtt5OutMessage)) {
+          topicName() == expectedTopicName
+        }
   }
 
   def "should not provide any feedback for accepted publish without any subscriber"() {

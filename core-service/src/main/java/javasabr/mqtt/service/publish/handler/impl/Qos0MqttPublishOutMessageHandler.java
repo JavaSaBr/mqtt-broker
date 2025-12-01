@@ -21,8 +21,8 @@ public class Qos0MqttPublishOutMessageHandler extends AbstractMqttPublishOutMess
   }
 
   @Override
-  protected PublishHandlingResult handleImpl(Publish publish, ExternalNetworkMqttUser client) {
-    startDelivering(client, publish);
+  protected PublishHandlingResult handleImpl(Publish publish, ExternalNetworkMqttUser user) {
+    startDelivering(user, publish);
     return PublishHandlingResult.SUCCESS;
   }
 }

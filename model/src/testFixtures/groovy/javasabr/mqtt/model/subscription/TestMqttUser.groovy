@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.subscription
 
 import com.fasterxml.jackson.annotation.JsonValue
+import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttUser
 import javasabr.mqtt.model.message.SendableMqttMessage
 import javasabr.mqtt.model.session.MqttSession
@@ -37,11 +38,16 @@ record TestMqttUser(String id) implements MqttUser {
   }
 
   @Override
-  void sendAsync(SendableMqttMessage message) {
+  MqttClientConnectionConfig connectionConfig() {
+    return null
   }
 
   @Override
-  CompletionStage<Boolean> send(SendableMqttMessage message) {
+  void sendInBackground(SendableMqttMessage message) {
+  }
+
+  @Override
+  CompletionStage<Boolean> sendAsync(SendableMqttMessage message) {
     return CompletableFuture.completedFuture(true)
   }
 }

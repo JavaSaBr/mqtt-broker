@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
@@ -27,9 +28,9 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
 
   @Override
   public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
-    NetworkMqttUser user = subscriptionService.resolveClient(subscriber);
+    MqttUser user = subscriber.resolveUser();
     if (!expectedUser.isInstance(user)) {
-      log.warning(user, "Accepted not expected client:[%s]"::formatted);
+      log.warning(user, "Accepted not expected user:[%s]"::formatted);
       return PublishHandlingResult.NOT_EXPECTED_CLIENT;
     }
     publish = reconstruct(user, publish);
@@ -40,7 +41,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
   }
 
   @Nullable
-  protected Publish reconstruct(NetworkMqttUser user, Publish original) {
+  protected Publish reconstruct(MqttUser user, Publish original) {
     return original.with(
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos(),
@@ -48,14 +49,14 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
         MqttProperties.TOPIC_ALIAS_NOT_SET);
   }
 
-  protected abstract PublishHandlingResult handleImpl(Publish publish, U client) ;
+  protected abstract PublishHandlingResult handleImpl(Publish publish, U user) ;
 
   protected void startDelivering(NetworkMqttUser user, Publish publish) {
     MqttOutMessage outMessage = messageOutFactoryService
         .resolveFactory(user)
         .newPublish(
             publish.messageId(),
-            qos(),
+            publish.qos(),
             publish.retained(),
             publish.duplicated(),
             publish.topicName(),
@@ -65,6 +66,6 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
             publish.responseTopicName(),
             publish.correlationData(),
             publish.userProperties());
-    user.sendAsync(outMessage);
+    user.sendInBackground(outMessage);
   }
 }

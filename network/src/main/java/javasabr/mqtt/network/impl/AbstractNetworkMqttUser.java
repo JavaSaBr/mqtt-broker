@@ -58,30 +58,30 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   }
 
   @Override
-  public void sendAsync(SendableMqttMessage message) {
-    sendAsync((MqttOutMessage) message);
+  public void sendInBackground(SendableMqttMessage message) {
+    sendInBackground((MqttOutMessage) message);
   }
 
   @Override
-  public void sendAsync(MqttOutMessage message) {
+  public void sendInBackground(MqttOutMessage message) {
     log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
     connection.send(message);
   }
 
   @Override
-  public CompletionStage<Boolean> send(SendableMqttMessage message) {
-    return send((MqttOutMessage) message);
+  public CompletionStage<Boolean> sendAsync(SendableMqttMessage message) {
+    return sendAsync((MqttOutMessage) message);
   }
 
   @Override
-  public CompletableFuture<Boolean> send(MqttOutMessage message) {
+  public CompletableFuture<Boolean> sendAsync(MqttOutMessage message) {
     log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
     return connection.sendWithFeedback(message);
   }
 
   @Override
   public CompletableFuture<Boolean> closeWithReason(MqttOutMessage message) {
-    return send(message)
+    return sendAsync(message)
         .thenApply(sent -> {
           connection.close();
           return sent;

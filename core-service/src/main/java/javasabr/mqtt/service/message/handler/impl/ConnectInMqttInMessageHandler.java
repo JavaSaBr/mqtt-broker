@@ -85,7 +85,7 @@ public class ConnectInMqttInMessageHandler
   }
 
   private void reject(ExternalNetworkMqttUser user, ConnectAckReasonCode connectAckReasonCode) {
-    user.sendAsync(messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newConnectAck(user, connectAckReasonCode));
   }
@@ -209,7 +209,7 @@ public class ConnectInMqttInMessageHandler
     subscriptionService.restoreSubscriptions(user, session);
 
     return Mono.fromFuture(user
-        .send(connectAck)
+        .sendAsync(connectAck)
         .thenApply(result -> onSentConnAck(user, session, result)));
   }
 

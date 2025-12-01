@@ -1,8 +1,10 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.session.NetworkMqttSession.PendingMessageHandler;
@@ -38,8 +40,8 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
 
   @Nullable
   @Override
-  protected Publish reconstruct(NetworkMqttUser user, Publish original) {
-    NetworkMqttSession session = user.session();
+  protected Publish reconstruct(MqttUser user, Publish original) {
+    MqttSession session = user.session();
     if (session == null) {
       return null;
     }
@@ -52,9 +54,9 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
   }
 
   @Override
-  protected PublishHandlingResult handleImpl(Publish publish, ExternalNetworkMqttUser client) {
+  protected PublishHandlingResult handleImpl(Publish publish, ExternalNetworkMqttUser user) {
 
-    NetworkMqttSession session = client.session();
+    NetworkMqttSession session = user.session();
     if (session == null) {
       return PublishHandlingResult.SKIPPED;
     }
@@ -63,7 +65,7 @@ public abstract class PersistedMqttPublishOutMessageHandler extends
     session.registerOutPublish(publish, pendingMessageHandler);
 
     // send publish
-    startDelivering(client, publish);
+    startDelivering(user, publish);
     return PublishHandlingResult.SUCCESS;
   }
 

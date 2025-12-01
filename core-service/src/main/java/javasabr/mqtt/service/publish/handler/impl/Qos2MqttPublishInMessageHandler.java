@@ -137,7 +137,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
-    user.sendAsync(messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
   }
