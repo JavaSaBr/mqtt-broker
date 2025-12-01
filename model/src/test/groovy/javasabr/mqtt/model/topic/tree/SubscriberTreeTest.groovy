@@ -624,7 +624,7 @@ class SubscriberTreeTest extends UnitSpecification {
     return new TestMqttUser(id)
   }
 
-  static def makeSubscription(String topicFilter) {
+  static Subscription makeSubscription(String topicFilter) {
     return new Subscription(
         TopicFilter.valueOf(topicFilter),
         MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET,
