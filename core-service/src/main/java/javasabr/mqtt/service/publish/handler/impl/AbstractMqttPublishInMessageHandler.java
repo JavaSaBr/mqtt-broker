@@ -73,8 +73,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
       }
     }
 
-    log.debug(user.clientId(), count,
-        "[%s] Started delivering publish to [%s] subscribers"::formatted);
+    log.debug(count, "Started delivering publish to [%s] subscribers"::formatted);
     handleSuccess(user, session, publish, count);
 
     for (SingleSubscriber subscriber : subscribers) {
