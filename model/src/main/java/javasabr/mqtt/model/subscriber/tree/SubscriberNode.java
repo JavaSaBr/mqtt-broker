@@ -13,6 +13,7 @@ import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
+import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -45,6 +46,15 @@ public class SubscriberNode extends SubscriberTreeBase {
     }
     SubscriberNode childNode = getOrCreateChildNode(topicFilter.segment(level));
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
+  }
+
+  @Override
+  protected void matchesTo(
+      int level,
+      TopicName topicName,
+      int lastLevel,
+      MutableRefToRefDictionary<MqttUser, SingleSubscriber> container) {
+
   }
 
   protected boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {

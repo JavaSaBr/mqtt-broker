@@ -12,6 +12,7 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +26,7 @@ public abstract class SubscriberTreeBase {
       int level,
       TopicName topicName,
       int lastLevel,
-      MutableArray<SingleSubscriber> container);
+      MutableRefToRefDictionary<MqttUser, SingleSubscriber> container);
 
   protected abstract boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter);
 

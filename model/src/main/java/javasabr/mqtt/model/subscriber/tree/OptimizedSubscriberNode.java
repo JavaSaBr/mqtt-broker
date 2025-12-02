@@ -11,9 +11,9 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
-import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
+import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -31,7 +31,7 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     DebugUtils.registerIncludedFields("childNodes", "subscribers");
   }
 
-  private void appendSubscribersTo(MutableArray<SingleSubscriber> result, OptimizedSubscriberNode subscriberNode) {
+  private void appendSubscribersTo(MutableRefToRefDictionary<MqttUser, SingleSubscriber> result, OptimizedSubscriberNode subscriberNode) {
     LockableArray<Subscriber> subscribers = subscriberNode.subscribers();
     if (subscribers == null) {
       return;
@@ -46,18 +46,17 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     }
   }
 
-  private static void addOrReplaceIfLowerQos(MutableArray<SingleSubscriber> result, Subscriber subscriber) {
+  private static void addOrReplaceIfLowerQos(MutableRefToRefDictionary<MqttUser, SingleSubscriber> result, Subscriber subscriber) {
     SingleSubscriber subscriberFromNode = subscriber.resolveSingle();
-    int found = result.indexOf(SingleSubscriber::user, subscriberFromNode.user());
-    if (found == -1) {
-      result.add(subscriberFromNode);
+    SingleSubscriber singleSubscriber = result.get(subscriberFromNode.user());
+    if (singleSubscriber == null) {
+      result.put(subscriberFromNode.user(), subscriberFromNode);
       return;
     }
-    QoS existedQos = result.get(found).qos();
+    QoS existedQos = singleSubscriber.qos();
     QoS candidateQos = subscriberFromNode.qos();
     if (existedQos.ordinal() < candidateQos.ordinal()) {
-      result.remove(found);
-      result.add(subscriberFromNode);
+      result.put(subscriberFromNode.user(), subscriberFromNode);
     }
   }
 
@@ -86,29 +85,23 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     return childNode.unsubscribe(level + 1, owner, topicFilter);
   }
 
-  protected void matchesTo(int level, TopicName topicName, int lastLevel, MutableArray<SingleSubscriber> container) {
+  protected void matchesTo(int level, TopicName topicName, int lastLevel, MutableRefToRefDictionary<MqttUser, SingleSubscriber> container) {
     LockableRefToRefDictionary<String, OptimizedSubscriberNode> nodes = childNodes();
     if (nodes == null) {
       return;
     }
-    long stamp = nodes.readLock();
-    try {
-      collectSegmentMatches(nodes, topicName.segment(level), level, topicName, lastLevel, container);
-      collectSegmentMatches(nodes, TopicFilter.SINGLE_LEVEL_WILDCARD, level, topicName, lastLevel, container);
-      collectSegmentMatches(nodes, TopicFilter.MULTI_LEVEL_WILDCARD, level, topicName, lastLevel, container);
-    } finally {
-      nodes.readUnlock(stamp);
-    }
+    collectMatchingSubscribers(topicName.segment(level), level, topicName, lastLevel, container);
+    collectMatchingSubscribers(TopicFilter.SINGLE_LEVEL_WILDCARD, level, topicName, lastLevel, container);
+    collectMatchingSubscribers(TopicFilter.MULTI_LEVEL_WILDCARD, level, topicName, lastLevel, container);
   }
 
-  private void collectSegmentMatches(
-      LockableRefToRefDictionary<String, OptimizedSubscriberNode> childNodes,
+  private void collectMatchingSubscribers(
       String segment,
       int level,
       TopicName topicName,
       int lastLevel,
-      MutableArray<SingleSubscriber> result) {
-    OptimizedSubscriberNode subscriberNode = childNodes.get(segment);
+      MutableRefToRefDictionary<MqttUser, SingleSubscriber> result) {
+    OptimizedSubscriberNode subscriberNode = childNode(segment);
     if (subscriberNode == null) {
       return;
     }
@@ -165,6 +158,20 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
         subscribers = current;
       }
       return current;
+    }
+  }
+
+  @Nullable
+  private OptimizedSubscriberNode childNode(String segment) {
+    LockableRefToRefDictionary<String, OptimizedSubscriberNode> childNodes = childNodes();
+    if (childNodes == null) {
+      return null;
+    }
+    long stamp = childNodes.readLock();
+    try {
+      return childNodes.get(segment);
+    } finally {
+      childNodes.readUnlock(stamp);
     }
   }
 

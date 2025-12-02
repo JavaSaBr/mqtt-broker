@@ -6,7 +6,9 @@ import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.dictionary.DictionaryFactory;
+import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
 import javasabr.rlib.common.ThreadSafe;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +35,8 @@ public class ConcurrentSubscriberTree implements ThreadSafe {
   }
 
   public Array<SingleSubscriber> matches(TopicName topicName) {
-    var resultArray = MutableArray.ofType(SingleSubscriber.class);
+    MutableRefToRefDictionary<MqttUser, SingleSubscriber> resultArray = DictionaryFactory.mutableRefToRefDictionary();
     rootNode.matchesTo(0, topicName, topicName.levelsCount() - 1, resultArray);
-    return resultArray;
+    return resultArray.values(ArrayFactory.mutableArray(SingleSubscriber.class));
   }
 }
