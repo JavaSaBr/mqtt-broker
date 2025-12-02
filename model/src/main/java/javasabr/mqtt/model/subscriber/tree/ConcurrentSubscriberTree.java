@@ -19,6 +19,10 @@ public class ConcurrentSubscriberTree implements ThreadSafe {
 
   SubscriberTreeBase rootNode;
 
+  public ConcurrentSubscriberTree() {
+    rootNode = new OptimizedSubscriberNode();
+  }
+
   @Nullable
   public SingleSubscriber subscribe(MqttUser user, Subscription subscription) {
     return rootNode.subscribe(0, user, subscription, subscription.topicFilter());
