@@ -84,8 +84,19 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
     retryDeliveringImpl(expectedUserType.cast(user), session, publish);
   }
 
-  protected abstract void retryDeliveringImpl(
-      ExternalNetworkMqttUser user,
-      MqttSession session,
-      Publish publish);
+  protected void retryDeliveringImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
+    int messageId = publish.messageId();
+    MessageTacker messageTacker = session.outMessageTracker();
+    TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
+    if (messageMeta == null) {
+      log.warning(user.clientId(), messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      return;
+    } else if(messageMeta.messageType() != MqttMessageType.PUBLISH) {
+      log.warning(user.clientId(), messageMeta, messageId,
+          "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
+      return;
+    }
+    log.debug(user.clientId(), messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
+    send(user, publish.withDuplicated());
+  }
 }
