@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 @Getter(AccessLevel.PACKAGE)
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-class SubscriberNode extends SubscriberTreeBase {
+public class SubscriberNode extends SubscriberTreeBase {
 
   private final static Supplier<SubscriberNode> SUBSCRIBER_NODE_FACTORY = SubscriberNode::new;
 
@@ -39,7 +39,7 @@ class SubscriberNode extends SubscriberTreeBase {
    * @return the previous subscription from the same owner
    */
   @Nullable
-  public SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
+  protected SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
@@ -47,7 +47,7 @@ class SubscriberNode extends SubscriberTreeBase {
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
-  public boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
+  protected boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return removeSubscriber(subscribers(), owner, topicFilter);
     }
@@ -56,48 +56,25 @@ class SubscriberNode extends SubscriberTreeBase {
   }
 
   protected void matchesTo(int level, TopicName topicName, int lastLevel, MutableArray<SingleSubscriber> container) {
-    exactlyTopicMatch(level, topicName, lastLevel, container);
-    singleWildcardTopicMatch(level, topicName, lastLevel, container);
-    multiWildcardTopicMatch(container);
+    collectMatchingSubscribers(topicName.segment(level), level, topicName, lastLevel, container);
+    collectMatchingSubscribers(TopicFilter.SINGLE_LEVEL_WILDCARD, level, topicName, lastLevel, container);
+    collectMatchingSubscribers(TopicFilter.MULTI_LEVEL_WILDCARD, level, topicName, lastLevel, container);
   }
 
-  private void exactlyTopicMatch(
+  private void collectMatchingSubscribers(
+      String segment,
       int level,
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-    String segment = topicName.segment(level);
     SubscriberNode subscriberNode = childNode(segment);
     if (subscriberNode == null) {
       return;
     }
-    if (level == lastLevel) {
+    if (level == lastLevel || TopicFilter.MULTI_LEVEL_WILDCARD.equals(segment)) {
       appendSubscribersTo(result, subscriberNode);
     } else if (level < lastLevel) {
       subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
-    }
-  }
-
-  private void singleWildcardTopicMatch(
-      int level,
-      TopicName topicName,
-      int lastLevel,
-      MutableArray<SingleSubscriber> result) {
-    SubscriberNode subscriberNode = childNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
-    if (subscriberNode == null) {
-      return;
-    }
-    if (level == lastLevel) {
-      appendSubscribersTo(result, subscriberNode);
-    } else if (level < lastLevel) {
-      subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
-    }
-  }
-
-  private void multiWildcardTopicMatch(MutableArray<SingleSubscriber> result) {
-    SubscriberNode subscriberNode = childNode(TopicFilter.MULTI_LEVEL_WILDCARD);
-    if (subscriberNode != null) {
-      appendSubscribersTo(result, subscriberNode);
     }
   }
 
@@ -122,40 +99,46 @@ class SubscriberNode extends SubscriberTreeBase {
 
   @Nullable
   private SubscriberNode childNode(String segment) {
-    LockableRefToRefDictionary<String, SubscriberNode> childNodes = childNodes();
-    if (childNodes == null) {
+    LockableRefToRefDictionary<String, SubscriberNode> localChildNodes = childNodes;
+    if (localChildNodes == null) {
       return null;
     }
-    long stamp = childNodes.readLock();
+    long stamp = localChildNodes.readLock();
     try {
-      return childNodes.get(segment);
+      return localChildNodes.get(segment);
     } finally {
-      childNodes.readUnlock(stamp);
+      localChildNodes.readUnlock(stamp);
     }
   }
 
   private LockableRefToRefDictionary<String, SubscriberNode> getOrCreateChildNodes() {
-    if (childNodes == null) {
-      synchronized (this) {
-        if (childNodes == null) {
-          childNodes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
-        }
-      }
+    LockableRefToRefDictionary<String, SubscriberNode> localChildNodes = childNodes;
+    if (localChildNodes != null) {
+      return localChildNodes;
     }
-    //noinspection ConstantConditions
-    return childNodes;
+    synchronized (this) {
+      localChildNodes = childNodes;
+      if (localChildNodes == null) {
+        localChildNodes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+        childNodes = localChildNodes;
+      }
+      return localChildNodes;
+    }
   }
 
   private LockableArray<Subscriber> getOrCreateSubscribers() {
-    if (subscribers == null) {
-      synchronized (this) {
-        if (subscribers == null) {
-          subscribers = ArrayFactory.stampedLockBasedArray(Subscriber.class);
-        }
-      }
+    LockableArray<Subscriber> localSubscribers = subscribers;
+    if (localSubscribers != null) {
+      return localSubscribers;
     }
-    //noinspection ConstantConditions
-    return subscribers;
+    synchronized (this) {
+      localSubscribers = subscribers;
+      if (localSubscribers == null) {
+        localSubscribers = ArrayFactory.stampedLockBasedArray(Subscriber.class);
+        subscribers = localSubscribers;
+      }
+      return localSubscribers;
+    }
   }
 
   @Override

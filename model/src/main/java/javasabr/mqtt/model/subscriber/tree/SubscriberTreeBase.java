@@ -45,9 +45,7 @@ abstract class SubscriberTreeBase {
   }
 
   @Nullable
-  private static SingleSubscriber removePreviousIfExist(
-      LockableArray<Subscriber> subscribers,
-      MqttUser user) {
+  private static SingleSubscriber removePreviousIfExist(LockableArray<Subscriber> subscribers, MqttUser user) {
     int index = subscribers.indexOf(Subscriber::resolveUser, user);
     if (index < 0) {
       return null;
@@ -84,10 +82,7 @@ abstract class SubscriberTreeBase {
     long stamp = subscribers.readLock();
     try {
       for (Subscriber subscriber : subscribers) {
-        SingleSubscriber singleSubscriber = subscriber.resolveSingle();
-        if (removeDuplicateWithLowerQoS(result, singleSubscriber)) {
-          result.add(singleSubscriber);
-        }
+        addOrReplaceIfLowerQos(result, subscriber);
       }
     } finally {
       subscribers.readUnlock(stamp);
@@ -141,23 +136,20 @@ abstract class SubscriberTreeBase {
     return subscriber instanceof SharedSubscriber shared && Objects.equals(group, shared.group());
   }
 
-  private static boolean removeDuplicateWithLowerQoS(
-      MutableArray<SingleSubscriber> result, SingleSubscriber candidate) {
-
+  private static void addOrReplaceIfLowerQos(MutableArray<SingleSubscriber> result, Subscriber subscriber) {
+    SingleSubscriber candidate = subscriber.resolveSingle();
     int found = result.indexOf(SingleSubscriber::user, candidate.user());
     if (found == -1) {
-      return true;
+      result.add(candidate);
+      return;
     }
-
     QoS candidateQos = candidate.qos();
-    SingleSubscriber exist = result.get(found);
-    QoS existeQos = exist.qos();
-
-    if (existeQos.ordinal() < candidateQos.ordinal()) {
+    QoS existedQos = result
+        .get(found)
+        .qos();
+    if (existedQos.ordinal() < candidateQos.ordinal()) {
       result.remove(found);
-      return true;
+      result.add(candidate);
     }
-
-    return false;
   }
 }
