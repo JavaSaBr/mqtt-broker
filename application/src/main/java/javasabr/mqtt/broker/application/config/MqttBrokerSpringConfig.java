@@ -303,7 +303,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.topic.alias.maximum",
             int.class,
-            MqttProperties.TOPIC_ALIAS_MAX_DEFAULT),
+            0),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,
@@ -319,7 +319,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.retain.available",
             boolean.class,
-            MqttProperties.RETAIN_AVAILABLE_DEFAULT),
+            false), // not implemented
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
@@ -327,7 +327,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.subscription.id.available",
             boolean.class,
-            MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT),
+            false), // not implemented
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,

@@ -8,5 +8,5 @@ public interface TrackableMessageCallback {
   /**
    * @return true if this handler should be de-register
    */
-  boolean accept(MqttUser owner, MqttSession session, TrackableMqttMessage message);
+  boolean accept(MqttUser user, MqttSession session, TrackableMqttMessage message);
 }

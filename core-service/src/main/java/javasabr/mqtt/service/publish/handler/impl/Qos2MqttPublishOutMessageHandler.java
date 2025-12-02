@@ -10,7 +10,7 @@ import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 
-public class Qos2MqttPublishOutMessageHandler extends PersistedMqttPublishOutMessageHandler {
+public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMessageHandler {
 
   public Qos2MqttPublishOutMessageHandler(
       SubscriptionService subscriptionService,

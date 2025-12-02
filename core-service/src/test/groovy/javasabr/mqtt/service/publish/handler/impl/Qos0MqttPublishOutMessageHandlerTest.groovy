@@ -25,12 +25,14 @@ class Qos0MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+            .withDuplicated()
     when:
         def result = publishOutHandler.handle(publish, subscriber)
     then:
         result == PublishHandlingResult.SUCCESS
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
           qos() == QoS.AT_MOST_ONCE
+          !duplicate()
           payload() == testPayload
           topicName() == testTopicName
           messageId() == MqttProperties.MESSAGE_ID_IS_NOT_SET

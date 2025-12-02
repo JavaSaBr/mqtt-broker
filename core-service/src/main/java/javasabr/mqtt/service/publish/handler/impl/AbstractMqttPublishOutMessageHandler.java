@@ -1,10 +1,11 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
-import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -22,36 +23,39 @@ import org.jspecify.annotations.Nullable;
 public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqttUser>
     implements MqttPublishOutMessageHandler {
 
-  Class<U> expectedUser;
+  Class<U> expectedUserType;
   SubscriptionService subscriptionService;
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
   public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
     MqttUser user = subscriber.resolveUser();
-    if (!expectedUser.isInstance(user)) {
-      log.warning(user, "Accepted not expected user:[%s]"::formatted);
+    if (!expectedUserType.isInstance(user)) {
+      log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return PublishHandlingResult.NOT_EXPECTED_CLIENT;
     }
-    publish = reconstruct(user, publish);
+    U expectedUser = expectedUserType.cast(user);
+    MqttSession session = expectedUser.session();
+    if (session == null) {
+      log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+      return PublishHandlingResult.SESSION_IS_ALREADY_CLOSED;
+    }
+    publish = reconstruct(expectedUser, session, publish);
     if (publish == null) {
       return PublishHandlingResult.SKIPPED;
     }
-    return handleImpl(publish, expectedUser.cast(user));
+    return handleImpl(expectedUser, session, publish);
   }
 
   @Nullable
-  protected Publish reconstruct(MqttUser user, Publish original) {
-    return original.with(
-        MqttProperties.MESSAGE_ID_IS_NOT_SET,
-        qos(),
-        false,
-        MqttProperties.TOPIC_ALIAS_NOT_SET);
+  protected abstract Publish reconstruct(U user, MqttSession session, Publish original);
+
+  protected PublishHandlingResult handleImpl(U user, MqttSession session, Publish publish) {
+    startDelivering(user, publish);
+    return PublishHandlingResult.SUCCESS;
   }
 
-  protected abstract PublishHandlingResult handleImpl(Publish publish, U user) ;
-
-  protected void startDelivering(NetworkMqttUser user, Publish publish) {
+  protected void startDelivering(U user, Publish publish) {
     MqttOutMessage outMessage = messageOutFactoryService
         .resolveFactory(user)
         .newPublish(

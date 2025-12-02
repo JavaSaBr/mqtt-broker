@@ -107,14 +107,13 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   @Override
   public int generateMessageId() {
-
-    int nextId = messageIdGenerator.incrementAndGet();
-
-    if (nextId >= MqttProperties.MAXIMUM_PACKET_ID) {
-      messageIdGenerator.compareAndSet(nextId, 0);
-      return generateMessageId();
-    }
-
+    int nextId;
+    do {
+      nextId = messageIdGenerator.incrementAndGet();
+      if (nextId >= MqttProperties.MAXIMUM_PACKET_ID) {
+        messageIdGenerator.compareAndSet(nextId, 0);
+      }
+    } while (nextId >= MqttProperties.MAXIMUM_PACKET_ID);
     return nextId;
   }
 
