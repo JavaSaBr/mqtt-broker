@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 @Getter(AccessLevel.PACKAGE)
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SubscriberNode extends SubscriberTreeBase {
+class SubscriberNode extends SubscriberTreeBase {
 
   private final static Supplier<SubscriberNode> SUBSCRIBER_NODE_FACTORY = SubscriberNode::new;
 
