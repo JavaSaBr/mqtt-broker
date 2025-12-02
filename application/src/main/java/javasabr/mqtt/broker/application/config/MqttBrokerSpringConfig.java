@@ -8,7 +8,6 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.model.subscriber.tree.OptimizedSubscriberNode;
 import javasabr.mqtt.model.subscriber.tree.SubscriberNode;
-import javasabr.mqtt.model.subscriber.tree.SubscriberTreeBase;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
@@ -69,8 +68,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-@SuppressWarnings("unused")
 @CustomLog
+@SuppressWarnings("unused")
 @Configuration(proxyBeanMethods = false)
 public class MqttBrokerSpringConfig {
 
@@ -104,7 +103,7 @@ public class MqttBrokerSpringConfig {
 
   @Bean
   ConcurrentSubscriberTree subscriberTree() {
-    return new ConcurrentSubscriberTree(new SubscriberNode());
+    return new ConcurrentSubscriberTree(new OptimizedSubscriberNode());
   }
 
   @Bean

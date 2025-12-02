@@ -39,7 +39,7 @@ public class SubscriberNode extends SubscriberTreeBase {
    * @return the previous subscription from the same owner
    */
   @Nullable
-  public SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
+  protected SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
@@ -47,7 +47,7 @@ public class SubscriberNode extends SubscriberTreeBase {
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
-  public boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
+  protected boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return removeSubscriber(subscribers(), owner, topicFilter);
     }

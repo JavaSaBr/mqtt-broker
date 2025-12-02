@@ -27,9 +27,10 @@ public abstract class SubscriberTreeBase {
       int lastLevel,
       MutableArray<SingleSubscriber> container);
 
-  public abstract boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter);
+  protected abstract boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter);
 
-  public abstract SingleSubscriber subscribe(
+  @Nullable
+  protected abstract SingleSubscriber subscribe(
       int level,
       MqttUser owner,
       Subscription subscription,

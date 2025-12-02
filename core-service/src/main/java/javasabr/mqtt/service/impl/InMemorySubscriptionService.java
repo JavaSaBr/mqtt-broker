@@ -11,7 +11,6 @@ import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
-import javasabr.mqtt.model.subscriber.tree.OptimizedSubscriberNode;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -37,7 +36,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
   ConcurrentSubscriberTree subscriberTree;
 
   public InMemorySubscriptionService() {
-    this.subscriberTree = new ConcurrentSubscriberTree(new OptimizedSubscriberNode());
+    this.subscriberTree = new ConcurrentSubscriberTree();
   }
 
   @Override

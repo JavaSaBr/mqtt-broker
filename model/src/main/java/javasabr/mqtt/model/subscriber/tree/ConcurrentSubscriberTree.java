@@ -20,7 +20,7 @@ public class ConcurrentSubscriberTree implements ThreadSafe {
   SubscriberTreeBase rootNode;
 
   public ConcurrentSubscriberTree() {
-    rootNode = new OptimizedSubscriberNode();
+    this.rootNode = new OptimizedSubscriberNode();
   }
 
   @Nullable
@@ -34,13 +34,7 @@ public class ConcurrentSubscriberTree implements ThreadSafe {
 
   public Array<SingleSubscriber> matches(TopicName topicName) {
     var resultArray = MutableArray.ofType(SingleSubscriber.class);
-    matchesTo(resultArray, topicName);
-    return resultArray;
-  }
-
-  public MutableArray<SingleSubscriber> matchesTo(MutableArray<SingleSubscriber> container, TopicName topicName) {
-    var resultArray = MutableArray.ofType(SingleSubscriber.class);
-    rootNode.matchesTo(0, topicName, topicName.levelsCount() - 1, container);
+    rootNode.matchesTo(0, topicName, topicName.levelsCount() - 1, resultArray);
     return resultArray;
   }
 }
