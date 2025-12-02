@@ -31,7 +31,7 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     DebugUtils.registerIncludedFields("childNodes", "subscribers");
   }
 
-  protected static void appendSubscribersTo(
+  private void appendSubscribersTo(
       MutableArray<SingleSubscriber> result,
       OptimizedSubscriberNode subscriberNode) {
     LockableArray<Subscriber> subscribers = subscriberNode.subscribers();
@@ -41,31 +41,28 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     long stamp = subscribers.readLock();
     try {
       for (Subscriber subscriber : subscribers) {
-        SingleSubscriber singleSubscriber = subscriber.resolveSingle();
-        if (removeDuplicateWithLowerQoS(result, singleSubscriber)) {
-          result.add(singleSubscriber);
-        }
+        addOrReplaceIfLowerQos(result, subscriber);
       }
     } finally {
       subscribers.readUnlock(stamp);
     }
   }
 
-  private static boolean removeDuplicateWithLowerQoS(
+  private static void addOrReplaceIfLowerQos(
       MutableArray<SingleSubscriber> result,
-      SingleSubscriber candidate) {
-    int found = result.indexOf(SingleSubscriber::user, candidate.user());
+      Subscriber subscriber) {
+    SingleSubscriber subscriberFromNode = subscriber.resolveSingle();
+    int found = result.indexOf(SingleSubscriber::user, subscriberFromNode.user());
     if (found == -1) {
-      return true;
+      result.add(subscriberFromNode);
+      return;
     }
-    QoS candidateQos = candidate.qos();
-    SingleSubscriber exist = result.get(found);
-    QoS existeQos = exist.qos();
-    if (existeQos.ordinal() < candidateQos.ordinal()) {
+    QoS existedQos = result.get(found).qos();
+    QoS candidateQos = subscriberFromNode.qos();
+    if (existedQos.ordinal() < candidateQos.ordinal()) {
       result.remove(found);
-      return true;
+      result.add(subscriberFromNode);
     }
-    return false;
   }
 
   @Nullable
