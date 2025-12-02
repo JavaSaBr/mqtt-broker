@@ -9,17 +9,15 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.ThreadSafe;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConcurrentSubscriberTree implements ThreadSafe {
 
-  SubscriberNode rootNode;
-
-  public ConcurrentSubscriberTree() {
-    this.rootNode = new SubscriberNode();
-  }
+  SubscriberTreeBase rootNode;
 
   @Nullable
   public SingleSubscriber subscribe(MqttUser user, Subscription subscription) {

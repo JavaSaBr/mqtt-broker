@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 @Getter(AccessLevel.PACKAGE)
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-class OptimizedSubscriberNode extends SubscriberTreeBase {
+public class OptimizedSubscriberNode extends SubscriberTreeBase {
 
   private final static Supplier<OptimizedSubscriberNode> SUBSCRIBER_NODE_FACTORY = OptimizedSubscriberNode::new;
 
@@ -31,7 +31,9 @@ class OptimizedSubscriberNode extends SubscriberTreeBase {
     DebugUtils.registerIncludedFields("childNodes", "subscribers");
   }
 
-  protected static void appendSubscribersTo(MutableArray<SingleSubscriber> result, OptimizedSubscriberNode subscriberNode) {
+  protected static void appendSubscribersTo(
+      MutableArray<SingleSubscriber> result,
+      OptimizedSubscriberNode subscriberNode) {
     LockableArray<Subscriber> subscribers = subscriberNode.subscribers();
     if (subscribers == null) {
       return;
@@ -50,7 +52,8 @@ class OptimizedSubscriberNode extends SubscriberTreeBase {
   }
 
   private static boolean removeDuplicateWithLowerQoS(
-      MutableArray<SingleSubscriber> result, SingleSubscriber candidate) {
+      MutableArray<SingleSubscriber> result,
+      SingleSubscriber candidate) {
     int found = result.indexOf(SingleSubscriber::user, candidate.user());
     if (found == -1) {
       return true;

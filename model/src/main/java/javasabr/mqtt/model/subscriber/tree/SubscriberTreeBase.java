@@ -9,6 +9,7 @@ import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
@@ -18,7 +19,21 @@ import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-abstract class SubscriberTreeBase {
+public abstract class SubscriberTreeBase {
+
+  protected abstract void matchesTo(
+      int level,
+      TopicName topicName,
+      int lastLevel,
+      MutableArray<SingleSubscriber> container);
+
+  public abstract boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter);
+
+  public abstract SingleSubscriber subscribe(
+      int level,
+      MqttUser owner,
+      Subscription subscription,
+      TopicFilter topicFilter);
 
   /**
    * @return previous subscriber with the same user
@@ -45,9 +60,7 @@ abstract class SubscriberTreeBase {
   }
 
   @Nullable
-  private static SingleSubscriber removePreviousIfExist(
-      LockableArray<Subscriber> subscribers,
-      MqttUser user) {
+  private static SingleSubscriber removePreviousIfExist(LockableArray<Subscriber> subscribers, MqttUser user) {
     int index = subscribers.indexOf(Subscriber::resolveUser, user);
     if (index < 0) {
       return null;
@@ -142,7 +155,8 @@ abstract class SubscriberTreeBase {
   }
 
   private static boolean removeDuplicateWithLowerQoS(
-      MutableArray<SingleSubscriber> result, SingleSubscriber candidate) {
+      MutableArray<SingleSubscriber> result,
+      SingleSubscriber candidate) {
 
     int found = result.indexOf(SingleSubscriber::user, candidate.user());
     if (found == -1) {

@@ -6,6 +6,9 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree
+import javasabr.mqtt.model.subscriber.tree.OptimizedSubscriberNode
+import javasabr.mqtt.model.subscriber.tree.SubscriberNode
+import javasabr.mqtt.model.subscriber.tree.SubscriberTreeBase
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.model.topic.SharedTopicFilter
@@ -19,9 +22,10 @@ class SubscriberTreeTest extends UnitSpecification {
       List<Subscription> subscriptions,
       List<MqttUser> users,
       String topicName,
-      List<MqttUser> expectedUsers) {
+      List<MqttUser> expectedUsers,
+      SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           subscriberTree.subscribe(users.get(i), subscription)
         }
@@ -34,9 +38,36 @@ class SubscriberTreeTest extends UnitSpecification {
         topicName << [
             "/topic/segment1",
             "/topic/segment2",
+            "/topic/segment3",
+            "/topic/segment1",
+            "/topic/segment2",
             "/topic/segment3"
         ]
         subscriptions << [
+            [
+                makeSubscription("/topic/segment1"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/topic/segment1/segment2"),
+                makeSubscription("/topic/"),
+                makeSubscription("/topic")
+            ],
+            [
+                makeSubscription("/topic/segment1"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/topic/segment1/segment2"),
+                makeSubscription("/topic/"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/"),
+                makeSubscription("/topic/segment2/segment1")
+            ],
+            [
+                makeSubscription("/topic/segment1"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/topic/segment3"),
+                makeSubscription("/topic/segment3"),
+                makeSubscription("/topic/segment3"),
+                makeSubscription("/topic/segment3")
+            ],
             [
                 makeSubscription("/topic/segment1"),
                 makeSubscription("/topic/segment2"),
@@ -86,6 +117,30 @@ class SubscriberTreeTest extends UnitSpecification {
                 makeUser("id3"),
                 makeUser("id3"),
                 makeUser("id4")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id3"),
+                makeUser("id3"),
+                makeUser("id4")
             ]
         ]
         expectedUsers << [
@@ -99,7 +154,26 @@ class SubscriberTreeTest extends UnitSpecification {
             [
                 makeUser("id3"),
                 makeUser("id4")
+            ],
+            [
+                makeUser("id1")
+            ],
+            [
+                makeUser("id2"),
+                makeUser("id5")
+            ],
+            [
+                makeUser("id3"),
+                makeUser("id4")
             ]
+        ]
+        subscriberNode << [
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode()
         ]
   }
 
@@ -107,9 +181,10 @@ class SubscriberTreeTest extends UnitSpecification {
       List<Subscription> subscriptions,
       List<MqttUser> users,
       String topicName,
-      List<MqttUser> expectedUsers) {
+      List<MqttUser> expectedUsers,
+      SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           subscriberTree.subscribe(users.get(i), subscription)
         }
@@ -120,6 +195,9 @@ class SubscriberTreeTest extends UnitSpecification {
         found ==~ expectedUsers
     where:
         topicName << [
+            "/topic/segment1",
+            "/topic/segment2",
+            "/topic/segment3",
             "/topic/segment1",
             "/topic/segment2",
             "/topic/segment3"
@@ -154,9 +232,69 @@ class SubscriberTreeTest extends UnitSpecification {
                 makeSubscription("/topic2/segment1"),
                 makeSubscription("/+/segment2"),
                 makeSubscription("/topic2/+")
+            ],
+            [
+                makeSubscription("/topic/segment1"),
+                makeSubscription("/topic/+"),
+                makeSubscription("/+/segment1"),
+                makeSubscription("/+/+"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/topic2/segment1"),
+                makeSubscription("/+/segment2"),
+                makeSubscription("/topic2/+")
+            ],
+            [
+                makeSubscription("/topic/segment1"),
+                makeSubscription("/topic/+"),
+                makeSubscription("/+/segment1"),
+                makeSubscription("/+/+"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/topic2/segment1"),
+                makeSubscription("/+/segment2"),
+                makeSubscription("/topic2/+")
+            ],
+            [
+                makeSubscription("/topic/segment1"),
+                makeSubscription("/topic/+"),
+                makeSubscription("/+/segment1"),
+                makeSubscription("/+/+"),
+                makeSubscription("/topic/segment2"),
+                makeSubscription("/topic2/segment1"),
+                makeSubscription("/+/segment2"),
+                makeSubscription("/topic2/+")
             ]
         ]
         users << [
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7"),
+                makeUser("id8")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7"),
+                makeUser("id8")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7"),
+                makeUser("id8")
+            ],
             [
                 makeUser("id1"),
                 makeUser("id2"),
@@ -204,7 +342,31 @@ class SubscriberTreeTest extends UnitSpecification {
             [
                 makeUser("id2"),
                 makeUser("id4")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4")
+            ],
+            [
+                makeUser("id2"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id7")
+            ],
+            [
+                makeUser("id2"),
+                makeUser("id4")
             ]
+        ]
+        subscriberNode << [
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode()
         ]
   }
 
@@ -212,9 +374,10 @@ class SubscriberTreeTest extends UnitSpecification {
       List<Subscription> subscriptions,
       List<MqttUser> users,
       String topicName,
-      List<MqttUser> expectedUsers) {
+      List<MqttUser> expectedUsers,
+      SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           subscriberTree.subscribe(users.get(i), subscription)
         }
@@ -225,6 +388,9 @@ class SubscriberTreeTest extends UnitSpecification {
         found ==~ expectedUsers
     where:
         topicName << [
+            "/topic/segment1/segment2",
+            "/topic/segment3/segment4",
+            "/topic/segment2",
             "/topic/segment1/segment2",
             "/topic/segment3/segment4",
             "/topic/segment2"
@@ -262,9 +428,75 @@ class SubscriberTreeTest extends UnitSpecification {
                 makeSubscription("/topic/segment2/#"),
                 makeSubscription("/topic/segment3/segment4"),
                 makeSubscription("/topic/segment3/#")
+            ],
+            [
+                makeSubscription("/topic/segment1/segment2"),
+                makeSubscription("/topic/segment1/#"),
+                makeSubscription("/topic/#"),
+                makeSubscription("/#"),
+                makeSubscription("#"),
+                makeSubscription("/topic/segment2/segment3"),
+                makeSubscription("/topic/segment2/#"),
+                makeSubscription("/topic/segment3/segment4"),
+                makeSubscription("/topic/segment3/#")
+            ],
+            [
+                makeSubscription("/topic/segment1/segment2"),
+                makeSubscription("/topic/segment1/#"),
+                makeSubscription("/topic/#"),
+                makeSubscription("/#"),
+                makeSubscription("#"),
+                makeSubscription("/topic/segment2/segment3"),
+                makeSubscription("/topic/segment2/#"),
+                makeSubscription("/topic/segment3/segment4"),
+                makeSubscription("/topic/segment3/#")
+            ],
+            [
+                makeSubscription("/topic/segment1/segment2"),
+                makeSubscription("/topic/segment1/#"),
+                makeSubscription("/topic/#"),
+                makeSubscription("/#"),
+                makeSubscription("#"),
+                makeSubscription("/topic/segment2/segment3"),
+                makeSubscription("/topic/segment2/#"),
+                makeSubscription("/topic/segment3/segment4"),
+                makeSubscription("/topic/segment3/#")
             ]
         ]
         users << [
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7"),
+                makeUser("id8"),
+                makeUser("id9")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7"),
+                makeUser("id8"),
+                makeUser("id9")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5"),
+                makeUser("id6"),
+                makeUser("id7"),
+                makeUser("id8"),
+                makeUser("id9")
+            ],
             [
                 makeUser("id1"),
                 makeUser("id2"),
@@ -318,7 +550,34 @@ class SubscriberTreeTest extends UnitSpecification {
                 makeUser("id3"),
                 makeUser("id4"),
                 makeUser("id5")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5")
+            ],
+            [
+                makeUser("id8"),
+                makeUser("id9"),
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5")
+            ],
+            [
+                makeUser("id3"),
+                makeUser("id4"),
+                makeUser("id5")
             ]
+        ]
+        subscriberNode << [
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode()
         ]
   }
 
@@ -326,9 +585,10 @@ class SubscriberTreeTest extends UnitSpecification {
       List<Subscription> subscriptions,
       List<MqttUser> users,
       String topicName,
-      List<SingleSubscriber> expectedSubscribers) {
+      List<SingleSubscriber> expectedSubscribers,
+      SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriptions.eachWithIndex { Subscription subscription, int i ->
           subscriberTree.subscribe(users.get(i), subscription)
         }
@@ -340,9 +600,45 @@ class SubscriberTreeTest extends UnitSpecification {
         topicName << [
             "/topic/segment1/segment2",
             "/topic/segment3",
+            "/topic/segment2/",
+            "/topic/segment1/segment2",
+            "/topic/segment3",
             "/topic/segment2/"
         ]
         subscriptions << [
+            [
+                makeSubscription("/topic/segment1/segment2", 2),
+                makeSubscription("/topic/segment1/#", 1),
+                makeSubscription("/topic/#", 0),
+                makeSubscription("/topic/segment1/segment3", 2),
+                makeSubscription("/topic/segment1/#", 1),
+                makeSubscription("/topic/#", 0),
+                makeSubscription("/topic/segment2/segment3", 2),
+                makeSubscription("/topic/segment2/#", 1),
+                makeSubscription("/topic/#", 0)
+            ],
+            [
+                makeSubscription("/topic/segment1/segment2", 2),
+                makeSubscription("/topic/segment1/#", 1),
+                makeSubscription("/topic/#", 0),
+                makeSubscription("/topic/segment1/segment3", 2),
+                makeSubscription("/topic/segment1/#", 1),
+                makeSubscription("/topic/#", 0),
+                makeSubscription("/topic/segment2/segment3", 2),
+                makeSubscription("/topic/segment2/#", 1),
+                makeSubscription("/topic/#", 0)
+            ],
+            [
+                makeSubscription("/topic/segment1/segment2", 2),
+                makeSubscription("/topic/segment1/#", 1),
+                makeSubscription("/topic/#", 0),
+                makeSubscription("/topic/segment1/segment3", 2),
+                makeSubscription("/topic/segment1/#", 1),
+                makeSubscription("/topic/#", 0),
+                makeSubscription("/topic/segment2/segment3", 2),
+                makeSubscription("/topic/segment2/#", 1),
+                makeSubscription("/topic/#", 0)
+            ],
             [
                 makeSubscription("/topic/segment1/segment2", 2),
                 makeSubscription("/topic/segment1/#", 1),
@@ -410,6 +706,39 @@ class SubscriberTreeTest extends UnitSpecification {
                 makeUser("id3"),
                 makeUser("id3"),
                 makeUser("id3")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id1"),
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id2"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id3"),
+                makeUser("id3")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id1"),
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id2"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id3"),
+                makeUser("id3")
+            ],
+            [
+                makeUser("id1"),
+                makeUser("id1"),
+                makeUser("id1"),
+                makeUser("id2"),
+                makeUser("id2"),
+                makeUser("id2"),
+                makeUser("id3"),
+                makeUser("id3"),
+                makeUser("id3")
             ]
         ]
         expectedSubscribers << [
@@ -427,15 +756,38 @@ class SubscriberTreeTest extends UnitSpecification {
                 new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/#", 0)),
                 new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/#", 0)),
                 new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/segment2/#", 1)),
+            ],
+            [
+                new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/segment1/segment2", 2)),
+                new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/segment1/#", 1)),
+                new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/#", 0)),
+            ],
+            [
+                new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/#", 0)),
+                new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/#", 0)),
+                new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/#", 0)),
+            ],
+            [
+                new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/#", 0)),
+                new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/#", 0)),
+                new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/segment2/#", 1)),
             ]
+        ]
+        subscriberNode << [
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new SubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode(),
+            new OptimizedSubscriberNode()
         ]
   }
 
-  def "should provide different owners when math shared topic"() {
+  def "should provide different owners when math shared topic"(SubscriberTreeBase subscriberNode) {
     given:
         def group1 = ["id1", "id2", "id3", "id4", "id5"]
         def group2 = ["id6", "id7", "id8", "id9", "id10"]
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriberTree.subscribe(makeUser("id1"), makeSharedSubscription('$share/group1/topic/name1'))
         subscriberTree.subscribe(makeUser("id2"), makeSharedSubscription('$share/group1/topic/name1'))
         subscriberTree.subscribe(makeUser("id3"), makeSharedSubscription('$share/group1/topic/name1'))
@@ -464,11 +816,16 @@ class SubscriberTreeTest extends UnitSpecification {
             (group1.contains(matched[1]) && group2.contains(matched[0]))
         (group1.contains(matched2[0]) && group2.contains(matched2[1])) ||
             (group1.contains(matched2[1]) && group2.contains(matched2[0]))
+    where:
+        subscriberNode << [
+            new SubscriberNode(),
+            new OptimizedSubscriberNode()
+        ]
   }
 
-  def "should subscribe and unsubscribe simple topic correctly correctly"() {
+  def "should subscribe and unsubscribe simple topic correctly correctly"(SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriberTree.subscribe(makeUser("id1"), makeSubscription('topic/name1'))
         subscriberTree.subscribe(makeUser("id2"), makeSubscription('topic/name1'))
         subscriberTree.subscribe(makeUser("id3"), makeSubscription('topic/name1'))
@@ -501,11 +858,16 @@ class SubscriberTreeTest extends UnitSpecification {
         matched.size() == 0
         id1WasUnsubscribed
         !id3WasUnsubscribed
+    where:
+        subscriberNode << [
+            new SubscriberNode(),
+            new OptimizedSubscriberNode()
+        ]
   }
 
-  def "should subscribe and unsubscribe shared topic correctly correctly"() {
+  def "should subscribe and unsubscribe shared topic correctly correctly"(SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         subscriberTree.subscribe(makeUser("id1"), makeSharedSubscription('$share/group1/topic/name1'))
         subscriberTree.subscribe(makeUser("id2"), makeSharedSubscription('$share/group1/topic/name1'))
         subscriberTree.subscribe(makeUser("id3"), makeSharedSubscription('$share/group1/topic/name1'))
@@ -538,11 +900,16 @@ class SubscriberTreeTest extends UnitSpecification {
         matched.size() == 0
         id1WasUnsubscribed
         !id3WasUnsubscribed
+    where:
+        subscriberNode << [
+            new SubscriberNode(),
+            new OptimizedSubscriberNode()
+        ]
   }
 
-  def "should replace the same subscriptions"() {
+  def "should replace the same subscriptions"(SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         def owner1 = makeUser("id1")
         def originalSub = makeSubscription('topic/name1')
         def replacementSub = makeSubscription('topic/name1')
@@ -566,11 +933,16 @@ class SubscriberTreeTest extends UnitSpecification {
         matched.first().subscription() == replacementSub
         previous != null
         previous.subscription() == originalSub
+    where:
+        subscriberNode << [
+            new SubscriberNode(),
+            new OptimizedSubscriberNode()
+        ]
   }
 
-  def "should extend shared subscription group on multiply subscribing by the same topic"() {
+  def "should extend shared subscription group on multiply subscribing by the same topic"(SubscriberTreeBase subscriberNode) {
     given:
-        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
+        ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree(subscriberNode)
         def owner1 = makeUser("id1")
         def owner2 = makeUser("id2")
         subscriberTree.subscribe(owner1, makeSharedSubscription('$share/group1/topic/name1'))
@@ -618,6 +990,11 @@ class SubscriberTreeTest extends UnitSpecification {
     then:
         matched.size() == 1
         matched.first().user() == owner1
+    where:
+        subscriberNode << [
+            new SubscriberNode(),
+            new OptimizedSubscriberNode()
+        ]
   }
 
   static def makeUser(String id) {

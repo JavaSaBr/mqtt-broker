@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 @Getter(AccessLevel.PACKAGE)
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-class SubscriberNode extends SubscriberTreeBase {
+public class SubscriberNode extends SubscriberTreeBase {
 
   private final static Supplier<SubscriberNode> SUBSCRIBER_NODE_FACTORY = SubscriberNode::new;
 
@@ -61,11 +61,7 @@ class SubscriberNode extends SubscriberTreeBase {
     multiWildcardTopicMatch(container);
   }
 
-  private void exactlyTopicMatch(
-      int level,
-      TopicName topicName,
-      int lastLevel,
-      MutableArray<SingleSubscriber> result) {
+  private void exactlyTopicMatch(int level, TopicName topicName, int lastLevel, MutableArray<SingleSubscriber> result) {
     String segment = topicName.segment(level);
     SubscriberNode subscriberNode = childNode(segment);
     if (subscriberNode == null) {
