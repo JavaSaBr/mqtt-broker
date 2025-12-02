@@ -5,7 +5,6 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -51,11 +50,11 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
   protected abstract Publish reconstruct(U user, MqttSession session, Publish original);
 
   protected PublishHandlingResult handleImpl(U user, MqttSession session, Publish publish) {
-    startDelivering(user, publish);
+    send(user, publish);
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected void startDelivering(U user, Publish publish) {
+  protected void send(U user, Publish publish) {
     MqttOutMessage outMessage = messageOutFactoryService
         .resolveFactory(user)
         .newPublish(

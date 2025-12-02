@@ -1,10 +1,10 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
-import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
@@ -13,6 +13,7 @@ import javasabr.mqtt.network.message.in.PublishAckMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import lombok.CustomLog;
+import org.jspecify.annotations.Nullable;
 
 @CustomLog
 public class Qos1MqttPublishOutMessageHandler extends TrackableMqttPublishOutMessageHandler {
@@ -32,29 +33,52 @@ public class Qos1MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
   protected boolean handleReceivedTrackableMessageImpl(
       ExternalNetworkMqttUser user, 
       MqttSession session,
-      TrackableMqttMessage message) {
+      TrackableMqttMessage message,
+      @Nullable TrackedMessageMeta trackedMessageMeta) {
+    
     int messageId = message.messageId();
-    MessageTacker messageTacker = session.inMessageTracker();
-    TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
-    if (messageMeta == null) {
-      log.warning(user.clientId(), messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+    String clientId = user.clientId();
+    if (trackedMessageMeta == null) {
+      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      return true;
+    } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
+      log.warning(clientId, trackedMessageMeta, messageId,
+          "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
       return true;
     }
-    if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(user.clientId(), messageMeta, messageId,
-          "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
-      return true;
-    } else if (!(message instanceof PublishAckMqttInMessage publishAck)) {
-      log.warning(user.clientId(), message, "[%s] Not expected message:%s]"::formatted);
+    if (!(message instanceof PublishAckMqttInMessage publishAck)) {
+      log.warning(clientId, message.messageType(), "[%s] Not expected message type:[%s]"::formatted);
       return true;
     }
+    
+    PublishAckReasonCode reasonCode = publishAck.reasonCode();
+    if (reasonCode != PublishAckReasonCode.SUCCESS) {
+      log.warning(clientId, reasonCode, messageId, "[%s] Received error response:[%s] for publish:[%s]"::formatted);
+    }
+
+    MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.remove(messageId);
+    
+    log.debug(clientId, messageId, "[%s] Completed publish:[%s]"::formatted);
     return true;
   }
 
   @Override
   protected void retryDeliveringImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
     
-    
+    int messageId = publish.messageId();
+    MessageTacker messageTacker = session.outMessageTracker();
+    TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
+    if (messageMeta == null) {
+      log.warning(user.clientId(), messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      return;
+    } else if(messageMeta.messageType() != MqttMessageType.PUBLISH) {
+      log.warning(user.clientId(), messageMeta, messageId,
+          "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
+      return;
+    }
+
+    log.debug(user.clientId(), messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
+    send(user, publish.withDuplicated());
   }
 }

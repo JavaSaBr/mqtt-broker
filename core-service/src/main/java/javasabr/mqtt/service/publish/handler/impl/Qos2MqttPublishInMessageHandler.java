@@ -158,7 +158,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
       return true;
     } else if (!(message instanceof PublishReleaseMqttInMessage release)) {
-      log.warning(networkUser.clientId(), message, "[%s] Not expected message:%s]"::formatted);
+      log.warning(networkUser.clientId(), message, "[%s] Not expected message:[%s]"::formatted);
       return true;
     }
 

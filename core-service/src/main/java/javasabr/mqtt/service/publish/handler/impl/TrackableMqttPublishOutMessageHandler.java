@@ -10,14 +10,17 @@ import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
+import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
+import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
+@CustomLog
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class TrackableMqttPublishOutMessageHandler extends
     AbstractMqttPublishOutMessageHandler<ExternalNetworkMqttUser> {
@@ -59,13 +62,23 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
       MqttUser user, 
       MqttSession session,
       TrackableMqttMessage message) {
-    return handleReceivedTrackableMessageImpl(expectedUserType.cast(user), session, message);
+
+    int messageId = message.messageId();
+    MessageTacker messageTacker = session.outMessageTracker();
+    TrackedMessageMeta trackedMessageMeta = messageTacker.stored(messageId);
+ 
+    return handleReceivedTrackableMessageImpl(
+        expectedUserType.cast(user), 
+        session,
+        message,
+        trackedMessageMeta);
   }
 
   protected abstract boolean handleReceivedTrackableMessageImpl(
       ExternalNetworkMqttUser user,
       MqttSession session,
-      TrackableMqttMessage message);
+      TrackableMqttMessage message,
+      @Nullable TrackedMessageMeta trackedMessageMeta);
 
   protected void retryDelivering(MqttUser user, MqttSession session, Publish publish) {
     retryDeliveringImpl(expectedUserType.cast(user), session, publish);
