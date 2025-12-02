@@ -31,9 +31,7 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     DebugUtils.registerIncludedFields("childNodes", "subscribers");
   }
 
-  private void appendSubscribersTo(
-      MutableArray<SingleSubscriber> result,
-      OptimizedSubscriberNode subscriberNode) {
+  private void appendSubscribersTo(MutableArray<SingleSubscriber> result, OptimizedSubscriberNode subscriberNode) {
     LockableArray<Subscriber> subscribers = subscriberNode.subscribers();
     if (subscribers == null) {
       return;
@@ -48,9 +46,7 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     }
   }
 
-  private static void addOrReplaceIfLowerQos(
-      MutableArray<SingleSubscriber> result,
-      Subscriber subscriber) {
+  private static void addOrReplaceIfLowerQos(MutableArray<SingleSubscriber> result, Subscriber subscriber) {
     SingleSubscriber subscriberFromNode = subscriber.resolveSingle();
     int found = result.indexOf(SingleSubscriber::user, subscriberFromNode.user());
     if (found == -1) {
@@ -99,42 +95,27 @@ public class OptimizedSubscriberNode extends SubscriberTreeBase {
     try {
       collectSegmentMatches(nodes, topicName.segment(level), level, topicName, lastLevel, container);
       collectSegmentMatches(nodes, TopicFilter.SINGLE_LEVEL_WILDCARD, level, topicName, lastLevel, container);
-      collectWildcardMatches(nodes, container);
+      collectSegmentMatches(nodes, TopicFilter.MULTI_LEVEL_WILDCARD, level, topicName, lastLevel, container);
     } finally {
       nodes.readUnlock(stamp);
     }
   }
 
   private void collectSegmentMatches(
-      @Nullable LockableRefToRefDictionary<String, OptimizedSubscriberNode> childNodes,
+      LockableRefToRefDictionary<String, OptimizedSubscriberNode> childNodes,
       String segment,
       int level,
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-    if (childNodes == null) {
-      return;
-    }
     OptimizedSubscriberNode subscriberNode = childNodes.get(segment);
     if (subscriberNode == null) {
       return;
     }
-    if (level == lastLevel) {
+    if (level == lastLevel || TopicFilter.MULTI_LEVEL_WILDCARD.equals(segment)) {
       appendSubscribersTo(result, subscriberNode);
     } else if (level < lastLevel) {
       subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
-    }
-  }
-
-  private void collectWildcardMatches(
-      @Nullable LockableRefToRefDictionary<String, OptimizedSubscriberNode> childNodes,
-      MutableArray<SingleSubscriber> result) {
-    if (childNodes == null) {
-      return;
-    }
-    OptimizedSubscriberNode subscriberNode = childNodes.get(TopicFilter.MULTI_LEVEL_WILDCARD);
-    if (subscriberNode != null) {
-      appendSubscribersTo(result, subscriberNode);
     }
   }
 
