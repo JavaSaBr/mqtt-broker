@@ -1,0 +1,14 @@
+plugins {
+  id("groovy")
+  id("java-library")
+  id("configure-java")
+}
+
+dependencies {
+  api libs.groovy
+  api projects.model
+  api libs.rlib.collections
+
+  testImplementation testFixtures(projects.model)
+  testImplementation projects.testSupport
+}
