@@ -3,7 +3,6 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
-import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;

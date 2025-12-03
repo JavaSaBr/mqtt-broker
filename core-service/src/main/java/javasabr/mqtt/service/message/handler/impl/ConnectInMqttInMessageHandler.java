@@ -220,7 +220,7 @@ public class ConnectInMqttInMessageHandler
       return false;
     }
 
-    session.resendPendingPackets(user);
+    session.resendNotConfirmedPublishesTo(user);
     return true;
   }
 

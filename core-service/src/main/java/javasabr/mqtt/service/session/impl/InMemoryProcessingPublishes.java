@@ -51,7 +51,8 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
       if (inProcessPublish == null) {
         return false;
       }
-      boolean shouldBeDeregister = inProcessPublish.callback.accept(user, session, message);
+      TrackableMessageCallback callback = inProcessPublish.callback();
+      boolean shouldBeDeregister = callback.accept(user, session, message);
       if (shouldBeDeregister) {
         processing.remove(message.messageId());
       }
@@ -61,12 +62,39 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
     }
   }
 
+  /**
+   * @return the count of resent publishes
+   */
+  public int resendTo(MqttUser user) {
+    int counter = 0;
+    long stamp = lock.writeLock();
+    try {
+      for (InProcessPublish inProcessPublish : processing) {
+        PublishRetryer retryer = inProcessPublish.retryer();
+        retryer.retry(user, session, inProcessPublish.publish);
+        counter++;
+      }
+    } finally {
+      lock.unlockWrite(stamp);
+    }
+    return counter;
+  }
+  
   @Override
   public boolean remove(TrackableMqttMessage message) {
     long stamp = lock.writeLock();
     try {
       InProcessPublish inProcessPublish = processing.remove(message.messageId());
       return inProcessPublish != null;
+    } finally {
+      lock.unlockWrite(stamp);
+    }
+  }
+  
+  public void clear() {
+    long stamp = lock.writeLock();
+    try {
+      processing.clear();
     } finally {
       lock.unlockWrite(stamp);
     }
