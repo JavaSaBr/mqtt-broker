@@ -67,7 +67,7 @@ class SubscriberNode extends SubscriberTreeBase {
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-    SubscriberNode subscriberNode = childNode(segment);
+    SubscriberNode subscriberNode = getChildNode(segment);
     if (subscriberNode == null) {
       return;
     }
@@ -98,7 +98,7 @@ class SubscriberNode extends SubscriberTreeBase {
   }
 
   @Nullable
-  private SubscriberNode childNode(String segment) {
+  private SubscriberNode getChildNode(String segment) {
     LockableRefToRefDictionary<String, SubscriberNode> localChildNodes = childNodes;
     if (localChildNodes == null) {
       return null;

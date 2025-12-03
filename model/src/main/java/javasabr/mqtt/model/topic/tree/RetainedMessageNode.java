@@ -1,11 +1,6 @@
 package javasabr.mqtt.model.topic.tree;
 
-import static javasabr.mqtt.model.topic.TopicFilter.MULTI_LEVEL_WILDCARD;
-import static javasabr.mqtt.model.topic.TopicFilter.SINGLE_LEVEL_WILDCARD;
-
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -13,6 +8,7 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
+import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
@@ -39,49 +35,47 @@ class RetainedMessageNode {
 
   public void retainMessage(int level, Publish message, TopicName topicName) {
     var child = getOrCreateChildNode(topicName.segment(level));
-    boolean isLeaf = (level + 1 == topicName.levelsCount());
-    if (isLeaf) {
-      if (Objects.equals(message.topicName().lastSegment(), topicName.lastSegment())) {
-        child.retainedMessage.set(message.payload().length == 0 ? null : message);
-      }
+    boolean isLastLevel = (level + 1 == topicName.levelsCount());
+    if (isLastLevel) {
+      child.retainedMessage.set(message.payload().length == 0 ? null : message);
     } else {
       child.retainMessage(level + 1, message, topicName);
     }
   }
 
   public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
-    String segment = topicFilter.segment(level);
-    if (Objects.equals(segment, MULTI_LEVEL_WILDCARD)) {
-      collectAllMessages(this, result);
-      return;
-    } else if (Objects.equals(segment, SINGLE_LEVEL_WILDCARD)) {
-      var childNodes = childNodes();
-      if (childNodes == null) {
-        return;
-      }
-      long stamp = childNodes.readLock();
-      try {
-        for (RetainedMessageNode childNode : childNodes) {
-          childNode.collectRetainedMessages(level + 1, topicFilter, result);
-        }
-      } finally {
-        childNodes.readUnlock(stamp);
-      }
-      return;
-    }
-    int lastLevel = topicFilter.levelsCount() - 1;
-    RetainedMessageNode retainedMessageNode = childNode(segment);
-    if (retainedMessageNode == null || level > lastLevel) {
-      return;
-    }
-    boolean isLeaf = (level == lastLevel);
-    if (isLeaf) {
-      Publish publish = retainedMessageNode.retainedMessage.get();
-      if(publish != null && Objects.equals(segment, publish.topicName().lastSegment())){
+    if (level == topicFilter.levelsCount()) {
+      Publish publish = retainedMessage.get();
+      if (publish != null) {
         result.add(publish);
       }
+      return;
+    }
+    String segment = topicFilter.segment(level);
+    boolean isOneCharSegment = segment.length() == 1;
+    if (isOneCharSegment && segment.charAt(0) == TopicFilter.MULTI_LEVEL_WILDCARD_CHAR) {
+      collectAllMessages(this, result);
+      return;
+    }
+    if (isOneCharSegment && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR) {
+      var localChildNodes = childNodes;
+      if (localChildNodes != null) {
+        var nextChildNodes = ArrayFactory.mutableArray(RetainedMessageNode.class);
+        long stamp = localChildNodes.readLock();
+        try {
+          localChildNodes.values(nextChildNodes);
+        } finally {
+          localChildNodes.readUnlock(stamp);
+        }
+        for (RetainedMessageNode childNode : nextChildNodes) {
+          childNode.collectRetainedMessages(level + 1, topicFilter, result);
+        }
+      }
     } else {
-      retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
+      RetainedMessageNode retainedMessageNode = getChildNode(segment);
+      if (retainedMessageNode != null) {
+        retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
+      }
     }
   }
 
@@ -100,9 +94,7 @@ class RetainedMessageNode {
       }
       long stamp = childNodes.readLock();
       try {
-        for (RetainedMessageNode n : childNodes) {
-          queue.add(n);
-        }
+        childNodes.values(queue);
       } finally {
         childNodes.readUnlock(stamp);
       }
@@ -110,8 +102,8 @@ class RetainedMessageNode {
   }
 
   @Nullable
-  private RetainedMessageNode childNode(String segment) {
-    LockableRefToRefDictionary<String, RetainedMessageNode> childNodes = childNodes();
+  private RetainedMessageNode getChildNode(String segment) {
+    var childNodes = childNodes();
     if (childNodes == null) {
       return null;
     }
@@ -124,7 +116,7 @@ class RetainedMessageNode {
   }
 
   private RetainedMessageNode getOrCreateChildNode(String segment) {
-    LockableRefToRefDictionary<String, RetainedMessageNode> childNodes = getOrCreateChildNodes();
+    var childNodes = getOrCreateChildNodes();
     long stamp = childNodes.readLock();
     try {
       RetainedMessageNode topicFilterNode = childNodes.get(segment);
@@ -143,15 +135,18 @@ class RetainedMessageNode {
   }
 
   private LockableRefToRefDictionary<String, RetainedMessageNode> getOrCreateChildNodes() {
-    if (childNodes == null) {
-      synchronized (this) {
-        if (childNodes == null) {
-          childNodes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
-        }
-      }
+    var current = childNodes;
+    if (current != null) {
+      return current;
     }
-    //noinspection ConstantConditions
-    return childNodes;
+    synchronized (this) {
+      current = childNodes;
+      if (current == null) {
+        current = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+        childNodes = current;
+      }
+      return current;
+    }
   }
 
   @Override
