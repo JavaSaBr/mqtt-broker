@@ -1,7 +1,7 @@
-package javasabr.mqtt.service.impl;
+package javasabr.mqtt.service.auth.source;
 
 import java.util.Arrays;
-import javasabr.mqtt.service.CredentialSource;
+import javasabr.mqtt.service.auth.CredentialSource;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
@@ -39,6 +39,6 @@ public abstract class AbstractCredentialSource implements CredentialSource {
 
   @Override
   public Mono<Boolean> check(byte[] pass) {
-    return Mono.just(Boolean.FALSE);
+    return Mono.just(false);
   }
 }

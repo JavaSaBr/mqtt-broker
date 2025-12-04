@@ -23,10 +23,10 @@ import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
-import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.auth.AuthenticationService;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -74,7 +74,7 @@ public class ConnectInMqttInMessageHandler
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(user, message);
     authenticationService
-        .auth(message.username(), message.password())
+        .authenticate(message)
         .flatMap(ifTrue(
             user,
             message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))

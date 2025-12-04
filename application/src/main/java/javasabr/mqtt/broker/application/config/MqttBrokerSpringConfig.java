@@ -2,6 +2,10 @@ package javasabr.mqtt.broker.application.config;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.List;
+import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
+import javasabr.mqtt.service.auth.AuthenticationService;
+import javasabr.mqtt.service.auth.DefaultAuthenticationService;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -10,15 +14,15 @@ import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
-import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
-import javasabr.mqtt.service.CredentialSource;
+import javasabr.mqtt.service.auth.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
+import javasabr.mqtt.service.auth.PasswordBasedAuthenticationProvider;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -27,10 +31,9 @@ import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
-import javasabr.mqtt.service.impl.FileCredentialsSource;
+import javasabr.mqtt.service.auth.source.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
-import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
@@ -54,6 +57,7 @@ import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandle
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
+import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
@@ -91,10 +95,24 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  AuthenticationProvider passwordBasedAuthenticationProvider(CredentialSource credentialSource) {
+    return new PasswordBasedAuthenticationProvider(credentialSource, "basic");
+  }
+
+  @Bean
   AuthenticationService authenticationService(
-      CredentialSource credentialSource,
-      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth) {
-    return new SimpleAuthenticationService(credentialSource, allowAnonymousAuth);
+      List<AuthenticationProvider> credentialSource,
+      @Value("${authentication.allow.anonymous:false}")  boolean allowAnonymousAuth) {
+    String defaultProviderName = "basic";
+    var authenticationProviders = DictionaryFactory.mutableRefToRefDictionary(
+        String.class,
+        AuthenticationProvider.class);
+    credentialSource.forEach(value -> authenticationProviders.put(value.getAuthMethodName(), value));
+    AuthenticationProvider defaultProvider = authenticationProviders.get(defaultProviderName);
+    if (defaultProvider == null) {
+      throw new IllegalArgumentException("%s authenticator provider not found".formatted(defaultProviderName));
+    }
+    return new DefaultAuthenticationService(authenticationProviders.toReadOnly(), defaultProvider, allowAnonymousAuth);
   }
 
   @Bean

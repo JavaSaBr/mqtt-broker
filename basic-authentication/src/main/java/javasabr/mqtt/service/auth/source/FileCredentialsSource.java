@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.impl;
+package javasabr.mqtt.service.auth.source;
 
 import java.io.FileInputStream;
 import java.io.IOException;
