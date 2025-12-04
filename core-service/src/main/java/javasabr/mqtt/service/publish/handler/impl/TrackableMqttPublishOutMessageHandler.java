@@ -89,19 +89,20 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
   }
 
   protected void retryDeliveringImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
+    String clientId = user.clientId();
     int messageId = publish.messageId();
-    MessageTacker messageTacker = session.outMessageTracker();
-    TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
+    TrackedMessageMeta messageMeta = session
+        .outMessageTracker()
+        .stored(messageId);
     if (messageMeta == null) {
-      log.warning(user.clientId(), messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
-      return;
-    } else if(messageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(user.clientId(), messageMeta, messageId,
+      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+    } else if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
+      log.warning(clientId, messageMeta, messageId, 
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
-      return;
+    } else {
+      log.debug(clientId, messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
+      send(user, publish.withDuplicated());
     }
-    log.debug(user.clientId(), messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
-    send(user, publish.withDuplicated());
   }
 
   protected void handleNotExpectedFlowState(
