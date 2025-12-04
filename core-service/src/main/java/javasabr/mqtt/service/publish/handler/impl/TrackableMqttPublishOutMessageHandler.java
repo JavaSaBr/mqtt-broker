@@ -1,10 +1,12 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.session.ProcessingPublishes;
@@ -12,8 +14,10 @@ import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -98,5 +102,27 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
     }
     log.debug(user.clientId(), messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
     send(user, publish.withDuplicated());
+  }
+
+  protected void handleNotExpectedFlowState(
+      ExternalNetworkMqttUser user,
+      MqttMessageType trackedMessageType,
+      MqttMessageType expectedTrackedMessageType) {
+    MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(user);
+    String reason = MqttProtocolErrors.UNEXPECTED_FLOW_STATE.formatted(
+        trackedMessageType,
+        expectedTrackedMessageType);
+    user.closeWithReason(messageOutFactory.newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, reason));
+  }
+
+  protected void handleNotExpectedResponseMessage(
+      ExternalNetworkMqttUser user,
+      TrackableMqttMessage receivedMessage,
+      MqttMessageType expectedMessageType) {
+    MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(user);
+    String reason = MqttProtocolErrors.UNEXPECTED_RESPONSE_MESSAGE.formatted(
+        receivedMessage.messageType(),
+        expectedMessageType);
+    user.closeWithReason(messageOutFactory.newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, reason));
   }
 }
