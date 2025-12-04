@@ -319,7 +319,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.retain.available",
             boolean.class,
-            false), // not implemented
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
@@ -327,7 +327,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.subscription.id.available",
             boolean.class,
-            false), // not implemented
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,
