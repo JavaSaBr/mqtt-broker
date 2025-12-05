@@ -191,7 +191,7 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
   def "should not allow invalid message flags"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.put(PublishAckReasonCode.SUCCESS)
           it.putMbi(0)
         }

@@ -11,10 +11,10 @@ class PublishAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new PublishAckMqtt5OutMessage(
-            messageId,
+            testMessageId,
             PublishAckReasonCode.NOT_AUTHORIZED,
             reasonString,
-            userProperties)
+            testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -30,10 +30,12 @@ class PublishAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.exception() == null
-        reader.reasonCode() == PublishAckReasonCode.NOT_AUTHORIZED
-        reader.messageId() == messageId
-        reader.userProperties() == userProperties
-        reader.reason() == reasonString
+        with(reader) {
+          exception() == null
+          reasonCode() == PublishAckReasonCode.NOT_AUTHORIZED
+          messageId() == testMessageId
+          userProperties() == testUserProperties
+          reason() == reasonString
+        }
   }
 }

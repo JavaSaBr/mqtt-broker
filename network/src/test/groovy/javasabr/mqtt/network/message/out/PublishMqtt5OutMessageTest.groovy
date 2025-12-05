@@ -12,17 +12,17 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new PublishMqtt5OutMessage(
-            messageId,
+            testMessageId,
             QoS.EXACTLY_ONCE,
             true,
             true,
             publishTopic,
             publishPayload,
-            topicAlias,
+            testTopicAlias,
             PayloadFormat.BINARY,
-            responseTopic,
-            correlationData,
-            userProperties)
+            testResponseTopic,
+            testCorrelationData,
+            testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -37,31 +37,33 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.exception() == null
-        reader.messageId() == messageId
-        reader.qos() == QoS.EXACTLY_ONCE
-        reader.retain()
-        reader.duplicate()
-        reader.payload() == publishPayload
-        reader.rawTopicName() == publishTopic.rawTopic()
-        reader.userProperties() == userProperties
-        reader.topicAlias() == topicAlias
-        reader.payloadFormat() == PayloadFormat.BINARY
-        reader.rawResponseTopicName() == responseTopic.rawTopic()
-        reader.correlationData() == correlationData
+        with(reader) {
+          exception() == null
+          messageId() == testMessageId
+          qos() == QoS.EXACTLY_ONCE
+          retain()
+          duplicate()
+          payload() == publishPayload
+          rawTopicName() == publishTopic.rawTopic()
+          userProperties() == testUserProperties
+          topicAlias() == testTopicAlias
+          payloadFormat() == PayloadFormat.BINARY
+          rawResponseTopicName() == testResponseTopic.rawTopic()
+          correlationData() == testCorrelationData
+        }
     when:
         def outMessage2 = new PublishMqtt5OutMessage(
-            messageId,
+            testMessageId,
             QoS.AT_MOST_ONCE,
             false,
             false,
             publishTopic,
             publishPayload,
-            topicAlias,
+            testTopicAlias,
             PayloadFormat.UTF8_STRING,
-            responseTopic,
-            correlationData,
-            userProperties)
+            testResponseTopic,
+            testCorrelationData,
+            testUserProperties)
         def typeAndFlags2 = outMessage2.messageTypeAndFlags()
         byte type2 = NumberUtils.getHighByteBits(typeAndFlags2);
         byte info2 = NumberUtils.getLowByteBits(typeAndFlags2);
@@ -75,17 +77,19 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result2 = reader2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
     then:
         result2
-        reader2.exception() == null
-        reader2.messageId() == 0
-        reader2.qos() == QoS.AT_MOST_ONCE
-        !reader2.retain()
-        !reader2.duplicate()
-        reader2.payload() == publishPayload
-        reader2.rawTopicName() == publishTopic.rawTopic()
-        reader2.userProperties() == userProperties
-        reader2.topicAlias() == topicAlias
-        reader2.payloadFormat() == PayloadFormat.UTF8_STRING
-        reader2.rawResponseTopicName() == responseTopic.rawTopic()
-        reader2.correlationData() == correlationData
+        with(reader2) {
+          exception() == null
+          messageId() == 0
+          qos() == QoS.AT_MOST_ONCE
+          !retain()
+          !duplicate()
+          payload() == publishPayload
+          rawTopicName() == publishTopic.rawTopic()
+          userProperties() == testUserProperties
+          topicAlias() == testTopicAlias
+          payloadFormat() == PayloadFormat.UTF8_STRING
+          rawResponseTopicName() == testResponseTopic.rawTopic()
+          correlationData() == testCorrelationData
+        }
   }
 }

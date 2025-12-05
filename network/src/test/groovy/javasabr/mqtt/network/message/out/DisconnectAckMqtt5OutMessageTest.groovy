@@ -10,7 +10,7 @@ class DisconnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     given:
         def packet = new DisconnectMqtt5OutMessage(
             DisconnectReasonCode.PACKET_TOO_LARGE,
-            userProperties,
+            testUserProperties,
             reasonString,
             serverReference,
             sessionExpiryInterval)
@@ -23,7 +23,7 @@ class DisconnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCode == DisconnectReasonCode.PACKET_TOO_LARGE
-        reader.userProperties() == userProperties
+        reader.userProperties() == testUserProperties
         reader.reason == reasonString
         reader.serverReference == serverReference
         reader.sessionExpiryInterval == sessionExpiryInterval
