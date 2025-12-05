@@ -218,7 +218,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         with(session.outProcessingPublishes()) {
           size() == 1
         }
-    when: 'chane trackable info to publish release and send publish ack'
+    when: 'change trackable info to publish release and send publish ack'
         session
             .outMessageTracker()
             .update(receivedPublish.messageId(), MqttMessageType.PUBLISH_RELEASE, PublishReleaseReasonCode.SUCCESS)

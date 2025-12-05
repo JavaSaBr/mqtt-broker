@@ -14,7 +14,6 @@ import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
-import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;

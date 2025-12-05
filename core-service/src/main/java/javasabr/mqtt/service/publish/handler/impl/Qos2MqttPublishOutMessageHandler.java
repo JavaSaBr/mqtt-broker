@@ -43,9 +43,13 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
       handlePublishComplete(user, session, message, trackedMessageMeta, publishComplete);
       return true;
     } else {
+      MqttMessageType expectedMessageType = MqttMessageType.PUBLISH_RECEIVED;
+      if (trackedMessageMeta != null && trackedMessageMeta.messageType() == MqttMessageType.PUBLISH_RELEASE) {
+        expectedMessageType = MqttMessageType.PUBLISH_COMPLETE;
+      }
       log.warning(user.clientId(), message.messageType(), message.messageId(),
           "[%s] Not expected message type:[%s] for messageId:[%d]"::formatted);
-      handleNotExpectedResponseMessage(user, message, MqttMessageType.PUBLISH_RECEIVED);
+      handleNotExpectedResponseMessage(user, message, expectedMessageType);
       return true;
     }
   }

@@ -35,7 +35,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def client2 = subscriber2.user() as TestExternalNetworkMqttUser
         def client3 = publisher.user() as TestExternalNetworkMqttUser
         def topicFilter = defaultTopicService.createTopicFilter(client1, "Qos2MqttPublishInMessageHandlerTest/1")
-        def topicName = defaultTopicService.createTopicName(client1, "Qos2MqttPublishInMessageHandlerTest/1")
+        def expectedTopicName = defaultTopicService.createTopicName(client1, "Qos2MqttPublishInMessageHandlerTest/1")
         def expectedMessageId = 35
         defaultSubscriptionService.subscribe(
             client1,
@@ -49,34 +49,36 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             .session()
             .inMessageTracker()
     when:
-        publishInHandler.handle(client3, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        publishInHandler.handle(client3, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, expectedTopicName, testPayload))
     then: 'sender should have feedback of first phase'
-        def publishReceive = client3.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive.reasonCode() == PublishReceivedReasonCode.SUCCESS
-        publishReceive.messageId() == expectedMessageId
-        publishReceive.reason() == null
-        publishReceive.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta != null
-        trackedMessageMeta.messageType() == MqttMessageType.PUBLISH
-        trackedMessageMeta.reasonCode() == PublishReceivedReasonCode.SUCCESS
+        with(client3.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+        }
     then: 'subscribers should receive the publish'
-        def message1 = client1.nextSentMessage(PublishMqtt5OutMessage)
-        message1.topicName() == topicName
-        def message2 = client2.nextSentMessage(PublishMqtt5OutMessage)
-        message2.topicName() == topicName
+        with(client1.nextSentMessage(PublishMqtt5OutMessage)) {
+          topicName() == expectedTopicName
+        }
+        with(client2.nextSentMessage(PublishMqtt5OutMessage)) {
+          topicName() == expectedTopicName
+        }
     when:
-        def publishRelease = new PublishReleaseMqttInMessage(0b0000_0010 as byte) {{
-          messageId = expectedMessageId
-          reasonCode = PublishReleaseReasonCode.SUCCESS
-        }}
+        def publishRelease = PublishReleaseMqttInMessage
+            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
         defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
     then:
-        def publishComplete = client3.nextSentMessage(PublishCompleteMqtt5OutMessage)
-        publishComplete.reasonCode() == PublishCompletedReasonCode.SUCCESS
-        publishComplete.messageId() == expectedMessageId
-        publishComplete.reason() == null
-        publishComplete.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(client3.nextSentMessage(PublishCompleteMqtt5OutMessage)) {
+          reasonCode() == PublishCompletedReasonCode.SUCCESS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
         inMessageTracker.stored(expectedMessageId) == null
   }
 
@@ -95,27 +97,27 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
     when:
         publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then: 'sender should have feedback that no matched subscribers'
-        def publishReceive = user.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
-        publishReceive.messageId() == expectedMessageId
-        publishReceive.reason() == null
-        publishReceive.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta != null
-        trackedMessageMeta.messageType() == MqttMessageType.PUBLISH
-        trackedMessageMeta.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+        }
     when:
-        def publishRelease = new PublishReleaseMqttInMessage(0b0000_0010 as byte) {{
-          messageId = expectedMessageId
-          reasonCode = PublishReleaseReasonCode.SUCCESS
-        }}
+        def publishRelease = PublishReleaseMqttInMessage
+            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
         defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
     then:
-        def publishComplete = user.nextSentMessage(PublishCompleteMqtt5OutMessage)
-        publishComplete.reasonCode() == PublishCompletedReasonCode.SUCCESS
-        publishComplete.messageId() == expectedMessageId
-        publishComplete.reason() == null
-        publishComplete.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(user.nextSentMessage(PublishCompleteMqtt5OutMessage)) {
+          reasonCode() == PublishCompletedReasonCode.SUCCESS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
         inMessageTracker.stored(expectedMessageId) == null
   }
 
@@ -135,10 +137,11 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             topicName,
             testPayload))
     then:
-        def disconnect = user.nextSentMessage(DisconnectMqtt5OutMessage)
-        disconnect.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
-        disconnect.reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
-        disconnect.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
+          reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
+          reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
   }
 
   def "should provide feedback that message id is already used"() {
@@ -157,13 +160,14 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
     when:
         publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then:
-        def publishReceive = user.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive.reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
-        publishReceive.reason() == null
-        publishReceive.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta != null
-        trackedMessageMeta.messageType() == MqttMessageType.SUBSCRIBE
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.SUBSCRIBE
+        }
   }
 
   def "should provide feedback for duplicated publish as well"() {
@@ -184,13 +188,14 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
             .withDuplicated())
     then:
-        def publishReceive = user.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
-        publishReceive.reason() == null
-        publishReceive.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta != null
-        trackedMessageMeta.messageType() == MqttMessageType.PUBLISH
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+        }
   }
 
   def "should not provide feedback for duplicated publish after accepting publish release"() {
@@ -208,51 +213,53 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
     when: 'init floy by original publish'
         publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then:
-        def publishReceive = user.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
-        publishReceive.reason() == null
-        publishReceive.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta != null
-        trackedMessageMeta.messageType() == MqttMessageType.PUBLISH
-        trackedMessageMeta.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+        }
     when: 'send duplicated before publish release'
         publishInHandler.handle(user, Publish
             .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
             .withDuplicated())
     then: 'server should return the same feedback for duplicated as for original'
-        def publishReceive2 = user.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive2.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
-        publishReceive2.reason() == null
-        publishReceive2.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta2 = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta2 != null
-        trackedMessageMeta2.messageType() == MqttMessageType.PUBLISH
-        trackedMessageMeta2.reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+        }
     when: 'send publish release to change flow stage'
-        def publishRelease = new PublishReleaseMqttInMessage(0b0000_0010 as byte) {{
-          messageId = expectedMessageId
-          reasonCode = PublishReleaseReasonCode.SUCCESS
-        }}
+        def publishRelease = PublishReleaseMqttInMessage
+            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
         user.returnCompletedFeatures(false)
         defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
     then:
-        def publishComplete = user.nextSentMessage(PublishCompleteMqtt5OutMessage)
-        publishComplete.reasonCode() == PublishCompletedReasonCode.SUCCESS
-        publishComplete.messageId() == expectedMessageId
-        publishComplete.reason() == null
-        publishComplete.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta3 = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta3 != null
-        trackedMessageMeta3.messageType() == MqttMessageType.PUBLISH_COMPLETE
+        with(user.nextSentMessage(PublishCompleteMqtt5OutMessage)) {
+          reasonCode() == PublishCompletedReasonCode.SUCCESS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH_COMPLETE
+        }
     when: 'send duplicated after publish release'
         publishInHandler.handle(user, Publish
             .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
             .withDuplicated())
     then: 'server should return that this message id is already used because publish complete is in progress of sending'
-        def publishReceive3 = user.nextSentMessage(PublishReceivedMqtt5OutMessage)
-        publishReceive3.reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
-        publishReceive3.reason() == null
-        publishReceive3.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
   }
 }

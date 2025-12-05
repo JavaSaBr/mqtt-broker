@@ -80,7 +80,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         with(session.outProcessingPublishes()) {
           size() == 1
         }
-    when: 'send publish receive'
+    when: 'send publish received'
         def publishReceived = PublishReceivedMqttInMessage
             .of(publish.messageId(), PublishReceivedReasonCode.SUCCESS)
         session
@@ -122,7 +122,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         }
   }
 
-  def "should correctly handle publish ack when no stored trackable meta about the publish"() {
+  def "should correctly handle publish receive when no stored trackable meta about the publish"() {
     given:
         def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
             defaultSubscriptionService,
@@ -135,15 +135,15 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        def result = publishOutHandler.handle(testPublish, subscriber)
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
     then:
         result == PublishHandlingResult.SUCCESS
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -154,26 +154,27 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
     when: 'remove trackable info and send publish ack'
         session
             .outMessageTracker()
-            .remove(receivedPublish.messageId())
-        def publishAck = PublishAckMqttInMessage
-            .of(receivedPublish.messageId(), PublishAckReasonCode.SUCCESS)
+            .remove(publish.messageId())
+        def publishReceive = PublishReceivedMqttInMessage
+            .of(publish.messageId(), PublishReceivedReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
-            .apply(user, publishAck)
+            .apply(user, publishReceive)
     then:
         with(session.outMessageTracker()) {
-          stored(receivedPublish.messageId()) == null
+          stored(publish.messageId()) == null
         }
         with(session.outProcessingPublishes()) {
           size() == 0
         }
     then: 'user should not receive any new message'
-        with(user) {
-          isEmpty()
+        with(user.nextSentMessage(PublishReleaseMqtt5OutMessage)) {
+          reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
+          messageId() == publish.messageId()
         }
   }
 
-  def "should handle as protocol error receiving unexpected response message"() {
+  def "should handle as protocol error receiving unexpected response message for first stage"() {
     given:
         def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
             defaultSubscriptionService,
@@ -186,15 +187,15 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        def result = publishOutHandler.handle(testPublish, subscriber)
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
     then:
         result == PublishHandlingResult.SUCCESS
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -202,9 +203,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         with(session.outProcessingPublishes()) {
           size() == 1
         }
-    when: 'send unexpected publish receive to get protocol error'
+    when: 'send unexpected publish ack to get protocol error'
         def publishAck = PublishAckMqttInMessage
-            .of(receivedPublish.messageId(), PublishAckReasonCode.SUCCESS)
+            .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
             .apply(user, publishAck)
@@ -215,7 +216,60 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         }
   }
 
-  def "should handle as protocol error for unexpected flow state"() {
+  def "should handle as protocol error receiving unexpected response message for second stage"() {
+    given:
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
+            defaultSubscriptionService,
+            defaultMessageOutFactoryService)
+        def connection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def user = connection.user() as TestExternalNetworkMqttUser
+        def session = user.session()
+        def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/4")
+        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/4")
+        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
+        def subscriber = new SingleSubscriber(user, subscription)
+        def originalMessageId = 60
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+            .withDuplicated()
+    when:
+        def result = publishOutHandler.handle(testPublish, subscriber)
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+    then:
+        result == PublishHandlingResult.SUCCESS
+        with(session.outMessageTracker()) {
+          with(stored(publish.messageId())) {
+            messageType() == MqttMessageType.PUBLISH
+            reasonCode() == null
+          }
+        }
+        with(session.outProcessingPublishes()) {
+          size() == 1
+        }
+    when: 'send publish received'
+        def publishReceived = PublishReceivedMqttInMessage
+            .of(publish.messageId(), PublishReceivedReasonCode.SUCCESS)
+        session
+            .outProcessingPublishes()
+            .apply(user, publishReceived)
+    then:
+        with(user.nextSentMessage(PublishReleaseMqtt5OutMessage)) {
+          reasonCode() == PublishReleaseReasonCode.SUCCESS
+          messageId() == publish.messageId()
+        }
+    when: 'send unexpected publish ack to get protocol error'
+        def publishAck = PublishAckMqttInMessage
+            .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
+        session
+            .outProcessingPublishes()
+            .apply(user, publishAck)
+    then:
+        with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
+          reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
+          reason() == "Unexpected response packet:'$MqttMessageType.PUBLISH_ACK', expected:'$MqttMessageType.PUBLISH_COMPLETE'"
+        }
+  }
+
+  def "should handle as protocol error for unexpected flow state for publish received"() {
     given:
         def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
             defaultSubscriptionService,
@@ -228,15 +282,15 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        def result = publishOutHandler.handle(testPublish, subscriber)
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
     then:
         result == PublishHandlingResult.SUCCESS
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -244,19 +298,61 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         with(session.outProcessingPublishes()) {
           size() == 1
         }
-    when: 'chane trackable info to publish release and send publish ack'
+    when: 'change trackable info to publish release and send publish received'
         session
             .outMessageTracker()
-            .update(receivedPublish.messageId(), MqttMessageType.PUBLISH_RELEASE, PublishReleaseReasonCode.SUCCESS)
-        def publishAck = PublishAckMqttInMessage
-            .of(receivedPublish.messageId(), PublishAckReasonCode.SUCCESS)
+            .update(publish.messageId(), MqttMessageType.PUBLISH_RELEASE, PublishReleaseReasonCode.SUCCESS)
+        def publishReceived = PublishReceivedMqttInMessage
+            .of(publish.messageId(), PublishReceivedReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
-            .apply(user, publishAck)
+            .apply(user, publishReceived)
     then:
         with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
           reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
           reason() == "Unexpected flow state:'$MqttMessageType.PUBLISH_RELEASE', expected:'$MqttMessageType.PUBLISH'"
+        }
+  }
+
+  def "should handle as protocol error for unexpected flow state for publish complete"() {
+    given:
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
+            defaultSubscriptionService,
+            defaultMessageOutFactoryService)
+        def connection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def user = connection.user() as TestExternalNetworkMqttUser
+        def session = user.session()
+        def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/6")
+        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/6")
+        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
+        def subscriber = new SingleSubscriber(user, subscription)
+        def originalMessageId = 60
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+            .withDuplicated()
+    when:
+        def result = publishOutHandler.handle(testPublish, subscriber)
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+    then:
+        result == PublishHandlingResult.SUCCESS
+        with(session.outMessageTracker()) {
+          with(stored(publish.messageId())) {
+            messageType() == MqttMessageType.PUBLISH
+            reasonCode() == null
+          }
+        }
+        with(session.outProcessingPublishes()) {
+          size() == 1
+        }
+    when: 'send publish complete'
+        def publishComplete = PublishCompleteMqttInMessage
+            .of(publish.messageId(), PublishCompletedReasonCode.SUCCESS)
+        session
+            .outProcessingPublishes()
+            .apply(user, publishComplete)
+    then:
+        with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
+          reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
+          reason() == "Unexpected flow state:'$MqttMessageType.PUBLISH', expected:'$MqttMessageType.PUBLISH_RELEASE'"
         }
   }
 }

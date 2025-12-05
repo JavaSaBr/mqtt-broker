@@ -24,10 +24,10 @@ class Qos0MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
+        def result = publishOutHandler.handle(testPublish, subscriber)
     then:
         result == PublishHandlingResult.SUCCESS
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
