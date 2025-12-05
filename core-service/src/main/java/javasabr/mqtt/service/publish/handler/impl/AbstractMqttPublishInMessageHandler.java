@@ -33,9 +33,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   @Override
   public void handle(NetworkMqttUser user, Publish publish) {
     if (!expectedUserType.isInstance(user)) {
-      log.warning(
-          user.clientId(), user.getClass(),
-          "[%s] Not expected client of type:[%s]"::formatted);
+      log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;
     }
     U expectedUser = expectedUserType.cast(user);
@@ -75,12 +73,11 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
       }
     }
 
-    log.debug(user.clientId(), count,
-        "[%s] Started delivering publish to [%s] subscribers"::formatted);
+    log.debug(count, "Started delivering publish to [%s] subscribers"::formatted);
     handleSuccess(user, session, publish, count);
 
     for (SingleSubscriber subscriber : subscribers) {
-      startDelivering(user, session, publish, subscriber);
+      startDelivering(publish, subscriber);
     }
   }
 
@@ -105,16 +102,12 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
     return PublishHandlingResult.SUCCESS;
   }
 
-  protected PublishHandlingResult startDelivering(
-      U user,
-      NetworkMqttSession session,
-      Publish publish,
-      SingleSubscriber subscriber) {
-    return publishDeliveringService.startDelivering(publish, subscriber);
+  protected void startDelivering(Publish publish, SingleSubscriber subscriber) {
+    publishDeliveringService.startDelivering(publish, subscriber);
   }
 
   protected void sendFeedback(U user, MqttOutMessage response) {
-    user.sendAsync(response);
+    user.sendInBackground(response);
   }
 
   protected void sendFeedback(
@@ -123,7 +116,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
       MqttOutMessage response,
       int messageId) {
     MessageTacker messageTacker = session.inMessageTracker();
-    user.send(response)
+    user.sendAsync(response)
         .thenAccept(_ -> messageTacker.remove(messageId));
   }
 }

@@ -61,7 +61,7 @@ public record MqttServerConnectionConfig(
     this.receiveMaxPublishes = receiveMaxPublishes;
     this.topicAliasMaxValue = NumberUtils.validate(
         topicAliasMaxValue,
-        MqttProperties.TOPIC_ALIAS_MIN,
+        MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED,
         MqttProperties.TOPIC_ALIAS_MAX);
     this.defaultSessionExpiryInterval = defaultSessionExpiryInterval;
     this.keepAliveEnabled = keepAliveEnabled;

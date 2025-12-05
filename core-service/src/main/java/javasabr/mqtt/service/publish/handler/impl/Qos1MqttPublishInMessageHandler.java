@@ -94,7 +94,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
-    user.sendAsync(messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
   }

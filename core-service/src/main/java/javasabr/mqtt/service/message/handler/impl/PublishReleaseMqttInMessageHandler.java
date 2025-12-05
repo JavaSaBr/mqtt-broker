@@ -52,7 +52,7 @@ public class PublishReleaseMqttInMessageHandler
   }
 
   private void handleUnknownMessageId(ExternalNetworkMqttUser client, int messageId) {
-    client.sendAsync(messageOutFactoryService
+    client.sendInBackground(messageOutFactoryService
         .resolveFactory(client)
         .newPublishCompleted(messageId, PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND));
   }

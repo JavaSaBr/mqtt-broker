@@ -75,4 +75,13 @@ public class InMemoryMessageTacker implements MessageTacker {
       lock.unlockWrite(stamp);
     }
   }
+
+  public void clear() {
+    long stamp = lock.writeLock();
+    try {
+      messageIdToMeta.clear();
+    } finally {
+      lock.unlockWrite(stamp);
+    }
+  }
 }

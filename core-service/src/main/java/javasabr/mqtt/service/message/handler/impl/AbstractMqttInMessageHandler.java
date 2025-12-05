@@ -111,7 +111,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     MqttOutMessage feedback = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.MALFORMED_PACKET, exception.getMessage());
-    user.send(feedback)
+    user.sendAsync(feedback)
         .thenAccept(_ -> connection.close());
   }
 

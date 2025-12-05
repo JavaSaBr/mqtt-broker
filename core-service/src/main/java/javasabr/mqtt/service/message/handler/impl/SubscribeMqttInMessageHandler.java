@@ -140,7 +140,7 @@ public class SubscribeMqttInMessageHandler extends
     Array<SubscribeAckReasonCode> subscribeResults = Array.repeated(
         SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE,
         subscribeMessage.subscriptionsCount());
-    user.sendAsync(messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(subscribeMessage.messageId(), subscribeResults));
   }
@@ -156,7 +156,7 @@ public class SubscribeMqttInMessageHandler extends
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(messageId, subscribeResults);
-    user.send(response)
+    user.sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
@@ -171,7 +171,7 @@ public class SubscribeMqttInMessageHandler extends
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(messageId, subscribeResults);
-    user.send(response)
+    user.sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
