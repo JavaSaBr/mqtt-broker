@@ -71,7 +71,7 @@ public class UnsubscribeMqttInMessageHandler
         .newUnsubscribeAck(unsubscribeMessage.messageId(), unsubscribeResults);
 
     user
-        .send(response)
+        .sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
@@ -83,7 +83,7 @@ public class UnsubscribeMqttInMessageHandler
     Array<UnsubscribeAckReasonCode> unsubscribeResults = Array.repeated(
         UnsubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE,
         unsubscribeMessage.topicFiltersCount());
-    user.sendAsync(messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newUnsubscribeAck(unsubscribeMessage.messageId(), unsubscribeResults));
   }

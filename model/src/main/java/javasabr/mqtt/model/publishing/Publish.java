@@ -52,7 +52,7 @@ public record Publish(
   public static Publish minimal(QoS qos, TopicName topicName, byte[] payload) {
     return minimal(MqttProperties.MESSAGE_ID_IS_NOT_SET, qos, topicName, payload);
   }
-
+  
   public Publish withDuplicated() {
     if (duplicated) {
       return this;

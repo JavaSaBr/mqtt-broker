@@ -1,10 +1,12 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
+import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
+import org.jspecify.annotations.Nullable;
 
 public class Qos0MqttPublishOutMessageHandler extends AbstractMqttPublishOutMessageHandler<ExternalNetworkMqttUser> {
 
@@ -17,9 +19,16 @@ public class Qos0MqttPublishOutMessageHandler extends AbstractMqttPublishOutMess
     return QoS.AT_MOST_ONCE;
   }
 
+  @Nullable
   @Override
-  protected PublishHandlingResult handleImpl(Publish publish, ExternalNetworkMqttUser client) {
-    startDelivering(client, publish);
-    return PublishHandlingResult.SUCCESS;
+  protected Publish reconstruct(
+      ExternalNetworkMqttUser user,
+      MqttSession session,
+      Publish original) {
+    return original.with(
+        MqttProperties.MESSAGE_ID_IS_NOT_SET,
+        qos(),
+        false,
+        MqttProperties.TOPIC_ALIAS_NOT_SET);
   }
 }

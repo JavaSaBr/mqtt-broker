@@ -1,18 +1,9 @@
 package javasabr.mqtt.service.session.impl;
 
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.message.TrackableMqttMessage;
-import javasabr.mqtt.model.publishing.Publish;
-import javasabr.mqtt.model.session.ActiveSubscriptions;
-import javasabr.mqtt.model.session.MessageTacker;
-import javasabr.mqtt.model.session.ProcessingPublishes;
-import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
-import javasabr.rlib.collections.array.ArrayFactory;
-import javasabr.rlib.collections.array.LockableArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
@@ -28,66 +19,22 @@ import lombok.experimental.FieldDefaults;
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
-
-  private record PendingPublish(Publish publish, PendingMessageHandler handler) {}
-
-  private static void registerPublish(
-      Publish publish,
-      PendingMessageHandler handler,
-      LockableArray<PendingPublish> pendingPublishes) {
-    PendingPublish pendingPublish = new PendingPublish(publish, handler);
-    pendingPublishes
-        .operations()
-        .inWriteLock(pendingPublish, Collection::add);
-  }
-
-  private static void updatePendingPacket(
-      NetworkMqttUser user,
-      TrackableMqttMessage response,
-      LockableArray<PendingPublish> pendingPublishes,
-      String clientId) {
-
-    int messageId = response.messageId();
-    PendingPublish pendingPublish;
-
-    long stamp = pendingPublishes.readLock();
-    try {
-      pendingPublish = pendingPublishes
-          .iterations()
-          .findAny(messageId, (pending, targetId) -> pending.publish.messageId() == targetId);
-    } finally {
-      pendingPublishes.readUnlock(stamp);
-    }
-
-    if (pendingPublish == null) {
-      log.warning(clientId , response, "Not found pending publish for client:[%s] by received packet:[%s]"::formatted);
-      return;
-    }
-
-    boolean shouldBeRemoved = pendingPublish.handler.handleResponse(user, response);
-    if (shouldBeRemoved) {
-      pendingPublishes
-          .operations()
-          .inWriteLock(pendingPublish, Collection::remove);
-    }
-  }
-
+  
   final String clientId;
   final AtomicInteger messageIdGenerator;
-  final LockableArray<PendingPublish> pendingOutPublishes;
 
   @Getter
-  final MessageTacker inMessageTracker;
+  final InMemoryMessageTacker inMessageTracker;
   @Getter
-  final MessageTacker outMessageTracker;
+  final InMemoryMessageTacker outMessageTracker;
   @Getter
-  final ProcessingPublishes inProcessingPublishes;
+  final InMemoryProcessingPublishes inProcessingPublishes;
   @Getter
-  final ProcessingPublishes outProcessingPublishes;
+  final InMemoryProcessingPublishes outProcessingPublishes;
   @Getter
-  final ActiveSubscriptions activeSubscriptions;
+  final InMemoryActiveSubscriptions activeSubscriptions;
   @Getter
-  final TopicNameMapping topicNameMapping;
+  final InMemoryTopicNameMapping topicNameMapping;
 
   @Getter
   @Setter
@@ -95,7 +42,6 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   public InMemoryNetworkMqttSession(String clientId) {
     this.clientId = clientId;
-    this.pendingOutPublishes = ArrayFactory.stampedLockBasedArray(PendingPublish.class);
     this.messageIdGenerator = new AtomicInteger(0);
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
@@ -107,14 +53,13 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   @Override
   public int generateMessageId() {
-
-    int nextId = messageIdGenerator.incrementAndGet();
-
-    if (nextId >= MqttProperties.MAXIMUM_PACKET_ID) {
-      messageIdGenerator.compareAndSet(nextId, 0);
-      return generateMessageId();
-    }
-
+    int nextId;
+    do {
+      nextId = messageIdGenerator.incrementAndGet();
+      if (nextId >= MqttProperties.MAXIMUM_PACKET_ID) {
+        messageIdGenerator.compareAndSet(nextId, 0);
+      }
+    } while (nextId >= MqttProperties.MAXIMUM_PACKET_ID);
     return nextId;
   }
 
@@ -124,41 +69,16 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
   }
 
   @Override
-  public void registerOutPublish(Publish publish, PendingMessageHandler handler) {
-    registerPublish(publish, handler, pendingOutPublishes);
+  public int resendNotConfirmedPublishesTo(NetworkMqttUser user) {
+    return outProcessingPublishes.resendTo(user);
   }
-
-  @Override
-  public void resendPendingPackets(NetworkMqttUser user) {
-    long stamp = pendingOutPublishes.readLock();
-    try {
-      for (PendingPublish pending : pendingOutPublishes) {
-        PendingMessageHandler handler = pending.handler;
-        Publish publish = pending.publish;
-        handler.resend(user, publish);
-      }
-    } finally {
-      pendingOutPublishes.readUnlock(stamp);
-    }
-  }
-
-  @Override
-  public void updateOutPendingPacket(NetworkMqttUser user, TrackableMqttMessage response) {
-    updatePendingPacket(user, response, pendingOutPublishes, clientId);
-  }
-
-  @Override
+  
   public void clear() {
-    pendingOutPublishes
-        .operations()
-        .inWriteLock(Collection::clear);
-  }
-
-  @Override
-  public void onPersisted() {
-  }
-
-  @Override
-  public void onRestored() {
+    inMessageTracker.clear();
+    outMessageTracker.clear();
+    inProcessingPublishes.clear();
+    outProcessingPublishes.clear();
+    activeSubscriptions.clear();
+    topicNameMapping.clear();
   }
 }

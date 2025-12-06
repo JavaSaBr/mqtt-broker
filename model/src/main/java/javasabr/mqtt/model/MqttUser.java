@@ -17,10 +17,12 @@ public interface MqttUser {
   @Nullable 
   MqttSession session();
 
-  void sendAsync(SendableMqttMessage message);
+  MqttClientConnectionConfig connectionConfig();
+  
+  void sendInBackground(SendableMqttMessage message);
 
   /**
    * @return the feature with result of delivering the message
    */
-  CompletionStage<Boolean> send(SendableMqttMessage message);
+  CompletionStage<Boolean> sendAsync(SendableMqttMessage message);
 }

@@ -7,5 +7,5 @@ public interface PublishRetryer {
 
   PublishRetryer NO_OPS = (owner, session, publish) -> {};
 
-  void retry(MqttUser owner, Object session, Publish publish);
+  void retry(MqttUser user, MqttSession session, Publish publish);
 }
