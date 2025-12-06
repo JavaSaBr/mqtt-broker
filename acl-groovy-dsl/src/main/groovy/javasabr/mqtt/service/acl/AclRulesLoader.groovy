@@ -1,6 +1,5 @@
 package javasabr.mqtt.service.acl
 
-import groovy.transform.Field
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.acl.rule.Rule
 import javasabr.mqtt.model.exception.AclConfigurationException
