@@ -44,8 +44,6 @@ abstract class IntegrationServiceSpecification extends Specification {
   @Shared
   def defaultTopicService = new DefaultTopicService()
 
-
-
   @Shared
   def defaultMessageOutFactoryService = new DefaultMessageOutFactoryService([
       new Mqtt311MessageOutFactory(),

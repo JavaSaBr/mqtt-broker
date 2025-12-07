@@ -25,7 +25,3 @@ configurations.each {
   it.exclude group: "org.slf4j", module: "slf4j-log4j12"
   it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
 }
-
-bootJar {
-  mainClass = 'javasabr.mqtt.broker.application.MqttBrokerApplication'
-}
