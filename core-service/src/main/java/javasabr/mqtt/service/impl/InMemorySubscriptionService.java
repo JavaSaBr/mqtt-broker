@@ -81,12 +81,14 @@ public class InMemorySubscriptionService implements SubscriptionService {
     if (previous != null) {
       activeSubscriptions.remove(previous.subscription());
     }
-    if ((subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous != null)
+    if ((subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null)
         || subscription.retainHandling() == SEND) {
       sendRetainedMessages(user, subscription);
     }
     activeSubscriptions.add(subscription);
-    return subscription.qos().subscribeAckReasonCode();
+    return subscription
+        .qos()
+        .subscribeAckReasonCode();
   }
 
   @Override
@@ -140,15 +142,19 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   private void sendRetainedMessages(MqttUser user, Subscription subscription) {
-    int count = 0;
-    PublishHandlingResult errorResult = null;
-    if (subscription
+    SubscribeAckReasonCode subscribeAckReasonCode = subscription
         .qos()
-        .subscribeAckReasonCode()
-        .ordinal() > 2) {
-      // TODO handle error ?
+        .subscribeAckReasonCode();
+    if (subscribeAckReasonCode.ordinal() > 2) {
+      log.debug(
+          user.clientId(),
+          subscription,
+          subscribeAckReasonCode,
+          "[%s] Unable to send retained messages for [%s] due to wrong subscribeAckReasonCode [%s]"::formatted);
       return;
     }
+    int count = 0;
+    PublishHandlingResult errorResult = null;
     SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
     var results = publishDeliveringService.deliverRetainedMessages(subscription.topicFilter(), singleSubscriber);
     for (PublishHandlingResult result : results) {
@@ -158,19 +164,13 @@ public class InMemorySubscriptionService implements SubscriptionService {
         count++;
       }
       if (errorResult != null) {
-        log.debug(
-            user.clientId(),
-            errorResult,
-            "[%s] Found final error:[%s] during sending retained messages"::formatted);
-        // TODO handleError(client, publish, errorResult);
+        log.debug(user.clientId(), errorResult, "[%s] Error occurred [%s] during sending retained messages"::formatted);
       } else {
         log.debug(
             user.clientId(),
             count,
             "[%s] Successfully started delivering retained messages to [%s] subscribers"::formatted);
-        // TODO handleSuccessfulResult(client, publish, count);
       }
-
     }
   }
 }
