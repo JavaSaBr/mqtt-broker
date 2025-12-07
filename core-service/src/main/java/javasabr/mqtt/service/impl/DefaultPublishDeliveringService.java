@@ -1,10 +1,11 @@
 package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
+import java.util.function.Function;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
@@ -64,13 +65,16 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   }
 
   @Override
-  public Array<PublishHandlingResult> deliverRetainedMessages(TopicFilter topicFilter, SingleSubscriber subscriber) {
-    Array<Publish> retainedMessage = retainedMessageTree.getRetainedMessage(topicFilter);
+  public Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber) {
+    Subscription subscription = subscriber.subscription();
+    boolean retainAsPublished = subscription.retainAsPublished();
+    Function<Publish, Publish> transformer = retainAsPublished ? Function.identity() : Publish::withoutRetain;
+    Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter(), transformer);
     MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
-    for (Publish message : retainedMessage) {
+    for (Publish message : retainedMessages) {
       result.add(startDelivering(message, subscriber));
     }
-    return result;
+    return Array.copyOf(result);
   }
 
   private static String buildServiceDescription(

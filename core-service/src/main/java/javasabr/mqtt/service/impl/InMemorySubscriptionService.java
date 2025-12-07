@@ -156,7 +156,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
     int count = 0;
     PublishHandlingResult errorResult = null;
     SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
-    var results = publishDeliveringService.deliverRetainedMessages(subscription.topicFilter(), singleSubscriber);
+    var results = publishDeliveringService.deliverRetainedMessages(singleSubscriber);
     for (PublishHandlingResult result : results) {
       if (result.error()) {
         errorResult = result;

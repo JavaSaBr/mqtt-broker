@@ -1,15 +1,14 @@
 package javasabr.mqtt.model.topic.tree;
 
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.AbstractTrieNode;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.deque.DequeFactory;
@@ -47,11 +46,12 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     }
   }
 
-  public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
+  public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result,
+                                      Function<Publish, Publish> publishTransformer) {
     if (level == topicFilter.levelsCount()) {
       Publish publish = retainedMessage.get();
       if (publish != null) {
-        result.add(publish);
+        result.add(publishTransformer.apply(publish));
       }
       return;
     }
@@ -65,13 +65,13 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       var localChildNodes = getChildNodes(() -> ArrayFactory.mutableArray(RetainedMessageNode.class));
       if (localChildNodes != null) {
         for (RetainedMessageNode childNode : localChildNodes) {
-          childNode.collectRetainedMessages(level + 1, topicFilter, result);
+          childNode.collectRetainedMessages(level + 1, topicFilter, result, publishTransformer);
         }
       }
     } else {
       RetainedMessageNode retainedMessageNode = getChildNode(segment);
       if (retainedMessageNode != null) {
-        retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
+        retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result, publishTransformer);
       }
     }
   }

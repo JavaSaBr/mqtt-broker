@@ -10,5 +10,5 @@ public interface PublishDeliveringService {
 
   PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber);
 
-  Array<PublishHandlingResult> deliverRetainedMessages(TopicFilter topicFilter, SingleSubscriber subscriber);
+  Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber);
 }

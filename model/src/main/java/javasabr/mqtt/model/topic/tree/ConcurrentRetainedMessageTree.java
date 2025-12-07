@@ -1,5 +1,6 @@
 package javasabr.mqtt.model.topic.tree;
 
+import java.util.function.Function;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.Array;
@@ -21,9 +22,9 @@ public class ConcurrentRetainedMessageTree implements ThreadSafe {
     rootNode.retainMessage(0, message, message.topicName());
   }
 
-  public Array<Publish> getRetainedMessage(TopicFilter topicFilter) {
+  public Array<Publish> getRetainedMessage(TopicFilter topicFilter, Function<Publish, Publish> publishTransformer) {
     var resultArray = MutableArray.ofType(Publish.class);
-    rootNode.collectRetainedMessages(0, topicFilter, resultArray);
+    rootNode.collectRetainedMessages(0, topicFilter, resultArray, publishTransformer);
     return Array.copyOf(resultArray);
   }
 }

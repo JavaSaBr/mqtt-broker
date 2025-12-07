@@ -10,6 +10,8 @@ import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
 
+import java.util.function.Function
+
 import static java.nio.charset.StandardCharsets.UTF_8
 
 class RetainedMessageTreeTest extends UnitSpecification {
@@ -24,7 +26,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
           retainedMessageTree.retainMessage(message)
         }
     when:
-        def retainedMessages = retainedMessageTree.getRetainedMessage(TopicFilter.valueOf(topicFilter))
+        def retainedMessages = retainedMessageTree.getRetainedMessage(TopicFilter.valueOf(topicFilter), Function.identity())
             .collect { it }
     then:
         retainedMessages.size() == expectedMessages.size()
