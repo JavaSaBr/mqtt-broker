@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.subscriber.tree;
 
 import java.util.Objects;
+import javasabr.mqtt.model.AbstractTrieNode;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
@@ -18,7 +19,7 @@ import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-abstract class SubscriberTreeBase {
+abstract class SubscriberTreeBase extends AbstractTrieNode<SubscriberNode> {
 
   /**
    * @return previous subscriber with the same user
