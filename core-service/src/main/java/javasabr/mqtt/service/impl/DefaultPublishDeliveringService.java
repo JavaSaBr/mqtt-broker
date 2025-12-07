@@ -52,16 +52,10 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
 
   @Override
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
-    try {
-      if (publish.retained()) {
-        retainedMessageTree.retainMessage(publish);
-      }
-      //noinspection DataFlowIssue
-      return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
-    } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(publish, "Received not supported publish message:[%s]"::formatted);
-      return PublishHandlingResult.UNSPECIFIED_ERROR;
+    if (publish.retained()) {
+      retainedMessageTree.retainMessage(publish);
     }
+    return startDeliveringWithoutRetain(publish, subscriber);
   }
 
   @Override
@@ -72,9 +66,19 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
     Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter(), transformer);
     MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
     for (Publish message : retainedMessages) {
-      result.add(startDelivering(message, subscriber));
+      result.add(startDeliveringWithoutRetain(message, subscriber));
     }
     return Array.copyOf(result);
+  }
+
+  private PublishHandlingResult startDeliveringWithoutRetain(Publish publish, SingleSubscriber subscriber) {
+    try {
+      //noinspection DataFlowIssue
+      return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
+    } catch (IndexOutOfBoundsException | NullPointerException ex) {
+      log.warning(publish, "Received not supported publish message:[%s]"::formatted);
+      return PublishHandlingResult.UNSPECIFIED_ERROR;
+    }
   }
 
   private static String buildServiceDescription(
