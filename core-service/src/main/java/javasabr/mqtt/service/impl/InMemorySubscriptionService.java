@@ -145,9 +145,10 @@ public class InMemorySubscriptionService implements SubscriptionService {
     SubscribeAckReasonCode subscribeAckReasonCode = subscription
         .qos()
         .subscribeAckReasonCode();
+    String clientId = user.clientId();
     if (subscribeAckReasonCode.ordinal() > 2) {
       log.debug(
-          user.clientId(),
+          clientId,
           subscription,
           subscribeAckReasonCode,
           "[%s] Unable to send retained messages for [%s] due to wrong subscribeAckReasonCode [%s]"::formatted);
@@ -164,12 +165,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
         count++;
       }
       if (errorResult != null) {
-        log.debug(user.clientId(), errorResult, "[%s] Error occurred [%s] during sending retained messages"::formatted);
+        log.debug(clientId, errorResult, "[%s] Error occurred [%s] during sending retained messages"::formatted);
       } else {
-        log.debug(
-            user.clientId(),
-            count,
-            "[%s] Successfully started delivering retained messages to [%s] subscribers"::formatted);
+        log.debug(clientId, count, "[%s] Delivering [%s] retained messages has been started"::formatted);
       }
     }
   }
