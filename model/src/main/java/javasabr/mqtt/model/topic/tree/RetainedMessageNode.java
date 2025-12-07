@@ -29,6 +29,10 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     DebugUtils.registerIncludedFields("childNodes", "retainedMessage");
   }
 
+  private static MutableArray<RetainedMessageNode> childNodesFactory() {
+    return ArrayFactory.mutableArray(RetainedMessageNode.class);
+  }
+
   final AtomicReference<@Nullable Publish> retainedMessage = new AtomicReference<>();
 
   @Override
@@ -46,8 +50,11 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     }
   }
 
-  public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result,
-                                      Function<Publish, Publish> publishTransformer) {
+  public void collectRetainedMessages(
+      int level,
+      TopicFilter topicFilter,
+      MutableArray<Publish> result,
+      Function<Publish, Publish> publishTransformer) {
     if (level == topicFilter.levelsCount()) {
       Publish publish = retainedMessage.get();
       if (publish != null) {
@@ -62,7 +69,7 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       return;
     }
     if (isOneCharSegment && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR) {
-      var localChildNodes = getChildNodes(() -> ArrayFactory.mutableArray(RetainedMessageNode.class));
+      var localChildNodes = getChildNodes(RetainedMessageNode::childNodesFactory);
       if (localChildNodes != null) {
         for (RetainedMessageNode childNode : localChildNodes) {
           childNode.collectRetainedMessages(level + 1, topicFilter, result, publishTransformer);
