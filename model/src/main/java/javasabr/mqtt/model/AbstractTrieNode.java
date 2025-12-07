@@ -1,15 +1,12 @@
 package javasabr.mqtt.model;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import org.jspecify.annotations.Nullable;
 
-@Getter
-@Accessors
 public abstract class AbstractTrieNode<T> {
 
   @Nullable
@@ -49,6 +46,30 @@ public abstract class AbstractTrieNode<T> {
     } finally {
       childNodes.writeUnlock(stamp);
     }
+  }
+
+  protected void collectChildNodes(Collection<T> resultCollection) {
+    var localChildNodes = childNodes;
+    if (localChildNodes == null) {
+      return;
+    }
+    long stamp = localChildNodes.readLock();
+    try {
+      localChildNodes.values(resultCollection);
+    } finally {
+      localChildNodes.readUnlock(stamp);
+    }
+  }
+
+  @Nullable
+  protected Collection<T> getChildNodes(Supplier<Collection<T>> resultCollectionFactory) {
+    var localChildNodes = childNodes;
+    if (localChildNodes == null) {
+      return null;
+    }
+    Collection<T> resultCollection = resultCollectionFactory.get();
+    collectChildNodes(resultCollection);
+    return resultCollection;
   }
 
   @Nullable

@@ -1,5 +1,6 @@
 package javasabr.mqtt.network.message.out
 
+
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.message.MqttMessageType

@@ -9,8 +9,10 @@ import javasabr.mqtt.model.AbstractTrieNode;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
+import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.collections.deque.DequeFactory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -60,16 +62,9 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       return;
     }
     if (isOneCharSegment && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR) {
-      var localChildNodes = childNodes();
+      var localChildNodes = getChildNodes(() -> ArrayFactory.mutableArray(RetainedMessageNode.class));
       if (localChildNodes != null) {
-        var nextChildNodes = ArrayFactory.mutableArray(RetainedMessageNode.class);
-        long stamp = localChildNodes.readLock();
-        try {
-          localChildNodes.values(nextChildNodes);
-        } finally {
-          localChildNodes.readUnlock(stamp);
-        }
-        for (RetainedMessageNode childNode : nextChildNodes) {
+        for (RetainedMessageNode childNode : localChildNodes) {
           childNode.collectRetainedMessages(level + 1, topicFilter, result);
         }
       }
@@ -82,7 +77,7 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
   }
 
   private void collectAllMessages(RetainedMessageNode node, MutableArray<Publish> result) {
-    Queue<RetainedMessageNode> queue = new LinkedList<>();
+    Queue<RetainedMessageNode> queue = DequeFactory.arrayBasedBased(RetainedMessageNode.class);
     queue.add(node);
     while (!queue.isEmpty()) {
       RetainedMessageNode poll = queue.poll();
@@ -90,16 +85,7 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       if (message != null) {
         result.add(message);
       }
-      var childNodes = poll.childNodes();
-      if (childNodes == null) {
-        continue;
-      }
-      long stamp = childNodes.readLock();
-      try {
-        childNodes.values(queue);
-      } finally {
-        childNodes.readUnlock(stamp);
-      }
+      poll.collectChildNodes(queue);
     }
   }
 }

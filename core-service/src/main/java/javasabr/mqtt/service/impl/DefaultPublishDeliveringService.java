@@ -52,7 +52,9 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   @Override
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
     try {
-      retainedMessageTree.retainMessage(publish);
+      if (publish.retained()) {
+        retainedMessageTree.retainMessage(publish);
+      }
       //noinspection DataFlowIssue
       return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
