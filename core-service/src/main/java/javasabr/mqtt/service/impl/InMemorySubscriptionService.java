@@ -7,6 +7,7 @@ import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
+import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.ActiveSubscriptions;
@@ -81,13 +82,13 @@ public class InMemorySubscriptionService implements SubscriptionService {
     if (previous != null) {
       activeSubscriptions.remove(previous.subscription());
     }
-    if ((subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null)
-        || subscription.retainHandling() == SEND) {
+    QoS subscriptionQoS = subscription.qos();
+    if (subscriptionQoS.ordinal() <= 2 && (subscription.retainHandling() == SEND ||
+        (subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null))) {
       sendRetainedMessages(user, subscription);
     }
     activeSubscriptions.add(subscription);
-    return subscription
-        .qos()
+    return subscriptionQoS
         .subscribeAckReasonCode();
   }
 
@@ -142,19 +143,8 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   private void sendRetainedMessages(MqttUser user, Subscription subscription) {
-    SubscribeAckReasonCode subscribeAckReasonCode = subscription
-        .qos()
-        .subscribeAckReasonCode();
-    String clientId = user.clientId();
-    if (subscribeAckReasonCode.ordinal() > 2) {
-      log.debug(
-          clientId,
-          subscription,
-          subscribeAckReasonCode,
-          "[%s] Unable to send retained messages for [%s] due to wrong subscribeAckReasonCode [%s]"::formatted);
-      return;
-    }
     int count = 0;
+    String clientId = user.clientId();
     PublishHandlingResult errorResult = null;
     SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
     var results = publishDeliveringService.deliverRetainedMessages(singleSubscriber);
@@ -167,7 +157,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
       if (errorResult != null) {
         log.debug(clientId, errorResult, "[%s] Error occurred [%s] during sending retained messages"::formatted);
       } else {
-        log.debug(clientId, count, "[%s] Delivering [%s] retained messages has been started"::formatted);
+        log.debug(clientId, count, "[%s] Delivering of [%s] retained message has been started"::formatted);
       }
     }
   }

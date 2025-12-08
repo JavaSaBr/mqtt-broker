@@ -8,6 +8,10 @@ import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.subscription.TestPublishFactory
+import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicName
+import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
+import javasabr.mqtt.network.impl.InternalNetworkMqttUser
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.IntegrationServiceSpecification
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
@@ -514,21 +518,90 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         secondSentMessage.retain()
     and:
         mqttUser.isEmpty()
+  }
 
+  def "should not send retained messages in case of invalid QoS"() {
+    given:
+        def serverConfig = defaultExternalServerConnectionConfig
+        def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        def subscription = new Subscription(
+            defaultTopicService.createTopicFilter(mqttUser, "topic/filter/1"),
+            30,
+            QoS.INVALID,
+            SubscribeRetainHandling.SEND,
+            true,
+            true)
+        def subscriptions = Array.of(subscription)
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultPublishDeliveringService.startDelivering(publishWithRetain, new SingleSubscriber(mqttUser, subscription))
     when:
-        def publishWithRetain2 = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload2")
-        defaultPublishDeliveringService.startDelivering(publishWithRetain2, new SingleSubscriber(mqttUser, subscription))
         defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
-        def thirdSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        thirdSentMessage.payload() == publishWithRetain2.payload()
-        thirdSentMessage.retain()
+        mqttUser.isEmpty()
+  }
+
+  def "should clean and restore subscriptions"() {
+    given:
+        def serverConfig = defaultExternalServerConnectionConfig
+        def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
+        def expectedUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        def expectedSubscription = new Subscription(
+            TopicFilter.valueOf("topic"),
+            30,
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.SEND,
+            true,
+            true)
+    when:
+        defaultSubscriptionService.subscribe(expectedUser, expectedUser.session(), Array.of(expectedSubscription))
+        def subscribers = defaultSubscriptionService.findSubscribers(TopicName.valueOf("topic"))
+    then:
+        !subscribers.isEmpty()
+        with(subscribers[0]) {
+          user() == expectedUser
+          subscription() == expectedSubscription
+        }
+    when:
+        defaultSubscriptionService.cleanSubscriptions(expectedUser, expectedUser.session())
+        subscribers = defaultSubscriptionService.findSubscribers(TopicName.valueOf("topic"))
+    then:
+        subscribers.isEmpty()
+
+    when:
+        defaultSubscriptionService.restoreSubscriptions(expectedUser, expectedUser.session())
+        subscribers = defaultSubscriptionService.findSubscribers(TopicName.valueOf("topic"))
+    then:
+        !subscribers.isEmpty()
+        with(subscribers[0]) {
+          user() == expectedUser
+          subscription() == expectedSubscription
+        }
+  }
+  def "should suppress retained message delivering failure"() {
+    given:
+        def serverConfig = defaultExternalServerConnectionConfig
+        def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        def anotherUser = new InternalNetworkMqttUser(mqttConnection, Mock(NetworkMqttUserReleaseHandler))
+        def subscription = new Subscription(
+            defaultTopicService.createTopicFilter(mqttUser, "topic/filter/1"),
+            30,
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.SEND,
+            true,
+            true)
+        def subscriptions = Array.of(subscription)
     and:
-        def fourthSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        fourthSentMessage.payload() == publishWithRetain2.payload()
-        fourthSentMessage.retain()
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultPublishDeliveringService.startDelivering(publishWithRetain, new SingleSubscriber(mqttUser, subscription))
+    when:
+        defaultSubscriptionService.subscribe(anotherUser, mqttUser.session(), subscriptions)
+    then:
+        def firstSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        firstSentMessage.payload() == publishWithRetain.payload()
     and:
         mqttUser.isEmpty()
-
   }
 }
