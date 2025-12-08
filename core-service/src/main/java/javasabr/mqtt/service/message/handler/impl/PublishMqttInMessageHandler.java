@@ -1,10 +1,10 @@
 package javasabr.mqtt.service.message.handler.impl;
 
+import java.util.List;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.PayloadFormat;
-import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
@@ -16,9 +16,11 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
+import javasabr.mqtt.service.AclService;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
+import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -27,18 +29,22 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, PublishMqttInMessage> {
+    extends FieldsValidatedMqttInMessageHandler<ExternalNetworkMqttUser, PublishMqttInMessage> {
 
   PublishReceivingService publishReceivingService;
   TopicService topicService;
+  AclService aclService;
 
   public PublishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
-    super(ExternalNetworkMqttUser.class, PublishMqttInMessage.class, messageOutFactoryService);
+      TopicService topicService, 
+      AclService aclService,
+      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
+    super(ExternalNetworkMqttUser.class, PublishMqttInMessage.class, messageOutFactoryService, fieldValidators);
     this.publishReceivingService = publishReceivingService;
     this.topicService = topicService;
+    this.aclService = aclService;
   }
 
   @Override
@@ -111,6 +117,11 @@ public class PublishMqttInMessageHandler
       topicName = topicNameByAlias;
     }
 
+    if (!aclService.authorizePublish(user, topicName)) {
+      handleNotAuthorize(user);
+      return;
+    }
+
     byte[] payload = publishMessage.payload();
 
     //noinspection DataFlowIssue everything is already validated
@@ -137,19 +148,8 @@ public class PublishMqttInMessageHandler
       MqttConnection connection,
       ExternalNetworkMqttUser user,
       PublishMqttInMessage publishMessage) {
-    byte[] payload = publishMessage.payload();
-    if (payload == null) {
-      log.warning(user.clientId(), "[%s] Unexpected missed payload"::formatted);
-      return false;
-    }
-
-    QoS requestedQos = publishMessage.qos();
+ 
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    if (connectionConfig.maxQos().isLowerThan(requestedQos)) {
-      log.warning(user.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
-      handleNotSupportedQos(user);
-      return false;
-    }
 
     boolean retain = publishMessage.retain();
     if (retain && !connectionConfig.retainAvailable()) {
@@ -175,11 +175,6 @@ public class PublishMqttInMessageHandler
     return true;
   }
 
-  private void handleNotSupportedQos(ExternalNetworkMqttUser user) {
-    user.closeWithReason(messageOutFactoryService
-        .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.QOS_NOT_SUPPORTED));
-  }
 
   private void handleNotSupportedRetain(ExternalNetworkMqttUser user) {
     user.closeWithReason(messageOutFactoryService
@@ -220,6 +215,12 @@ public class PublishMqttInMessageHandler
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL);
     user.closeWithReason(response);
+  }
+
+  private void handleNotAuthorize(ExternalNetworkMqttUser user) {
+    user.closeWithReason(messageOutFactoryService
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.NOT_AUTHORIZED));
   }
 
   private void handleInvalidTopicName(

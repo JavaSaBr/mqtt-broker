@@ -2,6 +2,7 @@ package javasabr.mqtt.broker.application.config;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.List;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -9,7 +10,9 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
+import javasabr.mqtt.service.AclService;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
@@ -26,6 +29,7 @@ import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
+import javasabr.mqtt.service.impl.DisabledAclService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
@@ -44,6 +48,9 @@ import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandle
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
+import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -96,6 +103,11 @@ public class MqttBrokerSpringConfig {
       @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth) {
     return new SimpleAuthenticationService(credentialSource, allowAnonymousAuth);
   }
+  
+  @Bean
+  AclService aclService() {
+    return new DisabledAclService();
+  }
 
   @Bean
   SubscriptionService subscriptionService() {
@@ -147,16 +159,31 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler publishCompleteMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new PublishCompleteMqttInMessageHandler(messageOutFactoryService);
   }
+  
+  @Bean
+  PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator() {
+    return new PublishPayloadMqttInMessageFieldValidator();
+  }
+
+  @Bean
+  PublishQosMqttInMessageFieldValidator publishQosMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishQosMqttInMessageFieldValidator(messageOutFactoryService);
+  }
 
   @Bean
   MqttInMessageHandler publishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
+      TopicService topicService,
+      AclService aclService,
+      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
     return new PublishMqttInMessageHandler(
         publishReceivingService,
         messageOutFactoryService,
-        topicService);
+        topicService,
+        aclService,
+        fieldValidators);
   }
 
   @Bean
