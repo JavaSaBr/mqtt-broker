@@ -6,5 +6,9 @@ import javasabr.mqtt.network.message.in.MqttInMessage;
 
 public abstract class MqttInMessageFieldValidator<U extends MqttUser, M extends MqttInMessage> {
   
-  public abstract boolean validate(MqttConnection connection, U user, M message);
+  public abstract boolean isNotValid(MqttConnection connection, U user, M message);
+  
+  public int order() {
+    return 0;
+  }
 }

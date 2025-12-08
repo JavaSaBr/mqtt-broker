@@ -1,7 +1,7 @@
 package javasabr.mqtt.service.message.validator;
 
-import javasabr.mqtt.model.MqttClientConnectionConfig;
-import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
@@ -15,20 +15,20 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PublishQosMqttInMessageFieldValidator extends
+public class PublishMessageExpiryIntervalMqttInMessageFieldValidator extends
     MqttInMessageFieldValidator<NetworkMqttUser, PublishMqttInMessage> {
 
-  public static final int ORDER = PublishPayloadMqttInMessageFieldValidator.ORDER + 1;
+  public static final int ORDER = PublishRetainMqttInMessageFieldValidator.ORDER + 1;
   
   MessageOutFactoryService messageOutFactoryService;
   
   @Override
   public boolean isNotValid(MqttConnection connection, NetworkMqttUser user, PublishMqttInMessage message) {
-    QoS requestedQos = message.qos();
-    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    if (connectionConfig.maxQos().isLowerThan(requestedQos)) {
-      log.warning(user.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
-      handleNotSupportedQos(user);
+    long messageExpiryInterval = message.messageExpiryInterval();
+    if (messageExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
+        && messageExpiryInterval < MqttProperties.MESSAGE_EXPIRY_INTERVAL_MIN) {
+      log.warning(user.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
+      handleInvalidMessageExpiryInterval(user);
       return true;
     }
     return false;
@@ -39,9 +39,12 @@ public class PublishQosMqttInMessageFieldValidator extends
     return ORDER;
   }
 
-  private void handleNotSupportedQos(NetworkMqttUser user) {
+  private void handleInvalidMessageExpiryInterval(NetworkMqttUser user) {
     user.closeWithReason(messageOutFactoryService
         .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.QOS_NOT_SUPPORTED));
+        .newDisconnect(
+            user,
+            DisconnectReasonCode.PROTOCOL_ERROR,
+            MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL));
   }
 }

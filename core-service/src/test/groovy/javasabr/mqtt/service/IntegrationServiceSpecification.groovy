@@ -1,6 +1,5 @@
 package javasabr.mqtt.service
 
-
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
@@ -8,14 +7,22 @@ import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
+import javasabr.mqtt.network.message.in.PublishMqttInMessage
+import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
 import javasabr.mqtt.service.impl.DefaultTopicService
+import javasabr.mqtt.service.impl.DisabledAclService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
+import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator
+import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator
+import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator
+import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator
+import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishOutMessageHandler
 import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler
@@ -87,6 +94,17 @@ abstract class IntegrationServiceSpecification extends Specification {
 
   @Shared
   def defaultMqttSessionService = new InMemoryMqttSessionService(60_000);
+  
+  @Shared
+  def disabledAclService = new DisabledAclService()
+  
+  @Shared
+  List<? extends MqttInMessageFieldValidator<? extends NetworkMqttUser, PublishMqttInMessage>> publishInFieldValidators = [
+      new PublishRetainMqttInMessageFieldValidator(defaultMessageOutFactoryService),
+      new PublishQosMqttInMessageFieldValidator(defaultMessageOutFactoryService),
+      new PublishPayloadMqttInMessageFieldValidator(defaultMessageOutFactoryService),
+      new PublishMessageExpiryIntervalMqttInMessageFieldValidator(defaultMessageOutFactoryService),
+  ]
 
   @Shared
   def defaultExternalServerConnectionConfig = new MqttServerConnectionConfig(

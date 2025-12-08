@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
+import java.util.Comparator;
 import java.util.List;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.in.MqttInMessage;
@@ -25,30 +26,37 @@ public abstract class FieldsValidatedMqttInMessageHandler<U extends NetworkMqttU
       List<? extends MqttInMessageFieldValidator<? super U, M>> fieldValidators) {
     super(expectedUser, expectedMessage, messageOutFactoryService);
     //noinspection unchecked
-    this.fieldValidators = fieldValidators.toArray(MqttInMessageFieldValidator[]::new);
+    this.fieldValidators = fieldValidators
+        .stream()
+        .sorted(Comparator.comparingInt((MqttInMessageFieldValidator<? super U, M> validator) -> validator.order()))
+        .toArray(MqttInMessageFieldValidator[]::new);
   }
 
   @Override
-  protected void processValidMessage(MqttConnection connection, U user, M message) {
+  protected final void processValidMessage(MqttConnection connection, U user, M message) {
     for (MqttInMessageFieldValidator<? super U, M> fieldValidator : fieldValidators) {
-      if (!fieldValidator.validate(connection, user, message)) {
+      if (fieldValidator.isNotValid(connection, user, message)) {
         return;
       }
     }
-    super.processValidMessage(connection, user, message);
+    processMessageWithValidFields(connection, user, message);
   }
 
+  protected void processMessageWithValidFields(MqttConnection connection, U user, M message) {}
+
   @Override
-  protected void processValidMessage(
-      MqttConnection connection, 
-      U user, 
+  protected final void processValidMessage(MqttConnection connection, U user, NetworkMqttSession session, M message) {
+    for (MqttInMessageFieldValidator<? super U, M> fieldValidator : fieldValidators) {
+      if (fieldValidator.isNotValid(connection, user, message)) {
+        return;
+      }
+    }
+    processMessageWithValidFields(connection, user, session, message);
+  }
+
+  protected void processMessageWithValidFields(
+      MqttConnection connection,
+      U user,
       NetworkMqttSession session,
-      M message) {
-    for (MqttInMessageFieldValidator<? super U, M> fieldValidator : fieldValidators) {
-      if (!fieldValidator.validate(connection, user, message)) {
-        return;
-      }
-    }
-    super.processValidMessage(connection, user, session, message);
-  }
+      M message) {}
 }

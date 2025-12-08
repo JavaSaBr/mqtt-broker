@@ -49,8 +49,10 @@ import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -161,14 +163,27 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
-  PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator() {
-    return new PublishPayloadMqttInMessageFieldValidator();
+  PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishPayloadMqttInMessageFieldValidator(messageOutFactoryService);
   }
 
   @Bean
   PublishQosMqttInMessageFieldValidator publishQosMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishQosMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
+  PublishRetainMqttInMessageFieldValidator publishRetainMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishRetainMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+
+  @Bean
+  PublishMessageExpiryIntervalMqttInMessageFieldValidator publishMessageExpiryIntervalMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService);
   }
 
   @Bean

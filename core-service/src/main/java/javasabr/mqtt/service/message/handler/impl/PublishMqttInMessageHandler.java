@@ -4,7 +4,6 @@ import java.util.List;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
-import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
@@ -53,16 +52,12 @@ public class PublishMqttInMessageHandler
   }
 
   @Override
-  protected void processValidMessage(
+  protected void processMessageWithValidFields(
       MqttConnection connection,
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       PublishMqttInMessage publishMessage) {
-
-    if (!validateBaseFields(connection, user, publishMessage)) {
-      return;
-    }
-
+    
     String rawResponseTopicName = publishMessage.rawResponseTopicName();
     TopicName responseTopicName = null;
     if (rawResponseTopicName != null) {
@@ -144,44 +139,6 @@ public class PublishMqttInMessageHandler
     publishReceivingService.processPublish(user, publish);
   }
 
-  private boolean validateBaseFields(
-      MqttConnection connection,
-      ExternalNetworkMqttUser user,
-      PublishMqttInMessage publishMessage) {
- 
-    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-
-    boolean retain = publishMessage.retain();
-    if (retain && !connectionConfig.retainAvailable()) {
-      log.warning(user.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
-      handleNotSupportedRetain(user);
-      return false;
-    }
-
-    PayloadFormat payloadFormat = publishMessage.payloadFormat();
-    if (payloadFormat == PayloadFormat.INVALID) {
-      log.warning(user.clientId(), "[%s] Provided invalid PayloadFormat"::formatted);
-      handleInvalidPayloadFormat(user);
-      return false;
-    }
-
-    long messageExpiryInterval = publishMessage.messageExpiryInterval();
-    if (messageExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
-        && messageExpiryInterval < MqttProperties.MESSAGE_EXPIRY_INTERVAL_MIN) {
-      log.warning(user.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
-      handleInvalidMessageExpiryInterval(user);
-      return false;
-    }
-    return true;
-  }
-
-
-  private void handleNotSupportedRetain(ExternalNetworkMqttUser user) {
-    user.closeWithReason(messageOutFactoryService
-        .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.RETAIN_NOT_SUPPORTED));
-  }
-
   private void handleNotProvidedTopicName(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
@@ -196,27 +153,14 @@ public class PublishMqttInMessageHandler
     user.closeWithReason(response);
   }
 
-  private void handleInvalidPayloadFormat(ExternalNetworkMqttUser user) {
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT);
-    user.closeWithReason(response);
-  }
-
   private void handleInvalidResponseTopicName(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.INVALID_RESPONSE_TOPIC_NAME);
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_RESPONSE_TOPIC_NAME);
     user.closeWithReason(response);
   }
 
-  private void handleInvalidMessageExpiryInterval(ExternalNetworkMqttUser user) {
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL);
-    user.closeWithReason(response);
-  }
-
+ 
   private void handleNotAuthorize(ExternalNetworkMqttUser user) {
     user.closeWithReason(messageOutFactoryService
         .resolveFactory(user)
