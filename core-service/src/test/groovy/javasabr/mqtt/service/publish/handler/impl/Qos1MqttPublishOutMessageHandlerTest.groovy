@@ -22,9 +22,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should deliver publish to subscriber"() {
     given:
-        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1MqttPublishOutMessageHandlerTest/1")
@@ -50,9 +48,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should wait for ack response for publish"() {
     given:
-        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -98,9 +94,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should correctly handle publish ack when no stored trackable meta about the publish"() {
     given:
-        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -149,9 +143,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error receiving unexpected response message"() {
     given:
-        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -191,9 +183,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error for unexpected flow state"() {
     given:
-        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
