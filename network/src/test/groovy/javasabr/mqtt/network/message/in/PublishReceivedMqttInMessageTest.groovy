@@ -11,27 +11,29 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
         }
     when:
         def inMessage = new PublishReceivedMqttInMessage(PublishReceivedMqttInMessage.MESSAGE_FLAGS)
         def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        inMessage.reason() == null
-        inMessage.messageId() == messageId
-        inMessage.reasonCode() == PublishReceivedReasonCode.SUCCESS
-        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        with(inMessage) {
+          reason() == null
+          messageId() == testMessageId
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+          userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        }
   }
 
   def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
-          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.put(PublishReceivedReasonCode.QUOTA_EXCEEDED)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
@@ -41,13 +43,15 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        inMessage.reason() == reasonString
-        inMessage.messageId() == messageId
-        inMessage.reasonCode() == PublishReceivedReasonCode.QUOTA_EXCEEDED
-        inMessage.userProperties() == userProperties
+        with(inMessage) {
+          reason() == reasonString
+          messageId() == testMessageId
+          reasonCode() == PublishReceivedReasonCode.QUOTA_EXCEEDED
+          userProperties() == testUserProperties
+        }
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.put(PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR)
           it.putMbi(0)
         }
@@ -55,10 +59,12 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        inMessage.reason() == null
-        inMessage.messageId() == messageId
-        inMessage.reasonCode() == PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
-        inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        with(inMessage) {
+          reason() == null
+          messageId() == testMessageId
+          reasonCode() == PublishReceivedReasonCode.IMPLEMENTATION_SPECIFIC_ERROR
+          userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
+        }
   }
 
   def "should not allow to put reason 2 times"() {
@@ -68,7 +74,7 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.REASON_STRING, "reason1")
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.put(PublishReceivedReasonCode.SUCCESS)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
@@ -78,14 +84,16 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result
-        inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "Property:[$MqttMessageProperty.REASON_STRING] is already presented in message:[$MqttMessageType.PUBLISH_RECEIVED]"
+        with(inMessage) {
+          exception() instanceof MalformedProtocolMqttException
+          exception().message == "Property:[$MqttMessageProperty.REASON_STRING] is already presented in message:[$MqttMessageType.PUBLISH_RECEIVED]"
+        }
   }
 
   def "should not allow invalid message flags"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.put(PublishReceivedReasonCode.SUCCESS)
           it.putMbi(0)
         }
@@ -94,7 +102,9 @@ class PublishReceivedMqttInMessageTest extends BaseMqttInMessageTest {
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         !result
-        inMessage.exception() instanceof MalformedProtocolMqttException
-        inMessage.exception().message == "Unexpected message flags:[0b0101_0101] in message:[$MqttMessageType.PUBLISH_RECEIVED]"
+        with(inMessage) {
+          exception() instanceof MalformedProtocolMqttException
+          exception().message == "Unexpected message flags:[0b0101_0101] in message:[$MqttMessageType.PUBLISH_RECEIVED]"
+        }
   }
 }

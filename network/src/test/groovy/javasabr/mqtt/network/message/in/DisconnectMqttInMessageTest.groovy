@@ -12,7 +12,7 @@ class DisconnectMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
           it.putProperty(MqttMessageProperty.SERVER_REFERENCE, serverReference)
-          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putByte(DisconnectReasonCode.QUOTA_EXCEEDED.code())
@@ -28,7 +28,7 @@ class DisconnectMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.serverReference() == serverReference
         inMessage.reasonCode() == DisconnectReasonCode.QUOTA_EXCEEDED
         inMessage.sessionExpiryInterval() == sessionExpiryInterval
-        inMessage.userProperties() == userProperties
+        inMessage.userProperties() == testUserProperties
     when:
         propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)

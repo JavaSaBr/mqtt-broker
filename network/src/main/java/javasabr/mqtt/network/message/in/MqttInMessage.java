@@ -39,7 +39,6 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     DebugUtils.registerIncludedFields("userProperties");
   }
 
-  public static final Array<StringPair> EMPTY_USER_PROPERTIES = Array.empty(StringPair.class);
   protected static final Array<String> EMPTY_STRINGS = Array.empty(String.class);
 
   private record Utf8Decoder(CharsetDecoder decoder, ByteBuffer inBuffer, CharBuffer outBuffer) {}

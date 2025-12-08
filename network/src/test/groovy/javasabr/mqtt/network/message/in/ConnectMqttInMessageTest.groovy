@@ -44,7 +44,7 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation ? 1 : 0)
           it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
           it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
-          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putString("MQTT")
@@ -76,7 +76,7 @@ class ConnectMqttInMessageTest extends BaseMqttInMessageTest {
         packet.willTopic() == ""
         packet.willQos() == 0
         packet.willPayload() == ArrayUtils.EMPTY_BYTE_ARRAY
-        packet.userProperties() == userProperties
+        packet.userProperties() == testUserProperties
   }
 
   def "should not read packet correctly with invalid UTF8 strings"(byte[] stringBytes) {

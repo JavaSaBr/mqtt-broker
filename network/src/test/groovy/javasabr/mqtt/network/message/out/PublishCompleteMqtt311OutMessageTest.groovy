@@ -10,7 +10,7 @@ class PublishCompleteMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
   def "should write message correctly"() {
     given:
-        def outMessage = new PublishCompleteMqtt311OutMessage(messageId)
+        def outMessage = new PublishCompleteMqtt311OutMessage(testMessageId)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -26,9 +26,11 @@ class PublishCompleteMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode() == PublishCompletedReasonCode.SUCCESS
-        reader.messageId() == messageId
-        reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        reader.reason() == null
+        with(reader) {
+          reasonCode() == PublishCompletedReasonCode.SUCCESS
+          messageId() == testMessageId
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+          reason() == null
+        }
   }
 }
