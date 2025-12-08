@@ -37,22 +37,29 @@ public class Qos1MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
     if (trackedMessageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       return true;
-    } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
+    }
+    
+    MqttMessageType trackedMessageType = trackedMessageMeta.messageType();
+    if (trackedMessageType != MqttMessageType.PUBLISH) {
       log.warning(clientId, trackedMessageMeta, messageId,
           "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
+      handleNotExpectedFlowState(user, trackedMessageType, MqttMessageType.PUBLISH);
       return true;
     }
+    
     if (!(message instanceof PublishAckMqttInMessage publishAck)) {
       log.warning(clientId, message.messageType(), messageId, 
-          "[%s] Not expected message type:[%s] for messageId:[%d]"::formatted);
+          "[%s] Not expected message type:%s for messageId:[%d]"::formatted);
+      handleNotExpectedResponseMessage(user, message, MqttMessageType.PUBLISH_ACK);
       return true;
     }
     
     PublishAckReasonCode reasonCode = publishAck.reasonCode();
     if (reasonCode != PublishAckReasonCode.SUCCESS) {
+      // just to note in logs, we can't do anything with this
       log.warning(clientId, reasonCode, messageId, "[%s] Received error response:[%s] for publish:[%s]"::formatted);
     }
-
+    
     MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.remove(messageId);
     

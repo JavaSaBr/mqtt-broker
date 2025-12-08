@@ -64,4 +64,11 @@ public class PublishReceivedMqttInMessage extends PublishControlMqttInMessage<Pu
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
+  
+  public static PublishReceivedMqttInMessage of(int messageId, PublishReceivedReasonCode reasonCode) {
+    var message = new PublishReceivedMqttInMessage(MESSAGE_FLAGS);
+    message.messageId = messageId;
+    message.reasonCode = reasonCode;
+    return message;
+  }
 }
