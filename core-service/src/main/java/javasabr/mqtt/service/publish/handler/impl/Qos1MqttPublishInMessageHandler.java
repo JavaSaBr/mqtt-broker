@@ -11,6 +11,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -24,8 +25,9 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   public Qos1MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, subscriptionService, publishDeliveringService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
+    super(ExternalNetworkMqttUser.class, subscriptionService, publishDeliveringService, messageOutFactoryService, retainMessageService);
   }
 
   @Override

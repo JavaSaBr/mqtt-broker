@@ -69,7 +69,7 @@ class UnsubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecificatio
   def "should response with expected results"() {
     given:
         def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
-        def subscriptionService = new InMemorySubscriptionService(defaultPublishDeliveringService)
+        def subscriptionService = new InMemorySubscriptionService(defaultRetainMessageService)
         def messageHandler = new UnsubscribeMqttInMessageHandler(
             subscriptionService,
             defaultMessageOutFactoryService,

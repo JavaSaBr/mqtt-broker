@@ -17,6 +17,7 @@ import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
@@ -25,6 +26,7 @@ import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
+import javasabr.mqtt.service.impl.DefaultRetainMessageService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
@@ -99,8 +101,13 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService(PublishDeliveringService publishDeliveringService) {
-    return new InMemorySubscriptionService(publishDeliveringService);
+  SubscriptionService subscriptionService(RetainMessageService retainMessageService) {
+    return new InMemorySubscriptionService(retainMessageService);
+  }
+
+  @Bean
+  RetainMessageService retainMessageService(PublishDeliveringService publishDeliveringService) {
+    return new DefaultRetainMessageService(publishDeliveringService);
   }
 
   @Bean
@@ -218,24 +225,39 @@ public class MqttBrokerSpringConfig {
   MqttPublishInMessageHandler qos0MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
+    return new Qos0MqttPublishInMessageHandler(
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Bean
   MqttPublishInMessageHandler qos1MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
+    return new Qos1MqttPublishInMessageHandler(
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Bean
   MqttPublishInMessageHandler qos2MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
+    return new Qos2MqttPublishInMessageHandler(
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Bean
@@ -268,10 +290,7 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.receive.maximum",
             int.class,
             MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.topic.alias.maximum",
-            int.class,
-            0),
+        env.getProperty("mqtt.external.connection.topic.alias.maximum", int.class, 0),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,
@@ -284,18 +303,14 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.sessions.enabled",
             boolean.class,
             MqttProperties.SESSIONS_ENABLED_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.retain.available",
-            boolean.class,
-            false), // set false because currently it's not implemented and we should not allow for clients to use it
+        env.getProperty("mqtt.external.connection.retain.available", boolean.class, false),
+        // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
             MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.subscription.id.available",
-            boolean.class,
-            false), // set false because currently it's not implemented and we should not allow for clients to use it
+        env.getProperty("mqtt.external.connection.subscription.id.available", boolean.class, false),
+        // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,

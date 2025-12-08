@@ -11,6 +11,7 @@ import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
+import javasabr.mqtt.service.impl.DefaultRetainMessageService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
@@ -39,7 +40,7 @@ abstract class IntegrationServiceSpecification extends Specification {
   def testPayload = "testpayload".getBytes(StandardCharsets.UTF_8)
 
   @Shared
-  def clientIdGenerator = new AtomicInteger();
+  def clientIdGenerator = new AtomicInteger()
 
   @Shared
   def defaultTopicService = new DefaultTopicService()
@@ -58,13 +59,17 @@ abstract class IntegrationServiceSpecification extends Specification {
   ])
 
   @Shared
-  def defaultSubscriptionService = new InMemorySubscriptionService(defaultPublishDeliveringService)
+  def defaultRetainMessageService = new DefaultRetainMessageService(defaultPublishDeliveringService)
+
+  @Shared
+  def defaultSubscriptionService = new InMemorySubscriptionService(defaultRetainMessageService)
 
   @Shared
   def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(
       defaultSubscriptionService,
       defaultPublishDeliveringService,
-      defaultMessageOutFactoryService);
+      defaultMessageOutFactoryService,
+      defaultRetainMessageService)
 
   @Shared
   def publishReceivingService = new DefaultPublishReceivingService([
@@ -72,21 +77,23 @@ abstract class IntegrationServiceSpecification extends Specification {
       new Qos1MqttPublishInMessageHandler(
           defaultSubscriptionService,
           defaultPublishDeliveringService,
-          defaultMessageOutFactoryService),
+          defaultMessageOutFactoryService,
+          defaultRetainMessageService),
       new Qos2MqttPublishInMessageHandler(
           defaultSubscriptionService,
           defaultPublishDeliveringService,
-          defaultMessageOutFactoryService)
+          defaultMessageOutFactoryService,
+          defaultRetainMessageService)
   ])
 
   @Shared
-  def defaultPublishReleaseMqttInMessageHandler = new PublishReleaseMqttInMessageHandler(defaultMessageOutFactoryService);
+  def defaultPublishReleaseMqttInMessageHandler = new PublishReleaseMqttInMessageHandler(defaultMessageOutFactoryService)
 
   @Shared
   def defaultBufferAllocator = new DefaultBufferAllocator(SimpleServerNetworkConfig.builder().build())
 
   @Shared
-  def defaultMqttSessionService = new InMemoryMqttSessionService(60_000);
+  def defaultMqttSessionService = new InMemoryMqttSessionService(60_000)
 
   @Shared
   def defaultExternalServerConnectionConfig = new MqttServerConnectionConfig(

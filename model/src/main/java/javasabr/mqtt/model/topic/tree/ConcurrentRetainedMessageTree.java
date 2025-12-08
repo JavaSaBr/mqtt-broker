@@ -1,6 +1,5 @@
 package javasabr.mqtt.model.topic.tree;
 
-import java.util.function.Function;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.Array;

@@ -10,6 +10,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -29,6 +30,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   SubscriptionService subscriptionService;
   PublishDeliveringService publishDeliveringService;
   MessageOutFactoryService messageOutFactoryService;
+  RetainMessageService retainMessageService;
 
   @Override
   public void handle(NetworkMqttUser user, Publish publish) {
@@ -103,6 +105,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   }
 
   protected void startDelivering(Publish publish, SingleSubscriber subscriber) {
+    retainMessageService.retainMessage(publish, subscriber.subscription());
     publishDeliveringService.startDelivering(publish, subscriber);
   }
 

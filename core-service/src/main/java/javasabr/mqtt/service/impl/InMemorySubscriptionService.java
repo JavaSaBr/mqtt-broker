@@ -18,7 +18,7 @@ import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import javasabr.rlib.collections.array.Array;
@@ -35,12 +35,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
-  PublishDeliveringService publishDeliveringService;
+  RetainMessageService retainMessageService;
   ConcurrentSubscriberTree subscriberTree;
 
-  public InMemorySubscriptionService(PublishDeliveringService publishDeliveringService) {
+  public InMemorySubscriptionService(RetainMessageService retainMessageService) {
     this.subscriberTree = new ConcurrentSubscriberTree();
-    this.publishDeliveringService = publishDeliveringService;
+    this.retainMessageService = retainMessageService;
   }
 
   @Override
@@ -147,7 +147,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
     String clientId = user.clientId();
     PublishHandlingResult errorResult = null;
     SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
-    var results = publishDeliveringService.deliverRetainedMessages(singleSubscriber);
+    var results = retainMessageService.deliverRetainedMessages(singleSubscriber);
     for (PublishHandlingResult result : results) {
       if (result.error()) {
         errorResult = result;

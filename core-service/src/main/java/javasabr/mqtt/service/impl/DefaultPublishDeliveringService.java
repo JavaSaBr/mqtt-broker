@@ -1,17 +1,12 @@
 package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
-import java.util.function.Function;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.subscription.Subscription;
-import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
-import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +18,6 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
 
   @Nullable
   MqttPublishOutMessageHandler[] publishOutMessageHandlers;
-  ConcurrentRetainedMessageTree retainedMessageTree;
 
   public DefaultPublishDeliveringService(
       Collection<? extends MqttPublishOutMessageHandler> knownPublishOutHandlers) {
@@ -45,34 +39,12 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
       }
       handlers[qos.level()] = knownPublishOutHandler;
     }
-    this.retainedMessageTree = new ConcurrentRetainedMessageTree();
     this.publishOutMessageHandlers = handlers;
     log.info(publishOutMessageHandlers, DefaultPublishDeliveringService::buildServiceDescription);
   }
 
   @Override
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
-    if (publish.retained()) {
-      Subscription subscription = subscriber.subscription();
-      boolean retainAsPublished = subscription.retainAsPublished();
-      Function<Publish, Publish> transformer = retainAsPublished ? Function.identity() : Publish::withoutRetain;
-      retainedMessageTree.retainMessage(transformer.apply(publish));
-    }
-    return startDeliveringWithoutRetain(publish, subscriber);
-  }
-
-  @Override
-  public Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber) {
-    Subscription subscription = subscriber.subscription();
-    Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter());
-    MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
-    for (Publish message : retainedMessages) {
-      result.add(startDeliveringWithoutRetain(message, subscriber));
-    }
-    return Array.copyOf(result);
-  }
-
-  private PublishHandlingResult startDeliveringWithoutRetain(Publish publish, SingleSubscriber subscriber) {
     try {
       //noinspection DataFlowIssue
       return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);

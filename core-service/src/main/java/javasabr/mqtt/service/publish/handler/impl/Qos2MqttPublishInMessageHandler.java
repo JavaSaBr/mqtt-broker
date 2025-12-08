@@ -19,6 +19,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -34,8 +35,14 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   public Qos2MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, subscriptionService, publishDeliveringService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
+    super(
+        ExternalNetworkMqttUser.class,
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService,
+        retainMessageService);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
   }
 
@@ -67,17 +74,15 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected void handleNoMatchedSubscribers(
-      ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      Publish publish) {
+  protected void handleNoMatchedSubscribers(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
     var reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
     updateSessionState(session, publish, reasonCode);
     sendFeedback(
-        user, messageOutFactoryService
-        .resolveFactory(user)
-        .newPublishReceived(publish.messageId(), reasonCode));
+        user,
+        messageOutFactoryService
+            .resolveFactory(user)
+            .newPublishReceived(publish.messageId(), reasonCode));
   }
 
   @Override
@@ -90,9 +95,10 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
     var reasonCode = PublishReceivedReasonCode.SUCCESS;
     updateSessionState(session, publish, reasonCode);
     sendFeedback(
-        user, messageOutFactoryService
-        .resolveFactory(user)
-        .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.SUCCESS));
+        user,
+        messageOutFactoryService
+            .resolveFactory(user)
+            .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.SUCCESS));
   }
 
   private void updateSessionState(NetworkMqttSession session, Publish publish, PublishReceivedReasonCode reasonCode) {
@@ -118,22 +124,25 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.update(messageId, MqttMessageType.PUBLISH, reasonCode);
 
-    sendFeedback(user, session, messageOutFactoryService
-        .resolveFactory(user)
-        .newPublishReceived(messageId, reasonCode), messageId);
+    sendFeedback(
+        user,
+        session,
+        messageOutFactoryService
+            .resolveFactory(user)
+            .newPublishReceived(messageId, reasonCode),
+        messageId);
   }
 
-  private void handleDuplicated(
-      ExternalNetworkMqttUser user,
-      int messageId,
-      TrackedMessageMeta alreadyInProcess) {
+  private void handleDuplicated(ExternalNetworkMqttUser user, int messageId, TrackedMessageMeta alreadyInProcess) {
     PublishReceivedReasonCode reasonCode = PublishReceivedReasonCode.SUCCESS;
     if (alreadyInProcess.reasonCode() instanceof PublishReceivedReasonCode receivedReasonCode) {
       reasonCode = receivedReasonCode;
     }
-    sendFeedback(user, messageOutFactoryService
-        .resolveFactory(user)
-        .newPublishReceived(messageId, reasonCode));
+    sendFeedback(
+        user,
+        messageOutFactoryService
+            .resolveFactory(user)
+            .newPublishReceived(messageId, reasonCode));
   }
 
   private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
@@ -154,7 +163,10 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
     }
 
     if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(networkUser.clientId(), messageMeta, messageId,
+      log.warning(
+          networkUser.clientId(),
+          messageMeta,
+          messageId,
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
       return true;
     } else if (!(message instanceof PublishReleaseMqttInMessage release)) {
@@ -162,10 +174,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
       return true;
     }
 
-    messageTacker.update(
-        messageId,
-        MqttMessageType.PUBLISH_COMPLETE,
-        PublishCompletedReasonCode.SUCCESS);
+    messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
 
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(networkUser)
