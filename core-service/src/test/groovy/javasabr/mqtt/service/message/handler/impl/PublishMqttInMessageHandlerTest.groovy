@@ -289,7 +289,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
     then:
         def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
-        disconnectReason.reason() == MqttProtocolErrors.PROVIDED_INVALID_RESPONSE_TOPIC_NAME
+        disconnectReason.reason() == MqttProtocolErrors.PROVIDED_INVALID_RESPONSE_TOPIC
         disconnectReason.serverReference() == null
   }
 

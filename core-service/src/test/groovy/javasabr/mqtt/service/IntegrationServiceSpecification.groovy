@@ -22,7 +22,9 @@ import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator
 import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator
+import javasabr.mqtt.service.message.validator.PublishResponseTopicMqttInMessageFieldValidator
 import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator
+import javasabr.mqtt.service.message.validator.PublishTopicAliasMqttInMessageFieldValidator
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishOutMessageHandler
 import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler
@@ -104,6 +106,8 @@ abstract class IntegrationServiceSpecification extends Specification {
       new PublishQosMqttInMessageFieldValidator(defaultMessageOutFactoryService),
       new PublishPayloadMqttInMessageFieldValidator(defaultMessageOutFactoryService),
       new PublishMessageExpiryIntervalMqttInMessageFieldValidator(defaultMessageOutFactoryService),
+      new PublishResponseTopicMqttInMessageFieldValidator(defaultMessageOutFactoryService),
+      new PublishTopicAliasMqttInMessageFieldValidator(defaultMessageOutFactoryService)
   ]
 
   @Shared

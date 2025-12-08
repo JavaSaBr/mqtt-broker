@@ -17,7 +17,7 @@ public interface MqttProtocolErrors {
   String PROVIDED_INVALID_SUBSCRIPTION_IDENTIFIERS_AVAILABLE = "Provided invalid 'Subscription Identifiers Available'";
   String PROVIDED_INVALID_SHARED_SUBSCRIPTION_AVAILABLE = "Provided invalid 'Shared Subscription Available'";
   String PROVIDED_INVALID_SERVER_KEEP_ALIVE = "Provided invalid 'Server Keep Alive'";
-  String PROVIDED_INVALID_RESPONSE_TOPIC_NAME = "Provided invalid 'Response Topic''";
+  String PROVIDED_INVALID_RESPONSE_TOPIC = "Provided invalid 'Response Topic'";
   
   String UNSUPPORTED_QOS_OR_RETAIN_HANDLING = "Provided unsupported 'QoS' or 'RetainHandling'";
   String MISSED_REQUIRED_MESSAGE_ID = "'Packet Identifier' must be presented'";

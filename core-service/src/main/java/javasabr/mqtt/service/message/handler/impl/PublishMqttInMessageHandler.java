@@ -1,7 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import java.util.List;
-import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
@@ -13,7 +12,6 @@ import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
-import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.AclService;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -24,6 +22,7 @@ import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -58,72 +57,22 @@ public class PublishMqttInMessageHandler
       NetworkMqttSession session,
       PublishMqttInMessage publishMessage) {
     
-    String rawResponseTopicName = publishMessage.rawResponseTopicName();
-    TopicName responseTopicName = null;
-    if (rawResponseTopicName != null) {
-      if (!TopicValidator.validateTopicName(rawResponseTopicName)) {
-        log.warning(user.clientId(), rawResponseTopicName, "[%s] Provided invalid response TopicName:[%s]"::formatted);
-        handleInvalidResponseTopicName(user);
-        return;
-      }
-      responseTopicName = topicService.createTopicName(user, rawResponseTopicName);
-    }
-
-    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    int topicAliasMaxValue = connectionConfig.topicAliasMaxValue();
-    TopicNameMapping topicNameMapping = session.topicNameMapping();
-    TopicName topicNameByAlias = null;
-
-    String rawTopicName = publishMessage.rawTopicName();
-    boolean providedRawTopicName = !StringUtils.isEmpty(rawTopicName);
-    int topicAlias = publishMessage.topicAlias();
-
-    if (!providedRawTopicName) {
-      if (topicAlias == MqttProperties.TOPIC_ALIAS_NOT_SET) {
-        log.warning(user.clientId(), "[%s] Not provided any information about TopicName"::formatted);
-        handleNotProvidedTopicName(user);
-        return;
-      } else if (topicAlias < MqttProperties.TOPIC_ALIAS_MIN || topicAlias > topicAliasMaxValue) {
-        log.warning(user.clientId(), topicAlias, "[%s] Provided invalid TopicAlias:[%d]"::formatted);
-        handleInvalidTopicAlias(user);
-        return;
-      }
-      topicNameByAlias = topicNameMapping.resolve(topicAlias);
-      if (topicNameByAlias == null) {
-        log.warning(user.clientId(), topicAlias, "[%s] Unknown TopicAlias:[%d]"::formatted);
-        handleNotProvidedTopicName(user);
-        return;
-      }
-    }
-
-    TopicName topicName;
-
-    if (providedRawTopicName) {
-      if (!TopicValidator.validateTopicName(rawTopicName)) {
-        handleInvalidTopicName(user, session, publishMessage);
-        log.warning(user.clientId(), publishMessage.rawTopicName(), "[%s] TopicName:[%s] is invalid"::formatted);
-        return;
-      }
-      topicName = topicService.createTopicName(user, rawTopicName);
-      if (topicAlias != MqttProperties.TOPIC_ALIAS_NOT_SET) {
-        topicNameMapping.update(topicAlias, topicName);
-      }
-    } else {
-      topicName = topicNameByAlias;
-    }
-
-    if (!aclService.authorizePublish(user, topicName)) {
+    TopicName finalTopicName = resolveFinalTopicName(user, session, publishMessage);
+    if (finalTopicName == null) {
+      return;
+    } else if (!aclService.authorizePublish(user, finalTopicName)) {
       handleNotAuthorize(user);
       return;
     }
 
     byte[] payload = publishMessage.payload();
+    TopicName responseTopicName = resolveResponseTopic(user, publishMessage);
 
     //noinspection DataFlowIssue everything is already validated
     Publish publish = new Publish(
         publishMessage.messageId(),
         publishMessage.qos(),
-        topicName,
+        finalTopicName,
         responseTopicName,
         payload,
         publishMessage.duplicate(),
@@ -132,58 +81,73 @@ public class PublishMqttInMessageHandler
         publishMessage.subscriptionIds(),
         publishMessage.correlationData(),
         publishMessage.messageExpiryInterval(),
-        topicAlias,
+        publishMessage.topicAlias(),
         publishMessage.payloadFormat(),
         publishMessage.userProperties());
 
     publishReceivingService.processPublish(user, publish);
   }
+  
+  @Nullable
+  private TopicName resolveFinalTopicName(
+      ExternalNetworkMqttUser user,
+      NetworkMqttSession session,
+      PublishMqttInMessage publishMessage) {
+
+    TopicNameMapping topicNameMapping = session.topicNameMapping();
+    String rawTopicName = publishMessage.rawTopicName();
+    boolean providedRawTopicName = !StringUtils.isEmpty(rawTopicName);
+    int topicAlias = publishMessage.topicAlias();
+
+    TopicName topicNameByAlias;
+    TopicName finalTopicName;
+
+    if (!providedRawTopicName) {
+      topicNameByAlias = topicNameMapping.resolve(topicAlias);
+      if (topicNameByAlias == null) {
+        log.warning(user.clientId(), topicAlias, "[%s] Unknown TopicAlias:[%d]"::formatted);
+        handleNotProvidedTopicName(user);
+        return null;
+      }
+      finalTopicName = topicNameByAlias;
+    } else {
+      if (!TopicValidator.validateTopicName(rawTopicName)) {
+        handleInvalidTopicName(user);
+        log.warning(user.clientId(), rawTopicName, "[%s] TopicName:[%s] is invalid"::formatted);
+        return null;
+      }
+      finalTopicName = topicService.createTopicName(user, rawTopicName);
+      if (topicAlias != MqttProperties.TOPIC_ALIAS_NOT_SET) {
+        topicNameMapping.update(topicAlias, finalTopicName);
+      }
+    }
+    return finalTopicName;
+  }
+
+  @Nullable
+  private TopicName resolveResponseTopic(ExternalNetworkMqttUser user, PublishMqttInMessage publishMessage) {
+    String rawResponseTopicName = publishMessage.rawResponseTopicName();
+    if (rawResponseTopicName != null) {
+      return topicService.createTopicName(user, rawResponseTopicName);
+    }
+    return null;
+  }
 
   private void handleNotProvidedTopicName(ExternalNetworkMqttUser user) {
-    MqttOutMessage response = messageOutFactoryService
+    user.closeWithReason(messageOutFactoryService
         .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NO_ANY_TOPIC_NANE);
-    user.closeWithReason(response);
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NO_ANY_TOPIC_NANE));
   }
-
-  private void handleInvalidTopicAlias(ExternalNetworkMqttUser user) {
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.TOPIC_ALIAS_INVALID);
-    user.closeWithReason(response);
-  }
-
-  private void handleInvalidResponseTopicName(ExternalNetworkMqttUser user) {
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.PROVIDED_INVALID_RESPONSE_TOPIC_NAME);
-    user.closeWithReason(response);
-  }
-
- 
+  
   private void handleNotAuthorize(ExternalNetworkMqttUser user) {
     user.closeWithReason(messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.NOT_AUTHORIZED));
   }
 
-  private void handleInvalidTopicName(
-      ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      PublishMqttInMessage publishMessage) {
-    int messagedId = publishMessage.messageId();
-    MqttOutMessage response = messageOutFactoryService
+  private void handleInvalidTopicName(ExternalNetworkMqttUser user) {
+    user.closeWithReason(messageOutFactoryService
         .resolveFactory(user)
-        .newDisconnect(user, DisconnectReasonCode.TOPIC_NAME_INVALID);
-    // without messageId we do not need to clean it
-    if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      user.closeWithReason(response);
-      return;
-    }
-    user
-        .closeWithReason(response)
-        .thenAccept(_ -> session
-            .inMessageTracker()
-            .remove(messagedId));
+        .newDisconnect(user, DisconnectReasonCode.TOPIC_NAME_INVALID));
   }
 }

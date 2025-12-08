@@ -52,7 +52,9 @@ import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishResponseTopicMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishTopicAliasMqttInMessageFieldValidator;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -184,6 +186,18 @@ public class MqttBrokerSpringConfig {
   PublishMessageExpiryIntervalMqttInMessageFieldValidator publishMessageExpiryIntervalMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
+  PublishResponseTopicMqttInMessageFieldValidator publishResponseTopicMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishResponseTopicMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
+  PublishTopicAliasMqttInMessageFieldValidator publishTopicAliasMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishTopicAliasMqttInMessageFieldValidator(messageOutFactoryService);
   }
 
   @Bean
