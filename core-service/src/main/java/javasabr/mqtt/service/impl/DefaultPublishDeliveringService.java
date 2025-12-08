@@ -53,7 +53,10 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   @Override
   public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
     if (publish.retained()) {
-      retainedMessageTree.retainMessage(publish);
+      Subscription subscription = subscriber.subscription();
+      boolean retainAsPublished = subscription.retainAsPublished();
+      Function<Publish, Publish> transformer = retainAsPublished ? Function.identity() : Publish::withoutRetain;
+      retainedMessageTree.retainMessage(transformer.apply(publish));
     }
     return startDeliveringWithoutRetain(publish, subscriber);
   }
@@ -61,9 +64,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   @Override
   public Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber) {
     Subscription subscription = subscriber.subscription();
-    boolean retainAsPublished = subscription.retainAsPublished();
-    Function<Publish, Publish> transformer = retainAsPublished ? Function.identity() : Publish::withoutRetain;
-    Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter(), transformer);
+    Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter());
     MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
     for (Publish message : retainedMessages) {
       result.add(startDeliveringWithoutRetain(message, subscriber));

@@ -1,11 +1,8 @@
 package javasabr.mqtt.model.topic.tree
 
-
 import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
-
-import java.util.function.Function
 
 import static javasabr.mqtt.model.subscription.TestPublishFactory.makePublish
 
@@ -21,7 +18,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
           retainedMessageTree.retainMessage(message)
         }
     when:
-        def retainedMessages = retainedMessageTree.getRetainedMessage(TopicFilter.valueOf(topicFilter), Function.identity())
+        def retainedMessages = retainedMessageTree.getRetainedMessage(TopicFilter.valueOf(topicFilter))
             .collect { it }
     then:
         retainedMessages.size() == expectedMessages.size()

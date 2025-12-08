@@ -2,7 +2,6 @@ package javasabr.mqtt.model.topic.tree;
 
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.AbstractTrieNode;
@@ -53,12 +52,11 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
   public void collectRetainedMessages(
       int level,
       TopicFilter topicFilter,
-      MutableArray<Publish> result,
-      Function<Publish, Publish> publishTransformer) {
+      MutableArray<Publish> result) {
     if (level == topicFilter.levelsCount()) {
       Publish publish = retainedMessage.get();
       if (publish != null) {
-        result.add(publishTransformer.apply(publish));
+        result.add(publish);
       }
       return;
     }
@@ -72,13 +70,13 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       var localChildNodes = getChildNodes(RetainedMessageNode::childNodesFactory);
       if (localChildNodes != null) {
         for (RetainedMessageNode childNode : localChildNodes) {
-          childNode.collectRetainedMessages(level + 1, topicFilter, result, publishTransformer);
+          childNode.collectRetainedMessages(level + 1, topicFilter, result);
         }
       }
     } else {
       RetainedMessageNode retainedMessageNode = getChildNode(segment);
       if (retainedMessageNode != null) {
-        retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result, publishTransformer);
+        retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
       }
     }
   }
