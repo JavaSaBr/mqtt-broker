@@ -15,6 +15,7 @@ import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import lombok.CustomLog;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
@@ -43,13 +44,9 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
       handlePublishComplete(user, session, message, trackedMessageMeta, publishComplete);
       return true;
     } else {
-      MqttMessageType expectedMessageType = MqttMessageType.PUBLISH_RECEIVED;
-      if (trackedMessageMeta != null && trackedMessageMeta.messageType() == MqttMessageType.PUBLISH_RELEASE) {
-        expectedMessageType = MqttMessageType.PUBLISH_COMPLETE;
-      }
       log.warning(user.clientId(), message.messageType(), message.messageId(),
           "[%s] Not expected message type:[%s] for messageId:[%d]"::formatted);
-      handleNotExpectedResponseMessage(user, message, expectedMessageType);
+      handleNotExpectedResponseMessage(user, message, calculateExpectedMessageType(trackedMessageMeta));
       return true;
     }
   }
@@ -140,5 +137,13 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
     // finish the flow
     MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.remove(messageId);
+  }
+  
+  private static MqttMessageType calculateExpectedMessageType(@Nullable TrackedMessageMeta trackedMessageMeta) {
+    if (trackedMessageMeta != null && trackedMessageMeta.messageType() == MqttMessageType.PUBLISH_RELEASE) {
+      return MqttMessageType.PUBLISH_COMPLETE;
+    }
+    // by default, we expect 'PUBLISH_RECEIVED'
+    return MqttMessageType.PUBLISH_RECEIVED;
   }
 }
