@@ -33,7 +33,7 @@ contributor(context(scope: scriptScope())) {
       && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
     method name: 'topicFilter',
         type: 'javasabr.mqtt.service.acl.builder.SubscribeRuleBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
+        params: [string: 'javasabr.mqtt.model.acl.matcher.TopicFilterMatcher...'],
         doc: 'Set of topic filters matching by rule'
     method name: 'match',
         type: 'javasabr.mqtt.model.acl.matcher.TopicFilterMatcher',

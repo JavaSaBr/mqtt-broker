@@ -1,18 +1,13 @@
 package javasabr.mqtt.model.topic.tree
 
 
-import javasabr.mqtt.model.PayloadFormat
-import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.topic.TopicFilter
-import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification
-import javasabr.rlib.collections.array.Array
-import javasabr.rlib.collections.array.IntArray
 
 import java.util.function.Function
 
-import static java.nio.charset.StandardCharsets.UTF_8
+import static javasabr.mqtt.model.subscription.TestPublishFactory.makePublish
 
 class RetainedMessageTreeTest extends UnitSpecification {
 
@@ -102,23 +97,5 @@ class RetainedMessageTreeTest extends UnitSpecification {
                 makePublish("/topic/segment1/segment2")
             ]
         ]
-  }
-
-  static def makePublish(String topicName) {
-    return new Publish(
-        1,
-        QoS.AT_MOST_ONCE,
-        TopicName.valueOf(topicName),
-        null,
-        "payload".getBytes(UTF_8),
-        false,
-        true,
-        null,
-        IntArray.of(30),
-        null,
-        60000,
-        1,
-        PayloadFormat.UTF8_STRING,
-        Array.of());
   }
 }
