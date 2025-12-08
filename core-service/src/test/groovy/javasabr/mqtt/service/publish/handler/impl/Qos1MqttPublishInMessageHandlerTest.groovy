@@ -31,7 +31,7 @@ class Qos1MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def client2 = subscriber2.user() as TestExternalNetworkMqttUser
         def client3 = publisher.user() as TestExternalNetworkMqttUser
         def topicFilter = defaultTopicService.createTopicFilter(client1, "Qos1MqttPublishInMessageHandlerTest/1")
-        def topicName = defaultTopicService.createTopicName(client1, "Qos1MqttPublishInMessageHandlerTest/1")
+        def expectedTopicName = defaultTopicService.createTopicName(client1, "Qos1MqttPublishInMessageHandlerTest/1")
         def expectedMessageId = 35
         defaultSubscriptionService.subscribe(
             client1,
@@ -45,19 +45,22 @@ class Qos1MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             .session()
             .inMessageTracker()
     when:
-        publishInHandler.handle(client3, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
+        publishInHandler.handle(client3, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
     then: 'sender should have feedback'
-        def publishAck = client3.nextSentMessage(PublishAckMqtt5OutMessage)
-        publishAck.reasonCode() == PublishAckReasonCode.SUCCESS
-        publishAck.messageId() == expectedMessageId
-        publishAck.reason() == null
-        publishAck.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(client3.nextSentMessage(PublishAckMqtt5OutMessage)) {
+          reasonCode() == PublishAckReasonCode.SUCCESS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
         inMessageTracker.stored(expectedMessageId) == null
     then: 'subscribers should receive the publish'
-        def message1 = client1.nextSentMessage(PublishMqtt5OutMessage)
-        message1.topicName() == topicName
-        def message2 = client2.nextSentMessage(PublishMqtt5OutMessage)
-        message2.topicName() == topicName
+        with(client1.nextSentMessage(PublishMqtt5OutMessage)) {
+          topicName() == expectedTopicName
+        }
+        with(client2.nextSentMessage(PublishMqtt5OutMessage)) {
+          topicName() == expectedTopicName
+        }
   }
 
   def "should provide feedback for accepted publish without any subscriber"() {
@@ -75,11 +78,12 @@ class Qos1MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
     when:
         publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should have feedback that no matched subscribers'
-        def publishAck = user.nextSentMessage(PublishAckMqtt5OutMessage)
-        publishAck.reasonCode() == PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS
-        publishAck.messageId() == expectedMessageId
-        publishAck.reason() == null
-        publishAck.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(user.nextSentMessage(PublishAckMqtt5OutMessage)) {
+          reasonCode() == PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
         inMessageTracker.stored(expectedMessageId) == null
   }
 
@@ -99,10 +103,11 @@ class Qos1MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             topicName,
             testPayload))
     then:
-        def disconnect = user.nextSentMessage(DisconnectMqtt5OutMessage)
-        disconnect.reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
-        disconnect.reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
-        disconnect.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
+          reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
+          reason() == MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
   }
 
   def "should provide feedback that message id is already used"() {
@@ -121,13 +126,14 @@ class Qos1MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
     when:
         publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
     then:
-        def publishAck = user.nextSentMessage(PublishAckMqtt5OutMessage)
-        publishAck.reasonCode() == PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE
-        publishAck.reason() == null
-        publishAck.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        def trackedMessageMeta = inMessageTracker.stored(expectedMessageId)
-        trackedMessageMeta != null
-        trackedMessageMeta.messageType() == MqttMessageType.SUBSCRIBE
+        with(user.nextSentMessage(PublishAckMqtt5OutMessage)) {
+          reasonCode() == PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.SUBSCRIBE
+        }
   }
 
   def "should skip handling duplicated publish"() {

@@ -15,6 +15,7 @@ import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import lombok.CustomLog;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
@@ -38,18 +39,22 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
       TrackableMqttMessage message,
       @Nullable TrackedMessageMeta trackedMessageMeta) {
     if (message instanceof PublishReceivedMqttInMessage publishReceived) {
-      return handlePublishRelease(user, session, message, trackedMessageMeta, publishReceived);
+      return handlePublishReceive(user, session, message, trackedMessageMeta, publishReceived);
     } else if (message instanceof PublishCompleteMqttInMessage publishComplete) {
       handlePublishComplete(user, session, message, trackedMessageMeta, publishComplete);
       return true;
     } else {
       log.warning(user.clientId(), message.messageType(), message.messageId(),
           "[%s] Not expected message type:[%s] for messageId:[%d]"::formatted);
+      handleNotExpectedResponseMessage(user, message, calculateExpectedMessageType(trackedMessageMeta));
       return true;
     }
   }
 
-  private boolean handlePublishRelease(
+  /**
+   * @return true if need to cancel the flow
+   */
+  private boolean handlePublishReceive(
       ExternalNetworkMqttUser user,
       MqttSession session,
       TrackableMqttMessage message,
@@ -58,39 +63,45 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
 
     int messageId = message.messageId();
     String clientId = user.clientId();
-    if (trackedMessageMeta != null && trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
+    PublishReceivedReasonCode reasonCode = publishReceived.reasonCode();
+
+    // if we unknown this flow
+    if (trackedMessageMeta == null) {
+      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      // for success reason code we should answer that we don't know what this flow
+      if (reasonCode == PublishReceivedReasonCode.SUCCESS) {
+        user.sendInBackground(messageOutFactoryService
+            .resolveFactory(user)
+            .newPublishRelease(messageId, PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND));
+      }
+      return true;
+    }
+    
+    MqttMessageType trackedMessageType = trackedMessageMeta.messageType();
+    if (trackedMessageType != MqttMessageType.PUBLISH) {
       log.warning(clientId, trackedMessageMeta, messageId,
           "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
+      handleNotExpectedFlowState(user, trackedMessageType, MqttMessageType.PUBLISH);
       return true;
     }
 
     MessageTacker messageTacker = session.outMessageTracker();
-    PublishReceivedReasonCode reasonCode = publishReceived.reasonCode();
     if (reasonCode != PublishReceivedReasonCode.SUCCESS) {
       log.warning(clientId, reasonCode, messageId,
           "[%s] Received error response:[%s] for publish:[%s]"::formatted);
       // we can cancel the flow
-      if (trackedMessageMeta != null) {
-        messageTacker.remove(messageId);
-      }
+      messageTacker.remove(messageId);
       return true;
     }
 
-    PublishReleaseReasonCode releaseResult;
-    // we unknown this flow
-    if (trackedMessageMeta == null) {
-      releaseResult = PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND;
-    } else {
-      releaseResult = PublishReleaseReasonCode.SUCCESS;
-      messageTacker.update(messageId, MqttMessageType.PUBLISH_RELEASE, reasonCode);
-    }
-
+    // switch flow from publish to release phase
+    messageTacker.update(messageId, MqttMessageType.PUBLISH_RELEASE, reasonCode);
+    
+    // completed this phase
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
-        .newPublishRelease(messageId, releaseResult));
-
-    // cancel this flow if it's not success
-    return releaseResult != PublishReleaseReasonCode.SUCCESS;
+        .newPublishRelease(messageId, PublishReleaseReasonCode.SUCCESS));
+    return false;
   }
 
   private void handlePublishComplete(
@@ -102,12 +113,18 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
 
     int messageId = message.messageId();
     String clientId = user.clientId();
+
+    // if we unknown this flow
     if (trackedMessageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       return;
-    } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH_RELEASE) {
+    }
+
+    MqttMessageType trackedMessageType = trackedMessageMeta.messageType();
+    if (trackedMessageType != MqttMessageType.PUBLISH_RELEASE) {
       log.warning(clientId, trackedMessageMeta, messageId,
           "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
+      handleNotExpectedFlowState(user, trackedMessageType, MqttMessageType.PUBLISH_RELEASE);
       return;
     }
 
@@ -120,5 +137,13 @@ public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMes
     // finish the flow
     MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.remove(messageId);
+  }
+  
+  private static MqttMessageType calculateExpectedMessageType(@Nullable TrackedMessageMeta trackedMessageMeta) {
+    if (trackedMessageMeta != null && trackedMessageMeta.messageType() == MqttMessageType.PUBLISH_RELEASE) {
+      return MqttMessageType.PUBLISH_COMPLETE;
+    }
+    // by default, we expect 'PUBLISH_RECEIVED'
+    return MqttMessageType.PUBLISH_RECEIVED;
   }
 }

@@ -90,7 +90,17 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
       lock.unlockWrite(stamp);
     }
   }
-  
+
+  @Override
+  public int size() {
+    long stamp = lock.readLock();
+    try {
+      return processing.size();
+    } finally {
+      lock.unlockRead(stamp);
+    }
+  }
+
   public void clear() {
     long stamp = lock.writeLock();
     try {
