@@ -16,7 +16,6 @@ import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -48,31 +47,25 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
   }
 
   @Override
-  protected final PublishHandlingResult handleImpl(
-      ExternalNetworkMqttUser user,
-      MqttSession session, 
-      Publish publish) {
+  protected final void handleImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
     // register message id
     MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
     // register callback and retrier
     ProcessingPublishes processingPublishes = session.outProcessingPublishes();
     processingPublishes.register(publish, trackableMessageCallback, publishRetryer);
-    return super.handleImpl(user, session, publish);
+    super.handleImpl(user, session, publish);
   }
 
   protected final boolean handleReceivedTrackableMessage(
       MqttUser user, 
       MqttSession session,
       TrackableMqttMessage message) {
+    ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     int messageId = message.messageId();
     MessageTacker messageTacker = session.outMessageTracker();
     TrackedMessageMeta trackedMessageMeta = messageTacker.stored(messageId);
-    return handleReceivedTrackableMessageImpl(
-        expectedUserType.cast(user), 
-        session,
-        message,
-        trackedMessageMeta);
+    return handleReceivedTrackableMessageImpl(networkMqttUser, session, message, trackedMessageMeta);
   }
 
   protected abstract boolean handleReceivedTrackableMessageImpl(
@@ -85,7 +78,6 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     String clientId = networkMqttUser.clientId();
     int messageId = publish.messageId();
-
     MessageTacker outMessageTracker = session.outMessageTracker();
     TrackedMessageMeta trackedMessageMeta = outMessageTracker.stored(messageId);
     if (trackedMessageMeta == null) {

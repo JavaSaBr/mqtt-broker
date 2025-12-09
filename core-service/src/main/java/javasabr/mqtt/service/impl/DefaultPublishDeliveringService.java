@@ -6,7 +6,6 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
