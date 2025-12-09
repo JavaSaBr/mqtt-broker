@@ -8,6 +8,7 @@ import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.ActiveSubscriptions;
@@ -83,8 +84,10 @@ public class InMemorySubscriptionService implements SubscriptionService {
       activeSubscriptions.remove(previous.subscription());
     }
     QoS subscriptionQoS = subscription.qos();
-    if (subscriptionQoS.ordinal() <= 2 && (subscription.retainHandling() == SEND || (
-        subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null))) {
+    SubscribeRetainHandling retainHandling = subscription.retainHandling();
+    boolean isRetainHandlingSatisfied =
+        retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null);
+    if (subscriptionQoS.isValid() && isRetainHandlingSatisfied) {
       sendRetainedMessages(user, subscription);
     }
     activeSubscriptions.add(subscription);

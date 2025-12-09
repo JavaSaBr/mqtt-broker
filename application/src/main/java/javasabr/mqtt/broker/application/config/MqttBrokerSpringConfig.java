@@ -95,8 +95,7 @@ public class MqttBrokerSpringConfig {
   @Bean
   AuthenticationService authenticationService(
       CredentialSource credentialSource,
-      @Value("${authentication.allow.anonymous:false}")
-      boolean allowAnonymousAuth) {
+      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth) {
     return new SimpleAuthenticationService(credentialSource, allowAnonymousAuth);
   }
 
