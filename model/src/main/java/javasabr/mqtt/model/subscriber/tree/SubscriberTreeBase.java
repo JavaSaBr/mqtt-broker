@@ -142,10 +142,8 @@ abstract class SubscriberTreeBase extends AbstractTrieNode<SubscriberNode> {
       return;
     }
     QoS candidateQos = candidate.qos();
-    QoS existedQos = result
-        .get(found)
-        .qos();
-    if (existedQos.ordinal() < candidateQos.ordinal()) {
+    QoS existedQos = result.get(found).qos();
+    if (existedQos.isLowerThan(candidateQos)) {
       result.remove(found);
       result.add(candidate);
     }
