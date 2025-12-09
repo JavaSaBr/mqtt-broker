@@ -1,32 +1,28 @@
 package javasabr.mqtt.model.topic.tree
 
-import javasabr.mqtt.model.publishing.Publish
+import javasabr.mqtt.model.subscription.TestPublishFactory
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
-
-import static javasabr.mqtt.model.subscription.TestPublishFactory.createPublish
 
 class RetainedMessageTreeTest extends UnitSpecification {
 
   def "should fetch retained messages by topic filter"(
       List<String> messages,
-      String topicFilter,
+      String rawTopicFilter,
       List<String> expectedMessages) {
     given:
         ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree();
-        messages.collect { createPublish(it) }.eachWithIndex { Publish message, int i ->
-          retainedMessageTree.retainMessage(message)
-        }
+        messages.collect(TestPublishFactory::createPublish).each(retainedMessageTree::retainMessage)
+        def topicFilter = TopicFilter.valueOf(rawTopicFilter)
     when:
-        def retainedMessages = retainedMessageTree.getRetainedMessage(TopicFilter.valueOf(topicFilter))
-            .collect { it }
+        def retainedMessages = retainedMessageTree.getRetainedMessage(topicFilter)
     then:
         retainedMessages.size() == expectedMessages.size()
-        for (int i = 0; i < retainedMessages.size(); i++) {
-          assert retainedMessages[i].topicName().rawTopic() == expectedMessages[i]
+        verifyEach(retainedMessages) { publish, index ->
+          publish.topicName().rawTopic() == expectedMessages[index]
         }
     where:
-        topicFilter << [
+        rawTopicFilter << [
             "/topic/segment1",
             "/topic/segment2",
             "/topic/segment3",
