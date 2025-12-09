@@ -4,7 +4,7 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 
-public interface AclService {
+public interface AuthorizationService {
 
   boolean authorizePublish(MqttUser mqttUser, TopicName topicName);
   

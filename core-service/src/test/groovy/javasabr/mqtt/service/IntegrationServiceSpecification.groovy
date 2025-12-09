@@ -13,7 +13,7 @@ import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
 import javasabr.mqtt.service.impl.DefaultTopicService
-import javasabr.mqtt.service.impl.DisabledAclService
+import javasabr.mqtt.service.impl.DisabledAuthorizationService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
@@ -98,7 +98,7 @@ abstract class IntegrationServiceSpecification extends Specification {
   def defaultMqttSessionService = new InMemoryMqttSessionService(60_000);
   
   @Shared
-  def disabledAclService = new DisabledAclService()
+  def disabledAclService = new DisabledAuthorizationService()
   
   @Shared
   List<? extends MqttInMessageFieldValidator<? extends NetworkMqttUser, PublishMqttInMessage>> publishInFieldValidators = [

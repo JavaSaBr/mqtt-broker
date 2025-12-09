@@ -13,7 +13,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
-import javasabr.mqtt.service.AclService;
+import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
@@ -31,18 +31,18 @@ public class PublishMqttInMessageHandler
 
   PublishReceivingService publishReceivingService;
   TopicService topicService;
-  AclService aclService;
+  AuthorizationService authorizationService;
 
   public PublishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService, 
-      AclService aclService,
+      AuthorizationService authorizationService,
       List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
     super(ExternalNetworkMqttUser.class, PublishMqttInMessage.class, messageOutFactoryService, fieldValidators);
     this.publishReceivingService = publishReceivingService;
     this.topicService = topicService;
-    this.aclService = aclService;
+    this.authorizationService = authorizationService;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class PublishMqttInMessageHandler
     TopicName finalTopicName = resolveFinalTopicName(user, session, message);
     if (finalTopicName == null) {
       return;
-    } else if (!aclService.authorizePublish(user, finalTopicName)) {
+    } else if (!authorizationService.authorizePublish(user, finalTopicName)) {
       handleNotAuthorize(user);
       return;
     }
