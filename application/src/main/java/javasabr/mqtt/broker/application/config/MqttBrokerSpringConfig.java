@@ -12,7 +12,7 @@ import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
-import javasabr.mqtt.service.AclService;
+import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
@@ -29,7 +29,7 @@ import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
-import javasabr.mqtt.service.impl.DisabledAclService;
+import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
@@ -109,8 +109,8 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
-  AclService aclService() {
-    return new DisabledAclService();
+  AuthorizationService authorizationService() {
+    return new DisabledAuthorizationService();
   }
 
   @Bean
@@ -205,13 +205,12 @@ public class MqttBrokerSpringConfig {
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      AclService aclService,
+      AuthorizationService authorizationService,
       List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
     return new PublishMqttInMessageHandler(
         publishReceivingService,
         messageOutFactoryService,
-        topicService,
-        aclService,
+        topicService, authorizationService,
         fieldValidators);
   }
 
