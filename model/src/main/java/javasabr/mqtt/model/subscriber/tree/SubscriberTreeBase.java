@@ -7,7 +7,6 @@ import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
-import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.LockableArray;
@@ -27,17 +26,16 @@ abstract class SubscriberTreeBase extends AbstractTrieNode<SubscriberNode> {
   @Nullable
   protected static SingleSubscriber addSubscriber(
       LockableArray<Subscriber> subscribers,
-      MqttUser user,
-      Subscription subscription,
+      SingleSubscriber subscriber,
       TopicFilter topicFilter) {
     long stamp = subscribers.writeLock();
     try {
       if (topicFilter instanceof SharedTopicFilter stf) {
-        addSharedSubscriber(subscribers, user, subscription, stf);
+        addSharedSubscriber(subscribers, subscriber, stf);
         return null;
       } else {
-        SingleSubscriber previous = removePreviousIfExist(subscribers, user);
-        subscribers.add(new SingleSubscriber(user, subscription));
+        SingleSubscriber previous = removePreviousIfExist(subscribers, subscriber.user());
+        subscribers.add(subscriber);
         return previous;
       }
     } finally {
@@ -58,8 +56,7 @@ abstract class SubscriberTreeBase extends AbstractTrieNode<SubscriberNode> {
 
   private static void addSharedSubscriber(
       LockableArray<Subscriber> subscribers,
-      MqttUser user,
-      Subscription subscription,
+      SingleSubscriber subscriber,
       SharedTopicFilter sharedTopicFilter) {
 
     String group = sharedTopicFilter.shareName();
@@ -72,7 +69,7 @@ abstract class SubscriberTreeBase extends AbstractTrieNode<SubscriberNode> {
       subscribers.add(sharedSubscriber);
     }
 
-    sharedSubscriber.addSubscriber(new SingleSubscriber(user, subscription));
+    sharedSubscriber.addSubscriber(subscriber);
   }
 
   protected static void appendSubscribersTo(MutableArray<SingleSubscriber> result, SubscriberNode subscriberNode) {

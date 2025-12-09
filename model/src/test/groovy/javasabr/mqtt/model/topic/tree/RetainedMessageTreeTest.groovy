@@ -12,7 +12,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
       List<String> expectedMessages) {
     given:
         ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree();
-        messages.collect(TestPublishFactory::createPublish).each(retainedMessageTree::retainMessage)
+        messages.collect(TestPublishFactory::makePublish).each(retainedMessageTree::retainMessage)
         def topicFilter = TopicFilter.valueOf(rawTopicFilter)
     when:
         def retainedMessages = retainedMessageTree.getRetainedMessage(topicFilter)

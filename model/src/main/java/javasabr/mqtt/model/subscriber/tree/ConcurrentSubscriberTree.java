@@ -2,7 +2,6 @@ package javasabr.mqtt.model.subscriber.tree;
 
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
@@ -22,8 +21,8 @@ public class ConcurrentSubscriberTree implements ThreadSafe {
   }
 
   @Nullable
-  public SingleSubscriber subscribe(MqttUser user, Subscription subscription) {
-    return rootNode.subscribe(0, user, subscription, subscription.topicFilter());
+  public SingleSubscriber subscribe(SingleSubscriber subscriber) {
+    return rootNode.subscribe(0, subscriber, subscriber.subscription().topicFilter());
   }
 
   public boolean unsubscribe(MqttUser user, TopicFilter topicFilter) {

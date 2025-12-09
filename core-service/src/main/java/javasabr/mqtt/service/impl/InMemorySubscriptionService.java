@@ -79,16 +79,17 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber previous = subscriberTree.subscribe(user, subscription);
-    if (previous != null) {
-      activeSubscriptions.remove(previous.subscription());
+    SingleSubscriber newSubscriber = new SingleSubscriber(user, subscription);
+    SingleSubscriber previousSubscriber = subscriberTree.subscribe(newSubscriber);
+    if (previousSubscriber != null) {
+      activeSubscriptions.remove(previousSubscriber.subscription());
     }
     QoS subscriptionQoS = subscription.qos();
     SubscribeRetainHandling retainHandling = subscription.retainHandling();
     boolean isRetainHandlingSatisfied =
-        retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null);
+        retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previousSubscriber == null);
     if (subscriptionQoS.isValid() && isRetainHandlingSatisfied) {
-      sendRetainedMessages(user, subscription);
+      sendRetainedMessages(newSubscriber);
     }
     activeSubscriptions.add(subscription);
     return subscriptionQoS.subscribeAckReasonCode();
@@ -140,17 +141,17 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      subscriberTree.subscribe(user, subscription);
+      SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
+      subscriberTree.subscribe(singleSubscriber);
     }
   }
 
-  private void sendRetainedMessages(MqttUser user, Subscription subscription) {
+  private void sendRetainedMessages(SingleSubscriber singleSubscriber) {
     int count = 0;
-    String clientId = user.clientId();
-    PublishHandlingResult errorResult = null;
-    SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
+    String clientId = singleSubscriber.user().clientId();
     var results = retainMessageService.deliverRetainedMessages(singleSubscriber);
     for (PublishHandlingResult result : results) {
+      PublishHandlingResult errorResult = null;
       if (result.error()) {
         errorResult = result;
       } else if (result == PublishHandlingResult.SUCCESS) {
