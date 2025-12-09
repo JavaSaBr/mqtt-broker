@@ -15,7 +15,6 @@ import javasabr.mqtt.model.session.TrackableMessageCallback;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -31,10 +30,8 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
   TrackableMessageCallback trackableMessageCallback;
   PublishRetryer publishRetryer;
 
-  protected TrackableMqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, subscriptionService, messageOutFactoryService);
+  protected TrackableMqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    super(ExternalNetworkMqttUser.class, messageOutFactoryService);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
     this.publishRetryer = this::retryDelivering;
   }
@@ -51,7 +48,10 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
   }
 
   @Override
-  protected PublishHandlingResult handleImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
+  protected final PublishHandlingResult handleImpl(
+      ExternalNetworkMqttUser user,
+      MqttSession session, 
+      Publish publish) {
     // register message id
     MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
@@ -61,15 +61,13 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
     return super.handleImpl(user, session, publish);
   }
 
-  protected boolean handleReceivedTrackableMessage(
+  protected final boolean handleReceivedTrackableMessage(
       MqttUser user, 
       MqttSession session,
       TrackableMqttMessage message) {
-
     int messageId = message.messageId();
     MessageTacker messageTacker = session.outMessageTracker();
     TrackedMessageMeta trackedMessageMeta = messageTacker.stored(messageId);
- 
     return handleReceivedTrackableMessageImpl(
         expectedUserType.cast(user), 
         session,
@@ -83,24 +81,21 @@ public abstract class TrackableMqttPublishOutMessageHandler extends
       TrackableMqttMessage message,
       @Nullable TrackedMessageMeta trackedMessageMeta);
 
-  protected void retryDelivering(MqttUser user, MqttSession session, Publish publish) {
-    retryDeliveringImpl(expectedUserType.cast(user), session, publish);
-  }
-
-  protected void retryDeliveringImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
-    String clientId = user.clientId();
+  protected final void retryDelivering(MqttUser user, MqttSession session, Publish publish) {
+    ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
+    String clientId = networkMqttUser.clientId();
     int messageId = publish.messageId();
-    TrackedMessageMeta messageMeta = session
-        .outMessageTracker()
-        .stored(messageId);
-    if (messageMeta == null) {
+
+    MessageTacker outMessageTracker = session.outMessageTracker();
+    TrackedMessageMeta trackedMessageMeta = outMessageTracker.stored(messageId);
+    if (trackedMessageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
-    } else if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(clientId, messageMeta, messageId, 
+    } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
+      log.warning(clientId, trackedMessageMeta, messageId,
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
     } else {
       log.debug(clientId, messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
-      send(user, publish.withDuplicated());
+      send(networkMqttUser, publish.withDuplicated());
     }
   }
 

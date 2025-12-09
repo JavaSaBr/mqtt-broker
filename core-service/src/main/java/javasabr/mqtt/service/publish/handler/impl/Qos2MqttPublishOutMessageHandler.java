@@ -13,17 +13,14 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage;
 import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SubscriptionService;
 import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
 public class Qos2MqttPublishOutMessageHandler extends TrackableMqttPublishOutMessageHandler {
 
-  public Qos2MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(subscriptionService, messageOutFactoryService);
+  public Qos2MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    super(messageOutFactoryService);
   }
 
   @Override

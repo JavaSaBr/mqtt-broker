@@ -55,9 +55,9 @@ public class PublishMqttInMessageHandler
       MqttConnection connection,
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
-      PublishMqttInMessage publishMessage) {
+      PublishMqttInMessage message) {
     
-    TopicName finalTopicName = resolveFinalTopicName(user, session, publishMessage);
+    TopicName finalTopicName = resolveFinalTopicName(user, session, message);
     if (finalTopicName == null) {
       return;
     } else if (!aclService.authorizePublish(user, finalTopicName)) {
@@ -65,25 +65,25 @@ public class PublishMqttInMessageHandler
       return;
     }
 
-    byte[] payload = publishMessage.payload();
-    TopicName responseTopicName = resolveResponseTopic(user, publishMessage);
+    byte[] payload = message.payload();
+    TopicName responseTopicName = resolveResponseTopic(user, message);
 
     //noinspection DataFlowIssue everything is already validated
     Publish publish = new Publish(
-        publishMessage.messageId(),
-        publishMessage.qos(),
+        message.messageId(),
+        message.qos(),
         finalTopicName,
         responseTopicName,
         payload,
-        publishMessage.duplicate(),
-        publishMessage.retain(),
-        publishMessage.contentType(),
-        publishMessage.subscriptionIds(),
-        publishMessage.correlationData(),
-        publishMessage.messageExpiryInterval(),
-        publishMessage.topicAlias(),
-        publishMessage.payloadFormat(),
-        publishMessage.userProperties());
+        message.duplicate(),
+        message.retain(),
+        message.contentType(),
+        message.subscriptionIds(),
+        message.correlationData(),
+        message.messageExpiryInterval(),
+        message.topicAlias(),
+        message.payloadFormat(),
+        message.userProperties());
 
     publishReceivingService.processPublish(user, publish);
   }
@@ -92,12 +92,12 @@ public class PublishMqttInMessageHandler
   private TopicName resolveFinalTopicName(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
-      PublishMqttInMessage publishMessage) {
+      PublishMqttInMessage message) {
 
     TopicNameMapping topicNameMapping = session.topicNameMapping();
-    String rawTopicName = publishMessage.rawTopicName();
+    String rawTopicName = message.rawTopicName();
     boolean providedRawTopicName = !StringUtils.isEmpty(rawTopicName);
-    int topicAlias = publishMessage.topicAlias();
+    int topicAlias = message.topicAlias();
 
     TopicName topicNameByAlias;
     TopicName finalTopicName;

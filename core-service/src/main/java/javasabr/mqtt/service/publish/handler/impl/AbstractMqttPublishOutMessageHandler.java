@@ -4,10 +4,8 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -23,11 +21,10 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
     implements MqttPublishOutMessageHandler {
 
   Class<U> expectedUserType;
-  SubscriptionService subscriptionService;
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
+  public final void handle(Publish publish, SingleSubscriber subscriber) {
     MqttUser user = subscriber.resolveUser();
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
@@ -55,7 +52,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
   }
 
   protected void send(U user, Publish publish) {
-    MqttOutMessage outMessage = messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublish(
             publish.messageId(),
@@ -68,7 +65,6 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
             publish.payloadFormat(),
             publish.responseTopicName(),
             publish.correlationData(),
-            publish.userProperties());
-    user.sendInBackground(outMessage);
+            publish.userProperties()));
   }
 }

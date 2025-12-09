@@ -45,13 +45,12 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   }
 
   @Override
-  public PublishHandlingResult startDelivering(Publish publish, SingleSubscriber subscriber) {
+  public void startDelivering(Publish publish, SingleSubscriber subscriber) {
     try {
       //noinspection DataFlowIssue
-      return publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
+      publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
-      return PublishHandlingResult.UNSPECIFIED_ERROR;
     }
   }
 
