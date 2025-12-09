@@ -8,7 +8,7 @@ import javasabr.rlib.collections.array.Array;
 
 public interface RetainMessageService {
 
-  void retainMessage(Publish publish, Subscription subscription);
+  void retainMessage(Publish publish);
 
   Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber);
 }

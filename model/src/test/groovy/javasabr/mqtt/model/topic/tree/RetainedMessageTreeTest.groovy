@@ -4,17 +4,17 @@ import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 
-import static javasabr.mqtt.model.subscription.TestPublishFactory.makePublish
+import static javasabr.mqtt.model.subscription.TestPublishFactory.createPublish
 
 class RetainedMessageTreeTest extends UnitSpecification {
 
   def "should fetch retained messages by topic filter"(
-      List<Publish> messages,
+      List<String> messages,
       String topicFilter,
-      List<Publish> expectedMessages) {
+      List<String> expectedMessages) {
     given:
         ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree();
-        messages.eachWithIndex { Publish message, int i ->
+        messages.collect { createPublish(it) }.eachWithIndex { Publish message, int i ->
           retainedMessageTree.retainMessage(message)
         }
     when:
@@ -23,7 +23,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
     then:
         retainedMessages.size() == expectedMessages.size()
         for (int i = 0; i < retainedMessages.size(); i++) {
-          assert retainedMessages.get(i).topicName() == expectedMessages.get(i).topicName()
+          assert retainedMessages[i].topicName().rawTopic() == expectedMessages[i]
         }
     where:
         topicFilter << [
@@ -35,63 +35,63 @@ class RetainedMessageTreeTest extends UnitSpecification {
         ]
         messages << [
             [
-                makePublish("/topic/segment1"),
-                makePublish("/topic/segment2"),
-                makePublish("/topic/segment1/segment2"),
-                makePublish("/topic/"),
-                makePublish("/topic")
+                "/topic/segment1",
+                "/topic/segment2",
+                "/topic/segment1/segment2",
+                "/topic/",
+                "/topic"
             ],
             [
-                makePublish("/topic/segment1"),
-                makePublish("/topic/segment2"),
-                makePublish("/topic/segment1/segment2"),
-                makePublish("/topic/"),
-                makePublish("/topic/segment2"),
-                makePublish("/"),
-                makePublish("/topic/segment2/segment1")
+                "/topic/segment1",
+                "/topic/segment2",
+                "/topic/segment1/segment2",
+                "/topic/",
+                "/topic/segment2",
+                "/",
+                "/topic/segment2/segment1"
             ],
             [
-                makePublish("/topic/segment1"),
-                makePublish("/topic/segment2"),
-                makePublish("/topic/segment3"),
-                makePublish("/topic/segment3"),
-                makePublish("/topic/segment3"),
-                makePublish("/topic/segment3")
+                "/topic/segment1",
+                "/topic/segment2",
+                "/topic/segment3",
+                "/topic/segment3",
+                "/topic/segment3",
+                "/topic/segment3"
             ],
             [
-                makePublish("/topic/segment1"),
-                makePublish("/topic/segment2"),
-                makePublish("/topic/segment1/segment2"),
-                makePublish("/topic/segment500/segment2"),
-                makePublish("/topic/"),
-                makePublish("/topic")
+                "/topic/segment1",
+                "/topic/segment2",
+                "/topic/segment1/segment2",
+                "/topic/segment500/segment2",
+                "/topic/",
+                "/topic"
             ],
             [
-                makePublish("/topic1/segment1"),
-                makePublish("/topic/segment2"),
-                makePublish("/topic2/segment1/segment2"),
-                makePublish("/topic/segment3"),
-                makePublish("/topic/segment1/segment2")
+                "/topic1/segment1",
+                "/topic/segment2",
+                "/topic2/segment1/segment2",
+                "/topic/segment3",
+                "/topic/segment1/segment2"
             ]
         ]
         expectedMessages << [
             [
-                makePublish("/topic/segment1")
+                "/topic/segment1"
             ],
             [
-                makePublish("/topic/segment2")
+                "/topic/segment2"
             ],
             [
-                makePublish("/topic/segment3")
+                "/topic/segment3"
             ],
             [
-                makePublish("/topic/segment1/segment2"),
-                makePublish("/topic/segment500/segment2")
+                "/topic/segment1/segment2",
+                "/topic/segment500/segment2"
             ],
             [
-                makePublish("/topic/segment2"),
-                makePublish("/topic/segment3"),
-                makePublish("/topic/segment1/segment2")
+                "/topic/segment2",
+                "/topic/segment3",
+                "/topic/segment1/segment2"
             ]
         ]
   }

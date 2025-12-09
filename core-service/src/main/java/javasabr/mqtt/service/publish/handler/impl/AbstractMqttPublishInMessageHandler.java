@@ -54,6 +54,8 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   }
 
   protected void handleImpl(U user, NetworkMqttSession session, Publish publish) {
+    retainMessageService.retainMessage(publish);
+
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -105,7 +107,6 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   }
 
   protected void startDelivering(Publish publish, SingleSubscriber subscriber) {
-    retainMessageService.retainMessage(publish, subscriber.subscription());
     publishDeliveringService.startDelivering(publish, subscriber);
   }
 

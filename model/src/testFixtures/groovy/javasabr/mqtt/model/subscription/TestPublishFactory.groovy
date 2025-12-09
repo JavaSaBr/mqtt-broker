@@ -11,7 +11,7 @@ import static java.nio.charset.StandardCharsets.UTF_8
 
 class TestPublishFactory {
 
-  static def makePublish(String topicName) {
+  static def createPublish(String topicName) {
     return new Publish(
         1,
         QoS.AT_MOST_ONCE,
@@ -29,7 +29,7 @@ class TestPublishFactory {
         Array.of());
   }
 
-  static def makePublishWithRetain(String topicName, String payload) {
+  static def createPublishWithRetain(String topicName, String payload) {
     return new Publish(
         1,
         QoS.AT_MOST_ONCE,
@@ -47,7 +47,7 @@ class TestPublishFactory {
         Array.of());
   }
 
-  static def makePublishWithoutRetain(String topicName, String payload) {
+  static def createPublishWithoutRetain(String topicName, String payload) {
     return new Publish(
         1,
         QoS.AT_MOST_ONCE,
@@ -64,5 +64,4 @@ class TestPublishFactory {
         PayloadFormat.UTF8_STRING,
         Array.of());
   }
-
 }

@@ -1,6 +1,5 @@
 package javasabr.mqtt.service.impl;
 
-import java.util.function.Function;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscription.Subscription;
@@ -25,20 +24,22 @@ public class DefaultRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public void retainMessage(Publish publish, Subscription subscription) {
+  public void retainMessage(Publish publish) {
     if (publish.retained()) {
-      boolean retainAsPublished = subscription.retainAsPublished();
-      Function<Publish, Publish> transformer = retainAsPublished ? Function.identity() : Publish::withoutRetain;
-      retainedMessageTree.retainMessage(transformer.apply(publish));
+      retainedMessageTree.retainMessage(publish);
     }
   }
 
   @Override
   public Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber) {
     Subscription subscription = subscriber.subscription();
+    boolean retainAsPublished = subscription.retainAsPublished();
     Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter());
     MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
     for (Publish message : retainedMessages) {
+      if (!retainAsPublished) {
+        message = message.withoutRetain();
+      }
       result.add(defaultPublishDeliveringService.startDelivering(message, subscriber));
     }
     return Array.copyOf(result);
