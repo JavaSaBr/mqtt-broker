@@ -493,7 +493,6 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             true,
             true)
         def subscriptions = Array.of(subscription)
-
     when:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
         defaultRetainMessageService.retainMessage(publishWithRetain)
