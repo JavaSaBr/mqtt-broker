@@ -39,6 +39,7 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
       }
       handlers[qos.level()] = knownPublishOutHandler;
     }
+
     this.publishOutMessageHandlers = handlers;
     log.info(publishOutMessageHandlers, DefaultPublishDeliveringService::buildServiceDescription);
   }

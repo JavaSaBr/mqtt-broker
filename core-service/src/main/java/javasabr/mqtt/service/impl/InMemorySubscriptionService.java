@@ -83,13 +83,12 @@ public class InMemorySubscriptionService implements SubscriptionService {
       activeSubscriptions.remove(previous.subscription());
     }
     QoS subscriptionQoS = subscription.qos();
-    if (subscriptionQoS.ordinal() <= 2 && (subscription.retainHandling() == SEND ||
-        (subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null))) {
+    if (subscriptionQoS.ordinal() <= 2 && (subscription.retainHandling() == SEND || (
+        subscription.retainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previous == null))) {
       sendRetainedMessages(user, subscription);
     }
     activeSubscriptions.add(subscription);
-    return subscriptionQoS
-        .subscribeAckReasonCode();
+    return subscriptionQoS.subscribeAckReasonCode();
   }
 
   @Override

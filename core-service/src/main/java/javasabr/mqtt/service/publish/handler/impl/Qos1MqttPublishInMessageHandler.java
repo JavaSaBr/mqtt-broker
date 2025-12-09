@@ -27,7 +27,12 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService,
       RetainMessageService retainMessageService) {
-    super(ExternalNetworkMqttUser.class, subscriptionService, publishDeliveringService, messageOutFactoryService, retainMessageService);
+    super(
+        ExternalNetworkMqttUser.class,
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Override
@@ -55,10 +60,7 @@ public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   @Override
-  protected void handleNoMatchedSubscribers(
-      ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      Publish publish) {
+  protected void handleNoMatchedSubscribers(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService

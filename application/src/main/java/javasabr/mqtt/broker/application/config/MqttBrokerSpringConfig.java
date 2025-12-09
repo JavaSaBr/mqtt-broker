@@ -343,8 +343,7 @@ public class MqttBrokerSpringConfig {
   MqttConnectionFactory externalConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
-      @Value("${mqtt.external.connection.max.packets.by.read:100}")
-      int maxPacketsByRead) {
+      @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead) {
     return new DefaultMqttConnectionFactory(externalServerConnectionConfig, mqttUserFactory, maxPacketsByRead);
   }
 
