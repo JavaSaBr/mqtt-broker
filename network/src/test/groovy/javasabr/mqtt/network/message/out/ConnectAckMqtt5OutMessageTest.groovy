@@ -51,7 +51,7 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             responseInformation,
             authMethod,
             authData,
-            userProperties)
+            testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -75,7 +75,7 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         inMessage.assignedClientId() == mqtt5ClientId
         inMessage.topicAliasMaxValue() == 300
         inMessage.reason() == reasonString
-        inMessage.userProperties() == userProperties
+        inMessage.userProperties() == testUserProperties
         inMessage.serverKeepAlive() == 30
         inMessage.responseInformation() == responseInformation
         inMessage.serverReference() == serverReference

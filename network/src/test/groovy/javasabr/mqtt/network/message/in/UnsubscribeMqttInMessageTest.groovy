@@ -11,7 +11,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.putString(topicFilter2)
         }
@@ -20,7 +20,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result = inMessage.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        inMessage.messageId() == messageId
+        inMessage.messageId() == testMessageId
         inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         def rawTopicFilters = inMessage.rawTopicFilters()
         rawTopicFilters.size() == 2
@@ -31,10 +31,10 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.putString(topicFilter)
@@ -45,15 +45,15 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        inMessage.messageId() == messageId
-        inMessage.userProperties() == userProperties
+        inMessage.messageId() == testMessageId
+        inMessage.userProperties() == testUserProperties
         def rawTopicFilters = inMessage.rawTopicFilters()
         rawTopicFilters.size() == 2
         rawTopicFilters.get(0).toString() == topicFilter
         rawTopicFilters.get(1).toString() == topicFilter2
     when:
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
           it.putString(topicFilter)
           it.putString(topicFilter2)
@@ -62,7 +62,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         def result2 = inMessage2.read(defaultMqtt5Connection, dataBuffer2, dataBuffer2.limit())
     then:
         result2
-        inMessage2.messageId() == messageId
+        inMessage2.messageId() == testMessageId
         inMessage2.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         def rawTopicFilters2 = inMessage2.rawTopicFilters()
         rawTopicFilters2.size() == 2
@@ -73,7 +73,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should not read invalid message as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
         }
     when:
@@ -85,7 +85,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.UNSUBSCRIBE]"
     when:
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
         }
         def inMessage2 = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
         def successful2 = inMessage2.read(defaultMqtt311Connection, dataBuffer2, dataBuffer2.limit())
@@ -98,7 +98,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should not read invalid message as MQTT 5.0"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
         }
     when:
@@ -110,7 +110,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.UNSUBSCRIBE]"
     when:
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
         }
         def inMessage2 = new UnsubscribeMqttInMessage(UnsubscribeMqttInMessage.MESSAGE_FLAGS)
@@ -124,7 +124,7 @@ class UnsubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.SERVER_REFERENCE, "reference")
         }
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }

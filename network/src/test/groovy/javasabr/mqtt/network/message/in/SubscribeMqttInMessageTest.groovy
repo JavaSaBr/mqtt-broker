@@ -14,7 +14,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.put(0b0000_0001 as byte) // QoS.AT_LEAST_ONCE
           it.putString(topicFilter2)
@@ -37,7 +37,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         subscriptions.get(1).noLocal()
         subscriptions.get(1).retainAsPublished()
         subscriptions.get(1).retainHandling() == SubscribeRetainHandling.SEND
-        inMessage.messageId() == messageId
+        inMessage.messageId() == testMessageId
         inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
@@ -46,10 +46,10 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, subscriptionId)
-          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.putString(topicFilter)
@@ -81,12 +81,12 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         subscriptions.get(2).noLocal()
         !subscriptions.get(2).retainAsPublished()
         subscriptions.get(2).retainHandling() == SubscribeRetainHandling.DO_NOT_SEND
-        inMessage.messageId() == messageId
-        inMessage.userProperties() == userProperties
+        inMessage.messageId() == testMessageId
+        inMessage.userProperties() == testUserProperties
         inMessage.subscriptionId() == subscriptionId
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
           it.putString(topicFilter)
           it.put(0b0000_0001 as byte)
@@ -109,7 +109,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         !subscriptions.get(1).noLocal()
         !subscriptions.get(1).retainAsPublished()
         subscriptions.get(1).retainHandling() == SubscribeRetainHandling.SEND
-        inMessage.messageId() == messageId
+        inMessage.messageId() == testMessageId
         inMessage.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
   }
@@ -117,7 +117,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should not read invalid message as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.put(0b0000_0001 as byte)
         }
@@ -130,7 +130,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.SUBSCRIBE]"
     when: 'invalid QoS or Retain Handling'
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.put(0b0000_0011 as byte)
         }
@@ -142,7 +142,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage2.exception().message == MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING
     when: 'not provided any topic filter'
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
         }
         def inMessage3 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
         def successful3 = inMessage3.read(defaultMqtt311Connection, dataBuffer3, dataBuffer3.limit())
@@ -152,7 +152,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage3.exception().message == MqttProtocolErrors.NO_ANY_TOPIC_FILTERS
     when: 'unsupported no local option'
         def dataBuffer4 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.put(0b0000_0100 as byte)
         }
@@ -164,7 +164,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage4.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_NO_LOCAL_OPTION
     when: 'unsupported retain as publish option'
         def dataBuffer5 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.put(0b0000_1000 as byte)
         }
@@ -176,7 +176,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage5.exception().message == MqttProtocolErrors.PROTOCOL_LEVEL_UNSUPPORTED_RETAIN_AS_PUBLISH_OPTION
     when: 'unsupported retain handling option'
         def dataBuffer6 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putString(topicFilter)
           it.put(0b0011_0000 as byte)
         }
@@ -191,7 +191,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
   def "should not read invalid message as MQTT 5.0"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
           it.putString(topicFilter)
           it.put(0b0000_0001 as byte)
@@ -205,7 +205,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.exception().message == "Unexpected message flags:[0b0000_0000] in message:[$MqttMessageType.SUBSCRIBE]"
     when: 'invalid QoS or retain handling'
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
           it.putString(topicFilter)
           it.put(0b0011_1001 as byte)
@@ -218,7 +218,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage2.exception().message == MqttProtocolErrors.UNSUPPORTED_QOS_OR_RETAIN_HANDLING
     when: 'no any topic filter'
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
         }
         def inMessage3 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
@@ -232,7 +232,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.SERVER_REFERENCE, "reference")
         }
         def dataBuffer4 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
         }
@@ -247,7 +247,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, -50)
         }
         def dataBuffer5 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer2.limit())
           it.put(propertiesBuffer2)
         }
@@ -263,7 +263,7 @@ class SubscribeMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, 90)
         }
         def dataBuffer6 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer3.limit())
           it.put(propertiesBuffer3)
         }

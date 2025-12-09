@@ -15,7 +15,7 @@ class AuthenticationMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             reasonString,
             authMethod,
             authData,
-            userProperties)
+            testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -35,6 +35,6 @@ class AuthenticationMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         reader.reason() == reasonString
         reader.authenticationMethod() == authMethod
         reader.authenticationData() == authData
-        reader.userProperties() == userProperties
+        reader.userProperties() == testUserProperties
   }
 }

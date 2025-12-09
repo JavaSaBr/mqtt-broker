@@ -11,7 +11,7 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new PublishMqtt311OutMessage(
-            messageId,
+            testMessageId,
             QoS.EXACTLY_ONCE,
             true,
             true,
@@ -31,17 +31,19 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.exception() == null
-        reader.messageId() == messageId
-        reader.qos() == QoS.EXACTLY_ONCE
-        reader.retain()
-        reader.duplicate()
-        reader.payload() == publishPayload
-        reader.rawTopicName() == publishTopic.rawTopic()
-        reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(reader) {
+          exception() == null
+          messageId() == testMessageId
+          qos() == QoS.EXACTLY_ONCE
+          retain()
+          duplicate()
+          payload() == publishPayload
+          rawTopicName() == publishTopic.rawTopic()
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
     when:
         def outMessage2 = new PublishMqtt311OutMessage(
-            messageId,
+            testMessageId,
             QoS.AT_MOST_ONCE,
             false,
             false,
@@ -60,13 +62,15 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result2 = reader2.read(defaultMqtt311Connection, dataBuffer2, dataBuffer2.limit())
     then:
         result2
-        reader2.exception() == null
-        reader2.messageId() == 0
-        reader2.qos() == QoS.AT_MOST_ONCE
-        !reader2.retain()
-        !reader2.duplicate()
-        reader2.payload() == publishPayload
-        reader2.rawTopicName() == publishTopic.rawTopic()
-        reader2.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        with(reader2) {
+          exception() == null
+          messageId() == 0
+          qos() == QoS.AT_MOST_ONCE
+          !retain()
+          !duplicate()
+          payload() == publishPayload
+          rawTopicName() == publishTopic.rawTopic()
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
   }
 }

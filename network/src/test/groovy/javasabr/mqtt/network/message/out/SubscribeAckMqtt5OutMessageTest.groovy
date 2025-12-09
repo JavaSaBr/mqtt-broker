@@ -10,9 +10,9 @@ class SubscribeAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new SubscribeAckMqtt5OutMessage(
-            messageId,
+            testMessageId,
             subscribeAckReasonCodes,
-            userProperties,
+            testUserProperties,
             reasonString)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -31,8 +31,8 @@ class SubscribeAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         result
         reader.exception() == null
         reader.reasonCodes() == subscribeAckReasonCodes
-        reader.messageId() == messageId
-        reader.userProperties() == userProperties
+        reader.messageId() == testMessageId
+        reader.userProperties() == testUserProperties
         reader.reason() == reasonString
   }
 }
