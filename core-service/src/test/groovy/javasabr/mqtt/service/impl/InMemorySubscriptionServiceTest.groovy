@@ -5,7 +5,6 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
-import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.model.subscription.TestPublishFactory
 import javasabr.mqtt.model.topic.TopicFilter
@@ -18,6 +17,9 @@ import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
 class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
+
+  def retainMessageService = new DefaultRetainMessageService(defaultPublishDeliveringService)
+  def subscriptionService = new InMemorySubscriptionService(retainMessageService)
 
   def "should subscribe with expected results in default settings"() {
     given:
@@ -54,7 +56,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true,
                 true))
     when:
-        def result = defaultSubscriptionService
+        def result = subscriptionService
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 4
@@ -109,7 +111,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true,
                 true))
     when:
-        def result = defaultSubscriptionService
+        def result = subscriptionService
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 5
@@ -157,7 +159,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             true)
         def subscriptions = Array.of(sub1, sub2, sub3, sub4)
     when:
-        def result = defaultSubscriptionService
+        def result = subscriptionService
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 4
@@ -205,14 +207,14 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 SubscribeRetainHandling.SEND,
                 true,
                 true))
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         def topicsToUnsubscribe = Array.of(
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/1"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/3"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/notexist"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/invalid##"))
     when:
-        def result = defaultSubscriptionService
+        def result = subscriptionService
             .unsubscribe(mqttUser, mqttUser.session(), topicsToUnsubscribe)
     then:
         result.size() == 4
@@ -256,13 +258,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/1"),
             defaultTopicService.createTopicFilter(mqttUser, "topic/filter/3"))
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         def storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
-        defaultSubscriptionService.unsubscribe(mqttUser, mqttUser.session(), topicsToUnsubscribe)
+        subscriptionService.unsubscribe(mqttUser, mqttUser.session(), topicsToUnsubscribe)
         storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 1
@@ -318,13 +320,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             subscriptions.get(1),
             subscriptions2.get(1))
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         def storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions == subscriptions
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions2)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions2)
         storedSubscriptions = activeSubscriptions.subscriptions()
     then:
         storedSubscriptions.size() == 3
@@ -361,13 +363,13 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true))
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultRetainMessageService.retainMessage(publishWithRetain)
+        retainMessageService.retainMessage(publishWithRetain)
     and:
         def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
-        defaultRetainMessageService.retainMessage(publishWithoutRetain)
+        retainMessageService.retainMessage(publishWithoutRetain)
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         def thirdPublishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         thirdPublishMessage.payload() == publishWithRetain.payload()
@@ -390,19 +392,16 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def subscriptions = Array.of(subscription)
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultPublishDeliveringService.startDelivering(publishWithRetain, new SingleSubscriber(mqttUser, subscription))
+        retainMessageService.retainMessage(publishWithRetain)
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         def firstSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         firstSentMessage.payload() == publishWithRetain.payload()
     and:
         def thirdSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         thirdSentMessage.payload() == publishWithRetain.payload()
-    and:
-        def fourthSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        fourthSentMessage.payload() == publishWithRetain.payload()
     and:
         mqttUser.isEmpty()
   }
@@ -437,20 +436,14 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
                 true))
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultPublishDeliveringService.startDelivering(publishWithRetain, new SingleSubscriber(mqttUser, subscription))
+        retainMessageService.retainMessage(publishWithRetain)
     and:
         def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
-        defaultPublishDeliveringService.startDelivering(publishWithoutRetain, new SingleSubscriber(mqttUser, subscription))
+        retainMessageService.retainMessage(publishWithoutRetain)
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
-        def firstPublishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        firstPublishMessage.payload() == publishWithRetain.payload()
-    and:
-        def secondPublishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        secondPublishMessage.payload() == publishWithoutRetain.payload()
-    and:
         mqttUser.isEmpty()
   }
 
@@ -469,9 +462,9 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def subscriptions = Array.of(subscription)
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultRetainMessageService.retainMessage(publishWithRetain)
+        retainMessageService.retainMessage(publishWithRetain)
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         def sentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         sentMessage.payload() == publishWithRetain.payload()
@@ -495,8 +488,8 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def subscriptions = Array.of(subscription)
     when:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultRetainMessageService.retainMessage(publishWithRetain)
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        retainMessageService.retainMessage(publishWithRetain)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         def secondSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         secondSentMessage.payload() == publishWithRetain.payload()
@@ -520,9 +513,9 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def subscriptions = Array.of(subscription)
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultPublishDeliveringService.startDelivering(publishWithRetain, new SingleSubscriber(mqttUser, subscription))
+        retainMessageService.retainMessage(publishWithRetain)
     when:
-        defaultSubscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         mqttUser.isEmpty()
   }
@@ -540,8 +533,8 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             true,
             true)
     when:
-        defaultSubscriptionService.subscribe(expectedUser, expectedUser.session(), Array.of(expectedSubscription))
-        def subscribers = defaultSubscriptionService.findSubscribers(TopicName.valueOf("topic"))
+        subscriptionService.subscribe(expectedUser, expectedUser.session(), Array.of(expectedSubscription))
+        def subscribers = subscriptionService.findSubscribers(TopicName.valueOf("topic"))
     then:
         !subscribers.isEmpty()
         with(subscribers[0]) {
@@ -549,14 +542,14 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
           subscription() == expectedSubscription
         }
     when:
-        defaultSubscriptionService.cleanSubscriptions(expectedUser, expectedUser.session())
-        subscribers = defaultSubscriptionService.findSubscribers(TopicName.valueOf("topic"))
+        subscriptionService.cleanSubscriptions(expectedUser, expectedUser.session())
+        subscribers = subscriptionService.findSubscribers(TopicName.valueOf("topic"))
     then:
         subscribers.isEmpty()
 
     when:
-        defaultSubscriptionService.restoreSubscriptions(expectedUser, expectedUser.session())
-        subscribers = defaultSubscriptionService.findSubscribers(TopicName.valueOf("topic"))
+        subscriptionService.restoreSubscriptions(expectedUser, expectedUser.session())
+        subscribers = subscriptionService.findSubscribers(TopicName.valueOf("topic"))
     then:
         !subscribers.isEmpty()
         with(subscribers[0]) {
@@ -564,6 +557,7 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
           subscription() == expectedSubscription
         }
   }
+
   def "should suppress retained message delivering failure"() {
     given:
         def serverConfig = defaultExternalServerConnectionConfig
@@ -580,13 +574,10 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
         def subscriptions = Array.of(subscription)
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        defaultPublishDeliveringService.startDelivering(publishWithRetain, new SingleSubscriber(mqttUser, subscription))
+        retainMessageService.retainMessage(publishWithRetain)
     when:
-        defaultSubscriptionService.subscribe(anotherUser, mqttUser.session(), subscriptions)
+        subscriptionService.subscribe(anotherUser, mqttUser.session(), subscriptions)
     then:
-        def firstSentMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        firstSentMessage.payload() == publishWithRetain.payload()
-    and:
         mqttUser.isEmpty()
   }
 }
