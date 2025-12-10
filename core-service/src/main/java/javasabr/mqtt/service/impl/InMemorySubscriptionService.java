@@ -7,13 +7,13 @@ import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
@@ -28,6 +28,7 @@ import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * In memory subscription service based on {@link ConcurrentSubscriberTree}
@@ -84,15 +85,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
     if (previousSubscriber != null) {
       activeSubscriptions.remove(previousSubscriber.subscription());
     }
-    QoS subscriptionQoS = subscription.qos();
-    SubscribeRetainHandling retainHandling = subscription.retainHandling();
-    boolean isRetainHandlingSatisfied =
-        retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && previousSubscriber == null);
-    if (subscriptionQoS.isValid() && isRetainHandlingSatisfied) {
-      sendRetainedMessages(newSubscriber);
-    }
+    sendRetainedMessages(newSubscriber, previousSubscriber);
     activeSubscriptions.add(subscription);
-    return subscriptionQoS.subscribeAckReasonCode();
+    return subscription.qos().subscribeAckReasonCode();
   }
 
   @Override
@@ -116,9 +111,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
     if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
     } else if (subscriberTree.unsubscribe(user, topicFilter)) {
-      session
-          .activeSubscriptions()
-          .removeByTopicFilter(topicFilter);
+      session.activeSubscriptions().removeByTopicFilter(topicFilter);
       return SUCCESS;
     } else {
       return NO_SUBSCRIPTION_EXISTED;
@@ -127,9 +120,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public void cleanSubscriptions(MqttUser user, MqttSession session) {
-    Array<Subscription> subscriptions = session
-        .activeSubscriptions()
-        .subscriptions();
+    Array<Subscription> subscriptions = session.activeSubscriptions().subscriptions();
     for (Subscription subscription : subscriptions) {
       subscriberTree.unsubscribe(user, subscription.topicFilter());
     }
@@ -137,19 +128,27 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public void restoreSubscriptions(MqttUser user, MqttSession session) {
-    Array<Subscription> subscriptions = session
-        .activeSubscriptions()
-        .subscriptions();
+    Array<Subscription> subscriptions = session.activeSubscriptions().subscriptions();
     for (Subscription subscription : subscriptions) {
       SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
       subscriberTree.subscribe(singleSubscriber);
     }
   }
 
-  private void sendRetainedMessages(SingleSubscriber singleSubscriber) {
+  private static boolean isRetainHandlingSatisfied(Subscription subscription, @Nullable Subscriber previousSubscriber) {
+    SubscribeRetainHandling retainHandling = subscription.retainHandling();
+    return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
+                                          && previousSubscriber == null);
+  }
+
+  private void sendRetainedMessages(Subscriber newSubscriber, @Nullable Subscriber previousSubscriber) {
+    Subscription subscription = newSubscriber.resolveSingle().subscription();
+    if (!subscription.qos().isValid() || !isRetainHandlingSatisfied(subscription, previousSubscriber)) {
+      return;
+    }
     int count = 0;
-    String clientId = singleSubscriber.user().clientId();
-    var results = retainMessageService.deliverRetainedMessages(singleSubscriber);
+    String clientId = newSubscriber.resolveSingle().user().clientId();
+    var results = retainMessageService.deliverRetainedMessages(newSubscriber);
     for (PublishHandlingResult result : results) {
       PublishHandlingResult errorResult = null;
       if (result.error()) {
