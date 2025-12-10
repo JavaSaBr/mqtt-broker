@@ -56,25 +56,48 @@ class SubscriberNode extends SubscriberTreeBase {
   }
 
   protected void matchesTo(int level, TopicName topicName, int lastLevel, MutableArray<SingleSubscriber> container) {
-    collectMatchingSubscribers(topicName.segment(level), level, topicName, lastLevel, container);
-    collectMatchingSubscribers(TopicFilter.SINGLE_LEVEL_WILDCARD, level, topicName, lastLevel, container);
-    collectMatchingSubscribers(TopicFilter.MULTI_LEVEL_WILDCARD, level, topicName, lastLevel, container);
+    exactlyTopicMatch(level, topicName, lastLevel, container);
+    singleWildcardTopicMatch(level, topicName, lastLevel, container);
+    multiWildcardTopicMatch(container);
   }
 
-  private void collectMatchingSubscribers(
-      String segment,
+  private void exactlyTopicMatch(
       int level,
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
+    String segment = topicName.segment(level);
     SubscriberNode subscriberNode = getChildNode(segment);
     if (subscriberNode == null) {
       return;
     }
-    if (level == lastLevel || TopicFilter.MULTI_LEVEL_WILDCARD.equals(segment)) {
+    if (level == lastLevel) {
       appendSubscribersTo(result, subscriberNode);
     } else if (level < lastLevel) {
       subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
+    }
+  }
+
+  private void singleWildcardTopicMatch(
+      int level,
+      TopicName topicName,
+      int lastLevel,
+      MutableArray<SingleSubscriber> result) {
+    SubscriberNode subscriberNode = getChildNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
+    if (subscriberNode == null) {
+      return;
+    }
+    if (level == lastLevel) {
+      appendSubscribersTo(result, subscriberNode);
+    } else if (level < lastLevel) {
+      subscriberNode.matchesTo(level + 1, topicName, lastLevel, result);
+    }
+  }
+
+  private void multiWildcardTopicMatch(MutableArray<SingleSubscriber> result) {
+    SubscriberNode subscriberNode = getChildNode(TopicFilter.MULTI_LEVEL_WILDCARD);
+    if (subscriberNode != null) {
+      appendSubscribersTo(result, subscriberNode);
     }
   }
 
