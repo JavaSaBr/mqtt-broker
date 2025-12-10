@@ -16,14 +16,12 @@ import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @Getter
 @CustomLog
-@Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqttUser {
 
@@ -65,7 +63,7 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   @Override
   public void sendInBackground(MqttOutMessage message) {
     log.debug(clientId, message.name(), message, "[%s] Send message to user:[%s] %s"::formatted);
-    connection.send(message);
+    connection.sendInBackground(message);
   }
 
   @Override
@@ -76,7 +74,7 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   @Override
   public CompletableFuture<Boolean> sendAsync(MqttOutMessage message) {
     log.debug(clientId, message.name(), message, "[%s] Send message to user:[%s] %s"::formatted);
-    return connection.sendWithFeedback(message);
+    return connection.sendAsync(message);
   }
 
   @Override
@@ -91,7 +89,7 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   @Override
   public void reject(ConnectAckMqtt311OutMessage connectAsk) {
     connection
-        .sendWithFeedback(connectAsk)
+        .sendAsync(connectAsk)
         .thenAccept(_ -> connection.close());
   }
 
