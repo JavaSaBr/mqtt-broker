@@ -12,6 +12,7 @@ import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
+import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
