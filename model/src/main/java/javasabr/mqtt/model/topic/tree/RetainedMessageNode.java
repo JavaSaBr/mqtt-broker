@@ -43,10 +43,22 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     var child = getOrCreateChildNode(topicName.segment(level));
     boolean isLastLevel = (level + 1 == topicName.levelsCount());
     if (isLastLevel) {
-      child.retainedMessage.set(message.payload().length == 0 ? null : message);
+      if (message.payload().length == 0) {
+        child.clearRetainedMessage();
+      } else {
+        child.setRetainedMessage(message);
+      }
     } else {
       child.retainMessage(level + 1, message, topicName);
     }
+  }
+
+  private void setRetainedMessage(Publish value) {
+    retainedMessage.set(value);
+  }
+
+  private void clearRetainedMessage() {
+    retainedMessage.set(null);
   }
 
   public void collectRetainedMessages(
