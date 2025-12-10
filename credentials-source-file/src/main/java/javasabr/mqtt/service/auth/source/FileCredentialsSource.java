@@ -7,12 +7,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import javasabr.mqtt.model.exception.CredentialsSourceException;
 import javasabr.rlib.collections.dictionary.DictionaryCollectors;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileCredentialsSource extends InMemoryCredentialSource {
 
   private static final String CREDENTIALS_SOURCE_NAME = "file";
 
-  private final String fileName;
+  String fileName;
 
   public FileCredentialsSource(String fileName) {
     this.fileName = fileName;
