@@ -12,11 +12,11 @@ import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactories;
+import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
-import javasabr.mqtt.service.auth.CredentialSource;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DatabaseCredentialsSource implements CredentialSource {
 
-  private final ConnectionPool connectionPool;
+  private final ConnectionFactory connectionPool;
   private final String credentialsQuery;
 
   @Override

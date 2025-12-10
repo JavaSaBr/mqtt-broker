@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.auth;
 
 import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
+import javasabr.mqtt.service.auth.source.CredentialSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

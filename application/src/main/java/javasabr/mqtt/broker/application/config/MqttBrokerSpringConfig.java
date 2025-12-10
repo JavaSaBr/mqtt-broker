@@ -21,7 +21,7 @@ import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.auth.AuthenticationService;
-import javasabr.mqtt.service.auth.CredentialSource;
+import javasabr.mqtt.service.auth.source.CredentialSource;
 import javasabr.mqtt.service.auth.DefaultAuthenticationService;
 import javasabr.mqtt.service.auth.PasswordBasedAuthenticationProvider;
 import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
@@ -142,7 +142,7 @@ public class MqttBrokerSpringConfig {
     credentialSource.forEach(value -> authenticationProviders.put(value.getAuthMethodName(), value));
     AuthenticationProvider defaultProvider = authenticationProviders.get(defaultProviderName);
     if (defaultProvider == null) {
-      throw new IllegalArgumentException("%s authenticator provider not found".formatted(defaultProviderName));
+      throw new IllegalArgumentException("[%s] authenticator provider not found".formatted(defaultProviderName));
     }
     return new DefaultAuthenticationService(authenticationProviders.toReadOnly(), defaultProvider, allowAnonymousAuth);
   }

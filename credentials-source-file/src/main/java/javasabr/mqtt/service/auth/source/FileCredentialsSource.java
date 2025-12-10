@@ -9,7 +9,7 @@ import javasabr.mqtt.model.exception.CredentialsSourceException;
 import javasabr.rlib.collections.dictionary.DictionaryCollectors;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 
-public class FileCredentialsSource extends AbstractCredentialSource {
+public class FileCredentialsSource extends InMemoryCredentialSource {
 
   private final String fileName;
 
@@ -39,7 +39,7 @@ public class FileCredentialsSource extends AbstractCredentialSource {
               entry -> entry.getKey().toString(),
               entry -> entry.getValue().toString().getBytes(StandardCharsets.UTF_8)));
 
-      putAll(credentials);
+      reset(credentials);
     } catch (IOException e) {
       throw new CredentialsSourceException(e);
     }

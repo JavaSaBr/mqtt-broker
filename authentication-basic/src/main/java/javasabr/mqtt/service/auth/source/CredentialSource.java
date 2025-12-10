@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.auth;
+package javasabr.mqtt.service.auth.source;
 
 import reactor.core.publisher.Mono;
 
