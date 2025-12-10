@@ -7,9 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import javasabr.mqtt.model.exception.CredentialsSourceException;
 import javasabr.rlib.collections.dictionary.DictionaryCollectors;
-import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 
 public class FileCredentialsSource extends InMemoryCredentialSource {
+
+  private static final String CREDENTIALS_SOURCE_NAME = "file";
 
   private final String fileName;
 
@@ -32,7 +33,7 @@ public class FileCredentialsSource extends InMemoryCredentialSource {
       var credentialsProperties = new Properties();
       credentialsProperties.load(new FileInputStream(credentialUrl.getPath()));
 
-      RefToRefDictionary<String, byte[]> credentials = credentialsProperties
+      var credentials = credentialsProperties
           .entrySet()
           .stream()
           .collect(DictionaryCollectors.toRefToRefDictionary(
@@ -47,6 +48,6 @@ public class FileCredentialsSource extends InMemoryCredentialSource {
 
   @Override
   public String getName() {
-    return "file";
+    return CREDENTIALS_SOURCE_NAME;
   }
 }

@@ -4,7 +4,7 @@ import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
 import javasabr.mqtt.broker.application.config.CredentialsSourceDatabaseConfig
 import javasabr.mqtt.service.auth.source.CredentialSource
-import javasabr.mqtt.service.auth.source.DatabaseCredentialsSource
+import javasabr.mqtt.service.auth.source.R2dbcCredentialsSource
 import org.springframework.context.annotation.Bean
 import org.springframework.core.io.ClassPathResource
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer
@@ -16,7 +16,7 @@ class CredentialsSourceTestConfig {
   CredentialSource credentialSource(
       ConnectionFactory connectionFactory,
       CredentialsSourceDatabaseConfig credentialsSourceDatabaseConfig) {
-    return new DatabaseCredentialsSource(connectionFactory, credentialsSourceDatabaseConfig.credentialsQuery())
+    return new R2dbcCredentialsSource(connectionFactory, credentialsSourceDatabaseConfig.credentialsQuery())
   }
 
   @Bean

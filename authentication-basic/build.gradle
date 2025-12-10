@@ -10,10 +10,6 @@ dependencies {
   api projects.base
   api projects.authentication
 
-  implementation 'io.r2dbc:r2dbc-spi:1.0.0.RELEASE'
-  implementation 'io.r2dbc:r2dbc-pool:1.0.2.RELEASE'
-  implementation 'org.postgresql:r2dbc-postgresql:1.1.1.RELEASE'
-
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport
 }

@@ -9,10 +9,9 @@ description = "Database-based Credentials Source Provider"
 dependencies {
   api projects.base
   api projects.authenticationBasic
-
-  implementation 'io.r2dbc:r2dbc-spi:1.0.0.RELEASE'
-  implementation 'io.r2dbc:r2dbc-pool:1.0.2.RELEASE'
-  implementation 'org.postgresql:r2dbc-postgresql:1.1.1.RELEASE'
+  implementation libs.r2dbc.spi
+  implementation libs.r2dbc.pool
+  implementation libs.r2dbc.postgresql
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport

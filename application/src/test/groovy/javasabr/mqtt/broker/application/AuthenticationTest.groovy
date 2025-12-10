@@ -100,7 +100,7 @@ class AuthenticationTest {
   }
 
   @ContextConfiguration(classes = CredentialsSourceTestConfig)
-  static class DatabaseCredentialsSourceTest extends IntegrationSpecification {
+  static class R2dbcCredentialsSourceTest extends IntegrationSpecification {
 
     def "should not be able to connect with wrong password using mqtt 3.1.1 client"() {
       given:

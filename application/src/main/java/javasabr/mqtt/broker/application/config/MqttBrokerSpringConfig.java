@@ -21,12 +21,13 @@ import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.auth.AuthenticationService;
-import javasabr.mqtt.service.auth.source.CredentialSource;
 import javasabr.mqtt.service.auth.DefaultAuthenticationService;
 import javasabr.mqtt.service.auth.PasswordBasedAuthenticationProvider;
 import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
-import javasabr.mqtt.service.auth.source.DatabaseCredentialsSource;
+import javasabr.mqtt.service.auth.source.CredentialSource;
+import javasabr.mqtt.service.auth.source.CredentialsSourceConfig;
 import javasabr.mqtt.service.auth.source.FileCredentialsSource;
+import javasabr.mqtt.service.auth.source.R2dbcCredentialsSource;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -108,22 +109,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  CredentialSource dbCredentialSource(CredentialsSourceDatabaseConfig credentialsSourceDatabaseConfig) {
-    return DatabaseCredentialsSource
-        .builder()
-        .dbPort(credentialsSourceDatabaseConfig.port())
-        .dbDriver(credentialsSourceDatabaseConfig.driver())
-        .dbName(credentialsSourceDatabaseConfig.name())
-        .dbHost(credentialsSourceDatabaseConfig.host())
-        .dbUsername(credentialsSourceDatabaseConfig.username())
-        .dbPassword(credentialsSourceDatabaseConfig.password())
-        .maxIdleTime(credentialsSourceDatabaseConfig.maxIdleTime())
-        .initialPoolSize(credentialsSourceDatabaseConfig.initialPoolSize())
-        .maxPoolSize(credentialsSourceDatabaseConfig.maxPoolSize())
-        .credentialsQuery(credentialsSourceDatabaseConfig.credentialsQuery())
-        .lockTimeout(credentialsSourceDatabaseConfig.lockTimeout())
-        .statementTimeout(credentialsSourceDatabaseConfig.statementTimeout())
-        .build();
+  CredentialSource dbCredentialSource(CredentialsSourceConfig credentialsSourceDatabaseConfig) {
+    return R2dbcCredentialsSource.builder().config(credentialsSourceDatabaseConfig).build();
   }
 
   @Bean
@@ -146,7 +133,7 @@ public class MqttBrokerSpringConfig {
     }
     return new DefaultAuthenticationService(authenticationProviders.toReadOnly(), defaultProvider, allowAnonymousAuth);
   }
-  
+
   @Bean
   AuthorizationService authorizationService() {
     return new DisabledAuthorizationService();
@@ -202,7 +189,7 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler publishCompleteMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new PublishCompleteMqttInMessageHandler(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
@@ -214,7 +201,7 @@ public class MqttBrokerSpringConfig {
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishQosMqttInMessageFieldValidator(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishRetainMqttInMessageFieldValidator publishRetainMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
@@ -226,13 +213,13 @@ public class MqttBrokerSpringConfig {
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishResponseTopicMqttInMessageFieldValidator publishResponseTopicMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishResponseTopicMqttInMessageFieldValidator(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishTopicAliasMqttInMessageFieldValidator publishTopicAliasMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
@@ -371,10 +358,7 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.receive.maximum",
             int.class,
             MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.topic.alias.maximum",
-            int.class,
-            0),
+        env.getProperty("mqtt.external.connection.topic.alias.maximum", int.class, 0),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,
@@ -387,18 +371,14 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.sessions.enabled",
             boolean.class,
             MqttProperties.SESSIONS_ENABLED_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.retain.available",
-            boolean.class,
-            false), // set false because currently it's not implemented and we should not allow for clients to use it
+        env.getProperty("mqtt.external.connection.retain.available", boolean.class, false),
+        // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
             MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.subscription.id.available",
-            boolean.class,
-            false), // set false because currently it's not implemented and we should not allow for clients to use it
+        env.getProperty("mqtt.external.connection.subscription.id.available", boolean.class, false),
+        // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,
