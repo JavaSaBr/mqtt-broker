@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * Publish message.
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class PublishMqttInMessage extends TrackableMqttInMessage {
 

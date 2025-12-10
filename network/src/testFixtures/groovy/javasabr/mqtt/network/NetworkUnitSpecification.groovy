@@ -37,13 +37,13 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final willRetain = false
   public static final mqtt311ClientId = "testMqtt311ClientId"
   public static final mqtt5ClientId = "testMqtt5ClientId"
-  public static final messageId = 1234 as short
+  public static final testMessageId = 1234 as short
   public static final userName = "testUser"
   public static final userPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
   public static final keepAlive = 120
   public static final sessionExpiryInterval = 300
-  public static final messageExpiryInterval = 60
-  public static final topicAlias = 252
+  public static final testMessageExpiryInterval = 60
+  public static final testTopicAlias = 252
   public static final receiveMaxPublishes = 10
   public static final maxMessageSize = 1024
   public static final maxStringLength = 256
@@ -60,7 +60,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
   public static final publishTopic = TopicName.valueOf("publish/Topic")
-  public static final responseTopic = TopicName.valueOf("response/Topic")
+  public static final testResponseTopic = TopicName.valueOf("response/Topic")
   public static final topicFilter = "topic/Filter"
   public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
   public static final topicFilter1Obj5 = new Subscription(
@@ -84,7 +84,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final topicFilter4 = "topic/Filter4"
 
   public static final serverReference = "serverReference"
-  public static final contentType = "application/json"
+  public static final testContentType = "application/json"
   public static final subscribeAckReasonCodes = Array.typed(
       SubscribeAckReasonCode,
       SubscribeAckReasonCode.GRANTED_QOS_1,
@@ -97,18 +97,18 @@ class NetworkUnitSpecification extends UnitSpecification {
       UnsubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
       UnsubscribeAckReasonCode.UNSPECIFIED_ERROR)
 
-  public static final userProperties = Array.typed(
+  public static final testUserProperties = Array.typed(
       StringPair,
       new StringPair("key1", "val1"),
       new StringPair("key2", "val2"),
       new StringPair("key3", "val3"))
 
-  public static final subscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
+  public static final testSubscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
   public static final topicFilters = Array.of(topicFilter, topicFilter2)
   public static final subscriptionsObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
   public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
   public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
-  public static final correlationData = "correlationData".getBytes(StandardCharsets.UTF_8)
+  public static final testCorrelationData = "correlationData".getBytes(StandardCharsets.UTF_8)
   public static final clientIdGenerator = new AtomicInteger(1)
 
   @Shared

@@ -10,7 +10,7 @@ class UnsubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
   def "should write message correctly"() {
     given:
-        def outMessage = new UnsubscribeAckMqtt311OutMessage(messageId)
+        def outMessage = new UnsubscribeAckMqtt311OutMessage(testMessageId)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -27,7 +27,7 @@ class UnsubscribeAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
     then:
         result
         reader.reasonCodes() == UnsubscribeAckMqttInMessage.EMPTY_REASON_CODES
-        reader.messageId() == messageId
+        reader.messageId() == testMessageId
         reader.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         reader.reason() == null
   }

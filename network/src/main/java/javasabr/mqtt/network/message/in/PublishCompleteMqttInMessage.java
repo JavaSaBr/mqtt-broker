@@ -64,4 +64,11 @@ public class PublishCompleteMqttInMessage extends PublishControlMqttInMessage<Pu
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
+
+  public static PublishCompleteMqttInMessage of(int messageId, PublishCompletedReasonCode reasonCode) {
+    var message = new PublishCompleteMqttInMessage(MESSAGE_FLAGS);
+    message.messageId = messageId;
+    message.reasonCode = reasonCode;
+    return message;
+  }
 }

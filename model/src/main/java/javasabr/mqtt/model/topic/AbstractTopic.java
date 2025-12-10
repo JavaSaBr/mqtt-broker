@@ -1,6 +1,5 @@
 package javasabr.mqtt.model.topic;
 
-import java.util.Objects;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;

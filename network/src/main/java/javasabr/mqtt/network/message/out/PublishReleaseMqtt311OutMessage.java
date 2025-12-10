@@ -3,20 +3,18 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.network.MqttConnection;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Publish release (QoS 2 delivery part 2).
  */
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
+public class PublishReleaseMqtt311OutMessage extends TrackableMqttOutMessage {
 
+  public static final int MESSAGE_FLAGS = 0b0000_0010;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.PUBLISH_RELEASE.ordinal();
 
-  int messageId;
+  public PublishReleaseMqtt311OutMessage(int messageId) {
+    super(messageId);
+  }
 
   @Override
   protected byte messageTypeId() {
@@ -30,7 +28,7 @@ public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
   
   @Override
   protected byte messageFlags() {
-    return 0b0000_0010;
+    return MESSAGE_FLAGS;
   }
 
   @Override
@@ -43,5 +41,4 @@ public class PublishReleaseMqtt311OutMessage extends MqttOutMessage {
     // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718055
     writeShort(buffer, messageId);
   }
-
 }

@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.session.impl;
 
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ReasonCode;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
@@ -18,7 +19,16 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
 
+  static {
+    DebugUtils.registerIncludedFields("messageType", "reasonCode");
+  }
+  
   MqttMessageType messageType;
   @Nullable
   ReasonCode reasonCode;
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
+  }
 }

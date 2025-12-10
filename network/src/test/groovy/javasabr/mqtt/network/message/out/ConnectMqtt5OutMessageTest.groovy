@@ -19,7 +19,7 @@ class ConnectMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             keepAlive,
             willRetain,
             cleanStart,
-            userProperties,
+            testUserProperties,
             authMethod,
             authData,
             sessionExpiryInterval,
@@ -40,7 +40,7 @@ class ConnectMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         reader.clientId() == mqtt311ClientId
         reader.password() == userPassword
         reader.keepAlive() == keepAlive
-        reader.userProperties() == userProperties
+        reader.userProperties() == testUserProperties
         reader.cleanStart() == cleanStart
         reader.willRetain() == willRetain
         reader.authenticationMethod() == authMethod

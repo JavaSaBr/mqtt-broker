@@ -1,7 +1,6 @@
 package javasabr.mqtt.broker.application.config;
 
 import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import javasabr.mqtt.model.MqttProperties;
@@ -11,7 +10,9 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
+import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -33,6 +34,7 @@ import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
+import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
@@ -49,6 +51,13 @@ import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandle
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
+import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishResponseTopicMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishTopicAliasMqttInMessageFieldValidator;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -137,6 +146,11 @@ public class MqttBrokerSpringConfig {
     }
     return new DefaultAuthenticationService(authenticationProviders.toReadOnly(), defaultProvider, allowAnonymousAuth);
   }
+  
+  @Bean
+  AuthorizationService authorizationService() {
+    return new DisabledAuthorizationService();
+  }
 
   @Bean
   SubscriptionService subscriptionService() {
@@ -188,13 +202,56 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler publishCompleteMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new PublishCompleteMqttInMessageHandler(messageOutFactoryService);
   }
+  
+  @Bean
+  PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishPayloadMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+
+  @Bean
+  PublishQosMqttInMessageFieldValidator publishQosMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishQosMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
+  PublishRetainMqttInMessageFieldValidator publishRetainMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishRetainMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+
+  @Bean
+  PublishMessageExpiryIntervalMqttInMessageFieldValidator publishMessageExpiryIntervalMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
+  PublishResponseTopicMqttInMessageFieldValidator publishResponseTopicMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishResponseTopicMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
+  PublishTopicAliasMqttInMessageFieldValidator publishTopicAliasMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new PublishTopicAliasMqttInMessageFieldValidator(messageOutFactoryService);
+  }
 
   @Bean
   MqttInMessageHandler publishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
-    return new PublishMqttInMessageHandler(publishReceivingService, messageOutFactoryService, topicService);
+      TopicService topicService,
+      AuthorizationService authorizationService,
+      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
+    return new PublishMqttInMessageHandler(
+        publishReceivingService,
+        messageOutFactoryService,
+        topicService,
+        authorizationService,
+        fieldValidators);
   }
 
   @Bean
@@ -317,7 +374,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.topic.alias.maximum",
             int.class,
-            MqttProperties.TOPIC_ALIAS_MAX_DEFAULT),
+            0),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,
@@ -333,7 +390,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.retain.available",
             boolean.class,
-            MqttProperties.RETAIN_AVAILABLE_DEFAULT),
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
@@ -341,7 +398,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.subscription.id.available",
             boolean.class,
-            MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_DEFAULT),
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,

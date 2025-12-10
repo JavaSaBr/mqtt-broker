@@ -29,22 +29,22 @@ class TestExternalNetworkMqttUser extends ExternalNetworkMqttUser {
   }
 
   @Override
-  void sendAsync(SendableMqttMessage message) {
-    sendAsync((MqttOutMessage) message)
+  void sendInBackground(SendableMqttMessage message) {
+    sendInBackground((MqttOutMessage) message)
   }
 
   @Override
-  void sendAsync(MqttOutMessage message) {
+  void sendInBackground(MqttOutMessage message) {
     sentMessages.add(message)
   }
 
   @Override
-  CompletionStage<Boolean> send(SendableMqttMessage message) {
-    return send((MqttOutMessage) message)
+  CompletionStage<Boolean> sendAsync(SendableMqttMessage message) {
+    return sendAsync((MqttOutMessage) message)
   }
   
   @Override
-  CompletableFuture<Boolean> send(MqttOutMessage message) {
+  CompletableFuture<Boolean> sendAsync(MqttOutMessage message) {
     sentMessages.add(message)
     if (!returnCompletedFeatures) {
       return CompletableFuture.supplyAsync({ true }, DELAYED_EXECUTOR);

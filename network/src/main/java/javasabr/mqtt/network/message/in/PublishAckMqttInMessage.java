@@ -64,4 +64,11 @@ public class PublishAckMqttInMessage extends PublishControlMqttInMessage<Publish
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
+  
+  public static PublishAckMqttInMessage of(int messageId, PublishAckReasonCode reasonCode) {
+    var message = new PublishAckMqttInMessage(MESSAGE_FLAGS);
+    message.messageId = messageId;
+    message.reasonCode = reasonCode;
+    return message;
+  }
 }

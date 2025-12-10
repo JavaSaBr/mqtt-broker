@@ -17,4 +17,6 @@ public interface ProcessingPublishes {
    * @return true if was found some callback for this message
    */
   boolean remove(TrackableMqttMessage message);
+  
+  int size();
 }

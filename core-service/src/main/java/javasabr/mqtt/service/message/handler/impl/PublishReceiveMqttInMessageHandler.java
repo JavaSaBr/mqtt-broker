@@ -5,7 +5,7 @@ import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 
 public class PublishReceiveMqttInMessageHandler extends
-    PendingOutResponseMqttInMessageHandler<PublishReceivedMqttInMessage> {
+    ProcessingOutPublishesMqttInMessageHandler<PublishReceivedMqttInMessage> {
 
   public PublishReceiveMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     super(PublishReceivedMqttInMessage.class, messageOutFactoryService);

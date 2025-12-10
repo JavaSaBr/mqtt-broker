@@ -10,7 +10,7 @@ class PublishAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
 
   def "should write message correctly"() {
     given:
-        def outMessage = new PublishAckMqtt311OutMessage(messageId)
+        def outMessage = new PublishAckMqtt311OutMessage(testMessageId)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -26,10 +26,12 @@ class PublishAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.exception() == null
-        reader.reasonCode() == PublishAckReasonCode.SUCCESS
-        reader.messageId() == messageId
-        reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
-        reader.reason() == null
+        with(reader) {
+          exception() == null
+          reasonCode() == PublishAckReasonCode.SUCCESS
+          messageId() == testMessageId
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+          reason() == null
+        }
   }
 }

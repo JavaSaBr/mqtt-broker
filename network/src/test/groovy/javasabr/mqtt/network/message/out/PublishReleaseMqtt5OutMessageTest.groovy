@@ -11,9 +11,9 @@ class PublishReleaseMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new PublishReleaseMqtt5OutMessage(
-            messageId,
+            testMessageId,
             PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
-            userProperties,
+            testUserProperties,
             reasonString)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -30,9 +30,11 @@ class PublishReleaseMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
-        reader.messageId() == messageId
-        reader.userProperties() == userProperties
-        reader.reason() == reasonString
+        with(reader) {
+          reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND
+          messageId() == testMessageId
+          userProperties() == testUserProperties
+          reason() == reasonString
+        }
   }
 }

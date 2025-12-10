@@ -38,7 +38,7 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def outMessage = new SubscribeMqtt5OutMessage(
             1,
             subscriptions,
-            userProperties,
+            testUserProperties,
             MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -57,13 +57,13 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         result
         inMessage.messageId() == 1
         inMessage.subscriptions() == requestedSubscriptions
-        inMessage.userProperties() == userProperties
+        inMessage.userProperties() == testUserProperties
         inMessage.subscriptionId() == MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET
     when:
         def outMessage2 = new SubscribeMqtt5OutMessage(
             25,
             subscriptions,
-            userProperties,
+            testUserProperties,
             35)
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           outMessage2.write(defaultMqtt5Connection, it)
@@ -74,7 +74,7 @@ class SubscribeMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         result2
         inMessage2.messageId() == 25
         inMessage2.subscriptions() == requestedSubscriptions
-        inMessage2.userProperties() == userProperties
+        inMessage2.userProperties() == testUserProperties
         inMessage2.subscriptionId() == 35
   }
 }

@@ -16,14 +16,12 @@ import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @Getter
 @CustomLog
-@Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqttUser {
 
@@ -58,30 +56,30 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   }
 
   @Override
-  public void sendAsync(SendableMqttMessage message) {
-    sendAsync((MqttOutMessage) message);
+  public void sendInBackground(SendableMqttMessage message) {
+    sendInBackground((MqttOutMessage) message);
   }
 
   @Override
-  public void sendAsync(MqttOutMessage message) {
-    log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
-    connection.send(message);
+  public void sendInBackground(MqttOutMessage message) {
+    log.debug(clientId, message.name(), message, "[%s] Send message to user:[%s] %s"::formatted);
+    connection.sendInBackground(message);
   }
 
   @Override
-  public CompletionStage<Boolean> send(SendableMqttMessage message) {
-    return send((MqttOutMessage) message);
+  public CompletionStage<Boolean> sendAsync(SendableMqttMessage message) {
+    return sendAsync((MqttOutMessage) message);
   }
 
   @Override
-  public CompletableFuture<Boolean> send(MqttOutMessage message) {
-    log.debug(clientId, message.name(), message, "[%s] Send to client packet:[%s] %s"::formatted);
-    return connection.sendWithFeedback(message);
+  public CompletableFuture<Boolean> sendAsync(MqttOutMessage message) {
+    log.debug(clientId, message.name(), message, "[%s] Send message to user:[%s] %s"::formatted);
+    return connection.sendAsync(message);
   }
 
   @Override
   public CompletableFuture<Boolean> closeWithReason(MqttOutMessage message) {
-    return send(message)
+    return sendAsync(message)
         .thenApply(sent -> {
           connection.close();
           return sent;
@@ -91,7 +89,7 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
   @Override
   public void reject(ConnectAckMqtt311OutMessage connectAsk) {
     connection
-        .sendWithFeedback(connectAsk)
+        .sendAsync(connectAsk)
         .thenAccept(_ -> connection.close());
   }
 

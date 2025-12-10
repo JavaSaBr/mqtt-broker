@@ -70,4 +70,11 @@ public class PublishReleaseMqttInMessage extends PublishControlMqttInMessage<Pub
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
   }
+
+  public static PublishReleaseMqttInMessage of(int messageId, PublishReleaseReasonCode reasonCode) {
+    var message = new PublishReleaseMqttInMessage(MESSAGE_FLAGS);
+    message.messageId = messageId;
+    message.reasonCode = reasonCode;
+    return message;
+  }
 }

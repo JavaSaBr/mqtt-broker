@@ -11,7 +11,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_2)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1)
@@ -23,7 +23,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         inMessage.reason() == null
-        inMessage.messageId() == messageId
+        inMessage.messageId() == testMessageId
         def reasonCodes = inMessage.reasonCodes()
         reasonCodes.size() == 4
         reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
@@ -36,10 +36,10 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
-          it.putProperty(MqttMessageProperty.USER_PROPERTY, userProperties)
+          it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0)
@@ -53,8 +53,8 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         inMessage.reason() == reasonString
-        inMessage.messageId() == messageId
-        inMessage.userProperties() == userProperties
+        inMessage.messageId() == testMessageId
+        inMessage.userProperties() == testUserProperties
         def reasonCodes = inMessage.reasonCodes()
         reasonCodes.size() == 4
         reasonCodes.get(0) == SubscribeAckReasonCode.GRANTED_QOS_0
@@ -63,7 +63,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
         reasonCodes.get(3) == SubscribeAckReasonCode.UNSPECIFIED_ERROR
     when:
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
           it.putByte(SubscribeAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED.code())
           it.putByte(SubscribeAckReasonCode.GRANTED_QOS_2.code())
@@ -75,7 +75,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result2
         inMessage2.reason() == null
-        inMessage2.messageId() == messageId
+        inMessage2.messageId() == testMessageId
         inMessage2.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
         def reasonCodes2 = inMessage2.reasonCodes()
         reasonCodes2.size() == 4
@@ -92,7 +92,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.REASON_STRING, "reason1")
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0)
@@ -110,7 +110,7 @@ class SubscribeAckMqttInMessageTest extends BaseMqttInMessageTest {
   def "should not allow invalid message flags"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putShort(messageId)
+          it.putShort(testMessageId)
           it.putMbi(0)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_0)
           it.put(SubscribeAckReasonCode.GRANTED_QOS_1)

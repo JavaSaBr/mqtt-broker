@@ -137,7 +137,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
-    user.sendAsync(messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
   }
@@ -158,7 +158,7 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
       return true;
     } else if (!(message instanceof PublishReleaseMqttInMessage release)) {
-      log.warning(networkUser.clientId(), message, "[%s] Not expected message:%s]"::formatted);
+      log.warning(networkUser.clientId(), message, "[%s] Not expected message:[%s]"::formatted);
       return true;
     }
 

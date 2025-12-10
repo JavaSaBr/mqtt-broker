@@ -38,6 +38,10 @@ public enum PublishHandlingResult {
   NOT_EXPECTED_CLIENT(
       true,
       PublishAckReasonCode.UNSPECIFIED_ERROR,
+      PublishReceivedReasonCode.UNSPECIFIED_ERROR),
+  SESSION_IS_ALREADY_CLOSED(
+      true,
+      PublishAckReasonCode.UNSPECIFIED_ERROR,
       PublishReceivedReasonCode.UNSPECIFIED_ERROR);
 
   boolean error;

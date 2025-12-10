@@ -11,9 +11,9 @@ class PublishReceivedMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new PublishReceivedMqtt5OutMessage(
-            messageId,
+            testMessageId,
             PublishReceivedReasonCode.UNSPECIFIED_ERROR,
-            userProperties,
+            testUserProperties,
             reasonString)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -30,9 +30,11 @@ class PublishReceivedMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.reasonCode() == PublishReceivedReasonCode.UNSPECIFIED_ERROR
-        reader.messageId() == messageId
-        reader.userProperties() == userProperties
-        reader.reason() == reasonString
+        with(reader) {
+          reasonCode() == PublishReceivedReasonCode.UNSPECIFIED_ERROR
+          messageId() == testMessageId
+          userProperties() == testUserProperties
+          reason() == reasonString
+        }
   }
 }
