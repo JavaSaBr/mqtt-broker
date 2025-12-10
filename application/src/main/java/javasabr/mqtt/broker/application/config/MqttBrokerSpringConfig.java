@@ -250,7 +250,10 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    return new UnsubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
+    return new UnsubscribeMqttInMessageHandler(
+        subscriptionService,
+        messageOutFactoryService,
+        topicService);
   }
 
   @Bean
@@ -340,15 +343,30 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.max.message.size",
             int.class,
             MqttProperties.MAXIMUM_MESSAGE_SIZE_DEFAULT),
-        env.getProperty("mqtt.external.connection.max.string.length", int.class, MqttProperties.MAXIMUM_STRING_LENGTH),
-        env.getProperty("mqtt.external.connection.max.binary.size", int.class, MqttProperties.MAXIMUM_BINARY_SIZE),
-        env.getProperty("mqtt.external.connection.max.topic.levels", int.class, MqttProperties.MAXIMUM_TOPIC_LEVELS),
-        env.getProperty("mqtt.external.connection.min.keep.alive", int.class, MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
+        env.getProperty(
+            "mqtt.external.connection.max.string.length",
+            int.class,
+            MqttProperties.MAXIMUM_STRING_LENGTH),
+        env.getProperty(
+            "mqtt.external.connection.max.binary.size",
+            int.class,
+            MqttProperties.MAXIMUM_BINARY_SIZE),
+        env.getProperty(
+            "mqtt.external.connection.max.topic.levels",
+            int.class,
+            MqttProperties.MAXIMUM_TOPIC_LEVELS),
+        env.getProperty(
+            "mqtt.external.connection.min.keep.alive",
+            int.class,
+            MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.receive.maximum",
             int.class,
             MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT),
-        env.getProperty("mqtt.external.connection.topic.alias.maximum", int.class, 0),
+        env.getProperty(
+            "mqtt.external.connection.topic.alias.maximum",
+            int.class,
+            0),
         env.getProperty(
             "mqtt.external.connection.default.session.expiration.time",
             long.class,
@@ -361,14 +379,18 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.sessions.enabled",
             boolean.class,
             MqttProperties.SESSIONS_ENABLED_DEFAULT),
-        env.getProperty("mqtt.external.connection.retain.available", boolean.class, false),
-        // set false because currently it's not implemented and we should not allow for clients to use it
+        env.getProperty(
+            "mqtt.external.connection.retain.available",
+            boolean.class,
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
             MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_DEFAULT),
-        env.getProperty("mqtt.external.connection.subscription.id.available", boolean.class, false),
-        // set false because currently it's not implemented and we should not allow for clients to use it
+        env.getProperty(
+            "mqtt.external.connection.subscription.id.available",
+            boolean.class,
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,
