@@ -83,7 +83,7 @@ import org.springframework.core.env.Environment;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(DatabaseCredentialsSourceConfig.class)
+@EnableConfigurationProperties(CredentialsSourceDatabaseConfig.class)
 public class MqttBrokerSpringConfig {
 
   @Bean
@@ -108,21 +108,21 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  CredentialSource dbCredentialSource(DatabaseCredentialsSourceConfig databaseCredentialsSourceConfig) {
+  CredentialSource dbCredentialSource(CredentialsSourceDatabaseConfig credentialsSourceDatabaseConfig) {
     return DatabaseCredentialsSource
         .builder()
-        .dbPort(databaseCredentialsSourceConfig.port())
-        .dbDriver(databaseCredentialsSourceConfig.driver())
-        .dbName(databaseCredentialsSourceConfig.name())
-        .dbHost(databaseCredentialsSourceConfig.host())
-        .dbUsername(databaseCredentialsSourceConfig.username())
-        .dbPassword(databaseCredentialsSourceConfig.password())
-        .maxIdleTime(databaseCredentialsSourceConfig.maxIdleTime())
-        .initialPoolSize(databaseCredentialsSourceConfig.initialPoolSize())
-        .maxPoolSize(databaseCredentialsSourceConfig.maxPoolSize())
-        .credentialsQuery(databaseCredentialsSourceConfig.credentialsQuery())
-        .lockTimeout(databaseCredentialsSourceConfig.lockTimeout())
-        .statementTimeout(databaseCredentialsSourceConfig.statementTimeout())
+        .dbPort(credentialsSourceDatabaseConfig.port())
+        .dbDriver(credentialsSourceDatabaseConfig.driver())
+        .dbName(credentialsSourceDatabaseConfig.name())
+        .dbHost(credentialsSourceDatabaseConfig.host())
+        .dbUsername(credentialsSourceDatabaseConfig.username())
+        .dbPassword(credentialsSourceDatabaseConfig.password())
+        .maxIdleTime(credentialsSourceDatabaseConfig.maxIdleTime())
+        .initialPoolSize(credentialsSourceDatabaseConfig.initialPoolSize())
+        .maxPoolSize(credentialsSourceDatabaseConfig.maxPoolSize())
+        .credentialsQuery(credentialsSourceDatabaseConfig.credentialsQuery())
+        .lockTimeout(credentialsSourceDatabaseConfig.lockTimeout())
+        .statementTimeout(credentialsSourceDatabaseConfig.statementTimeout())
         .build();
   }
 

@@ -4,7 +4,7 @@ import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "credentials.source.db")
-public record DatabaseCredentialsSourceConfig(
+public record CredentialsSourceDatabaseConfig(
     String username,
     String password,
     String driver,
