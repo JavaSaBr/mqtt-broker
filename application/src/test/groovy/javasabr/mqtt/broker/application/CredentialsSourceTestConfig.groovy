@@ -2,7 +2,7 @@ package javasabr.mqtt.broker.application
 
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
-import javasabr.mqtt.broker.application.config.CredentialsSourceDatabaseConfig
+import javasabr.mqtt.broker.application.config.CredentialsSourceDatabaseProperties
 import javasabr.mqtt.service.auth.source.CredentialSource
 import javasabr.mqtt.service.auth.source.R2dbcCredentialsSource
 import org.springframework.context.annotation.Bean
@@ -15,7 +15,7 @@ class CredentialsSourceTestConfig {
   @Bean
   CredentialSource credentialSource(
       ConnectionFactory connectionFactory,
-      CredentialsSourceDatabaseConfig credentialsSourceDatabaseConfig) {
+      CredentialsSourceDatabaseProperties credentialsSourceDatabaseConfig) {
     return new R2dbcCredentialsSource(connectionFactory, credentialsSourceDatabaseConfig.credentialsQuery())
   }
 

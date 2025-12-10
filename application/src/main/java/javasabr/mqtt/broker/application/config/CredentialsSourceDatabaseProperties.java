@@ -1,11 +1,11 @@
 package javasabr.mqtt.broker.application.config;
 
 import java.time.Duration;
-import javasabr.mqtt.service.auth.source.CredentialsSourceConfig;
+import javasabr.mqtt.service.auth.source.DatabaseProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "credentials.source.db")
-public record CredentialsSourceDatabaseConfig(
+public record CredentialsSourceDatabaseProperties(
     String username,
     String password,
     String driver,
@@ -17,4 +17,4 @@ public record CredentialsSourceDatabaseConfig(
     int initialPoolSize,
     int maxPoolSize,
     String lockTimeout,
-    String statementTimeout) implements CredentialsSourceConfig {}
+    String statementTimeout) implements DatabaseProperties {}

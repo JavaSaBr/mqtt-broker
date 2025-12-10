@@ -21,13 +21,6 @@ import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.auth.AuthenticationService;
-import javasabr.mqtt.service.auth.DefaultAuthenticationService;
-import javasabr.mqtt.service.auth.PasswordBasedAuthenticationProvider;
-import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
-import javasabr.mqtt.service.auth.source.CredentialSource;
-import javasabr.mqtt.service.auth.source.CredentialsSourceConfig;
-import javasabr.mqtt.service.auth.source.FileCredentialsSource;
-import javasabr.mqtt.service.auth.source.R2dbcCredentialsSource;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -69,7 +62,6 @@ import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandle
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
-import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
@@ -80,11 +72,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(CredentialsSourceDatabaseConfig.class)
+@Import(AuthenticationSpringConfig.class)
+@EnableConfigurationProperties(CredentialsSourceDatabaseProperties.class)
 public class MqttBrokerSpringConfig {
 
   @Bean
@@ -100,38 +94,6 @@ public class MqttBrokerSpringConfig {
   MqttSessionService mqttSessionService(
       @Value("${sessions.clean.thread.interval:60000}") int cleanInterval) {
     return new InMemoryMqttSessionService(cleanInterval);
-  }
-
-  @Bean
-  CredentialSource credentialSource(
-      @Value("${credentials.source.file.name:credentials}") String fileName) {
-    return new FileCredentialsSource(fileName);
-  }
-
-  @Bean
-  CredentialSource dbCredentialSource(CredentialsSourceConfig credentialsSourceDatabaseConfig) {
-    return R2dbcCredentialsSource.builder().config(credentialsSourceDatabaseConfig).build();
-  }
-
-  @Bean
-  AuthenticationProvider passwordBasedAuthenticationProvider(CredentialSource credentialSource) {
-    return new PasswordBasedAuthenticationProvider(credentialSource);
-  }
-
-  @Bean
-  AuthenticationService authenticationService(
-      List<AuthenticationProvider> credentialSource,
-      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth,
-      @Value("${authentication.provider.default:basic}") String defaultProviderName) {
-    var authenticationProviders = DictionaryFactory.mutableRefToRefDictionary(
-        String.class,
-        AuthenticationProvider.class);
-    credentialSource.forEach(value -> authenticationProviders.put(value.getAuthMethodName(), value));
-    AuthenticationProvider defaultProvider = authenticationProviders.get(defaultProviderName);
-    if (defaultProvider == null) {
-      throw new IllegalArgumentException("[%s] authenticator provider not found".formatted(defaultProviderName));
-    }
-    return new DefaultAuthenticationService(authenticationProviders.toReadOnly(), defaultProvider, allowAnonymousAuth);
   }
 
   @Bean

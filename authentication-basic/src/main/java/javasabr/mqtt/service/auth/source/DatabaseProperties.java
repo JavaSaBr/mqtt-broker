@@ -2,7 +2,7 @@ package javasabr.mqtt.service.auth.source;
 
 import java.time.Duration;
 
-public interface CredentialsSourceConfig {
+public interface DatabaseProperties {
   String username();
   String password();
   String driver();
