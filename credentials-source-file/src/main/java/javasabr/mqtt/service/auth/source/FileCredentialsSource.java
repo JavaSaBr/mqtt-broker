@@ -44,4 +44,9 @@ public class FileCredentialsSource extends AbstractCredentialSource {
       throw new CredentialsSourceException(e);
     }
   }
+
+  @Override
+  public String getName() {
+    return "file";
+  }
 }

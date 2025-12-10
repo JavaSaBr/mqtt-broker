@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 public interface CredentialSource {
 
-  Mono<Boolean> check(String user, byte[] pass);
+  String getName();
 
-  Mono<Boolean> check(byte[] pass);
+  Mono<Boolean> isCredentialExists(String user, byte[] pass);
 }

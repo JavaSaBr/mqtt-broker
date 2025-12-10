@@ -33,12 +33,8 @@ public abstract class AbstractCredentialSource implements CredentialSource {
   }
 
   @Override
-  public Mono<Boolean> check(String user, byte[] pass) {
+  public Mono<Boolean> isCredentialExists(String user, byte[] pass) {
     return Mono.just(Arrays.equals(pass, credentials.get(user)));
   }
 
-  @Override
-  public Mono<Boolean> check(byte[] pass) {
-    return Mono.just(false);
-  }
 }

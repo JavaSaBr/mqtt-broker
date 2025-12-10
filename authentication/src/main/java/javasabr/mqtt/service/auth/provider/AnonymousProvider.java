@@ -12,6 +12,6 @@ public class AnonymousProvider implements AuthenticationProvider {
 
   @Override
   public Mono<Boolean> authenticate(String username, byte[] password, byte[] data) {
-    return Mono.just(Boolean.TRUE);
+    return Mono.just(true);
   }
 }

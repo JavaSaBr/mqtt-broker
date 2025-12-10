@@ -1,11 +1,9 @@
 package javasabr.mqtt.broker.application.config;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
-import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
-import javasabr.mqtt.service.auth.AuthenticationService;
-import javasabr.mqtt.service.auth.DefaultAuthenticationService;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -16,13 +14,18 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
-import javasabr.mqtt.service.auth.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
+import javasabr.mqtt.service.auth.AuthenticationService;
+import javasabr.mqtt.service.auth.CredentialSource;
+import javasabr.mqtt.service.auth.DefaultAuthenticationService;
 import javasabr.mqtt.service.auth.PasswordBasedAuthenticationProvider;
+import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
+import javasabr.mqtt.service.auth.source.DatabaseCredentialsSource;
+import javasabr.mqtt.service.auth.source.FileCredentialsSource;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -31,7 +34,6 @@ import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
-import javasabr.mqtt.service.auth.source.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
@@ -64,6 +66,7 @@ import javasabr.rlib.network.server.ServerNetwork;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,6 +74,7 @@ import org.springframework.core.env.Environment;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(DatabaseCredentialsSourceConfig.class)
 public class MqttBrokerSpringConfig {
 
   @Bean
@@ -95,15 +99,34 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  CredentialSource dbCredentialSource(DatabaseCredentialsSourceConfig databaseCredentialsSourceConfig) {
+    return DatabaseCredentialsSource
+        .builder()
+        .dbPort(databaseCredentialsSourceConfig.port())
+        .dbDriver(databaseCredentialsSourceConfig.driver())
+        .dbName(databaseCredentialsSourceConfig.name())
+        .dbHost(databaseCredentialsSourceConfig.host())
+        .dbUsername(databaseCredentialsSourceConfig.username())
+        .dbPassword(databaseCredentialsSourceConfig.password())
+        .maxIdleTime(databaseCredentialsSourceConfig.maxIdleTime())
+        .initialPoolSize(databaseCredentialsSourceConfig.initialPoolSize())
+        .maxPoolSize(databaseCredentialsSourceConfig.maxPoolSize())
+        .credentialsQuery(databaseCredentialsSourceConfig.credentialsQuery())
+        .lockTimeout(databaseCredentialsSourceConfig.lockTimeout())
+        .statementTimeout(databaseCredentialsSourceConfig.statementTimeout())
+        .build();
+  }
+
+  @Bean
   AuthenticationProvider passwordBasedAuthenticationProvider(CredentialSource credentialSource) {
-    return new PasswordBasedAuthenticationProvider(credentialSource, "basic");
+    return new PasswordBasedAuthenticationProvider(credentialSource);
   }
 
   @Bean
   AuthenticationService authenticationService(
       List<AuthenticationProvider> credentialSource,
-      @Value("${authentication.allow.anonymous:false}")  boolean allowAnonymousAuth) {
-    String defaultProviderName = "basic";
+      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth,
+      @Value("${authentication.provider.default:basic}") String defaultProviderName) {
     var authenticationProviders = DictionaryFactory.mutableRefToRefDictionary(
         String.class,
         AuthenticationProvider.class);
@@ -171,10 +194,7 @@ public class MqttBrokerSpringConfig {
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    return new PublishMqttInMessageHandler(
-        publishReceivingService,
-        messageOutFactoryService,
-        topicService);
+    return new PublishMqttInMessageHandler(publishReceivingService, messageOutFactoryService, topicService);
   }
 
   @Bean
@@ -205,10 +225,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    return new UnsubscribeMqttInMessageHandler(
-        subscriptionService,
-        messageOutFactoryService,
-        topicService);
+    return new UnsubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
   }
 
   @Bean
@@ -248,10 +265,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService);
+    return new Qos0MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Bean
@@ -259,10 +273,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService);
+    return new Qos1MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Bean
@@ -270,10 +281,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService);
+    return new Qos2MqttPublishInMessageHandler(subscriptionService, publishDeliveringService, messageOutFactoryService);
   }
 
   @Bean
@@ -298,22 +306,10 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.max.message.size",
             int.class,
             MqttProperties.MAXIMUM_MESSAGE_SIZE_DEFAULT),
-        env.getProperty(
-            "mqtt.external.connection.max.string.length",
-            int.class,
-            MqttProperties.MAXIMUM_STRING_LENGTH),
-        env.getProperty(
-            "mqtt.external.connection.max.binary.size",
-            int.class,
-            MqttProperties.MAXIMUM_BINARY_SIZE),
-        env.getProperty(
-            "mqtt.external.connection.max.topic.levels",
-            int.class,
-            MqttProperties.MAXIMUM_TOPIC_LEVELS),
-        env.getProperty(
-            "mqtt.external.connection.min.keep.alive",
-            int.class,
-            MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
+        env.getProperty("mqtt.external.connection.max.string.length", int.class, MqttProperties.MAXIMUM_STRING_LENGTH),
+        env.getProperty("mqtt.external.connection.max.binary.size", int.class, MqttProperties.MAXIMUM_BINARY_SIZE),
+        env.getProperty("mqtt.external.connection.max.topic.levels", int.class, MqttProperties.MAXIMUM_TOPIC_LEVELS),
+        env.getProperty("mqtt.external.connection.min.keep.alive", int.class, MqttProperties.SERVER_KEEP_ALIVE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.receive.maximum",
             int.class,

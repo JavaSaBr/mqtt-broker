@@ -21,7 +21,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
   public Mono<Boolean> authenticate(AuthRequest request) {
     String username = request.username();
     if (allowAnonymousAuth && StringUtils.isEmpty(username)) {
-      return Mono.just(Boolean.TRUE);
+      return Mono.just(true);
     } else {
       return providers
           .getOrDefault(request.authenticationMethod(), defaultProvider)
