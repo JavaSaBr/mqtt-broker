@@ -364,15 +364,12 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
         retainMessageService.retainMessage(publishWithRetain)
-    and:
-        def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
-        retainMessageService.retainMessage(publishWithoutRetain)
     when:
         subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
         subscriptionService.subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
-        def thirdPublishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
-        thirdPublishMessage.payload() == publishWithRetain.payload()
+        def publishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        publishMessage.payload() == publishWithRetain.payload()
     and:
         mqttUser.isEmpty()
   }

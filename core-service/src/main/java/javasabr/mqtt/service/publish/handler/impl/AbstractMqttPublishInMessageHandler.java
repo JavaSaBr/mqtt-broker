@@ -54,8 +54,9 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   }
 
   protected void handleImpl(U user, NetworkMqttSession session, Publish publish) {
-    retainMessageService.retainMessage(publish);
-
+    if (publish.retained()) {
+      retainMessageService.retainMessage(publish);
+    }
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {

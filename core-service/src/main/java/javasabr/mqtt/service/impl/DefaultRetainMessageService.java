@@ -2,6 +2,7 @@ package javasabr.mqtt.service.impl;
 
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
 import javasabr.mqtt.service.PublishDeliveringService;
@@ -15,24 +16,24 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DefaultRetainMessageService implements RetainMessageService {
 
-  PublishDeliveringService defaultPublishDeliveringService;
+  PublishDeliveringService publishDeliveringService;
   ConcurrentRetainedMessageTree retainedMessageTree;
 
-  public DefaultRetainMessageService(PublishDeliveringService defaultPublishDeliveringService) {
-    this.defaultPublishDeliveringService = defaultPublishDeliveringService;
+  public DefaultRetainMessageService(PublishDeliveringService publishDeliveringService) {
+    this.publishDeliveringService = publishDeliveringService;
     this.retainedMessageTree = new ConcurrentRetainedMessageTree();
   }
 
   @Override
   public void retainMessage(Publish publish) {
-    if (publish.retained()) {
-      retainedMessageTree.retainMessage(publish);
-    }
+    retainedMessageTree.retainMessage(publish);
+
   }
 
   @Override
-  public Array<PublishHandlingResult> deliverRetainedMessages(SingleSubscriber subscriber) {
-    Subscription subscription = subscriber.subscription();
+  public Array<PublishHandlingResult> deliverRetainedMessages(Subscriber subscriber) {
+    SingleSubscriber singleSubscriber = subscriber.resolveSingle();
+    Subscription subscription = singleSubscriber.subscription();
     boolean retainAsPublished = subscription.retainAsPublished();
     Array<Publish> retainedMessages = retainedMessageTree.getRetainedMessage(subscription.topicFilter());
     MutableArray<PublishHandlingResult> result = MutableArray.ofType(PublishHandlingResult.class);
@@ -40,7 +41,7 @@ public class DefaultRetainMessageService implements RetainMessageService {
       if (!retainAsPublished) {
         message = message.withoutRetain();
       }
-      result.add(defaultPublishDeliveringService.startDelivering(message, subscriber));
+      result.add(publishDeliveringService.startDelivering(message, singleSubscriber));
     }
     return Array.copyOf(result);
   }
