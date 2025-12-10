@@ -1,16 +1,15 @@
 # JMQTT-Broker
 
-JMQTT-Broker is an open source (GPL v3) Java based MQTT Broker with network implementation based on Java.NIO.2
-
+MQTT-Broker is an open source Java based MQTT Broker which implements MQTT v3.1.1 and v5.0 protocol versions.
 ## Dependencies for building
-### java 13+
+### java 25+
 ##### Ubuntu:
 ```bash
 sudo wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
 sudo add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
 sudo apt-get install adoptopenjdk-13-hotspot
 ```
-##### Windows: [Windows x64 installer](https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9/OpenJDK13U-jdk_x64_windows_hotspot_13.0.1_9.msi)
+##### Windows: [Windows x64 installer](https://adoptium.net/temurin/releases)
 ##### MacOS: [MacOS x64 installer](https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9/OpenJDK13U-jdk_x64_mac_hotspot_13.0.1_9.pkg)
 ### Docker
 ##### Ubuntu: [installation guide](https://docs.docker.com/install/linux/docker-ce/ubuntu)
