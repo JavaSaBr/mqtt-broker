@@ -9,14 +9,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.core.io.ClassPathResource
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer
 import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator
+import org.springframework.r2dbc.core.DatabaseClient
 
 class CredentialsSourceTestConfig {
 
   @Bean
-  CredentialSource credentialSource(
-      ConnectionFactory connectionFactory,
-      CredentialsSourceDatabaseProperties credentialsSourceDatabaseConfig) {
-    return new R2dbcCredentialsSource(connectionFactory, credentialsSourceDatabaseConfig.credentialsQuery())
+  CredentialSource credentialSource(DatabaseClient databaseClient, CredentialsSourceDatabaseProperties properties) {
+    return new R2dbcCredentialsSource(databaseClient, properties.credentialsQuery())
   }
 
   @Bean

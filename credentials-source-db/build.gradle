@@ -12,6 +12,7 @@ dependencies {
   api libs.r2dbc.spi
   api libs.r2dbc.pool
   api libs.r2dbc.postgresql
+  api libs.spring.r2dbc
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport

@@ -15,7 +15,6 @@ dependencies {
   implementation libs.springboot.starter.core
   implementation libs.springboot.starter.log4j2
 
-  testImplementation libs.spring.r2dbc
   testImplementation libs.r2dbc.h2
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)

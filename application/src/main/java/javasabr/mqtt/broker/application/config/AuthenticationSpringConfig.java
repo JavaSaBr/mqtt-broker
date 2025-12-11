@@ -27,6 +27,7 @@ import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration(proxyBeanMethods = false)
 public class AuthenticationSpringConfig {
@@ -61,12 +62,17 @@ public class AuthenticationSpringConfig {
   }
 
   @Bean
+  DatabaseClient databaseClient(ConnectionFactory connectionFactory) {
+    return DatabaseClient.create(connectionFactory);
+  }
+
+  @Bean
   CredentialSource credentialSource(@Value("${credentials.source.file.name:credentials}") String fileName) {
     return new FileCredentialsSource(fileName);
   }
 
   @Bean
-  CredentialSource dbCredentialSource(ConnectionFactory connectionFactory, DatabaseProperties databaseProperties) {
+  CredentialSource dbCredentialSource(DatabaseClient connectionFactory, DatabaseProperties databaseProperties) {
     return new R2dbcCredentialsSource(connectionFactory, databaseProperties.credentialsQuery());
   }
 
