@@ -11,7 +11,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
       String rawTopicFilter,
       List<String> expectedMessages) {
     given:
-        ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree();
+        ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree()
         messages.collect(TestPublishFactory::makePublish).each(retainedMessageTree::retainMessage)
         def topicFilter = TopicFilter.valueOf(rawTopicFilter)
     when:
@@ -29,6 +29,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
             "/topic/+/segment2",
             "/topic/#"
         ]
+        //noinspection GroovyAssignabilityCheck
         messages << [
             [
                 "/topic/segment1",
@@ -70,6 +71,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
                 "/topic/segment1/segment2"
             ]
         ]
+        //noinspection GroovyAssignabilityCheck
         expectedMessages << [
             [
                 "/topic/segment1"
@@ -85,9 +87,9 @@ class RetainedMessageTreeTest extends UnitSpecification {
                 "/topic/segment500/segment2"
             ],
             [
+                "/topic/segment1/segment2",
                 "/topic/segment2",
-                "/topic/segment3",
-                "/topic/segment1/segment2"
+                "/topic/segment3"
             ]
         ]
   }

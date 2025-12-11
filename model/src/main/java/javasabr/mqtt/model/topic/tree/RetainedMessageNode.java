@@ -1,6 +1,5 @@
 package javasabr.mqtt.model.topic.tree;
 
-import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
@@ -10,7 +9,6 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.collections.deque.DequeFactory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -61,10 +59,7 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     retainedMessage.set(null);
   }
 
-  public void collectRetainedMessages(
-      int level,
-      TopicFilter topicFilter,
-      MutableArray<Publish> result) {
+  public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
     if (level == topicFilter.levelsCount()) {
       Publish publish = retainedMessage.get();
       if (publish != null) {
@@ -73,36 +68,51 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       return;
     }
     String segment = topicFilter.segment(level);
-    boolean isOneCharSegment = segment.length() == 1;
-    if (isOneCharSegment && segment.charAt(0) == TopicFilter.MULTI_LEVEL_WILDCARD_CHAR) {
-      collectAllMessages(this, result);
-      return;
-    }
-    if (isOneCharSegment && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR) {
-      var localChildNodes = getChildNodes(RetainedMessageNode::childNodesFactory);
-      if (localChildNodes != null) {
-        for (RetainedMessageNode childNode : localChildNodes) {
-          childNode.collectRetainedMessages(level + 1, topicFilter, result);
-        }
-      }
+    boolean isOneChar = segment.length() == 1;
+    if (isOneChar && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR) {
+      collectAllChildren(level, topicFilter, result);
+    } else if (isOneChar && segment.charAt(0) == TopicFilter.MULTI_LEVEL_WILDCARD_CHAR) {
+      collectEverything(this, result);
     } else {
-      RetainedMessageNode retainedMessageNode = getChildNode(segment);
-      if (retainedMessageNode != null) {
-        retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
+      collectExactSegment(level, segment, topicFilter, result);
+    }
+  }
+
+  private void collectExactSegment(
+      int level,
+      String segment,
+      TopicFilter topicFilter,
+      MutableArray<Publish> result) {
+    RetainedMessageNode retainedMessageNode = getChildNode(segment);
+    if (retainedMessageNode != null) {
+      retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
+    }
+  }
+
+  private void collectAllChildren(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
+    var localChildNodes = getChildNodes(RetainedMessageNode::childNodesFactory);
+    if (localChildNodes != null) {
+      for (RetainedMessageNode childNode : localChildNodes) {
+        childNode.collectRetainedMessages(level + 1, topicFilter, result);
       }
     }
   }
 
-  private void collectAllMessages(RetainedMessageNode node, MutableArray<Publish> result) {
-    Queue<RetainedMessageNode> queue = DequeFactory.arrayBasedBased(RetainedMessageNode.class);
-    queue.add(node);
-    while (!queue.isEmpty()) {
-      RetainedMessageNode poll = queue.poll();
-      Publish message = poll.retainedMessage.get();
-      if (message != null) {
-        result.add(message);
+  private void collectEverything(RetainedMessageNode node, MutableArray<Publish> result) {
+    collectEverythingDfs(node, result);
+  }
+
+  private void collectEverythingDfs(RetainedMessageNode node, MutableArray<Publish> result) {
+    Publish message = node.retainedMessage.get();
+    if (message != null) {
+      result.add(message);
+    }
+
+    var childNodes = node.getChildNodes(RetainedMessageNode::childNodesFactory);
+    if (childNodes != null) {
+      for (RetainedMessageNode childNode : childNodes) {
+        collectEverythingDfs(childNode, result);
       }
-      poll.collectChildNodes(queue);
     }
   }
 }
