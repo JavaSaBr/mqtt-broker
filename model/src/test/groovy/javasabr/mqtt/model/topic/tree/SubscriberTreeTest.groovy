@@ -15,6 +15,18 @@ import javasabr.mqtt.test.support.UnitSpecification
 
 class SubscriberTreeTest extends UnitSpecification {
 
+  static SingleSubscriber createSubscriber(String clientId, String rawTopicFilter) {
+    return createSubscriber(clientId, rawTopicFilter, QoS.AT_LEAST_ONCE.number())
+  }
+
+  static SingleSubscriber createSubscriber(String clientId, String rawTopicFilter, int qos) {
+    return new SingleSubscriber(makeUser(clientId), makeSubscription(rawTopicFilter, qos))
+  }
+
+  static SingleSubscriber createShareSubscriber(String clientId, String rawTopicFilter) {
+    return new SingleSubscriber(makeUser(clientId), makeSharedSubscription(rawTopicFilter))
+  }
+
   def "should match simple topic correctly"(
       List<Subscription> subscriptions,
       List<MqttUser> users,
@@ -426,19 +438,19 @@ class SubscriberTreeTest extends UnitSpecification {
         //noinspection GroovyAssignabilityCheck
         expectedSubscribers << [
             [
-                new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/segment1/segment2", 2)),
-                new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/segment1/#", 1)),
-                new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/#", 0)),
+                createSubscriber("id1", "/topic/segment1/segment2", 2),
+                createSubscriber("id2", "/topic/segment1/#", 1),
+                createSubscriber("id3", "/topic/#", 0),
             ],
             [
-                new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/#", 0)),
-                new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/#", 0)),
-                new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/#", 0)),
+                createSubscriber("id1", "/topic/#", 0),
+                createSubscriber("id2", "/topic/#", 0),
+                createSubscriber("id3", "/topic/#", 0),
             ],
             [
-                new SingleSubscriber(makeUser("id1"), makeSubscription("/topic/#", 0)),
-                new SingleSubscriber(makeUser("id2"), makeSubscription("/topic/#", 0)),
-                new SingleSubscriber(makeUser("id3"), makeSubscription("/topic/segment2/#", 1)),
+                createSubscriber("id1", "/topic/#", 0),
+                createSubscriber("id2", "/topic/#", 0),
+                createSubscriber("id3", "/topic/segment2/#", 1),
             ]
         ]
   }
@@ -448,16 +460,16 @@ class SubscriberTreeTest extends UnitSpecification {
         def group1 = ["id1", "id2", "id3", "id4", "id5"]
         def group2 = ["id6", "id7", "id8", "id9", "id10"]
         ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id1"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id2"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id3"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id4"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id5"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id6"), makeSharedSubscription('$share/group2/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id7"), makeSharedSubscription('$share/group2/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id8"), makeSharedSubscription('$share/group2/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id9"), makeSharedSubscription('$share/group2/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id10"), makeSharedSubscription('$share/group2/topic/name1')))
+        subscriberTree.subscribe(createShareSubscriber("id1", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id2", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id3", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id4", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id5", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id6", '$share/group2/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id7", '$share/group2/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id8", '$share/group2/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id9", '$share/group2/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id10", '$share/group2/topic/name1'))
     when:
         def matched = subscriberTree
             .matches(TopicName.valueOf("topic/name1"))
@@ -481,9 +493,9 @@ class SubscriberTreeTest extends UnitSpecification {
   def "should subscribe and unsubscribe simple topic correctly correctly"() {
     given:
         ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id1"), makeSubscription('topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id2"), makeSubscription('topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id3"), makeSubscription('topic/name1')))
+        subscriberTree.subscribe(createSubscriber("id1", 'topic/name1'))
+        subscriberTree.subscribe(createSubscriber("id2", 'topic/name1'))
+        subscriberTree.subscribe(createSubscriber("id3", 'topic/name1'))
     when:
         def matched = subscriberTree
             .matches(TopicName.valueOf("topic/name1"))
@@ -518,9 +530,9 @@ class SubscriberTreeTest extends UnitSpecification {
   def "should subscribe and unsubscribe shared topic correctly correctly"() {
     given:
         ConcurrentSubscriberTree subscriberTree = new ConcurrentSubscriberTree()
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id1"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id2"), makeSharedSubscription('$share/group1/topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id3"), makeSharedSubscription('$share/group1/topic/name1')))
+        subscriberTree.subscribe(createShareSubscriber("id1", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id2", '$share/group1/topic/name1'))
+        subscriberTree.subscribe(createShareSubscriber("id3", '$share/group1/topic/name1'))
     when:
         def matched = subscriberTree
             .matches(TopicName.valueOf("topic/name1"))
@@ -529,8 +541,12 @@ class SubscriberTreeTest extends UnitSpecification {
     then:
         matched.size() == 1
     when:
-        def id2WasUnsubscribed = subscriberTree.unsubscribe(makeUser("id2"), SharedTopicFilter.valueOf('$share/group1/topic/name1'))
-        def id3WasUnsubscribed = subscriberTree.unsubscribe(makeUser("id3"), SharedTopicFilter.valueOf('$share/group1/topic/name1'))
+        def id2WasUnsubscribed = subscriberTree.unsubscribe(
+            makeUser("id2"),
+            SharedTopicFilter.valueOf('$share/group1/topic/name1'))
+        def id3WasUnsubscribed = subscriberTree.unsubscribe(
+            makeUser("id3"),
+            SharedTopicFilter.valueOf('$share/group1/topic/name1'))
         matched = subscriberTree
             .matches(TopicName.valueOf("topic/name1"))
             .collect { it.user().toString() }
@@ -540,8 +556,12 @@ class SubscriberTreeTest extends UnitSpecification {
         id2WasUnsubscribed
         id3WasUnsubscribed
     when:
-        def id1WasUnsubscribed = subscriberTree.unsubscribe(makeUser("id1"), SharedTopicFilter.valueOf('$share/group1/topic/name1'))
-        id3WasUnsubscribed = subscriberTree.unsubscribe(makeUser("id3"), SharedTopicFilter.valueOf('$share/group1/topic/name1'))
+        def id1WasUnsubscribed = subscriberTree.unsubscribe(
+            makeUser("id1"),
+            SharedTopicFilter.valueOf('$share/group1/topic/name1'))
+        id3WasUnsubscribed = subscriberTree.unsubscribe(
+            makeUser("id3"),
+            SharedTopicFilter.valueOf('$share/group1/topic/name1'))
         matched = subscriberTree
             .matches(TopicName.valueOf("topic/name1"))
             .collect { it.user().toString() }
@@ -558,8 +578,8 @@ class SubscriberTreeTest extends UnitSpecification {
         def owner1 = makeUser("id1")
         def originalSub = makeSubscription('topic/name1')
         def replacementSub = makeSubscription('topic/name1')
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id2"), makeSubscription('topic/name1')))
-        subscriberTree.subscribe(new SingleSubscriber(makeUser("id3"), makeSubscription('topic/name1')))
+        subscriberTree.subscribe(createSubscriber("id2", 'topic/name1'))
+        subscriberTree.subscribe(createSubscriber("id3", 'topic/name1'))
     when:
         def previous = subscriberTree.subscribe(new SingleSubscriber(owner1, originalSub))
         def matched = subscriberTree
