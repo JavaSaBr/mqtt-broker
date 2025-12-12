@@ -21,7 +21,6 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
@@ -85,7 +84,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
     if (previousSubscriber != null) {
       activeSubscriptions.remove(previousSubscriber.subscription());
     }
-    sendRetainedMessages(newSubscriber, previousSubscriber);
+    if (isRetainHandlingRequired(subscription, previousSubscriber)) {
+        retainMessageService.deliverRetainedMessages(newSubscriber);
+    }
     activeSubscriptions.add(subscription);
     return subscription.qos().subscribeAckReasonCode();
   }
@@ -111,7 +112,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
     if (topicFilter.isInvalid()) {
       return UnsubscribeAckReasonCode.TOPIC_FILTER_INVALID;
     } else if (subscriberTree.unsubscribe(user, topicFilter)) {
-      session.activeSubscriptions().removeByTopicFilter(topicFilter);
+      session
+          .activeSubscriptions()
+          .removeByTopicFilter(topicFilter);
       return SUCCESS;
     } else {
       return NO_SUBSCRIPTION_EXISTED;
@@ -120,7 +123,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public void cleanSubscriptions(MqttUser user, MqttSession session) {
-    Array<Subscription> subscriptions = session.activeSubscriptions().subscriptions();
+    Array<Subscription> subscriptions = session
+        .activeSubscriptions()
+        .subscriptions();
     for (Subscription subscription : subscriptions) {
       subscriberTree.unsubscribe(user, subscription.topicFilter());
     }
@@ -128,39 +133,22 @@ public class InMemorySubscriptionService implements SubscriptionService {
 
   @Override
   public void restoreSubscriptions(MqttUser user, MqttSession session) {
-    Array<Subscription> subscriptions = session.activeSubscriptions().subscriptions();
+    Array<Subscription> subscriptions = session
+        .activeSubscriptions()
+        .subscriptions();
     for (Subscription subscription : subscriptions) {
-      SingleSubscriber singleSubscriber = new SingleSubscriber(user, subscription);
-      subscriberTree.subscribe(singleSubscriber);
+      subscriberTree.subscribe(new SingleSubscriber(user, subscription));
     }
   }
 
-  private static boolean isRetainHandlingSatisfied(Subscription subscription, @Nullable Subscriber previousSubscriber) {
-    SubscribeRetainHandling retainHandling = subscription.retainHandling();
+  private static boolean isRetainHandlingRequired(
+      Subscription newSubscription,
+      @Nullable Subscriber previousSubscriber) {
+    if (newSubscription.topicFilter().isShared() || !newSubscription.qos().isValid()) {
+      return false;
+    }
+    SubscribeRetainHandling retainHandling = newSubscription.retainHandling();
     return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
                                           && previousSubscriber == null);
-  }
-
-  private void sendRetainedMessages(Subscriber newSubscriber, @Nullable Subscriber previousSubscriber) {
-    Subscription subscription = newSubscriber.resolveSingle().subscription();
-    if (!subscription.qos().isValid() || !isRetainHandlingSatisfied(subscription, previousSubscriber)) {
-      return;
-    }
-    int count = 0;
-    String clientId = newSubscriber.resolveSingle().user().clientId();
-    var results = retainMessageService.deliverRetainedMessages(newSubscriber);
-    for (PublishHandlingResult result : results) {
-      PublishHandlingResult errorResult = null;
-      if (result.error()) {
-        errorResult = result;
-      } else if (result == PublishHandlingResult.SUCCESS) {
-        count++;
-      }
-      if (errorResult != null) {
-        log.debug(clientId, errorResult, "[%s] Error occurred [%s] during sending retained messages"::formatted);
-      } else {
-        log.debug(clientId, count, "[%s] Delivering of [%s] retained message has been started"::formatted);
-      }
-    }
   }
 }

@@ -11,5 +11,5 @@ public interface RetainMessageService {
 
   void retainMessage(Publish publish);
 
-  Array<PublishHandlingResult> deliverRetainedMessages(Subscriber subscriber);
+  void deliverRetainedMessages(Subscriber subscriber);
 }

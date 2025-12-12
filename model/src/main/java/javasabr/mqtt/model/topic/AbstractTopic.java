@@ -32,6 +32,10 @@ public abstract class AbstractTopic {
     rawTopic = rawTopicName;
   }
 
+  public boolean isShared(){
+    return false;
+  }
+
   public String segment(int level) {
     return segments[level];
   }

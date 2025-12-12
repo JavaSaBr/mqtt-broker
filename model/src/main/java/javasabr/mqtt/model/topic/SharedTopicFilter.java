@@ -28,6 +28,11 @@ public class SharedTopicFilter extends TopicFilter {
     return new SharedTopicFilter(rawTopicFilter, shareName);
   }
 
+  @Override
+  public boolean isShared(){
+    return true;
+  }
+
   public static boolean isShared(String rawTopicFilter) {
     return rawTopicFilter.startsWith(SharedTopicFilter.SHARE_KEYWORD);
   }

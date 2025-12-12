@@ -31,7 +31,7 @@ public class DefaultRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public Array<PublishHandlingResult> deliverRetainedMessages(Subscriber subscriber) {
+  public void deliverRetainedMessages(Subscriber subscriber) {
     SingleSubscriber singleSubscriber = subscriber.resolveSingle();
     Subscription subscription = singleSubscriber.subscription();
     boolean retainAsPublished = subscription.retainAsPublished();
@@ -41,8 +41,7 @@ public class DefaultRetainMessageService implements RetainMessageService {
       if (!retainAsPublished) {
         message = message.withoutRetain();
       }
-      result.add(publishDeliveringService.startDelivering(message, singleSubscriber));
+      publishDeliveringService.startDelivering(message, singleSubscriber);
     }
-    return Array.copyOf(result);
   }
 }
