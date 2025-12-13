@@ -38,10 +38,8 @@ public class AuthenticationSpringConfig {
   @Bean
   ConnectionFactory connectionFactory(DatabaseProperties config) {
     Map<String, String> timeoutOptions = Map.of(
-        LOCK_TIMEOUT_OPTION,
-        config.lockTimeout(),
-        STATEMENT_TIMEOUT_OPTION,
-        config.statementTimeout());
+        LOCK_TIMEOUT_OPTION, config.lockTimeout(),
+        STATEMENT_TIMEOUT_OPTION, config.statementTimeout());
     ConnectionFactoryOptions connectionFactoryOptions = ConnectionFactoryOptions
         .builder()
         .option(DRIVER, config.driver())
@@ -52,8 +50,9 @@ public class AuthenticationSpringConfig {
         .option(DATABASE, config.name())
         .option(OPTIONS, timeoutOptions)
         .build();
+    ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration
-        .builder(ConnectionFactories.get(connectionFactoryOptions))
+        .builder(connectionFactory)
         .maxIdleTime(config.maxIdleTime())
         .maxSize(config.maxPoolSize())
         .initialSize(config.initialPoolSize())
@@ -83,17 +82,15 @@ public class AuthenticationSpringConfig {
 
   @Bean
   AuthenticationService authenticationService(
-      List<AuthenticationProvider> credentialSource,
+      List<AuthenticationProvider> authenticationProviders,
       @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth,
       @Value("${authentication.provider.default:basic}") String defaultProviderName) {
-    var authenticationProviders = DictionaryFactory.mutableRefToRefDictionary(
-        String.class,
-        AuthenticationProvider.class);
-    credentialSource.forEach(value -> authenticationProviders.put(value.getAuthMethodName(), value));
-    AuthenticationProvider defaultProvider = authenticationProviders.get(defaultProviderName);
+    var providers = DictionaryFactory.mutableRefToRefDictionary(String.class, AuthenticationProvider.class);
+    authenticationProviders.forEach(value -> providers.put(value.getAuthMethodName(), value));
+    AuthenticationProvider defaultProvider = providers.get(defaultProviderName);
     if (defaultProvider == null) {
       throw new IllegalArgumentException("[%s] authenticator provider not found".formatted(defaultProviderName));
     }
-    return new DefaultAuthenticationService(authenticationProviders.toReadOnly(), defaultProvider, allowAnonymousAuth);
+    return new DefaultAuthenticationService(providers.toReadOnly(), defaultProvider, allowAnonymousAuth);
   }
 }
