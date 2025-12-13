@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.auth;
 
-import javasabr.mqtt.model.message.AuthRequest;
+import javasabr.mqtt.model.auth.AuthRequest;
 import javasabr.mqtt.service.auth.provider.AuthenticationProvider;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import javasabr.rlib.common.util.StringUtils;

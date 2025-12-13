@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.auth;
 
-import javasabr.mqtt.model.message.AuthRequest;
+import javasabr.mqtt.model.auth.AuthRequest;
 import reactor.core.publisher.Mono;
 
 public interface AuthenticationService {

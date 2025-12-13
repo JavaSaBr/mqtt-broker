@@ -8,7 +8,6 @@ import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.model.message.AuthRequest;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -26,7 +25,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ConnectMqttInMessage extends MqttInMessage implements AuthRequest {
+public class ConnectMqttInMessage extends MqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT.ordinal();
 

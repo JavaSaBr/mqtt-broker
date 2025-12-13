@@ -15,6 +15,7 @@ import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
+import javasabr.mqtt.model.auth.AuthRequest;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -27,6 +28,7 @@ import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.auth.AuthenticationService;
+import javasabr.mqtt.service.message.converter.ConnectToAuthRequestConverter;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -43,6 +45,7 @@ public class ConnectInMqttInMessageHandler
   AuthenticationService authenticationService;
   MqttSessionService sessionService;
   SubscriptionService subscriptionService;
+  ConnectToAuthRequestConverter connectToAuthRequestConverter;
 
   public ConnectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
@@ -55,6 +58,7 @@ public class ConnectInMqttInMessageHandler
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
     this.subscriptionService = subscriptionService;
+    this.connectToAuthRequestConverter = new ConnectToAuthRequestConverter();
   }
 
   @Override
@@ -73,8 +77,9 @@ public class ConnectInMqttInMessageHandler
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(user, message);
+    AuthRequest authRequest = connectToAuthRequestConverter.convert(message);
     authenticationService
-        .authenticate(message)
+        .authenticate(authRequest)
         .flatMap(ifTrue(
             user,
             message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))
