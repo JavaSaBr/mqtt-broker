@@ -26,7 +26,7 @@ class RuleTest extends UnitSpecification implements ConditionMatcherAware {
         SUBSCRIBE | new AllowPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)          | false
         PUBLISH   | new AllowSubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)        | false
         SUBSCRIBE | new AllowSubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)        | true
-        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY) | true
+        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)           | true
         SUBSCRIBE | new DenyPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)           | false
         PUBLISH   | new DenySubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)         | false
         SUBSCRIBE | new DenySubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)         | true

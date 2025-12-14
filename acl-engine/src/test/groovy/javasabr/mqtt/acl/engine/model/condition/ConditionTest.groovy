@@ -17,7 +17,7 @@ class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
         result == expectedResult
     where:
         mqttUser                                  | condition                                                        | expectedResult
-        new TestMqttUser(null, "username2", null) | new AnyOfCondition(userNameEquals("username2")) | true
+        new TestMqttUser(null, "username2", null) | new AnyOfCondition(userNameEquals("username2"))                  | true
         new TestMqttUser(null, "username2", null) | new AllOfCondition(userNameEquals("username2"))                  | true
         new TestMqttUser(null, "username2", null) | new AnyOfCondition(userNameEquals("username1"))                  | false
         new TestMqttUser(null, "username2", null) | new AllOfCondition(userNameEquals("username1"))                  | false
