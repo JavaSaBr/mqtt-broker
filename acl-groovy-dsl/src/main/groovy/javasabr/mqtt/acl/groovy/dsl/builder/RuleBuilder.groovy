@@ -1,5 +1,5 @@
 //file:noinspection unused
-package javasabr.mqtt.service.acl.builder
+package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.Action
@@ -7,6 +7,7 @@ import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.service.acl.builder.TopicMatcherBuilder
 
 abstract class RuleBuilder implements TopicMatcherBuilder {
   Action action

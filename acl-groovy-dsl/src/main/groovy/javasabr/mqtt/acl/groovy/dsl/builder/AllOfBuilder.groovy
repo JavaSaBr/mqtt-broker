@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.acl.builder
+package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition

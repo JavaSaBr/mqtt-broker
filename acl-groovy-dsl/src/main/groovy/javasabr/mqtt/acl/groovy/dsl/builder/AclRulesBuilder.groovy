@@ -1,5 +1,5 @@
 //file:noinspection unused
-package javasabr.mqtt.service.acl.builder
+package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.rlib.collections.array.Array

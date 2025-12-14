@@ -1,7 +1,6 @@
-package javasabr.mqtt.service.acl
+package javasabr.mqtt.acl.groovy.dsl.loader
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
-import javasabr.mqtt.acl.engine.model.Action
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
@@ -15,7 +14,7 @@ import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.mqtt.acl.engine.model.rule.AbstractRule
-import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.service.acl.TestRulesGenerator
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
@@ -78,7 +77,7 @@ class AclRulesLoaderTest extends UnitSpecification {
         "1.config"         | AclConfigurationException | 'Only one clients section allowed'
         "2.config"         | AclConfigurationException | 'Only one clients section allowed'
         "3.config"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
-        "4.config"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.service.acl.builder.AllOfBuilder.allOf'
+        "4.config"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.acl.groovy.dsl.builder.AllOfBuilder.allOf'
         "5.config"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
   }
 
