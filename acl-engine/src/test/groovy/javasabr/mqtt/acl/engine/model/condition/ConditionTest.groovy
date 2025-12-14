@@ -1,16 +1,10 @@
 package javasabr.mqtt.acl.engine.model.condition
 
-import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
-import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
-import javasabr.mqtt.acl.engine.model.condition.AnyUserCondition
-import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
-import javasabr.mqtt.acl.engine.model.condition.TopicCondition
-import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
+import javasabr.mqtt.acl.engine.ConditionMatcherAware
 import javasabr.mqtt.acl.engine.model.matcher.AnyValueMatcher
 import javasabr.mqtt.model.MqttUser
-import TestMqttUser
+import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.model.topic.TopicName
-import ConditionMatcherAware
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
@@ -23,7 +17,7 @@ class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
         result == expectedResult
     where:
         mqttUser                                  | condition                                                        | expectedResult
-        new TestMqttUser(null, "username2", null) | new AnyOfCondition(userNameEquals("username2"))                  | true
+        new TestMqttUser(null, "username2", null) | new AnyOfCondition(userNameEquals("username2")) | true
         new TestMqttUser(null, "username2", null) | new AllOfCondition(userNameEquals("username2"))                  | true
         new TestMqttUser(null, "username2", null) | new AnyOfCondition(userNameEquals("username1"))                  | false
         new TestMqttUser(null, "username2", null) | new AllOfCondition(userNameEquals("username1"))                  | false

@@ -1,10 +1,10 @@
 package javasabr.mqtt.acl.engine;
 
 import java.util.Map;
-import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.acl.engine.model.Action;
-import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.acl.engine.model.rule.Rule;
+import javasabr.mqtt.model.MqttUser;
+import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;

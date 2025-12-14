@@ -1,12 +1,12 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import javasabr.mqtt.acl.engine.builder.ClientMatcherBuilder
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
-import javasabr.mqtt.service.acl.builder.ClientMatcherBuilder
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 

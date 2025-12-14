@@ -1,5 +1,5 @@
 //file:noinspection unused
-package javasabr.mqtt.service.acl.builder;
+package javasabr.mqtt.acl.engine.builder;
 
 import java.util.regex.Pattern;
 import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher;

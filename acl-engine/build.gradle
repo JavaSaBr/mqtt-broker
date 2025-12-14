@@ -8,4 +8,5 @@ dependencies {
   api projects.model
 
   testImplementation projects.testSupport
+  testImplementation testFixtures(projects.model)
 }

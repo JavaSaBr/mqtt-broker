@@ -1,7 +1,7 @@
 package javasabr.mqtt.acl.engine.model.condition;
 
-import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
+import javasabr.mqtt.model.MqttUser;
 
 public record ClientIdCondition(ValueMatcher<String> expectedClientId) implements MqttUserCondition {
 

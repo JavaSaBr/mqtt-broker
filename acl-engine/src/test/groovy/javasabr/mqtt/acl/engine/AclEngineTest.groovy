@@ -1,7 +1,6 @@
 package javasabr.mqtt.acl.engine
 
-import javasabr.mqtt.model.MqttUser
-import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.acl.engine.builder.TopicMatcherBuilder
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
@@ -12,11 +11,11 @@ import javasabr.mqtt.acl.engine.model.rule.AllowSubscribeRule
 import javasabr.mqtt.acl.engine.model.rule.DenyPublishRule
 import javasabr.mqtt.acl.engine.model.rule.DenySubscribeRule
 import javasabr.mqtt.acl.engine.model.rule.Rule
+import javasabr.mqtt.model.MqttUser
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.topic.AbstractTopic
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
-import javasabr.mqtt.service.acl.ConditionMatcherAware
-import javasabr.mqtt.service.acl.builder.TopicMatcherBuilder
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray

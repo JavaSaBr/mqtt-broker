@@ -1,6 +1,5 @@
 package javasabr.mqtt.acl.engine.model.matcher
 
-
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.test.support.UnitSpecification
 

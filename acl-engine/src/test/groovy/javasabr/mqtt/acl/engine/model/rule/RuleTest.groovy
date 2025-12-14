@@ -1,10 +1,10 @@
 package javasabr.mqtt.acl.engine.model.rule
 
+import javasabr.mqtt.acl.engine.ConditionMatcherAware
+import javasabr.mqtt.acl.engine.model.condition.TopicCondition
 import javasabr.mqtt.model.acl.Operation
-import TopicCondition
-import TestMqttUser
+import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.model.topic.TopicName
-import ConditionMatcherAware
 import javasabr.mqtt.test.support.UnitSpecification
 
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
@@ -26,7 +26,7 @@ class RuleTest extends UnitSpecification implements ConditionMatcherAware {
         SUBSCRIBE | new AllowPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)          | false
         PUBLISH   | new AllowSubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)        | false
         SUBSCRIBE | new AllowSubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)        | true
-        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)           | true
+        PUBLISH   | new DenyPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY) | true
         SUBSCRIBE | new DenyPublishRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)           | false
         PUBLISH   | new DenySubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)         | false
         SUBSCRIBE | new DenySubscribeRule(clientIdEquals("clientId"), TopicCondition.MATCH_ANY)         | true
