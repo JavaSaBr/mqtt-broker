@@ -29,7 +29,7 @@ import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
-import javasabr.mqtt.service.impl.DefaultRetainMessageService;
+import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
@@ -116,13 +116,13 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService(RetainMessageService retainMessageService) {
-    return new InMemorySubscriptionService(retainMessageService);
+  SubscriptionService subscriptionService() {
+    return new InMemorySubscriptionService();
   }
 
   @Bean
-  RetainMessageService retainMessageService(PublishDeliveringService publishDeliveringService) {
-    return new DefaultRetainMessageService(publishDeliveringService);
+  RetainMessageService retainMessageService() {
+    return new InMemoryRetainMessageService();
   }
 
   @Bean
@@ -241,8 +241,15 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler subscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
-    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
+      TopicService topicService,
+      RetainMessageService retainMessageService,
+      PublishDeliveringService publishDeliveringService) {
+    return new SubscribeMqttInMessageHandler(
+        subscriptionService,
+        messageOutFactoryService,
+        topicService,
+        retainMessageService,
+        publishDeliveringService);
   }
 
   @Bean

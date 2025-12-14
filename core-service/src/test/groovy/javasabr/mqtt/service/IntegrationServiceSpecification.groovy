@@ -12,7 +12,7 @@ import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
-import javasabr.mqtt.service.impl.DefaultRetainMessageService
+import javasabr.mqtt.service.impl.InMemoryRetainMessageService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.DisabledAuthorizationService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
@@ -68,10 +68,10 @@ abstract class IntegrationServiceSpecification extends Specification {
   ])
 
   @Shared
-  def defaultRetainMessageService = new DefaultRetainMessageService(defaultPublishDeliveringService)
+  def defaultRetainMessageService = new InMemoryRetainMessageService()
 
   @Shared
-  def defaultSubscriptionService = new InMemorySubscriptionService(defaultRetainMessageService)
+  def defaultSubscriptionService = new InMemorySubscriptionService()
 
   @Shared
   def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(

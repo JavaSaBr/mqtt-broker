@@ -1,25 +1,21 @@
 package javasabr.mqtt.service.impl;
 
-import static javasabr.mqtt.model.SubscribeRetainHandling.SEND;
-import static javasabr.mqtt.model.SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.NO_SUBSCRIPTION_EXISTED;
 import static javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode.SUCCESS;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.ActiveSubscriptions;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.model.subscriber.Subscriber;
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.model.subscription.Subscription;
+import javasabr.mqtt.model.subscription.SubscriptionResult;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -27,7 +23,6 @@ import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 
 /**
  * In memory subscription service based on {@link ConcurrentSubscriberTree}
@@ -36,12 +31,10 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
-  RetainMessageService retainMessageService;
   ConcurrentSubscriberTree subscriberTree;
 
-  public InMemorySubscriptionService(RetainMessageService retainMessageService) {
+  public InMemorySubscriptionService() {
     this.subscriberTree = new ConcurrentSubscriberTree();
-    this.retainMessageService = retainMessageService;
   }
 
   @Override
@@ -52,13 +45,13 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public Array<SubscribeAckReasonCode> subscribe(
+  public Array<SubscriptionResult> subscribe(
       MqttUser user,
       MqttSession session,
       Array<Subscription> subscriptions) {
 
-    MutableArray<SubscribeAckReasonCode> subscribeResults = ArrayFactory.mutableArray(
-        SubscribeAckReasonCode.class,
+    MutableArray<SubscriptionResult> subscribeResults = ArrayFactory.mutableArray(
+        SubscriptionResult.class,
         subscriptions.size());
 
     for (Subscription subscription : subscriptions) {
@@ -68,27 +61,26 @@ public class InMemorySubscriptionService implements SubscriptionService {
     return subscribeResults;
   }
 
-  private SubscribeAckReasonCode addSubscription(MqttUser user, MqttSession session, Subscription subscription) {
+  private SubscriptionResult addSubscription(MqttUser user, MqttSession session, Subscription subscription) {
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     TopicFilter topicFilter = subscription.topicFilter();
     if (topicFilter.isInvalid()) {
-      return SubscribeAckReasonCode.TOPIC_FILTER_INVALID;
+      return new SubscriptionResult(SubscribeAckReasonCode.TOPIC_FILTER_INVALID);
     } else if (!connectionConfig.sharedSubscriptionAvailable() && topicFilter instanceof SharedTopicFilter) {
-      return SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+      return new SubscriptionResult(SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
     } else if (!connectionConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
-      return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+      return new SubscriptionResult(SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
     SingleSubscriber newSubscriber = new SingleSubscriber(user, subscription);
     SingleSubscriber previousSubscriber = subscriberTree.subscribe(newSubscriber);
+    boolean isSubscriptionAlreadyExisted = false;
     if (previousSubscriber != null) {
+      isSubscriptionAlreadyExisted = true;
       activeSubscriptions.remove(previousSubscriber.subscription());
     }
-    if (isRetainHandlingRequired(subscription, previousSubscriber)) {
-        retainMessageService.deliverRetainedMessages(newSubscriber);
-    }
     activeSubscriptions.add(subscription);
-    return subscription.qos().subscribeAckReasonCode();
+    return new SubscriptionResult(newSubscriber, isSubscriptionAlreadyExisted);
   }
 
   @Override
@@ -139,16 +131,5 @@ public class InMemorySubscriptionService implements SubscriptionService {
     for (Subscription subscription : subscriptions) {
       subscriberTree.subscribe(new SingleSubscriber(user, subscription));
     }
-  }
-
-  private static boolean isRetainHandlingRequired(
-      Subscription newSubscription,
-      @Nullable Subscriber previousSubscriber) {
-    if (newSubscription.topicFilter().isShared() || !newSubscription.qos().isValid()) {
-      return false;
-    }
-    SubscribeRetainHandling retainHandling = newSubscription.retainHandling();
-    return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
-                                          && previousSubscriber == null);
   }
 }

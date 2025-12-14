@@ -2,12 +2,15 @@ package javasabr.mqtt.service.message.handler.impl
 
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.subscription.RequestedSubscription
+import javasabr.mqtt.model.subscription.TestPublishFactory
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
+import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.network.message.out.SubscribeAckMqtt5OutMessage
 import javasabr.mqtt.network.util.ExtraErrorReasons
 import javasabr.mqtt.service.IntegrationServiceSpecification
@@ -25,18 +28,25 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
     LoggerManager.enable(SubscribeMqttInMessageHandler,  LoggerLevel.INFO)
   }
 
+  SubscribeMqttInMessageHandler subscribeMessageHandler
+
+  def setup() {
+    subscribeMessageHandler = new SubscribeMqttInMessageHandler(
+        defaultSubscriptionService,
+        defaultMessageOutFactoryService,
+        defaultTopicService,
+        defaultRetainMessageService,
+        defaultPublishDeliveringService)
+  }
+
   def "should close connection by reason that session is already closed"() {
     given:
         def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.session(null)
     when:
         def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS)
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.UNSPECIFIED_ERROR
@@ -47,10 +57,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
   def "should response that message id is in use"() {
     given:
         def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         def session = mqttUser.session()
@@ -64,7 +70,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -79,10 +85,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def serverConfig = defaultExternalServerConnectionConfig
             .withSubscriptionIdAvailable(false)
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -94,7 +96,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -109,10 +111,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def serverConfig = defaultExternalServerConnectionConfig
             .withMaxQos(QoS.AT_MOST_ONCE)
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -124,7 +122,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -139,10 +137,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def serverConfig = defaultExternalServerConnectionConfig
             .withWildcardSubscriptionAvailable(false)
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -153,7 +147,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("topic1/#", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("topic2/+", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -172,10 +166,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def serverConfig = defaultExternalServerConnectionConfig
             .withSharedSubscriptionAvailable(false)
         def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -186,7 +176,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
               RequestedSubscription.minimal("\$share/group1/topic1/#", QoS.EXACTLY_ONCE),
               RequestedSubscription.minimal("\$share/group1/topic2/+", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -203,14 +193,10 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
   def "should close connection by reason MQTT protocol error"() {
     given:
         def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def subscribeMessage = new SubscribeMqttInMessage(0 as byte)
-        messageHandler.processInvalidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processInvalidMessage(mqttConnection, subscribeMessage)
     then:
         def disconnectReason = mqttUser.nextSentMessage(DisconnectMqtt5OutMessage)
         disconnectReason.reasonCode() == DisconnectReasonCode.MALFORMED_PACKET
@@ -221,10 +207,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
   def "should reuse the same message if from previous request"() {
     given:
         def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -233,7 +215,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(Array.of(RequestedSubscription.minimal("topic1", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -247,7 +229,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(Array.of(RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage2)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
         def subscribeAck2 = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes2 = subscribeAck2.reasonCodes()
@@ -259,10 +241,6 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
   def "should response that message id is in use because previous is still in progress"() {
     given:
         def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
-        def messageHandler = new SubscribeMqttInMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService,
-            defaultTopicService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.returnCompletedFeatures(false)
@@ -272,7 +250,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(Array.of(RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
         def subscribeAck = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes = subscribeAck.reasonCodes()
@@ -286,12 +264,182 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(Array.of(RequestedSubscription.minimal("topic2", QoS.EXACTLY_ONCE)))
         }}
-        messageHandler.processValidMessage(mqttConnection, subscribeMessage2)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
         def subscribeAck2 = mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         def reasonCodes2 = subscribeAck2.reasonCodes()
         reasonCodes2.size() == 1
         reasonCodes2.get(0) == SubscribeAckReasonCode.PACKET_IDENTIFIER_IN_USE
         subscribeAck2.messageId() == expectedMessageId
+  }
+
+  def "should only deliver 'send-if-subscription-does-not-exist' Subscribe Retain Handling once"() {
+    given:
+        def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+    and:
+        def expectedMessageId = 15
+        def requestedSubscriptions = Array.of(new RequestedSubscription(
+            "topic/filter/1",
+            QoS.EXACTLY_ONCE,
+            SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+            true,
+            true))
+        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = expectedMessageId
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultRetainMessageService.retainMessage(publishWithRetain)
+    when:
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        mqttUser.isEmpty()
+    when:
+        subscribeMessage.messageId = ++expectedMessageId
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.isEmpty()
+  }
+
+  def "should always deliver 'send' Subscribe Retain Handling"() {
+    given:
+        def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+    and:
+        def expectedMessageId = 15
+        def requestedSubscriptions = Array.of(new RequestedSubscription(
+            "topic/filter/1",
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.SEND,
+            true,
+            true))
+        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = expectedMessageId
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultRetainMessageService.retainMessage(publishWithRetain)
+    when:
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        mqttUser.isEmpty()
+    when:
+        subscribeMessage.messageId = ++expectedMessageId
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        mqttUser.isEmpty()
+  }
+
+  def "should not deliver 'do-not-send' Subscribe Retain Handling"() {
+    given:
+        def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+    and:
+        def expectedMessageId = 15
+        def requestedSubscriptions = Array.of(new RequestedSubscription(
+            "topic/filter/1",
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.DO_NOT_SEND,
+            true,
+            true))
+        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = expectedMessageId
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultRetainMessageService.retainMessage(publishWithRetain)
+    and:
+        def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
+        defaultRetainMessageService.retainMessage(publishWithoutRetain)
+    when:
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.isEmpty()
+    when:
+        subscribeMessage.messageId = ++expectedMessageId
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.isEmpty()
+  }
+
+  def "should reset retain flag if 'retain as published' is false"() {
+    given:
+        def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+    and:
+        def expectedMessageId = 15
+        def requestedSubscriptions = Array.of(new RequestedSubscription(
+            "topic/filter/1",
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.SEND,
+            true,
+            false))
+        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = expectedMessageId
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultRetainMessageService.retainMessage(publishWithRetain)
+    when:
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def publishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        mqttUser.isEmpty()
+    and:
+        !publishMessage.retain()
+  }
+
+  def "should keep retain flag if 'retain as published' is true"() {
+    given:
+        def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+    and:
+        def expectedMessageId = 15
+        def requestedSubscriptions = Array.of(new RequestedSubscription(
+            "topic/filter/1",
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.SEND,
+            true,
+            true))
+        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = expectedMessageId
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        defaultRetainMessageService.retainMessage(publishWithRetain)
+    when:
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        def publishMessage = mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        mqttUser.isEmpty()
+    and:
+        publishMessage.retain()
   }
 }

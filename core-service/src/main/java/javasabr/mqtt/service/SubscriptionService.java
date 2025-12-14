@@ -1,11 +1,11 @@
 package javasabr.mqtt.service;
 
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscription.Subscription;
+import javasabr.mqtt.model.subscription.SubscriptionResult;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
@@ -29,7 +29,7 @@ public interface SubscriptionService {
    * @param subscriptions the list of request to subscribe topics
    * @return array of subscribe ack reason codes
    */
-  Array<SubscribeAckReasonCode> subscribe(MqttUser user, MqttSession session, Array<Subscription> subscriptions);
+  Array<SubscriptionResult> subscribe(MqttUser user, MqttSession session, Array<Subscription> subscriptions);
 
   /**
    * Removes MQTT client from listening to the topics.
