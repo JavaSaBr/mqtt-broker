@@ -31,7 +31,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public void handle(NetworkMqttUser user, Publish publish) {
+  public final void handle(NetworkMqttUser user, Publish publish) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;

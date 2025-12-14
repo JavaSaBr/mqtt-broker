@@ -14,9 +14,9 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @CustomLog
+@Accessors
 @ToString(of = "clientId")
 @EqualsAndHashCode(of = "clientId")
-@Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
   

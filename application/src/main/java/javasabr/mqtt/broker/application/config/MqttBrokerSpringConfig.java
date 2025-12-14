@@ -14,6 +14,7 @@ import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.AuthenticationService;
+import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.CredentialSource;
@@ -254,24 +255,20 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
+  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos0MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
   MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
+    return new Qos1MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
   MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(
-      SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2MqttPublishOutMessageHandler(subscriptionService, messageOutFactoryService);
+    return new Qos2MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
