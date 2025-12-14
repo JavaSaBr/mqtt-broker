@@ -87,8 +87,8 @@ import org.springframework.core.env.Environment;
 @CustomLog
 @Configuration(proxyBeanMethods = false)
 @PropertySources({
-    @PropertySource("classpath:broker.properties"),
-    @PropertySource(value = "file:./broker.properties", ignoreResourceNotFound = true),
+    @PropertySource("classpath:application.properties"),
+    @PropertySource(value = "file:./application.properties", ignoreResourceNotFound = true),
     @PropertySource(value = "${BROKER_CONFIG}", ignoreResourceNotFound = true)
 })
 public class MqttBrokerSpringConfig {

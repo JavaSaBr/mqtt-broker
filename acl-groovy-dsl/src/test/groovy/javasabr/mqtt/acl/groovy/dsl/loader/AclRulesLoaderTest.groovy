@@ -31,7 +31,7 @@ class AclRulesLoaderTest extends UnitSpecification {
     given:
         def ruleFile = TestRulesGenerator.generate(100)
     when:
-        def load = new AclRulesLoader(ruleFile.toString()).load()
+        def load = AclRulesLoader.load(ruleFile.toString())
     then:
         load.get(SUBSCRIBE).size() == 50
         load.get(PUBLISH).size() == 50
@@ -40,22 +40,20 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   def "should throw exception if config not exists"(String configPath, String errorMessage) {
     when:
-        new AclRulesLoader(configPath)
+        AclRulesLoader.load(configPath)
     then:
         def exception = thrown(AclConfigurationException)
         exception.message == errorMessage
     where:
         configPath         | errorMessage
-        "not/existed/path" | 'Class loader unable to load resource: not/existed/path'
-        null               | 'ACL config path is null'
+        "not/existed/path" | 'Config file:[not/existed/path] doesn\'t exist'
   }
 
   def "should work fine with only publish rules"() {
     given:
         def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.groovy")
-        def rules = new AclRulesLoader(onlyPublishRulesAclPath)
     when:
-        def ruleMap = rules.load()
+        def ruleMap = AclRulesLoader.load(onlyPublishRulesAclPath)
     then:
         noExceptionThrown()
         !ruleMap.get(PUBLISH).isEmpty()
@@ -65,9 +63,8 @@ class AclRulesLoaderTest extends UnitSpecification {
   def "should throw exception if config is invalid"(String invalidAclFileName, String errorMessage, Class<? extends Exception> exceptionClass) {
     given:
         def invalidAclPath = getAbsolutePath("acl/config/invalid/${invalidAclFileName}")
-        def rules = new AclRulesLoader(invalidAclPath)
     when:
-        rules.load()
+        AclRulesLoader.load(invalidAclPath)
     then:
         def exception = thrown CompletionException
         exceptionClass.isInstance exception.cause
@@ -89,7 +86,7 @@ class AclRulesLoaderTest extends UnitSpecification {
   def "should parse Groovy DSL config"() {
     when:
         def absolutePath = getAbsolutePath("acl/config/acl.groovy")
-        def rules = new AclRulesLoader(absolutePath).load()
+        def rules = AclRulesLoader.load(absolutePath)
     then:
         verifyAll(rules.get(PUBLISH)) {
           size() == 2
