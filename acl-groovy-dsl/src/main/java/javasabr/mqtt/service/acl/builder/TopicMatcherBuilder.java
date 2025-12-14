@@ -1,9 +1,9 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder;
 
-import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher;
-import javasabr.mqtt.model.acl.matcher.TopicNameMatcher;
-import javasabr.mqtt.model.acl.matcher.ValueMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;

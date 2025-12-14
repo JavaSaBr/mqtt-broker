@@ -1,8 +1,8 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.condition.AnyOfCondition
-import javasabr.mqtt.model.acl.condition.MqttUserCondition
+import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
+import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.rlib.collections.array.Array
 
 class AnyOfBuilder extends ConditionBuilder {

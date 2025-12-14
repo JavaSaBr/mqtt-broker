@@ -1,10 +1,10 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.Action
-import javasabr.mqtt.model.acl.condition.TopicCondition
-import javasabr.mqtt.model.acl.rule.DenySubscribeRule
-import javasabr.mqtt.model.acl.rule.Rule
+import javasabr.mqtt.acl.engine.model.Action
+import javasabr.mqtt.acl.engine.model.condition.TopicCondition
+import javasabr.mqtt.acl.engine.model.rule.DenySubscribeRule
+import javasabr.mqtt.acl.engine.model.rule.Rule
 
 class DenySubscribeRuleBuilder extends SubscribeRuleBuilder {
 

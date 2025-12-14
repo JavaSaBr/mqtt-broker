@@ -2,9 +2,9 @@
 package javasabr.mqtt.service.acl.builder;
 
 import java.util.regex.Pattern;
-import javasabr.mqtt.model.acl.matcher.EqualsMatcher;
-import javasabr.mqtt.model.acl.matcher.RegexMatcher;
-import javasabr.mqtt.model.acl.matcher.ValueMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
 
 public interface ClientMatcherBuilder {
 

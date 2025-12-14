@@ -1,26 +1,28 @@
 package javasabr.mqtt.service.acl
 
-import javasabr.mqtt.model.acl.condition.AllOfCondition
-import javasabr.mqtt.model.acl.condition.AnyOfCondition
-import javasabr.mqtt.model.acl.condition.ClientIdCondition
-import javasabr.mqtt.model.acl.condition.Condition
-import javasabr.mqtt.model.acl.condition.IpAddressCondition
-import javasabr.mqtt.model.acl.condition.MqttUserCondition
-import javasabr.mqtt.model.acl.condition.UserNameCondition
-import javasabr.mqtt.model.acl.matcher.EqualsMatcher
-import javasabr.mqtt.model.acl.matcher.RegexMatcher
-import javasabr.mqtt.model.acl.matcher.TopicFilterMatcher
-import javasabr.mqtt.model.acl.matcher.TopicNameMatcher
-import javasabr.mqtt.model.acl.matcher.ValueMatcher
-import javasabr.mqtt.model.acl.rule.AbstractRule
-import javasabr.mqtt.model.exception.AclConfigurationException
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException
+import javasabr.mqtt.acl.engine.model.Action
+import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
+import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
+import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
+import javasabr.mqtt.acl.engine.model.condition.Condition
+import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
+import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
+import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
+import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher
+import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
+import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
+import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
+import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
+import javasabr.mqtt.acl.engine.model.rule.AbstractRule
+import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
 import java.util.concurrent.CompletionException
 
-import static javasabr.mqtt.model.acl.Action.ALLOW
-import static javasabr.mqtt.model.acl.Action.DENY
+import static javasabr.mqtt.acl.engine.model.Action.ALLOW
+import static javasabr.mqtt.acl.engine.model.Action.DENY
 import static javasabr.mqtt.model.acl.Operation.PUBLISH
 import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
 

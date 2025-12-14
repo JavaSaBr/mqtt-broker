@@ -1,9 +1,9 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.Action
+import javasabr.mqtt.acl.engine.model.Action
+import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.mqtt.model.acl.Operation
-import javasabr.mqtt.model.acl.matcher.ValueMatcher
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray

@@ -1,14 +1,14 @@
 //file:noinspection unused
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.rule.Rule
+import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
 
 import java.util.concurrent.CompletableFuture
 
 /**
- * Builds list of {@link javasabr.mqtt.model.acl.rule.Rule} from ACL configuration
+ * Builds list of {@link Rule} from ACL configuration
  */
 class AclRulesBuilder {
 

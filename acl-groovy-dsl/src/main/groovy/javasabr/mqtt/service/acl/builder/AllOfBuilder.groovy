@@ -1,9 +1,9 @@
 package javasabr.mqtt.service.acl.builder
 
-import javasabr.mqtt.model.acl.condition.AllOfCondition
-import javasabr.mqtt.model.acl.condition.MqttUserCondition
-import javasabr.mqtt.model.acl.matcher.ValueMatcher
-import javasabr.mqtt.model.exception.AclConfigurationException
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException
+import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
+import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
+import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.rlib.collections.array.Array
 
 class AllOfBuilder extends ConditionBuilder {
