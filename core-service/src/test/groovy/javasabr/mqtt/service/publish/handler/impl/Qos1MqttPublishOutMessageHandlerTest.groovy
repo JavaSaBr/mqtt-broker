@@ -16,7 +16,6 @@ import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult
 
 class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandlerTest {
 
@@ -30,12 +29,11 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
           qos() == QoS.AT_LEAST_ONCE
           !duplicate()
@@ -57,15 +55,14 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -75,13 +72,13 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         }
     when: 'send publish ack'
         def publishAck = PublishAckMqttInMessage
-            .of(receivedPublish.messageId(), PublishAckReasonCode.SUCCESS)
+            .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
             .apply(user, publishAck)
     then:
         with(session.outMessageTracker()) {
-          stored(receivedPublish.messageId()) == null
+          stored(publish.messageId()) == null
         }
         with(session.outProcessingPublishes()) {
           size() == 0
@@ -103,15 +100,14 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -122,15 +118,15 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
     when: 'remove trackable info and send publish ack'
         session
             .outMessageTracker()
-            .remove(receivedPublish.messageId())
+            .remove(publish.messageId())
         def publishAck = PublishAckMqttInMessage
-            .of(receivedPublish.messageId(), PublishAckReasonCode.SUCCESS)
+            .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
             .apply(user, publishAck)
     then:
         with(session.outMessageTracker()) {
-          stored(receivedPublish.messageId()) == null
+          stored(publish.messageId()) == null
         }
         with(session.outProcessingPublishes()) {
           size() == 0
@@ -152,15 +148,14 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -170,7 +165,7 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         }
     when: 'send unexpected publish receive to get protocol error'
         def publishReceive = PublishReceivedMqttInMessage
-            .of(receivedPublish.messageId(), PublishReceivedReasonCode.SUCCESS)
+            .of(publish.messageId(), PublishReceivedReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
             .apply(user, publishReceive)
@@ -192,15 +187,14 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
         def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
-        def publish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(publish, subscriber)
-        def receivedPublish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
-          with(stored(receivedPublish.messageId())) {
+          with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
             reasonCode() == null
           }
@@ -211,9 +205,9 @@ class Qos1MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
     when: 'change trackable info to publish release and send publish ack'
         session
             .outMessageTracker()
-            .update(receivedPublish.messageId(), MqttMessageType.PUBLISH_RELEASE, PublishReleaseReasonCode.SUCCESS)
+            .update(publish.messageId(), MqttMessageType.PUBLISH_RELEASE, PublishReleaseReasonCode.SUCCESS)
         def publishAck = PublishAckMqttInMessage
-            .of(receivedPublish.messageId(), PublishAckReasonCode.SUCCESS)
+            .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
             .outProcessingPublishes()
             .apply(user, publishAck)

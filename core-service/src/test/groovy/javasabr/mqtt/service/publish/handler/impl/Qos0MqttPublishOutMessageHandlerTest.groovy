@@ -8,7 +8,6 @@ import javasabr.mqtt.model.subscriber.SingleSubscriber
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult
 
 class Qos0MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandlerTest {
 
@@ -25,9 +24,8 @@ class Qos0MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
           qos() == QoS.AT_MOST_ONCE
           !duplicate()

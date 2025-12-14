@@ -4,11 +4,9 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
-import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
@@ -25,35 +23,33 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber) {
+  public final void handle(Publish publish, SingleSubscriber subscriber) {
     MqttUser user = subscriber.resolveUser();
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
-      return PublishHandlingResult.NOT_EXPECTED_CLIENT;
+      return;
     }
     U expectedUser = expectedUserType.cast(user);
     MqttSession session = expectedUser.session();
     if (session == null) {
       log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
-      return PublishHandlingResult.SESSION_IS_ALREADY_CLOSED;
+      return;
     }
-    publish = reconstruct(expectedUser, session, publish);
-    if (publish == null) {
-      return PublishHandlingResult.SKIPPED;
+    Publish publishToSend = reconstruct(expectedUser, session, publish);
+    if (publishToSend != null) {
+      handleImpl(expectedUser, session, publishToSend);
     }
-    return handleImpl(expectedUser, session, publish);
   }
 
   @Nullable
   protected abstract Publish reconstruct(U user, MqttSession session, Publish original);
 
-  protected PublishHandlingResult handleImpl(U user, MqttSession session, Publish publish) {
+  protected void handleImpl(U user, MqttSession session, Publish publish) {
     send(user, publish);
-    return PublishHandlingResult.SUCCESS;
   }
 
   protected void send(U user, Publish publish) {
-    MqttOutMessage outMessage = messageOutFactoryService
+    user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublish(
             publish.messageId(),
@@ -66,7 +62,6 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
             publish.payloadFormat(),
             publish.responseTopicName(),
             publish.correlationData(),
-            publish.userProperties());
-    user.sendInBackground(outMessage);
+            publish.userProperties()));
   }
 }

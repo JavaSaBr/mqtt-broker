@@ -152,35 +152,33 @@ public class Qos2MqttPublishInMessageHandler extends TrackableMqttPublishInMessa
   }
 
   private boolean handleReceivedTrackableMessage(MqttUser user, MqttSession session, TrackableMqttMessage message) {
-    ExternalNetworkMqttUser networkUser = (ExternalNetworkMqttUser) user;
+    ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
+    String clientId = networkMqttUser.clientId();
     int messageId = message.messageId();
 
     MessageTacker messageTacker = session.inMessageTracker();
     TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
     if (messageMeta == null) {
-      log.warning(networkUser.clientId(), messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       return true;
     }
 
     if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(
-          networkUser.clientId(),
-          messageMeta,
-          messageId,
+      log.warning(clientId, messageMeta, messageId, 
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
       return true;
     } else if (!(message instanceof PublishReleaseMqttInMessage release)) {
-      log.warning(networkUser.clientId(), message, "[%s] Not expected message:[%s]"::formatted);
+      log.warning(clientId, message.messageType(), "[%s] Not expected message:[%s]"::formatted);
       return true;
     }
 
     messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
 
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(networkUser)
+        .resolveFactory(networkMqttUser)
         .newPublishCompleted(message.messageId(), PublishCompletedReasonCode.SUCCESS);
 
-    sendFeedback(networkUser, session, response, messageId);
+    sendFeedback(networkMqttUser, session, response, messageId);
     return true;
   }
 }
