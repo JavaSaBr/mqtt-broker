@@ -54,8 +54,7 @@ public class DefaultPublishReceivingService implements PublishReceivingService {
       log.warning(user.clientId(), publish, "[%s] Received not supported publish:%s"::formatted);
     }
   }
-
-
+  
   private static String buildServiceDescription(
       @Nullable MqttPublishInMessageHandler[] publishInMessageHandlers) {
     var builder = new StringBuilder();

@@ -35,7 +35,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
   }
 
   @Override
-  public void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
+  public final void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     NetworkMqttUser user = connection.user();
     if (!expectedUser.isInstance(user)) {
       log.warning(user, "Received not expected user:[%s]"::formatted);
@@ -60,7 +60,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
   }
 
   @Override
-  public void processInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
+  public final void processInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     NetworkMqttUser user = connection.user();
     if (!expectedUser.isInstance(user)) {
       log.warning(user, "Received not expected user:[%s]"::formatted);

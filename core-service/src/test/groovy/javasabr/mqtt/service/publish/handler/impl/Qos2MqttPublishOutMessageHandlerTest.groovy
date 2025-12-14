@@ -19,15 +19,12 @@ import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult
 
 class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandlerTest {
 
   def "should deliver publish to subscriber"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/1")
@@ -38,9 +35,8 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
           qos() == QoS.EXACTLY_ONCE
           !duplicate()
@@ -53,9 +49,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should wait for receive-complete responses for publish"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -67,10 +61,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
-        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
           with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
@@ -124,9 +117,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should correctly handle publish receive when no stored trackable meta about the publish"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -138,10 +129,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
-        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
           with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
@@ -176,9 +166,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error receiving unexpected response message for first stage"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -190,10 +178,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
-        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
           with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
@@ -218,9 +205,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error receiving unexpected response message for second stage"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -232,10 +217,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
-        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
           with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
@@ -271,9 +255,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error for unexpected flow state for publish received"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -285,10 +267,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
-        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
           with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH
@@ -316,9 +297,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error for unexpected flow state for publish complete"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(
-            defaultSubscriptionService,
-            defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -330,10 +309,9 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        def result = publishOutHandler.handle(testPublish, subscriber)
-        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
+        publishOutHandler.handle(testPublish, subscriber)
     then:
-        result == PublishHandlingResult.SUCCESS
+        def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
           with(stored(publish.messageId())) {
             messageType() == MqttMessageType.PUBLISH

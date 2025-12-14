@@ -64,9 +64,9 @@ abstract class IntegrationServiceSpecification extends Specification {
 
   @Shared
   def defaultPublishDeliveringService = new DefaultPublishDeliveringService([
-      new Qos0MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
-      new Qos1MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService),
-      new Qos2MqttPublishOutMessageHandler(defaultSubscriptionService, defaultMessageOutFactoryService)
+      new Qos0MqttPublishOutMessageHandler(defaultMessageOutFactoryService),
+      new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService),
+      new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
   ])
 
   @Shared
