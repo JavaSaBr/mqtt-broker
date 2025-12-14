@@ -5,10 +5,8 @@ plugins {
 }
 
 dependencies {
-  api projects.aclGroovyDsl
   api projects.model
-  api libs.groovy
 
   testImplementation projects.testSupport
-  testImplementation testFixtures(projects.aclGroovyDsl)
+  testImplementation testFixtures(projects.model)
 }
