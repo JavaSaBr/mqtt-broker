@@ -3,6 +3,7 @@ package javasabr.mqtt.broker.application.config;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
+import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -14,7 +15,6 @@ import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.AuthenticationService;
-import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.CredentialSource;
@@ -71,14 +71,26 @@ import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 
+@Import({
+    GroovyDslBasedAclServiceSpringConfig.class
+})
 @CustomLog
 @Configuration(proxyBeanMethods = false)
+@PropertySources({
+    @PropertySource("classpath:broker.properties"),
+    @PropertySource(value = "file:./broker.properties", ignoreResourceNotFound = true),
+    @PropertySource(value = "${BROKER_CONFIG}", ignoreResourceNotFound = true)
+})
 public class MqttBrokerSpringConfig {
 
   @Bean
@@ -110,6 +122,10 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
+  @ConditionalOnProperty(
+      name = "acl.engine.type", 
+      havingValue = "disabled", 
+      matchIfMissing = true)
   AuthorizationService authorizationService() {
     return new DisabledAuthorizationService();
   }

@@ -12,21 +12,15 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class AclRulesLoader {
-
-  @SuppressWarnings('GrFinalVariableAccess')
-  private final Path aclConfigPath
-
-  AclRulesLoader(String aclConfigPath) {
-    if (aclConfigPath == null) {
-      throw new AclConfigurationException("ACL config path is null")
-    }
-    this.aclConfigPath = Path.of(aclConfigPath)
-    if (Files.notExists(this.aclConfigPath)) {
-      throw new AclConfigurationException("Class loader unable to load resource: %s".formatted(aclConfigPath))
-    }
+  
+  static Map<Operation, Array<Rule>> load(String aclConfigPath) {
+    return load(Path.of(aclConfigPath))
   }
-
-  Map<Operation, Array<Rule>> load() {
+  
+  static Map<Operation, Array<Rule>> load(Path aclConfigPath) {
+    if (Files.notExists(aclConfigPath)) {
+      throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath))
+    }
     CompilerConfiguration compilerConfig = new CompilerConfiguration()
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
     new GroovyShell(compilerConfig).with {
@@ -36,7 +30,7 @@ class AclRulesLoader {
       setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
       evaluate(aclConfigPath.toFile())
     }
-    def rules = aclRulesBuilder.build()
-    return RuleContainerBuilder.groupRulesByOperation(rules)
+    def allDefinedRules = aclRulesBuilder.build()
+    return RuleContainerBuilder.groupRulesByOperation(allDefinedRules)
   }
 }
