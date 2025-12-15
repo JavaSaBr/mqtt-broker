@@ -118,15 +118,10 @@ public class SubscribeMqttInMessageHandler extends
         .findAny(DISCONNECT_CASES, SubscribeMqttInMessageHandler::containsSubscribeAckReasonCode);
 
     if (anyDisconnectResult != null) {
-      log.info(
-          user.clientId(),
-          anyDisconnectResult.subscribeAckReasonCode(),
-          "[%s] Will be forced closing by reason:[%s]"::formatted);
-      DisconnectReasonCode reasonCode = DisconnectReasonCode.ofCode(anyDisconnectResult.subscribeAckReasonCode()
-          .code());
-      user.closeWithReason(messageOutFactoryService
-          .resolveFactory(user)
-          .newDisconnect(user, reasonCode));
+      SubscribeAckReasonCode subackReasonCode = anyDisconnectResult.subscribeAckReasonCode();
+      log.info(user.clientId(), subackReasonCode, "[%s] Will be forced closing by reason:[%s]"::formatted);
+      DisconnectReasonCode reasonCode = DisconnectReasonCode.ofCode(subackReasonCode.code());
+      user.closeWithReason(messageOutFactoryService.resolveFactory(user).newDisconnect(user, reasonCode));
     }
   }
 
@@ -195,7 +190,7 @@ public class SubscribeMqttInMessageHandler extends
       SubscribeMqttInMessage subscribeMessage,
       Array<SubscriptionResult> subscribeResults) {
     int messageId = subscribeMessage.messageId();
-    Array<SubscribeAckReasonCode> ackReasonCodes = collectAckReasonCodes(subscribeResults);
+    Array<SubscribeAckReasonCode> ackReasonCodes = getAckReasonCodes(subscribeResults);
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(messageId, ackReasonCodes);
@@ -214,7 +209,7 @@ public class SubscribeMqttInMessageHandler extends
         }
         Subscription subscription = subscriber.subscription();
         boolean retainAsPublished = subscription.retainAsPublished();
-        Array<Publish> retainedMessages = retainMessageService.getRetainedMessages(subscription.topicFilter());
+        var retainedMessages = retainMessageService.getRetainedMessages(subscription.topicFilter());
         for (Publish retainedMessage : retainedMessages) {
           if (!retainAsPublished) {
             retainedMessage = retainedMessage.withoutRetain();
@@ -235,7 +230,7 @@ public class SubscribeMqttInMessageHandler extends
                                           && !subscriptionResult.isSubscriptionAlreadyExisted());
   }
 
-  private Array<SubscribeAckReasonCode> collectAckReasonCodes(Array<SubscriptionResult> reasonCodes) {
+  private static Array<SubscribeAckReasonCode> getAckReasonCodes(Array<SubscriptionResult> reasonCodes) {
     if (reasonCodes.isEmpty()) {
       return EMPTY_SUBACK_REASON_CODES;
     }
