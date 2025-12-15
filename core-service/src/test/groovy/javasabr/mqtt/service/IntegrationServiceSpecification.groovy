@@ -68,7 +68,7 @@ abstract class IntegrationServiceSpecification extends Specification {
   ])
 
   @Shared
-  def defaultRetainMessageService = new InMemoryRetainMessageService()
+  def inMemoryRetainMessageService = new InMemoryRetainMessageService()
 
   @Shared
   def defaultSubscriptionService = new InMemorySubscriptionService()
@@ -78,7 +78,7 @@ abstract class IntegrationServiceSpecification extends Specification {
       defaultSubscriptionService,
       defaultPublishDeliveringService,
       defaultMessageOutFactoryService,
-      defaultRetainMessageService)
+      inMemoryRetainMessageService)
 
   @Shared
   def publishReceivingService = new DefaultPublishReceivingService([
@@ -87,12 +87,12 @@ abstract class IntegrationServiceSpecification extends Specification {
           defaultSubscriptionService,
           defaultPublishDeliveringService,
           defaultMessageOutFactoryService,
-          defaultRetainMessageService),
+          inMemoryRetainMessageService),
       new Qos2MqttPublishInMessageHandler(
           defaultSubscriptionService,
           defaultPublishDeliveringService,
           defaultMessageOutFactoryService,
-          defaultRetainMessageService)
+          inMemoryRetainMessageService)
   ])
 
   @Shared

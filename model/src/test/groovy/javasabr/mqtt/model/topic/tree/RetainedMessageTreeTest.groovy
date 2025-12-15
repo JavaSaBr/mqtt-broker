@@ -1,7 +1,9 @@
 package javasabr.mqtt.model.topic.tree
 
+
 import javasabr.mqtt.model.subscription.TestPublishFactory
 import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification
 
 class RetainedMessageTreeTest extends UnitSpecification {
@@ -12,7 +14,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
       List<String> expectedMessages) {
     given:
         ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree()
-        messages.collect(TestPublishFactory::makePublish).each(retainedMessageTree::retainMessage)
+        messages.collect(TestPublishFactory::makePublish).each(retainedMessageTree::addRetainedMessage)
         def topicFilter = TopicFilter.valueOf(rawTopicFilter)
     when:
         def retainedMessages = retainedMessageTree.getRetainedMessage(topicFilter)
@@ -92,5 +94,24 @@ class RetainedMessageTreeTest extends UnitSpecification {
                 "/topic/segment3"
             ]
         ]
+  }
+
+  def "should add and remove retained messages to and from retained message tree"() {
+    given:
+        def publish = TestPublishFactory.makePublish("topic")
+        ConcurrentRetainedMessageTree retainedMessageTree = new ConcurrentRetainedMessageTree()
+    when:
+        retainedMessageTree.addRetainedMessage(publish)
+    then:
+        with(retainedMessageTree.getRetainedMessage(TopicFilter.valueOf("topic"))) {
+          size() == 1
+          first() == publish
+        }
+    when:
+        retainedMessageTree.removeRetainedMessage(TopicName.valueOf("topic"))
+    then:
+        with(retainedMessageTree.getRetainedMessage(TopicFilter.valueOf("topic"))) {
+          isEmpty()
+        }
   }
 }
