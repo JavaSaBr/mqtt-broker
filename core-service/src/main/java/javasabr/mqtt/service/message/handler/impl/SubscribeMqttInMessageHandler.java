@@ -31,7 +31,7 @@ import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.ArrayBuilder;
+import javasabr.rlib.collections.array.ArrayCollectors;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
@@ -42,9 +42,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubscribeMqttInMessageHandler extends
     AbstractMqttInMessageHandler<ExternalNetworkMqttUser, SubscribeMqttInMessage> {
-
-  private static final Array<SubscribeAckReasonCode> EMPTY_SUBACK_REASON_CODES =
-      Array.empty(SubscribeAckReasonCode.class);
 
   private final static Set<SubscribeAckReasonCode> DISCONNECT_CASES = Set.of(
       SHARED_SUBSCRIPTIONS_NOT_SUPPORTED,
@@ -190,7 +187,9 @@ public class SubscribeMqttInMessageHandler extends
       SubscribeMqttInMessage subscribeMessage,
       Array<SubscriptionResult> subscribeResults) {
     int messageId = subscribeMessage.messageId();
-    Array<SubscribeAckReasonCode> ackReasonCodes = getAckReasonCodes(subscribeResults);
+    Array<SubscribeAckReasonCode> ackReasonCodes = subscribeResults.stream()
+        .map(SubscriptionResult::subscribeAckReasonCode)
+        .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newSubscribeAck(messageId, ackReasonCodes);
@@ -228,16 +227,5 @@ public class SubscribeMqttInMessageHandler extends
     SubscribeRetainHandling retainHandling = subscriber.subscription().retainHandling();
     return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
                                           && !subscriptionResult.isSubscriptionAlreadyExisted());
-  }
-
-  private static Array<SubscribeAckReasonCode> getAckReasonCodes(Array<SubscriptionResult> reasonCodes) {
-    if (reasonCodes.isEmpty()) {
-      return EMPTY_SUBACK_REASON_CODES;
-    }
-    ArrayBuilder<SubscribeAckReasonCode> builder = Array.builder(SubscribeAckReasonCode.class);
-    for (SubscriptionResult result : reasonCodes) {
-      builder.add(result.subscribeAckReasonCode());
-    }
-    return builder.build();
   }
 }
