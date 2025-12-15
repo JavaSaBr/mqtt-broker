@@ -31,6 +31,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
+  private static final SubscriptionResult INVALID_TOPIC_FILTER_RESULT =
+      new SubscriptionResult(SubscribeAckReasonCode.TOPIC_FILTER_INVALID);
+  private static final SubscriptionResult SHARED_SUBSCRIPTION_NOT_SUPPORTED_RESULT =
+      new SubscriptionResult(SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
+  private static final SubscriptionResult WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT =
+      new SubscriptionResult(SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
+
   ConcurrentSubscriberTree subscriberTree;
 
   public InMemorySubscriptionService() {
@@ -65,18 +72,17 @@ public class InMemorySubscriptionService implements SubscriptionService {
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     TopicFilter topicFilter = subscription.topicFilter();
     if (topicFilter.isInvalid()) {
-      return new SubscriptionResult(SubscribeAckReasonCode.TOPIC_FILTER_INVALID);
+      return INVALID_TOPIC_FILTER_RESULT;
     } else if (!connectionConfig.sharedSubscriptionAvailable() && topicFilter instanceof SharedTopicFilter) {
-      return new SubscriptionResult(SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
+      return SHARED_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     } else if (!connectionConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
-      return new SubscriptionResult(SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
+      return WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
     SingleSubscriber newSubscriber = new SingleSubscriber(user, subscription);
     SingleSubscriber previousSubscriber = subscriberTree.subscribe(newSubscriber);
-    boolean isSubscriptionAlreadyExisted = false;
-    if (previousSubscriber != null) {
-      isSubscriptionAlreadyExisted = true;
+    boolean isSubscriptionAlreadyExisted = previousSubscriber != null;
+    if (isSubscriptionAlreadyExisted) {
       activeSubscriptions.remove(previousSubscriber.subscription());
     }
     activeSubscriptions.add(subscription);
