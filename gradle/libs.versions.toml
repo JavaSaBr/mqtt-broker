@@ -62,7 +62,7 @@ spring-r2dbc = { module = "org.springframework:spring-r2dbc", version.ref = "spr
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
 spock-spring = { module = "org.spockframework:spock-spring", version.ref = "spock" }
-groovy = { module = "org.apache.groovy:groovy", version.ref = "groovy" }
+groovy-core = { module = "org.apache.groovy:groovy", version.ref = "groovy" }
 groovy-all = { module = "org.apache.groovy:groovy-all", version.ref = "groovy" }
 byte-buddy-dep = { module = "net.bytebuddy:byte-buddy-dep", version.ref = "byte-buddy" }
 objenesis = { module = "org.objenesis:objenesis", version.ref = "objenesis" }
