@@ -16,4 +16,8 @@ public record SubscriptionResult(
   public SubscriptionResult(SubscribeAckReasonCode subscribeAckReasonCode) {
     this(subscribeAckReasonCode, null, false);
   }
+
+  public boolean isNotExistedPreviously(){
+    return !isSubscriptionAlreadyExisted;
+  }
 }

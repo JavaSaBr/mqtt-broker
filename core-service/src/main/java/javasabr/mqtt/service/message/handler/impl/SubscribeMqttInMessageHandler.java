@@ -109,6 +109,7 @@ public class SubscribeMqttInMessageHandler extends
         .subscribe(user, session, subscriptions);
     sendSubscribeResults(user, session, subscribeMessage, subscribeResults);
     sendRetainedMessages(subscribeResults);
+
     SubscriptionResult anyDisconnectResult = subscribeResults
         .iterations()
         .reversedArgs()
@@ -201,31 +202,30 @@ public class SubscribeMqttInMessageHandler extends
 
   private void sendRetainedMessages(Array<SubscriptionResult> subscribeResults) {
     for (SubscriptionResult subscriptionResult : subscribeResults) {
-      if (isRetainHandlingRequired(subscriptionResult)) {
-        SingleSubscriber subscriber = subscriptionResult.subscriber();
-        if (subscriber == null) {
-          continue;
+      SingleSubscriber subscriber = subscriptionResult.subscriber();
+      if (subscriber == null || !isRetainHandlingRequired(subscriber, subscriptionResult)) {
+        continue;
+      }
+      Subscription subscription = subscriber.subscription();
+      boolean retainAsPublished = subscription.retainAsPublished();
+      var retainedMessages = retainMessageService.getRetainedMessages(subscription.topicFilter());
+      for (Publish retainedMessage : retainedMessages) {
+        if (!retainAsPublished) {
+          retainedMessage = retainedMessage.withoutRetain();
         }
-        Subscription subscription = subscriber.subscription();
-        boolean retainAsPublished = subscription.retainAsPublished();
-        var retainedMessages = retainMessageService.getRetainedMessages(subscription.topicFilter());
-        for (Publish retainedMessage : retainedMessages) {
-          if (!retainAsPublished) {
-            retainedMessage = retainedMessage.withoutRetain();
-          }
-          publishDeliveringService.startDelivering(retainedMessage, subscriber);
-        }
+        publishDeliveringService.startDelivering(retainedMessage, subscriber);
       }
     }
   }
 
-  private static boolean isRetainHandlingRequired(SubscriptionResult subscriptionResult) {
-    SingleSubscriber subscriber = subscriptionResult.subscriber();
-    if (subscriber == null || subscriber.subscription().topicFilter().isShared()) {
+  private static boolean isRetainHandlingRequired(SingleSubscriber subscriber, SubscriptionResult subscriptionResult) {
+    Subscription subscription = subscriber.subscription();
+    if (subscription.topicFilter().isShared()) {
       return false;
+    } else {
+      SubscribeRetainHandling retainHandling = subscription.retainHandling();
+      return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
+                                            && subscriptionResult.isNotExistedPreviously());
     }
-    SubscribeRetainHandling retainHandling = subscriber.subscription().retainHandling();
-    return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
-                                          && !subscriptionResult.isSubscriptionAlreadyExisted());
   }
 }
