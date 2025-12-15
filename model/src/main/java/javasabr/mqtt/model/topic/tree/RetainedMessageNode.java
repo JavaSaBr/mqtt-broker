@@ -7,6 +7,7 @@ import javasabr.mqtt.model.AbstractTrieNode;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
+import javasabr.rlib.collections.array.ArrayBuilder;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
@@ -66,7 +67,7 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     retainedMessage.set(null);
   }
 
-  public void collectRetainedMessages(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
+  public void collectRetainedMessages(int level, TopicFilter topicFilter, ArrayBuilder<Publish> result) {
     if (level == topicFilter.levelsCount()) {
       Publish publish = retainedMessage.get();
       if (publish != null) {
@@ -89,14 +90,14 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       int level,
       String segment,
       TopicFilter topicFilter,
-      MutableArray<Publish> result) {
+      ArrayBuilder<Publish> result) {
     RetainedMessageNode retainedMessageNode = getChildNode(segment);
     if (retainedMessageNode != null) {
       retainedMessageNode.collectRetainedMessages(level + 1, topicFilter, result);
     }
   }
 
-  private void collectAllChildren(int level, TopicFilter topicFilter, MutableArray<Publish> result) {
+  private void collectAllChildren(int level, TopicFilter topicFilter, ArrayBuilder<Publish> result) {
     var localChildNodes = getChildNodes(RetainedMessageNode::childNodesFactory);
     if (localChildNodes != null) {
       for (RetainedMessageNode childNode : localChildNodes) {
@@ -105,11 +106,11 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     }
   }
 
-  private void collectEverything(RetainedMessageNode node, MutableArray<Publish> result) {
+  private void collectEverything(RetainedMessageNode node, ArrayBuilder<Publish> result) {
     collectEverythingDfs(node, result);
   }
 
-  private void collectEverythingDfs(RetainedMessageNode node, MutableArray<Publish> result) {
+  private void collectEverythingDfs(RetainedMessageNode node, ArrayBuilder<Publish> result) {
     Publish message = node.retainedMessage.get();
     if (message != null) {
       result.add(message);

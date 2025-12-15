@@ -17,7 +17,7 @@ class RetainedMessageTreeTest extends UnitSpecification {
         messages.collect(TestPublishFactory::makePublish).each(retainedMessageTree::addRetainedMessage)
         def topicFilter = TopicFilter.valueOf(rawTopicFilter)
     when:
-        def retainedMessages = retainedMessageTree.getRetainedMessage(topicFilter)
+        def retainedMessages = retainedMessageTree.getRetainedMessages(topicFilter)
     then:
         retainedMessages.size() == expectedMessages.size()
         verifyEach(retainedMessages) { publish, index ->
@@ -103,14 +103,14 @@ class RetainedMessageTreeTest extends UnitSpecification {
     when:
         retainedMessageTree.addRetainedMessage(publish)
     then:
-        with(retainedMessageTree.getRetainedMessage(TopicFilter.valueOf("topic"))) {
+        with(retainedMessageTree.getRetainedMessages(TopicFilter.valueOf("topic"))) {
           size() == 1
           first() == publish
         }
     when:
         retainedMessageTree.removeRetainedMessage(TopicName.valueOf("topic"))
     then:
-        with(retainedMessageTree.getRetainedMessage(TopicFilter.valueOf("topic"))) {
+        with(retainedMessageTree.getRetainedMessages(TopicFilter.valueOf("topic"))) {
           isEmpty()
         }
   }

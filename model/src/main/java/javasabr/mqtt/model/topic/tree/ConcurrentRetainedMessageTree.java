@@ -4,7 +4,6 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.ThreadSafe;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -26,9 +25,9 @@ public class ConcurrentRetainedMessageTree implements ThreadSafe {
     rootNode.removeRetainedMessage(0, topicName);
   }
 
-  public Array<Publish> getRetainedMessage(TopicFilter topicFilter) {
-    var resultArray = MutableArray.ofType(Publish.class);
+  public Array<Publish> getRetainedMessages(TopicFilter topicFilter) {
+    var resultArray = Array.builder(Publish.class);
     rootNode.collectRetainedMessages(0, topicFilter, resultArray);
-    return Array.copyOf(resultArray);
+    return resultArray.build();
   }
 }
