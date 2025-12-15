@@ -8,5 +8,5 @@ public interface MqttPublishOutMessageHandler {
 
   QoS qos();
 
-  PublishHandlingResult handle(Publish publish, SingleSubscriber subscriber);
+  void handle(Publish publish, SingleSubscriber subscriber);
 }

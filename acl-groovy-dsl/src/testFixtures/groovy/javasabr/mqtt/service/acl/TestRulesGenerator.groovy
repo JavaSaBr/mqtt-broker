@@ -6,7 +6,7 @@ class TestRulesGenerator {
 
   private static final SecureRandom RANDOM = new SecureRandom()
 
-  public static File generate(int ruleCount) {
+  static File generate(int ruleCount) {
     def fileName = "${RANDOM.nextLong()}.groovy"
     def file = new File("build/${fileName}")
     file.withWriter('UTF-8') { writer ->

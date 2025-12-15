@@ -5,8 +5,8 @@ plugins {
 }
 
 dependencies {
-  api libs.groovy
-  api projects.model
+  api projects.aclEngine
+  api libs.groovy.core
   api libs.rlib.collections
 
   testImplementation testFixtures(projects.model)
