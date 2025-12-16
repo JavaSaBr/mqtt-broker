@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import javasabr.mqtt.acl.engine.AclEngine;
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.Rule;
 import javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader;
 import javasabr.mqtt.acl.service.AclEngineBasedAuthorizationService;
@@ -20,9 +21,9 @@ public class GroovyDslBasedAuthorizationService extends AclEngineBasedAuthorizat
   public void loadFrom(URI resource) {
     Path localFile = Path.of(resource);
     if (Files.notExists(localFile)) {
-      throw new IllegalArgumentException("ACL configuration:[%s] doesn't exist".formatted(resource));
+      throw new AclConfigurationException("ACL configuration:[%s] doesn't exist".formatted(resource));
     } else if (Files.isDirectory(localFile)) {
-      throw new IllegalArgumentException("ACL configuration:[%s] is directory".formatted(resource));
+      throw new AclConfigurationException("ACL configuration:[%s] is directory".formatted(resource));
     }
     Map<Operation, Array<Rule>> loadedAclRulesMap = AclRulesLoader.load(localFile);
     switchTo(new AclEngine(loadedAclRulesMap));
