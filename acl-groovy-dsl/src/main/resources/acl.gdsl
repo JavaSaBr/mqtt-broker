@@ -49,6 +49,14 @@ contributor(context(scope: scriptScope())) {
         doc: 'Match incoming value by strict equality'
   }
 
+  if (enclosingCall("allowPublish") || enclosingCall("denyPublish")
+      || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe")) {
+    method name: 'startWith',
+        type: 'javasabr.mqtt.model.acl.matcher.StartWithMatcher',
+        params: [string: 'String'],
+        doc: 'Match incoming value by string prefix'
+  }
+
   if (enclosingCall("allOf") || enclosingCall("anyOf")) {
     method name: 'regex',
         type: 'javasabr.mqtt.model.acl.matcher.RegexMatcher',

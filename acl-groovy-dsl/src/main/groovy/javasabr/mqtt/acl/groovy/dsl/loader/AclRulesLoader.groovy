@@ -21,16 +21,18 @@ class AclRulesLoader {
     if (Files.notExists(aclConfigPath)) {
       throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath))
     }
-    CompilerConfiguration compilerConfig = new CompilerConfiguration()
+    
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
-    new GroovyShell(compilerConfig).with {
-      setVariable("allowPublish", aclRulesBuilder.&allowPublish)
-      setVariable("denyPublish", aclRulesBuilder.&denyPublish)
-      setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
-      setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
-      evaluate(aclConfigPath.toFile())
-    }
-    def allDefinedRules = aclRulesBuilder.build()
-    return RuleContainerBuilder.groupRulesByOperation(allDefinedRules)
+    
+    def binding = new Binding()
+    binding.setVariable("allowPublish", aclRulesBuilder.&allowPublish)
+    binding.setVariable("denyPublish", aclRulesBuilder.&denyPublish)
+    binding.setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
+    binding.setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
+    
+    def groovyShell = new GroovyShell(binding)
+    groovyShell.evaluate(aclConfigPath.toFile())
+    
+    return RuleContainerBuilder.groupRulesByOperation(aclRulesBuilder.build())
   }
 }
