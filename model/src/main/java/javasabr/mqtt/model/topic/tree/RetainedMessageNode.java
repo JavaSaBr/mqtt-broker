@@ -107,10 +107,6 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
   }
 
   private void collectEverything(RetainedMessageNode node, ArrayBuilder<Publish> result) {
-    collectEverythingDfs(node, result);
-  }
-
-  private void collectEverythingDfs(RetainedMessageNode node, ArrayBuilder<Publish> result) {
     Publish message = node.retainedMessage.get();
     if (message != null) {
       result.add(message);
@@ -119,7 +115,7 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
     var childNodes = node.getChildNodes(RetainedMessageNode::childNodesFactory);
     if (childNodes != null) {
       for (RetainedMessageNode childNode : childNodes) {
-        collectEverythingDfs(childNode, result);
+        collectEverything(childNode, result);
       }
     }
   }
