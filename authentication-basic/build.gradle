@@ -1,0 +1,15 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+  id("groovy")
+}
+
+description = "Basic authentication service"
+
+dependencies {
+  api projects.base
+  api projects.authentication
+
+  testImplementation projects.testSupport
+  testFixturesApi projects.testSupport
+}

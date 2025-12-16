@@ -12,7 +12,7 @@ class AllOfBuilder extends ConditionBuilder {
     USER_NAME, CLIENT_ID, IP_ADDRESS
   }
 
-  private final Set<Identity> alreadySetIdentities = new HashSet<>()
+  private final Set<Identity> alreadySetIdentities = EnumSet.noneOf(Identity.class)
 
   @Override
   ConditionBuilder userName(ValueMatcher<String>... userNames) {

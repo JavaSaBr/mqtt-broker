@@ -13,6 +13,12 @@ junit-jupiter = "5.13.4"
 junit-platform-launcher = "1.13.4"
 # https://mvnrepository.com/artifact/io.projectreactor/reactor-core
 project-reactor = "3.7.8"
+# https://mvnrepository.com/artifact/io.r2dbc/r2dbc-spi
+r2dbc = "1.0.0.RELEASE"
+# https://mvnrepository.com/artifact/io.r2dbc/r2dbc-pool
+r2dbc-pool="1.0.2.RELEASE"
+# https://mvnrepository.com/artifact/org.postgresql/r2dbc-postgresql
+r2dbc-postgresql="1.1.1.RELEASE"
 # https://mvnrepository.com/artifact/org.spockframework/spock-core
 spock = "2.4-M6-groovy-4.0"
 # https://mvnrepository.com/artifact/org.apache.groovy/groovy-all
@@ -45,12 +51,17 @@ springboot-starter-core = { module = "org.springframework.boot:spring-boot-start
 springboot-starter-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springboot" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "springboot" }
 project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "project-reactor" }
+r2dbc-h2 = { module = "io.r2dbc:r2dbc-h2", version.ref = "r2dbc" }
+r2dbc-spi = { module ='io.r2dbc:r2dbc-spi', version.ref = "r2dbc"}
+r2dbc-pool = { module = 'io.r2dbc:r2dbc-pool', version.ref = "r2dbc-pool"}
+r2dbc-postgresql= { module = 'org.postgresql:r2dbc-postgresql', version.ref = "r2dbc-postgresql"}
 jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 
+spring-r2dbc = { module = "org.springframework:spring-r2dbc", version.ref = "spring" }
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
 spock-spring = { module = "org.spockframework:spock-spring", version.ref = "spock" }

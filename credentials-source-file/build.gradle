@@ -1,0 +1,15 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+  id("groovy")
+}
+
+description = "File-based Credentials Source Provider"
+
+dependencies {
+  api projects.base
+  api projects.authenticationBasic
+
+  testImplementation projects.testSupport
+  testFixturesApi projects.testSupport
+}

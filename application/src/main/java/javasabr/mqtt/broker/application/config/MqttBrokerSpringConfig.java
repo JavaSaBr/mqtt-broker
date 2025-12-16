@@ -14,15 +14,14 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthorizationService;
-import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
-import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
+import javasabr.mqtt.service.auth.AuthenticationService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -32,10 +31,8 @@ import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
-import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
-import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
@@ -73,6 +70,7 @@ import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,7 +80,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 
 @Import({
-    GroovyDslBasedAclServiceSpringConfig.class
+    GroovyDslBasedAclServiceSpringConfig.class,
+    AuthenticationSpringConfig.class
 })
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -91,6 +90,7 @@ import org.springframework.core.env.Environment;
     @PropertySource(value = "file:./application.properties", ignoreResourceNotFound = true),
     @PropertySource(value = "${BROKER_CONFIG}", ignoreResourceNotFound = true)
 })
+@EnableConfigurationProperties(CredentialsSourceDatabaseProperties.class)
 public class MqttBrokerSpringConfig {
 
   @Bean
@@ -106,19 +106,6 @@ public class MqttBrokerSpringConfig {
   MqttSessionService mqttSessionService(
       @Value("${sessions.clean.thread.interval:60000}") int cleanInterval) {
     return new InMemoryMqttSessionService(cleanInterval);
-  }
-
-  @Bean
-  CredentialSource credentialSource(
-      @Value("${credentials.source.file.name:credentials}") String fileName) {
-    return new FileCredentialsSource(fileName);
-  }
-
-  @Bean
-  AuthenticationService authenticationService(
-      CredentialSource credentialSource,
-      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth) {
-    return new SimpleAuthenticationService(credentialSource, allowAnonymousAuth);
   }
   
   @Bean
@@ -180,7 +167,7 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler publishCompleteMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new PublishCompleteMqttInMessageHandler(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
@@ -192,7 +179,7 @@ public class MqttBrokerSpringConfig {
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishQosMqttInMessageFieldValidator(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishRetainMqttInMessageFieldValidator publishRetainMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
@@ -204,13 +191,13 @@ public class MqttBrokerSpringConfig {
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishResponseTopicMqttInMessageFieldValidator publishResponseTopicMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
     return new PublishResponseTopicMqttInMessageFieldValidator(messageOutFactoryService);
   }
-  
+
   @Bean
   PublishTopicAliasMqttInMessageFieldValidator publishTopicAliasMqttInMessageFieldValidator(
       MessageOutFactoryService messageOutFactoryService) {
@@ -227,7 +214,8 @@ public class MqttBrokerSpringConfig {
     return new PublishMqttInMessageHandler(
         publishReceivingService,
         messageOutFactoryService,
-        topicService, authorizationService,
+        topicService,
+        authorizationService,
         fieldValidators);
   }
 
