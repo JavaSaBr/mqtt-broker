@@ -1,43 +1,45 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
-import javasabr.mqtt.acl.engine.builder.TopicMatcherBuilder
+import groovy.transform.TypeChecked
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.Action
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.mqtt.model.acl.Operation
+import javasabr.mqtt.model.topic.AbstractTopic
+import javasabr.rlib.collections.array.Array
 
-abstract class RuleBuilder implements TopicMatcherBuilder {
+abstract class RuleBuilder {
   Action action
   Operation operation
+  
   MqttUserCondition userCondition
+  Array<ValueMatcher<AbstractTopic>> topicMatchers;
 
   RuleBuilder(Action action, Operation operation) {
     this.action = action
     this.operation = operation
   }
 
-  RuleBuilder allOf(Closure<?> config) {
+  @TypeChecked
+  RuleBuilder users(Closure<?> config) {
     if (this.userCondition) {
-      throw new AclConfigurationException("Only one clients section allowed")
+      throw new AclConfigurationException("Only one users section allowed")
     }
-    this.userCondition = new AllOfBuilder().buildCondition(config).build()
+    this.userCondition = new UsersBuilder().configure(config).build()
     return this
   }
 
-  RuleBuilder anyOf(Closure<?> config) {
-    if (this.userCondition) {
-      throw new AclConfigurationException("Only one clients section allowed")
+  @TypeChecked
+  RuleBuilder topics(Closure<?> config) {
+    if (this.topicMatchers) {
+      throw new AclConfigurationException("Only one topics section allowed")
     }
-    this.userCondition = config == null ? MqttUserCondition.MATCH_ANY : new AnyOfBuilder().buildCondition(config).build()
+    this.topicMatchers = new TopicsBuilder().configure(config).build()
     return this
   }
-
-  static ValueMatcher<?> anyone() {
-    return ValueMatcher.MATCH_ANY
-  }
-
+  
   abstract Rule build()
 }

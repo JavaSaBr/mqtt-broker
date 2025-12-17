@@ -1,35 +1,69 @@
 contributor(context(scope: scriptScope())) {
 
-  method name: 'allowPublish',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
-      doc: 'Define Access Control List rule'
-  method name: 'denyPublish',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
-      doc: 'Define Access Control List rule'
-  method name: 'allowSubscribe',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
-      doc: 'Define Access Control List rule'
-  method name: 'denySubscribe',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
-      doc: 'Define Access Control List rule'
+  def insideAllowPublish = enclosingCall("allowPublish")
+  def insideDenyPublish = enclosingCall("denyPublish")
 
-  if ((enclosingCall("allowPublish") || enclosingCall("denyPublish"))
-      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
-    method name: 'topicName',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
-        doc: 'Set of topic names matching by rule'
+  def insideAllowSubscribe = enclosingCall("allowSubscribe")
+  def insideDenySubscribe = enclosingCall("denySubscribe")
+
+  def insideUsers = enclosingCall("users")
+  def insideTopics = enclosingCall("topics")
+  def insideRootElement = insideAllowPublish || insideDenyPublish || insideAllowSubscribe || insideDenySubscribe
+
+  if (!insideRootElement) {
+    method name: 'allowPublish',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
+        doc: 'Define Access Control List rule'
+    method name: 'denyPublish',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
+        doc: 'Define Access Control List rule'
+    method name: 'allowSubscribe',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
+        doc: 'Define Access Control List rule'
+    method name: 'denySubscribe',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
+        doc: 'Define Access Control List rule'
+  }
+  
+  if (insideRootElement && !insideUsers && !insideTopics) {
+    method name: 'users',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        doc: 'Define user conditions to apply this rule'
   }
 
-  if ((enclosingCall("allowSubscribe") || enclosingCall("denySubscribe"))
+  if (insideRootElement && !insideUsers && !insideTopics) {
+    method name: 'topics',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        doc: 'Define topic matchers to apply this rule'
+  }
+
+  if (insideTopics) {
+    method name: 'match',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher',
+        params: [string: 'String'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
+        doc: 'Match incoming topic by topic filter'
+    method name: 'eq',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher',
+        params: [string: 'String'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
+        doc: 'Match incoming topic by topic filter'
+  }
+
+
+  if ((insideAllowSubscribe || insideDenySubscribe)
       && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
     method name: 'topicFilter',
         type: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
@@ -41,16 +75,16 @@ contributor(context(scope: scriptScope())) {
         doc: 'Match incoming topic by topic filter'
   }
 
-  if (enclosingCall("allowPublish") || enclosingCall("denyPublish")
-      || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe")) {
+  if (insideAllowPublish || insideDenyPublish
+      || insideAllowSubscribe || insideDenySubscribe) {
     method name: 'eq',
         type: 'javasabr.mqtt.model.acl.matcher.EqualsMatcher',
         params: [string: 'String'],
         doc: 'Match incoming value by strict equality'
   }
 
-  if (enclosingCall("allowPublish") || enclosingCall("denyPublish")
-      || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe")) {
+  if (insideAllowPublish || insideDenyPublish
+      || insideAllowSubscribe || insideDenySubscribe) {
     method name: 'startWith',
         type: 'javasabr.mqtt.model.acl.matcher.StartWithMatcher',
         params: [string: 'String'],
@@ -66,10 +100,10 @@ contributor(context(scope: scriptScope())) {
 
   if (!enclosingCall("allOf")
       && !enclosingCall("anyOf")
-      && (enclosingCall("allowPublish")
-      || enclosingCall("denyPublish")
-      || enclosingCall("allowSubscribe")
-      || enclosingCall("denySubscribe"))) {
+      && (insideAllowPublish
+      || insideDenyPublish
+      || insideAllowSubscribe
+      || insideDenySubscribe)) {
     method name: 'allOf',
         type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
         params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder>'],

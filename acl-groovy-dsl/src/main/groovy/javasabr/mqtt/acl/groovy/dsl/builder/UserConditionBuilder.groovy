@@ -1,7 +1,6 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
-import javasabr.mqtt.acl.engine.builder.ClientMatcherBuilder
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
@@ -10,29 +9,29 @@ import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.rlib.collections.array.ArrayFactory
 import javasabr.rlib.collections.array.MutableArray
 
-abstract class ConditionBuilder implements ClientMatcherBuilder {
+abstract class UserConditionBuilder extends UserMatchersFactory {
 
-  protected MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
+  MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
 
-  ConditionBuilder userName(ValueMatcher<String>... userNames) {
+  UserConditionBuilder userName(ValueMatcher<String>... userNames) {
     def collect = userNames.collect { new UserNameCondition(it) }
     this.conditions.addAll(collect)
     return this
   }
 
-  ConditionBuilder clientId(ValueMatcher<String>... clientIds) {
+  UserConditionBuilder clientId(ValueMatcher<String>... clientIds) {
     def collect = clientIds.collect { new ClientIdCondition(it) }
     this.conditions.addAll(collect)
     return this
   }
 
-  ConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
+  UserConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
     def collect = ipAddresses.collect { new IpAddressCondition(it) }
     this.conditions.addAll(collect)
     return this
   }
 
-  ConditionBuilder buildCondition(Closure<?> config) {
+  UserConditionBuilder configure(Closure<?> config) {
     config.delegate = this
     config.resolveStrategy = Closure.DELEGATE_ONLY
     config()

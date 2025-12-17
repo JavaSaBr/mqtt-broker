@@ -3,10 +3,10 @@ package javasabr.mqtt.acl.groovy.dsl.loader
 import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.rule.Rule
+
 import javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder
 import javasabr.mqtt.model.acl.Operation
 import javasabr.rlib.collections.array.Array
-import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -23,7 +23,7 @@ class AclRulesLoader {
     }
     
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
-    
+
     def binding = new Binding()
     binding.setVariable("allowPublish", aclRulesBuilder.&allowPublish)
     binding.setVariable("denyPublish", aclRulesBuilder.&denyPublish)

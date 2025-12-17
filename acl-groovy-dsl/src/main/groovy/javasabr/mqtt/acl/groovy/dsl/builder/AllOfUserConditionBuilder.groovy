@@ -6,27 +6,32 @@ import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.rlib.collections.array.Array
 
-class AllOfBuilder extends ConditionBuilder {
+class AllOfUserConditionBuilder extends UserConditionBuilder {
 
   enum Identity {
     USER_NAME, CLIENT_ID, IP_ADDRESS
   }
 
-  private final Set<Identity> alreadySetIdentities = new HashSet<>()
-
+  Set<Identity> alreadySetIdentities = new HashSet<>()
+  
+  AllOfUserConditionBuilder anyOf(Closure<?> config) {
+    this.conditions.add(new AnyOfUserConditionBuilder().configure(config).build())
+    return this
+  }
+  
   @Override
-  ConditionBuilder userName(ValueMatcher<String>... userNames) {
+  UserConditionBuilder userName(ValueMatcher<String>... userNames) {
     requireSingleMatcher(Identity.USER_NAME, userNames)
     return super.userName(userNames)
   }
 
   @Override
-  ConditionBuilder clientId(ValueMatcher<String>... clientIds) {
+  UserConditionBuilder clientId(ValueMatcher<String>... clientIds) {
     requireSingleMatcher(Identity.CLIENT_ID, clientIds)
     return super.clientId(clientIds)
   }
 
-  ConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
+  UserConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
     requireSingleMatcher(Identity.IP_ADDRESS, ipAddresses)
     return super.ipAddress(ipAddresses)
   }

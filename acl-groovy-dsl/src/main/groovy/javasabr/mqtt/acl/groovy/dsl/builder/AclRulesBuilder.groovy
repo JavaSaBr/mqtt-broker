@@ -1,6 +1,7 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import groovy.transform.TypeChecked
 import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
@@ -17,19 +18,23 @@ class AclRulesBuilder {
   Array<Rule> build() {
     return ruleBuilderFutures.collect(ArrayFactory.mutableArray(Rule.class), { it.join() })
   }
-
+  
+  @TypeChecked
   void allowPublish(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new AllowPublishRuleBuilder(), config))
   }
 
+  @TypeChecked
   void denyPublish(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new DenyPublishRuleBuilder(), config))
   }
 
+  @TypeChecked
   void allowSubscribe(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new AllowSubscribeRuleBuilder(), config))
   }
 
+  @TypeChecked
   void denySubscribe(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new DenySubscribeRuleBuilder(), config))
   }
@@ -40,10 +45,10 @@ class AclRulesBuilder {
 
   private static RuleBuilder putConfigToBuilder(
       RuleBuilder ruleBuilder,
-      Closure<?> ruleConfigurator) {
-    ruleConfigurator.delegate = ruleBuilder
-    ruleConfigurator.resolveStrategy = Closure.DELEGATE_ONLY
-    ruleConfigurator()
+      Closure<?> config) {
+    config.delegate = ruleBuilder
+    config.resolveStrategy = Closure.DELEGATE_ONLY
+    config()
     return ruleBuilder
   }
 }
