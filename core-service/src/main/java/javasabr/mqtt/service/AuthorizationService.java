@@ -6,7 +6,7 @@ import javasabr.mqtt.model.topic.TopicName;
 
 public interface AuthorizationService {
 
-  boolean authorizePublish(MqttUser mqttUser, TopicName topicName);
+  boolean authorizePublish(MqttUser user, TopicName topicName);
   
-  boolean authorizeSubscribe(MqttUser mqttUser, TopicFilter topicFilter);
+  boolean authorizeSubscribe(MqttUser user, TopicFilter topicFilter);
 }

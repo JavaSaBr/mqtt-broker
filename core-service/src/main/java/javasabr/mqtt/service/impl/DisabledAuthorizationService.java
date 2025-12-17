@@ -7,12 +7,12 @@ import javasabr.mqtt.service.AuthorizationService;
 
 public class DisabledAuthorizationService implements AuthorizationService {
   @Override
-  public boolean authorizePublish(MqttUser mqttUser, TopicName topicName) {
+  public boolean authorizePublish(MqttUser user, TopicName topicName) {
     return true;
   }
 
   @Override
-  public boolean authorizeSubscribe(MqttUser mqttUser, TopicFilter topicFilter) {
+  public boolean authorizeSubscribe(MqttUser user, TopicFilter topicFilter) {
     return true;
   }
 }

@@ -17,7 +17,6 @@ public final class RuleContainerBuilder {
   private static final Array<Rule> EMPTY_RULES = Array.empty(Rule.class);
 
   public static Map<Operation, Array<Rule>> groupRulesByOperation(Array<Rule> rules) {
-
     var intermediate = new EnumMap<Operation, MutableArray<Rule>>(Operation.class);
     for (Rule rule : rules) {
       intermediate
@@ -31,7 +30,8 @@ public final class RuleContainerBuilder {
     Operation.forEach(operation -> {
       finalMap.computeIfAbsent(operation, RuleContainerBuilder::emptyArray);
     });
-    return Collections.unmodifiableMap(finalMap);
+    // no need to wrap this map because it's not public API
+    return finalMap;
   }
 
   static Array<Rule> emptyArray(Operation ignored) {

@@ -12,6 +12,8 @@ import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.MqttMockClient
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import spock.lang.Specification
 
@@ -19,6 +21,7 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
+@TestPropertySource("classpath:application-test.properties")
 @SpringJUnitConfig(classes = MqttBrokerTestConfig)
 class IntegrationSpecification extends Specification {
 
