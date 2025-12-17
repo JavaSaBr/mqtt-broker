@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.PropertySource
 
 import java.util.concurrent.ThreadLocalRandom
 
@@ -16,7 +15,6 @@ import java.util.concurrent.ThreadLocalRandom
     MqttBrokerSpringConfig,
 ])
 @Configuration(proxyBeanMethods = false)
-@PropertySource("classpath:application-test.properties")
 class MqttBrokerTestConfig {
 
   @Bean

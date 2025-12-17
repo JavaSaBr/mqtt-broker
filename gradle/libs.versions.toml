@@ -24,9 +24,9 @@ spock = "2.4-M6-groovy-4.0"
 # https://mvnrepository.com/artifact/org.apache.groovy/groovy-all
 groovy = "4.0.28"
 # https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
-springboot = '3.5.4'
+springboot = '3.5.8'
 # https://mvnrepository.com/artifact/org.springframework/spring-core
-spring = '6.2.9'
+spring = '6.2.15'
 # https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
 byte-buddy = "1.17.6"
 # https://mvnrepository.com/artifact/org.objenesis/objenesis
@@ -45,7 +45,10 @@ rlib-logger-api = { module = "javasabr.rlib:rlib-logger-api", version.ref = "rli
 rlib-logger-slf4j = { module = "javasabr.rlib:rlib-logger-slf4j", version.ref = "rlib" }
 rlib-logger-impl = { module = "javasabr.rlib:rlib-logger-impl", version.ref = "rlib" }
 rlib-collections = { module = "javasabr.rlib:rlib-collections", version.ref = "rlib" }
+spring-core = { module = "org.springframework:spring-core", version.ref = "spring" }
+spring-context = { module = "org.springframework:spring-context", version.ref = "spring" }
 springboot-starter-core = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springboot" }
+springboot-starter-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springboot" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "springboot" }
 project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "project-reactor" }
 r2dbc-h2 = { module = "io.r2dbc:r2dbc-h2", version.ref = "r2dbc" }

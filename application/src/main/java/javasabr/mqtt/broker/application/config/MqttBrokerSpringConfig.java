@@ -3,6 +3,7 @@ package javasabr.mqtt.broker.application.config;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
+import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -67,17 +68,28 @@ import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 
+@Import({
+    GroovyDslBasedAclServiceSpringConfig.class,
+    AuthenticationSpringConfig.class
+})
 @CustomLog
 @Configuration(proxyBeanMethods = false)
-@Import(AuthenticationSpringConfig.class)
+@PropertySources({
+    @PropertySource("classpath:application.properties"),
+    @PropertySource(value = "file:./application.properties", ignoreResourceNotFound = true),
+    @PropertySource(value = "${BROKER_CONFIG}", ignoreResourceNotFound = true)
+})
 @EnableConfigurationProperties(CredentialsSourceDatabaseProperties.class)
 public class MqttBrokerSpringConfig {
 
@@ -87,10 +99,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "client.id.available.chars",
             "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"),
-        env.getProperty(
-            "client.id.max.length",
-            int.class,
-            36));
+        env.getProperty("client.id.max.length", int.class, 36));
   }
 
   @Bean
@@ -100,6 +109,10 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  @ConditionalOnProperty(
+      name = "acl.engine.type", 
+      havingValue = "disabled", 
+      matchIfMissing = true)
   AuthorizationService authorizationService() {
     return new DisabledAuthorizationService();
   }
@@ -226,10 +239,7 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService) {
-    return new SubscribeMqttInMessageHandler(
-        subscriptionService,
-        messageOutFactoryService,
-        topicService);
+    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
   }
 
   @Bean
@@ -245,9 +255,7 @@ public class MqttBrokerSpringConfig {
 
   @Bean
   ConnectionService externalMqttConnectionService(Collection<? extends MqttInMessageHandler> inMessageHandlers) {
-    return new DefaultConnectionService(
-        ExternalNetworkMqttUser.class,
-        inMessageHandlers);
+    return new DefaultConnectionService(ExternalNetworkMqttUser.class, inMessageHandlers);
   }
 
   @Bean
@@ -317,19 +325,13 @@ public class MqttBrokerSpringConfig {
       ClientIdRegistry clientIdRegistry,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService) {
-    return new ExternalNetworkMqttUserReleaseHandler(
-        clientIdRegistry,
-        sessionService,
-        subscriptionService);
+    return new ExternalNetworkMqttUserReleaseHandler(clientIdRegistry, sessionService, subscriptionService);
   }
 
   @Bean
   MqttServerConnectionConfig externalConnectionConfig(Environment env) {
     return new MqttServerConnectionConfig(
-        QoS.ofCode(env.getProperty(
-            "mqtt.connection.max.qos",
-            int.class,
-            2)),
+        QoS.ofCode(env.getProperty("mqtt.connection.max.qos", int.class, 2)),
         env.getProperty(
             "mqtt.external.connection.max.message.size",
             int.class,
@@ -373,8 +375,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.retain.available",
             boolean.class,
-            false),
-        // set false because currently it's not implemented and we should not allow for clients to use it
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.wildcard.subscription.available",
             boolean.class,
@@ -382,8 +383,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.subscription.id.available",
             boolean.class,
-            false),
-        // set false because currently it's not implemented and we should not allow for clients to use it
+            false), // set false because currently it's not implemented and we should not allow for clients to use it
         env.getProperty(
             "mqtt.external.connection.shared.subscription.available",
             boolean.class,
@@ -397,9 +397,14 @@ public class MqttBrokerSpringConfig {
       @Value("${mqtt.external.network.write.buffer.size:512}") int writeBufferSize,
       @Value("${mqtt.external.network.thread.group.name:ExternalNetwork}") String threadGroupName,
       @Value("${mqtt.external.network.thread.count:1}") int threadGroupMaxSize) {
-    return ServerNetworkConfig.SimpleServerNetworkConfig.builder().readBufferSize(readBufferSize)
-        .pendingBufferSize(pendingBufferSize).writeBufferSize(writeBufferSize).threadGroupName(threadGroupName)
-        .threadGroupMaxSize(threadGroupMaxSize).build();
+    return ServerNetworkConfig.SimpleServerNetworkConfig
+        .builder()
+        .readBufferSize(readBufferSize)
+        .pendingBufferSize(pendingBufferSize)
+        .writeBufferSize(writeBufferSize)
+        .threadGroupName(threadGroupName)
+        .threadGroupMaxSize(threadGroupMaxSize)
+        .build();
   }
 
   @Bean
@@ -412,28 +417,21 @@ public class MqttBrokerSpringConfig {
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead) {
-    return new DefaultMqttConnectionFactory(
-        externalServerConnectionConfig,
-        mqttUserFactory,
-        maxPacketsByRead);
+    return new DefaultMqttConnectionFactory(externalServerConnectionConfig, mqttUserFactory, maxPacketsByRead);
   }
 
   @Bean
   InetSocketAddress externalNetworkAddress(
       @Value("${mqtt.external.network.host:localhost}") String host,
       @Value("${mqtt.external.network.port:1883}") int port) {
-    return new InetSocketAddress(
-        host,
-        port);
+    return new InetSocketAddress(host, port);
   }
 
   @Bean
   ServerNetwork<MqttConnection> externalNetwork(
       ServerNetworkConfig externalNetworkConfig,
       MqttConnectionFactory externalConnectionFactory) {
-    return NetworkFactory.serverNetwork(
-        externalNetworkConfig,
-        externalConnectionFactory::newConnection);
+    return NetworkFactory.serverNetwork(externalNetworkConfig, externalConnectionFactory::newConnection);
   }
 
   @Bean
@@ -444,9 +442,7 @@ public class MqttBrokerSpringConfig {
     return _ -> {
       externalNetwork.start(externalNetworkAddress);
       externalNetwork.onAccept(connectionService::processAcceptedConnection);
-      log.info(
-          externalNetworkAddress,
-          "Started external MQTT network by address:[%s]"::formatted);
+      log.info(externalNetworkAddress, "Started external MQTT network by address:[%s]"::formatted);
     };
   }
 }
