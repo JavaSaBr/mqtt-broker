@@ -25,7 +25,7 @@ public class FileCredentialsSource extends AbstractCredentialSource {
         .getResource(fileName);
 
     if (credentialUrl == null) {
-      throw new CredentialsSourceException("Credentials file could not be found");
+      throw new CredentialsSourceException("Credentials file:[%s] could not be found".formatted(fileName));
     }
 
     try {
