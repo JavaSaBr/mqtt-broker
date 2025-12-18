@@ -29,7 +29,7 @@ public class SharedTopicFilter extends TopicFilter {
   }
 
   @Override
-  public boolean isShared(){
+  public boolean isShared() {
     return true;
   }
 

@@ -18,7 +18,7 @@ public class InMemoryRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public void retainMessage(Publish publish) {
+  public void registerRetainMessage(Publish publish) {
     if (publish.payload().length == 0) {
       retainedMessageTree.removeRetainedMessage(publish.topicName());
     } else {
@@ -27,7 +27,7 @@ public class InMemoryRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public Array<Publish> getRetainedMessages(TopicFilter topicFilter) {
+  public Array<Publish> lookupRetainedMessages(TopicFilter topicFilter) {
     return retainedMessageTree.getRetainedMessages(topicFilter);
   }
 }

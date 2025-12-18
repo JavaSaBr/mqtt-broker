@@ -5,6 +5,7 @@ import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.Subscriber;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -39,12 +40,12 @@ class SubscriberNode extends SubscriberTreeBase {
    * @return the previous subscription from the same owner
    */
   @Nullable
-  protected SingleSubscriber subscribe(int level, SingleSubscriber subscriber, TopicFilter topicFilter) {
+  protected SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
-      return addSubscriber(getOrCreateSubscribers(), subscriber, topicFilter);
+      return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
     SubscriberNode childNode = getOrCreateChildNode(topicFilter.segment(level));
-    return childNode.subscribe(level + 1, subscriber, topicFilter);
+    return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
   protected boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {

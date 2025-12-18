@@ -79,14 +79,13 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber newSubscriber = new SingleSubscriber(user, subscription);
-    SingleSubscriber previousSubscriber = subscriberTree.subscribe(newSubscriber);
+    SingleSubscriber previousSubscriber = subscriberTree.subscribe(user, subscription);
     boolean isSubscriptionAlreadyExisted = previousSubscriber != null;
     if (isSubscriptionAlreadyExisted) {
       activeSubscriptions.remove(previousSubscriber.subscription());
     }
     activeSubscriptions.add(subscription);
-    return new SubscriptionResult(newSubscriber, isSubscriptionAlreadyExisted);
+    return new SubscriptionResult(subscription, isSubscriptionAlreadyExisted);
   }
 
   @Override
@@ -135,7 +134,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
         .activeSubscriptions()
         .subscriptions();
     for (Subscription subscription : subscriptions) {
-      subscriberTree.subscribe(new SingleSubscriber(user, subscription));
+      subscriberTree.subscribe(user, subscription);
     }
   }
 }

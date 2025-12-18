@@ -8,6 +8,7 @@ import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SU
 import java.util.Set;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.message.MqttMessageType;
@@ -15,7 +16,6 @@ import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
-import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscription.RequestedSubscription;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.model.subscription.SubscriptionResult;
@@ -30,6 +30,7 @@ import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
+import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -108,25 +109,21 @@ public class SubscribeMqttInMessageHandler extends
     Array<SubscriptionResult> subscribeResults = subscriptionService
         .subscribe(user, session, subscriptions);
     sendSubscribeResults(user, session, subscribeMessage, subscribeResults);
-    sendRetainedMessages(subscribeResults);
+    sendRetainedMessages(user, subscribeResults);
 
     SubscriptionResult anyDisconnectResult = subscribeResults
         .iterations()
         .reversedArgs()
-        .findAny(DISCONNECT_CASES, SubscribeMqttInMessageHandler::containsSubscribeAckReasonCode);
+        .findAny(DISCONNECT_CASES, (codes, candidate) -> codes.contains(candidate.subscribeAckReasonCode()));
 
     if (anyDisconnectResult != null) {
       SubscribeAckReasonCode subackReasonCode = anyDisconnectResult.subscribeAckReasonCode();
       log.info(user.clientId(), subackReasonCode, "[%s] Will be forced closing by reason:[%s]"::formatted);
       DisconnectReasonCode reasonCode = DisconnectReasonCode.ofCode(subackReasonCode.code());
-      user.closeWithReason(messageOutFactoryService.resolveFactory(user).newDisconnect(user, reasonCode));
+      MqttMessageOutFactory mqttMessageOutFactory = messageOutFactoryService.resolveFactory(user);
+      MqttOutMessage disconnectMessage = mqttMessageOutFactory.newDisconnect(user, reasonCode);
+      user.closeWithReason(disconnectMessage);
     }
-  }
-
-  private static boolean containsSubscribeAckReasonCode(
-      Set<SubscribeAckReasonCode> reasonCodes,
-      SubscriptionResult subscriptionResult) {
-    return reasonCodes.contains(subscriptionResult.subscribeAckReasonCode());
   }
 
   private Array<Subscription> transformSubscriptions(
@@ -200,26 +197,24 @@ public class SubscribeMqttInMessageHandler extends
             .remove(messageId));
   }
 
-  private void sendRetainedMessages(Array<SubscriptionResult> subscribeResults) {
+  private void sendRetainedMessages(MqttUser user, Array<SubscriptionResult> subscribeResults) {
     for (SubscriptionResult subscriptionResult : subscribeResults) {
-      SingleSubscriber subscriber = subscriptionResult.subscriber();
-      if (subscriber == null || !isRetainHandlingRequired(subscriber, subscriptionResult)) {
+      Subscription subscription = subscriptionResult.subscription();
+      if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {
         continue;
       }
-      Subscription subscription = subscriber.subscription();
       boolean retainAsPublished = subscription.retainAsPublished();
-      var retainedMessages = retainMessageService.getRetainedMessages(subscription.topicFilter());
+      var retainedMessages = retainMessageService.lookupRetainedMessages(subscription.topicFilter());
       for (Publish retainedMessage : retainedMessages) {
         if (!retainAsPublished) {
           retainedMessage = retainedMessage.withoutRetain();
         }
-        publishDeliveringService.startDelivering(retainedMessage, subscriber);
+        publishDeliveringService.startDelivering(retainedMessage, user, subscription);
       }
     }
   }
 
-  private static boolean isRetainHandlingRequired(SingleSubscriber subscriber, SubscriptionResult subscriptionResult) {
-    Subscription subscription = subscriber.subscription();
+  private static boolean isRetainHandlingRequired(Subscription subscription, SubscriptionResult subscriptionResult) {
     if (subscription.topicFilter().isShared()) {
       return false;
     } else {

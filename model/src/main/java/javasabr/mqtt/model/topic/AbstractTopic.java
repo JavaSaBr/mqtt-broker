@@ -32,7 +32,7 @@ public abstract class AbstractTopic {
     rawTopic = rawTopicName;
   }
 
-  public boolean isShared(){
+  public boolean isShared() {
     return false;
   }
 
