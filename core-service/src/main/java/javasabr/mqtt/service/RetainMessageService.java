@@ -6,7 +6,7 @@ import javasabr.rlib.collections.array.Array;
 
 public interface RetainMessageService {
 
-  void registerRetainMessage(Publish publish);
+  void retain(Publish publish);
 
   Array<Publish> lookupRetainedMessages(TopicFilter topicFilter);
 }

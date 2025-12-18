@@ -18,7 +18,7 @@ public class InMemoryRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public void registerRetainMessage(Publish publish) {
+  public void retain(Publish publish) {
     if (publish.payload().length == 0) {
       retainedMessageTree.removeRetainedMessage(publish.topicName());
     } else {

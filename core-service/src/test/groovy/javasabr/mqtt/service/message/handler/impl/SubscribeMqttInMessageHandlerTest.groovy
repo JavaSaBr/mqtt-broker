@@ -293,7 +293,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.registerRetainMessage(publishWithRetain)
+        inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
@@ -328,7 +328,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.registerRetainMessage(publishWithRetain)
+        inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
@@ -364,10 +364,10 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.registerRetainMessage(publishWithRetain)
+        inMemoryRetainMessageService.retain(publishWithRetain)
     and:
         def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
-        inMemoryRetainMessageService.registerRetainMessage(publishWithoutRetain)
+        inMemoryRetainMessageService.retain(publishWithoutRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
@@ -401,7 +401,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.registerRetainMessage(publishWithRetain)
+        inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
@@ -432,7 +432,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.registerRetainMessage(publishWithRetain)
+        inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:

@@ -91,7 +91,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
       Publish publish,
       int matchedSubscribers) {
     if (publish.retained()) {
-      retainMessageService.registerRetainMessage(publish);
+      retainMessageService.retain(publish);
     }
   }
 
