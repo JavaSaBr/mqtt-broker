@@ -68,9 +68,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
     return subscribeResults;
   }
 
-  private SubscriptionResult addSubscription(MqttUser user, MqttSession session, Subscription subscription) {
+  private SubscriptionResult addSubscription(MqttUser user, MqttSession session, Subscription newSubscription) {
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
-    TopicFilter topicFilter = subscription.topicFilter();
+    TopicFilter topicFilter = newSubscription.topicFilter();
     if (topicFilter.isInvalid()) {
       return INVALID_TOPIC_FILTER_RESULT;
     } else if (!connectionConfig.sharedSubscriptionAvailable() && topicFilter instanceof SharedTopicFilter) {
@@ -79,13 +79,14 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber previousSubscriber = subscriberTree.subscribe(user, subscription);
-    boolean isSubscriptionAlreadyExisted = previousSubscriber != null;
-    if (isSubscriptionAlreadyExisted) {
-      activeSubscriptions.remove(previousSubscriber.subscription());
+    SingleSubscriber previousSubscriber = subscriberTree.subscribe(user, newSubscription);
+    Subscription previousSubscription = null;
+    if (previousSubscriber != null) {
+      previousSubscription = previousSubscriber.subscription();
+      activeSubscriptions.remove(previousSubscription);
     }
-    activeSubscriptions.add(subscription);
-    return new SubscriptionResult(subscription, isSubscriptionAlreadyExisted);
+    activeSubscriptions.add(newSubscription);
+    return new SubscriptionResult(newSubscription, previousSubscription);
   }
 
   @Override

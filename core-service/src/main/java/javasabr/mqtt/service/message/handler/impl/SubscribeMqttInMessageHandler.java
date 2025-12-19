@@ -199,7 +199,7 @@ public class SubscribeMqttInMessageHandler extends
 
   private void sendRetainedMessages(MqttUser user, Array<SubscriptionResult> subscribeResults) {
     for (SubscriptionResult subscriptionResult : subscribeResults) {
-      Subscription subscription = subscriptionResult.subscription();
+      Subscription subscription = subscriptionResult.newSubscription();
       if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {
         continue;
       }

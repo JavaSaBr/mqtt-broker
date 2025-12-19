@@ -5,18 +5,18 @@ import org.jspecify.annotations.Nullable;
 
 public record SubscriptionResult(
     SubscribeAckReasonCode subscribeAckReasonCode,
-    @Nullable Subscription subscription,
-    boolean isSubscriptionAlreadyExisted) {
+    @Nullable Subscription newSubscription,
+    @Nullable Subscription previousSubscription) {
 
-  public SubscriptionResult(Subscription subscription, boolean isSubscriptionAlreadyExisted) {
-    this(subscription.qos().subscribeAckReasonCode(), subscription, isSubscriptionAlreadyExisted);
+  public SubscriptionResult(Subscription newSubscription, @Nullable Subscription previousSubscription) {
+    this(newSubscription.qos().subscribeAckReasonCode(), newSubscription, previousSubscription);
   }
 
   public SubscriptionResult(SubscribeAckReasonCode subscribeAckReasonCode) {
-    this(subscribeAckReasonCode, null, false);
+    this(subscribeAckReasonCode, null, null);
   }
 
   public boolean isNotExistedPreviously(){
-    return !isSubscriptionAlreadyExisted;
+    return previousSubscription == null;
   }
 }
