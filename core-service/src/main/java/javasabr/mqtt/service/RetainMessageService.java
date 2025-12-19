@@ -8,5 +8,5 @@ public interface RetainMessageService {
 
   void retain(Publish publish);
 
-  Array<Publish> lookupRetainedMessages(TopicFilter topicFilter);
+  Array<Publish> findRetainedMessages(TopicFilter topicFilter);
 }

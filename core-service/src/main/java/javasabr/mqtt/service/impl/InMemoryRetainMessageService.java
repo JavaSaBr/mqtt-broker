@@ -27,7 +27,7 @@ public class InMemoryRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public Array<Publish> lookupRetainedMessages(TopicFilter topicFilter) {
+  public Array<Publish> findRetainedMessages(TopicFilter topicFilter) {
     return retainedMessageTree.getRetainedMessages(topicFilter);
   }
 }
