@@ -21,7 +21,7 @@ import java.util.concurrent.CompletionException
 class AuthenticationServiceTest extends ContextRunnerSpecification {
 
   def setup() {
-    applyProperties(MqttBrokerTestConfig, "application-test.properties")
+    prepareContext(MqttBrokerTestConfig, "application-test.properties")
   }
 
   def "should not be able to connect with wrong password using mqtt 3.1.1 client"() {
@@ -42,14 +42,12 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
     expect:
         runContextWithApplicationProperties(authenticationProperties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
-          try {
-            subscriber.connect(connectMessage).join()
-            throw new AssertionError("MQTT 3 client is able to connect with wrong password" as Object)
-            // then
-          } catch (CompletionException e) {
-            assert e.cause instanceof Mqtt3ConnAckException
-            def connAckEx = e.cause as Mqtt3ConnAckException
-            assert connAckEx.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
+          def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
+          // then
+          assert exception instanceof CompletionException
+          assert exception.cause instanceof Mqtt3ConnAckException
+          with(exception.cause as Mqtt3ConnAckException) {
+            mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
@@ -76,14 +74,12 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
     expect:
         runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
-          try {
-            subscriber.connect(connectMessage).join()
-            throw new AssertionError("MQTT 5 client is able to connect with wrong password" as Object)
-            // then
-          } catch (CompletionException e) {
-            assert e.cause instanceof Mqtt5ConnAckException
-            def connAckEx = e.cause as Mqtt5ConnAckException
-            assert connAckEx.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+          def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
+          // then
+          assert exception instanceof CompletionException
+          assert exception.cause instanceof Mqtt5ConnAckException
+          with(exception.cause as Mqtt5ConnAckException) {
+            mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
@@ -173,14 +169,12 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
     expect:
         runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
-          try {
-            subscriber.connect(connectMessage).join()
-            throw new AssertionError("MQTT 5 client is able to connect with blank username" as Object)
-            // then
-          } catch (CompletionException e) {
-            assert e.cause instanceof Mqtt5ConnAckException
-            def connAckEx = e.cause as Mqtt5ConnAckException
-            assert connAckEx.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+          def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
+          // then
+          assert exception instanceof CompletionException
+          assert exception.cause instanceof Mqtt5ConnAckException
+          with(exception.cause as Mqtt5ConnAckException) {
+            mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
@@ -208,14 +202,12 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
     expect:
         runContextWithApplicationProperties(properties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
-          try {
-            subscriber.connect(connectMessage).join()
-            throw new AssertionError("MQTT 5 client is able to connect with blank username" as Object)
-            // then
-          } catch (CompletionException e) {
-            assert e.cause instanceof Mqtt3ConnAckException
-            def connAckEx = e.cause as Mqtt3ConnAckException
-            assert connAckEx.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
+          def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
+          // then
+          assert exception instanceof CompletionException
+          assert exception.cause instanceof Mqtt3ConnAckException
+          with(exception.cause as Mqtt3ConnAckException) {
+            mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:

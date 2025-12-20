@@ -10,7 +10,7 @@ abstract class ContextRunnerSpecification extends Specification {
 
   ApplicationContextRunner contextRunner
 
-  def applyProperties(Class springConfigClass, String applicationPropertiesFile) {
+  def prepareContext(Class springConfigClass, String applicationPropertiesFile) {
     PropertySource propertySource = new PropertiesPropertySourceLoader()
         .load("test-props", new ClassPathResource(applicationPropertiesFile)).getFirst()
     contextRunner = new ApplicationContextRunner()
