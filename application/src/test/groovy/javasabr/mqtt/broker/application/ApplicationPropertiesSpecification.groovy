@@ -1,34 +1,34 @@
 package javasabr.mqtt.broker.application
 
 import com.hivemq.client.mqtt.MqttClient
-import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
 import org.springframework.boot.env.PropertiesPropertySourceLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.core.env.PropertySource
 import org.springframework.core.io.ClassPathResource
 import spock.lang.Specification
 
-class ApplicationPropertiesSpecification extends Specification {
+abstract class ApplicationPropertiesSpecification extends Specification {
 
-  def loader = new PropertiesPropertySourceLoader()
-  def testProperties = loader.load("test-props", new ClassPathResource("application-test.properties")).get(0)
+  ApplicationContextRunner contextRunner
 
-  def contextRunner = new ApplicationContextRunner()
-      .withAllowBeanDefinitionOverriding(true)
-      .withInitializer { context ->
-        context.getEnvironment().getPropertySources().addLast(testProperties)
-      }
-      .withUserConfiguration(MqttBrokerTestConfig)
-
-  void mqtt3ClientWithProperties(String[] properties, Closure assertion) {
-    contextRunner
-        .withPropertyValues(properties)
-        .run({ assertion(buildMqtt311Client(it.getBean(InetSocketAddress))) })
+  def applyProperties(Class springConfigClass, String applicationPropertiesFile) {
+    PropertySource propertySource = new PropertiesPropertySourceLoader()
+        .load("test-props", new ClassPathResource(applicationPropertiesFile)).getFirst()
+    contextRunner = new ApplicationContextRunner()
+        .withAllowBeanDefinitionOverriding(true)
+        .withUserConfiguration(springConfigClass)
+        .withInitializer { context ->
+          context.getEnvironment().getPropertySources().addLast(propertySource)
+        }
   }
 
-  void mqtt5ClientWithProperties(String[] properties, Closure assertion) {
+  void runContextWithApplicationProperties(String[] properties, Closure clientConstructor, Closure assertion) {
+    Objects.requireNonNull(
+        contextRunner,
+        "ApplicationContextRunner is not initialized. See `ApplicationPropertiesSpecification.applyProperties`")
     contextRunner
         .withPropertyValues(properties)
-        .run({ assertion(buildMqtt5Client(it.getBean(InetSocketAddress))) })
+        .run({ assertion(clientConstructor(it.getBean(InetSocketAddress))) })
   }
 
   def buildMqtt5Client(InetSocketAddress networkAddress) {
@@ -66,10 +66,6 @@ class ApplicationPropertiesSpecification extends Specification {
   }
 
   def generateClientId() {
-    return generateClientId("Default")
-  }
-
-  def generateClientId(String prefix) {
-    return prefix + "_" + IntegrationSpecification.idGenerator.incrementAndGet()
+    return "ApplicationContextRunner_" + IntegrationSpecification.idGenerator.incrementAndGet()
   }
 }

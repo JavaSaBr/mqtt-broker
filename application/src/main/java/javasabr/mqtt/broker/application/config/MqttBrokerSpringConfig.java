@@ -107,7 +107,7 @@ public class MqttBrokerSpringConfig {
       @Value("${sessions.clean.thread.interval:60000}") int cleanInterval) {
     return new InMemoryMqttSessionService(cleanInterval);
   }
-  
+
   @Bean
   @ConditionalOnProperty(
       name = "acl.engine.type", 

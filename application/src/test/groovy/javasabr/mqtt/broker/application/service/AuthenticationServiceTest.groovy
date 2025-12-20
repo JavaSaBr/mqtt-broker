@@ -13,11 +13,16 @@ import com.hivemq.client.mqtt.mqtt5.message.connect.Mqtt5Connect
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import javasabr.mqtt.broker.application.ApplicationPropertiesSpecification
+import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
 
 class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
+
+  def setup() {
+    applyProperties(MqttBrokerTestConfig, "application-test.properties")
+  }
 
   def "should not be able to connect with wrong password using mqtt 3.1.1 client"() {
     given:
@@ -35,7 +40,7 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
             "authentication.credentials.source=$source"
         }
     expect:
-        mqtt3ClientWithProperties(authenticationProperties) { Mqtt3AsyncClient subscriber ->
+        runContextWithApplicationProperties(authenticationProperties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
           try {
             subscriber.connect(connectMessage).join()
@@ -44,7 +49,7 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
           } catch (CompletionException e) {
             assert e.cause instanceof Mqtt3ConnAckException
             def connAckEx = e.cause as Mqtt3ConnAckException
-            assert connAckEx.connAck.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
+            assert connAckEx.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
@@ -63,13 +68,13 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
                 .password(wrongPassword)
                 .build())
             .build()
-        String[] authenticationProperties = new String[]{
+        String[] properties = new String[]{
             "authentication.allow.anonymous=false",
             "authentication.provider=$provider",
             "authentication.credentials.source=$source"
         }
     expect:
-        mqtt5ClientWithProperties(authenticationProperties) { Mqtt5AsyncClient subscriber ->
+        runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
           try {
             subscriber.connect(connectMessage).join()
@@ -78,7 +83,7 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
           } catch (CompletionException e) {
             assert e.cause instanceof Mqtt5ConnAckException
             def connAckEx = e.cause as Mqtt5ConnAckException
-            assert connAckEx.connAck.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+            assert connAckEx.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
@@ -98,13 +103,13 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
                 .password(correctPassword)
                 .build())
             .build()
-        String[] authenticationProperties = new String[]{
+        String[] properties = new String[]{
             "authentication.allow.anonymous=false",
             "authentication.provider=$provider",
             "authentication.credentials.source=$source"
         }
     expect:
-        mqtt3ClientWithProperties(authenticationProperties) { Mqtt3AsyncClient subscriber ->
+        runContextWithApplicationProperties(properties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
           Mqtt3ConnAck ack = subscriber.connect(connectMessage).join()
           // then
@@ -129,13 +134,13 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
                 .password(correctPassword)
                 .build())
             .build()
-        String[] authenticationProperties = new String[]{
+        String[] properties = new String[]{
             "authentication.allow.anonymous=false",
             "authentication.provider=$provider",
             "authentication.credentials.source=$source"
         }
     expect:
-        mqtt5ClientWithProperties(authenticationProperties) { Mqtt5AsyncClient subscriber ->
+        runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
           Mqtt5ConnAck ack = subscriber.connect(connectMessage).join()
           // then
@@ -160,13 +165,13 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
                 .password(correctPassword)
                 .build())
             .build()
-        String[] authenticationProperties = new String[]{
+        String[] properties = new String[]{
             "authentication.allow.anonymous=false",
             "authentication.provider=$provider",
             "authentication.credentials.source=$source"
         }
     expect:
-        mqtt5ClientWithProperties(authenticationProperties) { Mqtt5AsyncClient subscriber ->
+        runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
           try {
             subscriber.connect(connectMessage).join()
@@ -175,7 +180,7 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
           } catch (CompletionException e) {
             assert e.cause instanceof Mqtt5ConnAckException
             def connAckEx = e.cause as Mqtt5ConnAckException
-            assert connAckEx.connAck.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+            assert connAckEx.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
@@ -195,13 +200,13 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
                 .password(correctPassword)
                 .build())
             .build()
-        String[] authenticationProperties = new String[]{
+        String[] properties = new String[]{
             "authentication.allow.anonymous=false",
             "authentication.provider=$provider",
             "authentication.credentials.source=$source"
         }
     expect:
-        mqtt3ClientWithProperties(authenticationProperties) { Mqtt3AsyncClient subscriber ->
+        runContextWithApplicationProperties(properties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
           try {
             subscriber.connect(connectMessage).join()
@@ -210,7 +215,7 @@ class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
           } catch (CompletionException e) {
             assert e.cause instanceof Mqtt3ConnAckException
             def connAckEx = e.cause as Mqtt3ConnAckException
-            assert connAckEx.connAck.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
+            assert connAckEx.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
           }
         }
     where:
