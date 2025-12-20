@@ -37,13 +37,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     var builder = new StringBuilder();
     builder.append("{\n");
-    builder.append("  \"DEFAULT\":\"").append(defaultProvider).append("\",\n");
+    builder.append("  \"DEFAULT\": \"").append(defaultProvider.getName()).append("\",\n");
 
     for (AuthenticationProvider provider : providers) {
       builder
-          .append("  \"")
-          .append(provider.getName())
-          .append("\": ")
+          .append("  ")
           .append(provider)
           .append(",")
           .append("\n");

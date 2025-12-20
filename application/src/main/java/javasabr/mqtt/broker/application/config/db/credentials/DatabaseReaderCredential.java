@@ -1,6 +1,6 @@
-package javasabr.mqtt.broker.application.config;
+package javasabr.mqtt.broker.application.config.db.credentials;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "credentials.source.db.reader")
-public record DatabaseCredentialReaderProperties(String username, String password) {}
+public record DatabaseReaderCredential(String username, String password) {}

@@ -1,7 +1,6 @@
 package javasabr.mqtt.auth.service.config;
 
 import io.r2dbc.spi.ConnectionFactory;
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider;
@@ -9,26 +8,23 @@ import javasabr.mqtt.auth.api.AuthenticationConfigException;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialSource;
-import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
-import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
+import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
+import javasabr.mqtt.auth.service.DefaultAuthenticationService;
+import javasabr.mqtt.model.DatabaseProperties;
+import javasabr.mqtt.model.DatabaseUrlBuilder;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({
-    CredentialsSourceDatabaseProperties.class
-})
 public class BasicAuthenticationSpringConfig {
 
   @Bean
@@ -61,9 +57,8 @@ public class BasicAuthenticationSpringConfig {
   @Bean
   @ConditionalOnProperty(name = "authentication.credentials.source", havingValue = "file")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
-  CredentialSource fileCredentialSource(@Value("${credentials.source.file.name:credentials}") Resource fileName)
-      throws IOException {
-    FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileName.getURI());
+  CredentialSource fileCredentialSource(@Value("${credentials.source.file.name:credentials}") URI fileName) {
+    FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileName);
     fileCredentialsSource.init();
     return fileCredentialsSource;
   }
@@ -71,8 +66,11 @@ public class BasicAuthenticationSpringConfig {
   @Bean
   @ConditionalOnProperty(name = "authentication.credentials.source", havingValue = "database")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource")
-  CredentialSource dbCredentialSource(DatabaseClient connectionFactory) {
-    return new DatabaseCredentialsSource(connectionFactory);
+  CredentialSource dbCredentialSource(
+      DatabaseClient databaseClient,
+      DatabaseProperties databaseProperties,
+      DatabaseUrlBuilder databaseUrlBuilder) {
+    return new DatabaseCredentialsSource(databaseClient, databaseUrlBuilder.build(databaseProperties));
   }
 
   @Bean

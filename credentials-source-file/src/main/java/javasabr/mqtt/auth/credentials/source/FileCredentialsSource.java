@@ -35,6 +35,6 @@ public class FileCredentialsSource extends InMemoryCredentialSource {
 
   @Override
   public String toString() {
-    return "FileCredentialsSource{fileName='%s'}".formatted(fileName);
+    return "{ \"%s\": \"%s\" }".formatted(getName(), fileName.getPath());
   }
 }

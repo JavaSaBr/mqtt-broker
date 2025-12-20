@@ -1,5 +1,7 @@
 package javasabr.mqtt.auth.credentials.source;
 
+import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.ConnectionFactory;
 import java.util.Arrays;
 import javasabr.mqtt.auth.api.CredentialSource;
 import lombok.AccessLevel;
@@ -20,6 +22,7 @@ public class DatabaseCredentialsSource implements CredentialSource {
       """;
 
   DatabaseClient databaseClient;
+  String dbUrl;
 
   @Override
   public String getName() {
@@ -40,7 +43,6 @@ public class DatabaseCredentialsSource implements CredentialSource {
 
   @Override
   public String toString() {
-    String driver = databaseClient.getConnectionFactory().getMetadata().getName();
-    return "DatabaseCredentialsSource{driver='%s'}".formatted(driver);
+    return "{ \"%s\": \"%s\" }".formatted(getName(), dbUrl);
   }
 }

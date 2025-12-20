@@ -30,6 +30,6 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
   @Override
   public String toString() {
-    return "BasicAuthenticationProvider{credentialsSource=[%s]}".formatted(credentialsSource);
+    return "\"%s\": { \"credentialSource\": %s }".formatted(getName(), credentialsSource);
   }
 }

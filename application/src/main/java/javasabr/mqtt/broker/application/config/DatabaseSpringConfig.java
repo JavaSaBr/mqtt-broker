@@ -14,32 +14,40 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
-import javasabr.mqtt.auth.service.config.CredentialsSourceDatabaseProperties;
+import javasabr.mqtt.broker.application.config.db.DatabaseConnectionProperties;
+import javasabr.mqtt.broker.application.config.db.credentials.DatabaseAdminCredential;
+import javasabr.mqtt.broker.application.config.db.credentials.DatabaseReaderCredential;
+import javasabr.mqtt.broker.application.config.db.credentials.DatabaseWriterCredential;
+import javasabr.mqtt.model.DatabaseUrlBuilder;
 import org.flywaydb.core.Flyway;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties({
+    DatabaseConnectionProperties.class,
+    DatabaseAdminCredential.class,
+    DatabaseReaderCredential.class,
+    DatabaseWriterCredential.class
+})
 public class DatabaseSpringConfig {
-
-  private static final String LOCK_TIMEOUT_OPTION = "lock_timeout";
-  private static final String STATEMENT_TIMEOUT_OPTION = "statement_timeout";
 
   @Bean
   @DependsOn("flyway")
   ConnectionFactory connectionFactory(
-      CredentialsSourceDatabaseProperties config,
-      DatabaseCredentialReaderProperties readerProperties) {
+      DatabaseConnectionProperties config,
+      DatabaseWriterCredential writerCredential) {
     Map<String, String> timeoutOptions = Map.of(
-        LOCK_TIMEOUT_OPTION, config.lockTimeout(),
-        STATEMENT_TIMEOUT_OPTION, config.statementTimeout());
+        "lock_timeout", config.lockTimeout(),
+        "statement_timeout", config.statementTimeout());
     ConnectionFactoryOptions connectionFactoryOptions = ConnectionFactoryOptions.builder()
         .option(DRIVER, config.driver())
         .option(HOST, config.host())
         .option(PORT, config.port())
-        .option(USER, readerProperties.username())
-        .option(PASSWORD, readerProperties.password())
+        .option(USER, writerCredential.username())
+        .option(PASSWORD, writerCredential.password())
         .option(DATABASE, config.name())
         .option(OPTIONS, timeoutOptions).build();
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
@@ -52,23 +60,17 @@ public class DatabaseSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  public Flyway flyway(
+  Flyway flyway(
       DatabaseUrlBuilder databaseUrlBuilder,
-      CredentialsSourceDatabaseProperties dbProperties,
-      DatabaseCredentialWriterProperties dbCredentials) {
+      DatabaseConnectionProperties dbProperties,
+      DatabaseAdminCredential adminCredential) {
     return Flyway.configure()
-        .dataSource(databaseUrlBuilder.build(dbProperties), dbCredentials.username(), dbCredentials.password())
-        .locations("db/migration")
-        .baselineOnMigrate(true)
+        .dataSource(databaseUrlBuilder.build(dbProperties), adminCredential.username(), adminCredential.password())
         .load();
   }
 
   @Bean
   DatabaseUrlBuilder databaseUrlBuilder() {
     return dbProps -> "jdbc:%s://%s:%s/%s".formatted(dbProps.driver(), dbProps.host(), dbProps.port(), dbProps.name());
-  }
-
-  public interface DatabaseUrlBuilder {
-    String build(CredentialsSourceDatabaseProperties dbProps);
   }
 }
