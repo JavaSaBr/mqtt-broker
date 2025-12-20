@@ -1,7 +1,7 @@
 package javasabr.mqtt.auth.provider;
 
 import javasabr.mqtt.auth.api.AuthenticationProvider;
-import javasabr.mqtt.auth.api.CredentialSource;
+import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BasicAuthenticationProvider implements AuthenticationProvider {
 
-  CredentialSource credentialsSource;
+  CredentialsSource credentialsSource;
 
   @Override
   public String getName() {
@@ -24,7 +24,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     if (username == null) {
       return Mono.just(false);
     } else {
-      return credentialsSource.isCredentialExists(username, password);
+      return credentialsSource.isCredentialsExists(username, password);
     }
   }
 

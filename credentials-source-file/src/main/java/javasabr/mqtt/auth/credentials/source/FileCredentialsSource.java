@@ -5,14 +5,14 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javasabr.mqtt.auth.api.CredentialsSourceException;
-import javasabr.mqtt.auth.api.InMemoryCredentialSource;
+import javasabr.mqtt.auth.api.InMemoryCredentialsSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class FileCredentialsSource extends InMemoryCredentialSource {
+public class FileCredentialsSource extends InMemoryCredentialsSource {
 
   URI fileName;
 

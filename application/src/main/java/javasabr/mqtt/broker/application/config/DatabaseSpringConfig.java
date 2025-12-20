@@ -14,10 +14,6 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
-import javasabr.mqtt.broker.application.config.db.DatabaseConnectionProperties;
-import javasabr.mqtt.broker.application.config.db.credentials.DatabaseAdminCredential;
-import javasabr.mqtt.broker.application.config.db.credentials.DatabaseReaderCredential;
-import javasabr.mqtt.broker.application.config.db.credentials.DatabaseWriterCredential;
 import javasabr.mqtt.model.DatabaseUrlBuilder;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,19 +22,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({
-    DatabaseConnectionProperties.class,
-    DatabaseAdminCredential.class,
-    DatabaseReaderCredential.class,
-    DatabaseWriterCredential.class
-})
+@EnableConfigurationProperties(DatabaseConnectionProperties.class)
 public class DatabaseSpringConfig {
 
   @Bean
   @DependsOn("flyway")
-  ConnectionFactory connectionFactory(
-      DatabaseConnectionProperties config,
-      DatabaseWriterCredential writerCredential) {
+  ConnectionFactory connectionFactory(DatabaseConnectionProperties config) {
+    javasabr.mqtt.model.Credentials reader = config.users().get("reader");
     Map<String, String> timeoutOptions = Map.of(
         "lock_timeout", config.lockTimeout(),
         "statement_timeout", config.statementTimeout());
@@ -46,8 +36,8 @@ public class DatabaseSpringConfig {
         .option(DRIVER, config.driver())
         .option(HOST, config.host())
         .option(PORT, config.port())
-        .option(USER, writerCredential.username())
-        .option(PASSWORD, writerCredential.password())
+        .option(USER, reader.username())
+        .option(PASSWORD, reader.password())
         .option(DATABASE, config.name())
         .option(OPTIONS, timeoutOptions).build();
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
@@ -60,12 +50,10 @@ public class DatabaseSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(
-      DatabaseUrlBuilder databaseUrlBuilder,
-      DatabaseConnectionProperties dbProperties,
-      DatabaseAdminCredential adminCredential) {
+  Flyway flyway(DatabaseUrlBuilder databaseUrlBuilder, DatabaseConnectionProperties dbProperties) {
+    javasabr.mqtt.model.Credentials admin = dbProperties.users().get("admin");
     return Flyway.configure()
-        .dataSource(databaseUrlBuilder.build(dbProperties), adminCredential.username(), adminCredential.password())
+        .dataSource(databaseUrlBuilder.build(dbProperties), admin.username(), admin.password())
         .load();
   }
 

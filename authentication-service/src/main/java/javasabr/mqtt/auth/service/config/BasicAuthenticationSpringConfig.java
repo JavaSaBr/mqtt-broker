@@ -7,7 +7,7 @@ import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationConfigException;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
-import javasabr.mqtt.auth.api.CredentialSource;
+import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
@@ -57,7 +57,7 @@ public class BasicAuthenticationSpringConfig {
   @Bean
   @ConditionalOnProperty(name = "authentication.credentials.source", havingValue = "file")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
-  CredentialSource fileCredentialSource(@Value("${credentials.source.file.name:credentials}") URI fileName) {
+  CredentialsSource fileCredentialsSource(@Value("${credentials.source.file.name:credentials}") URI fileName) {
     FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileName);
     fileCredentialsSource.init();
     return fileCredentialsSource;
@@ -66,7 +66,7 @@ public class BasicAuthenticationSpringConfig {
   @Bean
   @ConditionalOnProperty(name = "authentication.credentials.source", havingValue = "database")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource")
-  CredentialSource dbCredentialSource(
+  CredentialsSource dbCredentialsSource(
       DatabaseClient databaseClient,
       DatabaseProperties databaseProperties,
       DatabaseUrlBuilder databaseUrlBuilder) {
@@ -76,8 +76,8 @@ public class BasicAuthenticationSpringConfig {
   @Bean
   @ConditionalOnProperty(name = "authentication.provider", havingValue = "basic")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.provider.BasicAuthenticationProvider")
-  AuthenticationProvider passwordBasedAuthenticationProvider(CredentialSource credentialSource) {
-    return new BasicAuthenticationProvider(credentialSource);
+  AuthenticationProvider passwordBasedAuthenticationProvider(CredentialsSource credentialsSource) {
+    return new BasicAuthenticationProvider(credentialsSource);
   }
 
   @Bean

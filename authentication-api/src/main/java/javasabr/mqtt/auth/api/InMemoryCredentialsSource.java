@@ -11,7 +11,7 @@ import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import reactor.core.publisher.Mono;
 
-public abstract class InMemoryCredentialSource implements CredentialSource {
+public abstract class InMemoryCredentialsSource implements CredentialsSource {
 
   private final LockableRefToRefDictionary<String, byte[]> credentials =
       DictionaryFactory.stampedLockBasedRefToRefDictionary(String.class, byte[].class);
@@ -47,7 +47,7 @@ public abstract class InMemoryCredentialSource implements CredentialSource {
   }
 
   @Override
-  public Mono<Boolean> isCredentialExists(String user, byte[] pass) {
+  public Mono<Boolean> isCredentialsExists(String user, byte[] pass) {
     return Mono.just(Arrays.equals(pass, credentials.get(user)));
   }
 }

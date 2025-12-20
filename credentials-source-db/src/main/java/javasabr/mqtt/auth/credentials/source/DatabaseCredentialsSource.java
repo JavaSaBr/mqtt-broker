@@ -1,9 +1,7 @@
 package javasabr.mqtt.auth.credentials.source;
 
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactory;
 import java.util.Arrays;
-import javasabr.mqtt.auth.api.CredentialSource;
+import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class DatabaseCredentialsSource implements CredentialSource {
+public class DatabaseCredentialsSource implements CredentialsSource {
 
   @SuppressWarnings("SqlNoDataSourceInspection")
   private static final String CREDENTIALS_QUERY = """
@@ -30,7 +28,7 @@ public class DatabaseCredentialsSource implements CredentialSource {
   }
 
   @Override
-  public Mono<Boolean> isCredentialExists(String username, byte[] requestedPassword) {
+  public Mono<Boolean> isCredentialsExists(String username, byte[] requestedPassword) {
     return databaseClient
         .sql(CREDENTIALS_QUERY)
         .bind("$1", username)

@@ -4,7 +4,6 @@ import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.ConnectionFactoryOptions
 import io.r2dbc.spi.Option
-import javasabr.mqtt.broker.application.config.db.credentials.DatabaseWriterCredential
 import javasabr.mqtt.model.DatabaseUrlBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,13 +21,14 @@ class CredentialsSourceTestConfig {
 
   @Bean
   @DependsOn("flyway")
-  ConnectionFactory connectionFactory(DatabaseWriterCredential writerCredential) {
+  ConnectionFactory connectionFactory(DatabaseConnectionProperties dbProperties) {
+    def reader = dbProperties.users().get("reader")
     ConnectionFactoryOptions options = builder()
         .option(DRIVER, "h2")
         .option(PROTOCOL, "mem")
         .option(DATABASE, "testdb")
-        .option(USER, writerCredential.username())
-        .option(PASSWORD, writerCredential.password())
+        .option(USER, reader.username())
+        .option(PASSWORD, reader.password())
         .option(Option.valueOf("DB_CLOSE_DELAY"), "-1")
         .build()
     return ConnectionFactories.get(options)
