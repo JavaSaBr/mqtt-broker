@@ -5,14 +5,7 @@ import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCo
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5ConnAckException
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
-import javasabr.mqtt.network.message.out.ConnectMqtt311OutMessage
-import javasabr.rlib.common.util.ArrayUtils
-import spock.lang.Ignore
 
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
 
 class ExternalConnectionTest extends IntegrationSpecification {

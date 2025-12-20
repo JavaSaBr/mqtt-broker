@@ -36,6 +36,6 @@ class CredentialsSourceTestConfig {
 
   @Bean
   DatabaseUrlBuilder databaseUrlBuilder() {
-    return { dbProps -> "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1" }
+    return { "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1" }
   }
 }

@@ -13,6 +13,7 @@ import com.hivemq.client.mqtt.mqtt5.message.connect.Mqtt5Connect
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import javasabr.mqtt.broker.application.ContextRunnerSpecification
+import javasabr.mqtt.broker.application.MqttClientFactory
 import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
 
 import java.nio.charset.StandardCharsets
@@ -34,13 +35,13 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
                 .password(wrongPassword)
                 .build())
             .build()
-        String[] authenticationProperties = new String[]{
+        String[] properties = new String[]{
             "authentication.allow.anonymous=false",
             "authentication.provider=$provider",
             "authentication.credentials.source=$source"
         }
     expect:
-        runContextWithApplicationProperties(authenticationProperties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
+        runContextWithProperties(properties, MqttClientFactory.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
           def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
           // then
@@ -72,7 +73,7 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
             "authentication.credentials.source=$source"
         }
     expect:
-        runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
+        runContextWithProperties(properties, MqttClientFactory.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
           def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
           // then
@@ -105,7 +106,7 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
             "authentication.credentials.source=$source"
         }
     expect:
-        runContextWithApplicationProperties(properties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
+        runContextWithProperties(properties, MqttClientFactory.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
           Mqtt3ConnAck ack = subscriber.connect(connectMessage).join()
           // then
@@ -136,7 +137,7 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
             "authentication.credentials.source=$source"
         }
     expect:
-        runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
+        runContextWithProperties(properties, MqttClientFactory.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
           Mqtt5ConnAck ack = subscriber.connect(connectMessage).join()
           // then
@@ -167,7 +168,7 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
             "authentication.credentials.source=$source"
         }
     expect:
-        runContextWithApplicationProperties(properties, this.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
+        runContextWithProperties(properties, MqttClientFactory.&buildMqtt5Client) { Mqtt5AsyncClient subscriber ->
           // when
           def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
           // then
@@ -200,7 +201,7 @@ class AuthenticationServiceTest extends ContextRunnerSpecification {
             "authentication.credentials.source=$source"
         }
     expect:
-        runContextWithApplicationProperties(properties, this.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
+        runContextWithProperties(properties, MqttClientFactory.&buildMqtt311Client) { Mqtt3AsyncClient subscriber ->
           // when
           def exception = { try { subscriber.connect(connectMessage).join() } catch(e) { return e } }()
           // then

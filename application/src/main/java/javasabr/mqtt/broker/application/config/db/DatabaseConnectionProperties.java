@@ -1,7 +1,8 @@
 package javasabr.mqtt.broker.application.config.db;
 
 import java.time.Duration;
-import javasabr.mqtt.model.DatabaseProperties;import org.springframework.boot.context.properties.ConfigurationProperties;
+import javasabr.mqtt.model.DatabaseProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "credentials.source.db")
 public record DatabaseConnectionProperties(

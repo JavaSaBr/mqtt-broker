@@ -6,6 +6,8 @@ import org.springframework.core.env.PropertySource
 import org.springframework.core.io.ClassPathResource
 import spock.lang.Specification
 
+import static javasabr.mqtt.broker.application.MqttClientFactory.generateClientId
+
 abstract class ContextRunnerSpecification extends Specification {
 
   ApplicationContextRunner contextRunner
@@ -21,24 +23,14 @@ abstract class ContextRunnerSpecification extends Specification {
         }
   }
 
-  void runContextWithApplicationProperties(String[] properties, Closure clientConstructor, Closure assertion) {
+  void runContextWithProperties(String[] properties, Closure clientConstructor, Closure assertion) {
     Objects.requireNonNull(
         contextRunner,
         "ApplicationContextRunner is not initialized. See `ApplicationPropertiesSpecification.applyProperties`")
     contextRunner
         .withPropertyValues(properties)
-        .run({ assertion(clientConstructor(it.getBean(InetSocketAddress))) })
-  }
-
-  def buildMqtt5Client(InetSocketAddress networkAddress) {
-    return MqttClientFactory.buildMqtt5Client(generateClientId(), networkAddress)
-  }
-
-  def buildMqtt311Client(InetSocketAddress networkAddress) {
-    return MqttClientFactory.buildMqtt311Client(generateClientId(), networkAddress)
-  }
-
-  def generateClientId() {
-    return MqttClientFactory.generateClientId("ApplicationContextRunner")
+        .run({ ctx ->
+          assertion(clientConstructor(generateClientId("ApplicationContextRunner"), ctx.getBean(InetSocketAddress)))
+        })
   }
 }
