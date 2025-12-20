@@ -35,9 +35,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
       RefToRefDictionary<String, AuthenticationProvider> providers,
       AuthenticationProvider defaultProvider) {
 
-    var builder = new StringBuilder();
-    builder.append("{\n");
-    builder.append("  \"DEFAULT\": \"").append(defaultProvider.getName()).append("\",\n");
+    var builder = new StringBuilder()
+        .append("{\n")
+        .append("  \"DEFAULT\": \"")
+        .append(defaultProvider.getName())
+        .append("\",\n");
 
     for (AuthenticationProvider provider : providers) {
       builder

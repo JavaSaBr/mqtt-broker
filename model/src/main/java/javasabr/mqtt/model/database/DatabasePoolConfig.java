@@ -2,7 +2,7 @@ package javasabr.mqtt.model.database;
 
 import java.time.Duration;
 
-public interface DatabasePoolProperties {
+public interface DatabasePoolConfig {
 
   Duration maxIdleTime();
 

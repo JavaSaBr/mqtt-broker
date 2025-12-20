@@ -15,11 +15,11 @@ import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
 import javasabr.mqtt.model.Credentials;
-import javasabr.mqtt.model.DatabaseUrlBuilder;
-import javasabr.mqtt.model.database.DatabasePoolProperties;
-import javasabr.mqtt.model.database.DatabaseTimeoutsProperties;
-import javasabr.mqtt.model.database.DatabaseUrlProperties;
-import javasabr.mqtt.model.database.DatabaseUsersProperties;
+import javasabr.mqtt.model.database.DatabaseUrlBuilder;
+import javasabr.mqtt.model.database.DatabasePoolConfig;
+import javasabr.mqtt.model.database.DatabaseTimeoutsConfig;
+import javasabr.mqtt.model.database.DatabaseUrlConfig;
+import javasabr.mqtt.model.database.DatabaseUsersConfig;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,32 +33,33 @@ public class DatabaseSpringConfig {
 
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
-      DatabaseTimeoutsProperties config,
-      DatabaseUrlProperties databaseUrlProperties,
+      DatabaseTimeoutsConfig databaseTimeoutsConfig,
+      DatabaseUrlConfig databaseUrlConfig,
       @Qualifier("readerCredentials") Credentials credentials){
     Map<String, String> timeoutOptions = Map.of(
-        "lock_timeout", config.lockTimeout(),
-        "statement_timeout", config.statementTimeout());
+        "lock_timeout", databaseTimeoutsConfig.lockTimeout(),
+        "statement_timeout", databaseTimeoutsConfig.statementTimeout());
     return ConnectionFactoryOptions.builder()
-        .option(DRIVER, databaseUrlProperties.driver())
-        .option(HOST, databaseUrlProperties.host())
-        .option(PORT, databaseUrlProperties.port())
+        .option(DATABASE, databaseUrlConfig.name())
+        .option(DRIVER, databaseUrlConfig.driver())
+        .option(HOST, databaseUrlConfig.host())
+        .option(PORT, databaseUrlConfig.port())
         .option(USER, credentials.username())
         .option(PASSWORD, credentials.password())
-        .option(DATABASE, databaseUrlProperties.name())
-        .option(OPTIONS, timeoutOptions).build();
+        .option(OPTIONS, timeoutOptions)
+        .build();
   }
 
   @Bean
   @DependsOn("flyway")
   ConnectionFactory connectionFactory(
-      DatabasePoolProperties config,
+      DatabasePoolConfig databasePoolConfig,
       ConnectionFactoryOptions connectionFactoryOptions) {
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-        .maxIdleTime(config.maxIdleTime())
-        .maxSize(config.maxPoolSize())
-        .initialSize(config.initialPoolSize())
+        .maxIdleTime(databasePoolConfig.maxIdleTime())
+        .maxSize(databasePoolConfig.maxPoolSize())
+        .initialSize(databasePoolConfig.initialPoolSize())
         .build();
     return new ConnectionPool(configuration);
   }
@@ -66,10 +67,10 @@ public class DatabaseSpringConfig {
   @Bean(initMethod = "migrate")
   Flyway flyway(
       DatabaseUrlBuilder databaseUrlBuilder,
-      DatabaseUrlProperties databaseUrlProperties,
+      DatabaseUrlConfig databaseUrlConfig,
       @Qualifier("adminCredentials") Credentials credentials) {
     return Flyway.configure()
-        .dataSource(databaseUrlBuilder.build(databaseUrlProperties), credentials.username(), credentials.password())
+        .dataSource(databaseUrlBuilder.build(databaseUrlConfig), credentials.username(), credentials.password())
         .load();
   }
 
@@ -79,17 +80,17 @@ public class DatabaseSpringConfig {
   }
 
   @Bean
-  public Credentials readerCredentials(DatabaseUsersProperties users) {
+  public Credentials readerCredentials(DatabaseUsersConfig users) {
     return users.get("reader");
   }
 
   @Bean
-  public Credentials writerCredentials(DatabaseUsersProperties users) {
+  public Credentials writerCredentials(DatabaseUsersConfig users) {
     return users.get("writer");
   }
 
   @Bean
-  public Credentials adminCredentials(DatabaseUsersProperties users) {
+  public Credentials adminCredentials(DatabaseUsersConfig users) {
     return users.get("admin");
   }
 }

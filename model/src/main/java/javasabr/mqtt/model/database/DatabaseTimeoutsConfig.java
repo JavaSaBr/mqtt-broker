@@ -1,6 +1,6 @@
 package javasabr.mqtt.model.database;
 
-public interface DatabaseTimeoutsProperties {
+public interface DatabaseTimeoutsConfig {
 
   String lockTimeout();
 

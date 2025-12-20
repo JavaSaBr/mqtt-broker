@@ -4,7 +4,7 @@ package javasabr.mqtt.broker.application.config
 import io.r2dbc.spi.ConnectionFactoryOptions
 import io.r2dbc.spi.Option
 import javasabr.mqtt.model.Credentials
-import javasabr.mqtt.model.DatabaseUrlBuilder
+import javasabr.mqtt.model.database.DatabaseUrlBuilder
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

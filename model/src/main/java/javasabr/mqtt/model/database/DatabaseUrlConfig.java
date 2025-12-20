@@ -1,8 +1,6 @@
 package javasabr.mqtt.model.database;
 
-import java.time.Duration;
-
-public interface DatabaseUrlProperties {
+public interface DatabaseUrlConfig {
   String driver();
 
   String host();

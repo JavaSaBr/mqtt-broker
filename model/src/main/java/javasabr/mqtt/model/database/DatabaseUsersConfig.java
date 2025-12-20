@@ -3,7 +3,7 @@ package javasabr.mqtt.model.database;
 import java.util.Map;
 import javasabr.mqtt.model.Credentials;
 
-public interface DatabaseUsersProperties {
+public interface DatabaseUsersConfig {
 
   Credentials ANONYMOUS_CREDENTIAL = new Credentials("", "");
 
