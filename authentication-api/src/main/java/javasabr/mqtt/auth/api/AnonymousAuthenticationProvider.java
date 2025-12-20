@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public class AnonymousAuthenticationProvider implements AuthenticationProvider {
   @Override
-  public String getAuthMethodName() {
+  public String getName() {
     return "anonymous";
   }
 

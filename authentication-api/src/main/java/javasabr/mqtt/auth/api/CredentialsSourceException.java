@@ -6,7 +6,7 @@ public class CredentialsSourceException extends RuntimeException {
     super(message);
   }
 
-  public CredentialsSourceException(Throwable cause) {
-    super(cause);
+  public CredentialsSourceException(String message, Throwable cause) {
+    super(message, cause);
   }
 }
