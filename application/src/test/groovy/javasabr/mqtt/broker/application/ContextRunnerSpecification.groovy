@@ -12,7 +12,7 @@ abstract class ContextRunnerSpecification extends Specification {
 
   ApplicationContextRunner contextRunner
 
-  def prepareContext(Class springConfigClass, String applicationPropertiesFile) {
+  def createContextRunner(Class springConfigClass, String applicationPropertiesFile) {
     PropertySource propertySource = new PropertiesPropertySourceLoader()
         .load("test-props", new ClassPathResource(applicationPropertiesFile)).getFirst()
     contextRunner = new ApplicationContextRunner()
@@ -26,7 +26,7 @@ abstract class ContextRunnerSpecification extends Specification {
   void runContextWithProperties(String[] properties, Closure clientConstructor, Closure assertion) {
     Objects.requireNonNull(
         contextRunner,
-        "ApplicationContextRunner is not initialized. See `ApplicationPropertiesSpecification.applyProperties`")
+        "ApplicationContextRunner is not initialized. See `ApplicationPropertiesSpecification.createContextRunner`")
     contextRunner
         .withPropertyValues(properties)
         .run({ ctx ->

@@ -22,7 +22,7 @@ import java.util.concurrent.CompletionException
 class AuthenticationServiceTest extends ContextRunnerSpecification {
 
   def setup() {
-    prepareContext(MqttBrokerTestConfig, "application-test.properties")
+    createContextRunner(MqttBrokerTestConfig, "application-test.properties")
   }
 
   def "should not be able to connect with wrong password using mqtt 3.1.1 client"() {
