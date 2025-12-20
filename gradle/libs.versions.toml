@@ -31,6 +31,8 @@ groovy = "4.0.28"
 springboot = '3.5.8'
 # https://mvnrepository.com/artifact/org.springframework/spring-core
 spring = '6.2.15'
+# https://mvnrepository.com/artifact/org.assertj/assertj-core
+assertj = '3.24.2'
 # https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
 byte-buddy = "1.17.6"
 # https://mvnrepository.com/artifact/org.objenesis/objenesis
@@ -54,6 +56,8 @@ spring-context = { module = "org.springframework:spring-context", version.ref = 
 springboot-starter-core = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springboot" }
 springboot-starter-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springboot" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "springboot" }
+springboot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "springboot" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "project-reactor" }
 r2dbc-h2 = { module = "io.r2dbc:r2dbc-h2", version.ref = "r2dbc" }
 r2dbc-spi = { module ='io.r2dbc:r2dbc-spi', version.ref = "r2dbc"}
