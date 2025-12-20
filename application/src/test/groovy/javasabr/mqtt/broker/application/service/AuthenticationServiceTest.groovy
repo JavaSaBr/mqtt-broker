@@ -12,13 +12,13 @@ import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth
 import com.hivemq.client.mqtt.mqtt5.message.connect.Mqtt5Connect
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
-import javasabr.mqtt.broker.application.ApplicationPropertiesSpecification
+import javasabr.mqtt.broker.application.ContextRunnerSpecification
 import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
 
-class AuthenticationServiceTest extends ApplicationPropertiesSpecification {
+class AuthenticationServiceTest extends ContextRunnerSpecification {
 
   def setup() {
     applyProperties(MqttBrokerTestConfig, "application-test.properties")

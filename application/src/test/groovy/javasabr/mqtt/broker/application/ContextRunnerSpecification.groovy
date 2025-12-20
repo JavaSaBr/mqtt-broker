@@ -1,13 +1,12 @@
 package javasabr.mqtt.broker.application
 
-import com.hivemq.client.mqtt.MqttClient
 import org.springframework.boot.env.PropertiesPropertySourceLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.core.env.PropertySource
 import org.springframework.core.io.ClassPathResource
 import spock.lang.Specification
 
-abstract class ApplicationPropertiesSpecification extends Specification {
+abstract class ContextRunnerSpecification extends Specification {
 
   ApplicationContextRunner contextRunner
 
@@ -32,40 +31,14 @@ abstract class ApplicationPropertiesSpecification extends Specification {
   }
 
   def buildMqtt5Client(InetSocketAddress networkAddress) {
-    return buildMqtt5Client(generateClientId(), networkAddress)
-  }
-
-  def buildMqtt5Client(String clientId, InetSocketAddress address) {
-    return MqttClient.builder()
-        .identifier(clientId)
-        .serverHost(address.getHostName())
-        .serverPort(address.getPort())
-        .useMqttVersion5()
-        .addDisconnectedListener {
-          println "[${clientId}|mqtt5] disconnected:[${it.cause.message}]"
-        }
-        .build()
-        .toAsync()
+    return MqttClientFactory.buildMqtt5Client(generateClientId(), networkAddress)
   }
 
   def buildMqtt311Client(InetSocketAddress networkAddress) {
-    return buildMqtt311Client(generateClientId(), networkAddress)
-  }
-
-  def buildMqtt311Client(String clientId, InetSocketAddress address) {
-    return MqttClient.builder()
-        .identifier(clientId)
-        .serverHost(address.getHostName())
-        .serverPort(address.getPort())
-        .useMqttVersion3()
-        .addDisconnectedListener {
-          println "[${clientId}|mqtt311] disconnected:[${it.cause.message}]"
-        }
-        .build()
-        .toAsync()
+    return MqttClientFactory.buildMqtt311Client(generateClientId(), networkAddress)
   }
 
   def generateClientId() {
-    return "ApplicationContextRunner_" + IntegrationSpecification.idGenerator.incrementAndGet()
+    return MqttClientFactory.generateClientId("ApplicationContextRunner")
   }
 }
