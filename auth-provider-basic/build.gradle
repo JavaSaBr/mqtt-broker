@@ -4,12 +4,11 @@ plugins {
   id("groovy")
 }
 
-description = "Database-based Credentials Source Provider"
+description = "Basic authentication service"
 
 dependencies {
   api projects.base
   api projects.authenticationApi
-  api libs.spring.r2dbc
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport

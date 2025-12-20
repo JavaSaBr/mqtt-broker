@@ -12,7 +12,6 @@ import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.MqttMockClient
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import spock.lang.Specification
@@ -31,7 +30,7 @@ class IntegrationSpecification extends Specification {
   public static final clientId = "testClientId"
   public static final keepAlive = 120
 
-  private static final idGenerator = new AtomicInteger(1)
+  public static final idGenerator = new AtomicInteger(1)
 
   @Autowired
   InetSocketAddress externalNetworkAddress

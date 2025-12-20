@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.message.converter;
 
-import javasabr.mqtt.model.auth.AuthRequest;
+import javasabr.mqtt.auth.api.AuthRequest;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 
 public class ConnectToAuthRequestConverter implements MessageConverter<ConnectMqttInMessage, AuthRequest> {

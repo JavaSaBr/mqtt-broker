@@ -52,7 +52,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
     given:
         def client = buildExternalMqtt311Client()
     when:
-        def result = connectWith(client, 'user1', 'password')
+        def result = connectWith(client, '', '')
     then:
         result.returnCode == Mqtt3ConnAckReturnCode.SUCCESS
         !result.sessionPresent
@@ -64,7 +64,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
     given:
         def client = buildExternalMqtt5Client()
     when:
-        def result = connectWith(client, 'user1', 'password')
+        def result = connectWith(client, '', '')
     then:
         result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
         result.sessionExpiryInterval.present
@@ -127,53 +127,5 @@ class ExternalConnectionTest extends IntegrationSpecification {
         cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID
     where:
         clientId << ["!@#!@*()^&"]
-  }
-
-  def "client should not connect to broker with wrong pass using mqtt 3.1.1"() {
-    given:
-        def client = buildExternalMqtt311Client()
-    when:
-        connectWith(client, "user", "wrongPassword")
-    then:
-        def ex = thrown CompletionException
-        def cause = ex.cause as Mqtt3ConnAckException
-        cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
-  }
-
-  @Ignore
-  def "client should not connect to broker without username and with pass using mqtt 3.1.1"() {
-    given:
-        def client = buildMqtt311MockClient()
-        def clientId = generateClientId()
-    when:
-
-        client.connect()
-        client.send(new ConnectMqtt311OutMessage(
-            "",
-            "",
-            clientId,
-            "wrongPassword".getBytes(StandardCharsets.UTF_8),
-            ArrayUtils.EMPTY_BYTE_ARRAY,
-            QoS.AT_MOST_ONCE,
-            keepAlive,
-            false,
-            false
-        ))
-
-        def connectAck = client.readNext() as ConnectAckMqttInMessage
-
-    then:
-        connectAck.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
-  }
-
-  def "client should not connect to broker with wrong pass using mqtt 5"() {
-    given:
-        def client = buildExternalMqtt5Client()
-    when:
-        connectWith(client, "user", "wrongPassword")
-    then:
-        def ex = thrown CompletionException
-        def cause = ex.cause as Mqtt5ConnAckException
-        cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
   }
 }

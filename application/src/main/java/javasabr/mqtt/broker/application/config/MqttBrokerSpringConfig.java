@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
+import javasabr.mqtt.auth.api.AuthenticationService;
+import javasabr.mqtt.auth.service.config.BasicAuthenticationSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -21,7 +23,6 @@ import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
-import javasabr.mqtt.service.auth.AuthenticationService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
@@ -81,7 +82,8 @@ import org.springframework.core.env.Environment;
 
 @Import({
     GroovyDslBasedAclServiceSpringConfig.class,
-    AuthenticationSpringConfig.class
+    DatabaseSpringConfig.class,
+    BasicAuthenticationSpringConfig.class
 })
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -90,7 +92,10 @@ import org.springframework.core.env.Environment;
     @PropertySource(value = "file:./application.properties", ignoreResourceNotFound = true),
     @PropertySource(value = "${BROKER_CONFIG}", ignoreResourceNotFound = true)
 })
-@EnableConfigurationProperties(CredentialsSourceDatabaseProperties.class)
+@EnableConfigurationProperties({
+    DatabaseCredentialWriterProperties.class,
+    DatabaseCredentialReaderProperties.class
+})
 public class MqttBrokerSpringConfig {
 
   @Bean

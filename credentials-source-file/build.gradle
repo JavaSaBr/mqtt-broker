@@ -8,7 +8,7 @@ description = "File-based Credentials Source Provider"
 
 dependencies {
   api projects.base
-  api projects.authenticationBasic
+  api projects.authenticationApi
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport

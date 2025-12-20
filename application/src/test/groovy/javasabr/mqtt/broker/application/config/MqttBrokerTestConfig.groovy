@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 @Import([
     MqttBrokerSpringConfig,
+    CredentialsSourceTestConfig
 ])
 @Configuration(proxyBeanMethods = false)
 class MqttBrokerTestConfig {

@@ -11,13 +11,24 @@ dependencies {
   implementation projects.coreService
   implementation projects.aclService
   implementation projects.aclGroovyDsl
-  implementation projects.credentialsSourceFile
-  implementation projects.credentialsSourceDb
+  implementation projects.authProviderBasic
+  implementation projects.authenticationApi
+  implementation projects.authenticationService
   implementation libs.rlib.logger.slf4j
   implementation libs.springboot.starter.core
   implementation libs.springboot.starter.log4j2
+  implementation libs.jdbc.postgres
+  implementation libs.flyway.core
+  implementation libs.r2dbc.spi
+  implementation libs.r2dbc.pool
+  implementation libs.r2dbc.postgresql
+  implementation libs.flyway.postgresql
+  testImplementation 'org.springframework.boot:spring-boot-test:3.2.0'
+  testImplementation 'org.assertj:assertj-core:3.24.2'
 
   testImplementation libs.r2dbc.h2
+  testImplementation projects.credentialsSourceFile
+  testImplementation projects.credentialsSourceDb
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
 }

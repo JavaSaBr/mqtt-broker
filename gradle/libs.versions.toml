@@ -19,6 +19,10 @@ r2dbc = "1.0.0.RELEASE"
 r2dbc-pool="1.0.2.RELEASE"
 # https://mvnrepository.com/artifact/org.postgresql/r2dbc-postgresql
 r2dbc-postgresql="1.1.1.RELEASE"
+# https://mvnrepository.com/artifact/org.postgresql/postgresql
+jdbc-postgres="42.7.8"
+# https://mvnrepository.com/artifact/org.flywaydb/flyway-core
+flyway="11.19.0"
 # https://mvnrepository.com/artifact/org.spockframework/spock-core
 spock = "2.4-M6-groovy-4.0"
 # https://mvnrepository.com/artifact/org.apache.groovy/groovy-all
@@ -54,7 +58,10 @@ project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref 
 r2dbc-h2 = { module = "io.r2dbc:r2dbc-h2", version.ref = "r2dbc" }
 r2dbc-spi = { module ='io.r2dbc:r2dbc-spi', version.ref = "r2dbc"}
 r2dbc-pool = { module = 'io.r2dbc:r2dbc-pool', version.ref = "r2dbc-pool"}
-r2dbc-postgresql= { module = 'org.postgresql:r2dbc-postgresql', version.ref = "r2dbc-postgresql"}
+r2dbc-postgresql = { module = 'org.postgresql:r2dbc-postgresql', version.ref = "r2dbc-postgresql"}
+jdbc-postgres = { module = 'org.postgresql:postgresql', version.ref = "jdbc-postgres"}
+flyway-core = { module = 'org.flywaydb:flyway-core', version.ref = "flyway"}
+flyway-postgresql = { module = 'org.flywaydb:flyway-database-postgresql', version.ref = "flyway"}
 jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 
