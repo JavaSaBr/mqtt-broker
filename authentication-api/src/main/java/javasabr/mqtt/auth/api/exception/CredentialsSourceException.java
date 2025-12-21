@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.api;
+package javasabr.mqtt.auth.api.exception;
 
 public class CredentialsSourceException extends RuntimeException {
 

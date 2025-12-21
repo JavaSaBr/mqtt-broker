@@ -4,7 +4,7 @@ import io.r2dbc.spi.ConnectionFactory;
 import java.net.URI;
 import java.util.List;
 import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider;
-import javasabr.mqtt.auth.api.AuthenticationConfigException;
+import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialsSource;

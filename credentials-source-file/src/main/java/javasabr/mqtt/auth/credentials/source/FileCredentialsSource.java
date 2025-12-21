@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javasabr.mqtt.auth.api.CredentialsSourceException;
+import javasabr.mqtt.auth.api.exception.CredentialsSourceException;
 import javasabr.mqtt.auth.api.InMemoryCredentialsSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
