@@ -2,11 +2,11 @@ package javasabr.mqtt.broker.application.config;
 
 import java.time.Duration;
 import java.util.Map;
-import javasabr.mqtt.model.Credentials;
-import javasabr.mqtt.model.database.DatabasePoolConfig;
-import javasabr.mqtt.model.database.DatabaseTimeoutsConfig;
-import javasabr.mqtt.model.database.DatabaseUrlConfig;
-import javasabr.mqtt.model.database.DatabaseUsersConfig;
+import javasabr.mqtt.auth.credentials.source.config.Credentials;
+import javasabr.mqtt.auth.credentials.source.config.DatabasePoolConfig;
+import javasabr.mqtt.auth.credentials.source.config.DatabaseTimeoutsConfig;
+import javasabr.mqtt.auth.credentials.source.config.DatabaseUrlConfig;
+import javasabr.mqtt.auth.credentials.source.config.DatabaseUsersConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "persistence.database")

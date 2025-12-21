@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.database;
+package javasabr.mqtt.auth.credentials.source.config;
 
 import java.time.Duration;
 

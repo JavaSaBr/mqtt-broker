@@ -1,4 +1,4 @@
-package javasabr.mqtt.model.database;
+package javasabr.mqtt.auth.credentials.source.config;
 
 public interface DatabaseUrlConfig {
   String driver();

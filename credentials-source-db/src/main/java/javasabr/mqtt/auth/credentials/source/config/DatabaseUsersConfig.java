@@ -1,7 +1,6 @@
-package javasabr.mqtt.model.database;
+package javasabr.mqtt.auth.credentials.source.config;
 
 import java.util.Map;
-import javasabr.mqtt.model.Credentials;
 
 public interface DatabaseUsersConfig {
 
