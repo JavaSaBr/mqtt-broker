@@ -82,6 +82,7 @@ class AclRulesLoaderTest extends UnitSpecification {
         "6.gacl"           | AclConfigurationException | 'Invalid topic filter:[/topic1/#/segment3]'
         "7.gacl"           | AclConfigurationException | 'Already included any topic condition'
         "8.gacl"           | AclConfigurationException | 'Already included any user condition'
+        "9.gacl"           | AclConfigurationException | 'Already included any value matcher'
   }
 
   def getAbsolutePath(String fileName) {

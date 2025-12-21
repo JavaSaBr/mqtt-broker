@@ -2,16 +2,18 @@ package acl.config
 
 allowPublish {
   users {
-    userName eq("sensor1")
-    userName regex("sensor10\$")
-    clientIds([
-        eq("clientId1"),
-        regex("^cliend")
-    ])
-    ipAddresses([
-        eq("10.56.0.3"),
-        eq("127.0.0.1")
-    ])
+    userNames {
+      eq("sensor1")
+      regex("sensor10\$")
+    }
+    clientIds {
+      eq("clientId1")
+      regex("^cliend")
+    }
+    ipAddresses {
+      eq("10.56.0.3")
+      eq("127.0.0.1")
+    }
     anyOf {
       userName anyValue()
       clientId eq("clientId2")

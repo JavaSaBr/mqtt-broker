@@ -28,7 +28,9 @@ abstract class AclRuleBuilder {
     if (userCondition != null) {
       throw new AclConfigurationException("Only one users section allowed")
     }
-    userCondition = new UsersBuilder().configure(config).build()
+    userCondition = new UsersBuilder()
+        .configure(config)
+        .build()
     return this
   }
 
@@ -37,10 +39,12 @@ abstract class AclRuleBuilder {
     if (topicMatchers != null) {
       throw new AclConfigurationException("Only one topics section allowed")
     }
-    topicMatchers = new TopicsBuilder().configure(config).build()
+    topicMatchers = new TopicsBuilder()
+        .configure(config)
+        .build()
     return this
   }
-
+  
   AclRule build() {
     if (userCondition == null) {
       throw new AclConfigurationException("Users section is not defined")

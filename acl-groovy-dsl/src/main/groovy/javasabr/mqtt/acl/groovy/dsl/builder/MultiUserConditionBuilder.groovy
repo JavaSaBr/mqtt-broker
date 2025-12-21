@@ -4,31 +4,39 @@ package javasabr.mqtt.acl.groovy.dsl.builder
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
 import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
-import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 
 abstract class MultiUserConditionBuilder extends UserConditionBuilder {
 
-  UserConditionBuilder userNames(Collection<? extends ValueMatcher<String>> userNames) {
+  UserConditionBuilder userNames(Closure<?> config) {
+    def userNames = new UserMatchersBuilder()
+        .configure(config)
+        .build()
     def transformed = userNames.collect {
       new UserNameCondition(replaceMatcherIfNeed(it))
     }
-    this.conditions.addAll(transformed)
+    conditions.addAll(transformed)
     return this
   }
 
-  UserConditionBuilder clientIds(Collection<? extends ValueMatcher<String>> clientIds) {
+  UserConditionBuilder clientIds(Closure<?> config) {
+    def clientIds = new UserMatchersBuilder()
+        .configure(config)
+        .build()
     def transformed = clientIds.collect {
       new ClientIdCondition(replaceMatcherIfNeed(it))
     }
-    this.conditions.addAll(transformed)
+    conditions.addAll(transformed)
     return this
   }
 
-  UserConditionBuilder ipAddresses(Collection<? extends ValueMatcher<String>> ipAddresses) {
+  UserConditionBuilder ipAddresses(Closure<?> config) {
+    def ipAddresses = new UserMatchersBuilder()
+        .configure(config)
+        .build()
     def transformed = ipAddresses.collect {
       new IpAddressCondition(replaceMatcherIfNeed(it))
     }
-    this.conditions.addAll(transformed)
+    conditions.addAll(transformed)
     return this
   }
 }

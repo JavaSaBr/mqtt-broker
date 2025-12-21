@@ -42,13 +42,13 @@ class UsersBuilder extends MultiUserConditionBuilder {
   }
 
   @Override
-  UserConditionBuilder userNames(Collection<ValueMatcher<String>> userNames) {
+  UserConditionBuilder userNames(Closure<?> config) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
       throw new AclConfigurationException("Already included any user condition")
     }
-    return super.userNames(userNames)
+    return super.userNames(config)
   }
-
+  
   @Override
   UserConditionBuilder clientId(ValueMatcher<String> matcher) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
@@ -58,13 +58,13 @@ class UsersBuilder extends MultiUserConditionBuilder {
   }
 
   @Override
-  UserConditionBuilder clientIds(Collection<ValueMatcher<String>> clientIds) {
+  UserConditionBuilder clientIds(Closure<?> config) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
       throw new AclConfigurationException("Already included any user condition")
     }
-    return super.clientIds(clientIds)
+    return super.clientIds(config)
   }
-  
+
   @Override
   UserConditionBuilder ipAddress(ValueMatcher<String> matcher) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
@@ -74,11 +74,11 @@ class UsersBuilder extends MultiUserConditionBuilder {
   }
 
   @Override
-  UserConditionBuilder ipAddresses(Collection<ValueMatcher<String>> ipAddresses) {
+  UserConditionBuilder ipAddresses(Closure<?> config) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
       throw new AclConfigurationException("Already included any user condition")
     }
-    return super.ipAddresses(ipAddresses)
+    return super.ipAddresses(config)
   }
 
   @Override

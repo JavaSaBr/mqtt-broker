@@ -28,6 +28,6 @@ class UserMatchersFactory {
   }
 
   ValueMatcher<String> replaceMatcherIfNeed(ValueMatcher<String> it) {
-    return it instanceof AnyValueMatcher ? AnyValueMatcher.stringMatcher() : it
+    return it instanceof AnyValueMatcher ? ValueMatcher.MATCH_ANY_STRING : it
   }
 }

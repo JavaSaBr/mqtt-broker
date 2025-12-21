@@ -1,6 +1,7 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
@@ -14,16 +15,25 @@ abstract class UserConditionBuilder extends UserMatchersFactory {
   MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
 
   UserConditionBuilder userName(ValueMatcher<String> matcher) {
+    if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
+      throw new AclConfigurationException("Already included any user condition")
+    }
     conditions.add(new UserNameCondition(replaceMatcherIfNeed(matcher)))
     return this
   }
 
   UserConditionBuilder clientId(ValueMatcher<String> matcher) {
+    if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
+      throw new AclConfigurationException("Already included any user condition")
+    }
     conditions.add(new ClientIdCondition(replaceMatcherIfNeed(matcher)))
     return this
   }
 
   UserConditionBuilder ipAddress(ValueMatcher<String> matcher) {
+    if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
+      throw new AclConfigurationException("Already included any user condition")
+    }
     conditions.add(new IpAddressCondition(replaceMatcherIfNeed(matcher)))
     return this
   }
