@@ -47,7 +47,7 @@ public abstract class InMemoryCredentialsSource implements CredentialsSource {
   }
 
   @Override
-  public Mono<Boolean> isCredentialsExists(String user, byte[] pass) {
-    return Mono.just(Arrays.equals(pass, credentials.get(user)));
+  public Mono<Boolean> isCredentialsExists(String userName, byte[] password) {
+    return Mono.just(Arrays.equals(password, credentials.get(userName)));
   }
 }

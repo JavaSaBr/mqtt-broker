@@ -28,14 +28,14 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   }
 
   @Override
-  public Mono<Boolean> isCredentialsExists(String username, byte[] requestedPassword) {
+  public Mono<Boolean> isCredentialsExists(String userName, byte[] password) {
     return databaseClient
         .sql(CREDENTIALS_QUERY)
-        .bind("$1", username)
+        .bind("$1", userName)
         .map(row -> row.get("password", byte[].class))
         .all()
         .singleOrEmpty()
-        .map(existingPassword -> Arrays.equals(existingPassword, requestedPassword))
+        .map(existingPassword -> Arrays.equals(existingPassword, password))
         .defaultIfEmpty(false);
   }
 

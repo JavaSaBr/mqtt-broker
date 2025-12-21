@@ -6,5 +6,5 @@ public interface CredentialsSource {
 
   String getName();
 
-  Mono<Boolean> isCredentialsExists(String user, byte[] pass);
+  Mono<Boolean> isCredentialsExists(String userName, byte[] password);
 }

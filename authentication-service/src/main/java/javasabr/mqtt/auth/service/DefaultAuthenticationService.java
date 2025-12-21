@@ -26,9 +26,8 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
   @Override
   public Mono<Boolean> authenticate(AuthRequest request) {
-    String username = request.username();
     return providers.getOrDefault(request.authenticationMethod(), defaultProvider)
-        .authenticate(username, request.password(), request.authenticationData());
+        .authenticate(request.username(), request.password(), request.authenticationData());
   }
 
   private static String buildServiceDescription(
