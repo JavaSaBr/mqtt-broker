@@ -52,6 +52,10 @@ public record Subscription(
         true);
   }
 
+  public Subscription higherQoS(Subscription alternative) {
+    return alternative.qos.level() > qos.level() ? alternative : this;
+  }
+
   @JsonValue
   @Override
   public String toString() {

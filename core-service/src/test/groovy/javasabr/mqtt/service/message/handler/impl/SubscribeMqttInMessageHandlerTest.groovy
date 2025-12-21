@@ -451,4 +451,46 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
     and:
         publishMessage.retain()
   }
+
+  def "should only deliver a retained message once if several subscription matches"() {
+    given:
+        def mqttConnection = mockedExternalConnection(MqttVersion.MQTT_5)
+        def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        mqttUser.returnCompletedFeatures(false)
+    and:
+        def requestedSubscriptions = Array.of(
+            new RequestedSubscription(
+                "topic/filter/1",
+                QoS.AT_MOST_ONCE,
+                SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                true,
+                true),
+            new RequestedSubscription(
+                "topic/#",
+                QoS.AT_LEAST_ONCE,
+                SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                true,
+                true),
+            new RequestedSubscription(
+                "topic/+/1",
+                QoS.EXACTLY_ONCE,
+                SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                true,
+                true)
+        )
+        def subscribeMessage1 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 20
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+    and:
+        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        inMemoryRetainMessageService.retain(publishWithRetain)
+    when:
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
+    then:
+        mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
+        mqttUser.nextSentMessage(PublishMqtt5OutMessage)
+        mqttUser.isEmpty()
+  }
 }

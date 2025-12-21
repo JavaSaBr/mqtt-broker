@@ -5,6 +5,8 @@ import static javasabr.mqtt.model.SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_D
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
@@ -198,6 +200,10 @@ public class SubscribeMqttInMessageHandler extends
   }
 
   private void sendRetainedMessages(MqttUser user, Array<SubscriptionResult> subscribeResults) {
+    if (subscribeResults.isEmpty()) {
+      return;
+    }
+    IdentityHashMap<Publish, Subscription> uniqueRetainedMessages = null;
     for (SubscriptionResult subscriptionResult : subscribeResults) {
       Subscription subscription = subscriptionResult.newSubscription();
       if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {
@@ -209,8 +215,20 @@ public class SubscribeMqttInMessageHandler extends
         if (!retainAsPublished) {
           retainedMessage = retainedMessage.withoutRetain();
         }
-        publishDeliveringService.startDelivering(retainedMessage, user, subscription);
+        if (uniqueRetainedMessages == null) {
+          uniqueRetainedMessages = new IdentityHashMap<>();
+        }
+        uniqueRetainedMessages.merge(retainedMessage, subscription, Subscription::higherQoS);
       }
+    }
+    if (uniqueRetainedMessages == null) {
+      return;
+    }
+    for (Map.Entry<Publish, Subscription> retainedMessageEntry : uniqueRetainedMessages.entrySet()) {
+      publishDeliveringService.startDelivering(
+          retainedMessageEntry.getKey(),
+          user,
+          retainedMessageEntry.getValue());
     }
   }
 
