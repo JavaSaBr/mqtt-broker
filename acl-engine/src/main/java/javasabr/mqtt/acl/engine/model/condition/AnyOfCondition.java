@@ -1,5 +1,7 @@
 package javasabr.mqtt.acl.engine.model.condition;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.rlib.collections.array.Array;
 
@@ -17,5 +19,10 @@ public record AnyOfCondition(Array<MqttUserCondition> expectedUsers) implements 
       }
     }
     return false;
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    return Map.of("AnyOf", expectedUsers.toList());
   }
 }

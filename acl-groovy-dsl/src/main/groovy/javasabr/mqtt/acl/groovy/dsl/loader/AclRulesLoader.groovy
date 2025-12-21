@@ -3,7 +3,6 @@ package javasabr.mqtt.acl.groovy.dsl.loader
 import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.rule.Rule
-
 import javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder
 import javasabr.mqtt.model.acl.Operation
 import javasabr.rlib.collections.array.Array

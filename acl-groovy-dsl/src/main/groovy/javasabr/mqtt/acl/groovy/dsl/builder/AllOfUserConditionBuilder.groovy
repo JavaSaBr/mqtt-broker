@@ -20,24 +20,24 @@ class AllOfUserConditionBuilder extends UserConditionBuilder {
   }
   
   @Override
-  UserConditionBuilder userName(ValueMatcher<String>... userNames) {
-    requireSingleMatcher(Identity.USER_NAME, userNames)
-    return super.userName(userNames)
+  UserConditionBuilder userName(ValueMatcher<String> userName) {
+    requireSingleMatcher(Identity.USER_NAME, userName)
+    return super.userName(userName)
   }
 
   @Override
-  UserConditionBuilder clientId(ValueMatcher<String>... clientIds) {
-    requireSingleMatcher(Identity.CLIENT_ID, clientIds)
-    return super.clientId(clientIds)
+  UserConditionBuilder clientId(ValueMatcher<String> clientId) {
+    requireSingleMatcher(Identity.CLIENT_ID, clientId)
+    return super.clientId(clientId)
   }
 
-  UserConditionBuilder ipAddress(ValueMatcher<String>... ipAddresses) {
-    requireSingleMatcher(Identity.IP_ADDRESS, ipAddresses)
-    return super.ipAddress(ipAddresses)
+  UserConditionBuilder ipAddress(ValueMatcher<String> ipAddress) {
+    requireSingleMatcher(Identity.IP_ADDRESS, ipAddress)
+    return super.ipAddress(ipAddress)
   }
 
-  private void requireSingleMatcher(Identity identity, ValueMatcher<String>[] newMatchers) {
-    if (alreadySetIdentities.contains(identity) || newMatchers.length > 1) {
+  private void requireSingleMatcher(Identity identity, ValueMatcher<String> matcher) {
+    if (alreadySetIdentities.contains(identity)) {
       throw new AclConfigurationException("AllOf condition can only have single-matcher members")
     } else {
       alreadySetIdentities.add(identity)

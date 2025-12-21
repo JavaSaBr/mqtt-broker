@@ -1,7 +1,9 @@
 package javasabr.mqtt.acl.engine.model.condition;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher;
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.rlib.collections.array.Array;
 import org.jspecify.annotations.Nullable;
@@ -21,5 +23,15 @@ public record TopicCondition(Array<ValueMatcher<AbstractTopic>> matchers) implem
       }
     }
     return false;
+  }
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(matchers);
+  }
+  
+  @JsonValue
+  Object jsonDebugValue() {
+    return matchers;
   }
 }

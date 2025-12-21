@@ -8,6 +8,7 @@ import javasabr.mqtt.acl.engine.model.condition.Condition
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
+import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher
 import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher
 import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
@@ -51,7 +52,7 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   def "should work fine with only publish rules"() {
     given:
-        def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.groovy")
+        def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.gacl")
     when:
         def ruleMap = AclRulesLoader.load(onlyPublishRulesAclPath)
     then:
@@ -71,11 +72,10 @@ class AclRulesLoaderTest extends UnitSpecification {
         exception.cause.message.startsWith errorMessage
     where:
         invalidAclFileName | exceptionClass            | errorMessage
-        "1.config"         | AclConfigurationException | 'Only one clients section allowed'
-        "2.config"         | AclConfigurationException | 'Only one clients section allowed'
-        "3.config"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
-        "4.config"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.acl.groovy.dsl.builder.AllOfBuilder.allOf'
-        "5.config"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "1.gacl"         | AclConfigurationException | 'Only one users section allowed'
+        "2.gacl"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "3.gacl"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "4.gacl"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.acl.groovy.dsl.builder.AllOfUserConditionBuilder.allOf()'
   }
 
   def getAbsolutePath(String fileName) {
@@ -85,7 +85,7 @@ class AclRulesLoaderTest extends UnitSpecification {
   @SuppressWarnings('GroovyAccessibility')
   def "should parse Groovy DSL config"() {
     when:
-        def absolutePath = getAbsolutePath("acl/config/acl.groovy")
+        def absolutePath = getAbsolutePath("acl/config/acl.gacl")
         def rules = AclRulesLoader.load(absolutePath)
     then:
         verifyAll(rules.get(PUBLISH)) {
@@ -102,16 +102,16 @@ class AclRulesLoaderTest extends UnitSpecification {
                   with(userNameMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(expectedClientId as EqualsMatcher) { expectedValue == "clientId1" }
+                  with(clientIdMatcher as EqualsMatcher) { expectedValue == "clientId1" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(expectedClientId as RegexMatcher) { pattern.pattern() == "^cliend" }
+                  with(clientIdMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                  with(ipAddressMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                  with(ipAddressMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
                 }
                 with(get(6) as AnyOfCondition) {
                   with(expectedUsers as Array<Condition>) {
@@ -124,10 +124,10 @@ class AclRulesLoaderTest extends UnitSpecification {
                       with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
                     }
                     with(get(1) as ClientIdCondition) {
-                      with(expectedClientId as EqualsMatcher) { expectedValue == "clientId2" }
+                      with(clientIdMatcher as EqualsMatcher) { expectedValue == "clientId2" }
                     }
                     with(get(2) as IpAddressCondition) {
-                      with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                      with(ipAddressMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                     }
                   }
                 }
@@ -142,7 +142,7 @@ class AclRulesLoaderTest extends UnitSpecification {
             operation() == PUBLISH
             action() == DENY
             userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().matchers.get(0) == ValueMatcher.MATCH_ANY
+            topicCondition().matchers.get(0) == AnyTopicMatcher.instance()
           }
         }
         verifyAll(rules.get(SUBSCRIBE)) {
@@ -156,10 +156,10 @@ class AclRulesLoaderTest extends UnitSpecification {
                   with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
                 }
                 with(get(1) as ClientIdCondition) {
-                  with(expectedClientId as EqualsMatcher) { expectedValue == "clientId2" }
+                  with(clientIdMatcher as EqualsMatcher) { expectedValue == "clientId2" }
                 }
                 with(get(2) as IpAddressCondition) {
-                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                  with(ipAddressMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
               }
             }
@@ -176,107 +176,7 @@ class AclRulesLoaderTest extends UnitSpecification {
             operation() == SUBSCRIBE
             action() == DENY
             userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().matchers.get(0) == ValueMatcher.MATCH_ANY
-          }
-        }
-  }
-
-
-  @SuppressWarnings('GroovyAccessibility')
-  def "should parse Groovy DSL config v2"() {
-    when:
-        def absolutePath = getAbsolutePath("acl/config/aclv2.groovy")
-        def rules = AclRulesLoader.load(absolutePath)
-    then:
-        verifyAll(rules.get(PUBLISH)) {
-          size() == 2
-          with(get(0) as AbstractRule) {
-            operation() == PUBLISH
-            action() == ALLOW
-            with(userCondition() as AnyOfCondition) {
-              with(expectedUsers as Array<Condition>) {
-                with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor1" }
-                }
-                with(get(1) as UserNameCondition) {
-                  with(userNameMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
-                }
-                with(get(2) as ClientIdCondition) {
-                  with(expectedClientId as EqualsMatcher) { expectedValue == "clientId1" }
-                }
-                with(get(3) as ClientIdCondition) {
-                  with(expectedClientId as RegexMatcher) { pattern.pattern() == "^cliend" }
-                }
-                with(get(4) as IpAddressCondition) {
-                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                }
-                with(get(5) as IpAddressCondition) {
-                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "127.0.0.1" }
-                }
-                with(get(6) as AnyOfCondition) {
-                  with(expectedUsers as Array<Condition>) {
-                    with(get(0) as UserNameCondition) { userNameMatcher == ValueMatcher.MATCH_ANY }
-                  }
-                }
-                with(get(7) as AllOfCondition) {
-                  with(expectedUsers as Array<Condition>) {
-                    with(get(0) as UserNameCondition) {
-                      with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
-                    }
-                    with(get(1) as ClientIdCondition) {
-                      with(expectedClientId as EqualsMatcher) { expectedValue == "clientId2" }
-                    }
-                    with(get(2) as IpAddressCondition) {
-                      with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                    }
-                  }
-                }
-              }
-            }
-            with(topicCondition().matchers) {
-              with(get(0) as TopicNameMatcher) { expectedTopic.rawTopic() == "/topic1" }
-              with(get(1) as TopicNameMatcher) { expectedTopic.rawTopic() == "/topic2/temp" }
-            }
-          }
-          with(get(1) as AbstractRule) {
-            operation() == PUBLISH
-            action() == DENY
-            userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().matchers.get(0) == ValueMatcher.MATCH_ANY
-          }
-        }
-        verifyAll(rules.get(SUBSCRIBE)) {
-          size() == 3
-          with(get(0) as AbstractRule) {
-            operation() == SUBSCRIBE
-            action() == DENY
-            with(userCondition() as AllOfCondition) {
-              with(expectedUsers as Array<Condition>) {
-                with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
-                }
-                with(get(1) as ClientIdCondition) {
-                  with(expectedClientId as EqualsMatcher) { expectedValue == "clientId2" }
-                }
-                with(get(2) as IpAddressCondition) {
-                  with(expectedIpAddress as EqualsMatcher) { expectedValue == "10.56.0.3" }
-                }
-              }
-            }
-            with(topicCondition().matchers) {
-              with(get(0) as TopicFilterMatcher) { expectedTopic.rawTopic == "/topic1/#" }
-              with(get(1) as TopicFilterMatcher) { expectedTopic.rawTopic == "/topic2/+/temp" }
-            }
-          }
-          with(get(1)) {
-            operation() == SUBSCRIBE
-            action() == ALLOW
-          }
-          with(get(2) as AbstractRule) {
-            operation() == SUBSCRIBE
-            action() == DENY
-            userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().matchers.get(0) == ValueMatcher.MATCH_ANY
+            topicCondition().matchers.get(0) == AnyTopicMatcher.instance()
           }
         }
   }

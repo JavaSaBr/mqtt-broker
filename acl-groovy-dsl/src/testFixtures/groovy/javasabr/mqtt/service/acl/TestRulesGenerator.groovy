@@ -17,32 +17,43 @@ class TestRulesGenerator {
         def ruleContent = switch (ruleNum % 4) {
           case 1 -> """
                   allowPublish {
-                    anyOf {
-                      userName eq("user_${ruleNum}"), regex("user_${ruleNum}\\\$")
-                      clientId eq("client_${ruleNum}"), regex("^client_${ruleNum}")
-                      ipAddress eq("${ip1}"), eq("${ip2}")
+                    users {
+                      userName eq("user_${ruleNum}")
+                      userName regex("user_${ruleNum}\\\\\\\$")
+                      clientId eq("client_${ruleNum}")
+                      clientId regex("^client_${ruleNum}")
+                      ipAddress eq("${ip1}")
+                      ipAddress eq("${ip2}")
                       allOf {
                         userName eq("user_${nextNum}")
                         clientId eq("client_${nextNum}")
                         ipAddress eq("10.${nextNum}.${nextNum}.${nextNum}")
                       }
                     }
-                    topicName eq("/data/temp/${ruleNum}"), eq("/status/log/${ruleNum}")
+                    topics {
+                      eq("/data/temp/${ruleNum}")
+                      eq("/status/log/${ruleNum}")
+                    }
                   }
                   """
           case 2 -> """
                   denySubscribe {
-                    allOf {
-                      userName eq("user_${ruleNum}")
-                      clientId eq("client_${ruleNum}")
-                      ipAddress eq("${ip1}")
+                    users {
+                      allOf {
+                        userName eq("user_${ruleNum}")
+                        clientId eq("client_${ruleNum}")
+                        ipAddress eq("${ip1}")
+                      }
                     }
-                    topicFilter match("/config/+/ ${ruleNum}"), match("/control/#")
+                    topics {
+                      match("/config/+/ ${ruleNum}")
+                      match("/control/#")
+                    }
                   }
                   """
           case 3 -> """
                   allowSubscribe {
-                    anyOf {
+                    users {
                       userName eq("user_${ruleNum}")
                       userName regex("user_${ruleNum}\\\\\\\$")
                       clientId eq("client_${ruleNum}")
@@ -50,17 +61,25 @@ class TestRulesGenerator {
                       ipAddress eq("${ip1}")
                       ipAddress eq("${ip2}")
                     }
-                    topicFilter match("/sensor/temp/${ruleNum}"), match("/sensor/+/log")
+                    topics {
+                      match("/sensor/temp/${ruleNum}")
+                      match("/sensor/+/log")
+                    }
                   }
                   """
           default -> """
                   denyPublish {
-                    allOf {
-                      userName eq("user_${ruleNum}")
-                      clientId eq("client_${ruleNum}")
-                      ipAddress eq("${ip1}")
+                    users {
+                      allOf {
+                        userName eq("user_${ruleNum}")
+                        clientId eq("client_${ruleNum}")
+                        ipAddress eq("${ip1}")
+                      }
                     }
-                    topicName eq("/admin/alerts/${ruleNum}"), eq("/system/update/${ruleNum}")
+                    topics {
+                      eq("/admin/alerts/${ruleNum}")
+                      eq("/system/update/${ruleNum}")
+                    }
                   }
                   """
         }

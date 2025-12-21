@@ -16,7 +16,7 @@ abstract class RuleBuilder {
   Operation operation
   
   MqttUserCondition userCondition
-  Array<ValueMatcher<AbstractTopic>> topicMatchers;
+  Array<ValueMatcher<AbstractTopic>> topicMatchers
 
   RuleBuilder(Action action, Operation operation) {
     this.action = action
@@ -25,19 +25,19 @@ abstract class RuleBuilder {
 
   @TypeChecked
   RuleBuilder users(Closure<?> config) {
-    if (this.userCondition) {
+    if (userCondition != null) {
       throw new AclConfigurationException("Only one users section allowed")
     }
-    this.userCondition = new UsersBuilder().configure(config).build()
+    userCondition = new UsersBuilder().configure(config).build()
     return this
   }
 
   @TypeChecked
   RuleBuilder topics(Closure<?> config) {
-    if (this.topicMatchers) {
+    if (topicMatchers != null) {
       throw new AclConfigurationException("Only one topics section allowed")
     }
-    this.topicMatchers = new TopicsBuilder().configure(config).build()
+    topicMatchers = new TopicsBuilder().configure(config).build()
     return this
   }
   

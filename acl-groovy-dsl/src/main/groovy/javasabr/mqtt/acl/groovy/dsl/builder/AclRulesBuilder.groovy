@@ -20,23 +20,27 @@ class AclRulesBuilder {
   }
   
   @TypeChecked
-  void allowPublish(Closure<?> config) {
+  AclRulesBuilder allowPublish(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new AllowPublishRuleBuilder(), config))
+    return this
   }
 
   @TypeChecked
-  void denyPublish(Closure<?> config) {
+  AclRulesBuilder denyPublish(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new DenyPublishRuleBuilder(), config))
+    return this
   }
 
   @TypeChecked
-  void allowSubscribe(Closure<?> config) {
+  AclRulesBuilder allowSubscribe(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new AllowSubscribeRuleBuilder(), config))
+    return this
   }
 
   @TypeChecked
-  void denySubscribe(Closure<?> config) {
+  AclRulesBuilder denySubscribe(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new DenySubscribeRuleBuilder(), config))
+    return this
   }
 
   private static CompletableFuture<Rule> startBuilderAsync(RuleBuilder builder, Closure<?> config) {

@@ -5,7 +5,7 @@ import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.rlib.collections.array.Array
 
-class AnyOfUserConditionBuilder extends UserConditionBuilder {
+class AnyOfUserConditionBuilder extends MultiUserConditionBuilder {
 
   AnyOfUserConditionBuilder allOf(Closure<?> config) {
     this.conditions.add(new AllOfUserConditionBuilder().configure(config).build())

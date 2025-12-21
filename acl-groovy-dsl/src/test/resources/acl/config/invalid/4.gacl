@@ -1,0 +1,15 @@
+package acl.config.invalid
+
+allowPublish {
+  users {
+    allOf {
+      allOf {
+        userName eq("user")
+      }
+    }
+  }
+  topics {
+    eq("/topic1")
+    eq("/topic2/temp")
+  }
+}
