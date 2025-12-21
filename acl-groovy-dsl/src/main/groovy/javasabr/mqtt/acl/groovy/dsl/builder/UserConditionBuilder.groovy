@@ -14,17 +14,17 @@ abstract class UserConditionBuilder extends UserMatchersFactory {
   MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
 
   UserConditionBuilder userName(ValueMatcher<String> userName) {
-    this.conditions.add(new UserNameCondition(userName))
+    conditions.add(new UserNameCondition(userName))
     return this
   }
   
   UserConditionBuilder clientId(ValueMatcher<String> clientId) {
-    this.conditions.add(new ClientIdCondition(clientId))
+    conditions.add(new ClientIdCondition(clientId))
     return this
   }
 
   UserConditionBuilder ipAddress(ValueMatcher<String> ipAddress) {
-    this.conditions.add(new IpAddressCondition(ipAddress))
+    conditions.add(new IpAddressCondition(ipAddress))
     return this
   }
   
