@@ -5,7 +5,6 @@ import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -20,12 +19,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
   }
 
   @Override
-  public Mono<Boolean> authenticate(@Nullable String username, byte[] password, byte[] data) {
-    if (username == null) {
-      return Mono.just(false);
-    } else {
-      return credentialsSource.isCredentialsExists(username, password);
-    }
+  public Mono<Boolean> authenticate(String username, byte[] password, byte[] data) {
+    return credentialsSource.isCredentialsExists(username, password);
   }
 
   @Override

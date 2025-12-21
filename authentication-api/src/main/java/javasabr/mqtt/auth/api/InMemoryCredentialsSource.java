@@ -16,7 +16,7 @@ public abstract class InMemoryCredentialsSource implements CredentialsSource {
   private final LockableRefToRefDictionary<String, byte[]> credentials =
       DictionaryFactory.stampedLockBasedRefToRefDictionary(String.class, byte[].class);
 
-  protected void reset(RefToRefDictionary<String, byte[]> otherCredentials) {
+  private void reset(RefToRefDictionary<String, byte[]> otherCredentials) {
     long stamp = credentials.writeLock();
     try {
       credentials.clear();
@@ -26,7 +26,7 @@ public abstract class InMemoryCredentialsSource implements CredentialsSource {
     }
   }
 
-  void put(String user, byte[] pass) {
+  private void put(String user, byte[] pass) {
     long stamp = credentials.writeLock();
     try {
       credentials.put(user, pass);
