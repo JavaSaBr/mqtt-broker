@@ -279,15 +279,19 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.returnCompletedFeatures(false)
     and:
-        def expectedMessageId = 15
         def requestedSubscriptions = Array.of(new RequestedSubscription(
             "topic/filter/1",
             QoS.EXACTLY_ONCE,
             SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
             true,
             true))
-        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
-          this.messageId = expectedMessageId
+        def subscribeMessage1 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 20
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+        def subscribeMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 21
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(requestedSubscriptions)
         }}
@@ -295,14 +299,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
-        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:
         mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         mqttUser.isEmpty()
     when:
-        subscribeMessage.messageId = ++expectedMessageId
-        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
         mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         mqttUser.isEmpty()
@@ -314,15 +317,19 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.returnCompletedFeatures(false)
     and:
-        def expectedMessageId = 15
         def requestedSubscriptions = Array.of(new RequestedSubscription(
             "topic/filter/1",
             QoS.AT_MOST_ONCE,
             SubscribeRetainHandling.SEND,
             true,
             true))
-        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
-          this.messageId = expectedMessageId
+        def subscribeMessage1 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 20
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+        def subscribeMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 21
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(requestedSubscriptions)
         }}
@@ -330,14 +337,13 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
-        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:
         mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         mqttUser.nextSentMessage(PublishMqtt5OutMessage)
         mqttUser.isEmpty()
     when:
-        subscribeMessage.messageId = ++expectedMessageId
-        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
         mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         mqttUser.nextSentMessage(PublishMqtt5OutMessage)
@@ -350,15 +356,19 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.returnCompletedFeatures(false)
     and:
-        def expectedMessageId = 15
         def requestedSubscriptions = Array.of(new RequestedSubscription(
             "topic/filter/1",
             QoS.AT_MOST_ONCE,
             SubscribeRetainHandling.DO_NOT_SEND,
             true,
             true))
-        def subscribeMessage = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
-          this.messageId = expectedMessageId
+        def subscribeMessage1 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 20
+          this.subscriptions = MutableArray.ofType(RequestedSubscription)
+          this.subscriptions.addAll(requestedSubscriptions)
+        }}
+        def subscribeMessage2 = new SubscribeMqttInMessage(SubscribeMqttInMessage.MESSAGE_FLAGS) {{
+          this.messageId = 21
           this.subscriptions = MutableArray.ofType(RequestedSubscription)
           this.subscriptions.addAll(requestedSubscriptions)
         }}
@@ -369,13 +379,12 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
         inMemoryRetainMessageService.retain(publishWithoutRetain)
     when:
-        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:
         mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         mqttUser.isEmpty()
     when:
-        subscribeMessage.messageId = ++expectedMessageId
-        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
+        subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage2)
     then:
         mqttUser.nextSentMessage(SubscribeAckMqtt5OutMessage)
         mqttUser.isEmpty()
