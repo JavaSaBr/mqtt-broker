@@ -1,0 +1,11 @@
+package acl.config.invalid
+
+allowPublish {
+  users {
+    anyUser()
+    userName eq("sensor2")
+  }
+  topics {
+    anyTopic()
+  }
+}

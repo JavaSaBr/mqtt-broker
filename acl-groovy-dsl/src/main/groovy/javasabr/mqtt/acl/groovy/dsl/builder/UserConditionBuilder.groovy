@@ -13,21 +13,21 @@ abstract class UserConditionBuilder extends UserMatchersFactory {
 
   MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition)
 
-  UserConditionBuilder userName(ValueMatcher<String> userName) {
-    conditions.add(new UserNameCondition(userName))
-    return this
-  }
-  
-  UserConditionBuilder clientId(ValueMatcher<String> clientId) {
-    conditions.add(new ClientIdCondition(clientId))
+  UserConditionBuilder userName(ValueMatcher<String> matcher) {
+    conditions.add(new UserNameCondition(replaceMatcherIfNeed(matcher)))
     return this
   }
 
-  UserConditionBuilder ipAddress(ValueMatcher<String> ipAddress) {
-    conditions.add(new IpAddressCondition(ipAddress))
+  UserConditionBuilder clientId(ValueMatcher<String> matcher) {
+    conditions.add(new ClientIdCondition(replaceMatcherIfNeed(matcher)))
     return this
   }
-  
+
+  UserConditionBuilder ipAddress(ValueMatcher<String> matcher) {
+    conditions.add(new IpAddressCondition(replaceMatcherIfNeed(matcher)))
+    return this
+  }
+
   UserConditionBuilder configure(Closure<?> config) {
     config.delegate = this
     config.resolveStrategy = Closure.DELEGATE_ONLY

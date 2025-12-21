@@ -8,8 +8,8 @@ import javasabr.mqtt.model.MqttUser;
 public record IpAddressCondition(ValueMatcher<String> ipAddressMatcher) implements MqttUserCondition {
 
   @Override
-  public boolean test(MqttUser requestedUser) {
-    return ipAddressMatcher.test(requestedUser.ipAddress());
+  public boolean test(MqttUser user) {
+    return ipAddressMatcher.test(user.ipAddress());
   }
 
   @JsonValue

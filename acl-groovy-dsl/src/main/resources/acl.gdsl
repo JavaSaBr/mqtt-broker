@@ -90,7 +90,7 @@ contributor(aclScriptContext) {
         doc: 'Match by IP address'
 
     method name: 'eq',
-        type: 'javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher<String>',
         params: [string: 'String'],
         doc: 'Match value by strict equality'
     method name: 'regex',

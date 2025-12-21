@@ -10,9 +10,9 @@ import javasabr.mqtt.model.acl.Operation;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
-public final class DenySubscribeRule extends AbstractRule {
+public final class DenySubscribeAclRule extends AbstractAclRule {
 
-  public DenySubscribeRule(MqttUserCondition userCondition, TopicCondition topicCondition) {
+  public DenySubscribeAclRule(MqttUserCondition userCondition, TopicCondition topicCondition) {
     super(userCondition, topicCondition);
   }
 

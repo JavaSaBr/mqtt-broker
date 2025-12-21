@@ -8,8 +8,12 @@ import javasabr.mqtt.model.MqttUser;
 public record UserNameCondition(ValueMatcher<String> userNameMatcher) implements MqttUserCondition {
 
   @Override
-  public boolean test(MqttUser requestedUser) {
-    return userNameMatcher.test(requestedUser.userName());
+  public boolean test(MqttUser user) {
+    String userName = user.userName();
+    if (userName == null) {
+      return userNameMatcher == ValueMatcher.MATCH_ANY_STRING;
+    }
+    return userNameMatcher.test(userName);
   }
 
   @JsonValue

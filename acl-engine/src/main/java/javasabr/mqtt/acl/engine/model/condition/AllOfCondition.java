@@ -12,9 +12,9 @@ public record AllOfCondition(Array<MqttUserCondition> expectedUsers) implements 
   }
 
   @Override
-  public boolean test(MqttUser requestedUser) {
+  public boolean test(MqttUser user) {
     for (MqttUserCondition condition : expectedUsers) {
-      if (!condition.test(requestedUser)) {
+      if (!condition.test(user)) {
         return false;
       }
     }

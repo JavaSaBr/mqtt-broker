@@ -1,27 +1,33 @@
+//file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
-import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher
-import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
-import javasabr.mqtt.acl.engine.model.matcher.StartWithMatcher
+import javasabr.mqtt.acl.engine.model.matcher.AnyValueMatcher
+import javasabr.mqtt.acl.engine.model.matcher.UserMatchers
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
-
-import java.util.regex.Pattern
 
 class UserMatchersFactory {
 
-  ValueMatcher<String> startWith(String string) {
-    return new StartWithMatcher(string);
+  ValueMatcher<String> startWith(String prefix) {
+    return UserMatchers.startWith(prefix)
+  }
+
+  ValueMatcher<String> contains(String substring) {
+    return UserMatchers.contains(substring)
   }
 
   ValueMatcher<String> eq(String string) {
-    return new EqualsMatcher(string);
+    return UserMatchers.eq(string)
   }
 
   ValueMatcher<String> regex(String string) {
-    return new RegexMatcher(Pattern.compile(string));
+    return UserMatchers.regex(string)
   }
 
-  ValueMatcher<?> anyValue() {
-    return ValueMatcher.MATCH_ANY;
+  ValueMatcher<String> anyValue() {
+    return ValueMatcher.MATCH_ANY_STRING
+  }
+
+  ValueMatcher<String> replaceMatcherIfNeed(ValueMatcher<String> it) {
+    return it instanceof AnyValueMatcher ? AnyValueMatcher.stringMatcher() : it
   }
 }

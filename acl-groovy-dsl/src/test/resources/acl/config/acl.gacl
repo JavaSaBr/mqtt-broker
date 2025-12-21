@@ -74,3 +74,13 @@ denySubscribe {
     anyTopic()
   }
 }
+
+allowPublish {
+  users {
+    userName startWith("start_with_5")
+    clientId contains("contains")
+  }
+  topics {
+    anyTopic()
+  }
+}

@@ -8,8 +8,8 @@ import javasabr.mqtt.model.MqttUser;
 public record ClientIdCondition(ValueMatcher<String> clientIdMatcher) implements MqttUserCondition {
 
   @Override
-  public boolean test(MqttUser requestedUser) {
-    return clientIdMatcher.test(requestedUser.clientId());
+  public boolean test(MqttUser user) {
+    return clientIdMatcher.test(user.clientId());
   }
 
   @JsonValue

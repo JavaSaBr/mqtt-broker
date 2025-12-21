@@ -26,7 +26,7 @@ class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
         new TestMqttUser("username", null, null)  | clientIdEquals("username1")                                      | false
         new TestMqttUser(null, null, "username")  | ipAddressEquals("username1")                                     | false
         new TestMqttUser(null, null, null)        | new AnyUserCondition()                                           | true
-        new TestMqttUser(null, null, null)        | new AnyOfCondition(new UserNameCondition(new AnyValueMatcher())) | true
+        new TestMqttUser(null, null, null)        | new AnyOfCondition(new UserNameCondition(AnyValueMatcher.stringMatcher())) | true
   }
 
   def "should test topic condition"(TopicCondition condition, TopicName mqttUser, boolean expectedResult) {

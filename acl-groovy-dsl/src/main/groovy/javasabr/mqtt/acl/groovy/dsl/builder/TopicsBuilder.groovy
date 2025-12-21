@@ -1,5 +1,7 @@
+//file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
@@ -17,9 +19,9 @@ class TopicsBuilder {
 
   TopicsBuilder eq(String rawTopicName) {
     if (topicMatchers.contains(AnyTopicMatcher.instance())) {
-      throw new IllegalArgumentException("Already included any topic condition")
+      throw new AclConfigurationException("Already included any topic condition")
     } else if (!TopicValidator.validateTopicName(rawTopicName)) {
-      throw new IllegalArgumentException("Invalid topic name:[$rawTopicName]")
+      throw new AclConfigurationException("Invalid topic name:[$rawTopicName]")
     }
     topicMatchers.add(new TopicNameMatcher(TopicName.valueOf(rawTopicName)))
     return this
@@ -27,9 +29,9 @@ class TopicsBuilder {
 
   TopicsBuilder match(String rawTopicFilter) {
     if (topicMatchers.contains(AnyTopicMatcher.instance())) {
-      throw new IllegalArgumentException("Already included any topic condition")
+      throw new AclConfigurationException("Already included any topic condition")
     } else if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
-      throw new IllegalArgumentException("Invalid topic filter:[$rawTopicFilter]")
+      throw new AclConfigurationException("Invalid topic filter:[$rawTopicFilter]")
     }
     topicMatchers.add(new TopicFilterMatcher(TopicFilter.valueOf(rawTopicFilter)))
     return this
@@ -37,7 +39,7 @@ class TopicsBuilder {
 
   TopicsBuilder anyTopic() {
     if (topicMatchers.contains(AnyTopicMatcher.instance())) {
-      throw new IllegalArgumentException("Already included any topic condition")
+      throw new AclConfigurationException("Already included any topic condition")
     }
     topicMatchers.add(AnyTopicMatcher.instance())
     return this

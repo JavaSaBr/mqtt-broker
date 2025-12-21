@@ -2,16 +2,16 @@ package javasabr.mqtt.acl.engine.model.matcher;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public record AnyValueMatcher() implements ValueMatcher<String> {
+public record AnyValueMatcher<T>() implements ValueMatcher<T> {
  
-  private static final AnyValueMatcher INSTANCE = new AnyValueMatcher();
+  private static final ValueMatcher<String> STRING_MATCHER = new AnyValueMatcher<>();
 
-  public static AnyValueMatcher instance() {
-    return INSTANCE;
+  public static ValueMatcher<String> stringMatcher() {
+    return STRING_MATCHER;
   }
 
   @Override
-  public boolean test(String value) {
+  public boolean test(Object value) {
     return true;
   }
 
