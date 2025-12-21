@@ -11,12 +11,12 @@ import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
+import javasabr.mqtt.auth.api.AuthRequest;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
-import javasabr.mqtt.auth.api.AuthRequest;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -28,7 +28,6 @@ import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.message.converter.ConnectToAuthRequestConverter;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -45,7 +44,6 @@ public class ConnectInMqttInMessageHandler
   AuthenticationService authenticationService;
   MqttSessionService sessionService;
   SubscriptionService subscriptionService;
-  ConnectToAuthRequestConverter connectToAuthRequestConverter;
 
   public ConnectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
@@ -58,7 +56,6 @@ public class ConnectInMqttInMessageHandler
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
     this.subscriptionService = subscriptionService;
-    this.connectToAuthRequestConverter = new ConnectToAuthRequestConverter();
   }
 
   @Override
@@ -77,7 +74,11 @@ public class ConnectInMqttInMessageHandler
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(user, message);
-    AuthRequest authRequest = connectToAuthRequestConverter.convert(message);
+    AuthRequest authRequest = new AuthRequest(
+        message.username(),
+        message.password(),
+        message.authenticationMethod(),
+        message.authenticationData());
     authenticationService
         .authenticate(authRequest)
         .flatMap(ifTrue(
