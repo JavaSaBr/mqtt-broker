@@ -11,7 +11,7 @@ dependencies {
   implementation projects.coreService
   implementation projects.aclService
   implementation projects.aclGroovyDsl
-  implementation projects.authProviderBasic
+  implementation projects.authenticationProviderBasic
   implementation projects.authenticationApi
   implementation projects.authenticationService
   implementation libs.rlib.logger.slf4j

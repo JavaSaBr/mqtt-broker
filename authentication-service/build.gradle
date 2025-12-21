@@ -14,7 +14,7 @@ dependencies {
 
   compileOnlyApi projects.credentialsSourceDb
   compileOnlyApi projects.credentialsSourceFile
-  compileOnlyApi projects.authProviderBasic
+  compileOnlyApi projects.authenticationProviderBasic
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport
