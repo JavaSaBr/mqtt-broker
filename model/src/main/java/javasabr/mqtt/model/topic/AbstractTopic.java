@@ -40,6 +40,16 @@ public abstract class AbstractTopic {
     return segments[level];
   }
 
+  public boolean isSingleLevelWildcard(int level) {
+    String segment = segments[level];
+    return segment.length() == 1 && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR;
+  }
+
+  public boolean isMultiLevelWildcard(int level) {
+    String segment = segments[level];
+    return segment.length() == 1 && segment.charAt(0) == TopicFilter.MULTI_LEVEL_WILDCARD_CHAR;
+  }
+
   public int levelsCount() {
     return segments.length;
   }

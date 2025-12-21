@@ -40,22 +40,23 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
 
   public void addRetainedMessage(int level, Publish message, TopicName topicName) {
     var child = getOrCreateChildNode(topicName.segment(level));
-    boolean isLastLevel = (level + 1 == topicName.levelsCount());
+    int nextLevel = level + 1;
+    boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
       child.setRetainedMessage(message);
     } else {
-      child.addRetainedMessage(level + 1, message, topicName);
+      child.addRetainedMessage(nextLevel, message, topicName);
     }
   }
 
   public void removeRetainedMessage(int level, TopicName topicName) {
     var child = getOrCreateChildNode(topicName.segment(level));
-    boolean isLastLevel = (level + 1 == topicName.levelsCount());
+    int nextLevel = level + 1;
+    boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
       child.clearRetainedMessage();
     } else {
-      child.removeRetainedMessage(level + 1,
-          topicName);
+      child.removeRetainedMessage(nextLevel, topicName);
     }
   }
 
@@ -73,16 +74,12 @@ class RetainedMessageNode extends AbstractTrieNode<RetainedMessageNode> {
       if (publish != null) {
         result.add(publish);
       }
-      return;
-    }
-    String segment = topicFilter.segment(level);
-    boolean isOneChar = segment.length() == 1;
-    if (isOneChar && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR) {
+    } else if (topicFilter.isSingleLevelWildcard(level)) {
       collectAllChildren(level, topicFilter, result);
-    } else if (isOneChar && segment.charAt(0) == TopicFilter.MULTI_LEVEL_WILDCARD_CHAR) {
+    } else if (topicFilter.isMultiLevelWildcard(level)) {
       collectEverything(this, result);
     } else {
-      collectExactSegment(level, segment, topicFilter, result);
+      collectExactSegment(level, topicFilter.segment(level), topicFilter, result);
     }
   }
 
