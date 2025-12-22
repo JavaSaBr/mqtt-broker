@@ -1,15 +1,15 @@
 package javasabr.mqtt.acl.engine;
 
-import javasabr.mqtt.acl.engine.model.matcher.TopicMatchers;
-import javasabr.mqtt.acl.engine.model.matcher.UserMatchers;
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition;
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition;
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition;
 import javasabr.mqtt.acl.engine.model.condition.TopicCondition;
 import javasabr.mqtt.acl.engine.model.condition.UserNameCondition;
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.TopicMatchers;
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher;
-import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.UserMatchers;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
@@ -41,11 +41,11 @@ public interface ConditionMatcherAware {
     return new IpAddressCondition(UserMatchers.regex(value));
   }
 
-  default ValueMatcher<AbstractTopic> topicEq(String value) {
+  default TopicMatcher<AbstractTopic> topicEq(String value) {
     return TopicMatchers.eq(value);
   }
 
-  default ValueMatcher<AbstractTopic> topicMatch(String value) {
+  default TopicMatcher<AbstractTopic> topicMatch(String value) {
     return TopicMatchers.match(value);
   }
   

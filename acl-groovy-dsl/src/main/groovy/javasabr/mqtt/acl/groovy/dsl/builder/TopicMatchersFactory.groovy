@@ -2,9 +2,10 @@
 package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
-import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
+import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
+import javasabr.mqtt.model.topic.AbstractTopic
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.model.topic.TopicValidator
@@ -25,7 +26,7 @@ class TopicMatchersFactory {
     return new TopicFilterMatcher(TopicFilter.valueOf(rawTopicFilter))
   }
 
-  AnyTopicMatcher anyTopic() {
-    return AnyTopicMatcher.instance()
+  TopicMatcher<AbstractTopic> anyTopic() {
+    return TopicMatcher.MATCH_ANY
   }
 }

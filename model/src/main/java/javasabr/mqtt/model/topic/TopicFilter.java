@@ -34,7 +34,9 @@ public class TopicFilter extends AbstractTopic {
 
   @Override
   public boolean isMatched(AbstractTopic anotherTopic) {
-    if (!wildcard()) {
+    if (anotherTopic == this) {
+      return true;
+    } else if (!wildcard()) {
       if (levelsCount() != anotherTopic.levelsCount()) {
         return false;
       }

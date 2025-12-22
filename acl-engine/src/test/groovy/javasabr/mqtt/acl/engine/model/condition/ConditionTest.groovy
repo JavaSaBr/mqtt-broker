@@ -1,7 +1,6 @@
 package javasabr.mqtt.acl.engine.model.condition
 
 import javasabr.mqtt.acl.engine.ConditionMatcherAware
-import javasabr.mqtt.acl.engine.model.matcher.AnyValueMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.mqtt.model.MqttUser
 import javasabr.mqtt.model.subscription.TestMqttUser

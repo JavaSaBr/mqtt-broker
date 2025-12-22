@@ -24,7 +24,9 @@ public class TopicName extends AbstractTopic {
 
   @Override
   public boolean isMatched(AbstractTopic anotherTopic) {
-    if (anotherTopic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
+    if (anotherTopic == this) {
+      return true;
+    } else if (anotherTopic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
       return false;
     } else if (levelsCount() != anotherTopic.levelsCount()) {
       return false;

@@ -5,7 +5,7 @@ import groovy.transform.TypeChecked
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.Action
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
-import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
+import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher
 import javasabr.mqtt.acl.engine.model.rule.AclRule
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.topic.AbstractTopic
@@ -16,7 +16,7 @@ abstract class AclRuleBuilder {
   Operation operation
   
   MqttUserCondition userCondition
-  Array<ValueMatcher<AbstractTopic>> topicMatchers
+  Array<TopicMatcher<AbstractTopic>> topicMatchers
 
   AclRuleBuilder(Action action, Operation operation) {
     this.action = action

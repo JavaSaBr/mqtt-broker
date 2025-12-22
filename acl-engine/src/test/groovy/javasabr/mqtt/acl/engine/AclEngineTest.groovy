@@ -1,16 +1,15 @@
 package javasabr.mqtt.acl.engine
 
-
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.condition.TopicCondition
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
+import javasabr.mqtt.acl.engine.model.rule.AclRule
 import javasabr.mqtt.acl.engine.model.rule.AllowPublishAclRule
 import javasabr.mqtt.acl.engine.model.rule.AllowSubscribeAclRule
 import javasabr.mqtt.acl.engine.model.rule.DenyPublishAclRule
 import javasabr.mqtt.acl.engine.model.rule.DenySubscribeAclRule
-import javasabr.mqtt.acl.engine.model.rule.AclRule
 import javasabr.mqtt.model.MqttUser
 import javasabr.mqtt.model.acl.Operation
 import javasabr.mqtt.model.topic.AbstractTopic

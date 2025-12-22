@@ -28,8 +28,8 @@ public abstract class AbstractAclRule implements AclRule {
   TopicCondition topicCondition;
 
   @Override
-  public boolean test(MqttUser mqttUser, Operation operation, AbstractTopic topic) {
-    return operation() == operation && topicCondition.test(topic) && userCondition.test(mqttUser);
+  public boolean test(MqttUser user, Operation operation, AbstractTopic topic) {
+    return operation() == operation && topicCondition.test(user, topic) && userCondition.test(user);
   }
 
   @Override
