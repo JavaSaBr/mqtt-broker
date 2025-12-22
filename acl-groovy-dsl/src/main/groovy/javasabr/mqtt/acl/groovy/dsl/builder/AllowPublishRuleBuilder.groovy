@@ -11,6 +11,6 @@ class AllowPublishRuleBuilder extends PublishRuleBuilder {
   AllowPublishRuleBuilder() { super(Action.ALLOW) }
 
   Rule build() {
-    return new AllowPublishRule(userCondition, new TopicCondition(topicNames))
+    return new AllowPublishRule(userCondition, new TopicCondition(topicMatchers))
   }
 }

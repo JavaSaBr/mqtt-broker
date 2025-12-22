@@ -11,6 +11,6 @@ class DenyPublishRuleBuilder extends PublishRuleBuilder {
   DenyPublishRuleBuilder() { super(Action.DENY) }
 
   Rule build() {
-    return new DenyPublishRule(userCondition, new TopicCondition(topicNames))
+    return new DenyPublishRule(userCondition, new TopicCondition(topicMatchers))
   }
 }

@@ -1,6 +1,7 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import groovy.transform.TypeChecked
 import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.ArrayFactory
@@ -17,21 +18,29 @@ class AclRulesBuilder {
   Array<Rule> build() {
     return ruleBuilderFutures.collect(ArrayFactory.mutableArray(Rule.class), { it.join() })
   }
-
-  void allowPublish(Closure<?> config) {
+  
+  @TypeChecked
+  AclRulesBuilder allowPublish(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new AllowPublishRuleBuilder(), config))
+    return this
   }
 
-  void denyPublish(Closure<?> config) {
+  @TypeChecked
+  AclRulesBuilder denyPublish(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new DenyPublishRuleBuilder(), config))
+    return this
   }
 
-  void allowSubscribe(Closure<?> config) {
+  @TypeChecked
+  AclRulesBuilder allowSubscribe(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new AllowSubscribeRuleBuilder(), config))
+    return this
   }
 
-  void denySubscribe(Closure<?> config) {
+  @TypeChecked
+  AclRulesBuilder denySubscribe(Closure<?> config) {
     ruleBuilderFutures.add(startBuilderAsync(new DenySubscribeRuleBuilder(), config))
+    return this
   }
 
   private static CompletableFuture<Rule> startBuilderAsync(RuleBuilder builder, Closure<?> config) {
@@ -40,10 +49,10 @@ class AclRulesBuilder {
 
   private static RuleBuilder putConfigToBuilder(
       RuleBuilder ruleBuilder,
-      Closure<?> ruleConfigurator) {
-    ruleConfigurator.delegate = ruleBuilder
-    ruleConfigurator.resolveStrategy = Closure.DELEGATE_ONLY
-    ruleConfigurator()
+      Closure<?> config) {
+    config.delegate = ruleBuilder
+    config.resolveStrategy = Closure.DELEGATE_ONLY
+    config()
     return ruleBuilder
   }
 }

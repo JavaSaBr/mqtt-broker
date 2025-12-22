@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.engine.model.matcher;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -30,5 +31,15 @@ public record TopicFilterMatcher(TopicFilter expectedTopic) implements ValueMatc
       }
     }
     return expectedFilterLevels == incomingFilterLevels;
+  }
+
+  @Override
+  public String toString() {
+    return "Match:[" + expectedTopic + "]";
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    return toString();
   }
 }

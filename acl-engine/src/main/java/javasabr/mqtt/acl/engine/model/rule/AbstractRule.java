@@ -2,6 +2,7 @@ package javasabr.mqtt.acl.engine.model.rule;
 
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition;
 import javasabr.mqtt.acl.engine.model.condition.TopicCondition;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.topic.AbstractTopic;
@@ -13,17 +14,26 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@Accessors(fluent = true)
+@Accessors
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@EqualsAndHashCode
 public abstract class AbstractRule implements Rule {
 
+  static {
+    DebugUtils.registerIncludedFields("userCondition", "topicCondition");
+  }
+  
   MqttUserCondition userCondition;
   TopicCondition topicCondition;
 
   @Override
   public boolean test(MqttUser mqttUser, Operation operation, AbstractTopic topic) {
     return operation() == operation && topicCondition.test(topic) && userCondition.test(mqttUser);
+  }
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
   }
 }

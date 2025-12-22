@@ -1,0 +1,10 @@
+package acl.config
+
+denyPublish {
+  users {
+    anyUser()
+  }
+  topics {
+    anyTopic()
+  }
+}
