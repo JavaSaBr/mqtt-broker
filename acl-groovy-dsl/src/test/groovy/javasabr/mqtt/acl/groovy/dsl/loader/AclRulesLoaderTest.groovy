@@ -72,10 +72,10 @@ class AclRulesLoaderTest extends UnitSpecification {
         exception.cause.message.startsWith errorMessage
     where:
         invalidAclFileName | exceptionClass            | errorMessage
-        "1.gacl"         | AclConfigurationException | 'Only one users section allowed'
-        "2.gacl"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
-        "3.gacl"         | AclConfigurationException | 'AllOf condition can only have single-matcher members'
-        "4.gacl"         | MissingMethodException    | 'No signature of method: javasabr.mqtt.acl.groovy.dsl.builder.AllOfUserConditionBuilder.allOf()'
+        "1.gacl"           | AclConfigurationException | 'Only one users section allowed'
+        "2.gacl"           | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "3.gacl"           | AclConfigurationException | 'AllOf condition can only have single-matcher members'
+        "4.gacl"           | MissingMethodException    | 'No signature of method: javasabr.mqtt.acl.groovy.dsl.builder.AllOfUserConditionBuilder.allOf()'
   }
 
   def getAbsolutePath(String fileName) {
@@ -96,38 +96,38 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(userCondition() as AnyOfCondition) {
               with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor1" }
+                  with(matcher as EqualsMatcher) { expectedValue == "sensor1" }
                 }
                 with(get(1) as UserNameCondition) {
-                  with(userNameMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
+                  with(matcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(clientIdMatcher as EqualsMatcher) { expectedValue == "clientId1" }
+                  with(matcher as EqualsMatcher) { expectedValue == "clientId1" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(clientIdMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
+                  with(matcher as RegexMatcher) { pattern.pattern() == "^cliend" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(ipAddressMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                  with(matcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(ipAddressMatcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
+                  with(matcher as EqualsMatcher) { expectedValue == "127.0.0.1" }
                 }
                 with(get(6) as AnyOfCondition) {
                   with(expectedUsers as Array<Condition>) {
-                    with(get(0) as UserNameCondition) { userNameMatcher == ValueMatcher.MATCH_ANY }
+                    with(get(0) as UserNameCondition) { matcher == ValueMatcher.MATCH_ANY }
                   }
                 }
                 with(get(7) as AllOfCondition) {
                   with(expectedUsers as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
-                      with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                      with(matcher as EqualsMatcher) { expectedValue == "sensor2" }
                     }
                     with(get(1) as ClientIdCondition) {
-                      with(clientIdMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                      with(matcher as EqualsMatcher) { expectedValue == "clientId2" }
                     }
                     with(get(2) as IpAddressCondition) {
-                      with(ipAddressMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                      with(matcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                     }
                   }
                 }
@@ -153,13 +153,13 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(userCondition() as AllOfCondition) {
               with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as EqualsMatcher) { expectedValue == "sensor2" }
+                  with(matcher as EqualsMatcher) { expectedValue == "sensor2" }
                 }
                 with(get(1) as ClientIdCondition) {
-                  with(clientIdMatcher as EqualsMatcher) { expectedValue == "clientId2" }
+                  with(matcher as EqualsMatcher) { expectedValue == "clientId2" }
                 }
                 with(get(2) as IpAddressCondition) {
-                  with(ipAddressMatcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
+                  with(matcher as EqualsMatcher) { expectedValue == "10.56.0.3" }
                 }
               }
             }

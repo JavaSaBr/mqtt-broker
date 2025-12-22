@@ -2,7 +2,7 @@ package javasabr.mqtt.acl.engine.model.matcher;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public record StartWithMatcher(String prefix) implements ValueMatcher<String> {
+public record StartsWithMatcher(String prefix) implements ValueMatcher<String> {
 
   @Override
   public boolean test(String value) {

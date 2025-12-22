@@ -19,7 +19,7 @@ class TestRulesGenerator {
                   allowPublish {
                     users {
                       userName eq("user_${ruleNum}")
-                      userName regex("user_${ruleNum}\\\\\\\$")
+                      userName regex("user_${ruleNum}\\\$")
                       clientId eq("client_${ruleNum}")
                       clientId regex("^client_${ruleNum}")
                       ipAddress eq("${ip1}")

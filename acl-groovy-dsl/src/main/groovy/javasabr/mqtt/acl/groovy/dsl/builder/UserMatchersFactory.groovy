@@ -2,15 +2,15 @@ package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher
 import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
-import javasabr.mqtt.acl.engine.model.matcher.StartWithMatcher
+import javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 
 import java.util.regex.Pattern
 
-class UserMatchersFactory {
+abstract class UserMatchersFactory {
 
-  ValueMatcher<String> startWith(String string) {
-    return new StartWithMatcher(string);
+  ValueMatcher<String> startsWith(String string) {
+    return new StartsWithMatcher(string);
   }
 
   ValueMatcher<String> eq(String string) {

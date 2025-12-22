@@ -82,9 +82,12 @@ class UsersBuilder extends MultiUserConditionBuilder {
 
   @Override
   MqttUserCondition build() {
-    if (conditions.size() > 1) {
+    if (conditions.isEmpty()) {
+      return MqttUserCondition.MATCH_NONE;
+    } else if (conditions.size() > 1) {
       return new AnyOfCondition(Array.copyOf(conditions))
+    } else {
+      return conditions.first();
     }
-    return conditions.isEmpty() ? MqttUserCondition.MATCH_NONE : conditions.first()
   }
 }
