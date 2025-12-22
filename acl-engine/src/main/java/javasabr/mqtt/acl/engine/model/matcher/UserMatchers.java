@@ -12,12 +12,12 @@ public class UserMatchers {
     return new ContainsMatcher(substring);
   }
 
-  public static ValueMatcher<String> eq(String string) {
-    return new EqualsMatcher<>(string);
+  public static ValueMatcher<String> eq(String expected) {
+    return new EqualsMatcher<>(expected);
   }
 
-  public static ValueMatcher<String> regex(String string) {
-    return new RegexMatcher(Pattern.compile(string));
+  public static ValueMatcher<String> regex(String pattern) {
+    return new RegexMatcher(Pattern.compile(pattern));
   }
 
   public static ValueMatcher<String> anyValue() {

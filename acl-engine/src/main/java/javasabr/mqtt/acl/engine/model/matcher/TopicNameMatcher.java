@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicName;
 
-public record TopicNameMatcher(TopicName expectedTopic) implements ValueMatcher<AbstractTopic> {
+public record TopicNameMatcher(TopicName expected) implements ValueMatcher<AbstractTopic> {
 
   @Override
   public boolean test(AbstractTopic topicValue) {
-    return expectedTopic.isMatched(topicValue);
+    return expected.isMatched(topicValue);
   }
 
   @Override
   public String toString() {
-    return "Eq:[" + expectedTopic + "]";
+    return "Eq:[" + expected + "]";
   }
   
   @JsonValue

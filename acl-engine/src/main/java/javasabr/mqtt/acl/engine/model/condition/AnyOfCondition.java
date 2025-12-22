@@ -5,15 +5,15 @@ import java.util.Map;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.rlib.collections.array.Array;
 
-public record AnyOfCondition(Array<MqttUserCondition> expectedUsers) implements MqttUserCondition {
+public record AnyOfCondition(Array<MqttUserCondition> conditions) implements MqttUserCondition {
 
-  public AnyOfCondition(MqttUserCondition... expectedUsers) {
-    this(Array.of(expectedUsers));
+  public AnyOfCondition(MqttUserCondition... conditions) {
+    this(Array.of(conditions));
   }
 
   @Override
   public boolean test(MqttUser user) {
-    for (MqttUserCondition condition : expectedUsers) {
+    for (MqttUserCondition condition : conditions) {
       if (condition.test(user)) {
         return true;
       }
@@ -23,6 +23,6 @@ public record AnyOfCondition(Array<MqttUserCondition> expectedUsers) implements 
 
   @JsonValue
   Object jsonDebugValue() {
-    return Map.of("AnyOf", expectedUsers.toList());
+    return Map.of("AnyOf", conditions.toList());
   }
 }
