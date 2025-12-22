@@ -79,7 +79,7 @@ denySubscribe {
 
 allowPublish {
   users {
-    userName startWith("start_with_5")
+    userName startsWith("start_with_5")
     clientId contains("contains")
   }
   topics {

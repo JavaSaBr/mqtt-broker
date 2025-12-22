@@ -5,15 +5,15 @@ import java.util.Map;
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
 import javasabr.mqtt.model.MqttUser;
 
-public record ClientIdCondition(ValueMatcher<String> clientIdMatcher) implements MqttUserCondition {
+public record ClientIdCondition(ValueMatcher<String> matcher) implements MqttUserCondition {
 
   @Override
   public boolean test(MqttUser user) {
-    return clientIdMatcher.test(user.clientId());
+    return matcher.test(user.clientId());
   }
 
   @JsonValue
   Object jsonDebugValue() {
-    return Map.of("clientId", clientIdMatcher);
+    return Map.of("clientId", matcher);
   }
 }

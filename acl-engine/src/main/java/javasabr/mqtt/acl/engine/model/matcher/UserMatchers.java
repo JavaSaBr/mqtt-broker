@@ -4,8 +4,8 @@ import java.util.regex.Pattern;
 
 public class UserMatchers {
 
-  public static ValueMatcher<String> startWith(String prefix) {
-    return new StartWithMatcher(prefix);
+  public static ValueMatcher<String> startsWith(String prefix) {
+    return new StartsWithMatcher(prefix);
   }
   
   public static ValueMatcher<String> contains(String substring) {
@@ -20,7 +20,7 @@ public class UserMatchers {
     return new RegexMatcher(Pattern.compile(string));
   }
 
-  public static ValueMatcher<?> anyValue() {
+  public static ValueMatcher<String> anyValue() {
     return ValueMatcher.MATCH_ANY_STRING;
   }
 }

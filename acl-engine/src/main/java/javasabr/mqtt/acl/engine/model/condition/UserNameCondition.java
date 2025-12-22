@@ -5,19 +5,19 @@ import java.util.Map;
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
 import javasabr.mqtt.model.MqttUser;
 
-public record UserNameCondition(ValueMatcher<String> userNameMatcher) implements MqttUserCondition {
+public record UserNameCondition(ValueMatcher<String> matcher) implements MqttUserCondition {
 
   @Override
   public boolean test(MqttUser user) {
     String userName = user.userName();
     if (userName == null) {
-      return userNameMatcher == ValueMatcher.MATCH_ANY_STRING;
+      return matcher == ValueMatcher.MATCH_ANY_STRING;
     }
-    return userNameMatcher.test(userName);
+    return matcher.test(userName);
   }
 
   @JsonValue
   Object jsonDebugValue() {
-    return Map.of("userName", userNameMatcher);
+    return Map.of("userName", matcher);
   }
 }

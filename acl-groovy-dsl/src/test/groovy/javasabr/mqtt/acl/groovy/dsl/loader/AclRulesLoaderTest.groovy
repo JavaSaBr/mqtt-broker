@@ -12,7 +12,7 @@ import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ContainsMatcher
 import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher
 import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
-import javasabr.mqtt.acl.engine.model.matcher.StartWithMatcher
+import javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
@@ -103,38 +103,38 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(userCondition() as AnyOfCondition) {
               with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as EqualsMatcher) { expected == "sensor1" }
+                  with(matcher as EqualsMatcher) { expected == "sensor1" }
                 }
                 with(get(1) as UserNameCondition) {
-                  with(userNameMatcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
+                  with(matcher as RegexMatcher) { pattern.pattern() == "sensor10\$" }
                 }
                 with(get(2) as ClientIdCondition) {
-                  with(clientIdMatcher as EqualsMatcher) { expected == "clientId1" }
+                  with(matcher as EqualsMatcher) { expected == "clientId1" }
                 }
                 with(get(3) as ClientIdCondition) {
-                  with(clientIdMatcher as RegexMatcher) { pattern.pattern() == "^cliend" }
+                  with(matcher as RegexMatcher) { pattern.pattern() == "^cliend" }
                 }
                 with(get(4) as IpAddressCondition) {
-                  with(ipAddressMatcher as EqualsMatcher) { expected == "10.56.0.3" }
+                  with(matcher as EqualsMatcher) { expected == "10.56.0.3" }
                 }
                 with(get(5) as IpAddressCondition) {
-                  with(ipAddressMatcher as EqualsMatcher) { expected == "127.0.0.1" }
+                  with(matcher as EqualsMatcher) { expected == "127.0.0.1" }
                 }
                 with(get(6) as AnyOfCondition) {
                   with(expectedUsers as Array<Condition>) {
-                    with(get(0) as UserNameCondition) { userNameMatcher == ValueMatcher.MATCH_ANY_STRING }
+                    with(get(0) as UserNameCondition) { matcher == ValueMatcher.MATCH_ANY_STRING }
                   }
                 }
                 with(get(7) as AllOfCondition) {
                   with(expectedUsers as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
-                      with(userNameMatcher as EqualsMatcher) { expected == "sensor2" }
+                      with(matcher as EqualsMatcher) { expected == "sensor2" }
                     }
                     with(get(1) as ClientIdCondition) {
-                      with(clientIdMatcher as EqualsMatcher) { expected == "clientId2" }
+                      with(matcher as EqualsMatcher) { expected == "clientId2" }
                     }
                     with(get(2) as IpAddressCondition) {
-                      with(ipAddressMatcher as EqualsMatcher) { expected == "10.56.0.3" }
+                      with(matcher as EqualsMatcher) { expected == "10.56.0.3" }
                     }
                   }
                 }
@@ -157,10 +157,10 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(userCondition() as AnyOfCondition) {
               with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as StartWithMatcher) { prefix() == "start_with_5" }
+                  with(matcher as StartsWithMatcher) { prefix() == "start_with_5" }
                 }
                 with(get(1) as ClientIdCondition) {
-                  with(clientIdMatcher as ContainsMatcher) { substring() == "contains" }
+                  with(matcher as ContainsMatcher) { substring() == "contains" }
                 }
               }
             }
@@ -174,13 +174,13 @@ class AclRulesLoaderTest extends UnitSpecification {
             with(userCondition() as AllOfCondition) {
               with(expectedUsers as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
-                  with(userNameMatcher as EqualsMatcher) { expected == "sensor2" }
+                  with(matcher as EqualsMatcher) { expected == "sensor2" }
                 }
                 with(get(1) as ClientIdCondition) {
-                  with(clientIdMatcher as EqualsMatcher) { expected == "clientId2" }
+                  with(matcher as EqualsMatcher) { expected == "clientId2" }
                 }
                 with(get(2) as IpAddressCondition) {
-                  with(ipAddressMatcher as EqualsMatcher) { expected == "10.56.0.3" }
+                  with(matcher as EqualsMatcher) { expected == "10.56.0.3" }
                 }
               }
             }

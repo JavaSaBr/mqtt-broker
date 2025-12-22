@@ -11,11 +11,11 @@ class UserMatchersBuilder {
 
   MutableArray<? extends ValueMatcher<String>> matchers = ArrayFactory.mutableArray(ValueMatcher)
 
-  UserMatchersBuilder startWith(String prefix) {
+  UserMatchersBuilder startsWith(String prefix) {
     if (matchers.contains(ValueMatcher.MATCH_ANY_STRING)) {
       throw new AclConfigurationException("Already included any value matcher")
     }
-    matchers.add(UserMatchers.startWith(prefix))
+    matchers.add(UserMatchers.startsWith(prefix))
     return this
   }
 

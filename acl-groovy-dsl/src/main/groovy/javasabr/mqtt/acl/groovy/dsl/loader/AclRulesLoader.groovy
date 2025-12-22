@@ -24,11 +24,13 @@ class AclRulesLoader {
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
 
     def binding = new Binding()
-    binding.setVariable("allowPublish", aclRulesBuilder.&allowPublish)
-    binding.setVariable("denyPublish", aclRulesBuilder.&denyPublish)
-    binding.setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
-    binding.setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
-    
+    binding.with {
+      setVariable("allowPublish", aclRulesBuilder.&allowPublish)
+      setVariable("denyPublish", aclRulesBuilder.&denyPublish)
+      setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
+      setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
+    }
+
     def groovyShell = new GroovyShell(binding)
     groovyShell.evaluate(aclConfigPath.toFile())
     

@@ -5,10 +5,10 @@ import javasabr.mqtt.acl.engine.model.matcher.AnyValueMatcher
 import javasabr.mqtt.acl.engine.model.matcher.UserMatchers
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 
-class UserMatchersFactory {
+abstract class UserMatchersFactory {
 
-  ValueMatcher<String> startWith(String prefix) {
-    return UserMatchers.startWith(prefix)
+  ValueMatcher<String> startsWith(String prefix) {
+    return UserMatchers.startsWith(prefix)
   }
 
   ValueMatcher<String> contains(String substring) {
@@ -31,3 +31,4 @@ class UserMatchersFactory {
     return it instanceof AnyValueMatcher ? ValueMatcher.MATCH_ANY_STRING : it
   }
 }
+  

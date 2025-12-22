@@ -102,8 +102,8 @@ contributor(aclScriptContext) {
         type: 'javasabr.mqtt.acl.engine.model.matcher.RegexMatcher',
         params: [string: 'String'],
         doc: 'Match value by regex'
-    method name: 'startWith',
-        type: 'javasabr.mqtt.acl.engine.model.matcher.StartWithMatcher',
+    method name: 'startsWith',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher',
         params: [string: 'String'],
         doc: 'Match value by prefix'
     method name: 'contains',
@@ -157,7 +157,7 @@ contributor(aclScriptContext) {
         params: [string: 'String'],
         delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.UserMatchersBuilder',
         doc: 'Match value by strict equality'
-    method name: 'startWith',
+    method name: 'startwWith',
         type: 'javasabr.mqtt.acl.groovy.dsl.builder.UserMatchersBuilder',
         params: [string: 'String'],
         delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.UserMatchersBuilder',

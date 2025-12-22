@@ -79,7 +79,7 @@ class MatcherTest extends UnitSpecification {
 
   def "should match prefix matcher"(String prefix, String incomingValue, boolean expectedResult) {
     given:
-        def matcher = new StartWithMatcher(prefix)
+        def matcher = new StartsWithMatcher(prefix)
     when:
         boolean result = matcher.test(incomingValue)
     then:
