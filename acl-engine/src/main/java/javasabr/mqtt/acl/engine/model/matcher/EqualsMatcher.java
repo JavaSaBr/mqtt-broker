@@ -19,14 +19,4 @@ public record EqualsMatcher<T>(T expected) implements ValueMatcher<T> {
   Object jsonDebugValue() {
     return toString();
   }
-
-  @Override
-  public String toString() {
-    return "Eq:[" + expectedValue + "]";
-  }
-
-  @JsonValue
-  Object jsonDebugValue() {
-    return toString();
-  }
 }

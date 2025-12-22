@@ -101,7 +101,7 @@ class AclRulesLoaderTest extends UnitSpecification {
             operation() == PUBLISH
             action() == ALLOW
             with(userCondition() as AnyOfCondition) {
-              with(expectedUsers as Array<Condition>) {
+              with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
                   with(matcher as EqualsMatcher) { expected == "sensor1" }
                 }
@@ -121,12 +121,12 @@ class AclRulesLoaderTest extends UnitSpecification {
                   with(matcher as EqualsMatcher) { expected == "127.0.0.1" }
                 }
                 with(get(6) as AnyOfCondition) {
-                  with(expectedUsers as Array<Condition>) {
+                  with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) { matcher == ValueMatcher.MATCH_ANY_STRING }
                   }
                 }
                 with(get(7) as AllOfCondition) {
-                  with(expectedUsers as Array<Condition>) {
+                  with(conditions as Array<Condition>) {
                     with(get(0) as UserNameCondition) {
                       with(matcher as EqualsMatcher) { expected == "sensor2" }
                     }
@@ -141,8 +141,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               }
             }
             with(topicCondition().matchers) {
-              with(get(0) as TopicNameMatcher) { expectedTopic.rawTopic() == "/topic1" }
-              with(get(1) as TopicNameMatcher) { expectedTopic.rawTopic() == "/topic2/temp" }
+              with(get(0) as TopicNameMatcher) { expected.rawTopic() == "/topic1" }
+              with(get(1) as TopicNameMatcher) { expected.rawTopic() == "/topic2/temp" }
             }
           }
           with(get(1) as AbstractAclRule) {
@@ -155,7 +155,7 @@ class AclRulesLoaderTest extends UnitSpecification {
             operation() == PUBLISH
             action() == ALLOW
             with(userCondition() as AnyOfCondition) {
-              with(expectedUsers as Array<Condition>) {
+              with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
                   with(matcher as StartsWithMatcher) { prefix() == "start_with_5" }
                 }
@@ -172,7 +172,7 @@ class AclRulesLoaderTest extends UnitSpecification {
             operation() == SUBSCRIBE
             action() == DENY
             with(userCondition() as AllOfCondition) {
-              with(expectedUsers as Array<Condition>) {
+              with(conditions as Array<Condition>) {
                 with(get(0) as UserNameCondition) {
                   with(matcher as EqualsMatcher) { expected == "sensor2" }
                 }
@@ -185,8 +185,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               }
             }
             with(topicCondition().matchers) {
-              with(get(0) as TopicFilterMatcher) { expectedTopic.rawTopic == "/topic1/#" }
-              with(get(1) as TopicFilterMatcher) { expectedTopic.rawTopic == "/topic2/+/temp" }
+              with(get(0) as TopicFilterMatcher) { expected.rawTopic == "/topic1/#" }
+              with(get(1) as TopicFilterMatcher) { expected.rawTopic == "/topic2/+/temp" }
             }
           }
           with(get(1)) {
