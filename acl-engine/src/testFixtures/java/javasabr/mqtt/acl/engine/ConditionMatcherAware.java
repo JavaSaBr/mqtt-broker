@@ -10,7 +10,6 @@ import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher;
 import javasabr.mqtt.acl.engine.model.matcher.TopicMatchers;
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher;
 import javasabr.mqtt.acl.engine.model.matcher.UserMatchers;
-import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.Array;
@@ -41,11 +40,11 @@ public interface ConditionMatcherAware {
     return new IpAddressCondition(UserMatchers.regex(value));
   }
 
-  default TopicMatcher<AbstractTopic> topicEq(String value) {
+  default TopicMatcher topicEq(String value) {
     return TopicMatchers.eq(value);
   }
 
-  default TopicMatcher<AbstractTopic> topicMatch(String value) {
+  default TopicMatcher topicMatch(String value) {
     return TopicMatchers.match(value);
   }
   

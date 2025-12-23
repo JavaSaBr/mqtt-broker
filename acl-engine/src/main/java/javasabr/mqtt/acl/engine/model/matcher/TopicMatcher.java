@@ -3,9 +3,9 @@ package javasabr.mqtt.acl.engine.model.matcher;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.AbstractTopic;
 
-public interface TopicMatcher<T extends AbstractTopic> {
+public interface TopicMatcher {
 
-  TopicMatcher<AbstractTopic> MATCH_ANY = AnyTopicMatcher.instance();
+  TopicMatcher MATCH_ANY = AnyTopicMatcher.instance();
 
-  boolean test(MqttUser user, T topic);
+  boolean test(MqttUser user, AbstractTopic topic);
 }

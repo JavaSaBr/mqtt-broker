@@ -32,6 +32,11 @@ public class TopicFilter extends AbstractTopic {
     this.wildcard = rawTopicFilter.contains(SINGLE_LEVEL_WILDCARD) || rawTopicFilter.contains(MULTI_LEVEL_WILDCARD);
   }
 
+  public TopicFilter(String[] segments, String rawTopic, boolean wildcard) {
+    super(segments, rawTopic);
+    this.wildcard = wildcard;
+  }
+
   @Override
   public boolean isMatched(AbstractTopic anotherTopic) {
     if (anotherTopic == this) {

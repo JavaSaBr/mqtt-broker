@@ -1,16 +1,20 @@
 package javasabr.mqtt.acl.engine.model.matcher;
 
-import javasabr.mqtt.model.topic.AbstractTopic;
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 
 public class TopicMatchers {
 
-  public static TopicMatcher<AbstractTopic> eq(String string) {
-    return new TopicNameMatcher(TopicName.valueOf(string));
+  public static TopicMatcher eq(String rawTopicName) {
+    return new TopicNameMatcher(TopicName.valueOf(rawTopicName));
   }
 
-  public static TopicMatcher<AbstractTopic> match(String string) {
-    return new TopicFilterMatcher(TopicFilter.valueOf(string));
+  public static TopicMatcher match(String rawTopicFilter) {
+    return new TopicFilterMatcher(TopicFilter.valueOf(rawTopicFilter));
+  }
+
+  public static TopicMatcher dynamic(String rawTopic) {
+    return DynamicTopicMatcher.autoBuild(rawTopic);
   }
 }

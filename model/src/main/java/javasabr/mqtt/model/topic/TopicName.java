@@ -18,8 +18,12 @@ public class TopicName extends AbstractTopic {
     }
   };
 
-  public TopicName(String topicName) {
-    super(topicName);
+  public TopicName(String rawTopicName) {
+    super(rawTopicName);
+  }
+
+  public TopicName(String[] segments, String rawTopicName) {
+    super(segments, rawTopicName);
   }
 
   @Override

@@ -5,28 +5,32 @@ import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
-import javasabr.mqtt.model.topic.AbstractTopic
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.model.topic.TopicValidator
 
 class TopicMatchersFactory {
 
-  TopicNameMatcher eq(String rawTopicName) {
+  TopicMatcher eq(String rawTopicName) {
     if (!TopicValidator.validateTopicName(rawTopicName)) {
       throw new AclConfigurationException("Invalid topic name:[$rawTopicName]")
     }
     return new TopicNameMatcher(TopicName.valueOf(rawTopicName))
   }
 
-  TopicFilterMatcher match(String rawTopicFilter) {
+  TopicMatcher match(String rawTopicFilter) {
     if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
       throw new AclConfigurationException("Invalid topic filter:[$rawTopicFilter]")
     }
     return new TopicFilterMatcher(TopicFilter.valueOf(rawTopicFilter))
   }
 
-  TopicMatcher<AbstractTopic> anyTopic() {
+  TopicMatcher dynamic(String rawTopic) {
+    return DynamicTopicMatcher.autoBuild(rawTopic)
+  }
+
+  TopicMatcher anyTopic() {
     return TopicMatcher.MATCH_ANY
   }
 }

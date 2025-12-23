@@ -5,7 +5,7 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicName;
 
-public record TopicNameMatcher(TopicName expected) implements TopicMatcher<AbstractTopic> {
+public record TopicNameMatcher(TopicName expected) implements TopicMatcher {
 
   @Override
   public boolean test(MqttUser user, AbstractTopic topic) {

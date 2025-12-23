@@ -29,13 +29,14 @@ class ConditionTest extends UnitSpecification implements ConditionMatcherAware {
         new TestMqttUser(null, null, null)        | new AnyOfCondition(new UserNameCondition(ValueMatcher.MATCH_ANY_STRING)) | true
   }
 
-  def "should test topic condition"(TopicCondition condition, TopicName mqttUser, boolean expectedResult) {
+  def "should test topic condition"(TopicCondition condition, TopicName topicName, boolean expectedResult) {
     when:
-        boolean result = condition.test(mqttUser)
+        def user = new TestMqttUser("clientId")
+        boolean result = condition.test(user, topicName)
     then:
         result == expectedResult
     where:
-        mqttUser                   | condition                      | expectedResult
+        topicName                   | condition                      | expectedResult
         TopicName.valueOf("topic") | topicNameCondition("topic")    | true
         TopicName.valueOf("topic") | topicNameCondition("topic1")   | false
         TopicName.valueOf("topic") | new TopicCondition(Array.of()) | false

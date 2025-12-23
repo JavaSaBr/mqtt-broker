@@ -8,12 +8,12 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.rlib.collections.array.Array;
 
-public record TopicCondition(Array<TopicMatcher<AbstractTopic>> matchers) {
+public record TopicCondition(Array<TopicMatcher> matchers) {
 
   public static final TopicCondition MATCH_ANY = new TopicCondition(Array.of(new AnyTopicMatcher()));
 
   public boolean test(MqttUser user, AbstractTopic topic) {
-    for (TopicMatcher<AbstractTopic> matcher : matchers) {
+    for (TopicMatcher matcher : matchers) {
       if (matcher.test(user, topic)) {
         return true;
       }

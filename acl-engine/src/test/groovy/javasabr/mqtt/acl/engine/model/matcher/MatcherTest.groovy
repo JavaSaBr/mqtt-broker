@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.engine.model.matcher
 
+import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicValidator
 import javasabr.mqtt.test.support.UnitSpecification
@@ -13,9 +14,10 @@ class MatcherTest extends UnitSpecification {
         if (!TopicValidator.validateTopicFilter(topicFilter)) {
           throw new IllegalArgumentException("Invalid topic filter:$topicFilter")
         }
+        def user = new TestMqttUser("clientId")
         def matcher = new TopicFilterMatcher(TopicFilter.valueOf(topicFilter))
     when:
-        boolean result = matcher.test(TopicFilter.valueOf(incomingValue))
+        boolean result = matcher.test(user, TopicFilter.valueOf(incomingValue))
     then:
         result == expectedResult
     where:

@@ -9,8 +9,8 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
+@Accessors
 @EqualsAndHashCode(of = "rawTopic")
-@Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
 
@@ -23,12 +23,15 @@ public abstract class AbstractTopic {
 
   String[] segments;
   String rawTopic;
-  int length;
 
-  protected AbstractTopic(String rawTopicName) {
-    length = rawTopicName.length();
-    segments = splitTopic(rawTopicName);
-    rawTopic = rawTopicName;
+  protected AbstractTopic(String rawTopic) {
+    this.segments = splitTopic(rawTopic);
+    this.rawTopic = rawTopic;
+  }
+
+  protected AbstractTopic(String[] segments, String rawTopic) {
+    this.segments = segments;
+    this.rawTopic = rawTopic;
   }
 
   public String segment(int level) {
