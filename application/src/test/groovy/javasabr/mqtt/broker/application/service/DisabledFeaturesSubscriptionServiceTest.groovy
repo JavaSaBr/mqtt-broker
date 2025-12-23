@@ -13,7 +13,7 @@ import static com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckR
 import static com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED
 
 @TestPropertySource(locations = "classpath:disabled-features.properties")
-class DisabledFeaturesSubscribtionServiceTest extends IntegrationSpecification {
+class DisabledFeaturesSubscriptionServiceTest extends IntegrationSpecification {
 
   @Unroll
   def "should reject subscribe with wrong topic filter"(
