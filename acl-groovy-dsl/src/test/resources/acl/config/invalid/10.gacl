@@ -1,0 +1,10 @@
+package acl.config.invalid
+
+allowPublish {
+  users {
+    anyUser()
+  }
+  topics {
+    dynamic("invalid/##")
+  }
+}

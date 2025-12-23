@@ -27,7 +27,11 @@ class TopicMatchersFactory {
   }
 
   TopicMatcher dynamic(String rawTopic) {
-    return DynamicTopicMatcher.autoBuild(rawTopic)
+    try {
+      return DynamicTopicMatcher.autoBuild(rawTopic)
+    } catch (RuntimeException e) {
+      throw new AclConfigurationException(e.message)
+    }
   }
 
   TopicMatcher anyTopic() {

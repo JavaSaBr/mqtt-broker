@@ -1,5 +1,7 @@
 package javasabr.mqtt.model.topic;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -60,6 +62,11 @@ public abstract class AbstractTopic {
    */
   public abstract boolean isMatched(AbstractTopic anotherTopic);
 
+  @JsonValue
+  Object jsonDebugValue() {
+    return rawTopic;
+  }
+  
   protected static String[] splitTopic(String topic) {
     int segmentCount = countOccurrencesOf(topic, AbstractTopic.DELIMITER) + 1;
     var segments = new String[segmentCount];

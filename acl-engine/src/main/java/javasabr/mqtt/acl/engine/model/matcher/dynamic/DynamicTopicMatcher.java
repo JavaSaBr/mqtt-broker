@@ -1,6 +1,9 @@
 package javasabr.mqtt.acl.engine.model.matcher.dynamic;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
 import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicFilter;
@@ -14,6 +17,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class DynamicTopicMatcher<T extends AbstractTopic> implements TopicMatcher {
 
+  static {
+    DebugUtils.registerIncludedFields("originalTopic", "resolvers");
+  }
+  
   public static TopicMatcher autoBuild(String rawOriginalTopic) {
     if (TopicValidator.validateTopicName(rawOriginalTopic)) {
       return new DynamicTopicNameMatcher(TopicName.valueOf(rawOriginalTopic));
@@ -55,4 +62,16 @@ public abstract class DynamicTopicMatcher<T extends AbstractTopic> implements To
   }
 
   protected abstract T constructTopic(String[] segments, String rawTopic);
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    return Map.of("Dynamic", Map.of(
+        "originalTopic", originalTopic, 
+        "resolvers", resolvers));
+  }
 }

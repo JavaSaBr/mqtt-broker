@@ -43,6 +43,11 @@ public class DebugUtils {
         throws Exception {
 
       AnnotatedMember member = writer.getMember();
+      if (member == null) {
+        writer.serializeAsProperty(pojo, jsonGenerator, context);
+        return;
+      }
+      
       String name = member.getName();
       Class<?> declaringClass = member.getDeclaringClass();
       Set<String> fields = INCLUDED_DEBUG_PROPERTIES.get(declaringClass);
