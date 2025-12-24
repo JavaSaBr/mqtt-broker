@@ -1,18 +1,17 @@
 package javasabr.mqtt.acl.engine.model.matcher;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Objects;
 
-public record EqualsMatcher(String expectedValue) implements ValueMatcher<String> {
+public record ContainsMatcher(String substring) implements ValueMatcher<String> {
 
   @Override
   public boolean test(String value) {
-    return Objects.equals(expectedValue, value);
+    return value.contains(substring);
   }
 
   @Override
   public String toString() {
-    return "Eq:[" + expectedValue + "]";
+    return "Contains:[" + substring + "]";
   }
 
   @JsonValue

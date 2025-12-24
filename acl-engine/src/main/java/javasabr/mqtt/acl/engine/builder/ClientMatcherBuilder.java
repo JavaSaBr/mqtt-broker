@@ -4,10 +4,15 @@ package javasabr.mqtt.acl.engine.builder;
 import java.util.regex.Pattern;
 import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher;
 import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher;
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
 
 public interface ClientMatcherBuilder {
 
+  default ValueMatcher<String> startsWith(String string) {
+    return new StartsWithMatcher(string);
+  }
+  
   default ValueMatcher<String> eq(String string) {
     return new EqualsMatcher(string);
   }

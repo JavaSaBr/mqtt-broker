@@ -11,6 +11,6 @@ class AllowSubscribeRuleBuilder extends SubscribeRuleBuilder {
   AllowSubscribeRuleBuilder() { super(Action.ALLOW) }
 
   Rule build() {
-    return new AllowSubscribeRule(userCondition, new TopicCondition(topicFilters))
+    return new AllowSubscribeRule(userCondition, new TopicCondition(topicMatchers))
   }
 }

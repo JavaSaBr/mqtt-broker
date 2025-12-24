@@ -1,128 +1,143 @@
-contributor(context(scope: scriptScope())) {
+def aclScriptContext = context(scope: scriptScope(), filetypes: ["gacl"])
+contributor(aclScriptContext) {
 
-  method name: 'allowPublish',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
-      doc: 'Define Access Control List rule'
-  method name: 'denyPublish',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
-      doc: 'Define Access Control List rule'
-  method name: 'allowSubscribe',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
-      doc: 'Define Access Control List rule'
-  method name: 'denySubscribe',
-      type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
-      params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder>'],
-      delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
-      doc: 'Define Access Control List rule'
+  def insideAllowPublish = enclosingCall("allowPublish")
+  def insideDenyPublish = enclosingCall("denyPublish")
+  def insideAllowSubscribe = enclosingCall("allowSubscribe")
+  def insideDenySubscribe = enclosingCall("denySubscribe")
+  def inside1Level = insideAllowPublish || insideDenyPublish || insideAllowSubscribe || insideDenySubscribe
 
-  if ((enclosingCall("allowPublish") || enclosingCall("denyPublish"))
-      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
-    method name: 'topicName',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.PublishRuleBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
-        doc: 'Set of topic names matching by rule'
+  def insideUsers = enclosingCall("users")
+  def insideTopics = enclosingCall("topics")
+  def insideAllOf = enclosingCall("allOf")
+  def insideAnyOf = enclosingCall("anyOf")
+
+  // root level
+  if (!inside1Level) {
+    method name: 'allowPublish',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        doc: 'Define Access Control List rule'
+    method name: 'denyPublish',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        doc: 'Define Access Control List rule'
+    method name: 'allowSubscribe',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        doc: 'Define Access Control List rule'
+    method name: 'denySubscribe',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder',
+        doc: 'Define Access Control List rule'
   }
-
-  if ((enclosingCall("allowSubscribe") || enclosingCall("denySubscribe"))
-      && !enclosingCall("allOf") && !enclosingCall("anyOf")) {
-    method name: 'topicFilter',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.SubscribeRuleBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.TopicFilterMatcher...'],
-        doc: 'Set of topic filters matching by rule'
+  
+  // first level
+  if (inside1Level && !insideUsers && !insideTopics) {
+    method name: 'users',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        doc: 'Define user conditions to apply this rule'
+    method name: 'topics',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        doc: 'Define topic matchers to apply this rule'
+  }
+  
+  // topics {}
+  if (insideTopics) {
     method name: 'match',
-        type: 'javasabr.mqtt.model.acl.matcher.TopicFilterMatcher',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
         params: [string: 'String'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
         doc: 'Match incoming topic by topic filter'
-  }
-
-  if (enclosingCall("allowPublish") || enclosingCall("denyPublish")
-      || enclosingCall("allowSubscribe") || enclosingCall("denySubscribe")) {
     method name: 'eq',
-        type: 'javasabr.mqtt.model.acl.matcher.EqualsMatcher',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
         params: [string: 'String'],
-        doc: 'Match incoming value by strict equality'
-  }
-
-  if (enclosingCall("allOf") || enclosingCall("anyOf")) {
-    method name: 'regex',
-        type: 'javasabr.mqtt.model.acl.matcher.RegexMatcher',
-        params: [string: 'String'],
-        doc: 'Match incoming value by Regular Expression'
-  }
-
-  if (!enclosingCall("allOf")
-      && !enclosingCall("anyOf")
-      && (enclosingCall("allowPublish")
-      || enclosingCall("denyPublish")
-      || enclosingCall("allowSubscribe")
-      || enclosingCall("denySubscribe"))) {
-    method name: 'allOf',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
-        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder>'],
-        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
-        doc: 'All of conditions match an incoming client'
-    method name: 'anyOf',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
-        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder>'],
-        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
-        doc: 'At least one condition matches an incoming client'
-    method name: 'anyOf',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
+        doc: 'Match incoming topic by topic name'
+    method name: 'anyTopic',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
         params: [:],
-        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.RuleBuilder',
-        doc: 'Match any incoming client'
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
+        doc: 'Match any incoming topic'
   }
 
-  if (!enclosingCall("allOf") && enclosingCall("anyOf")) {
-    method name: 'allOf',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AllOfBuilder',
-        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder>'],
-        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        doc: 'All of conditions match an incoming client'
+  // inside users {}
+  if (insideUsers) {
     method name: 'anyOf',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AnyOfBuilder',
-        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder>'],
-        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        doc: 'At least one condition matches an incoming client'
-  }
-
-  if (enclosingCall("allOf")) {
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AnyOfUserConditionBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder',
+        doc: 'Must match at least one of user conditions'
     method name: 'userName',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>'],
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder',
+        params: [string: 'javasabr.mqtt.acl.engine.model.matcher.ValueMatcher<String>'],
         doc: 'Match by username'
     method name: 'clientId',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>'],
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder',
+        params: [string: 'javasabr.mqtt.acl.engine.model.matcher.ValueMatcher<String>'],
         doc: 'Match by clientId'
     method name: 'ipAddress',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>'],
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder',
+        params: [string: 'javasabr.mqtt.acl.engine.model.matcher.ValueMatcher<String>'],
         doc: 'Match by IP address'
-  }
-  if (enclosingCall("anyOf") && !enclosingCall("allOf")) {
-    method name: 'userName',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
-        doc: 'Match by username'
-    method name: 'clientId',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
-        doc: 'Match by clientId'
-    method name: 'ipAddress',
-        type: 'javasabr.mqtt.acl.groovy.dsl.builder.ConditionBuilder',
-        params: [string: 'javasabr.mqtt.model.acl.matcher.ValueMatcher<String>...'],
-        doc: 'Match by IP address'
+
+    method name: 'eq',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher',
+        params: [string: 'String'],
+        doc: 'Match value by strict equality'
+    method name: 'regex',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.RegexMatcher',
+        params: [string: 'String'],
+        doc: 'Match value by regex'
+    method name: 'startWith',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.StartWithMatcher',
+        params: [string: 'String'],
+        doc: 'Match value by prefix'
+    method name: 'contains',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.ContainsMatcher',
+        params: [string: 'String'],
+        doc: 'Match value by containing substring'
+    method name: 'anyValue',
+        type: 'javasabr.mqtt.acl.engine.model.matcher.AnyValueMatcher',
+        params: [:],
+        doc: 'Match any incoming value'
   }
 
-  method name: 'anyone',
-      type: 'javasabr.mqtt.model.acl.matcher.AnyValueMatcher',
-      params: [:],
-      doc: 'Match any incoming value'
+  // inside in the root if users {}
+  if (insideUsers && !insideAllOf && !insideAnyOf) {
+    method name: 'anyUser',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilder',
+        params: [:],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilder',
+        doc: 'Match any user'
+  }
+
+  // inside users {} but not in allOf {}
+  if (insideUsers && !insideAllOf) {
+    method name: 'allOf',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.AllOfUserConditionBuilder',
+        params: [config: 'Closure<javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder>'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder',
+        doc: 'Must match all user conditions'
+    method name: 'userNames',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.MultiUserConditionBuilder',
+        params: [string: 'java.util.Collection<? extends javasabr.mqtt.acl.engine.model.matcher.ValueMatcher<String>>'],
+        doc: 'Match by usernames'
+    method name: 'clientIds',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.MultiUserConditionBuilder',
+        params: [string: 'java.util.Collection<? extends javasabr.mqtt.acl.engine.model.matcher.ValueMatcher<String>>'],
+        doc: 'Match by usernames'
+    method name: 'ipAddresses',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.MultiUserConditionBuilder',
+        params: [string: 'java.util.Collection<? extends javasabr.mqtt.acl.engine.model.matcher.ValueMatcher<String>>'],
+        doc: 'Match by usernames'
+  }
 }

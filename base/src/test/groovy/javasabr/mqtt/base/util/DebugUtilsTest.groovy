@@ -40,9 +40,15 @@ class DebugUtilsTest extends UnitSpecification {
     then:
         json == """{
   "emptyArray" : [ ],
-  "mutableValues" : [ "First", "Second" ],
+  "mutableValues" : [
+    "First",
+    "Second"
+  ],
   "name" : "testData",
-  "values" : [ "First", "Second" ]
+  "values" : [
+    "First",
+    "Second"
+  ]
 }"""
   }
 }

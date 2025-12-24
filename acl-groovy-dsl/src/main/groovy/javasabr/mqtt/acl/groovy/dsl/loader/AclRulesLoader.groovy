@@ -6,7 +6,6 @@ import javasabr.mqtt.acl.engine.model.rule.Rule
 import javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder
 import javasabr.mqtt.model.acl.Operation
 import javasabr.rlib.collections.array.Array
-import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -21,16 +20,20 @@ class AclRulesLoader {
     if (Files.notExists(aclConfigPath)) {
       throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath))
     }
-    CompilerConfiguration compilerConfig = new CompilerConfiguration()
+    
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
-    new GroovyShell(compilerConfig).with {
+
+    def binding = new Binding()
+    binding.with {
       setVariable("allowPublish", aclRulesBuilder.&allowPublish)
       setVariable("denyPublish", aclRulesBuilder.&denyPublish)
       setVariable("allowSubscribe", aclRulesBuilder.&allowSubscribe)
       setVariable("denySubscribe", aclRulesBuilder.&denySubscribe)
-      evaluate(aclConfigPath.toFile())
     }
-    def allDefinedRules = aclRulesBuilder.build()
-    return RuleContainerBuilder.groupRulesByOperation(allDefinedRules)
+
+    def groovyShell = new GroovyShell(binding)
+    groovyShell.evaluate(aclConfigPath.toFile())
+    
+    return RuleContainerBuilder.groupRulesByOperation(aclRulesBuilder.build())
   }
 }

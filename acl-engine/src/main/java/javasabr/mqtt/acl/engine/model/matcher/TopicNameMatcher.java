@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.engine.model.matcher;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 import javasabr.mqtt.model.topic.AbstractTopic;
 import javasabr.mqtt.model.topic.TopicName;
@@ -9,5 +10,15 @@ public record TopicNameMatcher(TopicName expectedTopic) implements ValueMatcher<
   @Override
   public boolean test(AbstractTopic requestedTopic) {
     return Objects.equals(expectedTopic.rawTopic(), requestedTopic.rawTopic());
+  }
+
+  @Override
+  public String toString() {
+    return "Eq:[" + expectedTopic + "]";
+  }
+  
+  @JsonValue
+  Object jsonDebugValue() {
+    return toString();
   }
 }

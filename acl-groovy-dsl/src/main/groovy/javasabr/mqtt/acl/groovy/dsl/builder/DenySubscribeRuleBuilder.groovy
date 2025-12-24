@@ -11,6 +11,6 @@ class DenySubscribeRuleBuilder extends SubscribeRuleBuilder {
   DenySubscribeRuleBuilder() { super(Action.DENY) }
 
   Rule build() {
-    return new DenySubscribeRule(userCondition, new TopicCondition(topicFilters))
+    return new DenySubscribeRule(userCondition, new TopicCondition(topicMatchers))
   }
 }
