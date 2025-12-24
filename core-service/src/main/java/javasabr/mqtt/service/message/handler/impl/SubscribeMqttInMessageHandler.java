@@ -210,7 +210,7 @@ public class SubscribeMqttInMessageHandler extends
         continue;
       }
       boolean retainAsPublished = subscription.retainAsPublished();
-      var retainedMessages = retainMessageService.findRetainedMessages(subscription.topicFilter());
+      Array<Publish> retainedMessages = retainMessageService.findRetainedMessages(subscription.topicFilter());
       for (Publish retainedMessage : retainedMessages) {
         if (!retainAsPublished) {
           retainedMessage = retainedMessage.withoutRetain();
