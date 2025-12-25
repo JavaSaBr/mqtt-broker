@@ -10,9 +10,6 @@ class MatcherTest extends UnitSpecification {
 
   def "should match topic filter"(String topicFilter, String incomingValue, boolean expectedResult) {
     given:
-        if (!TopicValidator.validateTopicFilter(topicFilter)) {
-          throw new IllegalArgumentException("Invalid topic filter:$topicFilter")
-        }
         def matcher = new TopicFilterMatcher(TopicFilter.valueOf(topicFilter))
     when:
         boolean result = matcher.test(TopicFilter.valueOf(incomingValue))
