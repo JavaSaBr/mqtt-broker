@@ -38,6 +38,16 @@ public class TopicName extends AbstractTopic {
     return Objects.equals(rawTopic(), anotherTopic.rawTopic());
   }
 
+  @Override
+  public boolean isMatched(AbstractTopic anotherTopic) {
+    if (anotherTopic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
+      return false;
+    } else if (levelsCount() != anotherTopic.levelsCount()) {
+      return false;
+    }
+    return Objects.equals(rawTopic(), anotherTopic.rawTopic());
+  }
+
   public boolean isEmpty() {
     return false;
   }
