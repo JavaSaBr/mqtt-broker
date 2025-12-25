@@ -121,4 +121,26 @@ class ExternalConnectionTest extends IntegrationSpecification {
     where:
         clientId << ["!@#!@*()^&"]
   }
+
+  def "client should not connect to broker with wrong pass using mqtt 3.1.1"() {
+    given:
+        def client = buildExternalMqtt311Client()
+    when:
+        connectWith(client, "user", "wrongPassword")
+    then:
+        def ex = thrown CompletionException
+        def cause = ex.cause as Mqtt3ConnAckException
+        cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
+  }
+
+  def "client should not connect to broker with wrong pass using mqtt 5"() {
+    given:
+        def client = buildExternalMqtt5Client()
+    when:
+        connectWith(client, "user", "wrongPassword")
+    then:
+        def ex = thrown CompletionException
+        def cause = ex.cause as Mqtt5ConnAckException
+        cause.mqttMessage.reasonCode == Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD
+  }
 }
