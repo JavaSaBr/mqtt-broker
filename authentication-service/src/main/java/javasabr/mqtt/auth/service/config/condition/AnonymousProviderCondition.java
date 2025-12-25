@@ -12,13 +12,10 @@ public class AnonymousProviderCondition extends SpringBootCondition {
   public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
     return Binder.get(context.getEnvironment())
         .bind("authentication", AuthenticationProperties.class)
-        .map(authProps -> {
-          if (authProps.allowAnonymous()) {
-            return ConditionOutcome.match("Anonymous connections allowed");
-          } else {
-            return ConditionOutcome.noMatch("Anonymous connections denied");
-          }
-        })
+        .map(AuthenticationProperties::allowAnonymous)
+        .map(isCredentialsSourceEnabled -> isCredentialsSourceEnabled
+                                           ? ConditionOutcome.match("Anonymous connections allowed")
+                                           : ConditionOutcome.noMatch("Anonymous connections denied"))
         .orElse(ConditionOutcome.noMatch("Authentication providers are not configured"));
   }
 }

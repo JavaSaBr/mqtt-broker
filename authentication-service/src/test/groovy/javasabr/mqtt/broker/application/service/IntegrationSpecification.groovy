@@ -10,8 +10,7 @@ import spock.lang.Specification
 @TestPropertySource("classpath:application-test.properties")
 @SpringJUnitConfig(classes = [
   BasicAuthenticationSpringConfig,
-  DatabaseSpringConfig,
-  DatabaseTestSpringConfig
+  DatabaseSpringConfig
 ])
 class IntegrationSpecification extends Specification {
 }

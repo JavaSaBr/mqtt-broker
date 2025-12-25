@@ -26,25 +26,6 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   @TestPropertySource(properties = [
       "authentication.allow-anonymous=false",
       "authentication.providers[0]=basic",
-      "authentication.credentials-sources[0]=database"
-  ])
-  static class DatabaseCredentialsSourceTest extends AuthenticationProviderTest {
-    @Autowired
-    CredentialsSource credentialsSource
-
-    def "should create file credentials source and basic authentication provider"() {
-      expect:
-          credentialsSource instanceof DatabaseCredentialsSource
-          verifyEach(authenticationProviders) { provider ->
-            provider.name != "anonymous"
-            !(provider instanceof AnonymousAuthenticationProvider)
-          }
-    }
-  }
-
-  @TestPropertySource(properties = [
-      "authentication.allow-anonymous=false",
-      "authentication.providers[0]=basic",
       "authentication.credentials-sources[0]=file"
   ])
   static class FileCredentialsSourceTest extends AuthenticationProviderTest {

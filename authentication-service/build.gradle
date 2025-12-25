@@ -21,6 +21,13 @@ dependencies {
   testImplementation projects.authenticationProviderBasic
   testImplementation libs.r2dbc.h2
 
+  testImplementation 'org.springframework.boot:spring-boot-testcontainers:3.5.8'
+
+  testImplementation platform('org.testcontainers:testcontainers-bom:1.19.3')
+  testImplementation 'org.testcontainers:testcontainers'
+  testImplementation 'org.testcontainers:postgresql'
+  testImplementation "org.testcontainers:testcontainers-spock:2.0.2"
+
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport
 
@@ -31,5 +38,5 @@ dependencies {
   implementation libs.jdbc.postgres
   implementation libs.flyway.core
   implementation libs.flyway.postgresql
-  api libs.spring.r2dbc
+  implementation libs.spring.r2dbc
 }

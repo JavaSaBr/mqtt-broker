@@ -2,30 +2,22 @@ package javasabr.mqtt.auth.service.config.condition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javasabr.mqtt.auth.service.config.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnAuthenticationProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
-import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
-public class AuthenticationProviderCondition extends SpringBootCondition {
+public class AuthenticationProviderCondition extends AuthenticationConfigCondition {
   @Override
   public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-    Map<String, Object> attributes = metadata.getAnnotationAttributes(ConditionalOnAuthenticationProvider.class.getName());
-    String requiredProvider = attributes.getOrDefault("value", "").toString();
+    Map<String, Object> attrs = metadata.getAnnotationAttributes(ConditionalOnAuthenticationProvider.class.getName());
+    return doFredAgain(context.getEnvironment(), attrs, "Authentication Provider");
+  }
 
-    return Binder.get(context.getEnvironment())
-        .bind("authentication", AuthenticationProperties.class)
-        .map(authProps -> {
-          List<String> providers = authProps.providers();
-          if (providers != null && providers.contains(requiredProvider)) {
-            return ConditionOutcome.match("Provider '" + requiredProvider + "' found in MqttProperties");
-          } else {
-            return ConditionOutcome.noMatch("Provider '" + requiredProvider + "' not active");
-          }
-        })
-        .orElse(ConditionOutcome.noMatch("Authentication properties not found"));
+  @Override
+  boolean isCredentialsSourceEnabled(AuthenticationProperties properties, String value) {
+    return Objects.requireNonNullElse(properties.providers(), List.of()).contains(value);
   }
 }
