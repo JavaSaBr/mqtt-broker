@@ -1,18 +1,26 @@
 package javasabr.mqtt.service.message.handler.impl;
 
+import static javasabr.mqtt.model.SubscribeRetainHandling.SEND;
+import static javasabr.mqtt.model.SubscribeRetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
 import static javasabr.mqtt.model.reason.code.SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.subscription.RequestedSubscription;
 import javasabr.mqtt.model.subscription.Subscription;
+import javasabr.mqtt.model.subscription.SubscriptionResult;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
@@ -20,9 +28,13 @@ import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
+import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayCollectors;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
@@ -40,14 +52,20 @@ public class SubscribeMqttInMessageHandler extends
 
   SubscriptionService subscriptionService;
   TopicService topicService;
+  RetainMessageService retainMessageService;
+  PublishDeliveringService publishDeliveringService;
 
   public SubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
+      TopicService topicService,
+      RetainMessageService retainMessageService,
+      PublishDeliveringService publishDeliveringService) {
     super(ExternalNetworkMqttUser.class, SubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
     this.topicService = topicService;
+    this.retainMessageService = retainMessageService;
+    this.publishDeliveringService = publishDeliveringService;
   }
 
   @Override
@@ -90,22 +108,23 @@ public class SubscribeMqttInMessageHandler extends
         subscribeMessage.subscriptions(),
         subscriptionId);
 
-    Array<SubscribeAckReasonCode> subscribeResults = subscriptionService
+    Array<SubscriptionResult> subscribeResults = subscriptionService
         .subscribe(user, session, subscriptions);
-
     sendSubscribeResults(user, session, subscribeMessage, subscribeResults);
+    sendRetainedMessages(user, subscribeResults);
 
-    SubscribeAckReasonCode anyReasonToDisconnect = subscribeResults
+    SubscriptionResult anyDisconnectResult = subscribeResults
         .iterations()
         .reversedArgs()
-        .findAny(DISCONNECT_CASES, Set::contains);
+        .findAny(DISCONNECT_CASES, (codes, candidate) -> codes.contains(candidate.subscribeAckReasonCode()));
 
-    if (anyReasonToDisconnect != null) {
-      log.info(user.clientId(), anyReasonToDisconnect, "[%s] Will be forced closing by reason:[%s]"::formatted);
-      DisconnectReasonCode reasonCode = DisconnectReasonCode.ofCode(anyReasonToDisconnect.code());
-      user.closeWithReason(messageOutFactoryService
-          .resolveFactory(user)
-          .newDisconnect(user, reasonCode));
+    if (anyDisconnectResult != null) {
+      SubscribeAckReasonCode subackReasonCode = anyDisconnectResult.subscribeAckReasonCode();
+      log.info(user.clientId(), subackReasonCode, "[%s] Will be forced closing by reason:[%s]"::formatted);
+      DisconnectReasonCode reasonCode = DisconnectReasonCode.ofCode(subackReasonCode.code());
+      MqttMessageOutFactory mqttMessageOutFactory = messageOutFactoryService.resolveFactory(user);
+      MqttOutMessage disconnectMessage = mqttMessageOutFactory.newDisconnect(user, reasonCode);
+      user.closeWithReason(disconnectMessage);
     }
   }
 
@@ -166,14 +185,60 @@ public class SubscribeMqttInMessageHandler extends
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       SubscribeMqttInMessage subscribeMessage,
-      Array<SubscribeAckReasonCode> subscribeResults) {
+      Array<SubscriptionResult> subscribeResults) {
     int messageId = subscribeMessage.messageId();
+    Array<SubscribeAckReasonCode> ackReasonCodes = subscribeResults.stream()
+        .map(SubscriptionResult::subscribeAckReasonCode)
+        .collect(ArrayCollectors.toArray(SubscribeAckReasonCode.class));
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
-        .newSubscribeAck(messageId, subscribeResults);
+        .newSubscribeAck(messageId, ackReasonCodes);
     user.sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
             .remove(messageId));
+  }
+
+  private void sendRetainedMessages(MqttUser user, Array<SubscriptionResult> subscribeResults) {
+    if (subscribeResults.isEmpty()) {
+      return;
+    }
+    IdentityHashMap<Publish, Subscription> uniqueRetainedMessages = null;
+    for (SubscriptionResult subscriptionResult : subscribeResults) {
+      Subscription subscription = subscriptionResult.newSubscription();
+      if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {
+        continue;
+      }
+      boolean retainAsPublished = subscription.retainAsPublished();
+      Array<Publish> retainedMessages = retainMessageService.findRetainedMessages(subscription.topicFilter());
+      for (Publish retainedMessage : retainedMessages) {
+        if (!retainAsPublished) {
+          retainedMessage = retainedMessage.withoutRetain();
+        }
+        if (uniqueRetainedMessages == null) {
+          uniqueRetainedMessages = new IdentityHashMap<>();
+        }
+        uniqueRetainedMessages.merge(retainedMessage, subscription, Subscription::higherQoS);
+      }
+    }
+    if (uniqueRetainedMessages == null) {
+      return;
+    }
+    for (Map.Entry<Publish, Subscription> retainedMessageEntry : uniqueRetainedMessages.entrySet()) {
+      publishDeliveringService.startDelivering(
+          retainedMessageEntry.getKey(),
+          user,
+          retainedMessageEntry.getValue());
+    }
+  }
+
+  private static boolean isRetainHandlingRequired(Subscription subscription, SubscriptionResult subscriptionResult) {
+    if (subscription.topicFilter().isShared()) {
+      return false;
+    } else {
+      SubscribeRetainHandling retainHandling = subscription.retainHandling();
+      return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
+                                            && subscriptionResult.isNotExistedPreviously());
+    }
   }
 }

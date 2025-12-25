@@ -1,6 +1,7 @@
 package javasabr.mqtt.acl.engine.model.matcher
 
 import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicValidator
 import javasabr.mqtt.test.support.UnitSpecification
 
 import java.util.regex.Pattern
@@ -56,11 +57,10 @@ class MatcherTest extends UnitSpecification {
         "/"                            | "/"                      | true
         "/"                            | "+"                      | false
         "/"                            | "+/+"                    | true
-        "a/b/c"                        | "a/#/b"                  | false
         "a/b"                          | "aa/b"                   | false
   }
 
-  def "should match topic filter"(String pattern, String incomingValue, boolean expectedResult) {
+  def "should match string pattern matcher"(String pattern, String incomingValue, boolean expectedResult) {
     given:
         def matcher = new RegexMatcher(Pattern.compile(pattern))
     when:
@@ -72,5 +72,33 @@ class MatcherTest extends UnitSpecification {
         "^sensor\$" | "sensor"      | true
         "^sensor\$" | "/sensor"     | false
         "^sensor\$" | "sensor1"     | false
+  }
+
+  def "should match prefix matcher"(String prefix, String incomingValue, boolean expectedResult) {
+    given:
+        def matcher = new StartsWithMatcher(prefix)
+    when:
+        boolean result = matcher.test(incomingValue)
+    then:
+        result == expectedResult
+    where:
+        prefix    | incomingValue | expectedResult
+        "client_" | "client_123"  | true
+        "client_" | "123_client"  | false
+        "client_" | "_cli"        | false
+  }
+
+  def "should match contains matcher"(String substring, String incomingValue, boolean expectedResult) {
+    given:
+        def matcher = new ContainsMatcher(substring)
+    when:
+        boolean result = matcher.test(incomingValue)
+    then:
+        result == expectedResult
+    where:
+        substring | incomingValue | expectedResult
+        "123"     | "client_123"  | true
+        "123"     | "client_"     | false
+        "123"     | "123_client_" | true
   }
 }

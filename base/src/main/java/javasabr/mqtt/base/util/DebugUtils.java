@@ -10,6 +10,8 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.introspect.AnnotatedMember;
@@ -134,6 +136,9 @@ public class DebugUtils {
           .addSerializer(new ArraySerializer())
           .addSerializer(new RefToRefDictionarySerializer()))
       .filterProvider(DEBUG_FIELDS_FILTER)
+      .defaultPrettyPrinter(new DefaultPrettyPrinter()
+          .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+          .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE))
       .build();
 
   public static void registerIncludedFields(String... fieldNames) {
@@ -150,6 +155,8 @@ public class DebugUtils {
   }
 
   public static String toJsonString(Object object) {
-    return DEBUG_OBJECT_MAPPER.writeValueAsString(object);
+    return DEBUG_OBJECT_MAPPER
+        .writerWithDefaultPrettyPrinter()
+        .writeValueAsString(object);
   }
 }

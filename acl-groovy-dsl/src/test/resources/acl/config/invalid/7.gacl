@@ -1,0 +1,11 @@
+package acl.config.invalid
+
+allowPublish {
+  users {
+    anyUser()
+  }
+  topics {
+    anyTopic()
+    match("/topic1/#/segment3")
+  }
+}

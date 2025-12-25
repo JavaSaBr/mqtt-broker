@@ -1,0 +1,88 @@
+package acl.config
+
+allowPublish {
+  users {
+    userNames {
+      eq("sensor1")
+      regex("sensor10\$")
+    }
+    clientIds {
+      eq("clientId1")
+      regex("^cliend")
+    }
+    ipAddresses {
+      eq("10.56.0.3")
+      eq("127.0.0.1")
+    }
+    anyOf {
+      userName anyValue()
+      clientId eq("clientId2")
+      ipAddress eq("10.56.0.3")
+    }
+    allOf {
+      userName eq("sensor2")
+      clientId eq("clientId2")
+      ipAddress eq("10.56.0.3")
+    }
+  }
+  topics {
+    eq("/topic1")
+    eq("/topic2/temp")
+  }
+}
+
+denySubscribe {
+  users {
+    allOf {
+      userName eq("sensor2")
+      clientId eq("clientId2")
+      ipAddress eq("10.56.0.3")
+    }
+  }
+  topics {
+    match("/topic1/#")
+    match("/topic2/+/temp")
+  }
+}
+
+allowSubscribe {
+  users {
+    allOf {
+      userName eq("sensor2")
+      clientId eq("clientId2")
+      ipAddress eq("10.56.0.3")
+    }
+  }
+  topics {
+    match("/topic1/#")
+    match("/topic2/+/temp")
+  }
+}
+
+denyPublish {
+  users {
+    anyUser()
+  }
+  topics {
+    anyTopic()
+  }
+}
+
+denySubscribe {
+  users {
+    anyUser()
+  }
+  topics {
+    anyTopic()
+  }
+}
+
+allowPublish {
+  users {
+    userName startsWith("start_with_5")
+    clientId contains("contains")
+  }
+  topics {
+    anyTopic()
+  }
+}

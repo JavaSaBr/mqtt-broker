@@ -1,11 +1,17 @@
 package javasabr.mqtt.acl.engine.model.condition;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.MqttUser;
 
 public record AnyUserCondition() implements MqttUserCondition {
 
   @Override
-  public boolean test(MqttUser requestedUser) {
+  public boolean test(MqttUser user) {
     return true;
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    return "AnyUser";
   }
 }
