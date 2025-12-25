@@ -10,8 +10,6 @@ import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode
-import javasabr.mqtt.model.subscriber.SingleSubscriber
-import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.network.message.in.PublishAckMqttInMessage
 import javasabr.mqtt.network.message.in.PublishCompleteMqttInMessage
 import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
@@ -28,14 +26,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/1")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/1")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
           qos() == QoS.EXACTLY_ONCE
@@ -54,14 +49,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/2")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/2")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
@@ -122,14 +114,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/3")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/3")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
@@ -171,14 +160,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/4")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/4")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
@@ -210,14 +196,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/4")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/4")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
@@ -260,14 +243,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/5")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/5")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {
@@ -302,14 +282,11 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/6")
-        def topicFilter = defaultTopicService.createTopicFilter(user, "Qos2MqttPublishOutMessageHandlerTest/6")
-        def subscription = Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)
-        def subscriber = new SingleSubscriber(user, subscription)
         def originalMessageId = 60
         def testPublish = Publish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
-        publishOutHandler.handle(testPublish, subscriber)
+        publishOutHandler.handle(testPublish, user)
     then:
         def publish = user.nextSentMessage(PublishMqtt5OutMessage)
         with(session.outMessageTracker()) {

@@ -21,6 +21,7 @@ import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
@@ -29,6 +30,7 @@ import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
+import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
@@ -136,6 +138,11 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  RetainMessageService retainMessageService() {
+    return new InMemoryRetainMessageService();
+  }
+
+  @Bean
   MqttMessageOutFactory mqtt311MessageOutFactory() {
     return new Mqtt311MessageOutFactory();
   }
@@ -227,7 +234,8 @@ public class MqttBrokerSpringConfig {
     return new PublishMqttInMessageHandler(
         publishReceivingService,
         messageOutFactoryService,
-        topicService, authorizationService,
+        topicService,
+        authorizationService,
         fieldValidators);
   }
 
@@ -250,8 +258,15 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler subscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService) {
-    return new SubscribeMqttInMessageHandler(subscriptionService, messageOutFactoryService, topicService);
+      TopicService topicService,
+      RetainMessageService retainMessageService,
+      PublishDeliveringService publishDeliveringService) {
+    return new SubscribeMqttInMessageHandler(
+        subscriptionService,
+        messageOutFactoryService,
+        topicService,
+        retainMessageService,
+        publishDeliveringService);
   }
 
   @Bean
@@ -276,14 +291,12 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(
-      MessageOutFactoryService messageOutFactoryService) {
+  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new Qos1MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(
-      MessageOutFactoryService messageOutFactoryService) {
+  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new Qos2MqttPublishOutMessageHandler(messageOutFactoryService);
   }
 
@@ -297,33 +310,39 @@ public class MqttBrokerSpringConfig {
   MqttPublishInMessageHandler qos0MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
     return new Qos0MqttPublishInMessageHandler(
         subscriptionService,
         publishDeliveringService,
-        messageOutFactoryService);
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Bean
   MqttPublishInMessageHandler qos1MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
     return new Qos1MqttPublishInMessageHandler(
         subscriptionService,
         publishDeliveringService,
-        messageOutFactoryService);
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Bean
   MqttPublishInMessageHandler qos2MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
     return new Qos2MqttPublishInMessageHandler(
         subscriptionService,
         publishDeliveringService,
-        messageOutFactoryService);
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Bean

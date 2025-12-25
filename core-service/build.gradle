@@ -12,4 +12,5 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
+  testImplementation testFixtures(projects.model)
 }
