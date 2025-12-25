@@ -1,16 +1,17 @@
 package javasabr.mqtt.broker.application.service
 
-import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider
 import javasabr.mqtt.auth.api.AuthRequest
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationService
+import javasabr.mqtt.auth.api.AuthenticationType
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource
+import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.TestPropertySource
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 
@@ -64,7 +65,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
     expect:
         credentialsSource instanceof DatabaseCredentialsSource
         verifyEach(authenticationProviders) { provider ->
-          provider.name != "anonymous"
+          provider.authenticationType != AuthenticationType.ANONYMOUS
           !(provider instanceof AnonymousAuthenticationProvider)
         }
   }

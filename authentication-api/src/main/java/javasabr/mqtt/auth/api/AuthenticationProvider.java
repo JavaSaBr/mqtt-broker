@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 public interface AuthenticationProvider {
 
-  String getName();
+  AuthenticationType getAuthenticationType();
 
   Mono<Boolean> authenticate(String username, byte[] password, byte[] data);
 }

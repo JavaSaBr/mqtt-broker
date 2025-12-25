@@ -1,8 +1,8 @@
 package javasabr.mqtt.auth.service.config;
 
 import java.net.URI;
+import java.util.Comparator;
 import java.util.List;
-import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialsSource;
@@ -10,6 +10,7 @@ import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
+import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnAnonymousProvider;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnBasicAuthenticationProvider;
@@ -17,9 +18,8 @@ import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredent
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnFileCredentialsSource;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
-import javasabr.rlib.collections.dictionary.DictionaryFactory;
+import javasabr.rlib.collections.array.Array;
 import lombok.CustomLog;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -34,25 +34,13 @@ import org.springframework.r2dbc.core.DatabaseClient;
 public class AuthenticationServiceSpringConfig {
 
   @Bean
-  AuthenticationService authenticationService(
-      List<AuthenticationProvider> authenticationProviders,
-      @Value("${authentication.default-provider:#{null}}") @Nullable String defaultProviderName) {
+  AuthenticationService authenticationService(List<AuthenticationProvider> providers) {
     log.info("Initializing AuthenticationService...");
-    if (authenticationProviders.isEmpty()) {
+    if (providers.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
-    var providers = DictionaryFactory.mutableRefToRefDictionary(String.class, AuthenticationProvider.class);
-    authenticationProviders.forEach(value -> providers.put(value.getName(), value));
-    AuthenticationProvider defaultProvider;
-    if (defaultProviderName == null) {
-      defaultProvider = authenticationProviders.getFirst();
-    } else {
-      defaultProvider = providers.get(defaultProviderName);
-    }
-    if (defaultProvider == null) {
-      throw new AuthenticationConfigException("[%s] authenticator provider not found".formatted(defaultProviderName));
-    }
-    return new DefaultAuthenticationService(providers.toReadOnly(), defaultProvider);
+    providers.sort(Comparator.comparingInt(provider -> provider.getAuthenticationType().priority()));
+    return new DefaultAuthenticationService(Array.copyOf(AuthenticationProvider.class, providers));
   }
 
   @Bean

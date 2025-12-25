@@ -45,7 +45,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
     given:
         def client = buildExternalMqtt311Client()
     when:
-        def result = connectWith(client, '', '')
+        def result = connectWith(client, 'user1', 'password')
     then:
         result.returnCode == Mqtt3ConnAckReturnCode.SUCCESS
         !result.sessionPresent
@@ -57,7 +57,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
     given:
         def client = buildExternalMqtt5Client()
     when:
-        def result = connectWith(client, '', '')
+        def result = connectWith(client, 'user1', 'password')
     then:
         result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
         result.sessionExpiryInterval.present

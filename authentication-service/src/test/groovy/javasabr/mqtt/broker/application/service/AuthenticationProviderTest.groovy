@@ -1,11 +1,11 @@
 //file:noinspection SpringBootApplicationProperties
 package javasabr.mqtt.broker.application.service
 
-import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource
+import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
 import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.env.PropertiesPropertySourceLoader
@@ -13,8 +13,9 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.core.env.PropertySource
 import org.springframework.core.io.ClassPathResource
 import org.springframework.test.context.TestPropertySource
-import spock.lang.Ignore
 import spock.lang.Specification
+
+import static javasabr.mqtt.auth.api.AuthenticationType.ANONYMOUS
 
 class AuthenticationProviderTest extends IntegrationSpecification {
 
@@ -35,7 +36,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
           (credentialsSource instanceof FileCredentialsSource)
       and:
           verifyEach(authenticationProviders) { provider ->
-            provider.name != "anonymous"
+            provider.authenticationType != ANONYMOUS
             !(provider instanceof AnonymousAuthenticationProvider)
           }
     }
@@ -51,11 +52,11 @@ class AuthenticationProviderTest extends IntegrationSpecification {
     def "should create file credentials source and basic authentication provider"() {
       expect:
           authenticationProviders.any { provider ->
-            provider.name == "anonymous" && provider instanceof AnonymousAuthenticationProvider
+            provider.authenticationType == ANONYMOUS && provider instanceof AnonymousAuthenticationProvider
           }
       and:
           authenticationProviders.any { provider ->
-            provider.name != "anonymous" && !(provider instanceof AnonymousAuthenticationProvider)
+            provider.authenticationType != ANONYMOUS && !(provider instanceof AnonymousAuthenticationProvider)
           }
     }
   }
@@ -66,11 +67,11 @@ class AuthenticationProviderTest extends IntegrationSpecification {
     def "should create anonymous authentication provider"() {
       expect:
           authenticationProviders.any { provider ->
-            provider.name == "anonymous" && provider instanceof AnonymousAuthenticationProvider
+            provider.authenticationType == ANONYMOUS && provider instanceof AnonymousAuthenticationProvider
           }
       and:
           !authenticationProviders.any { provider ->
-            provider.name != "anonymous" && !(provider instanceof AnonymousAuthenticationProvider)
+            provider.authenticationType != ANONYMOUS && !(provider instanceof AnonymousAuthenticationProvider)
           }
     }
   }

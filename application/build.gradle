@@ -18,6 +18,8 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
+  testImplementation projects.credentialsSourceFile
+  testImplementation projects.authenticationProviderBasic
 }
 
 tasks.withType(GroovyCompile).configureEach {

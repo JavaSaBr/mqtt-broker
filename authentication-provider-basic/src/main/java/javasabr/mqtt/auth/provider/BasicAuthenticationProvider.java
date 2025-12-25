@@ -2,6 +2,7 @@ package javasabr.mqtt.auth.provider;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
+import javasabr.mqtt.auth.api.AuthenticationType;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
   CredentialsSource credentialsSource;
 
   @Override
-  public String getName() {
-    return "basic";
+  public AuthenticationType getAuthenticationType() {
+    return AuthenticationType.BASIC;
   }
 
   @Override
