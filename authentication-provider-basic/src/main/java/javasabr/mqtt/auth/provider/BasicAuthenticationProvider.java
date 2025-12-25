@@ -1,5 +1,6 @@
 package javasabr.mqtt.auth.provider;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
@@ -23,8 +24,9 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     return credentialsSource.isCredentialsExists(username, password);
   }
 
+  @JsonValue
   @Override
   public String toString() {
-    return "\"%s\": { \"credentialSource\": %s }".formatted(getName(), credentialsSource);
+    return "{ \"credentialSource\": %s }".formatted(credentialsSource);
   }
 }

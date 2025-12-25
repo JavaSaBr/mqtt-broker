@@ -5,8 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
 import javasabr.mqtt.auth.api.AuthenticationService;
-import javasabr.mqtt.auth.service.config.BasicAuthenticationSpringConfig;
-import javasabr.mqtt.auth.service.config.DatabaseSpringConfig;
+import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -82,8 +81,7 @@ import org.springframework.core.env.Environment;
 
 @Import({
     GroovyDslBasedAclServiceSpringConfig.class,
-    DatabaseSpringConfig.class,
-    BasicAuthenticationSpringConfig.class
+    AuthenticationServiceSpringConfig.class
 })
 @CustomLog
 @Configuration(proxyBeanMethods = false)

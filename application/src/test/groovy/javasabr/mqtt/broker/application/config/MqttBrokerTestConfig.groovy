@@ -1,11 +1,7 @@
 //file:noinspection SpringJavaInjectionPointsAutowiringInspection
 package javasabr.mqtt.broker.application.config
 
-
 import javasabr.mqtt.network.MqttConnection
-
-//import javasabr.mqtt.broker.application.service.DatabaseTestSpringConfig
-
 import javasabr.mqtt.service.ConnectionService
 import javasabr.rlib.network.server.ServerNetwork
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -17,8 +13,7 @@ import org.springframework.context.annotation.Import
 import java.util.concurrent.ThreadLocalRandom
 
 @Import([
-    MqttBrokerSpringConfig,
-//    DatabaseTestSpringConfig
+    MqttBrokerSpringConfig
 ])
 @Configuration(proxyBeanMethods = false)
 class MqttBrokerTestConfig {

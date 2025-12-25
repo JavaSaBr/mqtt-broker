@@ -36,20 +36,32 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     var builder = new StringBuilder()
         .append("{\n")
-        .append("  \"DEFAULT\": \"")
+        .append("  \"default\": \"")
         .append(defaultProvider.getName())
         .append("\",\n");
-
+    if (!providers.isEmpty()) {
+      builder
+          .append("  \"")
+          .append("available")
+          .append("\": {")
+          .append("\n");
+    }
     for (AuthenticationProvider provider : providers) {
       builder
-          .append("  ")
+          .append("    \"")
+          .append(provider.getName())
+          .append("\": ")
           .append(provider)
           .append(",")
           .append("\n");
     }
     builder
         .delete(builder.length() - 2, builder.length())
-        .append("\n}");
+        .append("\n");
+    if (!providers.isEmpty()) {
+      builder.append("  }\n");
+    }
+    builder.append("}");
 
     return "Loaded total [%s] authentication providers: %s".formatted(providers.size(), builder);
   }

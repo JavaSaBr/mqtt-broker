@@ -16,6 +16,6 @@ public class AnonymousProviderCondition extends SpringBootCondition {
         .map(isCredentialsSourceEnabled -> isCredentialsSourceEnabled
                                            ? ConditionOutcome.match("Anonymous connections allowed")
                                            : ConditionOutcome.noMatch("Anonymous connections denied"))
-        .orElse(ConditionOutcome.noMatch("Authentication providers are not configured"));
+        .orElse(ConditionOutcome.noMatch("Authentication properties not defined"));
   }
 }

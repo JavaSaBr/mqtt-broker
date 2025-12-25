@@ -27,6 +27,8 @@ dependencies {
   testImplementation 'org.testcontainers:testcontainers'
   testImplementation 'org.testcontainers:postgresql'
   testImplementation "org.testcontainers:testcontainers-spock:2.0.2"
+  implementation libs.springboot.starter.log4j2
+  implementation libs.rlib.logger.slf4j
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport

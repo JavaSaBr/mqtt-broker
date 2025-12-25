@@ -5,10 +5,8 @@ import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException
-import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource
-import javasabr.mqtt.auth.service.config.BasicAuthenticationSpringConfig
-import javasabr.mqtt.auth.service.config.DatabaseSpringConfig
+import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.env.PropertiesPropertySourceLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
@@ -87,7 +85,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
               .load("test-props", new ClassPathResource("application-test.properties")).getFirst()
           def appContext = new ApplicationContextRunner()
               .withAllowBeanDefinitionOverriding(true)
-              .withUserConfiguration(BasicAuthenticationSpringConfig, DatabaseSpringConfig)
+              .withUserConfiguration(AuthenticationServiceSpringConfig)
               .withInitializer { context ->
                 context.getEnvironment().getPropertySources().addLast(propertySource)
               }

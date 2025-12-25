@@ -12,4 +12,6 @@ import org.springframework.context.annotation.Conditional;
 @Conditional(CredentialsSourceCondition.class)
 public @interface ConditionalOnCredentialsSource {
     String value();
+
+    String message() default "Credentials Source";
 }

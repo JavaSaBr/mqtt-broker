@@ -1,5 +1,6 @@
 package javasabr.mqtt.auth.credentials.source;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
@@ -39,6 +40,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
         .defaultIfEmpty(false);
   }
 
+  @JsonValue
   @Override
   public String toString() {
     return "{ \"%s\": \"%s\" }".formatted(getName(), dbUrl);

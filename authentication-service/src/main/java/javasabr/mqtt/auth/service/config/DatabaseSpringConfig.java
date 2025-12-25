@@ -24,9 +24,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({
-    DatabaseConnectionProperties.class
-})
+@EnableConfigurationProperties(DatabaseConnectionProperties.class)
 @ConditionalOnDatabaseCredentialsSource
 public class DatabaseSpringConfig {
 
@@ -55,7 +53,6 @@ public class DatabaseSpringConfig {
   }
 
   @Bean
-  @ConditionalOnDatabaseCredentialsSource
   DatabaseClient databaseClient(ConnectionFactory connectionFactory) {
     return DatabaseClient.create(connectionFactory);
   }

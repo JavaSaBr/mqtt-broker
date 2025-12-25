@@ -6,22 +6,32 @@ import javasabr.mqtt.auth.service.config.AuthenticationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
 public abstract class AuthenticationConfigCondition extends SpringBootCondition {
 
-  public ConditionOutcome doFredAgain(Environment env, Map<String, Object> attributes, String resource) {
-    String id = Objects.requireNonNullElse(attributes, Map.of())
+  @Override
+  public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    Map<String, Object> attributes = metadata.getAnnotationAttributes(annotation().getName());
+    attributes = Objects.requireNonNullElse(attributes, Map.of());
+    String resourceId = attributes
         .getOrDefault("value", "none")
         .toString();
-    return Binder.get(env)
+    String resource = attributes
+        .getOrDefault("resource", "unknown")
+        .toString();
+    return Binder.get(context.getEnvironment())
         .bind("authentication", AuthenticationProperties.class)
-        .map(sources -> isCredentialsSourceEnabled(sources, id))
+        .map(properties -> isEnabled(properties, resourceId))
         .map(isCredentialsSourceEnabled -> isCredentialsSourceEnabled
-               ? ConditionOutcome.match("%s '%s' enabled".formatted(resource, id))
-               : ConditionOutcome.noMatch("%s '%s' disabled".formatted(resource, id)))
-        .orElse(ConditionOutcome.noMatch("Authentication properties not found"));
+                                           ? ConditionOutcome.match("%s '%s' enabled".formatted(resource, resourceId))
+                                           : ConditionOutcome.noMatch("%s '%s' disabled".formatted(resource, resourceId)))
+        .orElse(ConditionOutcome.noMatch("Authentication properties not defined"));
+
   }
 
-  abstract boolean isCredentialsSourceEnabled(AuthenticationProperties properties, String value);
+  abstract boolean isEnabled(AuthenticationProperties properties, String value);
+
+  abstract Class<?> annotation();
 }

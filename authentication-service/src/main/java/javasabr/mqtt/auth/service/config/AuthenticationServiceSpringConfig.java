@@ -1,6 +1,5 @@
 package javasabr.mqtt.auth.service.config;
 
-import io.r2dbc.spi.ConnectionFactory;
 import java.net.URI;
 import java.util.List;
 import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider;
@@ -10,8 +9,6 @@ import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
-import javasabr.mqtt.auth.service.config.DatabaseUrlBuilder;
-import javasabr.mqtt.auth.service.config.DatabaseUrlConfig;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnAnonymousProvider;
@@ -25,14 +22,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
+@Import(DatabaseSpringConfig.class)
 @EnableConfigurationProperties({
     AuthenticationProperties.class
 })
-public class BasicAuthenticationSpringConfig {
+public class AuthenticationServiceSpringConfig {
 
   @Bean
   AuthenticationService authenticationService(
@@ -55,8 +54,6 @@ public class BasicAuthenticationSpringConfig {
     }
     return new DefaultAuthenticationService(providers.toReadOnly(), defaultProvider);
   }
-
-
 
   @Bean
   @ConditionalOnFileCredentialsSource
