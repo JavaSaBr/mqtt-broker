@@ -5,7 +5,6 @@ import javasabr.mqtt.model.subscription.TestMqttUser
 import javasabr.mqtt.model.topic.AbstractTopic
 import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
-import javasabr.mqtt.model.topic.TopicValidator
 import javasabr.mqtt.test.support.UnitSpecification
 
 import java.util.regex.Pattern
@@ -14,9 +13,6 @@ class MatcherTest extends UnitSpecification {
 
   def "should match topic filter"(String topicFilter, String incomingValue, boolean expectedResult) {
     given:
-        if (!TopicValidator.validateTopicFilter(topicFilter)) {
-          throw new IllegalArgumentException("Invalid topic filter:$topicFilter")
-        }
         def user = new TestMqttUser("clientId")
         def matcher = new TopicFilterMatcher(TopicFilter.valueOf(topicFilter))
     when:

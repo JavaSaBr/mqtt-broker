@@ -12,8 +12,9 @@ public record UserNameCondition(ValueMatcher<String> matcher) implements MqttUse
     String userName = user.userName();
     if (userName == null) {
       return matcher == ValueMatcher.MATCH_ANY_STRING;
+    } else {
+      return matcher.test(userName);
     }
-    return matcher.test(userName);
   }
 
   @JsonValue

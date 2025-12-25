@@ -18,7 +18,7 @@ abstract class UserConditionBuilder extends UserMatchersFactory {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
       throw new AclConfigurationException("Already included any user condition")
     }
-    conditions.add(new UserNameCondition(replaceMatcherIfNeed(matcher)))
+    conditions.add(new UserNameCondition(matcher))
     return this
   }
 
@@ -26,7 +26,7 @@ abstract class UserConditionBuilder extends UserMatchersFactory {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
       throw new AclConfigurationException("Already included any user condition")
     }
-    conditions.add(new ClientIdCondition(replaceMatcherIfNeed(matcher)))
+    conditions.add(new ClientIdCondition(matcher))
     return this
   }
 
@@ -34,7 +34,7 @@ abstract class UserConditionBuilder extends UserMatchersFactory {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
       throw new AclConfigurationException("Already included any user condition")
     }
-    conditions.add(new IpAddressCondition(replaceMatcherIfNeed(matcher)))
+    conditions.add(new IpAddressCondition(matcher))
     return this
   }
 

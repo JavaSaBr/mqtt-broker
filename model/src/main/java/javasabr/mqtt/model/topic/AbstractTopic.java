@@ -72,10 +72,10 @@ public abstract class AbstractTopic {
     var segments = new String[segmentCount];
     int i = 0, pos = 0, end;
     while ((end = topic.indexOf(AbstractTopic.DELIMITER, pos)) >= 0) {
-      segments[i++] = replaceToConstant(topic.substring(pos, end));
+      segments[i++] = replaceWildcardToConstant(topic.substring(pos, end));
       pos = end + 1;
     }
-    segments[i] = replaceToConstant(topic.substring(pos));
+    segments[i] = replaceWildcardToConstant(topic.substring(pos));
     return segments;
   }
 
@@ -93,7 +93,7 @@ public abstract class AbstractTopic {
     return count;
   }
 
-  protected static String replaceToConstant(String segment) {
+  protected static String replaceWildcardToConstant(String segment) {
     if (segment.length() > 1) {
       return segment;
     }
