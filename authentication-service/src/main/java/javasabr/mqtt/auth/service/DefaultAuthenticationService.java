@@ -43,8 +43,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
       builder
           .append("  \"")
           .append("available")
-          .append("\": {")
-          .append("\n");
+          .append("\": {\n");
     }
     for (AuthenticationProvider provider : providers) {
       builder
@@ -52,8 +51,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
           .append(provider.getName())
           .append("\": ")
           .append(provider)
-          .append(",")
-          .append("\n");
+          .append(",\n");
     }
     builder
         .delete(builder.length() - 2, builder.length())
