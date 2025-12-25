@@ -15,6 +15,8 @@ import javasabr.mqtt.auth.service.config.annotation.ConditionalOnAnonymousProvid
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnBasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnFileCredentialsSource;
+import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
+import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
@@ -28,9 +30,7 @@ import org.springframework.r2dbc.core.DatabaseClient;
 @CustomLog
 @Configuration(proxyBeanMethods = false)
 @Import(DatabaseSpringConfig.class)
-@EnableConfigurationProperties({
-    AuthenticationProperties.class
-})
+@EnableConfigurationProperties(AuthenticationProperties.class)
 public class AuthenticationServiceSpringConfig {
 
   @Bean

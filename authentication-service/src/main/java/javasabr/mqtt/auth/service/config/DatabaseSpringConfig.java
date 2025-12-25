@@ -15,8 +15,14 @@ import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource;
+import javasabr.mqtt.auth.service.config.property.Credentials;
+import javasabr.mqtt.auth.service.config.property.DatabaseConnectionProperties;
+import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
+import javasabr.mqtt.auth.service.config.property.DatabaseTimeoutsConfig;
+import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,17 +87,20 @@ public class DatabaseSpringConfig {
   }
 
   @Bean
-  public Credentials readerCredentials(DatabaseUsersConfig users) {
-    return users.get("reader");
+  @ConditionalOnProperty(name = "persistence.database.users.reader.username")
+  public Credentials readerCredentials(DatabaseUsersConfig usersConfig) {
+      return usersConfig.users().get("reader");
   }
 
   @Bean
-  public Credentials writerCredentials(DatabaseUsersConfig users) {
-    return users.get("writer");
+  @ConditionalOnProperty(name = "persistence.database.users.writer.username")
+  public Credentials writerCredentials(DatabaseUsersConfig usersConfig) {
+    return usersConfig.users().get("writer");
   }
 
   @Bean
-  public Credentials adminCredentials(DatabaseUsersConfig users) {
-    return users.get("admin");
+  @ConditionalOnProperty(name = "persistence.database.users.admin.username")
+  public Credentials adminCredentials(DatabaseUsersConfig usersConfig) {
+    return usersConfig.users().get("admin");
   }
 }

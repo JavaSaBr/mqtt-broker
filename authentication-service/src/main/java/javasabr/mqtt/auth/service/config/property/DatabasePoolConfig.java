@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.service.config;
+package javasabr.mqtt.auth.service.config.property;
 
 import java.time.Duration;
 

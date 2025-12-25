@@ -1,7 +1,8 @@
-package javasabr.mqtt.auth.service.config;
+package javasabr.mqtt.auth.service.config.property;
 
 import java.time.Duration;
 import java.util.Map;
+import javasabr.mqtt.auth.service.config.DatabaseUsersConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "persistence.database")

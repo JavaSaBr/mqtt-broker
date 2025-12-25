@@ -60,7 +60,6 @@ class AuthenticationProviderTest extends IntegrationSpecification {
     }
   }
 
-  @Ignore
   @TestPropertySource(properties = "authentication.allow-anonymous=true")
   static class AnonymousProvider2Test extends AuthenticationProviderTest {
 
@@ -76,7 +75,6 @@ class AuthenticationProviderTest extends IntegrationSpecification {
     }
   }
 
-  @Ignore
   static class EmptyProviderTest extends Specification {
 
     def "should fail start application context without any authentication provider"() {
@@ -107,10 +105,10 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   }
 
   static Throwable rootCauseOf(Throwable throwable) {
-    Throwable rootCause = throwable;
+    Throwable rootCause = throwable
     while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
       rootCause = rootCause.getCause();
     }
-    return rootCause;
+    return rootCause
   }
 }

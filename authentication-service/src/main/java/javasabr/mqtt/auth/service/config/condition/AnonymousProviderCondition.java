@@ -1,6 +1,6 @@
 package javasabr.mqtt.auth.service.config.condition;
 
-import javasabr.mqtt.auth.service.config.AuthenticationProperties;
+import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.context.properties.bind.Binder;
