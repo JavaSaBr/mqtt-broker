@@ -10,30 +10,13 @@ dependencies {
   api projects.base
   api projects.model
   api projects.authenticationApi
-  api libs.springboot.starter.autoconfigure
-
   compileOnlyApi projects.credentialsSourceDb
   compileOnlyApi projects.credentialsSourceFile
   compileOnlyApi projects.authenticationProviderBasic
-
-  testImplementation projects.credentialsSourceDb
-  testImplementation projects.credentialsSourceFile
-  testImplementation projects.authenticationProviderBasic
-  testImplementation libs.r2dbc.h2
-
-  testImplementation 'org.springframework.boot:spring-boot-testcontainers:3.5.8'
-
-  testImplementation platform('org.testcontainers:testcontainers-bom:1.19.3')
-  testImplementation 'org.testcontainers:testcontainers'
-  testImplementation 'org.testcontainers:postgresql'
-  testImplementation "org.testcontainers:testcontainers-spock:2.0.2"
+  implementation libs.springboot.starter.autoconfigure
   implementation libs.springboot.starter.log4j2
   implementation libs.rlib.logger.slf4j
-
-  testImplementation projects.testSupport
-  testFixturesApi projects.testSupport
-
-// database support
+  // database support
   implementation libs.r2dbc.spi
   implementation libs.r2dbc.pool
   implementation libs.r2dbc.postgresql
@@ -41,4 +24,13 @@ dependencies {
   implementation libs.flyway.core
   implementation libs.flyway.postgresql
   implementation libs.spring.r2dbc
+  // test support
+  testImplementation projects.credentialsSourceDb
+  testImplementation projects.credentialsSourceFile
+  testImplementation projects.authenticationProviderBasic
+  testImplementation libs.testcontainers.core
+  testImplementation libs.testcontainers.postgresql
+  testImplementation libs.testcontainers.spock
+  testImplementation projects.testSupport
+  testFixturesApi projects.testSupport
 }

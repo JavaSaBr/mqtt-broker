@@ -6,7 +6,7 @@ lombok = "1.18.38"
 # https://mvnrepository.com/artifact/org.jspecify/jspecify
 jspecify = "1.0.0"
 # https://mvnrepository.com/artifact/org.testcontainers/testcontainers
-testcontainers = "1.21.3"
+testcontainers = "2.0.3"
 # https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
 junit-jupiter = "5.13.4"
 # https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
@@ -58,8 +58,10 @@ springboot-starter-autoconfigure = { module = "org.springframework.boot:spring-b
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "springboot" }
 springboot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "springboot" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers"}
+testcontainers-spock = { module = "org.testcontainers:testcontainers-spock", version.ref = "testcontainers"}
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers"}
 project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "project-reactor" }
-r2dbc-h2 = { module = "io.r2dbc:r2dbc-h2", version.ref = "r2dbc" }
 r2dbc-spi = { module ='io.r2dbc:r2dbc-spi', version.ref = "r2dbc"}
 r2dbc-pool = { module = 'io.r2dbc:r2dbc-pool', version.ref = "r2dbc-pool"}
 r2dbc-postgresql = { module = 'org.postgresql:r2dbc-postgresql', version.ref = "r2dbc-postgresql"}

@@ -6,9 +6,9 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
-public class MqttClientFactory {
+class MqttClientFactory {
 
-  private static final idGenerator = new AtomicInteger(1)
+  private static final ID_GENERATOR = new AtomicInteger(1)
 
   static Mqtt5AsyncClient buildMqtt5Client(String clientId, InetSocketAddress address) {
     return MqttClient.builder()
@@ -37,6 +37,6 @@ public class MqttClientFactory {
   }
 
   static String generateClientId(String prefix) {
-    return prefix + "_" + idGenerator.incrementAndGet()
+    return prefix + "_" + ID_GENERATOR.incrementAndGet()
   }
 }
