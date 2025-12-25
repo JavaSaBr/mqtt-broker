@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.credentials.source.config;
+package javasabr.mqtt.auth.service.config;
 
 import java.util.Map;
 

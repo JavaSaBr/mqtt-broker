@@ -1,4 +1,4 @@
-package javasabr.mqtt.broker.application.config;
+package javasabr.mqtt.auth.service.config;
 
 import static io.r2dbc.postgresql.PostgresqlConnectionFactoryProvider.OPTIONS;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
@@ -14,21 +14,20 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
-import javasabr.mqtt.auth.credentials.source.config.Credentials;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseUrlBuilder;
-import javasabr.mqtt.auth.credentials.source.config.DatabasePoolConfig;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseTimeoutsConfig;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseUrlConfig;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseUsersConfig;
+import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(DatabaseConnectionProperties.class)
+@EnableConfigurationProperties({
+    DatabaseConnectionProperties.class
+})
+@ConditionalOnDatabaseCredentialsSource
 public class DatabaseSpringConfig {
 
   @Bean
@@ -51,6 +50,17 @@ public class DatabaseSpringConfig {
   }
 
   @Bean
+  DatabaseUrlBuilder databaseUrlBuilder() {
+    return db -> "jdbc:%s://%s:%s/%s".formatted(db.driver(), db.host(), db.port(), db.name());
+  }
+
+  @Bean
+  @ConditionalOnDatabaseCredentialsSource
+  DatabaseClient databaseClient(ConnectionFactory connectionFactory) {
+    return DatabaseClient.create(connectionFactory);
+  }
+
+  @Bean
   @DependsOn("flyway")
   ConnectionFactory connectionFactory(
       DatabasePoolConfig databasePoolConfig,
@@ -70,13 +80,7 @@ public class DatabaseSpringConfig {
       DatabaseUrlConfig databaseUrlConfig,
       @Qualifier("adminCredentials") Credentials credentials) {
     return Flyway.configure()
-        .dataSource(databaseUrlBuilder.build(databaseUrlConfig), credentials.username(), credentials.password())
-        .load();
-  }
-
-  @Bean
-  DatabaseUrlBuilder databaseUrlBuilder() {
-    return db -> "jdbc:%s://%s:%s/%s".formatted(db.driver(), db.host(), db.port(), db.name());
+        .dataSource(databaseUrlBuilder.build(databaseUrlConfig), credentials.username(), credentials.password()).load();
   }
 
   @Bean

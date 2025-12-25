@@ -20,17 +20,6 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
-  testImplementation projects.credentialsSourceFile
-  testImplementation projects.credentialsSourceDb
-
-  // database support
-  implementation libs.r2dbc.spi
-  implementation libs.r2dbc.pool
-  implementation libs.r2dbc.postgresql
-  implementation libs.jdbc.postgres
-  implementation libs.flyway.core
-  implementation libs.flyway.postgresql
-  testImplementation libs.r2dbc.h2
 }
 
 tasks.withType(GroovyCompile).configureEach {

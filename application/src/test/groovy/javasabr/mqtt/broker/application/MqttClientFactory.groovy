@@ -6,7 +6,7 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
-class MqttClientFactory {
+public class MqttClientFactory {
 
   private static final idGenerator = new AtomicInteger(1)
 

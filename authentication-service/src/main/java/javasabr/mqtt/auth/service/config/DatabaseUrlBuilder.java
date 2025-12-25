@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.credentials.source.config;
+package javasabr.mqtt.auth.service.config;
 
 public interface DatabaseUrlBuilder {
   String build(DatabaseUrlConfig databaseUrlConfig);

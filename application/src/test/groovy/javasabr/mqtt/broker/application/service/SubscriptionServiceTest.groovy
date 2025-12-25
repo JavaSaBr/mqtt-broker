@@ -38,7 +38,7 @@ class SubscriptionServiceTest extends IntegrationSpecification {
             .findSubscribers(topicName)
     then: "should find the subscriber"
         subscribers.size() == 1
-        subscribers.get(0).user() instanceof NetworkMqttUser
+        (subscribers.get(0).user() instanceof NetworkMqttUser)
     when:
         def matchedSubscriber = subscribers.get(0)
         def subscription = matchedSubscriber.subscription()
@@ -61,7 +61,7 @@ class SubscriptionServiceTest extends IntegrationSpecification {
             .findSubscribers(topicName)
     then: "should find the reconnected subscriber"
         subscribers3.size() == 1
-        subscribers3.get(0).user() instanceof NetworkMqttUser
+        (subscribers3.get(0).user() instanceof NetworkMqttUser)
     when:
         matchedSubscriber = subscribers3.get(0)
         subscription = matchedSubscriber.subscription()

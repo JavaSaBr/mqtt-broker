@@ -1,10 +1,11 @@
 //file:noinspection SpringJavaInjectionPointsAutowiringInspection
-package javasabr.mqtt.broker.application.config
+package javasabr.mqtt.broker.application.service
 
 import io.r2dbc.spi.ConnectionFactoryOptions
 import io.r2dbc.spi.Option
-import javasabr.mqtt.auth.credentials.source.config.Credentials
-import javasabr.mqtt.auth.credentials.source.config.DatabaseUrlBuilder
+import javasabr.mqtt.auth.service.config.Credentials
+import javasabr.mqtt.auth.service.config.DatabaseUrlBuilder
+import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,6 +17,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER
 
 @Configuration
+@ConditionalOnDatabaseCredentialsSource
 class DatabaseTestSpringConfig {
 
   @Bean

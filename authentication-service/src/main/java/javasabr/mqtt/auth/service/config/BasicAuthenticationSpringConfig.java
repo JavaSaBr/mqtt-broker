@@ -4,33 +4,40 @@ import io.r2dbc.spi.ConnectionFactory;
 import java.net.URI;
 import java.util.List;
 import javasabr.mqtt.auth.api.AnonymousAuthenticationProvider;
-import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialsSource;
+import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
+import javasabr.mqtt.auth.service.config.DatabaseUrlBuilder;
+import javasabr.mqtt.auth.service.config.DatabaseUrlConfig;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseUrlBuilder;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseUrlConfig;
+import javasabr.mqtt.auth.service.config.annotation.ConditionalOnAnonymousProvider;
+import javasabr.mqtt.auth.service.config.annotation.ConditionalOnBasicAuthenticationProvider;
+import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource;
+import javasabr.mqtt.auth.service.config.annotation.ConditionalOnFileCredentialsSource;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import lombok.CustomLog;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties({
+    AuthenticationProperties.class
+})
 public class BasicAuthenticationSpringConfig {
 
   @Bean
   AuthenticationService authenticationService(
       List<AuthenticationProvider> authenticationProviders,
-      @Value("${authentication.provider.default:#{null}}") String defaultProviderName) {
+      @Value("${authentication.default-provider:#{null}}") @Nullable String defaultProviderName) {
     log.info("Initializing AuthenticationService...");
     if (authenticationProviders.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
@@ -49,14 +56,10 @@ public class BasicAuthenticationSpringConfig {
     return new DefaultAuthenticationService(providers.toReadOnly(), defaultProvider);
   }
 
-  @Bean
-  DatabaseClient databaseClient(ConnectionFactory connectionFactory) {
-    return DatabaseClient.create(connectionFactory);
-  }
+
 
   @Bean
-  @ConditionalOnProperty(name = "authentication.credentials.source", havingValue = "file")
-  @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
+  @ConditionalOnFileCredentialsSource
   CredentialsSource fileCredentialsSource(@Value("${credentials.source.file.name:credentials}") URI fileName) {
     FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileName);
     fileCredentialsSource.init();
@@ -64,8 +67,7 @@ public class BasicAuthenticationSpringConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "authentication.credentials.source", havingValue = "database")
-  @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource")
+  @ConditionalOnDatabaseCredentialsSource
   CredentialsSource dbCredentialsSource(
       DatabaseClient databaseClient,
       DatabaseUrlConfig databaseUrlConfig,
@@ -74,14 +76,13 @@ public class BasicAuthenticationSpringConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "authentication.provider", havingValue = "basic")
-  @ConditionalOnClass(name = "javasabr.mqtt.auth.provider.BasicAuthenticationProvider")
-  AuthenticationProvider passwordBasedAuthenticationProvider(CredentialsSource credentialsSource) {
+  @ConditionalOnBasicAuthenticationProvider
+  AuthenticationProvider basicAuthenticationProvider(CredentialsSource credentialsSource) {
     return new BasicAuthenticationProvider(credentialsSource);
   }
 
   @Bean
-  @ConditionalOnProperty(name = "authentication.allow.anonymous", havingValue = "true")
+  @ConditionalOnAnonymousProvider
   AuthenticationProvider anonymousAuthenticationProvider() {
     return new AnonymousAuthenticationProvider();
   }
