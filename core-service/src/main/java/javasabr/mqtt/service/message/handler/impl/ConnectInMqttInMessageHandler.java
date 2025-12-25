@@ -11,7 +11,7 @@ import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
-import javasabr.mqtt.auth.api.AuthRequest;
+import javasabr.mqtt.auth.api.AuthenticationRequest;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
@@ -74,13 +74,13 @@ public class ConnectInMqttInMessageHandler
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(user, message);
-    AuthRequest authRequest = new AuthRequest(
+    AuthenticationRequest authenticationRequest = new AuthenticationRequest(
         message.username(),
         message.password(),
         message.authenticationMethod(),
         message.authenticationData());
     authenticationService
-        .authenticate(authRequest)
+        .authenticate(authenticationRequest)
         .flatMap(ifTrue(
             user,
             message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))

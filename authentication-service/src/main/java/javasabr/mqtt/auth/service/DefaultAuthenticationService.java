@@ -1,6 +1,6 @@
 package javasabr.mqtt.auth.service;
 
-import javasabr.mqtt.auth.api.AuthRequest;
+import javasabr.mqtt.auth.api.AuthenticationRequest;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.rlib.collections.array.Array;
@@ -22,7 +22,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
   }
 
   @Override
-  public Mono<Boolean> authenticate(AuthRequest request) {
+  public Mono<Boolean> authenticate(AuthenticationRequest request) {
     return Flux.fromIterable(providers)
         .concatMap(manager -> manager.authenticate(
                 request.username(),

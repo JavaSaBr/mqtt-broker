@@ -1,6 +1,6 @@
 package javasabr.mqtt.broker.application.service
 
-import javasabr.mqtt.auth.api.AuthRequest
+import javasabr.mqtt.auth.api.AuthenticationRequest
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationService
 import javasabr.mqtt.auth.api.AuthenticationType
@@ -48,7 +48,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
   def "should authenticate credentials according [credentials/test] file"() {
     given:
         def passwordBytes = password.getBytes(StandardCharsets.UTF_8)
-        def request = new AuthRequest(userName, passwordBytes, "", new byte[0])
+        def request = new AuthenticationRequest(userName, passwordBytes, "", new byte[0])
     when:
         def result = authenticationService.authenticate(request).block()
     then:
