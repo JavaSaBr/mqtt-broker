@@ -15,7 +15,8 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def publishInHandler = new Qos0MqttPublishInMessageHandler(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
-            defaultMessageOutFactoryService)
+            defaultMessageOutFactoryService,
+            inMemoryRetainMessageService)
         def subscriber1 = mockedExternalConnection(MqttVersion.MQTT_5)
         def subscriber2 = mockedExternalConnection(MqttVersion.MQTT_5)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
@@ -50,7 +51,8 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def publishInHandler = new Qos0MqttPublishInMessageHandler(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
-            defaultMessageOutFactoryService)
+            defaultMessageOutFactoryService,
+            inMemoryRetainMessageService)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos0MqttPublishInMessageHandlerTest/2")

@@ -19,8 +19,7 @@ public enum QoS implements NumberedEnum<QoS> {
   EXACTLY_ONCE(2, SubscribeAckReasonCode.GRANTED_QOS_2),
   INVALID(3, SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR);
 
-  private static final NumberedEnumMap<QoS> NUMBERED_MAP =
-      new NumberedEnumMap<>(QoS.class);
+  private static final NumberedEnumMap<QoS> NUMBERED_MAP = new NumberedEnumMap<>(QoS.class);
 
   public static QoS ofCode(int level) {
     return NUMBERED_MAP.resolve(level, QoS.INVALID);
@@ -44,5 +43,9 @@ public enum QoS implements NumberedEnum<QoS> {
 
   public boolean isHigherThan(QoS another) {
     return level > another.level;
+  }
+
+  public boolean isValid() {
+    return this != INVALID;
   }
 }

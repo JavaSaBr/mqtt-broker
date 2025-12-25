@@ -3,7 +3,6 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.session.MqttSession;
-import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
@@ -23,8 +22,7 @@ public abstract class AbstractMqttPublishOutMessageHandler<U extends NetworkMqtt
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public final void handle(Publish publish, SingleSubscriber subscriber) {
-    MqttUser user = subscriber.resolveUser();
+  public final void handle(Publish publish, MqttUser user) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;
