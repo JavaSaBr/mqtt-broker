@@ -1,27 +1,42 @@
+//file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition
 import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
-import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 
 abstract class MultiUserConditionBuilder extends UserConditionBuilder {
-  
-  UserConditionBuilder userNames(Collection<ValueMatcher<String>> userNames) {
-    def transformed = userNames.collect { new UserNameCondition(it) }
-    this.conditions.addAll(transformed)
+
+  UserConditionBuilder userNames(Closure<?> config) {
+    def userNames = new UserMatchersBuilder()
+        .configure(config)
+        .build()
+    def transformed = userNames.collect {
+      new UserNameCondition(it)
+    }
+    conditions.addAll(transformed)
     return this
   }
 
-  UserConditionBuilder clientIds(Collection<ValueMatcher<String>> clientIds) {
-    def transformed = clientIds.collect { new ClientIdCondition(it) }
-    this.conditions.addAll(transformed)
+  UserConditionBuilder clientIds(Closure<?> config) {
+    def clientIds = new UserMatchersBuilder()
+        .configure(config)
+        .build()
+    def transformed = clientIds.collect {
+      new ClientIdCondition(it)
+    }
+    conditions.addAll(transformed)
     return this
   }
-  
-  UserConditionBuilder ipAddresses(Collection<ValueMatcher<String>> ipAddresses) {
-    def transformed = ipAddresses.collect { new IpAddressCondition(it) }
-    this.conditions.addAll(transformed)
+
+  UserConditionBuilder ipAddresses(Closure<?> config) {
+    def ipAddresses = new UserMatchersBuilder()
+        .configure(config)
+        .build()
+    def transformed = ipAddresses.collect {
+      new IpAddressCondition(it)
+    }
+    conditions.addAll(transformed)
     return this
   }
 }

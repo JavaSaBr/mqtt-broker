@@ -7,5 +7,5 @@ public interface MqttUserCondition {
   MqttUserCondition MATCH_ANY = new AnyUserCondition();
   MqttUserCondition MATCH_NONE = new NoneUserCondition();
 
-  boolean test(MqttUser requestedUser);
+  boolean test(MqttUser user);
 }

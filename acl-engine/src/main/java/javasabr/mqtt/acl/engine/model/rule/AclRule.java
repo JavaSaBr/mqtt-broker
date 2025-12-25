@@ -5,7 +5,7 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.mqtt.model.topic.AbstractTopic;
 
-public interface Rule {
+public interface AclRule {
 
   Operation operation();
 

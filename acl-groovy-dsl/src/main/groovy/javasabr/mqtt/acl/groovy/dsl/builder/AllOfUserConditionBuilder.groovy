@@ -1,3 +1,4 @@
+//file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
@@ -20,20 +21,20 @@ class AllOfUserConditionBuilder extends UserConditionBuilder {
   }
   
   @Override
-  UserConditionBuilder userName(ValueMatcher<String> userName) {
-    requireSingleMatcher(Identity.USER_NAME, userName)
-    return super.userName(userName)
+  UserConditionBuilder userName(ValueMatcher<String> matcher) {
+    requireSingleMatcher(Identity.USER_NAME, matcher)
+    return super.userName(matcher)
   }
 
   @Override
-  UserConditionBuilder clientId(ValueMatcher<String> clientId) {
-    requireSingleMatcher(Identity.CLIENT_ID, clientId)
-    return super.clientId(clientId)
+  UserConditionBuilder clientId(ValueMatcher<String> matcher) {
+    requireSingleMatcher(Identity.CLIENT_ID, matcher)
+    return super.clientId(matcher)
   }
 
-  UserConditionBuilder ipAddress(ValueMatcher<String> ipAddress) {
-    requireSingleMatcher(Identity.IP_ADDRESS, ipAddress)
-    return super.ipAddress(ipAddress)
+  UserConditionBuilder ipAddress(ValueMatcher<String> matcher) {
+    requireSingleMatcher(Identity.IP_ADDRESS, matcher)
+    return super.ipAddress(matcher)
   }
 
   private void requireSingleMatcher(Identity identity, ValueMatcher<String> matcher) {

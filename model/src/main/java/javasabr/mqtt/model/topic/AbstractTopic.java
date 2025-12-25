@@ -16,8 +16,7 @@ public abstract class AbstractTopic {
 
   public static final String DELIMITER = "/";
   public static final char DELIMITER_CHAR = '/';
-
-
+  
   static {
     DebugUtils.registerIncludedFields("rawTopic");
   }
@@ -67,15 +66,20 @@ public abstract class AbstractTopic {
     return rawTopic;
   }
 
+  /**
+   * @return true if the anotherTopic is matched to this.
+   */
+  public abstract boolean isMatched(AbstractTopic anotherTopic);
+
   protected static String[] splitTopic(String topic) {
     int segmentCount = countOccurrencesOf(topic, AbstractTopic.DELIMITER) + 1;
     var segments = new String[segmentCount];
     int i = 0, pos = 0, end;
     while ((end = topic.indexOf(AbstractTopic.DELIMITER, pos)) >= 0) {
-      segments[i++] = topic.substring(pos, end);
+      segments[i++] = replaceWildcardToConstant(topic.substring(pos, end));
       pos = end + 1;
     }
-    segments[i] = topic.substring(pos);
+    segments[i] = replaceWildcardToConstant(topic.substring(pos));
     return segments;
   }
 
@@ -91,5 +95,17 @@ public abstract class AbstractTopic {
       pos = idx + sub.length();
     }
     return count;
+  }
+
+  protected static String replaceWildcardToConstant(String segment) {
+    if (segment.length() > 1) {
+      return segment;
+    }
+    if (TopicFilter.MULTI_LEVEL_WILDCARD.equals(segment)) {
+      return TopicFilter.MULTI_LEVEL_WILDCARD;
+    } else if (TopicFilter.SINGLE_LEVEL_WILDCARD.equals(segment)) {
+      return TopicFilter.SINGLE_LEVEL_WILDCARD;
+    }
+    return segment;
   }
 }

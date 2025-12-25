@@ -1,5 +1,7 @@
 package javasabr.mqtt.model.topic;
 
+import java.util.Objects;
+
 public class TopicName extends AbstractTopic {
 
   public static final TopicName INVALID_TOPIC_NAME = new TopicName("$invalid$") {
@@ -18,6 +20,16 @@ public class TopicName extends AbstractTopic {
 
   public TopicName(String topicName) {
     super(topicName);
+  }
+
+  @Override
+  public boolean isMatched(AbstractTopic anotherTopic) {
+    if (anotherTopic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
+      return false;
+    } else if (levelsCount() != anotherTopic.levelsCount()) {
+      return false;
+    }
+    return Objects.equals(rawTopic(), anotherTopic.rawTopic());
   }
 
   public boolean isEmpty() {

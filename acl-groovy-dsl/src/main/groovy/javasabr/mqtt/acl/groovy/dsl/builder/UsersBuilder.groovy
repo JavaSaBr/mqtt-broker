@@ -1,5 +1,7 @@
+//file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
 import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
@@ -25,59 +27,58 @@ class UsersBuilder extends MultiUserConditionBuilder {
 
   UsersBuilder anyUser() {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
+      throw new AclConfigurationException("Already included any user condition")
     }
     conditions.add(MqttUserCondition.MATCH_ANY)
     return this
   }
 
   @Override
-  UserConditionBuilder userName(ValueMatcher<String> userName) {
+  UserConditionBuilder userName(ValueMatcher<String> matcher) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
+      throw new AclConfigurationException("Already included any user condition")
     }
-    return super.userName(userName)
+    return super.userName(matcher)
   }
 
   @Override
-  UserConditionBuilder userNames(Collection<ValueMatcher<String>> userNames) {
+  UserConditionBuilder userNames(Closure<?> config) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
+      throw new AclConfigurationException("Already included any user condition")
     }
-    return super.userNames(userNames)
+    return super.userNames(config)
+  }
+  
+  @Override
+  UserConditionBuilder clientId(ValueMatcher<String> matcher) {
+    if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
+      throw new AclConfigurationException("Already included any user condition")
+    }
+    return super.clientId(matcher)
   }
 
   @Override
-  UserConditionBuilder clientId(ValueMatcher<String> clientId) {
+  UserConditionBuilder clientIds(Closure<?> config) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
+      throw new AclConfigurationException("Already included any user condition")
     }
-    return super.clientId(clientId)
+    return super.clientIds(config)
   }
 
   @Override
-  UserConditionBuilder clientIds(Collection<ValueMatcher<String>> clientIds) {
+  UserConditionBuilder ipAddress(ValueMatcher<String> matcher) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
+      throw new AclConfigurationException("Already included any user condition")
     }
-    return super.clientIds(clientIds)
-  }
-
-
-  @Override
-  UserConditionBuilder ipAddress(ValueMatcher<String> ipAddress) {
-    if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
-    }
-    return super.ipAddress(ipAddress)
+    return super.ipAddress(matcher)
   }
 
   @Override
-  UserConditionBuilder ipAddresses(Collection<ValueMatcher<String>> ipAddresses) {
+  UserConditionBuilder ipAddresses(Closure<?> config) {
     if (conditions.contains(MqttUserCondition.MATCH_ANY)) {
-      throw new IllegalArgumentException("Already included any user condition")
+      throw new AclConfigurationException("Already included any user condition")
     }
-    return super.ipAddresses(ipAddresses)
+    return super.ipAddresses(config)
   }
 
   @Override

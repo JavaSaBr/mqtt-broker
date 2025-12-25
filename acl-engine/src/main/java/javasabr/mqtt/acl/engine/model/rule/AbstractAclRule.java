@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public abstract class AbstractRule implements Rule {
+public abstract class AbstractAclRule implements AclRule {
 
   static {
     DebugUtils.registerIncludedFields("userCondition", "topicCondition");

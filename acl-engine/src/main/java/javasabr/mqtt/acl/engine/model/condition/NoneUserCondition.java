@@ -5,7 +5,7 @@ import javasabr.mqtt.model.MqttUser;
 public record NoneUserCondition() implements MqttUserCondition {
 
   @Override
-  public boolean test(MqttUser requestedUser) {
+  public boolean test(MqttUser user) {
     return false;
   }
 }

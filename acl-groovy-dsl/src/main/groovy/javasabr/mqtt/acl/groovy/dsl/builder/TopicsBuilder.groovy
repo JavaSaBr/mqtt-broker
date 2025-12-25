@@ -1,45 +1,39 @@
+//file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher
-import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
-import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 import javasabr.mqtt.model.topic.AbstractTopic
-import javasabr.mqtt.model.topic.TopicFilter
-import javasabr.mqtt.model.topic.TopicName
-import javasabr.mqtt.model.topic.TopicValidator
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.MutableArray
 
 class TopicsBuilder {
 
+  TopicMatchersFactory topicMatchersFactory = new TopicMatchersFactory()
   MutableArray<ValueMatcher<AbstractTopic>> topicMatchers = MutableArray.ofType(ValueMatcher)
 
   TopicsBuilder eq(String rawTopicName) {
     if (topicMatchers.contains(AnyTopicMatcher.instance())) {
-      throw new IllegalArgumentException("Already included any topic condition")
-    } else if (!TopicValidator.validateTopicName(rawTopicName)) {
-      throw new IllegalArgumentException("Invalid topic name:[$rawTopicName]")
+      throw new AclConfigurationException("Already included any topic condition")
     }
-    topicMatchers.add(new TopicNameMatcher(TopicName.valueOf(rawTopicName)))
+    topicMatchers.add(topicMatchersFactory.eq(rawTopicName))
     return this
   }
 
   TopicsBuilder match(String rawTopicFilter) {
     if (topicMatchers.contains(AnyTopicMatcher.instance())) {
-      throw new IllegalArgumentException("Already included any topic condition")
-    } else if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
-      throw new IllegalArgumentException("Invalid topic filter:[$rawTopicFilter]")
+      throw new AclConfigurationException("Already included any topic condition")
     }
-    topicMatchers.add(new TopicFilterMatcher(TopicFilter.valueOf(rawTopicFilter)))
+    topicMatchers.add(topicMatchersFactory.match(rawTopicFilter))
     return this
   }
 
   TopicsBuilder anyTopic() {
     if (topicMatchers.contains(AnyTopicMatcher.instance())) {
-      throw new IllegalArgumentException("Already included any topic condition")
+      throw new AclConfigurationException("Already included any topic condition")
     }
-    topicMatchers.add(AnyTopicMatcher.instance())
+    topicMatchers.add(topicMatchersFactory.anyTopic())
     return this
   }
 
