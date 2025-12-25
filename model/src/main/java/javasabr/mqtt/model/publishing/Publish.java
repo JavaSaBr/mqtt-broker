@@ -92,6 +92,24 @@ public record Publish(
         userProperties);
   }
 
+  public Publish withoutRetain() {
+    return new Publish(
+        messageId,
+        qos,
+        topicName,
+        responseTopicName,
+        payload,
+        duplicated,
+        false,
+        contentType,
+        subscriptionIds,
+        correlationData,
+        messageExpiryInterval,
+        topicAlias,
+        payloadFormat,
+        userProperties);
+  }
+
   @Override
   public String toString() {
     return DebugUtils.toJsonString(this);

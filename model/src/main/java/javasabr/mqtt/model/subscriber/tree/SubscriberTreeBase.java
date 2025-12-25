@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.subscriber.tree;
 
 import java.util.Objects;
+import javasabr.mqtt.model.AbstractTrieNode;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.subscriber.SharedSubscriber;
@@ -18,7 +19,7 @@ import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-abstract class SubscriberTreeBase {
+abstract class SubscriberTreeBase extends AbstractTrieNode<SubscriberNode> {
 
   /**
    * @return previous subscriber with the same user
@@ -45,9 +46,7 @@ abstract class SubscriberTreeBase {
   }
 
   @Nullable
-  private static SingleSubscriber removePreviousIfExist(
-      LockableArray<Subscriber> subscribers,
-      MqttUser user) {
+  private static SingleSubscriber removePreviousIfExist(LockableArray<Subscriber> subscribers, MqttUser user) {
     int index = subscribers.indexOf(Subscriber::resolveUser, user);
     if (index < 0) {
       return null;
@@ -84,10 +83,7 @@ abstract class SubscriberTreeBase {
     long stamp = subscribers.readLock();
     try {
       for (Subscriber subscriber : subscribers) {
-        SingleSubscriber singleSubscriber = subscriber.resolveSingle();
-        if (removeDuplicateWithLowerQoS(result, singleSubscriber)) {
-          result.add(singleSubscriber);
-        }
+        addOrReplaceIfLowerQos(result, subscriber);
       }
     } finally {
       subscribers.readUnlock(stamp);
@@ -141,23 +137,18 @@ abstract class SubscriberTreeBase {
     return subscriber instanceof SharedSubscriber shared && Objects.equals(group, shared.group());
   }
 
-  private static boolean removeDuplicateWithLowerQoS(
-      MutableArray<SingleSubscriber> result, SingleSubscriber candidate) {
-
+  private static void addOrReplaceIfLowerQos(MutableArray<SingleSubscriber> result, Subscriber subscriber) {
+    SingleSubscriber candidate = subscriber.resolveSingle();
     int found = result.indexOf(SingleSubscriber::user, candidate.user());
     if (found == -1) {
-      return true;
+      result.add(candidate);
+      return;
     }
-
     QoS candidateQos = candidate.qos();
-    SingleSubscriber exist = result.get(found);
-    QoS existeQos = exist.qos();
-
-    if (existeQos.ordinal() < candidateQos.ordinal()) {
+    QoS existedQos = result.get(found).qos();
+    if (existedQos.isLowerThan(candidateQos)) {
       result.remove(found);
-      return true;
+      result.add(candidate);
     }
-
-    return false;
   }
 }

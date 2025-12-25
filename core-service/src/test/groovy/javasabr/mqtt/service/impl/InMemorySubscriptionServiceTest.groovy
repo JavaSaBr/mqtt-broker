@@ -6,13 +6,16 @@ import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.mqtt.model.subscription.Subscription
+import javasabr.mqtt.model.subscription.SubscriptionResult
+import javasabr.mqtt.model.topic.TopicFilter
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.service.IntegrationServiceSpecification
-import javasabr.mqtt.service.SubscriptionService
+import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
 class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
 
-  SubscriptionService subscriptionService = new InMemorySubscriptionService()
+  def subscriptionService = new InMemorySubscriptionService()
 
   def "should subscribe with expected results in default settings"() {
     given:
@@ -53,11 +56,11 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 4
-        result == Array.of(
+        result.collect(SubscriptionResult::subscribeAckReasonCode) == [
             SubscribeAckReasonCode.GRANTED_QOS_0,
             SubscribeAckReasonCode.GRANTED_QOS_1,
             SubscribeAckReasonCode.GRANTED_QOS_2,
-            SubscribeAckReasonCode.TOPIC_FILTER_INVALID)
+            SubscribeAckReasonCode.TOPIC_FILTER_INVALID]
   }
 
   def "should not subscribe with for not supported topic filter"() {
@@ -108,12 +111,12 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 5
-        result == Array.of(
+        result.collect(SubscriptionResult::subscribeAckReasonCode) == [
             SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED,
             SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED,
             SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED,
             SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED,
-            SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED)
+            SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED]
   }
 
   def "should store subscription with correct subscription id"() {
@@ -156,11 +159,11 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
             .subscribe(mqttUser, mqttUser.session(), subscriptions)
     then:
         result.size() == 4
-        result == Array.of(
+        result.collect(SubscriptionResult::subscribeAckReasonCode) == [
             SubscribeAckReasonCode.GRANTED_QOS_0,
             SubscribeAckReasonCode.GRANTED_QOS_1,
             SubscribeAckReasonCode.GRANTED_QOS_2,
-            SubscribeAckReasonCode.GRANTED_QOS_2)
+            SubscribeAckReasonCode.GRANTED_QOS_2]
     when:
         def mqttSession = mqttUser.session()
         def activeSubscriptions = mqttSession.activeSubscriptions()
@@ -324,5 +327,43 @@ class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
     then:
         storedSubscriptions.size() == 3
         storedSubscriptions ==~ resultSubscriptions
+  }
+
+  def "should clean and restore subscriptions"() {
+    given:
+        def serverConfig = defaultExternalServerConnectionConfig
+        def mqttConnection = mockedExternalConnection(serverConfig, MqttVersion.MQTT_5)
+        def expectedUser = mqttConnection.user() as TestExternalNetworkMqttUser
+        def expectedSubscription = new Subscription(
+            TopicFilter.valueOf("topic"),
+            30,
+            QoS.AT_MOST_ONCE,
+            SubscribeRetainHandling.SEND,
+            true,
+            true)
+    when:
+        subscriptionService.subscribe(expectedUser, expectedUser.session(), Array.of(expectedSubscription))
+        def subscribers = subscriptionService.findSubscribers(TopicName.valueOf("topic"))
+    then:
+        !subscribers.isEmpty()
+        with(subscribers[0]) {
+          user() == expectedUser
+          subscription() == expectedSubscription
+        }
+    when:
+        subscriptionService.cleanSubscriptions(expectedUser, expectedUser.session())
+        subscribers = subscriptionService.findSubscribers(TopicName.valueOf("topic"))
+    then:
+        subscribers.isEmpty()
+
+    when:
+        subscriptionService.restoreSubscriptions(expectedUser, expectedUser.session())
+        subscribers = subscriptionService.findSubscribers(TopicName.valueOf("topic"))
+    then:
+        !subscribers.isEmpty()
+        with(subscribers[0]) {
+          user() == expectedUser
+          subscription() == expectedSubscription
+        }
   }
 }

@@ -12,6 +12,7 @@ import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscriber.tree.ConcurrentSubscriberTree;
 import javasabr.mqtt.model.subscription.Subscription;
+import javasabr.mqtt.model.subscription.SubscriptionResult;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
@@ -30,6 +31,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemorySubscriptionService implements SubscriptionService {
 
+  private static final SubscriptionResult INVALID_TOPIC_FILTER_RESULT =
+      new SubscriptionResult(SubscribeAckReasonCode.TOPIC_FILTER_INVALID);
+  private static final SubscriptionResult SHARED_SUBSCRIPTION_NOT_SUPPORTED_RESULT =
+      new SubscriptionResult(SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
+  private static final SubscriptionResult WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT =
+      new SubscriptionResult(SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
+
   ConcurrentSubscriberTree subscriberTree;
 
   public InMemorySubscriptionService() {
@@ -44,13 +52,13 @@ public class InMemorySubscriptionService implements SubscriptionService {
   }
 
   @Override
-  public Array<SubscribeAckReasonCode> subscribe(
+  public Array<SubscriptionResult> subscribe(
       MqttUser user,
       MqttSession session,
       Array<Subscription> subscriptions) {
 
-    MutableArray<SubscribeAckReasonCode> subscribeResults = ArrayFactory.mutableArray(
-        SubscribeAckReasonCode.class,
+    MutableArray<SubscriptionResult> subscribeResults = ArrayFactory.mutableArray(
+        SubscriptionResult.class,
         subscriptions.size());
 
     for (Subscription subscription : subscriptions) {
@@ -60,23 +68,25 @@ public class InMemorySubscriptionService implements SubscriptionService {
     return subscribeResults;
   }
 
-  private SubscribeAckReasonCode addSubscription(MqttUser user, MqttSession session, Subscription subscription) {
+  private SubscriptionResult addSubscription(MqttUser user, MqttSession session, Subscription newSubscription) {
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
-    TopicFilter topicFilter = subscription.topicFilter();
+    TopicFilter topicFilter = newSubscription.topicFilter();
     if (topicFilter.isInvalid()) {
-      return SubscribeAckReasonCode.TOPIC_FILTER_INVALID;
+      return INVALID_TOPIC_FILTER_RESULT;
     } else if (!connectionConfig.sharedSubscriptionAvailable() && topicFilter instanceof SharedTopicFilter) {
-      return SubscribeAckReasonCode.SHARED_SUBSCRIPTIONS_NOT_SUPPORTED;
+      return SHARED_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     } else if (!connectionConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
-      return SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED;
+      return WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
-    SingleSubscriber previous = subscriberTree.subscribe(user, subscription);
-    if (previous != null) {
-      activeSubscriptions.remove(previous.subscription());
+    SingleSubscriber previousSubscriber = subscriberTree.subscribe(user, newSubscription);
+    Subscription previousSubscription = null;
+    if (previousSubscriber != null) {
+      previousSubscription = previousSubscriber.subscription();
+      activeSubscriptions.remove(previousSubscription);
     }
-    activeSubscriptions.add(subscription);
-    return subscription.qos().subscribeAckReasonCode();
+    activeSubscriptions.add(newSubscription);
+    return new SubscriptionResult(newSubscription, previousSubscription);
   }
 
   @Override
