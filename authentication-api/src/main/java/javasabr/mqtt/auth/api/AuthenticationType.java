@@ -12,10 +12,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum AuthenticationType {
   X509(1),
-  ENHANCED(2),
-  JWT(3),
-  BASIC(4),
-  ANONYMOUS(5);
+  IP_CIDR(2),
+  ENHANCED(3),
+  JWT(4),
+  OAUTH(5),
+  BASIC(6),
+  LDAP(7),
+  ANONYMOUS(8);
 
   int priority;
 }
