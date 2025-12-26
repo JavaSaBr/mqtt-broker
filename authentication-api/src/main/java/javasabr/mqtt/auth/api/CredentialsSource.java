@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 public interface CredentialsSource {
 
-  String getName();
+  DatasourceType getName();
 
   Mono<Boolean> isCredentialsExists(String userName, byte[] password);
 }

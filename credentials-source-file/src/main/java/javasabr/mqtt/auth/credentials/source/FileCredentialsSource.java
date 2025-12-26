@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javasabr.mqtt.auth.api.DatasourceType;
 import javasabr.mqtt.auth.api.InMemoryCredentialsSource;
 import javasabr.mqtt.auth.api.exception.CredentialsSourceException;
 import lombok.AccessLevel;
@@ -30,8 +31,8 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   }
 
   @Override
-  public String getName() {
-    return "file";
+  public DatasourceType getName() {
+    return DatasourceType.FILE;
   }
 
   @JsonValue

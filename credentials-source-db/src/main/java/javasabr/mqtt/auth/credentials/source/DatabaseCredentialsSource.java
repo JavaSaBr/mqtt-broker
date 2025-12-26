@@ -3,6 +3,7 @@ package javasabr.mqtt.auth.credentials.source;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import javasabr.mqtt.auth.api.CredentialsSource;
+import javasabr.mqtt.auth.api.DatasourceType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,8 +25,8 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   String dbUrl;
 
   @Override
-  public String getName() {
-    return "database";
+  public DatasourceType getName() {
+    return DatasourceType.DATABASE;
   }
 
   @Override
