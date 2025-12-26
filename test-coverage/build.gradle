@@ -3,7 +3,7 @@ plugins {
   id("jacoco-report-aggregation")
 }
 
-description = "Aggreggate test coverages from all modules"
+description = "Aggregate test coverages from all modules"
 
 dependencies {
   jacocoAggregation projects.base
@@ -11,4 +11,7 @@ dependencies {
   jacocoAggregation projects.model
   jacocoAggregation projects.network
   jacocoAggregation projects.coreService
+  jacocoAggregation projects.aclEngine
+  jacocoAggregation projects.aclGroovyDsl
+  jacocoAggregation projects.aclService
 }
