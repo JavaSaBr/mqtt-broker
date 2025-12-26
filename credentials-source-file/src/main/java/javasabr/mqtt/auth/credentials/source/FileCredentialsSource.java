@@ -37,6 +37,6 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   @JsonValue
   @Override
   public String toString() {
-    return "{ \"%s\": \"%s\" }".formatted(getName(), fileName.getPath());
+    return "{ \"credentialsSource\": \"%s\", \"filePath\": \"%s\" }".formatted(getName(), fileName.getPath());
   }
 }

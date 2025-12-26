@@ -43,6 +43,6 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   @JsonValue
   @Override
   public String toString() {
-    return "{ \"%s\": \"%s\" }".formatted(getName(), dbUrl);
+    return "{ \"credentialsSource\": \"%s\", \"databaseUrl\": \"%s\" }".formatted(getName(), dbUrl);
   }
 }

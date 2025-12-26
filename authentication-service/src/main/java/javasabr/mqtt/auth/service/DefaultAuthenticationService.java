@@ -27,6 +27,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
         .concatMap(manager -> manager.authenticate(
                 request.username(),
                 request.password(),
+                request.authenticationMethod(),
                 request.authenticationData())
             .onErrorReturn(false)
         )
@@ -37,18 +38,16 @@ public class DefaultAuthenticationService implements AuthenticationService {
       Array<AuthenticationProvider> providers) {
 
     var builder = new StringBuilder()
-        .append("{\n");
+        .append("[\n");
     for (AuthenticationProvider provider : providers) {
       builder
-          .append("  \"")
-          .append(provider.getAuthenticationType())
-          .append("\": ")
+          .append("  ")
           .append(provider)
           .append(",\n");
     }
     builder
         .delete(builder.length() - 2, builder.length())
-        .append("\n}");
+        .append("\n]");
 
     return "Loaded total [%s] authentication providers: %s".formatted(providers.size(), builder);
   }

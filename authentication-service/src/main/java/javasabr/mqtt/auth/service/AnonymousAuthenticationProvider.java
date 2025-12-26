@@ -13,13 +13,13 @@ public class AnonymousAuthenticationProvider implements AuthenticationProvider {
   }
 
   @Override
-  public Mono<Boolean> authenticate(String username, byte[] password, byte[] data) {
+  public Mono<Boolean> authenticate(String username, byte[] password, String authenticationMethod, byte[] data) {
     return Mono.just(StringUtils.isEmpty(username));
   }
 
   @JsonValue
   @Override
   public String toString() {
-    return "true";
+    return "{ \"authenticationType\": \"%s\", \"enabled\": true }".formatted(getAuthenticationType());
   }
 }

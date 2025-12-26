@@ -21,13 +21,15 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
   }
 
   @Override
-  public Mono<Boolean> authenticate(String username, byte[] password, byte[] data) {
+  public Mono<Boolean> authenticate(String username, byte[] password, String authenticationMethod, byte[] data) {
     return credentialsSource.isCredentialsExists(username, password);
   }
 
   @JsonValue
   @Override
   public String toString() {
-    return "{ \"credentialSource\": %s }".formatted(credentialsSource);
+    return "{ \"authenticationType\": \"%s\", \"credentialSource\": %s }".formatted(
+        getAuthenticationType(),
+        credentialsSource);
   }
 }
