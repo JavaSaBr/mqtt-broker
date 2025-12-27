@@ -33,8 +33,12 @@ public record Subscription(
     boolean noLocal,
     /*
       If true, Application Messages forwarded using this subscription keep the RETAIN flag they were published with. If
-      false, Application Messages forwarded using this subscription have the RETAIN flag set to 0. Retained messages sent
-      when the subscription is established have the RETAIN flag set to 1.
+      false, Application Messages forwarded using this subscription have the RETAIN flag set to 0.
+
+      Bit 3 of the Subscription Options represents the Retain As Published option.
+      If 1, Application Messages forwarded using this subscription keep the RETAIN flag they were published with.
+      If 0, Application Messages forwarded using this subscription have the RETAIN flag set to 0.
+      Retained messages sent when the subscription is established have the RETAIN flag set to 1.
      */
     boolean retainAsPublished) {
 
@@ -46,6 +50,10 @@ public record Subscription(
         SubscribeRetainHandling.SEND,
         true,
         true);
+  }
+
+  public Subscription higherQoS(Subscription alternative) {
+    return alternative.qos.level() > qos.level() ? alternative : this;
   }
 
   @JsonValue

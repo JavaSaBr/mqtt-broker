@@ -1,7 +1,6 @@
 //file:noinspection unused
 package javasabr.mqtt.acl.groovy.dsl.builder
 
-import javasabr.mqtt.acl.engine.model.matcher.AnyValueMatcher
 import javasabr.mqtt.acl.engine.model.matcher.UserMatchers
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
 
@@ -25,10 +24,6 @@ abstract class UserMatchersFactory {
 
   ValueMatcher<String> anyValue() {
     return ValueMatcher.MATCH_ANY_STRING
-  }
-
-  ValueMatcher<String> replaceMatcherIfNeed(ValueMatcher<String> it) {
-    return it instanceof AnyValueMatcher ? ValueMatcher.MATCH_ANY_STRING : it
   }
 }
   

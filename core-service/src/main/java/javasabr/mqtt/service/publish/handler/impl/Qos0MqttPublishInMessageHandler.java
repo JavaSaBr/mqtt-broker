@@ -10,6 +10,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 
 public class Qos0MqttPublishInMessageHandler extends AbstractMqttPublishInMessageHandler<ExternalNetworkMqttUser> {
@@ -17,8 +18,14 @@ public class Qos0MqttPublishInMessageHandler extends AbstractMqttPublishInMessag
   public Qos0MqttPublishInMessageHandler(
       SubscriptionService subscriptionService,
       PublishDeliveringService publishDeliveringService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, subscriptionService, publishDeliveringService, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      RetainMessageService retainMessageService) {
+    super(
+        ExternalNetworkMqttUser.class,
+        subscriptionService,
+        publishDeliveringService,
+        messageOutFactoryService,
+        retainMessageService);
   }
 
   @Override

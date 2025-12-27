@@ -12,7 +12,7 @@ abstract class MultiUserConditionBuilder extends UserConditionBuilder {
         .configure(config)
         .build()
     def transformed = userNames.collect {
-      new UserNameCondition(replaceMatcherIfNeed(it))
+      new UserNameCondition(it)
     }
     conditions.addAll(transformed)
     return this
@@ -23,7 +23,7 @@ abstract class MultiUserConditionBuilder extends UserConditionBuilder {
         .configure(config)
         .build()
     def transformed = clientIds.collect {
-      new ClientIdCondition(replaceMatcherIfNeed(it))
+      new ClientIdCondition(it)
     }
     conditions.addAll(transformed)
     return this
@@ -34,7 +34,7 @@ abstract class MultiUserConditionBuilder extends UserConditionBuilder {
         .configure(config)
         .build()
     def transformed = ipAddresses.collect {
-      new IpAddressCondition(replaceMatcherIfNeed(it))
+      new IpAddressCondition(it)
     }
     conditions.addAll(transformed)
     return this

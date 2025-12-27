@@ -37,7 +37,7 @@ public class TopicName extends AbstractTopic {
     }
     return Objects.equals(rawTopic(), anotherTopic.rawTopic());
   }
-
+  
   public boolean isEmpty() {
     return false;
   }

@@ -17,8 +17,9 @@ public class DynamicTopicNameMatcher extends DynamicTopicMatcher<TopicName> {
       return false;
     } else if (topic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
       return false;
+    } else {
+      return super.test(user, topic);
     }
-    return super.test(user, topic);
   }
 
   @Override

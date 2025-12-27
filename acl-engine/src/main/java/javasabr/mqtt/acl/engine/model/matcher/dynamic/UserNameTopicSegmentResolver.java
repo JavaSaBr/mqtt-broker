@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.model.MqttUser;
 import org.jspecify.annotations.Nullable;
 
-public class UserNameTopicSegmentResolver extends TopicSegmentResolver {
+public final class UserNameTopicSegmentResolver extends TopicSegmentResolver {
   
   public static final String VARIABLE = "{userName}";
   

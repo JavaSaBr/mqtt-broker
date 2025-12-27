@@ -1,9 +1,11 @@
 package javasabr.mqtt.service.impl;
 
 import java.util.Collection;
+import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
+import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import lombok.AccessLevel;
@@ -44,10 +46,10 @@ public class DefaultPublishDeliveringService implements PublishDeliveringService
   }
 
   @Override
-  public void startDelivering(Publish publish, SingleSubscriber subscriber) {
+  public void startDelivering(Publish publish, MqttUser user, Subscription subscription) {
     try {
       //noinspection DataFlowIssue
-      publishOutMessageHandlers[subscriber.qos().level()].handle(publish, subscriber);
+      publishOutMessageHandlers[subscription.qos().level()].handle(publish, user);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
       log.warning(publish, "Received not supported publish message:[%s]"::formatted);
     }

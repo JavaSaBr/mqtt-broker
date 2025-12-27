@@ -11,8 +11,6 @@ import javasabr.mqtt.model.topic.TopicName;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.LockableArray;
 import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.collections.dictionary.DictionaryFactory;
-import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -24,22 +22,25 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 class SubscriberNode extends SubscriberTreeBase {
 
-  private final static Supplier<SubscriberNode> SUBSCRIBER_NODE_FACTORY = SubscriberNode::new;
+  private final static Supplier<SubscriberNode> NODE_FACTORY = SubscriberNode::new;
 
   static {
     DebugUtils.registerIncludedFields("childNodes", "subscribers");
   }
 
   @Nullable
-  volatile LockableRefToRefDictionary<String, SubscriberNode> childNodes;
-  @Nullable
   volatile LockableArray<Subscriber> subscribers;
+
+  @Override
+  protected Supplier<SubscriberNode> getNodeFactory() {
+    return NODE_FACTORY;
+  }
 
   /**
    * @return the previous subscription from the same owner
    */
   @Nullable
-  public SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
+  protected SingleSubscriber subscribe(int level, MqttUser owner, Subscription subscription, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return addSubscriber(getOrCreateSubscribers(), owner, subscription, topicFilter);
     }
@@ -47,7 +48,7 @@ class SubscriberNode extends SubscriberTreeBase {
     return childNode.subscribe(level + 1, owner, subscription, topicFilter);
   }
 
-  public boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
+  protected boolean unsubscribe(int level, MqttUser owner, TopicFilter topicFilter) {
     if (level == topicFilter.levelsCount()) {
       return removeSubscriber(subscribers(), owner, topicFilter);
     }
@@ -67,7 +68,7 @@ class SubscriberNode extends SubscriberTreeBase {
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
     String segment = topicName.segment(level);
-    SubscriberNode subscriberNode = childNode(segment);
+    SubscriberNode subscriberNode = getChildNode(segment);
     if (subscriberNode == null) {
       return;
     }
@@ -83,7 +84,7 @@ class SubscriberNode extends SubscriberTreeBase {
       TopicName topicName,
       int lastLevel,
       MutableArray<SingleSubscriber> result) {
-    SubscriberNode subscriberNode = childNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
+    SubscriberNode subscriberNode = getChildNode(TopicFilter.SINGLE_LEVEL_WILDCARD);
     if (subscriberNode == null) {
       return;
     }
@@ -95,71 +96,24 @@ class SubscriberNode extends SubscriberTreeBase {
   }
 
   private void multiWildcardTopicMatch(MutableArray<SingleSubscriber> result) {
-    SubscriberNode subscriberNode = childNode(TopicFilter.MULTI_LEVEL_WILDCARD);
+    SubscriberNode subscriberNode = getChildNode(TopicFilter.MULTI_LEVEL_WILDCARD);
     if (subscriberNode != null) {
       appendSubscribersTo(result, subscriberNode);
     }
   }
 
-  private SubscriberNode getOrCreateChildNode(String segment) {
-    LockableRefToRefDictionary<String, SubscriberNode> childNodes = getOrCreateChildNodes();
-    long stamp = childNodes.readLock();
-    try {
-      SubscriberNode subscriberNode = childNodes.get(segment);
-      if (subscriberNode != null) {
-        return subscriberNode;
-      }
-    } finally {
-      childNodes.readUnlock(stamp);
-    }
-    stamp = childNodes.writeLock();
-    try {
-      return childNodes.getOrCompute(segment, SUBSCRIBER_NODE_FACTORY);
-    } finally {
-      childNodes.writeUnlock(stamp);
-    }
-  }
-
-  @Nullable
-  private SubscriberNode childNode(String segment) {
-    LockableRefToRefDictionary<String, SubscriberNode> childNodes = childNodes();
-    if (childNodes == null) {
-      return null;
-    }
-    long stamp = childNodes.readLock();
-    try {
-      return childNodes.get(segment);
-    } finally {
-      childNodes.readUnlock(stamp);
-    }
-  }
-
-  private LockableRefToRefDictionary<String, SubscriberNode> getOrCreateChildNodes() {
-    if (childNodes == null) {
-      synchronized (this) {
-        if (childNodes == null) {
-          childNodes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
-        }
-      }
-    }
-    //noinspection ConstantConditions
-    return childNodes;
-  }
-
   private LockableArray<Subscriber> getOrCreateSubscribers() {
-    if (subscribers == null) {
-      synchronized (this) {
-        if (subscribers == null) {
-          subscribers = ArrayFactory.stampedLockBasedArray(Subscriber.class);
-        }
-      }
+    LockableArray<Subscriber> localSubscribers = subscribers;
+    if (localSubscribers != null) {
+      return localSubscribers;
     }
-    //noinspection ConstantConditions
-    return subscribers;
-  }
-
-  @Override
-  public String toString() {
-    return DebugUtils.toJsonString(this);
+    synchronized (this) {
+      localSubscribers = subscribers;
+      if (localSubscribers == null) {
+        localSubscribers = ArrayFactory.stampedLockBasedArray(Subscriber.class);
+        subscribers = localSubscribers;
+      }
+      return localSubscribers;
+    }
   }
 }

@@ -47,7 +47,7 @@ abstract class AclRuleBuilder {
   AclRule build() {
     if (userCondition == null) {
       throw new AclConfigurationException("Users section is not defined")
-    } else if (topicMatchers == null) {
+    } else if (topicMatchers == null || topicMatchers.isEmpty()) {
       throw new AclConfigurationException("Topics section is not defined")
     }
     return buildImpl()

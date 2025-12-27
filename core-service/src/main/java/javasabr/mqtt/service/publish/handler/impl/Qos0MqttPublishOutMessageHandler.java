@@ -8,8 +8,7 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import org.jspecify.annotations.Nullable;
 
-public class Qos0MqttPublishOutMessageHandler 
-    extends AbstractMqttPublishOutMessageHandler<ExternalNetworkMqttUser> {
+public class Qos0MqttPublishOutMessageHandler extends AbstractMqttPublishOutMessageHandler<ExternalNetworkMqttUser> {
 
   public Qos0MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     super(ExternalNetworkMqttUser.class, messageOutFactoryService);

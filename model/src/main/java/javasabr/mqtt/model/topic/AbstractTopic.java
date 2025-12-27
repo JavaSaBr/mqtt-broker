@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Accessors
-@EqualsAndHashCode(of = "rawTopic")
+@EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
 
@@ -24,6 +24,7 @@ public abstract class AbstractTopic {
   }
 
   String[] segments;
+  @EqualsAndHashCode.Include
   String rawTopic;
 
   protected AbstractTopic(String rawTopic) {
@@ -36,8 +37,22 @@ public abstract class AbstractTopic {
     this.rawTopic = rawTopic;
   }
 
+  public boolean isShared() {
+    return false;
+  }
+
   public String segment(int level) {
     return segments[level];
+  }
+
+  public boolean isSingleLevelWildcard(int level) {
+    String segment = segments[level];
+    return segment.length() == 1 && segment.charAt(0) == TopicFilter.SINGLE_LEVEL_WILDCARD_CHAR;
+  }
+
+  public boolean isMultiLevelWildcard(int level) {
+    String segment = segments[level];
+    return segment.length() == 1 && segment.charAt(0) == TopicFilter.MULTI_LEVEL_WILDCARD_CHAR;
   }
 
   public int levelsCount() {
@@ -72,10 +87,10 @@ public abstract class AbstractTopic {
     var segments = new String[segmentCount];
     int i = 0, pos = 0, end;
     while ((end = topic.indexOf(AbstractTopic.DELIMITER, pos)) >= 0) {
-      segments[i++] = replaceToConstant(topic.substring(pos, end));
+      segments[i++] = replaceWildcardToConstant(topic.substring(pos, end));
       pos = end + 1;
     }
-    segments[i] = replaceToConstant(topic.substring(pos));
+    segments[i] = replaceWildcardToConstant(topic.substring(pos));
     return segments;
   }
 
@@ -93,7 +108,7 @@ public abstract class AbstractTopic {
     return count;
   }
 
-  protected static String replaceToConstant(String segment) {
+  protected static String replaceWildcardToConstant(String segment) {
     if (segment.length() > 1) {
       return segment;
     }
