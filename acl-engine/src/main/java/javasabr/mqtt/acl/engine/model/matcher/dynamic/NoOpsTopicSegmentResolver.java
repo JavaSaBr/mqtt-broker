@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class NoOpsTopicSegmentResolver extends TopicSegmentResolver {
+public final class NoOpsTopicSegmentResolver extends TopicSegmentResolver {
   
   String segment;
   

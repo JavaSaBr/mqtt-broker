@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Accessors
-@EqualsAndHashCode(of = "rawTopic")
+@EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
 
@@ -24,6 +24,7 @@ public abstract class AbstractTopic {
   }
 
   String[] segments;
+  @EqualsAndHashCode.Include
   String rawTopic;
 
   protected AbstractTopic(String rawTopic) {
