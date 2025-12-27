@@ -1,12 +1,11 @@
 package javasabr.mqtt.service.session.impl;
 
 import java.io.Closeable;
-import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
+import java.time.Duration;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
-import javasabr.rlib.collections.dictionary.Dictionary;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
@@ -19,8 +18,10 @@ import reactor.core.publisher.Mono;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
-
-  final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> storedSession;
+  
+  final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> activeSessions;
+  final LockableRefToRefDictionary<String, ExpirableSession> storedSessions;
+  
   final Thread cleanThread;
 
   final int cleanIntervalInMs;
@@ -28,7 +29,8 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   public InMemoryMqttSessionService(int cleanIntervalInMs) {
     this.cleanIntervalInMs = cleanIntervalInMs;
-    this.storedSession = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.activeSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.storedSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.cleanThread = new Thread(this::cleanup, "InMemoryMqttSessionService-Cleanup");
     this.cleanThread.setPriority(Thread.MIN_PRIORITY);
     this.cleanThread.setDaemon(true);
@@ -36,35 +38,73 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   }
 
   @Override
-  public Mono<NetworkMqttSession> restore(String clientId) {
+  public Mono<NetworkMqttSession> createClean(String clientId) {
+    // check if we already have an active session
+    long stamp = activeSessions.writeLock();
+    try {
+      InMemoryNetworkMqttSession currentActiveSession = activeSessions.get(clientId);
+      if (currentActiveSession != null) {
+        //TODO what should we do here?
+      }
 
-    InMemoryNetworkMqttSession session = storedSession
-        .operations()
-        .getInWriteLock(clientId, MutableRefToRefDictionary::remove);
-
-    if (session != null) {
-      log.debug(clientId, "[%s] Restored session"::formatted);
-    } else {
-      log.debug(clientId, "[%s] No any stored session"::formatted);
+      InMemoryNetworkMqttSession newCleanSession = new InMemoryNetworkMqttSession(clientId);
+      activeSessions.put(clientId, newCleanSession);
+      
+      log.debug(clientId, "[%s] Created new session"::formatted);
+      return Mono.just(newCleanSession);
+    } finally {
+      activeSessions.writeUnlock(stamp);
     }
-
-    return Mono.justOrEmpty(session);
   }
 
   @Override
-  public Mono<NetworkMqttSession> create(String clientId) {
-
-    InMemoryNetworkMqttSession session = storedSession
-        .operations()
-        .getInWriteLock(clientId, MutableRefToRefDictionary::remove);
-
-    if (session != null) {
-      log.debug(clientId, "Removed old session for client:[%s]"::formatted);
+  public Mono<NetworkMqttSession> restore(String clientId) {
+    // check if we already have an active session
+    long stamp = activeSessions.readLock();
+    try {
+      InMemoryNetworkMqttSession currentActiveSession = activeSessions.get(clientId);
+      if (currentActiveSession != null) {
+        //TODO what should we do here?
+      }
+    } finally {
+      activeSessions.readUnlock(stamp);
     }
+    // try to find restore stored session
+    stamp = storedSessions.writeLock();
+    try {
+      ExpirableSession storedSession = storedSessions.remove(clientId);
+      if (storedSession != null) {
+        log.debug(clientId, "[%s] Restored session"::formatted);
+        return Mono.just(storedSession.session());
+      }
+    } finally {
+      storedSessions.writeUnlock(stamp);
+    }
+    log.debug(clientId, "[%s] No any stored session"::formatted);
+    return Mono.empty();
+  }
 
-    log.debug(clientId, "Created new session for client:[%s]"::formatted);
+  @Override
+  public Mono<Boolean> store(String clientId, NetworkMqttSession session) {
+    // check if we already have an active session
+    long stamp = activeSessions.writeLock();
+    try {
+      InMemoryNetworkMqttSession currentActiveSession = activeSessions.get(clientId);
+      if (currentActiveSession != session) {
+        //TODO what should we do here?
+      }
+      activeSessions.remove(clientId);
 
-    return Mono.just(new InMemoryNetworkMqttSession(clientId));
+      Duration expiryInterval = session.expiryInterval();
+      if (expiryInterval == null) {
+        return Mono.just(false);
+      }
+      
+    } finally {
+      activeSessions.writeUnlock(stamp);
+    }
+    
+    return null;
   }
 
   @Override
@@ -84,68 +124,77 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   private void cleanup() {
 
-    var toCheck = ArrayFactory.mutableArray(InMemoryNetworkMqttSession.class);
-    var toRemove = ArrayFactory.mutableArray(InMemoryNetworkMqttSession.class);
+    var sessionsToCheck = ArrayFactory.mutableArray(ExpirableSession.class);
+    var expiredSessions = ArrayFactory.mutableArray(ExpirableSession.class);
 
     while (!closed) {
       ThreadUtils.sleep(cleanIntervalInMs);
-
-      toCheck.clear();
-      toRemove.clear();
-
-      storedSession
-          .operations()
-          .inReadLock(toCheck, Dictionary::values);
-
-      if (findToRemove(toCheck, toRemove)) {
+      if (storedSessions.isEmpty()) {
         continue;
       }
 
-      storedSession
-          .operations()
-          .inWriteLock(toRemove, InMemoryMqttSessionService::removeExpiredSessions);
-    }
-  }
+      sessionsToCheck.clear();
+      expiredSessions.clear();
 
-  private static void removeExpiredSessions(
-      LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> sessions,
-      MutableArray<InMemoryNetworkMqttSession> expired) {
-    long time = System.currentTimeMillis();
-    for (ConfigurableNetworkMqttSession session : expired) {
-      if (session.expirationTime() <= time) {
+      long stamp = storedSessions.readLock();
+      try {
+        storedSessions.values(sessionsToCheck);
+      } finally {
+        storedSessions.readUnlock(stamp);
+      }
+      if (sessionsToCheck.isEmpty()) {
         continue;
       }
-
-      InMemoryNetworkMqttSession removed = sessions.remove(session.clientId());
-      log.debug(session.clientId(), "Removed expired session for client:[%]"::formatted);
-
-      // if we already have new session under the same client id
-      if (removed != null && removed != session) {
-        sessions.put(session.clientId(), removed);
-      } else if (removed != null) {
-        removed.clear();
+      collectExpiredSessions(sessionsToCheck, expiredSessions);
+      if (!expiredSessions.isEmpty()) {
+        closeExpiredSessions(expiredSessions);
       }
     }
   }
-
-  private boolean findToRemove(
-      MutableArray<InMemoryNetworkMqttSession> toCheck, 
-      MutableArray<InMemoryNetworkMqttSession> toRemove) {
-
-    var currentTime = System.currentTimeMillis();
-
-    for (InMemoryNetworkMqttSession session : toCheck) {
-      if (session.expirationTime() > currentTime) {
-        toRemove.add(session);
+  
+  private void collectExpiredSessions(
+      MutableArray<ExpirableSession> sessionsToCheck,
+      MutableArray<ExpirableSession> expiredSessions) {
+    long currentTime = System.currentTimeMillis();
+    for (ExpirableSession expirableSession : sessionsToCheck) {
+      if (expirableSession.expiredAfter() < currentTime) {
+        expiredSessions.add(expirableSession);
       }
     }
-
-    return toRemove.isEmpty();
+  }
+  
+  private void closeExpiredSessions(MutableArray<ExpirableSession> expiredSessions) {
+    long stamp = storedSessions.writeLock();
+    try {
+      for (ExpirableSession expiredSession : expiredSessions) {
+        InMemoryNetworkMqttSession session = expiredSession.session();
+        ExpirableSession currentlyStored = storedSessions.remove(session.clientId());
+        // something was changed during this iteration
+        if (expiredSession != currentlyStored) {
+          if (currentlyStored != null) {
+            // return back the other instance of stored session for the same client id
+            storedSessions.put(session.clientId(), currentlyStored);
+          }
+          continue;
+        }
+        log.info(session.clientId(), "[%] Removed expired session"::formatted);
+        session.clear();
+      }
+    } finally {
+      storedSessions.writeUnlock(stamp);
+    }
   }
 
   @Override
   public void close() {
     closed = true;
     cleanThread.interrupt();
+  }
+
+  private record ExpirableSession(long expiredAfter, InMemoryNetworkMqttSession session) {
+    private static ExpirableSession of(Duration expiryInterval, InMemoryNetworkMqttSession session) {
+      long expiredAfter = System.currentTimeMillis() + expiryInterval.toMillis();
+      return new ExpirableSession(expiredAfter, session);
+    }
   }
 }

@@ -5,9 +5,14 @@ import reactor.core.publisher.Mono;
 
 public interface MqttSessionService {
 
+  Mono<NetworkMqttSession> createClean(String clientId);
+  
   Mono<NetworkMqttSession> restore(String clientId);
 
-  Mono<NetworkMqttSession> create(String clientId);
-
+  /**
+   * @return async result 'true' if session was stored
+   */
+  Mono<Boolean> store(String clientId, NetworkMqttSession session);
+  
   Mono<Boolean> store(String clientId, NetworkMqttSession session, long expiryInterval);
 }

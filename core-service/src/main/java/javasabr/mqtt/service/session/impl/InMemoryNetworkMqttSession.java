@@ -15,11 +15,13 @@ import lombok.experimental.FieldDefaults;
 
 @CustomLog
 @Accessors
-@ToString(of = "clientId")
-@EqualsAndHashCode(of = "clientId")
+@ToString
+@EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
   
+  @ToString.Include
+  @EqualsAndHashCode.Include
   final String clientId;
   final AtomicInteger messageIdGenerator;
 

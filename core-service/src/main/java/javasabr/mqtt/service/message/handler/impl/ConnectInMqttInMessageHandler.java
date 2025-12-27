@@ -119,14 +119,14 @@ public class ConnectInMqttInMessageHandler
   private Mono<Boolean> restoreSession(ConfigurableNetworkMqttUser user, ConnectMqttInMessage packet) {
     if (packet.cleanStart()) {
       return sessionService
-          .create(user.clientId())
+          .createClean(user.clientId())
           .flatMap(session -> onConnected(user, packet, session, false));
     } else {
       return sessionService
           .restore(user.clientId())
           .flatMap(session -> onConnected(user, packet, session, true))
           .switchIfEmpty(Mono.defer(() -> sessionService
-              .create(user.clientId())
+              .createClean(user.clientId())
               .flatMap(session -> onConnected(user, packet, session, false))));
     }
   }

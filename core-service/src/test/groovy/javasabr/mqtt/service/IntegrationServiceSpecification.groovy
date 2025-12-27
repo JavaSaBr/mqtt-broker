@@ -149,7 +149,7 @@ abstract class IntegrationServiceSpecification extends Specification {
         serverConnectionConfig,
         { MqttConnection ownedConnection ->
           def generatedClientId = "mockedClient_${clientIdGenerator.incrementAndGet()}"
-          def createdSession = defaultMqttSessionService.create(generatedClientId).block()
+          def createdSession = defaultMqttSessionService.createClean(generatedClientId).block()
           def user = new TestExternalNetworkMqttUser(ownedConnection, Mock(NetworkMqttUserReleaseHandler))
           user.session(createdSession)
           user.clientId(generatedClientId)
