@@ -79,4 +79,43 @@ class TopicCreationTest extends UnitSpecification {
         '$share/name16/+/topic/+/filter'      | 4      | "name16"  | ["+", "topic", "+", "filter"]
         '$share/name17/topic/+/filter/+/test' | 5      | "name17"  | ["topic", "+", "filter", "+", "test"]
   }
+
+  @Unroll
+  def "should correctly detect if topic filter:[#topicFilter] has [#wildcard]"() {
+    given:
+        def created = TopicFilter.valueOf(topicFilter)
+    expect:
+        created.wildcard() == wildcard
+    where:
+        topicFilter            | wildcard
+        'topic1'               | false
+        'topic1/name2'         | false
+        'topic1/name2/segment' | false
+        'topic1/+/segment'     | true
+        '+/name2/segment'      | true
+        'topic1/name2/+'       | true
+        'topic1/name2/#'       | true
+        'topic1/#'             | true
+        '#'                    | true
+        '+'                    | true
+
+  }
+
+  @Unroll
+  def "should replace wildcard segments to a [#constant] in topic filter:[#topicFilter] by [#index]"() {
+    given:
+        def created = TopicFilter.valueOf(topicFilter)
+    expect:
+        created.segment(index) === constant
+    where:
+        topicFilter        | index | constant
+        'topic1/name/+'    | 2     | TopicFilter.SINGLE_LEVEL_WILDCARD
+        'topic1/+/segment' | 1     | TopicFilter.SINGLE_LEVEL_WILDCARD
+        '+/name/segment'   | 0     | TopicFilter.SINGLE_LEVEL_WILDCARD
+        '+'                | 0     | TopicFilter.SINGLE_LEVEL_WILDCARD
+        'topic1/name/#'    | 2     | TopicFilter.MULTI_LEVEL_WILDCARD
+        'topic1/#'         | 1     | TopicFilter.MULTI_LEVEL_WILDCARD
+        '#'                | 0     | TopicFilter.MULTI_LEVEL_WILDCARD
+
+  }
 }

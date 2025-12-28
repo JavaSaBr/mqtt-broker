@@ -1,7 +1,10 @@
 package javasabr.mqtt.acl.engine.model.matcher
 
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
+import javasabr.mqtt.model.subscription.TestMqttUser
+import javasabr.mqtt.model.topic.AbstractTopic
 import javasabr.mqtt.model.topic.TopicFilter
-import javasabr.mqtt.model.topic.TopicValidator
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.test.support.UnitSpecification
 
 import java.util.regex.Pattern
@@ -10,9 +13,10 @@ class MatcherTest extends UnitSpecification {
 
   def "should match topic filter"(String topicFilter, String incomingValue, boolean expectedResult) {
     given:
+        def user = new TestMqttUser("clientId")
         def matcher = new TopicFilterMatcher(TopicFilter.valueOf(topicFilter))
     when:
-        boolean result = matcher.test(TopicFilter.valueOf(incomingValue))
+        boolean result = matcher.test(user, TopicFilter.valueOf(incomingValue))
     then:
         result == expectedResult
     where:
@@ -100,5 +104,30 @@ class MatcherTest extends UnitSpecification {
         "123"     | "client_123"  | true
         "123"     | "client_"     | false
         "123"     | "123_client_" | true
+  }
+
+  def "should match dynamic topic with expected result"(String rawTopic, AbstractTopic incomingTopic, boolean expectedResult) {
+    given:
+        def user = new TestMqttUser("id1", "user1", "168.1.55.23")
+        def matcher = DynamicTopicMatcher.autoBuild(rawTopic)
+    when:
+        boolean result = matcher.test(user, incomingTopic)
+    then:
+        result == expectedResult
+    where:
+        rawTopic                   | incomingTopic                       | expectedResult
+        "/topic/name/1"            | TopicName.valueOf("/topic/name/1")  | true
+        "topic/name/1"             | TopicName.valueOf("topic/name/1")   | true
+        "/topic/name/1/"           | TopicName.valueOf("/topic/name/1/") | true
+        "/topic/{userName}/1"      | TopicName.valueOf("/topic/user1/1") | true
+        "/topic/{userName}/1"      | TopicName.valueOf("/topic/user2/1") | false
+        "/topic/{userName}/1"      | TopicName.valueOf("/topic/user1")   | false
+        "/{clientId}/{userName}/1" | TopicName.valueOf("/id1/user1/1")   | true
+        "{clientId}/{userName}/1"  | TopicName.valueOf("id1/user1/1")    | true
+        "{clientId}/{userName}/"   | TopicName.valueOf("id1/user1/")     | true
+        "/{clientId}/{userName}/1" | TopicName.valueOf("/id2/user1/1")   | false
+        "/topic/name/+"            | TopicName.valueOf("/topic/name/1")  | true
+        "/+/{userName}/1"          | TopicName.valueOf("/id5/user1/1")   | true
+        "/{clientId}/#"            | TopicName.valueOf("/id1/user5/1")   | true
   }
 }
