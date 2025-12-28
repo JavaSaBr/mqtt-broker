@@ -75,7 +75,7 @@ public abstract class MqttMessageOutFactory {
         reasonCode,
         false,
         StringUtils.EMPTY,
-        connectionConfig.sessionExpiryInterval(),
+        connectionConfig.sessionExpiryIntervalInSecs(),
         connectionConfig.keepAlive(),
         connectionConfig.receiveMaxPublishes(),
         StringUtils.EMPTY,

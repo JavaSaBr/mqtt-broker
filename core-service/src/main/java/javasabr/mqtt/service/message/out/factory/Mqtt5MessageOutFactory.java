@@ -135,7 +135,7 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
         userProperties,
         reason,
         serverReference,
-        connectionConfig.sessionExpiryInterval());
+        connectionConfig.sessionExpiryIntervalInSecs());
   }
 
   @Override

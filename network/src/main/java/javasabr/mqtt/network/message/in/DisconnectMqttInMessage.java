@@ -92,7 +92,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
     this.sessionExpiryInterval = connection
         .clientConnectionConfig()
-        .sessionExpiryInterval();
+        .sessionExpiryIntervalInSecs();
     super.readImpl(connection, buffer);
   }
 

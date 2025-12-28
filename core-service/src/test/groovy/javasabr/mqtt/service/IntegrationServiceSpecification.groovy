@@ -12,9 +12,9 @@ import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
-import javasabr.mqtt.service.impl.InMemoryRetainMessageService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.DisabledAuthorizationService
+import javasabr.mqtt.service.impl.InMemoryRetainMessageService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory

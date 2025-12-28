@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.session.impl;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
@@ -12,6 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @CustomLog
 @Accessors
@@ -40,7 +42,8 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   @Getter
   @Setter
-  volatile long expirationTime = -1;
+  @Nullable
+  volatile Duration expiryInterval;
 
   public InMemoryNetworkMqttSession(String clientId) {
     this.clientId = clientId;

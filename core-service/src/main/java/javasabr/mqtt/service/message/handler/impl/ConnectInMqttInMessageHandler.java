@@ -4,13 +4,14 @@ import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
 import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
 import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
 import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
+import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY;
 import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
 import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
+import java.time.Duration;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
@@ -21,6 +22,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.AuthenticationService;
@@ -32,6 +34,7 @@ import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @CustomLog
@@ -131,50 +134,65 @@ public class ConnectInMqttInMessageHandler
     }
   }
 
-  private void resolveClientConnectionConfig(ConfigurableNetworkMqttUser user, ConnectMqttInMessage packet) {
+  private void resolveClientConnectionConfig(
+      ConfigurableNetworkMqttUser user,
+      ConnectMqttInMessage message) {
 
     MqttConnection connection = user.connection();
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
 
     // select result keep alive time
-    int minimalKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), packet.keepAlive());
+    int minimalKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), message.keepAlive());
     int keepAlive = serverConfig.keepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
-
-    // select result session expiry interval
-    long sessionExpiryInterval = serverConfig.sessionsEnabled()
-                                 ? packet.sessionExpiryInterval()
-                                 : SESSION_EXPIRY_INTERVAL_DISABLED;
-
-    if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
-      sessionExpiryInterval = serverConfig.defaultSessionExpiryInterval();
-    }
-
+    
     // select result receive max
-    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
+    int receiveMaxPublishes = message.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
                               ? serverConfig.receiveMaxPublishes()
-                              : Math.min(packet.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
+                              : Math.min(message.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
     // select result maximum packet size
-    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
+    var maximumPacketSize = message.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
                             ? serverConfig.maxMessageSize()
-                            : Math.min(packet.maxPacketSize(), serverConfig.maxMessageSize());
+                            : Math.min(message.maxPacketSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
-    var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
+    var topicAliasMaxValue = message.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
                              ? TOPIC_ALIAS_MAXIMUM_DISABLED
-                             : Math.min(packet.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
+                             : Math.min(message.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
 
     connection.configure(new MqttClientConnectionConfig(
         serverConfig,
         serverConfig.maxQos(),
-        packet.mqttVersion(),
-        sessionExpiryInterval,
+        message.mqttVersion(),
+        resolveSessionExpiryInterval(message, serverConfig),
         receiveMaxPublishes,
         maximumPacketSize,
         topicAliasMaxValue,
         keepAlive,
-        packet.requestResponseInformation(),
-        packet.requestProblemInformation()));
+        message.requestResponseInformation(),
+        message.requestProblemInformation()));
+  }
+  
+  @Nullable
+  private Duration resolveSessionExpiryInterval(
+      ConnectMqttInMessage message, 
+      MqttServerConnectionConfig serverConfig) {
+    // do not store such sessions after closing connection
+    if (!serverConfig.sessionsEnabled()) {
+      return null;
+    }
+    
+    // select result session expiry interval
+    long expiryIntervalInSecs = message.sessionExpiryInterval();
+    if (expiryIntervalInSecs == SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
+      expiryIntervalInSecs = serverConfig.defaultSessionExpiryInterval();
+    }
+    
+    if (expiryIntervalInSecs == SESSION_EXPIRY_INTERVAL_INFINITY) {
+      return Duration.ZERO;
+    } else {
+      return Duration.ofSeconds(expiryIntervalInSecs);
+    }
   }
 
   private Mono<Boolean> onConnected(
@@ -187,10 +205,14 @@ public class ConnectInMqttInMessageHandler
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
     MqttClientConnectionConfig clientConfig = connection.clientConnectionConfig();
 
+    if (session instanceof ConfigurableNetworkMqttSession configurableSession) {
+      configurableSession.expiryInterval(clientConfig.sessionExpiryInterval());
+    }
+
     // if it was closed in parallel
     if (connection.closed() && serverConfig.sessionsEnabled()) {
       // store the session again
-      return sessionService.store(user.clientId(), session, clientConfig.sessionExpiryInterval());
+      return sessionService.store(user.clientId(), session);
     }
 
     user.session(session);
