@@ -41,6 +41,7 @@ import spock.lang.Specification
 
 import java.nio.channels.AsynchronousSocketChannel
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract class IntegrationServiceSpecification extends Specification {
@@ -160,7 +161,7 @@ abstract class IntegrationServiceSpecification extends Specification {
         serverConnectionConfig,
         serverConnectionConfig.maxQos(),
         mqttVersion,
-        MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT,
+        Duration.ofSeconds(MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT),
         serverConnectionConfig.receiveMaxPublishes(),
         serverConnectionConfig.maxMessageSize(),
         serverConnectionConfig.topicAliasMaxValue(),

@@ -20,6 +20,7 @@ import javasabr.rlib.collections.array.IntArray
 import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 class NetworkUnitSpecification extends UnitSpecification {
@@ -236,7 +237,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         serverConnectionConfig,
         maxQos,
         mqttVersion,
-        sessionExpiryInterval,
+        Duration.ofSeconds(sessionExpiryInterval),
         receiveMaxPublishes,
         maxPacketSize,
         topicAliasMaxValue,
