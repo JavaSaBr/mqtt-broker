@@ -14,13 +14,12 @@ import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
-import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Connection request.
@@ -30,6 +29,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConnectMqttInMessage extends MqttInMessage {
 
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT.ordinal();
 
   static {
@@ -202,35 +202,43 @@ public class ConnectMqttInMessage extends MqttInMessage {
 
   MqttVersion mqttVersion = MqttVersion.MQTT_3_1_1;
 
-  String clientId = StringUtils.EMPTY;
-  String willTopic = StringUtils.EMPTY;
-  byte[] willPayload = ArrayUtils.EMPTY_BYTE_ARRAY;
-
-  String username = StringUtils.EMPTY;
-  byte[] password = ArrayUtils.EMPTY_BYTE_ARRAY;
-
+  @Nullable
+  String clientId;
   int keepAlive;
-  int willQos;
-  boolean willRetain;
   boolean cleanStart;
 
   boolean hasUserName;
+  @Nullable
+  String username;
   boolean hasPassword;
+  byte @Nullable [] password;
+  
   boolean willFlag;
+  boolean willRetain;
+  int willQos;
+  @Nullable
+  String willTopic;
+  byte @Nullable [] willPayload;
 
   // properties
-  String authenticationMethod = StringUtils.EMPTY;
-  byte[] authenticationData = ArrayUtils.EMPTY_BYTE_ARRAY;
+  @Nullable
+  String authenticationMethod;
+  byte @Nullable [] authenticationData;
 
-  long sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
-  int receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
-  int maxPacketSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
-  int topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
-  boolean requestResponseInformation = false;
-  boolean requestProblemInformation = false;
+  long sessionExpiryInterval;
+  int receiveMaxPublishes;
+  int maxMessageSize;
+  int topicAliasMaxValue;
+  
+  boolean requestResponseInformation;
+  boolean requestProblemInformation;
 
   public ConnectMqttInMessage(byte messageFlags) {
     super(messageFlags);
+    sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
+    receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
+    maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
+    topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
   }
 
   @Override
@@ -241,6 +249,11 @@ public class ConnectMqttInMessage extends MqttInMessage {
   @Override
   public MqttMessageType messageType() {
     return MqttMessageType.CONNECT;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
   }
 
   @Override
@@ -418,7 +431,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
         }
         sessionExpiryInterval = value;
       }
-      case MAXIMUM_MESSAGE_SIZE -> maxPacketSize = NumberUtils.validate(
+      case MAXIMUM_MESSAGE_SIZE -> maxMessageSize = NumberUtils.validate(
           (int) value,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);

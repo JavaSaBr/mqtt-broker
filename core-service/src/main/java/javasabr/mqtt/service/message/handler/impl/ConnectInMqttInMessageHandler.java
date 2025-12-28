@@ -33,7 +33,6 @@ import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @CustomLog
@@ -150,9 +149,9 @@ public class ConnectInMqttInMessageHandler
                               : Math.min(message.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
     // select result maximum packet size
-    var maximumPacketSize = message.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
+    var maximumPacketSize = message.maxMessageSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
                             ? serverConfig.maxMessageSize()
-                            : Math.min(message.maxPacketSize(), serverConfig.maxMessageSize());
+                            : Math.min(message.maxMessageSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
     var topicAliasMaxValue = message.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_IS_NOT_SET

@@ -13,8 +13,8 @@ class AuthenticationMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def outMessage = new AuthenticationMqtt5OutMessage(
             AuthenticateReasonCode.CONTINUE_AUTHENTICATION,
             reasonString,
-            authMethod,
-            authData,
+            testAuthMethod,
+            testAuthData,
             testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -33,8 +33,8 @@ class AuthenticationMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         result
         reader.reasonCode() == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
         reader.reason() == reasonString
-        reader.authenticationMethod() == authMethod
-        reader.authenticationData() == authData
+        reader.authenticationMethod() == testAuthMethod
+        reader.authenticationData() == testAuthData
         reader.userProperties() == testUserProperties
   }
 }

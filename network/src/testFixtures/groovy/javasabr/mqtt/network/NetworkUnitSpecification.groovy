@@ -1,6 +1,5 @@
 package javasabr.mqtt.network
 
-
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
@@ -39,26 +38,26 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final mqtt311ClientId = "testMqtt311ClientId"
   public static final mqtt5ClientId = "testMqtt5ClientId"
   public static final testMessageId = 1234 as short
-  public static final userName = "testUser"
-  public static final userPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
-  public static final keepAlive = 120
-  public static final sessionExpiryInterval = 300
+  public static final testUserName = "testUser"
+  public static final testUserPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
+  public static final testKeepAlive = 120
+  public static final testSessionExpiryInterval = 300
   public static final testMessageExpiryInterval = 60
   public static final testTopicAlias = 252
-  public static final receiveMaxPublishes = 10
-  public static final maxMessageSize = 1024
+  public static final testReceiveMaxPublishes = 10
+  public static final testMaxMessageSize = 1024
   public static final maxStringLength = 256
   public static final maxBinarySize = 1024
   public static final maxTopicLevels = 10
-  public static final topicAliasMaxValue = 32
+  public static final testTopicAliasMaxValue = 32
   public static final subscriptionId = 637
   public static final subscriptionId2 = 623
   public static final serverKeepAlive = 1200
   public static final requestResponseInformation = true
   public static final requestProblemInformation = true
   public static final responseInformation = "responseInformation"
-  public static final authMethod = "testAuthMethod"
-  public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
+  public static final testAuthMethod = "testAuthMethod"
+  public static final testAuthData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
   public static final publishTopic = TopicName.valueOf("publish/Topic")
   public static final testResponseTopic = TopicName.valueOf("response/Topic")
@@ -130,14 +129,13 @@ class NetworkUnitSpecification extends UnitSpecification {
   MqttServerConnectionConfig defaultServerConnectionConfig() {
     return serverConnectionConfig(
         maxQos,
-        maxMessageSize,
+        testMaxMessageSize,
         maxStringLength,
         maxBinarySize,
         maxTopicLevels,
         serverKeepAlive,
-        receiveMaxPublishes,
-        topicAliasMaxValue,
-        sessionExpiryInterval,
+        testReceiveMaxPublishes,
+        testTopicAliasMaxValue,
         keepAliveEnabled,
         sessionsEnabled,
         retainAvailable,
@@ -151,11 +149,11 @@ class NetworkUnitSpecification extends UnitSpecification {
         defaultServerConnectionConfig,
         maxQos,
         MqttVersion.MQTT_3_1_1,
-        sessionExpiryInterval,
-        receiveMaxPublishes,
-        maxMessageSize,
-        topicAliasMaxValue,
-        keepAlive,
+        testSessionExpiryInterval,
+        testReceiveMaxPublishes,
+        testMaxMessageSize,
+        testTopicAliasMaxValue,
+        testKeepAlive,
         false,
         false)
   }
@@ -165,11 +163,11 @@ class NetworkUnitSpecification extends UnitSpecification {
         defaultServerConnectionConfig,
         maxQos,
         MqttVersion.MQTT_5,
-        sessionExpiryInterval,
-        receiveMaxPublishes,
-        maxMessageSize,
-        topicAliasMaxValue,
-        keepAlive,
+        testSessionExpiryInterval,
+        testReceiveMaxPublishes,
+        testMaxMessageSize,
+        testTopicAliasMaxValue,
+        testKeepAlive,
         false,
         false)
   }
@@ -197,7 +195,6 @@ class NetworkUnitSpecification extends UnitSpecification {
       int serverKeepAlive,
       int receiveMaxPublishes,
       int topicAliasMaxValue,
-      long sessionExpiryInterval,
       boolean keepAliveEnabled,
       boolean sessionsEnabled,
       boolean retainAvailable,
@@ -213,7 +210,6 @@ class NetworkUnitSpecification extends UnitSpecification {
         serverKeepAlive,
         receiveMaxPublishes,
         topicAliasMaxValue,
-        sessionExpiryInterval,
         keepAliveEnabled,
         sessionsEnabled,
         retainAvailable,

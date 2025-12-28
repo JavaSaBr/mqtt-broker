@@ -67,7 +67,7 @@ class MqttSessionServiceTest extends IntegrationSpecification {
         restored == null
   }
 
-  def "should always store session for < MQTT 5 clients"() {
+  def "should always store session for < MQTT 5.0 clients"() {
     given:
         def clientId = clientIdRegistry.generate().block()
         def client = buildExternalMqtt311Client(clientId)

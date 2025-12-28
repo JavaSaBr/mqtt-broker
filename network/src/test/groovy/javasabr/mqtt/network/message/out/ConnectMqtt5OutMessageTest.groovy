@@ -10,22 +10,22 @@ class ConnectMqtt5OutMessageTest extends BaseMqttOutMessageTest {
   def "should write message correctly"() {
     given:
         def outMessage = new ConnectMqtt5OutMessage(
-            userName,
+            testUserName,
             "",
             mqtt311ClientId,
-            userPassword,
+            testUserPassword,
             ArrayUtils.EMPTY_BYTE_ARRAY,
             QoS.AT_MOST_ONCE,
-            keepAlive,
+            testKeepAlive,
             willRetain,
             cleanStart,
             testUserProperties,
-            authMethod,
-            authData,
-            sessionExpiryInterval,
-            receiveMaxPublishes,
-            maxMessageSize,
-            topicAliasMaxValue,
+            testAuthMethod,
+            testAuthData,
+            testSessionExpiryInterval,
+            testReceiveMaxPublishes,
+            testMaxMessageSize,
+            testTopicAliasMaxValue,
             requestResponseInformation,
             requestProblemInformation)
     when:
@@ -36,19 +36,19 @@ class ConnectMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.username() == userName
+        reader.username() == testUserName
         reader.clientId() == mqtt311ClientId
-        reader.password() == userPassword
-        reader.keepAlive() == keepAlive
+        reader.password() == testUserPassword
+        reader.keepAlive() == testKeepAlive
         reader.userProperties() == testUserProperties
         reader.cleanStart() == cleanStart
         reader.willRetain() == willRetain
-        reader.authenticationMethod() == authMethod
-        reader.authenticationData() == authData
-        reader.sessionExpiryInterval() == sessionExpiryInterval
-        reader.receiveMaxPublishes() == receiveMaxPublishes
-        reader.maxPacketSize() == maxMessageSize
-        reader.topicAliasMaxValue() == topicAliasMaxValue
+        reader.authenticationMethod() == testAuthMethod
+        reader.authenticationData() == testAuthData
+        reader.sessionExpiryInterval() == testSessionExpiryInterval
+        reader.receiveMaxPublishes() == testReceiveMaxPublishes
+        reader.maxMessageSize() == testMaxMessageSize
+        reader.topicAliasMaxValue() == testTopicAliasMaxValue
         reader.requestResponseInformation() == requestResponseInformation
         reader.requestProblemInformation() == requestProblemInformation
   }

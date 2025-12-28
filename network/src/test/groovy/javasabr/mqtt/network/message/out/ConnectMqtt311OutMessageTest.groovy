@@ -10,13 +10,13 @@ class ConnectMqtt311OutMessageTest extends BaseMqttOutMessageTest {
   def "should write packet correctly"() {
     given:
         def packet = new ConnectMqtt311OutMessage(
-            userName,
+            testUserName,
             "",
             mqtt311ClientId,
-            userPassword,
+            testUserPassword,
             ArrayUtils.EMPTY_BYTE_ARRAY,
             QoS.AT_MOST_ONCE,
-            keepAlive,
+            testKeepAlive,
             willRetain,
             cleanStart)
     when:
@@ -27,10 +27,10 @@ class ConnectMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         def result = reader.read(defaultMqtt311Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.username() == userName
+        reader.username() == testUserName
         reader.clientId() == mqtt311ClientId
-        reader.password() == userPassword
-        reader.keepAlive() == keepAlive
+        reader.password() == testUserPassword
+        reader.keepAlive() == testKeepAlive
         reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         reader.cleanStart() == cleanStart
         reader.willRetain  == willRetain
