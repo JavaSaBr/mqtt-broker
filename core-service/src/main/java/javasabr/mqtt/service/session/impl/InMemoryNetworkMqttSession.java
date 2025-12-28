@@ -42,7 +42,6 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   @Getter
   @Setter
-  @Nullable
   volatile Duration expiryInterval;
 
   public InMemoryNetworkMqttSession(String clientId) {
@@ -54,6 +53,7 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
     this.outProcessingPublishes = new InMemoryProcessingPublishes(this);
     this.activeSubscriptions = new InMemoryActiveSubscriptions();
     this.topicNameMapping = new InMemoryTopicNameMapping();
+    this.expiryInterval = MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
   }
 
   @Override

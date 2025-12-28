@@ -13,7 +13,6 @@ public record MqttServerConnectionConfig(
     int minKeepAliveTime,
     int receiveMaxPublishes,
     int topicAliasMaxValue,
-    long defaultSessionExpiryInterval,
     boolean keepAliveEnabled,
     boolean sessionsEnabled,
     boolean retainAvailable,
@@ -30,7 +29,6 @@ public record MqttServerConnectionConfig(
       int minKeepAliveTime,
       int receiveMaxPublishes,
       int topicAliasMaxValue,
-      long defaultSessionExpiryInterval,
       boolean keepAliveEnabled,
       boolean sessionsEnabled,
       boolean retainAvailable,
@@ -63,7 +61,6 @@ public record MqttServerConnectionConfig(
         topicAliasMaxValue,
         MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED,
         MqttProperties.TOPIC_ALIAS_MAX);
-    this.defaultSessionExpiryInterval = defaultSessionExpiryInterval;
     this.keepAliveEnabled = keepAliveEnabled;
     this.sessionsEnabled = sessionsEnabled;
     this.retainAvailable = retainAvailable;

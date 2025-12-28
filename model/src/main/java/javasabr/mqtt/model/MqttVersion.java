@@ -62,6 +62,10 @@ public enum MqttVersion {
     return ordinal() < version.ordinal();
   }
 
+  public boolean isEqualOrHigherThan(MqttVersion version) {
+    return ordinal() >= version.ordinal();
+  }
+  
   public static MqttVersion of(String name, byte level) {
 
     if (level < 0) {

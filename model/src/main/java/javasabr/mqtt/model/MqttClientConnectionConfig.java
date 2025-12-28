@@ -7,7 +7,7 @@ public record MqttClientConnectionConfig(
     MqttServerConnectionConfig server,
     QoS maxQos,
     MqttVersion mqttVersion,
-    @Nullable Duration sessionExpiryInterval,
+    Duration sessionExpiryInterval,
     int receiveMaxPublishes,
     int maxMessageSize,
     int topicAliasMaxValue,
@@ -48,8 +48,6 @@ public record MqttClientConnectionConfig(
   }
 
   public long sessionExpiryIntervalInSecs() {
-    return sessionExpiryInterval == null
-           ? MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
-           : sessionExpiryInterval.toSeconds();
+    return sessionExpiryInterval.toSeconds();
   }
 }

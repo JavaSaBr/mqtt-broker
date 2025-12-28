@@ -17,7 +17,7 @@ class MqttSessionServiceTest extends IntegrationSpecification {
   @Autowired
   MqttSessionService mqttSessionService
 
-  def "client should create fresh session each time"() {
+  def "should create fresh session if client request it"() {
     given:
         def clientId = clientIdRegistry.generate().block()
         def client = buildExternalMqtt5Client(clientId)
@@ -29,10 +29,14 @@ class MqttSessionServiceTest extends IntegrationSpecification {
     when:
         def connectionResult = client.connectWith()
             .cleanStart(true)
+            .sessionExpiryInterval(120)
             .send()
             .join()
     then:
-        connectionResult.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        with(connectionResult) {
+          !sessionPresent
+          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        }
     when:
         client.disconnect().join()
         Thread.sleep(100)
@@ -41,8 +45,45 @@ class MqttSessionServiceTest extends IntegrationSpecification {
         restored != null
         restored != previousSession
   }
+
+  def "should not store session for client which doesn't require it"() {
+    given:
+        def clientId = clientIdRegistry.generate().block()
+        def client = buildExternalMqtt5Client(clientId)
+    when:
+        def connectionResult = client.connectWith()
+            .send()
+            .join()
+    then:
+        with(connectionResult) {
+          !sessionPresent
+          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        }
+    when:
+        client.disconnect().join()
+        Thread.sleep(100)
+        def restored = mqttSessionService.restore(clientId).block()
+    then:
+        restored == null
+  }
+
+  def "should always store session for < MQTT 5 clients"() {
+    given:
+        def clientId = clientIdRegistry.generate().block()
+        def client = buildExternalMqtt311Client(clientId)
+    when:
+        def connectionResult = client.connect().join()
+    then:
+        !connectionResult.sessionPresent
+    when:
+        client.disconnect().join()
+        Thread.sleep(100)
+        def restored = mqttSessionService.restore(clientId).block()
+    then:
+        restored != null
+  }
   
-  def "client should re-use mqtt session between connections"() {
+  def "client should re-use MQTT session between connections"() {
     given:
         def clientId = clientIdRegistry.generate().block()
         def client = buildExternalMqtt5Client(clientId)
@@ -53,10 +94,14 @@ class MqttSessionServiceTest extends IntegrationSpecification {
     when:
         def connectionResult = client.connectWith()
             .cleanStart(false)
+            .sessionExpiryInterval(120)
             .send()
             .join()
     then:
-        connectionResult.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        with(connectionResult) {
+          !sessionPresent
+          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        }
     when:
         mqttSessionService.restore(clientId).block()
     then: 'there is active session for this client'
@@ -79,10 +124,14 @@ class MqttSessionServiceTest extends IntegrationSpecification {
         mqttSessionService.store(clientId, restored).block()
         connectionResult = client.connectWith()
             .cleanStart(false)
+            .sessionExpiryInterval(120)
             .send()
             .join()
     then:
-        connectionResult.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        with(connectionResult) {
+          sessionPresent
+          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+        }
     when:
         client.disconnect().join()
         Thread.sleep(100)

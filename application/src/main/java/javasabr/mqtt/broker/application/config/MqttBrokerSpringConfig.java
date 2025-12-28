@@ -392,10 +392,6 @@ public class MqttBrokerSpringConfig {
             int.class,
             0),
         env.getProperty(
-            "mqtt.external.connection.default.session.expiration.time",
-            long.class,
-            MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT),
-        env.getProperty(
             "mqtt.external.connection.keep.alive.enabled",
             boolean.class,
             MqttProperties.KEEP_ALIVE_ENABLED_DEFAULT),

@@ -6,8 +6,11 @@ import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.MqttProtocolErrors;
+import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
+import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
@@ -23,14 +26,19 @@ import lombok.experimental.FieldDefaults;
  * Connection request.
  */
 @Getter
-@Accessors(fluent = true, chain = false)
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConnectMqttInMessage extends MqttInMessage {
 
   private static final byte MESSAGE_TYPE = (byte) MqttMessageType.CONNECT.ordinal();
 
   static {
-    DebugUtils.registerIncludedFields("clientId", "keepAlive", "cleanStart", "mqttVersion");
+    DebugUtils.registerIncludedFields(
+        "clientId",
+        "keepAlive", 
+        "cleanStart", 
+        "mqttVersion",
+        "sessionExpiryInterval");
   }
 
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
@@ -265,7 +273,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
     cleanStart = NumberUtils.isSetBit(flags, 1);
 
     // for mqtt 3.1.1+
-    if (mqttVersion.ordinal() >= MqttVersion.MQTT_3_1_1.ordinal()) {
+    if (mqttVersion.isEqualOrHigherThan(MqttVersion.MQTT_3_1_1)) {
       boolean zeroReservedFlag = NumberUtils.isNotSetBit(flags, 0);
       if (!zeroReservedFlag) {
         /*
@@ -282,7 +290,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
     hasPassword = NumberUtils.isSetBit(flags, 6);
 
     // for mqtt < 5 we cannot have password without user
-    if (mqttVersion.ordinal() < MqttVersion.MQTT_5.ordinal() && !hasUserName && hasPassword) {
+    if (mqttVersion.isLowerThan(MqttVersion.MQTT_5) && !hasUserName && hasPassword) {
       throw new ConnectionRejectException(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD);
     }
 
@@ -296,6 +304,11 @@ public class ConnectMqttInMessage extends MqttInMessage {
     time interval between two adjacent control packets sent by the client.
      */
     keepAlive = readShortUnsigned(buffer);
+
+    // before MQTT 5 we can't configure session expiry interval so it's always infinity
+    if (mqttVersion.isLowerThan(MqttVersion.MQTT_5)) {
+      sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY;
+    }
   }
 
   @Override
@@ -321,7 +334,7 @@ public class ConnectMqttInMessage extends MqttInMessage {
      */
     clientId = readString(buffer, Integer.MAX_VALUE);
 
-    if (willFlag && mqttVersion.ordinal() >= MqttVersion.MQTT_5.ordinal()) {
+    if (willFlag && mqttVersion.include(MqttVersion.MQTT_5)) {
       readProperties(connection, buffer, WILL_PROPERTIES);
     }
 
@@ -350,6 +363,21 @@ public class ConnectMqttInMessage extends MqttInMessage {
   @Override
   protected Set<MqttMessageProperty> availableProperties() {
     return AVAILABLE_PROPERTIES;
+  }
+
+  public long sessionExpiryInterval() {
+    return sessionExpiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
+           ? MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED
+           : sessionExpiryInterval;
+  }
+
+  @Override
+  protected void readProperties(MqttConnection connection, ByteBuffer buffer) {
+    MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
+    int maxBinarySize = serverConfig.maxBinarySize();
+    int maxStringLength = serverConfig.maxStringLength();
+    // for this message client connection config is not available
+    super.readProperties(buffer, availableProperties(), maxStringLength, maxBinarySize);
   }
 
   @Override
@@ -381,10 +409,15 @@ public class ConnectMqttInMessage extends MqttInMessage {
           (int) value,
           MqttProperties.TOPIC_ALIAS_MIN,
           MqttProperties.TOPIC_ALIAS_MAX);
-      case SESSION_EXPIRY_INTERVAL -> sessionExpiryInterval = NumberUtils.validate(
-          value,
-          MqttProperties.SESSION_EXPIRY_INTERVAL_MIN,
-          MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY);
+      case SESSION_EXPIRY_INTERVAL -> {
+        if (sessionExpiryInterval != MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.SESSION_EXPIRY_INTERVAL_MIN
+            || value > MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_SESSION_EXPIRY_INTERVAL);
+        }
+        sessionExpiryInterval = value;
+      }
       case MAXIMUM_MESSAGE_SIZE -> maxPacketSize = NumberUtils.validate(
           (int) value,
           MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,

@@ -85,7 +85,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
@@ -111,7 +111,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
     then:
@@ -194,7 +194,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
         def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
     then:
         connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
@@ -220,7 +220,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
     then:
@@ -231,7 +231,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
         connectAck = subscriber.readNext() as ConnectAckMqttInMessage
         receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
         subscriber.send(new PublishReceivedMqtt5OutMessage(

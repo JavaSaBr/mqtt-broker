@@ -2,6 +2,7 @@ package javasabr.mqtt.service.session.impl;
 
 import java.io.Closeable;
 import java.time.Duration;
+import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -98,12 +99,10 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
         throw new IllegalStateException("Client:[%s] has another active session".formatted(clientId));
       }
       activeSessions.remove(clientId);
-
       Duration expiryInterval = currentActiveSession.expiryInterval();
-      // not storable session
-      if (expiryInterval == null) {
+      if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_DISABLED) {
         return Mono.just(false);
-      } else if (expiryInterval.isZero()) {
+      } else if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
         storeNotExpirableSession(clientId, currentActiveSession);
       } else {
         storeExpirableSession(clientId, expiryInterval, currentActiveSession);
