@@ -3,6 +3,7 @@ package javasabr.mqtt.network
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
+import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
@@ -43,6 +44,8 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final testKeepAlive = 120
   public static final testSessionExpiryInterval = 300
   public static final testMessageExpiryInterval = 60
+  public static final testWillMessageExpiryInterval = 90
+  public static final testWillDelayInterval = 10
   public static final testTopicAlias = 252
   public static final testReceiveMaxPublishes = 10
   public static final testMaxMessageSize = 1024
@@ -61,6 +64,8 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final reasonString = "reasonString"
   public static final publishTopic = TopicName.valueOf("publish/Topic")
   public static final testResponseTopic = TopicName.valueOf("response/Topic")
+  public static final testWillTopic = TopicName.valueOf("will/Topic")
+  public static final testWillResponseTopic = TopicName.valueOf("will/response/Topic")
   public static final topicFilter = "topic/Filter"
   public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
   public static final topicFilter1Obj5 = new Subscription(
@@ -85,6 +90,7 @@ class NetworkUnitSpecification extends UnitSpecification {
 
   public static final serverReference = "serverReference"
   public static final testContentType = "application/json"
+  public static final testWillContentType = "application/json"
   public static final subscribeAckReasonCodes = Array.typed(
       SubscribeAckReasonCode,
       SubscribeAckReasonCode.GRANTED_QOS_1,
@@ -103,12 +109,20 @@ class NetworkUnitSpecification extends UnitSpecification {
       new StringPair("key2", "val2"),
       new StringPair("key3", "val3"))
 
+  public static final testWillUserProperties = Array.typed(
+      StringPair,
+      new StringPair("will_key1", "val1"),
+      new StringPair("will_key2", "val2"))
+
   public static final testSubscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
   public static final topicFilters = Array.of(topicFilter, topicFilter2)
   public static final subscriptionsObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
   public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
   public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
   public static final testCorrelationData = "correlationData".getBytes(StandardCharsets.UTF_8)
+  public static final testWillPayload = "willPayload".getBytes(StandardCharsets.UTF_8)
+  public static final testWillPayloadFormat = PayloadFormat.UTF8_STRING.code() as byte
+  public static final testWillCorrelationData = "willCorrelationData".getBytes(StandardCharsets.UTF_8)
   public static final clientIdGenerator = new AtomicInteger(1)
 
   @Shared

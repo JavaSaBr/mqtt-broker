@@ -208,12 +208,13 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
   protected void applyProperty(MqttMessageProperty property, StringPair value) {
     switch (property) {
-      case USER_PROPERTY:
+      case USER_PROPERTY: {
         if (userProperties == null) {
           userProperties = MutableArray.ofType(StringPair.class);
         }
         userProperties.add(value);
         break;
+      }
     }
   }
 

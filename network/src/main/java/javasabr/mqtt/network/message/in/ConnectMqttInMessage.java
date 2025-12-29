@@ -9,11 +9,17 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
+import javasabr.mqtt.model.PayloadFormat;
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
 import javasabr.mqtt.model.exception.MalformedProtocolMqttException;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.util.MqttDataUtils;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.NumberUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -215,7 +221,8 @@ public class ConnectMqttInMessage extends MqttInMessage {
   
   boolean willFlag;
   boolean willRetain;
-  int willQos;
+  @Nullable
+  QoS willQos;
   @Nullable
   String willTopic;
   byte @Nullable [] willPayload;
@@ -229,9 +236,30 @@ public class ConnectMqttInMessage extends MqttInMessage {
   int receiveMaxPublishes;
   int maxMessageSize;
   int topicAliasMaxValue;
+
+  @Nullable
+  Boolean requestResponseInformation;
+  @Nullable
+  Boolean requestProblemInformation;
   
-  boolean requestResponseInformation;
-  boolean requestProblemInformation;
+  // will properties
+  @Nullable 
+  PayloadFormat willPayloadFormat;
+
+  @Nullable
+  String willContentType;
+  @Nullable 
+  String willResponseTopic;
+
+  byte @Nullable [] willCorrelationData;
+
+  int willDelayInterval;
+  long willMessageExpiryInterval;
+
+  @Nullable 
+  MutableArray<StringPair> willUserProperties;
+  
+  boolean readingWillProperties;
 
   public ConnectMqttInMessage(byte messageFlags) {
     super(messageFlags);
@@ -239,6 +267,8 @@ public class ConnectMqttInMessage extends MqttInMessage {
     receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
     maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
     topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
+    willDelayInterval = MqttProperties.WILL_DELAY_INTERVAL_IS_NOT_SET;
+    willMessageExpiryInterval = MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET;
   }
 
   @Override
@@ -269,48 +299,59 @@ public class ConnectMqttInMessage extends MqttInMessage {
       throw new ConnectionRejectException(ConnectAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION);
     }
 
-    int flags = readByteUnsigned(buffer);
+    int connectFlags = readByteUnsigned(buffer);
+    
     /*
-    Used to indicate whether the will message is a retained message.
+      Used to indicate whether the current connection is a new session or
+      a continuation of an existing session, which determines whether the server will directly
+      create a new session or attempt to reuse an existing session.
      */
-    willRetain = NumberUtils.isSetBit(flags, 5);
+    cleanStart = (connectFlags & 0b0000_0010) != 0;
     /*
-    Used to indicate the QoS of the will message.
+      Used to indicate whether the Payload contains relevant fields of the will message.
      */
-    willQos = (flags & 0x18) >> 3;
+    willFlag = (connectFlags & 0b0000_0100) != 0;
+   
     /*
-    Used to indicate whether the current connection is a new session or
-    a continuation of an existing session, which determines whether the server will directly
-    create a new session or attempt to reuse an existing session.
+      Used to indicate the QoS of the will message.
      */
-    cleanStart = NumberUtils.isSetBit(flags, 1);
-
+    int qosLevel = (connectFlags & 0x18) >> 3;
+    qosLevel = (connectFlags & 0b0001_1000) >> 3;
+    // If the Will Flag is set to 0, then the Will QoS MUST be set to 0 (0x00)
+    if (willFlag) {
+      willQos = QoS.ofCode(qosLevel);
+    } else if (qosLevel != 0) {
+      throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
+    }
+    
+    /*
+      Used to indicate whether the will message is a retained message.
+     */
+    willRetain = (connectFlags & 0b0010_0000) != 0;
+    // If the Will Flag is set to 0, then the Will Retain Flag MUST be set to 0
+    if (!willFlag && willRetain) {
+      throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
+    }
+    
     // for mqtt 3.1.1+
     if (mqttVersion.isEqualOrHigherThan(MqttVersion.MQTT_3_1_1)) {
-      boolean zeroReservedFlag = NumberUtils.isNotSetBit(flags, 0);
-      if (!zeroReservedFlag) {
+      boolean zeroReservedFlag = (connectFlags & 0b0000_0001) != 0;
+      if (zeroReservedFlag) {
         /*
          The Server MUST validate that the reserved flag in the CONNECT packet is set to 0 [MQTT-3.1.2-3]. If
-         the reserved flag is not 0 it is a Malformed Packet. Refer to section 4.13 for information about
-         handling
-         errors.
+         the reserved flag is not 0 it is a Malformed Packet.
         */
         throw new ConnectionRejectException(ConnectAckReasonCode.MALFORMED_PACKET);
       }
     }
 
-    hasUserName = NumberUtils.isSetBit(flags, 7);
-    hasPassword = NumberUtils.isSetBit(flags, 6);
+    hasUserName = (connectFlags & 0b1000_0000) != 0;
+    hasPassword = (connectFlags & 0b0100_0000) != 0; 
 
     // for mqtt < 5 we cannot have password without user
     if (mqttVersion.isLowerThan(MqttVersion.MQTT_5) && !hasUserName && hasPassword) {
       throw new ConnectionRejectException(ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD);
     }
-
-    /*
-    Used to indicate whether the Payload contains relevant fields of the will message.
-     */
-    willFlag = NumberUtils.isSetBit(flags, 2);
 
     /*
     This is a double-byte length unsigned integer used to indicate the maximum
@@ -326,7 +367,9 @@ public class ConnectMqttInMessage extends MqttInMessage {
 
   @Override
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {
-    var connectionConfig = connection.serverConnectionConfig();
+    MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
+    int maxBinarySize = serverConfig.maxBinarySize();
+    int maxStringLength = serverConfig.maxStringLength();
     /*
       The ClientID MUST be present and is the first field in the CONNECT packet Payload
       The ClientID MUST be a UTF-8 Encoded String as defined in
@@ -345,26 +388,28 @@ public class ConnectMqttInMessage extends MqttInMessage {
       If the Server rejects the ClientID it MAY respond to the CONNECT packet with a CONNACK using
       Reason Code 0x85 (Client Identifier not valid) and then it MUST close the Network Connection
      */
-    clientId = readString(buffer, Integer.MAX_VALUE);
+    clientId = readString(buffer, maxStringLength);
 
     if (willFlag && mqttVersion.include(MqttVersion.MQTT_5)) {
-      readProperties(connection, buffer, WILL_PROPERTIES);
+      readingWillProperties = true;
+      try {
+        readProperties(connection, buffer, WILL_PROPERTIES);
+      } finally {
+        readingWillProperties = false;
+      }
     }
 
     if (willFlag) {
-      willTopic = readString(buffer, Integer.MAX_VALUE);
+      willTopic = readString(buffer, maxStringLength);
+      willPayload = readBytes(buffer, maxBinarySize);
     }
-
-    if (willFlag) {
-      willPayload = readBytes(buffer, connectionConfig.maxBinarySize());
-    }
-
+    
     if (hasUserName) {
-      username = readString(buffer, Integer.MAX_VALUE);
+      username = readString(buffer, maxStringLength);
     }
 
     if (hasPassword) {
-      password = readBytes(buffer, connectionConfig.maxBinarySize());
+      password = readBytes(buffer, maxBinarySize);
     }
   }
 
@@ -384,6 +429,10 @@ public class ConnectMqttInMessage extends MqttInMessage {
            : sessionExpiryInterval;
   }
 
+  public Array<StringPair> willUserProperties() {
+    return willUserProperties == null ? EMPTY_USER_PROPERTIES : willUserProperties;
+  }
+
   @Override
   protected void readProperties(MqttConnection connection, ByteBuffer buffer) {
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
@@ -395,33 +444,78 @@ public class ConnectMqttInMessage extends MqttInMessage {
 
   @Override
   protected void applyProperty(MqttMessageProperty property, byte[] value) {
+    if (readingWillProperties) {
+      applyWillProperty(property, value);
+      return;
+    }
     switch (property) {
-      case AUTHENTICATION_DATA -> authenticationData = value;
+      case AUTHENTICATION_DATA -> {
+        if (authenticationData != null) {
+          alreadyPresentedProperty(property);
+        }
+        authenticationData = value;
+      }
       default -> unsupportedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(MqttMessageProperty property, String value) {
+    if (readingWillProperties) {
+      applyWillProperty(property, value);
+      return;
+    }
     switch (property) {
-      case AUTHENTICATION_METHOD -> authenticationMethod = value;
+      case AUTHENTICATION_METHOD -> {
+        if (authenticationMethod != null) {
+          alreadyPresentedProperty(property);
+        }
+        authenticationMethod = value;
+      }
       default -> unsupportedProperty(property);
     }
   }
 
   @Override
   protected void applyProperty(MqttMessageProperty property, long value) {
+    if (readingWillProperties) {
+      applyWillProperty(property, value);
+      return;
+    }
     switch (property) {
-      case REQUEST_RESPONSE_INFORMATION -> requestResponseInformation = NumberUtils.toBoolean(value);
-      case REQUEST_PROBLEM_INFORMATION -> requestProblemInformation = NumberUtils.toBoolean(value);
-      case RECEIVE_MAXIMUM_PUBLISHES -> receiveMaxPublishes = NumberUtils.validate(
-          (int) value,
-          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN,
-          MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX);
-      case TOPIC_ALIAS_MAXIMUM -> topicAliasMaxValue = NumberUtils.validate(
-          (int) value,
-          MqttProperties.TOPIC_ALIAS_MIN,
-          MqttProperties.TOPIC_ALIAS_MAX);
+      case REQUEST_RESPONSE_INFORMATION -> {
+        if (requestResponseInformation != null) {
+          alreadyPresentedProperty(property);
+        } else if (!MqttDataUtils.isValidBoolean(value)) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_REQUEST_RESPONSE_INFORMATION);
+        }
+        requestResponseInformation = NumberUtils.toBoolean(value);
+      }
+      case REQUEST_PROBLEM_INFORMATION -> {
+        if (requestProblemInformation != null) {
+          alreadyPresentedProperty(property);
+        } else if (!MqttDataUtils.isValidBoolean(value)) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_REQUEST_PROBLEM_INFORMATION);
+        }
+        requestProblemInformation = NumberUtils.toBoolean(value);
+      }
+      case RECEIVE_MAXIMUM_PUBLISHES -> {
+        if (receiveMaxPublishes != MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN
+            || value > MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_RECEIVED_MAX_PUBLISHES);
+        }
+        receiveMaxPublishes = (int) value;
+      }
+      case TOPIC_ALIAS_MAXIMUM -> {
+        if (topicAliasMaxValue != MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.TOPIC_ALIAS_MAXIMUM_MIN || value > MqttProperties.TOPIC_ALIAS_MAXIMUM_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_TOPIC_ALIAS_MAX);
+        }
+        topicAliasMaxValue = (int) value;
+      }
       case SESSION_EXPIRY_INTERVAL -> {
         if (sessionExpiryInterval != MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
           alreadyPresentedProperty(property);
@@ -431,10 +525,98 @@ public class ConnectMqttInMessage extends MqttInMessage {
         }
         sessionExpiryInterval = value;
       }
-      case MAXIMUM_MESSAGE_SIZE -> maxMessageSize = NumberUtils.validate(
-          (int) value,
-          MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
-          MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
+      case MAXIMUM_MESSAGE_SIZE -> {
+        if (maxMessageSize != MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN || value > MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_MAX_MESSAGE_SIZE);
+        }
+        maxMessageSize = (int) value;
+      }
+      default -> unsupportedProperty(property);
+    }
+  }
+
+  @Override
+  protected void applyProperty(MqttMessageProperty property, StringPair value) {
+    if (readingWillProperties) {
+      applyWillProperty(property, value);
+      return;
+    }
+    super.applyProperty(property, value);
+  }
+
+  protected void applyWillProperty(MqttMessageProperty property, StringPair value) {
+    switch (property) {
+      case USER_PROPERTY: {
+        if (willUserProperties == null) {
+          willUserProperties = MutableArray.ofType(StringPair.class);
+        }
+        willUserProperties.add(value);
+        break;
+      }
+    }
+  }
+  
+  private void applyWillProperty(MqttMessageProperty property, String value) {
+    switch (property) {
+      case CONTENT_TYPE -> {
+        if (willContentType != null) {
+          alreadyPresentedProperty(property);
+        }
+        willContentType = value;
+      }
+      case RESPONSE_TOPIC -> {
+        if (willResponseTopic != null) {
+          alreadyPresentedProperty(property);
+        }
+        willResponseTopic = value;
+      }
+      default -> unsupportedProperty(property);
+    }
+  }
+  
+  private void applyWillProperty(MqttMessageProperty property, byte[] value) {
+    switch (property) {
+      case CORRELATION_DATA -> {
+        if (willCorrelationData != null) {
+          alreadyPresentedProperty(property);
+        }
+        willCorrelationData = value;
+      }
+      default -> unsupportedProperty(property);
+    }
+  }
+  
+  private void applyWillProperty(MqttMessageProperty property, long value) {
+    switch (property) {
+      case WILL_DELAY_INTERVAL -> {
+        if (willDelayInterval != MqttProperties.WILL_DELAY_INTERVAL_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.WILL_DELAY_INTERVAL_MIN || value > MqttProperties.WILL_DELAY_INTERVAL_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_WILL_DELAY_INTERVAL);
+        }
+        willDelayInterval = (int) value;
+      }
+      case PAYLOAD_FORMAT_INDICATOR -> {
+        if (willPayloadFormat != null) {
+          alreadyPresentedProperty(property);
+        }
+        PayloadFormat payloadFormat = PayloadFormat.fromCode(value);
+        if (payloadFormat == PayloadFormat.UNDEFINED) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_PAYLOAD_FORMAT);
+        }
+        willPayloadFormat = payloadFormat;
+      }
+      case MESSAGE_EXPIRY_INTERVAL -> {
+        if (willMessageExpiryInterval != MqttProperties.WILL_DELAY_INTERVAL_IS_NOT_SET) {
+          alreadyPresentedProperty(property);
+        } else if (value < MqttProperties.MESSAGE_EXPIRY_INTERVAL_MIN
+            || value > MqttProperties.MESSAGE_EXPIRY_INTERVAL_MAX) {
+          throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_MESSAGE_EXPIRY_INTERVAL);
+        }
+        willMessageExpiryInterval = (int) value;
+      }
       default -> unsupportedProperty(property);
     }
   }
