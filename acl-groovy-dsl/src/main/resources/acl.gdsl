@@ -67,6 +67,11 @@ contributor(aclScriptContext) {
         params: [string: 'String'],
         delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
         doc: 'Match incoming topic by topic name'
+    method name: 'dynamic',
+        type: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
+        params: [string: 'String'],
+        delegateType: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
+        doc: 'Match incoming topic by topic name'
     method name: 'anyTopic',
         type: 'javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder',
         params: [:],

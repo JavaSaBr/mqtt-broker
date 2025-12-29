@@ -31,47 +31,56 @@ class PublishRetryTest extends IntegrationSpecification {
 
   def "mqtt 3.1.1 client should be generate session with one pending QoS 1 packet"() {
     given:
-        def publisher = buildExternalMqtt5Client()
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "PublishRetryTest1"
+        def publisher = buildExternalMqtt5Client(deviceId)
         def subscriber = buildMqtt311MockClient()
-        def subscriberId = generateClientId()
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
-        def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
+        subscriber.send(new ConnectMqtt311OutMessage(serviceId, keepAlive))
     then:
-        connectAck.reasonCode() == ConnectAckReasonCode.SUCCESS
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
     when:
         subscriber.send(new SubscribeMqtt311OutMessage(
             1,
-            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.AT_LEAST_ONCE))))
-        def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
+            Array.of(Subscription.minimal(TopicFilter.valueOf("service/$serviceName/device/+"), QoS.AT_LEAST_ONCE))))
     then:
-        subscribeAck.reasonCodes()
-            .stream()
-            .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_1 })
+        with(subscriber.readNext() as SubscribeAckMqttInMessage) {
+          reasonCodes()
+              .stream()
+              .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_1 })
+        }
     when:
-        publisher.publishWith()
-            .topic("test/retry/$subscriberId")
+        publisher
+            .publishWith()
+            .topic("service/$serviceName/device/$deviceId")
             .qos(MqttQos.AT_MOST_ONCE)
             .payload(publishPayload)
             .send()
             .join()
-        def receivedPublish = subscriber.readNext() as PublishMqttInMessage
     then:
-        receivedPublish.payload() == publishPayload
+        def receivedPublish = subscriber.readNext() as PublishMqttInMessage
+        with(receivedPublish) {
+          payload() == publishPayload
+        }
     when:
         subscriber.disconnect()
         Thread.sleep(1_000)
         subscriber.connect()
-        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
-        connectAck = subscriber.readNext() as ConnectAckMqttInMessage
-        def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
+        subscriber.send(new ConnectMqtt311OutMessage(serviceId, keepAlive))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
-        receivedDupPublish.duplicate
-        receivedDupPublish.messageId == receivedPublish.messageId
-        receivedDupPublish.payload == publishPayload
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
+        with(subscriber.readNext() as PublishMqttInMessage) {
+          duplicate()
+          messageId() == receivedPublish.messageId()
+          payload() == publishPayload
+        }
     cleanup:
         subscriber.close()
         publisher.disconnect().join()
@@ -79,46 +88,55 @@ class PublishRetryTest extends IntegrationSpecification {
 
   def "mqtt 5 client should be generate session with one pending QoS 1 packet"() {
     given:
-        def publisher = buildExternalMqtt5Client()
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "PublishRetryTest2"
+        def publisher = buildExternalMqtt5Client(deviceId)
         def subscriber = buildMqtt5MockClient()
-        def subscriberId = generateClientId()
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
-        def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, 120))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
     when:
         subscriber.send(new SubscribeMqtt5OutMessage(
             1,
-            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.AT_LEAST_ONCE))))
-        def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
+            Array.of(Subscription.minimal(TopicFilter.valueOf("service/$serviceName/device/+"), QoS.AT_LEAST_ONCE))))
     then:
-        subscribeAck.reasonCodes.stream()
-            .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_1 })
+        with(subscriber.readNext() as SubscribeAckMqttInMessage) {
+          reasonCodes()
+              .stream()
+              .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_1 })
+        }
     when:
-        publisher.publishWith()
-            .topic("test/retry/$subscriberId")
+        publisher
+            .publishWith()
+            .topic("service/$serviceName/device/$deviceId")
             .qos(MqttQos.AT_MOST_ONCE)
             .payload(publishPayload)
             .send()
             .join()
-
-        def receivedPublish = subscriber.readNext() as PublishMqttInMessage
     then:
-        receivedPublish.payload == publishPayload
+        def receivedPublish = subscriber.readNext() as PublishMqttInMessage
+        with(receivedPublish) {
+          payload() == publishPayload
+        }
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
-        connectAck = subscriber.readNext() as ConnectAckMqttInMessage
-        def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, 120))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
-        receivedDupPublish.duplicate
-        receivedDupPublish.messageId == receivedPublish.messageId
-        receivedDupPublish.payload == publishPayload
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
+        with(subscriber.readNext() as PublishMqttInMessage) {
+          duplicate()
+          messageId() == receivedPublish.messageId()
+          payload() == publishPayload
+        }
     cleanup:
         subscriber.close()
         publisher.disconnect().join()
@@ -126,61 +144,73 @@ class PublishRetryTest extends IntegrationSpecification {
 
   def "mqtt 3.1.1 client should be generate session with one pending QoS 2 packet"() {
     given:
-        def publisher = buildExternalMqtt5Client()
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "PublishRetryTest3"
+        def publisher = buildExternalMqtt5Client(deviceId)
         def subscriber = buildMqtt311MockClient()
-        def subscriberId = generateClientId()
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
-        def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
+        subscriber.send(new ConnectMqtt311OutMessage(serviceId, keepAlive))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
     when:
         subscriber.send(new SubscribeMqtt311OutMessage(
             1,
-            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.EXACTLY_ONCE))))
-        def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
+            Array.of(Subscription.minimal(TopicFilter.valueOf("service/$serviceName/device/+"), QoS.EXACTLY_ONCE))))
     then:
-        subscribeAck.reasonCodes.stream()
-            .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_2 })
+        with(subscriber.readNext() as SubscribeAckMqttInMessage) {
+          reasonCodes()
+              .stream()
+              .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_2 })
+        }
     when:
-        publisher.publishWith()
-            .topic("test/retry/$subscriberId")
+        publisher
+            .publishWith()
+            .topic("service/$serviceName/device/$deviceId")
             .qos(MqttQos.AT_MOST_ONCE)
             .payload(publishPayload)
             .send()
             .join()
-
+    then:
         def receivedPublish = subscriber.readNext() as PublishMqttInMessage
-    then:
-        receivedPublish.payload == publishPayload
+        with(receivedPublish) {
+          payload() == publishPayload
+        }
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
-        connectAck = subscriber.readNext() as ConnectAckMqttInMessage
-        def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
+        subscriber.send(new ConnectMqtt311OutMessage(serviceId, keepAlive))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
-        receivedDupPublish.duplicate
-        receivedDupPublish.messageId == receivedPublish.messageId
-        receivedDupPublish.payload == publishPayload
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
+        with(subscriber.readNext() as PublishMqttInMessage) {
+          duplicate()
+          messageId() == receivedPublish.messageId()
+          payload() == publishPayload
+        }
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt311OutMessage(subscriberId, keepAlive))
-        connectAck = subscriber.readNext() as ConnectAckMqttInMessage
-        receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
-        subscriber.send(new PublishReceivedMqtt311OutMessage(receivedDupPublish.messageId()))
-        def releaseAck = subscriber.readNext() as PublishReleaseMqttInMessage
-        subscriber.send(new PublishCompleteMqtt311OutMessage(receivedDupPublish.messageId()))
+        subscriber.send(new ConnectMqtt311OutMessage(serviceId, keepAlive))
+        subscriber.send(new PublishReceivedMqtt311OutMessage(receivedPublish.messageId()))
+        subscriber.send(new PublishCompleteMqtt311OutMessage(receivedPublish.messageId()))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
-        receivedDupPublish.duplicate
-        receivedDupPublish.messageId == receivedPublish.messageId
-        receivedDupPublish.payload == publishPayload
-        releaseAck.messageId == receivedPublish.messageId
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
+        with(subscriber.readNext() as PublishMqttInMessage) {
+          duplicate()
+          messageId() == receivedPublish.messageId()
+          payload() == publishPayload
+        }
+        with(subscriber.readNext() as PublishReleaseMqttInMessage) {
+          messageId() == receivedPublish.messageId()
+        }
     cleanup:
         subscriber.close()
         publisher.disconnect().join()
@@ -188,68 +218,79 @@ class PublishRetryTest extends IntegrationSpecification {
 
   def "mqtt 5 client should be generate session with one pending QoS 2 packet"() {
     given:
-        def publisher = buildExternalMqtt5Client()
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "PublishRetryTest4"
+        def publisher = buildExternalMqtt5Client(deviceId)
         def subscriber = buildMqtt5MockClient()
-        def subscriberId = generateClientId()
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
-        def connectAck = subscriber.readNext() as ConnectAckMqttInMessage
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, 120))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
     when:
         subscriber.send(new SubscribeMqtt5OutMessage(
             1,
-            Array.of(Subscription.minimal(TopicFilter.valueOf("test/retry/$subscriberId"), QoS.EXACTLY_ONCE))))
-        def subscribeAck = subscriber.readNext() as SubscribeAckMqttInMessage
+            Array.of(Subscription.minimal(TopicFilter.valueOf("service/$serviceName/device/+"), QoS.EXACTLY_ONCE))))
     then:
-        subscribeAck.reasonCodes.stream()
-            .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_2 })
+        with(subscriber.readNext() as SubscribeAckMqttInMessage) {
+          reasonCodes()
+              .stream()
+              .allMatch({ it == SubscribeAckReasonCode.GRANTED_QOS_2 })
+        }
     when:
-        publisher.publishWith()
-            .topic("test/retry/$subscriberId")
+        publisher
+            .publishWith()
+            .topic("service/$serviceName/device/$deviceId")
             .qos(MqttQos.AT_MOST_ONCE)
             .payload(publishPayload)
             .send()
             .join()
-
+    then:
         def receivedPublish = subscriber.readNext() as PublishMqttInMessage
-    then:
-        receivedPublish.payload == publishPayload
+        with(receivedPublish) {
+          payload() == publishPayload
+        }
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
-        connectAck = subscriber.readNext() as ConnectAckMqttInMessage
-        def receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, 120))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
-        receivedDupPublish.duplicate
-        receivedDupPublish.messageId == receivedPublish.messageId
-        receivedDupPublish.payload == publishPayload
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
+        with(subscriber.readNext() as PublishMqttInMessage) {
+          duplicate()
+          messageId() == receivedPublish.messageId()
+          payload() == publishPayload
+        }
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(subscriberId, keepAlive, 120))
-        connectAck = subscriber.readNext() as ConnectAckMqttInMessage
-        receivedDupPublish = subscriber.readNext() as PublishMqttInMessage
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, 120))
         subscriber.send(new PublishReceivedMqtt5OutMessage(
-            receivedDupPublish.messageId(),
+            receivedPublish.messageId(),
             PublishReceivedReasonCode.SUCCESS
         ))
-
-        def releaseAck = subscriber.readNext() as PublishReleaseMqttInMessage
         subscriber.send(new PublishCompleteMqtt5OutMessage(
-            receivedDupPublish.messageId(),
+            receivedPublish.messageId(),
             PublishCompletedReasonCode.SUCCESS
         ))
     then:
-        connectAck.reasonCode == ConnectAckReasonCode.SUCCESS
-        receivedDupPublish.duplicate
-        receivedDupPublish.messageId == receivedPublish.messageId
-        receivedDupPublish.payload == publishPayload
-        releaseAck.messageId == receivedPublish.messageId
+        with(subscriber.readNext() as ConnectAckMqttInMessage) {
+          reasonCode() == ConnectAckReasonCode.SUCCESS
+        }
+        with(subscriber.readNext() as PublishMqttInMessage) {
+          duplicate()
+          messageId() == receivedPublish.messageId()
+          payload() == publishPayload
+        }
+        with(subscriber.readNext() as PublishReleaseMqttInMessage) {
+          messageId() == receivedPublish.messageId()
+        }
     cleanup:
         subscriber.close()
         publisher.disconnect().join()

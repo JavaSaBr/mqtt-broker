@@ -16,7 +16,11 @@ import javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.ClientIdTopicSegmentResolver
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.NoOpsTopicSegmentResolver
 import javasabr.mqtt.acl.engine.model.rule.AbstractAclRule
+import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.service.acl.TestRulesGenerator
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
@@ -83,6 +87,7 @@ class AclRulesLoaderTest extends UnitSpecification {
         "7.gacl"           | AclConfigurationException | 'Already included any topic condition'
         "8.gacl"           | AclConfigurationException | 'Already included any user condition'
         "9.gacl"           | AclConfigurationException | 'Already included any value matcher'
+        "10.gacl"          | AclConfigurationException | 'Invalid topic:invalid/##'
   }
 
   def getAbsolutePath(String fileName) {
@@ -167,7 +172,7 @@ class AclRulesLoaderTest extends UnitSpecification {
           }
         }
         verifyAll(rules.get(SUBSCRIBE)) {
-          size() == 3
+          size() == 4
           with(get(0) as AbstractAclRule) {
             operation() == SUBSCRIBE
             action() == DENY
@@ -198,6 +203,24 @@ class AclRulesLoaderTest extends UnitSpecification {
             action() == DENY
             userCondition() == MqttUserCondition.MATCH_ANY
             topicCondition().matchers.get(0) == AnyTopicMatcher.instance()
+          }
+          with(get(3) as AbstractAclRule) {
+            operation() == SUBSCRIBE
+            action() == ALLOW
+            with(userCondition() as ClientIdCondition) {
+              with(matcher as StartsWithMatcher) { prefix() == "device_" }
+            }
+            with(topicCondition().matchers) {
+              with(get(0) as DynamicTopicMatcher<TopicName>) { 
+                originalTopic.rawTopic() == "/devices/{clientId}/notify" 
+                resolvers.length == 4
+                resolvers[0].class == NoOpsTopicSegmentResolver
+                resolvers[1].class == NoOpsTopicSegmentResolver
+                resolvers[2].class == ClientIdTopicSegmentResolver
+                resolvers[3].class == NoOpsTopicSegmentResolver
+              }
+              with(get(1) as TopicFilterMatcher) { expected.rawTopic() == "/devices/broadcast" }
+            }
           }
         }
   }
