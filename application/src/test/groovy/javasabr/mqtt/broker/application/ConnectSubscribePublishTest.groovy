@@ -17,15 +17,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 0 using mqtt 3.1.1"() {
     given:
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "ConnectSubscribePublishTest1"
         def received = new CompletableFuture<Mqtt3Publish>()
-        def subscriber = buildExternalMqtt311Client()
-        def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
-        def publisher = buildExternalMqtt311Client()
+        def subscriber = buildExternalMqtt311Client(serviceId)
+        def publisher = buildExternalMqtt311Client(deviceId)
     when:
         subscriber.connect().join()
         publisher.connect().join()
-        def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_MOST_ONCE, received)
-        def publishResult = publish(publisher, subscriberId, MqttQos.AT_MOST_ONCE)
+        def subscribeResult = subscribe(subscriber, "service/$serviceName/device/+", MqttQos.AT_MOST_ONCE, received)
+        def publishResult = publish(publisher, "service/$serviceName/device/$deviceId", MqttQos.AT_MOST_ONCE)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -44,15 +46,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 0 using mqtt 5"() {
     given:
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "ConnectSubscribePublishTest2"
         def received = new CompletableFuture<Mqtt5Publish>()
-        def subscriber = buildExternalMqtt5Client()
-        def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
-        def publisher = buildExternalMqtt5Client()
+        def subscriber = buildExternalMqtt5Client(serviceId)
+        def publisher = buildExternalMqtt5Client(deviceId)
     when:
         subscriber.connect().join()
         publisher.connect().join()
-        def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_MOST_ONCE, received)
-        def publishResult = publish(publisher, subscriberId, MqttQos.AT_MOST_ONCE)
+        def subscribeResult = subscribe(subscriber, "service/$serviceName/device/+", MqttQos.AT_MOST_ONCE, received)
+        def publishResult = publish(publisher, "service/$serviceName/device/$deviceId", MqttQos.AT_MOST_ONCE)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -71,15 +75,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 1 using mqtt 3.1.1"() {
     given:
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "ConnectSubscribePublishTest3"
         def received = new CompletableFuture<Mqtt3Publish>()
-        def subscriber = buildExternalMqtt311Client()
-        def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
-        def publisher = buildExternalMqtt311Client()
+        def subscriber = buildExternalMqtt311Client(serviceId)
+        def publisher = buildExternalMqtt311Client(deviceId)
     when:
         subscriber.connect().join()
         publisher.connect().join()
-        def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_LEAST_ONCE, received)
-        def publishResult = publish(publisher, subscriberId, MqttQos.AT_LEAST_ONCE)
+        def subscribeResult = subscribe(subscriber, "service/$serviceName/device/+", MqttQos.AT_LEAST_ONCE, received)
+        def publishResult = publish(publisher, "service/$serviceName/device/$deviceId", MqttQos.AT_LEAST_ONCE)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -98,15 +104,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 1 using mqtt 5"() {
     given:
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "ConnectSubscribePublishTest4"
         def received = new CompletableFuture<Mqtt5Publish>()
-        def subscriber = buildExternalMqtt5Client()
-        def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
-        def publisher = buildExternalMqtt5Client()
+        def subscriber = buildExternalMqtt5Client(serviceId)
+        def publisher = buildExternalMqtt5Client(deviceId)
     when:
         subscriber.connect().join()
         publisher.connect().join()
-        def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.AT_LEAST_ONCE, received)
-        def publishResult = publish(publisher, subscriberId, MqttQos.AT_LEAST_ONCE)
+        def subscribeResult = subscribe(subscriber, "service/$serviceName/device/+", MqttQos.AT_LEAST_ONCE, received)
+        def publishResult = publish(publisher, "service/$serviceName/device/$deviceId", MqttQos.AT_LEAST_ONCE)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -125,15 +133,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 2 using mqtt 3.1.1"() {
     given:
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "ConnectSubscribePublishTest5"
         def received = new CompletableFuture<Mqtt3Publish>()
-        def subscriber = buildExternalMqtt311Client()
-        def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
-        def publisher = buildExternalMqtt311Client()
+        def subscriber = buildExternalMqtt311Client(serviceId)
+        def publisher = buildExternalMqtt311Client(deviceId)
     when:
         subscriber.connect().join()
         publisher.connect().join()
-        def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.EXACTLY_ONCE, received)
-        def publishResult = publish(publisher, subscriberId, MqttQos.EXACTLY_ONCE)
+        def subscribeResult = subscribe(subscriber, "service/$serviceName/device/+", MqttQos.EXACTLY_ONCE, received)
+        def publishResult = publish(publisher, "service/$serviceName/device/$deviceId", MqttQos.EXACTLY_ONCE)
     then:
         noExceptionThrown()
         subscribeResult != null
@@ -149,15 +159,17 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 2 using mqtt 5"() {
     given:
+        def deviceId = generateClientId("device")
+        def serviceId = generateClientId("service")
+        def serviceName = "ConnectSubscribePublishTest6"
         def received = new CompletableFuture<Mqtt5Publish>()
-        def subscriber = buildExternalMqtt5Client()
-        def subscriberId = subscriber.getConfig().clientIdentifier.get().toString()
-        def publisher = buildExternalMqtt5Client()
+        def subscriber = buildExternalMqtt5Client(serviceId)
+        def publisher = buildExternalMqtt5Client(deviceId)
     when:
         subscriber.connect().join()
         publisher.connect().join()
-        def subscribeResult = subscribe(subscriber, subscriberId, MqttQos.EXACTLY_ONCE, received)
-        def publishResult = publish(publisher, subscriberId, MqttQos.EXACTLY_ONCE)
+        def subscribeResult = subscribe(subscriber, "service/$serviceName/device/+", MqttQos.EXACTLY_ONCE, received)
+        def publishResult = publish(publisher, "service/$serviceName/device/$deviceId", MqttQos.EXACTLY_ONCE)
         Thread.sleep(100)
     then:
         noExceptionThrown()
@@ -175,9 +187,9 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
         publisher.disconnect().join()
   }
 
-  def publish(Mqtt5AsyncClient publisher, String subscriberId, MqttQos qos) {
+  def publish(Mqtt5AsyncClient publisher, String topicName, MqttQos qos) {
     return publisher.publishWith()
-        .topic("test/$subscriberId")
+        .topic(topicName)
         .qos(qos)
         .payload(publishPayload)
         .payloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
@@ -187,20 +199,20 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def subscribe(
       Mqtt5AsyncClient subscriber,
-      String subscriberId,
+      String topicFilter,
       MqttQos qos,
       CompletableFuture<Mqtt5Publish> received) {
     return subscriber.subscribeWith()
-        .topicFilter("test/$subscriberId")
+        .topicFilter(topicFilter)
         .qos(qos)
         .callback({ publish -> received.complete(publish) })
         .send()
         .join()
   }
 
-  def publish(Mqtt3AsyncClient publisher, String subscriberId, MqttQos qos) {
+  def publish(Mqtt3AsyncClient publisher, String topicName, MqttQos qos) {
     return publisher.publishWith()
-        .topic("test/$subscriberId")
+        .topic(topicName)
         .qos(qos)
         .payload(publishPayload)
         .send()
@@ -209,11 +221,11 @@ class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def subscribe(
       Mqtt3AsyncClient subscriber,
-      String subscriberId,
+      String topicFilter,
       MqttQos qos,
       CompletableFuture<Mqtt3Publish> received) {
     return subscriber.subscribeWith()
-        .topicFilter("test/$subscriberId")
+        .topicFilter(topicFilter)
         .qos(qos)
         .callback({ publish -> received.complete(publish) })
         .send()
