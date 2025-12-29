@@ -11,6 +11,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthenticationService;
@@ -51,6 +52,7 @@ import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandle
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
+import javasabr.mqtt.service.message.validator.ClientIdMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
@@ -164,18 +166,26 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  ClientIdMqttInMessageFieldValidator clientIdMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new ClientIdMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
   MqttInMessageHandler connectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
+      MessageOutFactoryService messageOutFactoryService,
+      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, ConnectMqttInMessage>> fieldValidators) {
     return new ConnectInMqttInMessageHandler(
         clientIdRegistry,
         authenticationService,
         sessionService,
         subscriptionService,
-        messageOutFactoryService);
+        messageOutFactoryService,
+        fieldValidators);
   }
 
   @Bean

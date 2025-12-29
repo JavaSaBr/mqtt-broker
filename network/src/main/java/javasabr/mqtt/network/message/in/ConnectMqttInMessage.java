@@ -433,6 +433,14 @@ public class ConnectMqttInMessage extends MqttInMessage {
     return willUserProperties == null ? EMPTY_USER_PROPERTIES : willUserProperties;
   }
 
+  public boolean requestResponseInformation() {
+    return requestResponseInformation == null || requestResponseInformation;
+  }
+
+  public boolean requestProblemInformation() {
+    return requestProblemInformation == null || requestProblemInformation;
+  }
+ 
   @Override
   protected void readProperties(MqttConnection connection, ByteBuffer buffer) {
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();

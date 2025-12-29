@@ -7,9 +7,10 @@ import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
 import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
-import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
@@ -28,7 +29,9 @@ import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
 import javasabr.mqtt.service.session.MqttSessionService;
+import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -38,7 +41,7 @@ import reactor.core.publisher.Mono;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConnectInMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, ConnectMqttInMessage> {
+    extends FieldsValidatedMqttInMessageHandler<ExternalNetworkMqttUser, ConnectMqttInMessage> {
 
   ClientIdRegistry clientIdRegistry;
   AuthenticationService authenticationService;
@@ -50,8 +53,9 @@ public class ConnectInMqttInMessageHandler
       AuthenticationService authenticationService,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, ConnectMqttInMessage.class, messageOutFactoryService);
+      MessageOutFactoryService messageOutFactoryService,
+      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, ConnectMqttInMessage>> fieldValidators) {
+    super(ExternalNetworkMqttUser.class, ConnectMqttInMessage.class, messageOutFactoryService, fieldValidators);
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
@@ -74,17 +78,27 @@ public class ConnectInMqttInMessageHandler
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(user, message);
+    super.processValidMessage(connection, user, message);
+  }
+
+  @Override
+  protected void processMessageWithValidFields(
+      MqttConnection connection,
+      ExternalNetworkMqttUser user,
+      ConnectMqttInMessage message) {
+    String username = Objects.requireNonNullElse(message.username(), StringUtils.EMPTY);
+    byte[] password = Objects.requireNonNullElse(message.password(), ArrayUtils.EMPTY_BYTE_ARRAY);
     authenticationService
-        .auth(message.username(), message.password())
+        .auth(username, password)
         .flatMap(ifTrue(
             user,
             message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))
         .flatMap(ifTrue(
             user,
-            message, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(user, connectAckReasonCode)))
+            message, this::restoreSession, ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(user, connectAckReasonCode)))
         .subscribe();
   }
-
+  
   private void reject(ExternalNetworkMqttUser user, ConnectAckReasonCode connectAckReasonCode) {
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
@@ -210,7 +224,8 @@ public class ConnectInMqttInMessageHandler
 
     user.session(session);
 
-    String requestedClientId = message.clientId();
+    // already validated
+    String requestedClientId = Objects.requireNonNull(message.clientId());
     long requestedSessionExpiryInterval = message.sessionExpiryInterval();
     int requestedKeepAlive = message.keepAlive();
     int requestedReceiveMaxPublishes = message.receiveMaxPublishes();
