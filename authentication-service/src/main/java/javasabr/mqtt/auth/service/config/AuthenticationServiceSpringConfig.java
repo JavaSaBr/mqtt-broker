@@ -17,7 +17,6 @@ import javasabr.mqtt.auth.service.config.annotation.ConditionalOnBasicAuthentica
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource;
 import javasabr.mqtt.auth.service.config.annotation.ConditionalOnFileCredentialsSource;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
-import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.CustomLog;
@@ -56,11 +55,8 @@ public class AuthenticationServiceSpringConfig {
 
   @Bean
   @ConditionalOnDatabaseCredentialsSource
-  CredentialsSource dbCredentialsSource(
-      DatabaseClient databaseClient,
-      DatabaseUrlConfig databaseUrlConfig,
-      DatabaseUrlBuilder databaseUrlBuilder) {
-    return new DatabaseCredentialsSource(databaseClient, databaseUrlBuilder.build(databaseUrlConfig));
+  CredentialsSource dbCredentialsSource(DatabaseClient databaseClient) {
+    return new DatabaseCredentialsSource(databaseClient);
   }
 
   @Bean

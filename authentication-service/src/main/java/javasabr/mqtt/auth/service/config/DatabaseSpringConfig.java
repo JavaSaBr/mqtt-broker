@@ -21,7 +21,6 @@ import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseTimeoutsConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -54,11 +53,6 @@ public class DatabaseSpringConfig {
   }
 
   @Bean
-  DatabaseUrlBuilder databaseUrlBuilder() {
-    return db -> "jdbc:%s://%s:%s/%s".formatted(db.dbDriver().value(), db.dbHost(), db.dbPort(), db.dbName());
-  }
-
-  @Bean
   DatabaseClient databaseClient(ConnectionFactory connectionFactory) {
     return DatabaseClient.create(connectionFactory);
   }
@@ -78,12 +72,15 @@ public class DatabaseSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(
-      DatabaseUrlBuilder databaseUrlBuilder,
-      DatabaseUrlConfig databaseUrlConfig,
-      @Qualifier("adminCredentials") Credentials credentials) {
+  Flyway flyway(DatabaseUrlConfig databaseUrlConfig, Credentials adminCredentials) {
+    String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
+        databaseUrlConfig.dbDriver().value(),
+        databaseUrlConfig.dbHost(),
+        databaseUrlConfig.dbPort(),
+        databaseUrlConfig.dbName());
     return Flyway.configure()
-        .dataSource(databaseUrlBuilder.build(databaseUrlConfig), credentials.username(), credentials.password()).load();
+        .dataSource(databaseUrl, adminCredentials.username(), adminCredentials.password())
+        .load();
   }
 
   @Bean

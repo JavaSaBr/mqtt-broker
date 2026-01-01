@@ -23,7 +23,6 @@ public class DatabaseCredentialsSource implements CredentialsSource {
       """;
 
   DatabaseClient databaseClient;
-  String dbUrl;
 
   @Override
   public CredentialsSourceType getCredentialsSourceType() {
@@ -45,6 +44,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   @JsonValue
   @Override
   public String toString() {
-    return "{ \"credentialsSource\": \"%s\", \"databaseUrl\": \"%s\" }".formatted(getCredentialsSourceType(), dbUrl);
+    String dbDriver = databaseClient.getConnectionFactory().getMetadata().getName();
+    return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getCredentialsSourceType(), dbDriver);
   }
 }
