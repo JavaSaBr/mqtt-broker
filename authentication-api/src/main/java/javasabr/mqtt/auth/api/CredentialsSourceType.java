@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Accessors
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum DatasourceType {
+public enum CredentialsSourceType {
   MEMORY(1),
   REDIS(2),
   DATABASE(3),

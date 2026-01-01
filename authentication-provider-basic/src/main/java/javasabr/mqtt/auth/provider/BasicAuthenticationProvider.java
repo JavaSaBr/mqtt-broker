@@ -2,6 +2,7 @@ package javasabr.mqtt.auth.provider;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
+import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.AuthenticationType;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import lombok.AccessLevel;
@@ -21,8 +22,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
   }
 
   @Override
-  public Mono<Boolean> authenticate(String username, byte[] password, String authenticationMethod, byte[] data) {
-    return credentialsSource.isCredentialsExists(username, password);
+  public Mono<Boolean> authenticate(MqttCredentials credentials) {
+    return credentialsSource.isCredentialsExists(credentials);
   }
 
   @JsonValue

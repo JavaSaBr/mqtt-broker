@@ -8,10 +8,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "persistence.database")
 public record DatabaseConnectionProperties(
     Map<String, Credentials> users,
-    String driver,
-    String host,
-    int port,
-    String name,
+    DatabaseDriver dbDriver,
+    String dbHost,
+    int dbPort,
+    String dbName,
     String credentialsQuery,
     Duration maxIdleTime,
     int initialPoolSize,

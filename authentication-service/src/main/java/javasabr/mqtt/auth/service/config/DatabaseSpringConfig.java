@@ -38,24 +38,24 @@ public class DatabaseSpringConfig {
   ConnectionFactoryOptions connectionFactoryOptions(
       DatabaseTimeoutsConfig databaseTimeoutsConfig,
       DatabaseUrlConfig databaseUrlConfig,
-      @Qualifier("readerCredentials") Credentials credentials){
+      Credentials readerCredentials){
     Map<String, String> timeoutOptions = Map.of(
         "lock_timeout", databaseTimeoutsConfig.lockTimeout(),
         "statement_timeout", databaseTimeoutsConfig.statementTimeout());
     return ConnectionFactoryOptions.builder()
-        .option(DATABASE, databaseUrlConfig.name())
-        .option(DRIVER, databaseUrlConfig.driver())
-        .option(HOST, databaseUrlConfig.host())
-        .option(PORT, databaseUrlConfig.port())
-        .option(USER, credentials.username())
-        .option(PASSWORD, credentials.password())
+        .option(DATABASE, databaseUrlConfig.dbName())
+        .option(DRIVER, databaseUrlConfig.dbDriver().value())
+        .option(HOST, databaseUrlConfig.dbHost())
+        .option(PORT, databaseUrlConfig.dbPort())
+        .option(USER, readerCredentials.username())
+        .option(PASSWORD, readerCredentials.password())
         .option(OPTIONS, timeoutOptions)
         .build();
   }
 
   @Bean
   DatabaseUrlBuilder databaseUrlBuilder() {
-    return db -> "jdbc:%s://%s:%s/%s".formatted(db.driver(), db.host(), db.port(), db.name());
+    return db -> "jdbc:%s://%s:%s/%s".formatted(db.dbDriver().value(), db.dbHost(), db.dbPort(), db.dbName());
   }
 
   @Bean

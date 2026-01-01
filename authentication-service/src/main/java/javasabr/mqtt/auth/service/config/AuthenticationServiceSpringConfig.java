@@ -19,6 +19,7 @@ import javasabr.mqtt.auth.service.config.annotation.ConditionalOnFileCredentials
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,8 +40,10 @@ public class AuthenticationServiceSpringConfig {
     if (providers.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
-    providers.sort(Comparator.comparingInt(provider -> provider.getAuthenticationType().priority()));
-    return new DefaultAuthenticationService(Array.copyOf(AuthenticationProvider.class, providers));
+    Array<AuthenticationProvider> prioritySortedAuthenticationProviders = providers.stream()
+        .sorted(Comparator.comparingInt(provider -> provider.getAuthenticationType().priority()))
+        .collect(ArrayCollectors.toArray(AuthenticationProvider.class));
+    return new DefaultAuthenticationService(prioritySortedAuthenticationProviders);
   }
 
   @Bean

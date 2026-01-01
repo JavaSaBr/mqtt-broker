@@ -6,5 +6,5 @@ public interface AuthenticationProvider {
 
   AuthenticationType getAuthenticationType();
 
-  Mono<Boolean> authenticate(String username, byte[] password, String authenticationMethod, byte[] data);
+  Mono<Boolean> authenticate(MqttCredentials credentials);
 }

@@ -1,12 +1,12 @@
 package javasabr.mqtt.auth.service.config.property;
 
 public interface DatabaseUrlConfig {
-  String driver();
+  DatabaseDriver dbDriver();
 
-  String host();
+  String dbHost();
 
-  int port();
+  int dbPort();
 
-  String name();
+  String dbName();
 }
 

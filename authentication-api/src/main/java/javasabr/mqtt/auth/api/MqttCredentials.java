@@ -1,6 +1,6 @@
 package javasabr.mqtt.auth.api;
 
-public record AuthenticationRequest(
+public record MqttCredentials(
     String username,
     byte[] password,
     String authenticationMethod,
