@@ -1,5 +1,9 @@
 package javasabr.mqtt.auth.api;
 
+import java.util.Arrays;
+import java.util.function.Function;
+import javasabr.rlib.collections.dictionary.DictionaryCollectors;
+import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,14 +15,20 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum AuthenticationType {
-  X509(1),
-  IP_CIDR(2),
-  ENHANCED(3),
-  JWT(4),
-  OAUTH(5),
-  BASIC(6),
-  LDAP(7),
-  ANONYMOUS(8);
+  X509("x509"),
+  IP_CIDR("cidr"),
+  JWT("jwt"),
+  OAUTH2("oauth2"),
+  BASIC("basic"),
+  LDAP("ldap"),
+  ANONYMOUS("anon");
 
-  int priority;
+  private static final RefToRefDictionary<String, AuthenticationType> CACHE = Arrays.stream(values())
+      .collect(DictionaryCollectors.toRefToRefDictionary(AuthenticationType::value, Function.identity()));
+
+  String value;
+
+  public static AuthenticationType fromValue(String value){
+    return CACHE.get(value);
+  }
 }

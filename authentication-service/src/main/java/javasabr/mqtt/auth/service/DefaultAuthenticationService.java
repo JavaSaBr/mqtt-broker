@@ -1,35 +1,50 @@
 package javasabr.mqtt.auth.service;
 
-import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
-import javasabr.rlib.collections.array.Array;
+import javasabr.mqtt.auth.api.AuthenticationType;
+import javasabr.mqtt.auth.api.MqttCredentials;
+import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
-import reactor.core.publisher.Flux;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @CustomLog
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
-  Array<AuthenticationProvider> providers;
+  RefToRefDictionary<AuthenticationType, AuthenticationProvider> providers;
+  AuthenticationProvider defaultProvider;
+  @Nullable AnonymousAuthenticationProvider anonymousProvider;
 
-  public DefaultAuthenticationService(Array<AuthenticationProvider> providers) {
+  public DefaultAuthenticationService(
+      RefToRefDictionary<AuthenticationType, AuthenticationProvider> providers,
+      AuthenticationProvider defaultProvider,
+      AnonymousAuthenticationProvider anonymousAuthenticationProvider) {
     this.providers = providers;
+    this.defaultProvider = defaultProvider;
+    this.anonymousProvider = anonymousAuthenticationProvider;
     log.info(providers, DefaultAuthenticationService::buildServiceDescription);
   }
 
   @Override
   public Mono<Boolean> authenticate(MqttCredentials request) {
-    return Flux.fromIterable(providers)
-        .concatMap(provider -> provider.authenticate(request).onErrorReturn(false))
-        .any(Boolean::booleanValue);
+    AuthenticationProvider primary = (request.authenticationMethod() == null)
+                                     ? defaultProvider
+                                     : providers.get(request.authenticationMethod());
+
+    Mono<Boolean> anonymousStep =
+        anonymousProvider != null ? anonymousProvider.authenticate(request).onErrorReturn(false) : Mono.just(false);
+
+    return anonymousStep.flatMap(success -> (success || primary == null)
+                                            ? Mono.just(success)
+                                            : primary.authenticate(request).onErrorReturn(false));
   }
 
   private static String buildServiceDescription(
-      Array<AuthenticationProvider> providers) {
+      RefToRefDictionary<AuthenticationType, AuthenticationProvider> providers) {
 
     var builder = new StringBuilder()
         .append("[\n");
@@ -43,6 +58,6 @@ public class DefaultAuthenticationService implements AuthenticationService {
         .delete(builder.length() - 2, builder.length())
         .append("\n]");
 
-    return "Loaded total [%s] authentication providers: %s".formatted(providers.size(), builder);
+    return "Loaded total [%s] authentication provider: %s".formatted(providers.size(), builder);
   }
 }

@@ -41,10 +41,14 @@ public class DatabaseCredentialsSource implements CredentialsSource {
         .defaultIfEmpty(false);
   }
 
-  @JsonValue
   @Override
   public String toString() {
     String dbDriver = databaseClient.getConnectionFactory().getMetadata().getName();
     return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getCredentialsSourceType(), dbDriver);
+  }
+
+  @JsonValue
+  public String jsonDebugValue() {
+    return toString();
   }
 }

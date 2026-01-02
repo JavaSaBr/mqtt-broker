@@ -26,11 +26,15 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     return credentialsSource.isCredentialsExists(credentials);
   }
 
-  @JsonValue
   @Override
   public String toString() {
     return "{ \"authenticationType\": \"%s\", \"credentialSource\": %s }".formatted(
         getAuthenticationType(),
         credentialsSource);
+  }
+
+  @JsonValue
+  public String jsonDebugValue() {
+    return toString();
   }
 }

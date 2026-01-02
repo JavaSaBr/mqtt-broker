@@ -14,12 +14,13 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
-import javasabr.mqtt.auth.service.config.annotation.ConditionalOnDatabaseCredentialsSource;
+import javasabr.mqtt.auth.api.AuthenticationType;
+import javasabr.mqtt.auth.api.CredentialsSourceType;
+import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
+import javasabr.mqtt.auth.service.config.property.AuthenticationProviderProperties;
 import javasabr.mqtt.auth.service.config.property.Credentials;
+import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
 import javasabr.mqtt.auth.service.config.property.DatabaseConnectionProperties;
-import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
-import javasabr.mqtt.auth.service.config.property.DatabaseTimeoutsConfig;
-import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,22 +31,25 @@ import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(DatabaseConnectionProperties.class)
-@ConditionalOnDatabaseCredentialsSource
+@ConditionalOnProperty(name = "authentication.provider.basic.credentials-sources.database.enabled", havingValue = "true")
 public class DatabaseSpringConfig {
 
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
-      DatabaseTimeoutsConfig databaseTimeoutsConfig,
-      DatabaseUrlConfig databaseUrlConfig,
-      Credentials readerCredentials){
+      AuthenticationProperties authenticationProperties,
+      Credentials readerCredentials) {
+    AuthenticationProviderProperties authenticationProviderProperties = authenticationProperties.provider()
+        .get(AuthenticationType.BASIC);
+    CredentialsSourceProperties credentialsSourceProperties = authenticationProviderProperties.credentialsSources()
+        .get(CredentialsSourceType.DATABASE);
     Map<String, String> timeoutOptions = Map.of(
-        "lock_timeout", databaseTimeoutsConfig.lockTimeout(),
-        "statement_timeout", databaseTimeoutsConfig.statementTimeout());
+        "lock_timeout", credentialsSourceProperties.lockTimeout(),
+        "statement_timeout", credentialsSourceProperties.statementTimeout());
     return ConnectionFactoryOptions.builder()
-        .option(DATABASE, databaseUrlConfig.dbName())
-        .option(DRIVER, databaseUrlConfig.dbDriver().value())
-        .option(HOST, databaseUrlConfig.dbHost())
-        .option(PORT, databaseUrlConfig.dbPort())
+        .option(DATABASE, credentialsSourceProperties.dbName())
+        .option(DRIVER, credentialsSourceProperties.dbDriver().value())
+        .option(HOST, credentialsSourceProperties.dbHost())
+        .option(PORT, credentialsSourceProperties.dbPort())
         .option(USER, readerCredentials.username())
         .option(PASSWORD, readerCredentials.password())
         .option(OPTIONS, timeoutOptions)
@@ -60,44 +64,36 @@ public class DatabaseSpringConfig {
   @Bean
   @DependsOn("flyway")
   ConnectionFactory connectionFactory(
-      DatabasePoolConfig databasePoolConfig,
+      AuthenticationProperties authenticationProperties,
       ConnectionFactoryOptions connectionFactoryOptions) {
+    AuthenticationProviderProperties authenticationProviderProperties = authenticationProperties.provider()
+        .get(AuthenticationType.BASIC);
+    CredentialsSourceProperties credentialsSourceProperties = authenticationProviderProperties.credentialsSources()
+        .get(CredentialsSourceType.DATABASE);
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-        .maxIdleTime(databasePoolConfig.maxIdleTime())
-        .maxSize(databasePoolConfig.maxPoolSize())
-        .initialSize(databasePoolConfig.initialPoolSize())
+        .maxIdleTime(credentialsSourceProperties.maxIdleTime())
+        .maxSize(credentialsSourceProperties.maxPoolSize())
+        .initialSize(credentialsSourceProperties.initialPoolSize())
         .build();
     return new ConnectionPool(configuration);
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(DatabaseUrlConfig databaseUrlConfig, Credentials adminCredentials) {
+  Flyway flyway(AuthenticationProperties authenticationProperties, Credentials adminCredentials) {
+
+    AuthenticationProviderProperties authenticationProviderProperties = authenticationProperties.provider()
+        .get(AuthenticationType.BASIC);
+    CredentialsSourceProperties credentialsSourceProperties = authenticationProviderProperties.credentialsSources()
+        .get(CredentialsSourceType.DATABASE);
+
     String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
-        databaseUrlConfig.dbDriver().value(),
-        databaseUrlConfig.dbHost(),
-        databaseUrlConfig.dbPort(),
-        databaseUrlConfig.dbName());
+        credentialsSourceProperties.dbDriver().value(),
+        credentialsSourceProperties.dbHost(),
+        credentialsSourceProperties.dbPort(),
+        credentialsSourceProperties.dbName());
     return Flyway.configure()
         .dataSource(databaseUrl, adminCredentials.username(), adminCredentials.password())
         .load();
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "persistence.database.users.reader.username")
-  public Credentials readerCredentials(DatabaseUsersConfig usersConfig) {
-      return usersConfig.users().get("reader");
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "persistence.database.users.writer.username")
-  public Credentials writerCredentials(DatabaseUsersConfig usersConfig) {
-    return usersConfig.users().get("writer");
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "persistence.database.users.admin.username")
-  public Credentials adminCredentials(DatabaseUsersConfig usersConfig) {
-    return usersConfig.users().get("admin");
   }
 }

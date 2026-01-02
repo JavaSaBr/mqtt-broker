@@ -19,8 +19,8 @@ import java.nio.charset.StandardCharsets
 
 @TestPropertySource(properties = [
     "authentication.allow-anonymous=false",
-    "authentication.credentials-sources[0]=database",
-    "authentication.providers[0]=basic"
+    "authentication.provider.basic.enabled=true",
+    "authentication.provider.basic.credentials-sources.database.enabled=true"
 ])
 @Testcontainers
 class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
@@ -39,7 +39,9 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
     postgreSQLContainer.start()
-    registry.add("persistence.database.db-port", { "${postgreSQLContainer.getMappedPort(5432)}" })
+    registry.add(
+        "authentication.provider.basic.credentials-sources.database.db-port",
+        { "${postgreSQLContainer.getMappedPort(5432)}" })
   }
 
   @Autowired
@@ -48,7 +50,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
   def "should authenticate credentials according [credentials/test] file"() {
     given:
         def passwordBytes = password.getBytes(StandardCharsets.UTF_8)
-        def request = new MqttCredentials(userName, passwordBytes, "", new byte[0])
+        def request = new MqttCredentials(userName, passwordBytes, null, new byte[0])
     when:
         def result = authenticationService.authenticate(request).block()
     then:

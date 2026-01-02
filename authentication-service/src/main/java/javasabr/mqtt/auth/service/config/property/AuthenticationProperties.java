@@ -1,11 +1,11 @@
 package javasabr.mqtt.auth.service.config.property;
 
-import java.util.List;
-import org.jspecify.annotations.Nullable;
+import java.util.Map;
+import javasabr.mqtt.auth.api.AuthenticationType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "authentication")
 public record AuthenticationProperties(
     boolean allowAnonymous,
-    @Nullable List<String> providers,
-    @Nullable List<String> credentialsSources) {}
+    AuthenticationType defaultProvider,
+    Map<AuthenticationType, AuthenticationProviderProperties> provider) {}

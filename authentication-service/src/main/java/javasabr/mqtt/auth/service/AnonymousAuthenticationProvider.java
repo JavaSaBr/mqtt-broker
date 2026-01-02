@@ -18,9 +18,13 @@ public class AnonymousAuthenticationProvider implements AuthenticationProvider {
     return Mono.just(StringUtils.isEmpty(credentials.username()));
   }
 
-  @JsonValue
   @Override
   public String toString() {
     return "{ \"authenticationType\": \"%s\", \"enabled\": true }".formatted(getAuthenticationType());
+  }
+
+  @JsonValue
+  public String jsonDebugValue() {
+    return toString();
   }
 }

@@ -8,8 +8,8 @@ import org.springframework.test.context.TestPropertySource
 import java.nio.charset.StandardCharsets
 
 @TestPropertySource(properties = [
-    "authentication.credentials-sources[0]=file",
-    "authentication.providers[0]=basic"
+    "authentication.provider.basic.credentials-sources.file.enabled=true",
+    "authentication.provider.basic.enabled=true"
 ])
 class FileAuthenticationServiceTest extends IntegrationSpecification {
 
@@ -19,7 +19,7 @@ class FileAuthenticationServiceTest extends IntegrationSpecification {
   def "should authenticate credentials according [credentials/test] file"() {
     given:
         def passwordBytes = password.getBytes(StandardCharsets.UTF_8)
-        def request = new MqttCredentials(userName, passwordBytes, "", new byte[0])
+        def request = new MqttCredentials(userName, passwordBytes, null, new byte[0])
     when:
         def result = authenticationService.authenticate(request).block()
     then:

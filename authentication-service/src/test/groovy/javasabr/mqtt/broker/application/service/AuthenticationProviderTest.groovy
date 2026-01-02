@@ -24,8 +24,8 @@ class AuthenticationProviderTest extends IntegrationSpecification {
 
   @TestPropertySource(properties = [
       "authentication.allow-anonymous=false",
-      "authentication.providers[0]=basic",
-      "authentication.credentials-sources[0]=file"
+      "authentication.provider.basic.enabled=true",
+      "authentication.provider.basic.credentials-sources.file.enabled=true"
   ])
   static class FileCredentialsSourceTest extends AuthenticationProviderTest {
     @Autowired
@@ -44,8 +44,8 @@ class AuthenticationProviderTest extends IntegrationSpecification {
 
   @TestPropertySource(properties = [
       "authentication.allow-anonymous=true",
-      "authentication.providers[0]=basic",
-      "authentication.credentials-sources[0]=file"
+      "authentication.provider.basic.enabled=true",
+      "authentication.provider.basic.credentials-sources.file.enabled=true"
   ])
   static class AnonymousProviderTest extends AuthenticationProviderTest {
 
@@ -108,7 +108,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   static Throwable rootCauseOf(Throwable throwable) {
     Throwable rootCause = throwable
     while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-      rootCause = rootCause.getCause();
+      rootCause = rootCause.getCause()
     }
     return rootCause
   }
