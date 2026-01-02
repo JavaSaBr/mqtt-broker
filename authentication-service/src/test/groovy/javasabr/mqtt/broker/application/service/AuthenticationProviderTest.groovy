@@ -5,6 +5,7 @@ import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource
+import javasabr.mqtt.auth.provider.BasicAuthenticationProvider
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
 import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,6 +17,7 @@ import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
 import static javasabr.mqtt.auth.api.AuthenticationMethod.ANONYMOUS
+import static javasabr.mqtt.auth.api.AuthenticationMethod.BASIC
 
 class AuthenticationProviderTest extends IntegrationSpecification {
 
@@ -36,8 +38,8 @@ class AuthenticationProviderTest extends IntegrationSpecification {
           (credentialsSource instanceof FileCredentialsSource)
       and:
           verifyEach(authenticationProviders) { provider ->
-            provider.authenticationMethod != ANONYMOUS
-            !(provider instanceof AnonymousAuthenticationProvider)
+            provider.authenticationMethod == BASIC
+            provider instanceof BasicAuthenticationProvider
           }
     }
   }
@@ -56,7 +58,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
           }
       and:
           authenticationProviders.any { provider ->
-            provider.authenticationMethod != ANONYMOUS && !(provider instanceof AnonymousAuthenticationProvider)
+            provider.authenticationMethod == BASIC && provider instanceof BasicAuthenticationProvider
           }
     }
   }
@@ -66,12 +68,8 @@ class AuthenticationProviderTest extends IntegrationSpecification {
 
     def "should create anonymous authentication provider"() {
       expect:
-          authenticationProviders.any { provider ->
+          authenticationProviders.every { provider ->
             provider.authenticationMethod == ANONYMOUS && provider instanceof AnonymousAuthenticationProvider
-          }
-      and:
-          !authenticationProviders.any { provider ->
-            provider.authenticationMethod != ANONYMOUS && !(provider instanceof AnonymousAuthenticationProvider)
           }
     }
   }

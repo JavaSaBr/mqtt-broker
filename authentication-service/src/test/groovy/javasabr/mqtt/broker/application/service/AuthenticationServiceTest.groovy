@@ -1,11 +1,11 @@
 package javasabr.mqtt.broker.application.service
 
-import javasabr.mqtt.auth.api.MqttCredentials
+import javasabr.mqtt.auth.api.AuthenticationMethod
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationService
-import javasabr.mqtt.auth.api.AuthenticationMethod
 import javasabr.mqtt.auth.api.CredentialsSource
-import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource
+import javasabr.mqtt.auth.api.CredentialsSourceType
+import javasabr.mqtt.auth.api.MqttCredentials
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -20,13 +20,14 @@ import java.nio.charset.StandardCharsets
 @TestPropertySource(properties = [
     "authentication.allow-anonymous=false",
     "authentication.method.basic.enabled=true",
+    "authentication.credentials-source.file.enabled=true",
     "authentication.credentials-source.database.enabled=true"
 ])
 @Testcontainers
-class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
+class AuthenticationServiceTest extends IntegrationSpecification {
 
   @Autowired
-  CredentialsSource credentialsSource
+  List<CredentialsSource> credentialsSources
   @Autowired
   List<AuthenticationProvider> authenticationProviders
 
@@ -47,7 +48,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
   @Autowired
   AuthenticationService authenticationService
 
-  def "should authenticate credentials according [credentials/test] file"() {
+  def "should authenticate credentials according test database"() {
     given:
         def passwordBytes = password.getBytes(StandardCharsets.UTF_8)
         def request = new MqttCredentials(userName, passwordBytes, null, new byte[0])
@@ -61,11 +62,18 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
         "user"   | "correct-password" | true
         ""       | "correct-password" | false
         "user"   | ""                 | false
+        "user1"  | "correct-password" | true
   }
 
   def "should create file credentials source and basic authentication provider"() {
+    given:
+        def expectedSourceTypes = [CredentialsSourceType.FILE, CredentialsSourceType.DATABASE]
     expect:
-        credentialsSource instanceof DatabaseCredentialsSource
+        verifyEach(credentialsSources) { credentialsSource ->
+          expectedSourceTypes.remove(credentialsSource.credentialsSourceType)
+        }
+        expectedSourceTypes.isEmpty()
+    and:
         verifyEach(authenticationProviders) { provider ->
           provider.authenticationMethod != AuthenticationMethod.ANONYMOUS
           !(provider instanceof AnonymousAuthenticationProvider)

@@ -11,13 +11,12 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum CredentialsSourceType {
-  MEMORY(1),
+  FILE(1),
   REDIS(2),
   DATABASE(3),
-  FILE(4),
-  LDAP(5),
-  HTTP(6),
-  SYSTEM(7);
+  LDAP(4),
+  HTTP(5),
+  SYSTEM(6);
 
   int priority;
 }

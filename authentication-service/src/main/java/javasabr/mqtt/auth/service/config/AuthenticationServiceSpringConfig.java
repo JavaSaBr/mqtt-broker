@@ -6,7 +6,6 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
-import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
@@ -22,7 +21,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.r2dbc.core.DatabaseClient;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -41,10 +39,8 @@ public class AuthenticationServiceSpringConfig {
   }
 
   @Bean
-  public CredentialsSourceProperties fileCredentialsSourceProperties(AuthenticationProperties authenticationProperties) {
-    return authenticationProperties
-        .credentialsSource()
-        .get(CredentialsSourceType.FILE);
+  CredentialsSourceProperties fileCredentialsSourceProperties(AuthenticationProperties authenticationProperties) {
+    return authenticationProperties.credentialsSource().get(CredentialsSourceType.FILE);
   }
 
   @Bean(initMethod = "init")
@@ -55,18 +51,11 @@ public class AuthenticationServiceSpringConfig {
   }
 
   @Bean
-  @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource")
-  @ConditionalOnProperty(name = "authentication.credentials-source.database.enabled", havingValue = "true")
-  CredentialsSource dbCredentialsSource(DatabaseClient databaseClient) {
-    return new DatabaseCredentialsSource(databaseClient);
-  }
-
-  @Bean
   @ConditionalOnClass(name = "javasabr.mqtt.auth.provider.BasicAuthenticationProvider")
   @ConditionalOnProperty(name = "authentication.method.basic.enabled", havingValue = "true")
   @ConditionalOnBean(CredentialsSource.class)
-  AuthenticationProvider basicAuthenticationProvider(CredentialsSource credentialsSource) {
-    return new BasicAuthenticationProvider(credentialsSource);
+  AuthenticationProvider basicAuthenticationProvider(List<CredentialsSource> configuredCredentialsSources) {
+    return new BasicAuthenticationProvider(configuredCredentialsSources);
   }
 
   @Bean
