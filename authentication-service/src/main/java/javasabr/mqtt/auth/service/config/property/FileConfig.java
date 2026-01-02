@@ -4,5 +4,5 @@ import java.net.URI;
 
 public interface FileConfig {
 
-  URI fsPath();
+  URI uriPath();
 }

@@ -18,12 +18,10 @@ import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
+import javasabr.mqtt.auth.service.config.property.DatabaseConnectionConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseCredentials;
 import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
-import javasabr.mqtt.auth.service.config.property.DatabaseTimeoutsConfig;
-import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,17 +44,16 @@ public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
-      @Qualifier("dbCredentialsSourceProperties") DatabaseUrlConfig databaseUrlConfig,
-      @Qualifier("dbCredentialsSourceProperties") DatabaseTimeoutsConfig databaseTimeoutsConfig,
+      CredentialsSourceProperties dbCredentialsSourceProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     Map<String, String> timeoutOptions = Map.of(
-        "lock_timeout", databaseTimeoutsConfig.lockTimeout(),
-        "statement_timeout", databaseTimeoutsConfig.statementTimeout());
+        "lock_timeout", dbCredentialsSourceProperties.lockTimeout(),
+        "statement_timeout", dbCredentialsSourceProperties.statementTimeout());
     return ConnectionFactoryOptions.builder()
-        .option(DATABASE, databaseUrlConfig.dbName())
-        .option(DRIVER, databaseUrlConfig.dbDriver().value())
-        .option(HOST, databaseUrlConfig.dbHost())
-        .option(PORT, databaseUrlConfig.dbPort())
+        .option(DATABASE, dbCredentialsSourceProperties.dbName())
+        .option(DRIVER, dbCredentialsSourceProperties.dbDriver().value())
+        .option(HOST, dbCredentialsSourceProperties.dbHost())
+        .option(PORT, dbCredentialsSourceProperties.dbPort())
         .option(USER, readerDatabaseCredentials.username())
         .option(PASSWORD, readerDatabaseCredentials.password())
         .option(OPTIONS, timeoutOptions)
@@ -83,7 +80,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(DatabaseUrlConfig dbCredentialsSourceProperties, DatabaseCredentials adminDatabaseCredentials) {
+  Flyway flyway(DatabaseConnectionConfig dbCredentialsSourceProperties, DatabaseCredentials adminDatabaseCredentials) {
     String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
         dbCredentialsSourceProperties.dbDriver().value(),
         dbCredentialsSourceProperties.dbHost(),

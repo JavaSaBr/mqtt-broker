@@ -4,5 +4,6 @@ import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 
 public record AuthenticationProviderProperties(
-    boolean enabled, Map<CredentialsSourceType, CredentialsSourceProperties> credentialsSource) implements
-    BasicAuthenticationProviderProperties {}
+    boolean enabled,
+    Map<CredentialsSourceType,
+    CredentialsSourceProperties> credentialsSource) implements BasicAuthenticationProviderProperties {}

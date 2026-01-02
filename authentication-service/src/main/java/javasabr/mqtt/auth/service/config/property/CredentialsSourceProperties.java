@@ -5,7 +5,7 @@ import java.time.Duration;
 
 public record CredentialsSourceProperties(
     boolean enabled,
-    URI fsPath,
+    URI uriPath,
     DatabaseDriver dbDriver,
     String dbHost,
     int dbPort,
@@ -15,4 +15,4 @@ public record CredentialsSourceProperties(
     int maxPoolSize,
     String lockTimeout,
     String statementTimeout
-) implements FileConfig, DatabasePoolConfig, DatabaseUrlConfig, DatabaseTimeoutsConfig {}
+) implements FileConfig, DatabasePoolConfig, DatabaseConnectionConfig, DatabaseTimeoutsConfig {}

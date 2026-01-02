@@ -53,7 +53,7 @@ public class AuthenticationServiceSpringConfig {
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
   @ConditionalOnProperty(name = "authentication.method.basic.credentials-source.file.enabled", havingValue = "true")
   FileCredentialsSource fileCredentialsSource(CredentialsSourceProperties fileCredentialsSourceProperties) {
-    return new FileCredentialsSource(fileCredentialsSourceProperties.fsPath());
+    return new FileCredentialsSource(fileCredentialsSourceProperties.uriPath());
   }
 
   @Bean
