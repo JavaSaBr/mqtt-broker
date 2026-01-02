@@ -31,10 +31,8 @@ import org.springframework.r2dbc.core.DatabaseClient;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
-@Import(DatabaseSpringConfig.class)
-@EnableConfigurationProperties({
-    AuthenticationProperties.class
-})
+@Import(DatabaseCredentialsSourceSpringConfig.class)
+@EnableConfigurationProperties(AuthenticationProperties.class)
 public class AuthenticationServiceSpringConfig {
 
   @Bean
