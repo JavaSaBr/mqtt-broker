@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "persistence.database")
 public record DatabaseConnectionProperties(
-    Map<String, Credentials> users,
+    Map<String, DatabaseCredentials> users,
     DatabaseDriver dbDriver,
     String dbHost,
     int dbPort,

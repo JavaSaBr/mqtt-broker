@@ -18,7 +18,7 @@ import javasabr.mqtt.auth.api.AuthenticationType;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProviderProperties;
-import javasabr.mqtt.auth.service.config.property.Credentials;
+import javasabr.mqtt.auth.service.config.property.DatabaseCredentials;
 import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
 import javasabr.mqtt.auth.service.config.property.DatabaseConnectionProperties;
 import org.flywaydb.core.Flyway;
@@ -37,7 +37,7 @@ public class DatabaseSpringConfig {
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
       AuthenticationProperties authenticationProperties,
-      Credentials readerCredentials) {
+      DatabaseCredentials readerDatabaseCredentials) {
     AuthenticationProviderProperties authenticationProviderProperties = authenticationProperties.provider()
         .get(AuthenticationType.BASIC);
     CredentialsSourceProperties credentialsSourceProperties = authenticationProviderProperties.credentialsSources()
@@ -50,8 +50,8 @@ public class DatabaseSpringConfig {
         .option(DRIVER, credentialsSourceProperties.dbDriver().value())
         .option(HOST, credentialsSourceProperties.dbHost())
         .option(PORT, credentialsSourceProperties.dbPort())
-        .option(USER, readerCredentials.username())
-        .option(PASSWORD, readerCredentials.password())
+        .option(USER, readerDatabaseCredentials.username())
+        .option(PASSWORD, readerDatabaseCredentials.password())
         .option(OPTIONS, timeoutOptions)
         .build();
   }
@@ -80,7 +80,7 @@ public class DatabaseSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(AuthenticationProperties authenticationProperties, Credentials adminCredentials) {
+  Flyway flyway(AuthenticationProperties authenticationProperties, DatabaseCredentials adminDatabaseCredentials) {
 
     AuthenticationProviderProperties authenticationProviderProperties = authenticationProperties.provider()
         .get(AuthenticationType.BASIC);
@@ -93,7 +93,7 @@ public class DatabaseSpringConfig {
         credentialsSourceProperties.dbPort(),
         credentialsSourceProperties.dbName());
     return Flyway.configure()
-        .dataSource(databaseUrl, adminCredentials.username(), adminCredentials.password())
+        .dataSource(databaseUrl, adminDatabaseCredentials.username(), adminDatabaseCredentials.password())
         .load();
   }
 }
