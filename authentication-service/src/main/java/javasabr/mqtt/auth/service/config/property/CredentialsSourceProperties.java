@@ -1,10 +1,11 @@
 package javasabr.mqtt.auth.service.config.property;
 
+import java.net.URI;
 import java.time.Duration;
 
 public record CredentialsSourceProperties(
     boolean enabled,
-    String fsPath,
+    URI fsPath,
     DatabaseDriver dbDriver,
     String dbHost,
     int dbPort,

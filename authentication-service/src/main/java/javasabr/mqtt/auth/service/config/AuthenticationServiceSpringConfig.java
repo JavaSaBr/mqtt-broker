@@ -9,6 +9,7 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.AuthenticationType;
 import javasabr.mqtt.auth.api.CredentialsSource;
+import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
@@ -16,6 +17,7 @@ import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
+import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,11 +62,19 @@ public class AuthenticationServiceSpringConfig {
   }
 
   @Bean
+  public CredentialsSourceProperties fileCredentialsSourceProperties(AuthenticationProperties authenticationProperties) {
+    return authenticationProperties
+        .provider()
+        .get(AuthenticationType.BASIC)
+        .credentialsSources()
+        .get(CredentialsSourceType.FILE);
+  }
+
+  @Bean
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
   @ConditionalOnProperty(name = "authentication.provider.basic.credentials-sources.file.enabled", havingValue = "true")
-  CredentialsSource fileCredentialsSource(@Value("${authentication.provider.basic.credentials-sources.file.fs-path}")
-                                          URI fileName) {
-    FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileName);
+  CredentialsSource fileCredentialsSource(CredentialsSourceProperties fileCredentialsSourceProperties) {
+    FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileCredentialsSourceProperties.fsPath());
     fileCredentialsSource.init();
     return fileCredentialsSource;
   }

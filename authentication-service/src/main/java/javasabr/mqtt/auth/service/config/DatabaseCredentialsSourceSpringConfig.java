@@ -23,6 +23,7 @@ import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseTimeoutsConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseUrlConfig;
 import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,8 +46,8 @@ public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
-      DatabaseUrlConfig databaseUrlConfig,
-      DatabaseTimeoutsConfig databaseTimeoutsConfig,
+      @Qualifier("dbCredentialsSourceProperties") DatabaseUrlConfig databaseUrlConfig,
+      @Qualifier("dbCredentialsSourceProperties") DatabaseTimeoutsConfig databaseTimeoutsConfig,
       DatabaseCredentials readerDatabaseCredentials) {
     Map<String, String> timeoutOptions = Map.of(
         "lock_timeout", databaseTimeoutsConfig.lockTimeout(),
@@ -70,24 +71,24 @@ public class DatabaseCredentialsSourceSpringConfig {
   @Bean
   @DependsOn("flyway")
   ConnectionFactory connectionFactory(
-      DatabasePoolConfig databasePoolConfig,
+      DatabasePoolConfig dbCredentialsSourceProperties,
       ConnectionFactoryOptions connectionFactoryOptions) {
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-        .maxIdleTime(databasePoolConfig.maxIdleTime())
-        .maxSize(databasePoolConfig.maxPoolSize())
-        .initialSize(databasePoolConfig.initialPoolSize())
+        .maxIdleTime(dbCredentialsSourceProperties.maxIdleTime())
+        .maxSize(dbCredentialsSourceProperties.maxPoolSize())
+        .initialSize(dbCredentialsSourceProperties.initialPoolSize())
         .build();
     return new ConnectionPool(configuration);
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(DatabaseUrlConfig databaseUrlConfig, DatabaseCredentials adminDatabaseCredentials) {
+  Flyway flyway(DatabaseUrlConfig dbCredentialsSourceProperties, DatabaseCredentials adminDatabaseCredentials) {
     String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
-        databaseUrlConfig.dbDriver().value(),
-        databaseUrlConfig.dbHost(),
-        databaseUrlConfig.dbPort(),
-        databaseUrlConfig.dbName());
+        dbCredentialsSourceProperties.dbDriver().value(),
+        dbCredentialsSourceProperties.dbHost(),
+        dbCredentialsSourceProperties.dbPort(),
+        dbCredentialsSourceProperties.dbName());
     return Flyway.configure()
         .dataSource(databaseUrl, adminDatabaseCredentials.username(), adminDatabaseCredentials.password())
         .load();
