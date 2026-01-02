@@ -1,15 +1,11 @@
 package javasabr.mqtt.auth.service.config;
 
-import static javasabr.rlib.collections.dictionary.DictionaryCollectors.toRefToRefDictionary;
-
 import java.util.List;
-import java.util.function.Function;
+import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
-import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
-import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
@@ -17,7 +13,6 @@ import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
-import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -37,27 +32,12 @@ public class AuthenticationServiceSpringConfig {
 
   @Bean
   AuthenticationService authenticationService(
-      List<AuthenticationProvider> authenticationProviders,
+      List<AuthenticationProvider> availableProviders,
       AuthenticationProperties authenticationProperties,
-      @Autowired(required = false) AnonymousAuthenticationProvider anonymousAuthenticationProvider) {
+      @Autowired(required = false) AnonymousAuthenticationProvider anonymousProvider) {
     log.info("Initializing AuthenticationService...");
-    if (authenticationProviders.isEmpty()) {
-      throw new AuthenticationConfigException("Authenticator providers are not configured");
-    }
-    RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers = authenticationProviders.stream()
-        .collect(toRefToRefDictionary(AuthenticationProvider::getAuthenticationMethod, Function.identity()));
-    AuthenticationProvider defaultProvider;
     AuthenticationMethod defaultAuthenticationMethod = authenticationProperties.defaultMethod();
-    if (defaultAuthenticationMethod == null) {
-      defaultProvider = authenticationProviders.getFirst();
-    } else {
-      defaultProvider = providers.get(defaultAuthenticationMethod);
-    }
-    if (defaultProvider == null) {
-      throw new AuthenticationConfigException("[%s] authenticator method not found".formatted(
-          defaultAuthenticationMethod));
-    }
-    return new DefaultAuthenticationService(providers, defaultProvider, anonymousAuthenticationProvider);
+    return new DefaultAuthenticationService(availableProviders, defaultAuthenticationMethod, anonymousProvider);
   }
 
   @Bean
@@ -69,13 +49,11 @@ public class AuthenticationServiceSpringConfig {
         .get(CredentialsSourceType.FILE);
   }
 
-  @Bean
+  @Bean(initMethod = "init")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
   @ConditionalOnProperty(name = "authentication.method.basic.credentials-source.file.enabled", havingValue = "true")
-  CredentialsSource fileCredentialsSource(CredentialsSourceProperties fileCredentialsSourceProperties) {
-    FileCredentialsSource fileCredentialsSource = new FileCredentialsSource(fileCredentialsSourceProperties.fsPath());
-    fileCredentialsSource.init();
-    return fileCredentialsSource;
+  FileCredentialsSource fileCredentialsSource(CredentialsSourceProperties fileCredentialsSourceProperties) {
+    return new FileCredentialsSource(fileCredentialsSourceProperties.fsPath());
   }
 
   @Bean

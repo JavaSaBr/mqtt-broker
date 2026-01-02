@@ -1,10 +1,17 @@
 package javasabr.mqtt.auth.service;
 
+import static java.util.stream.Collectors.toMap;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
-import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.MqttCredentials;
-import javasabr.rlib.collections.dictionary.RefToRefDictionary;
+import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -15,18 +22,27 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
-  RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> availableProviders;
+  Map<AuthenticationMethod, AuthenticationProvider> availableProviders;
   AuthenticationProvider defaultProvider;
   @Nullable AnonymousAuthenticationProvider anonymousProvider;
 
   public DefaultAuthenticationService(
-      RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> availableProviders,
-      AuthenticationProvider defaultProvider,
-      @Nullable AnonymousAuthenticationProvider anonymousAuthenticationProvider) {
-    this.availableProviders = availableProviders;
-    this.defaultProvider = defaultProvider;
-    this.anonymousProvider = anonymousAuthenticationProvider;
-    log.info(availableProviders, DefaultAuthenticationService::buildServiceDescription);
+      List<AuthenticationProvider> configuredProviders,
+      @Nullable AuthenticationMethod defaultMethod,
+      @Nullable AnonymousAuthenticationProvider anonymousProvider) {
+    if (configuredProviders.isEmpty()) {
+      throw new AuthenticationConfigException("Authenticator providers are not configured");
+    }
+    this.availableProviders = new EnumMap<>(configuredProviders.stream()
+        .collect(toMap(AuthenticationProvider::getAuthenticationMethod, Function.identity())));
+    this.defaultProvider = Optional.ofNullable(defaultMethod)
+        .map(this.availableProviders::get)
+        .orElseGet(configuredProviders::getFirst);
+    if (defaultProvider == null) {
+      throw new AuthenticationConfigException("[%s] method not found".formatted(defaultMethod));
+    }
+    this.anonymousProvider = anonymousProvider;
+    log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);
   }
 
   @Override
@@ -44,12 +60,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
             .defaultIfEmpty(false));
   }
 
-  private static String buildServiceDescription(
-      RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers) {
+  private static String buildServiceDescription(Map<AuthenticationMethod, AuthenticationProvider> providers) {
 
     var builder = new StringBuilder()
         .append("[\n");
-    for (AuthenticationProvider provider : providers) {
+    for (AuthenticationProvider provider : providers.values()) {
       builder
           .append("  ")
           .append(provider)
