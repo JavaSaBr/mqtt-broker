@@ -43,22 +43,20 @@ public class AuthenticationServiceSpringConfig {
   @Bean
   public CredentialsSourceProperties fileCredentialsSourceProperties(AuthenticationProperties authenticationProperties) {
     return authenticationProperties
-        .method()
-        .get(AuthenticationMethod.BASIC)
         .credentialsSource()
         .get(CredentialsSourceType.FILE);
   }
 
   @Bean(initMethod = "init")
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.FileCredentialsSource")
-  @ConditionalOnProperty(name = "authentication.method.basic.credentials-source.file.enabled", havingValue = "true")
+  @ConditionalOnProperty(name = "authentication.credentials-source.file.enabled", havingValue = "true")
   FileCredentialsSource fileCredentialsSource(CredentialsSourceProperties fileCredentialsSourceProperties) {
     return new FileCredentialsSource(fileCredentialsSourceProperties.uriPath());
   }
 
   @Bean
   @ConditionalOnClass(name = "javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource")
-  @ConditionalOnProperty(name = "authentication.method.basic.credentials-source.database.enabled", havingValue = "true")
+  @ConditionalOnProperty(name = "authentication.credentials-source.database.enabled", havingValue = "true")
   CredentialsSource dbCredentialsSource(DatabaseClient databaseClient) {
     return new DatabaseCredentialsSource(databaseClient);
   }

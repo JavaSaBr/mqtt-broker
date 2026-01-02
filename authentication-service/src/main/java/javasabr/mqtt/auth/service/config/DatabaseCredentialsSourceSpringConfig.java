@@ -14,7 +14,6 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.Map;
-import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
@@ -30,15 +29,13 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(name = "authentication.method.basic.credentials-source.database.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "authentication.credentials-source.database.enabled", havingValue = "true")
 @ConditionalOnProperty(name = "authentication.method.basic.enabled", havingValue = "true")
 public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
   public CredentialsSourceProperties dbCredentialsSourceProperties(AuthenticationProperties authenticationProperties) {
     return authenticationProperties
-        .method()
-        .get(AuthenticationMethod.BASIC)
         .credentialsSource()
         .get(CredentialsSourceType.DATABASE);
   }

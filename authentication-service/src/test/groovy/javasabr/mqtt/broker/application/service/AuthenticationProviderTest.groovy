@@ -25,7 +25,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   @TestPropertySource(properties = [
       "authentication.allow-anonymous=false",
       "authentication.method.basic.enabled=true",
-      "authentication.method.basic.credentials-source.file.enabled=true"
+      "authentication.credentials-source.file.enabled=true"
   ])
   static class FileCredentialsSourceTest extends AuthenticationProviderTest {
     @Autowired
@@ -45,7 +45,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   @TestPropertySource(properties = [
       "authentication.allow-anonymous=true",
       "authentication.method.basic.enabled=true",
-      "authentication.method.basic.credentials-source.file.enabled=true"
+      "authentication.credentials-source.file.enabled=true"
   ])
   static class AnonymousProviderTest extends AuthenticationProviderTest {
 

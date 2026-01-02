@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets
 @TestPropertySource(properties = [
     "authentication.allow-anonymous=false",
     "authentication.method.basic.enabled=true",
-    "authentication.method.basic.credentials-source.database.enabled=true"
+    "authentication.credentials-source.database.enabled=true"
 ])
 @Testcontainers
 class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
@@ -40,7 +40,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
   static void configureProperties(DynamicPropertyRegistry registry) {
     postgreSQLContainer.start()
     registry.add(
-        "authentication.method.basic.credentials-source.database.db-port",
+        "authentication.credentials-source.database.db-port",
         { "${postgreSQLContainer.getMappedPort(5432)}" })
   }
 
