@@ -8,8 +8,8 @@ import org.springframework.test.context.TestPropertySource
 import java.nio.charset.StandardCharsets
 
 @TestPropertySource(properties = [
-    "authentication.provider.basic.credentials-sources.file.enabled=true",
-    "authentication.provider.basic.enabled=true"
+    "authentication.method.basic.credentials-source.file.enabled=true",
+    "authentication.method.basic.enabled=true"
 ])
 class FileAuthenticationServiceTest extends IntegrationSpecification {
 

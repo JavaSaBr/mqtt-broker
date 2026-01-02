@@ -3,7 +3,7 @@ package javasabr.mqtt.broker.application.service
 import javasabr.mqtt.auth.api.MqttCredentials
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationService
-import javasabr.mqtt.auth.api.AuthenticationType
+import javasabr.mqtt.auth.api.AuthenticationMethod
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
@@ -19,8 +19,8 @@ import java.nio.charset.StandardCharsets
 
 @TestPropertySource(properties = [
     "authentication.allow-anonymous=false",
-    "authentication.provider.basic.enabled=true",
-    "authentication.provider.basic.credentials-sources.database.enabled=true"
+    "authentication.method.basic.enabled=true",
+    "authentication.method.basic.credentials-source.database.enabled=true"
 ])
 @Testcontainers
 class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
@@ -40,7 +40,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
   static void configureProperties(DynamicPropertyRegistry registry) {
     postgreSQLContainer.start()
     registry.add(
-        "authentication.provider.basic.credentials-sources.database.db-port",
+        "authentication.method.basic.credentials-source.database.db-port",
         { "${postgreSQLContainer.getMappedPort(5432)}" })
   }
 
@@ -67,7 +67,7 @@ class DatabaseAuthenticationServiceTest extends IntegrationSpecification {
     expect:
         credentialsSource instanceof DatabaseCredentialsSource
         verifyEach(authenticationProviders) { provider ->
-          provider.authenticationType != AuthenticationType.ANONYMOUS
+          provider.authenticationMethod != AuthenticationMethod.ANONYMOUS
           !(provider instanceof AnonymousAuthenticationProvider)
         }
   }

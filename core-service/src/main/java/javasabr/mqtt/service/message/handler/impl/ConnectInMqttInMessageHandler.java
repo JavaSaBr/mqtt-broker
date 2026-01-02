@@ -11,7 +11,7 @@ import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
-import javasabr.mqtt.auth.api.AuthenticationType;
+import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
@@ -78,7 +78,7 @@ public class ConnectInMqttInMessageHandler
     MqttCredentials mqttCredentials = new MqttCredentials(
         message.username(),
         message.password(),
-        AuthenticationType.fromValue(message.authenticationMethod()),
+        AuthenticationMethod.fromValue(message.authenticationMethod()),
         message.authenticationData());
     authenticationService
         .authenticate(mqttCredentials)

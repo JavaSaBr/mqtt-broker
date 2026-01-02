@@ -3,14 +3,14 @@ package javasabr.mqtt.auth.service;
 import com.fasterxml.jackson.annotation.JsonValue;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.MqttCredentials;
-import javasabr.mqtt.auth.api.AuthenticationType;
+import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.rlib.common.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 public class AnonymousAuthenticationProvider implements AuthenticationProvider {
   @Override
-  public AuthenticationType getAuthenticationType() {
-    return AuthenticationType.ANONYMOUS;
+  public AuthenticationMethod getAuthenticationMethod() {
+    return AuthenticationMethod.ANONYMOUS;
   }
 
   @Override
@@ -20,7 +20,7 @@ public class AnonymousAuthenticationProvider implements AuthenticationProvider {
 
   @Override
   public String toString() {
-    return "{ \"authenticationType\": \"%s\", \"enabled\": true }".formatted(getAuthenticationType());
+    return "{ \"authenticationMethod\": \"%s\", \"enabled\": true }".formatted(getAuthenticationMethod());
   }
 
   @JsonValue

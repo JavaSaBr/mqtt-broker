@@ -2,7 +2,7 @@ package javasabr.mqtt.auth.service;
 
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
-import javasabr.mqtt.auth.api.AuthenticationType;
+import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
 import lombok.AccessLevel;
@@ -15,12 +15,12 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
-  RefToRefDictionary<AuthenticationType, AuthenticationProvider> providers;
+  RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers;
   AuthenticationProvider defaultProvider;
   @Nullable AnonymousAuthenticationProvider anonymousProvider;
 
   public DefaultAuthenticationService(
-      RefToRefDictionary<AuthenticationType, AuthenticationProvider> providers,
+      RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers,
       AuthenticationProvider defaultProvider,
       AnonymousAuthenticationProvider anonymousAuthenticationProvider) {
     this.providers = providers;
@@ -44,7 +44,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
   }
 
   private static String buildServiceDescription(
-      RefToRefDictionary<AuthenticationType, AuthenticationProvider> providers) {
+      RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers) {
 
     var builder = new StringBuilder()
         .append("[\n");
@@ -58,6 +58,6 @@ public class DefaultAuthenticationService implements AuthenticationService {
         .delete(builder.length() - 2, builder.length())
         .append("\n]");
 
-    return "Loaded total [%s] authentication provider: %s".formatted(providers.size(), builder);
+    return "Loaded total [%s] authentication method: %s".formatted(providers.size(), builder);
   }
 }

@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 public interface AuthenticationProvider {
 
-  AuthenticationType getAuthenticationType();
+  AuthenticationMethod getAuthenticationMethod();
 
   Mono<Boolean> authenticate(MqttCredentials credentials);
 }
