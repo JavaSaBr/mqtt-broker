@@ -61,6 +61,7 @@ public class PublishMqttInMessageHandler
     if (finalTopicName == null) {
       return;
     } else if (!authorizationService.authorizePublish(user, finalTopicName)) {
+      log.warning(user.clientId(), finalTopicName, "[%s] Not authorized for publish to:[%s]"::formatted);
       handleNotAuthorize(user);
       return;
     }

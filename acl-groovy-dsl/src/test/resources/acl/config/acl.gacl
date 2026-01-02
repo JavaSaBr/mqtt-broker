@@ -86,3 +86,13 @@ allowPublish {
     anyTopic()
   }
 }
+
+allowSubscribe {
+  users {
+    clientId startsWith("device_")
+  }
+  topics {
+    dynamic("/devices/{clientId}/notify")
+    match("/devices/broadcast")
+  }
+}

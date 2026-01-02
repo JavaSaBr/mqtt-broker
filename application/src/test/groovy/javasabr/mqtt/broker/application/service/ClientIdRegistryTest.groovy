@@ -12,7 +12,6 @@ class ClientIdRegistryTest extends IntegrationSpecification {
   ClientIdRegistry clientIdRegistry
 
   def "should register new client ids"() {
-
     given:
         def clientId1 = "testClientId1"
         def clientId2 = "testClientId2"
@@ -27,15 +26,11 @@ class ClientIdRegistryTest extends IntegrationSpecification {
   }
 
   def "should not register duplicated client ids"() {
-
     given:
-
         def clientId1 = "testClientId3"
         def clientId2 = "testClientId4"
-
         clientIdRegistry.register(clientId1).block()
         clientIdRegistry.register(clientId2).block()
-
     when:
         def result1 = clientIdRegistry.register(clientId1).block()
         def result2 = clientIdRegistry.register(clientId2).block()
@@ -47,15 +42,11 @@ class ClientIdRegistryTest extends IntegrationSpecification {
   }
 
   def "should unregister exist client ids"() {
-
     given:
-
         def clientId1 = "testClientId5"
         def clientId2 = "testClientId6"
-
         clientIdRegistry.register(clientId1).block()
         clientIdRegistry.register(clientId2).block()
-
     when:
         def result1 = clientIdRegistry.unregister(clientId1).block()
         def result2 = clientIdRegistry.unregister(clientId2).block()
@@ -64,7 +55,6 @@ class ClientIdRegistryTest extends IntegrationSpecification {
   }
 
   def "should not unregister not exist client ids"() {
-
     given:
         def clientId1 = "testClientId7"
         def clientId2 = "testClientId8"
@@ -76,7 +66,6 @@ class ClientIdRegistryTest extends IntegrationSpecification {
   }
 
   def "should generate and register new client ids"() {
-
     given:
         def clientId1 = clientIdRegistry.generate().block()
         def clientId2 = clientIdRegistry.generate().block()
@@ -93,7 +82,6 @@ class ClientIdRegistryTest extends IntegrationSpecification {
   }
 
   def "should generate invalid client ids"() {
-
     given:
         def clientId1 = "testClientId*^&%"
         def clientId2 = "testClientId{}@!"

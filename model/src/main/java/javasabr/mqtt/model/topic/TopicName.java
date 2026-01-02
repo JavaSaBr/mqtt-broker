@@ -18,20 +18,26 @@ public class TopicName extends AbstractTopic {
     }
   };
 
-  public TopicName(String topicName) {
-    super(topicName);
+  public TopicName(String rawTopicName) {
+    super(rawTopicName);
+  }
+
+  public TopicName(String[] segments, String rawTopicName) {
+    super(segments, rawTopicName);
   }
 
   @Override
   public boolean isMatched(AbstractTopic anotherTopic) {
-    if (anotherTopic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
+    if (anotherTopic == this) {
+      return true;
+    } else if (anotherTopic instanceof TopicFilter topicFilter && topicFilter.wildcard()) {
       return false;
     } else if (levelsCount() != anotherTopic.levelsCount()) {
       return false;
     }
     return Objects.equals(rawTopic(), anotherTopic.rawTopic());
   }
-
+  
   public boolean isEmpty() {
     return false;
   }

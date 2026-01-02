@@ -1,5 +1,7 @@
 package javasabr.mqtt.model.topic;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -9,8 +11,8 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@EqualsAndHashCode(of = "rawTopic")
-@Accessors(fluent = true, chain = false)
+@Accessors
+@EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class AbstractTopic {
 
@@ -22,13 +24,17 @@ public abstract class AbstractTopic {
   }
 
   String[] segments;
+  @EqualsAndHashCode.Include
   String rawTopic;
-  int length;
 
-  protected AbstractTopic(String rawTopicName) {
-    length = rawTopicName.length();
-    segments = splitTopic(rawTopicName);
-    rawTopic = rawTopicName;
+  protected AbstractTopic(String rawTopic) {
+    this.segments = splitTopic(rawTopic);
+    this.rawTopic = rawTopic;
+  }
+
+  protected AbstractTopic(String[] segments, String rawTopic) {
+    this.segments = segments;
+    this.rawTopic = rawTopic;
   }
 
   public boolean isShared() {
@@ -71,6 +77,11 @@ public abstract class AbstractTopic {
    */
   public abstract boolean isMatched(AbstractTopic anotherTopic);
 
+  @JsonValue
+  Object jsonDebugValue() {
+    return rawTopic;
+  }
+  
   protected static String[] splitTopic(String topic) {
     int segmentCount = countOccurrencesOf(topic, AbstractTopic.DELIMITER) + 1;
     var segments = new String[segmentCount];
