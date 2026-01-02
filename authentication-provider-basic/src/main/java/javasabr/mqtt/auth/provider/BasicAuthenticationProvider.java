@@ -32,9 +32,4 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
         getAuthenticationMethod(),
         credentialsSource);
   }
-
-  @JsonValue
-  public String jsonDebugValue() {
-    return toString();
-  }
 }

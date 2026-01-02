@@ -15,32 +15,33 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
-  RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers;
+  RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> availableProviders;
   AuthenticationProvider defaultProvider;
   @Nullable AnonymousAuthenticationProvider anonymousProvider;
 
   public DefaultAuthenticationService(
-      RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> providers,
+      RefToRefDictionary<AuthenticationMethod, AuthenticationProvider> availableProviders,
       AuthenticationProvider defaultProvider,
-      AnonymousAuthenticationProvider anonymousAuthenticationProvider) {
-    this.providers = providers;
+      @Nullable AnonymousAuthenticationProvider anonymousAuthenticationProvider) {
+    this.availableProviders = availableProviders;
     this.defaultProvider = defaultProvider;
     this.anonymousProvider = anonymousAuthenticationProvider;
-    log.info(providers, DefaultAuthenticationService::buildServiceDescription);
+    log.info(availableProviders, DefaultAuthenticationService::buildServiceDescription);
   }
 
   @Override
   public Mono<Boolean> authenticate(MqttCredentials request) {
-    AuthenticationProvider primary = (request.authenticationMethod() == null)
-                                     ? defaultProvider
-                                     : providers.get(request.authenticationMethod());
-
-    Mono<Boolean> anonymousStep =
-        anonymousProvider != null ? anonymousProvider.authenticate(request).onErrorReturn(false) : Mono.just(false);
-
-    return anonymousStep.flatMap(success -> (success || primary == null)
-                                            ? Mono.just(success)
-                                            : primary.authenticate(request).onErrorReturn(false));
+    AuthenticationMethod authenticationMethod = request.authenticationMethod();
+    AuthenticationProvider targetProvider =
+        authenticationMethod == null ? defaultProvider : availableProviders.get(authenticationMethod);
+    return Mono.justOrEmpty(anonymousProvider)
+        .flatMap(provider -> provider.authenticate(request))
+        .onErrorReturn(false)
+        .filter(Boolean::booleanValue)
+        .switchIfEmpty(Mono.justOrEmpty(targetProvider)
+            .flatMap(provider -> provider.authenticate(request))
+            .onErrorReturn(false)
+            .defaultIfEmpty(false));
   }
 
   private static String buildServiceDescription(

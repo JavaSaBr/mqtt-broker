@@ -46,9 +46,4 @@ public class DatabaseCredentialsSource implements CredentialsSource {
     String dbDriver = databaseClient.getConnectionFactory().getMetadata().getName();
     return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getCredentialsSourceType(), dbDriver);
   }
-
-  @JsonValue
-  public String jsonDebugValue() {
-    return toString();
-  }
 }

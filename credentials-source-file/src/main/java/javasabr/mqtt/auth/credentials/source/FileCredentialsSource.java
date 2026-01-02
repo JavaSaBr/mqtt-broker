@@ -41,9 +41,4 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
         getCredentialsSourceType(),
         fileName.getPath());
   }
-
-  @JsonValue
-  public String jsonDebugValue() {
-    return toString();
-  }
 }
