@@ -18,6 +18,7 @@ import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
+import javasabr.mqtt.auth.service.config.property.DatabaseConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseConnectionConfig;
 import javasabr.mqtt.auth.service.config.property.DatabaseCredentials;
 import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
@@ -44,7 +45,7 @@ public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
-      CredentialsSourceProperties dbCredentialsSourceProperties,
+      DatabaseConfig dbCredentialsSourceProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     Map<String, String> timeoutOptions = Map.of(
         "lock_timeout", dbCredentialsSourceProperties.lockTimeout(),
