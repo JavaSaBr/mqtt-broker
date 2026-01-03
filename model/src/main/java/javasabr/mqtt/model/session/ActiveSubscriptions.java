@@ -15,4 +15,6 @@ public interface ActiveSubscriptions {
   Array<Subscription> subscriptions();
 
   Array<Subscription> findBySubscriptionId(int subscriptionId);
+  
+  boolean isEmpty();
 }

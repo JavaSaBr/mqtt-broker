@@ -33,6 +33,7 @@ import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandl
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService
+import javasabr.mqtt.test.support.BaseSpecification
 import javasabr.rlib.network.Network
 import javasabr.rlib.network.ServerNetworkConfig.SimpleServerNetworkConfig
 import javasabr.rlib.network.impl.DefaultBufferAllocator
@@ -44,7 +45,7 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
-abstract class IntegrationServiceSpecification extends Specification {
+abstract class IntegrationServiceSpecification extends BaseSpecification {
 
   @Shared
   def testPayload = "testpayload".getBytes(StandardCharsets.UTF_8)
