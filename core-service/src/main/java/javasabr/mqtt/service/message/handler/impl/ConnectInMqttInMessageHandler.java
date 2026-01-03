@@ -193,13 +193,11 @@ public class ConnectInMqttInMessageHandler
       return MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
     }
     long expiryInterval = message.sessionExpiryInterval();
-    if (expiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY) {
-      return MqttProperties.SESSION_EXPIRY_DURATION_INFINITY;
-    } else if (expiryInterval == MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED) {
-      return MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
-    } else {
-      return Duration.ofSeconds(expiryInterval);
-    }
+    return switch (expiryInterval) {
+      case MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY -> MqttProperties.SESSION_EXPIRY_DURATION_INFINITY;
+      case MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED -> MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
+      default -> Duration.ofSeconds(expiryInterval);
+    };
   }
 
   private Mono<Boolean> onConnected(

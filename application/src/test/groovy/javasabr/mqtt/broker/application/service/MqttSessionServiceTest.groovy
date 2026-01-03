@@ -19,28 +19,25 @@ class MqttSessionServiceTest extends IntegrationSpecification {
 
   def "should create fresh session if client request it"() {
     given:
-        def clientId = clientIdRegistry.generate().block()
+        def clientId = fromAsync(clientIdRegistry.generate())
         def client = buildExternalMqtt5Client(clientId)
-        def previousSession = mqttSessionService.createClean(clientId).block()
-        if (previousSession instanceof ConfigurableNetworkMqttSession) {
-          previousSession.expiryInterval(Duration.ofHours(1))
-        }
-        mqttSessionService.store(clientId, previousSession).block()
+        def previousSession = fromAsync(mqttSessionService.createClean(clientId)) as ConfigurableNetworkMqttSession
+        previousSession.expiryInterval(Duration.ofHours(1))
+        waitForAsync(mqttSessionService.store(clientId, previousSession))
     when:
-        def connectionResult = client.connectWith()
+        def connectionResult = fromAsync(client.connectWith()
             .cleanStart(true)
             .sessionExpiryInterval(120)
-            .send()
-            .join()
+            .send())
     then:
         with(connectionResult) {
-          !sessionPresent
-          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+          !isSessionPresent()
+          getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS
         }
     when:
-        client.disconnect().join()
+        waitForAsync(client.disconnect())
         Thread.sleep(100)
-        def restored = mqttSessionService.restore(clientId).block()
+        def restored = fromAsync(mqttSessionService.restore(clientId))
     then:
         restored != null
         restored != previousSession
@@ -48,94 +45,90 @@ class MqttSessionServiceTest extends IntegrationSpecification {
 
   def "should not store session for client which doesn't require it"() {
     given:
-        def clientId = clientIdRegistry.generate().block()
+        def clientId = fromAsync(clientIdRegistry.generate())
         def client = buildExternalMqtt5Client(clientId)
     when:
-        def connectionResult = client.connectWith()
-            .send()
-            .join()
+        def connectionResult = fromAsync(client.connectWith().send())
     then:
         with(connectionResult) {
-          !sessionPresent
-          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+          !isSessionPresent()
+          getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS
         }
     when:
-        client.disconnect().join()
+        waitForAsync(client.disconnect())
         Thread.sleep(100)
-        def restored = mqttSessionService.restore(clientId).block()
+        def restored = fromAsync(mqttSessionService.restore(clientId))
     then:
         restored == null
   }
 
   def "should always store session for < MQTT 5.0 clients"() {
     given:
-        def clientId = clientIdRegistry.generate().block()
+        def clientId = fromAsync(clientIdRegistry.generate())
         def client = buildExternalMqtt311Client(clientId)
     when:
-        def connectionResult = client.connect().join()
+        def connectionResult = fromAsync(client.connect())
     then:
-        !connectionResult.sessionPresent
+        !connectionResult.isSessionPresent()
     when:
-        client.disconnect().join()
+        waitForAsync(client.disconnect())
         Thread.sleep(100)
-        def restored = mqttSessionService.restore(clientId).block()
+        def restored = fromAsync(mqttSessionService.restore(clientId))
     then:
         restored != null
   }
   
   def "client should re-use MQTT session between connections"() {
     given:
-        def clientId = clientIdRegistry.generate().block()
+        def clientId = fromAsync(clientIdRegistry.generate())
         def client = buildExternalMqtt5Client(clientId)
     when:
         def restoredSession = mqttSessionService.restore(clientId).block()
     then: 'there no any stored session for this client'
         restoredSession == null
     when:
-        def connectionResult = client.connectWith()
+        def connectionResult = fromAsync(client.connectWith()
             .cleanStart(false)
             .sessionExpiryInterval(120)
-            .send()
-            .join()
+            .send())
     then:
         with(connectionResult) {
-          !sessionPresent
-          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+          !isSessionPresent()
+          getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS
         }
     when:
-        mqttSessionService.restore(clientId).block()
+        waitForAsync(mqttSessionService.restore(clientId))
     then: 'there is active session for this client'
         def exception = thrown(IllegalStateException)
         exception.message == "Client:[$clientId] already has active session"
     when:
-        client.disconnect().join()
+        waitForAsync(client.disconnect())
         Thread.sleep(100)
-        def restored = mqttSessionService.restore(clientId).block()
+        def restored = fromAsync(mqttSessionService.restore(clientId))
     then:
         restored != null
         restored.clientId() == clientId
         restored.expiryInterval() != null
     when:
-        mqttSessionService.restore(clientId).block()
+        waitForAsync(mqttSessionService.restore(clientId))
     then: 'The session was already restored'
         exception = thrown(IllegalStateException)
         exception.message == "Client:[$clientId] already has active session"
     when:
-        mqttSessionService.store(clientId, restored).block()
-        connectionResult = client.connectWith()
+        waitForAsync(mqttSessionService.store(clientId, restored))
+        connectionResult = fromAsync(client.connectWith()
             .cleanStart(false)
             .sessionExpiryInterval(120)
-            .send()
-            .join()
+            .send())
     then:
         with(connectionResult) {
-          sessionPresent
-          reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
+          isSessionPresent()
+          getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS
         }
     when:
-        client.disconnect().join()
+        waitForAsync(client.disconnect())
         Thread.sleep(100)
-        def restored2 = mqttSessionService.restore(clientId).block()
+        def restored2 = fromAsync(mqttSessionService.restore(clientId))
     then: 'should be the same session instance'
         restored2 != null
         restored2 == restored
