@@ -1,12 +1,10 @@
 package javasabr.mqtt.auth.service;
 
-import static java.util.stream.Collectors.toMap;
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
@@ -33,13 +31,19 @@ public class DefaultAuthenticationService implements AuthenticationService {
     if (configuredProviders.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
-    this.availableProviders = new EnumMap<>(configuredProviders.stream()
-        .collect(toMap(AuthenticationProvider::getAuthenticationMethod, Function.identity())));
-    this.defaultProvider = Optional.ofNullable(defaultMethod)
-        .map(this.availableProviders::get)
-        .orElseGet(configuredProviders::getFirst);
-    if (defaultProvider == null) {
-      throw new AuthenticationConfigException("[%s] method not found".formatted(defaultMethod));
+    this.availableProviders = configuredProviders.stream()
+        .collect(Collectors.toMap(
+            AuthenticationProvider::getAuthenticationMethod,
+            Function.identity(),
+            (a, _) -> {
+              throw new AuthenticationConfigException("There are several [%s] authentication providers"
+                  .formatted(a.getAuthenticationMethod()));
+            },
+            () -> new EnumMap<>(AuthenticationMethod.class)));
+    this.defaultProvider = availableProviders.get(defaultMethod == null ? AuthenticationMethod.BASIC : defaultMethod);
+    if (defaultProvider == null && anonymousProvider == null) {
+      throw new AuthenticationConfigException("None of [%s, BASIC, ANONYMOUS] authentication provider configured"
+          .formatted(defaultMethod));
     }
     this.anonymousProvider = anonymousProvider;
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);
