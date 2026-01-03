@@ -41,6 +41,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
   @Override
   public String toString() {
     return "{ \"authenticationMethod\": \"%s\", \"credentialSource\": %s }".formatted(
-        getAuthenticationMethod(), credentialsSources);
+        getAuthenticationMethod(),
+        credentialsSources);
   }
 }
