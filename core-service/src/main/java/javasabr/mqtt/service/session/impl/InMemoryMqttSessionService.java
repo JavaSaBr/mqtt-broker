@@ -176,7 +176,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     long stamp = storedExpirableSessions.writeLock();
     try {
       var expirableSession = ExpirableSession.of(expiryInterval, currentActiveSession);
-      var previous = storedExpirableSessions.put(clientId, expirableSession);
+      ExpirableSession previous = storedExpirableSessions.put(clientId, expirableSession);
       if (previous != null) {
         throw new IllegalStateException("Client:[%s] already has stored expirable session".formatted(clientId));
       }

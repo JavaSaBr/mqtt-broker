@@ -26,8 +26,9 @@ public class ClientIdMqttInMessageFieldValidator extends
     if (clientId == null || clientId.isBlank()) {
       handleNotValidClientId(user);
       return true;
+    } else {
+      return false;
     }
-    return false;
   }
 
   @Override
