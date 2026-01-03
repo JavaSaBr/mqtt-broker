@@ -49,7 +49,7 @@ public abstract class AbstractNetworkMqttUserReleaseHandler<T extends AbstractNe
       if (connectionConfig.sessionsEnabled()) {
         asyncActions = sessionService.store(clientId, session);
       } else {
-        asyncActions = sessionService.close(clientId, session);
+        asyncActions = sessionService.delete(clientId, session);
       }
       user.session(null);
     }

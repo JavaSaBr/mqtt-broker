@@ -14,5 +14,5 @@ public interface MqttSessionService {
    */
   Mono<Boolean> store(String clientId, NetworkMqttSession session);
   
-  Mono<Boolean> close(String clientId, NetworkMqttSession session);
+  Mono<Boolean> delete(String clientId, NetworkMqttSession session);
 }

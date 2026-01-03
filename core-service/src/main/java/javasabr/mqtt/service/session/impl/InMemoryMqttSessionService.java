@@ -114,7 +114,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   }
 
   @Override
-  public Mono<Boolean> close(String clientId, NetworkMqttSession session) {
+  public Mono<Boolean> delete(String clientId, NetworkMqttSession session) {
     long stamp = activeSessions.writeLock();
     try {
       InMemoryNetworkMqttSession currentActiveSession = activeSessions.get(clientId);
