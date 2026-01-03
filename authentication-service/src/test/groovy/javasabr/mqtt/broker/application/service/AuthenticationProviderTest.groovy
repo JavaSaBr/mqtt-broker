@@ -68,8 +68,9 @@ class AuthenticationProviderTest extends IntegrationSpecification {
 
     def "should create anonymous authentication provider"() {
       expect:
-          authenticationProviders.every { provider ->
-            provider.authenticationMethod == ANONYMOUS && provider instanceof AnonymousAuthenticationProvider
+          verifyEach(authenticationProviders) { provider ->
+            provider.authenticationMethod == ANONYMOUS
+            provider instanceof AnonymousAuthenticationProvider
           }
     }
   }
