@@ -19,10 +19,10 @@ import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
-import javasabr.mqtt.auth.service.config.property.DatabaseConfig;
-import javasabr.mqtt.auth.service.config.property.DatabaseConnectionConfig;
+import javasabr.mqtt.auth.service.config.property.DatabaseProperties;
+import javasabr.mqtt.auth.service.config.property.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.service.config.property.DatabaseCredentials;
-import javasabr.mqtt.auth.service.config.property.DatabasePoolConfig;
+import javasabr.mqtt.auth.service.config.property.DatabasePoolProperties;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -48,7 +48,7 @@ public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
   ConnectionFactoryOptions connectionFactoryOptions(
-      DatabaseConfig dbCredentialsSourceProperties,
+      DatabaseProperties dbCredentialsSourceProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     Map<String, String> timeoutOptions = Map.of(
         "lock_timeout", dbCredentialsSourceProperties.lockTimeout(),
@@ -72,7 +72,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   @Bean
   @DependsOn("flyway")
   ConnectionFactory connectionFactory(
-      DatabasePoolConfig dbCredentialsSourceProperties,
+      DatabasePoolProperties dbCredentialsSourceProperties,
       ConnectionFactoryOptions connectionFactoryOptions) {
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
@@ -84,7 +84,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(DatabaseConnectionConfig dbCredentialsSourceProperties, DatabaseCredentials adminDatabaseCredentials) {
+  Flyway flyway(DatabaseConnectionProperties dbCredentialsSourceProperties, DatabaseCredentials adminDatabaseCredentials) {
     String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
         dbCredentialsSourceProperties.dbDriver().value(),
         dbCredentialsSourceProperties.dbHost(),

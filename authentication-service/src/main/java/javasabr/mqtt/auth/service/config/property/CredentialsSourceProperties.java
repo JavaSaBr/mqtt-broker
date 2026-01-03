@@ -14,4 +14,4 @@ public record CredentialsSourceProperties(
     int initialPoolSize,
     int maxPoolSize,
     String lockTimeout,
-    String statementTimeout) implements FileConfig, DatabaseConfig {}
+    String statementTimeout) implements FileProperties, DatabaseProperties {}

@@ -1,6 +1,6 @@
 package javasabr.mqtt.auth.service.config.property;
 
-public interface DatabaseConnectionConfig {
+public interface DatabaseConnectionProperties {
   DatabaseDriver dbDriver();
 
   String dbHost();

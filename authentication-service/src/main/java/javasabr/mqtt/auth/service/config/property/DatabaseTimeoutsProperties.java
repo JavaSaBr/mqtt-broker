@@ -1,6 +1,6 @@
 package javasabr.mqtt.auth.service.config.property;
 
-public interface DatabaseTimeoutsConfig {
+public interface DatabaseTimeoutsProperties {
 
   String lockTimeout();
 
