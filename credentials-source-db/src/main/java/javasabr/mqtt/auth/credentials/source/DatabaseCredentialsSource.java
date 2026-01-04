@@ -1,6 +1,5 @@
 package javasabr.mqtt.auth.credentials.source;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
@@ -25,7 +24,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   DatabaseClient databaseClient;
 
   @Override
-  public CredentialsSourceType getCredentialsSourceType() {
+  public CredentialsSourceType getType() {
     return CredentialsSourceType.DATABASE;
   }
 
@@ -44,6 +43,6 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   @Override
   public String toString() {
     String dbDriver = databaseClient.getConnectionFactory().getMetadata().getName();
-    return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getCredentialsSourceType(), dbDriver);
+    return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getType(), dbDriver);
   }
 }

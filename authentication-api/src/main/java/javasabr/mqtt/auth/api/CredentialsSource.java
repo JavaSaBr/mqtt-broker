@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 public interface CredentialsSource {
 
-  CredentialsSourceType getCredentialsSourceType();
+  CredentialsSourceType getType();
 
   Mono<Boolean> isCredentialsExists(MqttCredentials credentials);
 }

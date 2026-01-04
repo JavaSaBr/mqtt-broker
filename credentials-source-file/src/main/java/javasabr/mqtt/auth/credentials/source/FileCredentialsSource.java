@@ -1,6 +1,5 @@
 package javasabr.mqtt.auth.credentials.source;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -31,14 +30,14 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   }
 
   @Override
-  public CredentialsSourceType getCredentialsSourceType() {
+  public CredentialsSourceType getType() {
     return CredentialsSourceType.FILE;
   }
 
   @Override
   public String toString() {
     return "{ \"credentialsSource\": \"%s\", \"filePath\": \"%s\" }".formatted(
-        getCredentialsSourceType(),
+        getType(),
         fileName.getPath());
   }
 }

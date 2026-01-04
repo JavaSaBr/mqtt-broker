@@ -70,7 +70,7 @@ class AuthenticationServiceTest extends IntegrationSpecification {
         def expectedSourceTypes = [CredentialsSourceType.FILE, CredentialsSourceType.DATABASE]
     expect:
         verifyEach(credentialsSources) { credentialsSource ->
-          expectedSourceTypes.remove(credentialsSource.credentialsSourceType)
+          expectedSourceTypes.remove(credentialsSource.type)
         }
         expectedSourceTypes.isEmpty()
     and:

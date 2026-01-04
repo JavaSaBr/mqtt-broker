@@ -22,7 +22,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
   public BasicAuthenticationProvider(List<CredentialsSource> credentialsSources) {
     this.credentialsSources = credentialsSources.stream()
-        .sorted(comparingInt(credentialsSource -> credentialsSource.getCredentialsSourceType().priority()))
+        .sorted(comparingInt(credentialsSource -> credentialsSource.getType().priority()))
         .collect(ArrayCollectors.toArray(CredentialsSource.class));
   }
 
