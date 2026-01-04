@@ -10,19 +10,15 @@ import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 
 @CustomLog
 @Accessors
-@ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
   
-  @ToString.Include
   @EqualsAndHashCode.Include
   final String clientId;
   final AtomicInteger messageIdGenerator;

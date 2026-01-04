@@ -40,7 +40,7 @@ class MqttSessionServiceTest extends IntegrationSpecification {
         def restored = fromAsync(mqttSessionService.restore(clientId))
     then:
         restored != null
-        restored != previousSession
+        restored !== previousSession
   }
 
   def "should not store session for client which doesn't require it"() {

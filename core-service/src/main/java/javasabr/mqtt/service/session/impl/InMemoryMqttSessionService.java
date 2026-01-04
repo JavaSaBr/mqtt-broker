@@ -159,10 +159,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   private void storeNotExpirableSession(String clientId, InMemoryNetworkMqttSession activeSession) {
     long stamp = storedSessions.writeLock();
     try {
-      var previous = storedSessions.put(clientId, activeSession);
+      InMemoryNetworkMqttSession previous = storedSessions.get(clientId);
       if (previous != null) {
         throw new IllegalStateException("Client:[%s] already has stored not expirable session".formatted(clientId));
       }
+      storedSessions.put(clientId, activeSession);
       log.info(clientId, "[%s] Stored not expirable session"::formatted);
     } finally {
       storedSessions.writeUnlock(stamp);
@@ -175,11 +176,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       InMemoryNetworkMqttSession currentActiveSession) {
     long stamp = storedExpirableSessions.writeLock();
     try {
-      var expirableSession = ExpirableSession.of(expiryInterval, currentActiveSession);
-      ExpirableSession previous = storedExpirableSessions.put(clientId, expirableSession);
+      ExpirableSession previous = storedExpirableSessions.get(clientId);
       if (previous != null) {
         throw new IllegalStateException("Client:[%s] already has stored expirable session".formatted(clientId));
       }
+      storedExpirableSessions.put(clientId, ExpirableSession.of(expiryInterval, currentActiveSession));
       log.info(clientId, expiryInterval, "[%s] Stored expirable session with expiration:[%s]"::formatted);
     } finally {
       storedExpirableSessions.writeUnlock(stamp);
@@ -233,7 +234,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       }
       collectExpiredSessions(sessionsToCheck, expiredSessions);
       if (!expiredSessions.isEmpty()) {
-        closeExpiredSessions(expiredSessions);
+        deleteExpiredSessions(expiredSessions);
         expiredSessions.clear();
       }
       sessionsToCheck.clear();
@@ -251,22 +252,20 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     }
   }
 
-  private void closeExpiredSessions(MutableArray<ExpirableSession> expiredSessions) {
+  private void deleteExpiredSessions(MutableArray<ExpirableSession> expiredSessions) {
     long stamp = storedExpirableSessions.writeLock();
     try {
       for (ExpirableSession expirableSession : expiredSessions) {
         InMemoryNetworkMqttSession session = expirableSession.session();
         ExpirableSession currentlyStored = storedExpirableSessions.remove(session.clientId());
-        // something was changed during this iteration
-        if (expirableSession != currentlyStored) {
-          if (currentlyStored != null) {
-            // return back the other instance of stored session for the same client id
-            storedExpirableSessions.put(session.clientId(), currentlyStored);
-          }
-          continue;
+        if (expirableSession == currentlyStored) {
+          // nothing was changed during this iteration
+          log.info(session.clientId(), "[%] Removed expired session"::formatted);
+          session.clear();
+        } else if (currentlyStored != null) {
+          // return back the other instance of stored session for the same client id
+          storedExpirableSessions.put(session.clientId(), currentlyStored);
         }
-        log.info(session.clientId(), "[%] Removed expired session"::formatted);
-        session.clear();
       }
     } finally {
       storedExpirableSessions.writeUnlock(stamp);
