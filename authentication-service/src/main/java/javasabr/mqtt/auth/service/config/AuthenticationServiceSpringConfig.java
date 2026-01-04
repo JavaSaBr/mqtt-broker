@@ -9,6 +9,8 @@ import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
+import javasabr.mqtt.auth.service.config.property.DatabaseCredentialsSourceProperties;
+import javasabr.mqtt.auth.service.config.property.FileCredentialsSourceProperties;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,7 +27,11 @@ import org.springframework.context.annotation.Import;
     DatabaseCredentialsSourceSpringConfig.class,
     FileCredentialsSourceSpringConfig.class
 })
-@EnableConfigurationProperties(AuthenticationProperties.class)
+@EnableConfigurationProperties({
+    AuthenticationProperties.class,
+    FileCredentialsSourceProperties.class,
+    DatabaseCredentialsSourceProperties.class
+})
 public class AuthenticationServiceSpringConfig {
 
   @Bean
