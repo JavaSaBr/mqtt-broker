@@ -28,7 +28,7 @@ public enum AuthenticationMethod {
 
   String value;
 
-  public static AuthenticationMethod fromValue(String value){
+  public static AuthenticationMethod fromValue(String value) {
     return CACHE.get(value);
   }
 }
