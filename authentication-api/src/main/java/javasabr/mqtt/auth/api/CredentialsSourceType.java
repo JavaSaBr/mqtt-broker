@@ -12,11 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum CredentialsSourceType {
   FILE(1),
-  REDIS(2),
-  DATABASE(3),
-  LDAP(4),
-  HTTP(5),
-  SYSTEM(6);
+  DATABASE(2);
 
   int priority;
 }
