@@ -41,7 +41,7 @@ class AuthenticationServiceTest extends IntegrationSpecification {
   static void configureProperties(DynamicPropertyRegistry registry) {
     postgreSQLContainer.start()
     registry.add(
-        "authentication.credentials-source.database.db-port",
+        "authentication.credentials-source.database.port",
         { "${postgreSQLContainer.getMappedPort(5432)}" })
   }
 

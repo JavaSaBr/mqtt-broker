@@ -6,8 +6,8 @@ public interface DatabasePoolProperties {
 
   Duration maxIdleTime();
 
-  int initialPoolSize();
+  int initialSize();
 
-  int maxPoolSize();
+  int maxSize();
 }
 

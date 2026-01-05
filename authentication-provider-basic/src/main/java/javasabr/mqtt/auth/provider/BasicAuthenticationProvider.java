@@ -34,7 +34,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
   @Override
   public Mono<Boolean> authenticate(MqttCredentials credentials) {
     return Flux.fromIterable(credentialsSources)
-        .concatMap(credentialsSource -> credentialsSource.isCredentialsExists(credentials))
+        .concatMap(credentialsSource -> credentialsSource.isCredentialsValid(credentials))
         .any(Boolean::booleanValue);
   }
 

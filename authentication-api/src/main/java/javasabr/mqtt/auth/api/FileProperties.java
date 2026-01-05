@@ -4,5 +4,5 @@ import java.net.URI;
 
 public interface FileProperties {
 
-  URI uriPath();
+  URI path();
 }

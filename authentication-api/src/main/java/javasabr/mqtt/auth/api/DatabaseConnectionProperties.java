@@ -1,12 +1,12 @@
 package javasabr.mqtt.auth.api;
 
 public interface DatabaseConnectionProperties {
-  DatabaseDriver dbDriver();
+  DatabaseDriver driver();
 
-  String dbHost();
+  String host();
 
-  int dbPort();
+  int port();
 
-  String dbName();
+  String name();
 }
 

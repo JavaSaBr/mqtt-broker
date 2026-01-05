@@ -47,7 +47,7 @@ public abstract class InMemoryCredentialsSource implements CredentialsSource {
   }
 
   @Override
-  public Mono<Boolean> isCredentialsExists(MqttCredentials mqttCredentials) {
+  public Mono<Boolean> isCredentialsValid(MqttCredentials mqttCredentials) {
     return Mono.just(Arrays.equals(mqttCredentials.password(), credentials.get(mqttCredentials.username())));
   }
 }

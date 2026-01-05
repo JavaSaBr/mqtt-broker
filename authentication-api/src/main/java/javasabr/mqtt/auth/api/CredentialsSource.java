@@ -6,5 +6,5 @@ public interface CredentialsSource {
 
   CredentialsSourceType getType();
 
-  Mono<Boolean> isCredentialsExists(MqttCredentials credentials);
+  Mono<Boolean> isCredentialsValid(MqttCredentials credentials);
 }

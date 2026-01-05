@@ -37,7 +37,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   }
 
   @Override
-  public Mono<Boolean> isCredentialsExists(MqttCredentials credentials) {
+  public Mono<Boolean> isCredentialsValid(MqttCredentials credentials) {
     return Mono.usingWhen(
             connectionFactory.create(),
             connection -> executeCredentialsQuery(connection, credentials),
