@@ -1,10 +1,10 @@
 package javasabr.mqtt.auth.service.config;
 
 import javasabr.mqtt.auth.api.CredentialsSource;
-import javasabr.mqtt.auth.api.DatabaseConnectionProperties;
-import javasabr.mqtt.auth.api.DatabaseCredentials;
-import javasabr.mqtt.auth.api.DatabasePoolProperties;
-import javasabr.mqtt.auth.api.DatabaseTimeoutsProperties;
+import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
+import javasabr.mqtt.auth.api.database.DatabaseCredentials;
+import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
+import javasabr.mqtt.auth.api.database.DatabaseTimeoutsProperties;
 import javasabr.mqtt.auth.credentials.source.config.DatabaseCredentialsSourceFactories;
 import javasabr.mqtt.auth.service.config.property.SpringDatabaseConnectionProperties;
 import javasabr.mqtt.auth.service.config.property.SpringDatabasePoolProperties;

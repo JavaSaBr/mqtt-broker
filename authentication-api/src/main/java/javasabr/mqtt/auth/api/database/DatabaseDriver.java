@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.api;
+package javasabr.mqtt.auth.api.database;
 
 import lombok.AccessLevel;
 import lombok.Getter;

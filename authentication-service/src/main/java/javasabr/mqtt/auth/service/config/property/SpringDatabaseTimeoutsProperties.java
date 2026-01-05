@@ -1,6 +1,6 @@
 package javasabr.mqtt.auth.service.config.property;
 
-import javasabr.mqtt.auth.api.DatabaseTimeoutsProperties;
+import javasabr.mqtt.auth.api.database.DatabaseTimeoutsProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "authentication.credentials-source.database.timeout")
