@@ -25,9 +25,10 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   List<AuthenticationProvider> authenticationProviders
 
   @TestPropertySource(properties = [
-      "authentication.allow-anonymous=false",
+      "authentication.method.anonymous.enabled=false",
       "authentication.method.basic.enabled=true",
-      "authentication.credentials-source.file.enabled=true"
+      "authentication.credentials-source.file.enabled=true",
+      "authentication.method.default.type=basic"
   ])
   static class FileCredentialsSourceTest extends AuthenticationProviderTest {
     @Autowired
@@ -45,9 +46,10 @@ class AuthenticationProviderTest extends IntegrationSpecification {
   }
 
   @TestPropertySource(properties = [
-      "authentication.allow-anonymous=true",
+      "authentication.method.anonymous.enabled=true",
       "authentication.method.basic.enabled=true",
-      "authentication.credentials-source.file.enabled=true"
+      "authentication.credentials-source.file.enabled=true",
+      "authentication.method.default.type=basic"
   ])
   static class AnonymousProviderTest extends AuthenticationProviderTest {
 
@@ -63,7 +65,9 @@ class AuthenticationProviderTest extends IntegrationSpecification {
     }
   }
 
-  @TestPropertySource(properties = "authentication.allow-anonymous=true")
+  @TestPropertySource(properties = [
+      "authentication.method.anonymous.enabled=true"
+  ])
   static class AnonymousProvider2Test extends AuthenticationProviderTest {
 
     def "should create anonymous authentication provider"() {
@@ -89,7 +93,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
               }
       when:
           appContext
-              .withPropertyValues("authentication.allow-anonymous=false")
+              .withPropertyValues("authentication.method.anonymous.enabled=false")
               .run({ context ->
                 if (context.startupFailure) {
                   throw context.startupFailure

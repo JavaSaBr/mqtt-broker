@@ -10,6 +10,8 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
+import javasabr.mqtt.auth.service.config.property.AuthenticationMethodProperties;
+import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -21,12 +23,13 @@ import reactor.core.publisher.Mono;
 public class DefaultAuthenticationService implements AuthenticationService {
 
   Map<AuthenticationMethod, AuthenticationProvider> availableProviders;
-  AuthenticationProvider defaultProvider;
+  @Nullable AuthenticationProvider defaultProvider;
+  AuthenticationProvider anonymousProvider;
 
   public DefaultAuthenticationService(
       List<AuthenticationProvider> configuredProviders,
-      @Nullable AuthenticationMethod defaultMethod
-  ) {
+      AuthenticationProperties authenticationProperties) {
+
     if (configuredProviders.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
@@ -36,11 +39,18 @@ public class DefaultAuthenticationService implements AuthenticationService {
             Function.identity(),
             DefaultAuthenticationService::onDuplicateProviderErrorHandler,
             () -> new EnumMap<>(AuthenticationMethod.class)));
-    this.defaultProvider = availableProviders.get(defaultMethod == null ? AuthenticationMethod.BASIC : defaultMethod);
-    if (defaultProvider == null && !availableProviders.containsKey(AuthenticationMethod.ANONYMOUS)) {
-      throw new AuthenticationConfigException("None of [%s, BASIC, ANONYMOUS] authentication provider configured"
-          .formatted(defaultMethod));
+
+    this.anonymousProvider = availableProviders.get(AuthenticationMethod.ANONYMOUS);
+    AuthenticationMethodProperties defaultMethod = authenticationProperties.method().get(AuthenticationMethod.DEFAULT);
+    if (defaultMethod == null && anonymousProvider == null) {
+      throw new AuthenticationConfigException("Default authenticator method is not configured");
     }
+    this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod.type());
+    if (defaultProvider == null && anonymousProvider == null) {
+      throw new AuthenticationConfigException("Default [%s] authentication provider is not configured"
+          .formatted(defaultMethod.type()));
+    }
+
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);
   }
 
@@ -56,7 +66,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     AuthenticationMethod authenticationMethod = request.authenticationMethod();
     AuthenticationProvider targetProvider =
         authenticationMethod == null ? defaultProvider : availableProviders.get(authenticationMethod);
-    return Mono.justOrEmpty(availableProviders.get(AuthenticationMethod.ANONYMOUS))
+    return Mono.justOrEmpty(anonymousProvider)
         .flatMap(provider -> provider.authenticate(request))
         .onErrorReturn(false)
         .filter(Boolean::booleanValue)

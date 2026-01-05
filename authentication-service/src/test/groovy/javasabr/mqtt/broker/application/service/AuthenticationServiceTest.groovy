@@ -18,8 +18,9 @@ import spock.lang.Shared
 import java.nio.charset.StandardCharsets
 
 @TestPropertySource(properties = [
-    "authentication.allow-anonymous=false",
+    "authentication.method.anonymous.enabled=false",
     "authentication.method.basic.enabled=true",
+    "authentication.method.default.type=basic",
     "authentication.credentials-source.file.enabled=true",
     "authentication.credentials-source.database.enabled=true"
 ])

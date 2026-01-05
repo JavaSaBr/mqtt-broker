@@ -21,7 +21,8 @@ public enum AuthenticationMethod {
   OAUTH2("oauth2"),
   BASIC("basic"),
   LDAP("ldap"),
-  ANONYMOUS("anon");
+  ANONYMOUS("anonymous"),
+  DEFAULT("default");
 
   private static final RefToRefDictionary<String, AuthenticationMethod> CACHE = Arrays.stream(values())
       .collect(DictionaryCollectors.toRefToRefDictionary(AuthenticationMethod::value, Function.identity()));

@@ -1,13 +1,13 @@
 package javasabr.mqtt.auth.service.config;
 
 import java.util.List;
-import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
+import javasabr.mqtt.auth.service.config.property.AuthenticationMethodProperties;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import lombok.CustomLog;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,7 +25,8 @@ import org.springframework.context.annotation.Import;
     FileCredentialsSourceSpringConfig.class
 })
 @EnableConfigurationProperties({
-    AuthenticationProperties.class
+    AuthenticationProperties.class,
+    AuthenticationMethodProperties.class
 })
 public class AuthenticationServiceSpringConfig {
 
@@ -34,8 +35,7 @@ public class AuthenticationServiceSpringConfig {
       List<AuthenticationProvider> availableProviders,
       AuthenticationProperties authenticationProperties) {
     log.info("Initializing AuthenticationService...");
-    AuthenticationMethod defaultAuthenticationMethod = authenticationProperties.defaultMethod();
-    return new DefaultAuthenticationService(availableProviders, defaultAuthenticationMethod);
+    return new DefaultAuthenticationService(availableProviders, authenticationProperties);
   }
 
   @Bean
@@ -47,7 +47,7 @@ public class AuthenticationServiceSpringConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "authentication.allow-anonymous", havingValue = "true")
+  @ConditionalOnProperty(name = "authentication.method.anonymous.enabled", havingValue = "true")
   AuthenticationProvider anonymousAuthenticationProvider() {
     return new AnonymousAuthenticationProvider();
   }
