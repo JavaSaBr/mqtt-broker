@@ -35,10 +35,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
         .collect(Collectors.toMap(
             AuthenticationProvider::getAuthenticationMethod,
             Function.identity(),
-            (a, _) -> {
-              throw new AuthenticationConfigException("There are several [%s] authentication providers"
-                  .formatted(a.getAuthenticationMethod()));
-            },
+            DefaultAuthenticationService::onDuplicateProviderErrorHandler,
             () -> new EnumMap<>(AuthenticationMethod.class)));
     this.defaultProvider = availableProviders.get(defaultMethod == null ? AuthenticationMethod.BASIC : defaultMethod);
     if (defaultProvider == null && anonymousProvider == null) {
@@ -47,6 +44,13 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
     this.anonymousProvider = anonymousProvider;
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);
+  }
+
+  private static AuthenticationProvider onDuplicateProviderErrorHandler(
+      AuthenticationProvider first,
+      AuthenticationProvider second) {
+    throw new AuthenticationConfigException("There are several [%s] authentication providers"
+        .formatted(first.getAuthenticationMethod()));
   }
 
   @Override
