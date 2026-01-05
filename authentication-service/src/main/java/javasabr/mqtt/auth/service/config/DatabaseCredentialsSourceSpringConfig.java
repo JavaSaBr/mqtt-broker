@@ -1,35 +1,16 @@
 package javasabr.mqtt.auth.service.config;
 
-import static io.r2dbc.postgresql.PostgresqlConnectionFactoryProvider.OPTIONS;
-import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
-import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
-import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
-import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
-
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
-import io.r2dbc.spi.ConnectionFactories;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
-import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSource;
-import javasabr.mqtt.auth.api.CredentialsSourceType;
-import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
-import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
-import javasabr.mqtt.auth.service.config.property.CredentialsSourceProperties;
-import javasabr.mqtt.auth.service.config.property.DatabaseProperties;
-import javasabr.mqtt.auth.service.config.property.DatabaseConnectionProperties;
-import javasabr.mqtt.auth.service.config.property.DatabaseCredentials;
-import javasabr.mqtt.auth.service.config.property.DatabasePoolProperties;
+import javasabr.mqtt.auth.api.DatabaseConnectionProperties;
+import javasabr.mqtt.auth.api.DatabaseCredentials;
+import javasabr.mqtt.auth.api.DatabaseProperties;
+import javasabr.mqtt.auth.credentials.source.config.DatabaseCredentialsSourceFactories;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "authentication.credentials-source.database.enabled", havingValue = "true")
@@ -37,61 +18,23 @@ import org.springframework.r2dbc.core.DatabaseClient;
 public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
-  CredentialsSource dbCredentialsSource(DatabaseClient databaseClient) {
-    return new DatabaseCredentialsSource(databaseClient);
-  }
-
-  @Bean
-  public CredentialsSourceProperties dbCredentialsSourceProperties(AuthenticationProperties authenticationProperties) {
-    return authenticationProperties.credentialsSource().get(CredentialsSourceType.DATABASE);
-  }
-
-  @Bean
-  ConnectionFactoryOptions connectionFactoryOptions(
-      DatabaseProperties dbCredentialsSourceProperties,
-      DatabaseCredentials readerDatabaseCredentials) {
-    Map<String, String> timeoutOptions = Map.of(
-        "lock_timeout", dbCredentialsSourceProperties.lockTimeout(),
-        "statement_timeout", dbCredentialsSourceProperties.statementTimeout());
-    return ConnectionFactoryOptions.builder()
-        .option(DATABASE, dbCredentialsSourceProperties.dbName())
-        .option(DRIVER, dbCredentialsSourceProperties.dbDriver().value())
-        .option(HOST, dbCredentialsSourceProperties.dbHost())
-        .option(PORT, dbCredentialsSourceProperties.dbPort())
-        .option(USER, readerDatabaseCredentials.username())
-        .option(PASSWORD, readerDatabaseCredentials.password())
-        .option(OPTIONS, timeoutOptions)
-        .build();
-  }
-
-  @Bean
-  DatabaseClient databaseClient(ConnectionFactory connectionFactory) {
-    return DatabaseClient.create(connectionFactory);
-  }
-
-  @Bean
   @DependsOn("flyway")
-  ConnectionFactory connectionFactory(
-      DatabasePoolProperties dbCredentialsSourceProperties,
-      ConnectionFactoryOptions connectionFactoryOptions) {
-    ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
-    ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-        .maxIdleTime(dbCredentialsSourceProperties.maxIdleTime())
-        .maxSize(dbCredentialsSourceProperties.maxPoolSize())
-        .initialSize(dbCredentialsSourceProperties.initialPoolSize())
+  CredentialsSource dbCredentialsSource(
+      DatabaseProperties databaseCredentialsSourceProperties,
+      DatabaseCredentials readerDatabaseCredentials) {
+    return DatabaseCredentialsSourceFactories.databaseCredentialsSource()
+        .databaseCredentialsSourceProperties(databaseCredentialsSourceProperties)
+        .readerDatabaseCredentials(readerDatabaseCredentials)
         .build();
-    return new ConnectionPool(configuration);
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(DatabaseConnectionProperties dbCredentialsSourceProperties, DatabaseCredentials adminDatabaseCredentials) {
-    String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
-        dbCredentialsSourceProperties.dbDriver().value(),
-        dbCredentialsSourceProperties.dbHost(),
-        dbCredentialsSourceProperties.dbPort(),
-        dbCredentialsSourceProperties.dbName());
-    return Flyway.configure()
-        .dataSource(databaseUrl, adminDatabaseCredentials.username(), adminDatabaseCredentials.password())
-        .load();
+  Flyway flyway(
+      DatabaseConnectionProperties databaseCredentialsSourceProperties,
+      DatabaseCredentials adminDatabaseCredentials) {
+    return DatabaseCredentialsSourceFactories.flyway()
+        .databaseCredentialsSourceProperties(databaseCredentialsSourceProperties)
+        .adminDatabaseCredentials(adminDatabaseCredentials)
+        .build();
   }
 }

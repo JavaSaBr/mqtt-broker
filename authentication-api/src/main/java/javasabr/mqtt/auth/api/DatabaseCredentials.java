@@ -1,3 +1,3 @@
-package javasabr.mqtt.auth.service.config.property;
+package javasabr.mqtt.auth.api;
 
 public record DatabaseCredentials(String username, String password) {}

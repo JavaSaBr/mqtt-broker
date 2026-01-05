@@ -1,6 +1,6 @@
 package javasabr.mqtt.broker.application.service;
 
-import javasabr.mqtt.auth.service.config.property.DatabaseCredentials;
+import javasabr.mqtt.auth.api.DatabaseCredentials;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

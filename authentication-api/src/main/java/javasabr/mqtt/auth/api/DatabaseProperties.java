@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.service.config.property;
+package javasabr.mqtt.auth.api;
 
 public interface DatabaseProperties extends DatabasePoolProperties, DatabaseConnectionProperties,
     DatabaseTimeoutsProperties {}
