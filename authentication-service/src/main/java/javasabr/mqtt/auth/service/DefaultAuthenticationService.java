@@ -22,12 +22,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
   Map<AuthenticationMethod, AuthenticationProvider> availableProviders;
   AuthenticationProvider defaultProvider;
-  @Nullable AnonymousAuthenticationProvider anonymousProvider;
 
   public DefaultAuthenticationService(
       List<AuthenticationProvider> configuredProviders,
-      @Nullable AuthenticationMethod defaultMethod,
-      @Nullable AnonymousAuthenticationProvider anonymousProvider) {
+      @Nullable AuthenticationMethod defaultMethod
+  ) {
     if (configuredProviders.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
@@ -38,11 +37,10 @@ public class DefaultAuthenticationService implements AuthenticationService {
             DefaultAuthenticationService::onDuplicateProviderErrorHandler,
             () -> new EnumMap<>(AuthenticationMethod.class)));
     this.defaultProvider = availableProviders.get(defaultMethod == null ? AuthenticationMethod.BASIC : defaultMethod);
-    if (defaultProvider == null && anonymousProvider == null) {
+    if (defaultProvider == null && !availableProviders.containsKey(AuthenticationMethod.ANONYMOUS)) {
       throw new AuthenticationConfigException("None of [%s, BASIC, ANONYMOUS] authentication provider configured"
           .formatted(defaultMethod));
     }
-    this.anonymousProvider = anonymousProvider;
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);
   }
 
@@ -58,7 +56,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     AuthenticationMethod authenticationMethod = request.authenticationMethod();
     AuthenticationProvider targetProvider =
         authenticationMethod == null ? defaultProvider : availableProviders.get(authenticationMethod);
-    return Mono.justOrEmpty(anonymousProvider)
+    return Mono.justOrEmpty(availableProviders.get(AuthenticationMethod.ANONYMOUS))
         .flatMap(provider -> provider.authenticate(request))
         .onErrorReturn(false)
         .filter(Boolean::booleanValue)
