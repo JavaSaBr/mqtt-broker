@@ -60,7 +60,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod);
     if (defaultProvider == null && anonymousProvider == null) {
       throw new AuthenticationConfigException("Default [%s] authentication provider is not configured"
-          .formatted(defaultMethod));
+          .formatted(defaultMethod.value()));
     }
 
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);

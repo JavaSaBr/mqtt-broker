@@ -81,7 +81,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
 
   static class EmptyProviderTest extends Specification {
 
-    def "should fail start application context without any authentication provider"() {
+    def "should fail start application context without any authentication provider"(String[] properties) {
       given:
           PropertySource propertySource = new PropertiesPropertySourceLoader()
               .load("test-props", new ClassPathResource("application-test.properties")).getFirst()
@@ -93,7 +93,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
               }
       when:
           appContext
-              .withPropertyValues("authentication.provider.anonymous.enabled=false")
+              .withPropertyValues(properties)
               .run({ context ->
                 if (context.startupFailure) {
                   throw context.startupFailure
@@ -103,8 +103,24 @@ class AuthenticationProviderTest extends IntegrationSpecification {
           def exception = thrown(Exception)
           with(rootCauseOf(exception)) { rootCause ->
             assert rootCause instanceof AuthenticationConfigException
-            assert message == "Authenticator providers are not configured"
+            assert message == errorMessage
           }
+      where:
+          properties                                             | errorMessage
+          [
+              "authentication.provider.anonymous.enabled=false"
+          ]                                                      | "Authenticator providers are not configured"
+          [
+              "authentication.provider.anonymous.enabled=false",
+              "authentication.provider.basic.enabled=true",
+              "authentication.credentials-source.file.enabled=true"
+          ]                                                      | "Default authenticator method is not configured"
+          [
+              "authentication.provider.default.method=jwt",
+              "authentication.provider.anonymous.enabled=false",
+              "authentication.provider.basic.enabled=true",
+              "authentication.credentials-source.file.enabled=true"
+          ]                                                      | "Default [jwt] authentication provider is not configured"
     }
   }
 
