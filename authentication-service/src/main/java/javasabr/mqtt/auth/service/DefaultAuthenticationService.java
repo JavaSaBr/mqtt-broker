@@ -11,7 +11,6 @@ import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 import javasabr.mqtt.auth.service.config.property.DefaultProviderProperties;
-import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;

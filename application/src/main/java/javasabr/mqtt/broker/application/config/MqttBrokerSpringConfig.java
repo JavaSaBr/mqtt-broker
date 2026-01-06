@@ -111,7 +111,7 @@ public class MqttBrokerSpringConfig {
 
   @Bean
   @ConditionalOnProperty(
-      name = "acl.engine.method",
+      name = "acl.engine.type",
       havingValue = "disabled", 
       matchIfMissing = true)
   AuthorizationService authorizationService() {
