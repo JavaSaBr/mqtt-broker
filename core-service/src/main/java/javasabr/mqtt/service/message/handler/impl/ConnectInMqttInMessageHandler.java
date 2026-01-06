@@ -1,11 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
-import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
-import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
-import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
 
 import java.time.Duration;
@@ -29,7 +24,7 @@ import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.ClientIdMqttInMessageFieldValidator;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
@@ -53,9 +48,12 @@ public class ConnectInMqttInMessageHandler
       AuthenticationService authenticationService,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService,
-      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, ConnectMqttInMessage>> fieldValidators) {
-    super(ExternalNetworkMqttUser.class, ConnectMqttInMessage.class, messageOutFactoryService, fieldValidators);
+      MessageOutFactoryService messageOutFactoryService) {
+    super(
+        ExternalNetworkMqttUser.class,
+        ConnectMqttInMessage.class, 
+        messageOutFactoryService,
+        List.of(new ClientIdMqttInMessageFieldValidator(messageOutFactoryService)));
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
@@ -154,22 +152,22 @@ public class ConnectInMqttInMessageHandler
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
 
     // select result keep alive time
-    int minimalKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), message.keepAlive());
-    int keepAlive = serverConfig.keepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
-    
+    int minKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), message.keepAlive());
+    int keepAlive = serverConfig.keepAliveEnabled() ? minKeepAliveTime : MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
+
     // select result receive max
-    int receiveMaxPublishes = message.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
+    int receiveMaxPublishes = message.receiveMaxPublishes() == MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET
                               ? serverConfig.receiveMaxPublishes()
                               : Math.min(message.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
-    // select result maximum packet size
-    var maximumPacketSize = message.maxMessageSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
-                            ? serverConfig.maxMessageSize()
-                            : Math.min(message.maxMessageSize(), serverConfig.maxMessageSize());
+    // select result maximum message size
+    var maxMessageSize = message.maxMessageSize() == MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET
+                         ? serverConfig.maxMessageSize()
+                         : Math.min(message.maxMessageSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
-    var topicAliasMaxValue = message.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
-                             ? TOPIC_ALIAS_MAXIMUM_DISABLED
+    var topicAliasMaxValue = message.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET
+                             ? MqttProperties.TOPIC_ALIAS_MAX_DISABLED
                              : Math.min(message.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
 
     connection.configure(new MqttClientConnectionConfig(
@@ -178,7 +176,7 @@ public class ConnectInMqttInMessageHandler
         message.mqttVersion(),
         resolveSessionExpiryInterval(message, serverConfig),
         receiveMaxPublishes,
-        maximumPacketSize,
+        maxMessageSize,
         topicAliasMaxValue,
         keepAlive,
         message.requestResponseInformation(),

@@ -42,10 +42,10 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
     when:
         def freshSession = fromAsync(sessionService.createClean(testClientId))
     then:
-        freshSession != oldSession 
+        freshSession !== oldSession 
         with(freshSession) {
           clientId() == testClientId
-          topicNameMapping() != topicNameMappingFromOldSession
+          topicNameMapping() !== topicNameMappingFromOldSession
           topicNameMapping().size() == 0
         }
         topicNameMappingFromOldSession.size() == 0

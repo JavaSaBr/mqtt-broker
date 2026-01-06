@@ -1,6 +1,5 @@
 package javasabr.mqtt.model.topic;
 
-import java.util.Date;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;

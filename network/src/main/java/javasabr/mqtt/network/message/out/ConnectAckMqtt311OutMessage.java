@@ -6,12 +6,16 @@ import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 /**
  * Connect acknowledgment.
  */
+@Getter
+@Accessors
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public class ConnectAckMqtt311OutMessage extends MqttOutMessage {

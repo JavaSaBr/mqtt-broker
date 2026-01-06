@@ -1,7 +1,6 @@
 package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
-import java.time.Duration;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
@@ -13,12 +12,16 @@ import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Connect acknowledgment.
  */
+@Getter
+@Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
@@ -246,7 +249,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
 
   long requestedSessionExpiryInterval;
   int requestedKeepAlive;
-  int requestedReceiveMax;
+  int requestedReceiveMaxPublishes;
 
   Array<StringPair> userProperties;
 
@@ -269,7 +272,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
     this.requestedClientId = requestedClientId;
     this.requestedSessionExpiryInterval = requestedSessionExpiryInterval;
     this.requestedKeepAlive = requestedKeepAlive;
-    this.requestedReceiveMax = requestedReceiveMaxPublishes;
+    this.requestedReceiveMaxPublishes = requestedReceiveMaxPublishes;
     this.reason = reason;
     this.serverReference = serverReference;
     this.responseInformation = responseInformation;
@@ -324,18 +327,17 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
     writeProperty(
         buffer,
         MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES,
-        connectionConfig.receiveMaxPublishes(),
-        requestedReceiveMax);
+        connectionConfig.receiveMaxPublishes(), requestedReceiveMaxPublishes);
     writeProperty(
         buffer,
         MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
         connectionConfig.maxMessageSize(),
-        MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
+        MqttProperties.MAX_MESSAGE_SIZE_MAX);
     writeProperty(
         buffer,
         MqttMessageProperty.TOPIC_ALIAS_MAXIMUM,
         connectionConfig.topicAliasMaxValue(),
-        MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED);
+        MqttProperties.TOPIC_ALIAS_MAX_DISABLED);
     writeProperty(
         buffer,
         MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE,

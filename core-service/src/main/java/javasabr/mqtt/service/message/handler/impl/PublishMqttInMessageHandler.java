@@ -17,7 +17,12 @@ import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
-import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishResponseTopicMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator;
+import javasabr.mqtt.service.message.validator.PublishTopicAliasMqttInMessageFieldValidator;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -37,9 +42,18 @@ public class PublishMqttInMessageHandler
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService, 
-      AuthorizationService authorizationService,
-      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
-    super(ExternalNetworkMqttUser.class, PublishMqttInMessage.class, messageOutFactoryService, fieldValidators);
+      AuthorizationService authorizationService) {
+    super(
+        ExternalNetworkMqttUser.class, 
+        PublishMqttInMessage.class, 
+        messageOutFactoryService, 
+        List.of(
+            new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService),
+            new PublishResponseTopicMqttInMessageFieldValidator(messageOutFactoryService),
+            new PublishRetainMqttInMessageFieldValidator(messageOutFactoryService),
+            new PublishTopicAliasMqttInMessageFieldValidator(messageOutFactoryService),
+            new PublishQosMqttInMessageFieldValidator(messageOutFactoryService),
+            new PublishPayloadMqttInMessageFieldValidator(messageOutFactoryService)));
     this.publishReceivingService = publishReceivingService;
     this.topicService = topicService;
     this.authorizationService = authorizationService;

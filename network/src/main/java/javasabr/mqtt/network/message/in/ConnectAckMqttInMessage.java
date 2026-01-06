@@ -281,10 +281,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
     super(messageFlags);
     this.reasonCode = ConnectAckReasonCode.SUCCESS;
     this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
-    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
+    this.receiveMaxPublishes = MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET;
     this.retainAvailable = MqttProperties.RETAIN_AVAILABLE_IS_NOT_SET;
-    this.maxMessageSize = MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
-    this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
+    this.maxMessageSize = MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET;
+    this.topicAliasMaxValue = MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET;
     this.wildcardSubscriptionAvailable = MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_IS_NOT_SET;
     this.subscriptionIdAvailable = MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_IS_NOT_SET;
     this.sharedSubscriptionAvailable = MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IS_NOT_SET;
@@ -405,10 +405,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         retainAvailable = (int) value;
       }
       case RECEIVE_MAXIMUM_PUBLISHES -> {
-        if (receiveMaxPublishes != MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET) {
+        if (receiveMaxPublishes != MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET) {
           alreadyPresentedProperty(property);
-        } else if (value < MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MIN
-            || value > MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_MAX) {
+        } else if (value < MqttProperties.RECEIVE_MAX_PUBLISHES_MIN
+            || value > MqttProperties.RECEIVE_MAX_PUBLISHES_MAX) {
           throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_RECEIVED_MAX_PUBLISHES);
         }
         receiveMaxPublishes = (int) value;
@@ -430,7 +430,7 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         serverKeepAlive = (int) value;
       }
       case TOPIC_ALIAS_MAXIMUM -> {
-        if (topicAliasMaxValue != MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET) {
+        if (topicAliasMaxValue != MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET) {
           alreadyPresentedProperty(property);
         } else if (value > MqttProperties.TOPIC_ALIAS_MAX) {
           throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_TOPIC_ALIAS_MAX);
@@ -447,10 +447,10 @@ public class ConnectAckMqttInMessage extends MqttInMessage {
         sessionExpiryInterval = value;
       }
       case MAXIMUM_MESSAGE_SIZE -> {
-        if (maxMessageSize != MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET) {
+        if (maxMessageSize != MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET) {
           alreadyPresentedProperty(property);
-        } else if (value < MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN
-            || value > MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX) {
+        } else if (value < MqttProperties.MAX_MESSAGE_SIZE_MIN
+            || value > MqttProperties.MAX_MESSAGE_SIZE_MAX) {
           throw new MalformedProtocolMqttException(MqttProtocolErrors.PROVIDED_INVALID_MAX_MESSAGE_SIZE);
         }
         maxMessageSize = (int) value;

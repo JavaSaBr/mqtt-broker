@@ -24,8 +24,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def expectedTopicAlias = 5
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
@@ -54,8 +53,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.returnCompletedFeatures(false)
@@ -82,8 +80,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser.session(null)
     when:
@@ -103,8 +100,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0b0110_0010 as byte) {{
@@ -126,8 +122,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
         mqttUser
@@ -156,8 +151,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
         def publishMessage = new PublishMqttInMessage(0 as byte)
@@ -175,8 +169,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -201,8 +194,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -225,8 +217,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -250,8 +241,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -275,8 +265,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -300,8 +289,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -324,8 +312,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when: 'topic alias is too high'
@@ -361,8 +348,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:
@@ -386,8 +372,7 @@ class PublishMqttInMessageHandlerTest extends IntegrationServiceSpecification {
             publishReceivingService,
             defaultMessageOutFactoryService,
             defaultTopicService,
-            disabledAclService,
-            publishInFieldValidators)
+            disabledAclService)
         def expectedMessageId = 15
         def mqttUser = mqttConnection.user() as TestExternalNetworkMqttUser
     when:

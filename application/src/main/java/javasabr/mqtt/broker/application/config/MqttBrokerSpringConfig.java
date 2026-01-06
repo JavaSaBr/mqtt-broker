@@ -2,7 +2,6 @@ package javasabr.mqtt.broker.application.config;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.List;
 import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
@@ -11,8 +10,6 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
-import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
-import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.AuthorizationService;
@@ -52,14 +49,6 @@ import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandle
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
-import javasabr.mqtt.service.message.validator.ClientIdMqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.PublishQosMqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.PublishResponseTopicMqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator;
-import javasabr.mqtt.service.message.validator.PublishTopicAliasMqttInMessageFieldValidator;
 import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
@@ -164,12 +153,6 @@ public class MqttBrokerSpringConfig {
   TopicService topicService() {
     return new DefaultTopicService();
   }
-
-  @Bean
-  ClientIdMqttInMessageFieldValidator clientIdMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new ClientIdMqttInMessageFieldValidator(messageOutFactoryService);
-  }
   
   @Bean
   MqttInMessageHandler connectInMqttInMessageHandler(
@@ -177,15 +160,13 @@ public class MqttBrokerSpringConfig {
       AuthenticationService authenticationService,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService,
-      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, ConnectMqttInMessage>> fieldValidators) {
+      MessageOutFactoryService messageOutFactoryService) {
     return new ConnectInMqttInMessageHandler(
         clientIdRegistry,
         authenticationService,
         sessionService,
         subscriptionService,
-        messageOutFactoryService,
-        fieldValidators);
+        messageOutFactoryService);
   }
 
   @Bean
@@ -199,54 +180,16 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
-  PublishPayloadMqttInMessageFieldValidator publishPayloadMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishPayloadMqttInMessageFieldValidator(messageOutFactoryService);
-  }
-
-  @Bean
-  PublishQosMqttInMessageFieldValidator publishQosMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishQosMqttInMessageFieldValidator(messageOutFactoryService);
-  }
-  
-  @Bean
-  PublishRetainMqttInMessageFieldValidator publishRetainMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishRetainMqttInMessageFieldValidator(messageOutFactoryService);
-  }
-
-  @Bean
-  PublishMessageExpiryIntervalMqttInMessageFieldValidator publishMessageExpiryIntervalMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishMessageExpiryIntervalMqttInMessageFieldValidator(messageOutFactoryService);
-  }
-  
-  @Bean
-  PublishResponseTopicMqttInMessageFieldValidator publishResponseTopicMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishResponseTopicMqttInMessageFieldValidator(messageOutFactoryService);
-  }
-  
-  @Bean
-  PublishTopicAliasMqttInMessageFieldValidator publishTopicAliasMqttInMessageFieldValidator(
-      MessageOutFactoryService messageOutFactoryService) {
-    return new PublishTopicAliasMqttInMessageFieldValidator(messageOutFactoryService);
-  }
-
-  @Bean
   MqttInMessageHandler publishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      AuthorizationService authorizationService,
-      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, PublishMqttInMessage>> fieldValidators) {
+      AuthorizationService authorizationService) {
     return new PublishMqttInMessageHandler(
         publishReceivingService,
         messageOutFactoryService,
         topicService,
-        authorizationService,
-        fieldValidators);
+        authorizationService);
   }
 
   @Bean
@@ -376,7 +319,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.max.message.size",
             int.class,
-            MqttProperties.MAXIMUM_MESSAGE_SIZE_DEFAULT),
+            MqttProperties.MAX_MESSAGE_SIZE_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.max.string.length",
             int.class,
@@ -396,7 +339,7 @@ public class MqttBrokerSpringConfig {
         env.getProperty(
             "mqtt.external.connection.receive.maximum",
             int.class,
-            MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT),
+            MqttProperties.RECEIVE_MAX_PUBLISHES_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.topic.alias.maximum",
             int.class,

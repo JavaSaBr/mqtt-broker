@@ -37,11 +37,11 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.sharedSubscriptionAvailable() == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IS_NOT_SET
         inMessage.wildcardSubscriptionAvailable() == MqttProperties.WILDCARD_SUBSCRIPTION_AVAILABLE_IS_NOT_SET
         inMessage.subscriptionIdAvailable() == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_IS_NOT_SET
-        inMessage.maxMessageSize() == MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
+        inMessage.maxMessageSize() == MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET
         inMessage.serverKeepAlive() == MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET
         inMessage.sessionExpiryInterval() == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
-        inMessage.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
-        inMessage.receiveMaxPublishes() == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
+        inMessage.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET
+        inMessage.receiveMaxPublishes() == MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET
   }
 
   def "should read message correctly as MQTT 5.0"() {
