@@ -10,7 +10,7 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
-import javasabr.mqtt.auth.service.config.property.AuthenticationMethodProperties;
+import javasabr.mqtt.auth.service.config.property.DefaultProviderProperties;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -28,7 +28,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
   public DefaultAuthenticationService(
       List<AuthenticationProvider> configuredProviders,
-      AuthenticationProperties authenticationProperties) {
+      DefaultProviderProperties defaultProviderProperties) {
 
     if (configuredProviders.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
@@ -41,14 +41,14 @@ public class DefaultAuthenticationService implements AuthenticationService {
             () -> new EnumMap<>(AuthenticationMethod.class)));
 
     this.anonymousProvider = availableProviders.get(AuthenticationMethod.ANONYMOUS);
-    AuthenticationMethodProperties defaultMethod = authenticationProperties.provider().get(AuthenticationMethod.DEFAULT);
+    AuthenticationMethod defaultMethod = defaultProviderProperties.method();
     if (defaultMethod == null && anonymousProvider == null) {
       throw new AuthenticationConfigException("Default authenticator method is not configured");
     }
-    this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod.method());
+    this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod);
     if (defaultProvider == null && anonymousProvider == null) {
       throw new AuthenticationConfigException("Default [%s] authentication provider is not configured"
-          .formatted(defaultMethod.method()));
+          .formatted(defaultMethod));
     }
 
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);

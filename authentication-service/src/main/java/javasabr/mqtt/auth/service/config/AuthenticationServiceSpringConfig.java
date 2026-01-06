@@ -7,7 +7,7 @@ import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
-import javasabr.mqtt.auth.service.config.property.AuthenticationMethodProperties;
+import javasabr.mqtt.auth.service.config.property.DefaultProviderProperties;
 import javasabr.mqtt.auth.service.config.property.AuthenticationProperties;
 import lombok.CustomLog;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -26,16 +26,16 @@ import org.springframework.context.annotation.Import;
 })
 @EnableConfigurationProperties({
     AuthenticationProperties.class,
-    AuthenticationMethodProperties.class
+    DefaultProviderProperties.class
 })
 public class AuthenticationServiceSpringConfig {
 
   @Bean
   AuthenticationService authenticationService(
       List<AuthenticationProvider> availableProviders,
-      AuthenticationProperties authenticationProperties) {
+      DefaultProviderProperties defaultProviderProperties) {
     log.info("Initializing AuthenticationService...");
-    return new DefaultAuthenticationService(availableProviders, authenticationProperties);
+    return new DefaultAuthenticationService(availableProviders, defaultProviderProperties);
   }
 
   @Bean
