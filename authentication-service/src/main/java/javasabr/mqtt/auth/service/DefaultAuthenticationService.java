@@ -41,14 +41,14 @@ public class DefaultAuthenticationService implements AuthenticationService {
             () -> new EnumMap<>(AuthenticationMethod.class)));
 
     this.anonymousProvider = availableProviders.get(AuthenticationMethod.ANONYMOUS);
-    AuthenticationMethodProperties defaultMethod = authenticationProperties.method().get(AuthenticationMethod.DEFAULT);
+    AuthenticationMethodProperties defaultMethod = authenticationProperties.provider().get(AuthenticationMethod.DEFAULT);
     if (defaultMethod == null && anonymousProvider == null) {
       throw new AuthenticationConfigException("Default authenticator method is not configured");
     }
-    this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod.type());
+    this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod.method());
     if (defaultProvider == null && anonymousProvider == null) {
       throw new AuthenticationConfigException("Default [%s] authentication provider is not configured"
-          .formatted(defaultMethod.type()));
+          .formatted(defaultMethod.method()));
     }
 
     log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);

@@ -40,14 +40,14 @@ public class AuthenticationServiceSpringConfig {
 
   @Bean
   @ConditionalOnClass(name = "javasabr.mqtt.auth.provider.BasicAuthenticationProvider")
-  @ConditionalOnProperty(name = "authentication.method.basic.enabled", havingValue = "true")
+  @ConditionalOnProperty(name = "authentication.provider.basic.enabled", havingValue = "true")
   @ConditionalOnBean(CredentialsSource.class)
   AuthenticationProvider basicAuthenticationProvider(List<CredentialsSource> configuredCredentialsSources) {
     return new BasicAuthenticationProvider(configuredCredentialsSources);
   }
 
   @Bean
-  @ConditionalOnProperty(name = "authentication.method.anonymous.enabled", havingValue = "true")
+  @ConditionalOnProperty(name = "authentication.provider.anonymous.enabled", havingValue = "true")
   AuthenticationProvider anonymousAuthenticationProvider() {
     return new AnonymousAuthenticationProvider();
   }

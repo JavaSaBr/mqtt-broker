@@ -5,5 +5,5 @@ import javasabr.mqtt.auth.api.AuthenticationMethod;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "authentication")
-public record AuthenticationProperties(Map<AuthenticationMethod, AuthenticationMethodProperties> method) {}
+public record AuthenticationProperties(Map<AuthenticationMethod, AuthenticationMethodProperties> provider) {}
 
