@@ -21,6 +21,19 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
+  private static Mono<? extends Boolean> onAnonymousProviderErrorHandler(Throwable exception) {
+    log.error("Anonymous authentication provider threw an error: %s".formatted(exception.getMessage()));
+    return Mono.just(false);
+  }
+
+  private static Mono<? extends Boolean> onAuthenticationProviderErrorHandler(
+      @Nullable AuthenticationProvider provider,
+      Throwable exception) {
+    String authenticationMethod = provider == null ? null : provider.getAuthenticationMethod().value();
+    log.error("%s authentication provider threw an error: %s".formatted(authenticationMethod, exception.getMessage()));
+    return Mono.just(false);
+  }
+
   Map<AuthenticationMethod, AuthenticationProvider> availableProviders;
   @Nullable AuthenticationProvider defaultProvider;
   AuthenticationProvider anonymousProvider;
@@ -67,11 +80,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
         authenticationMethod == null ? defaultProvider : availableProviders.get(authenticationMethod);
     return Mono.justOrEmpty(anonymousProvider)
         .flatMap(provider -> provider.authenticate(request))
-        .onErrorReturn(false)
+        .onErrorResume(DefaultAuthenticationService::onAnonymousProviderErrorHandler)
         .filter(Boolean::booleanValue)
         .switchIfEmpty(Mono.justOrEmpty(targetProvider)
             .flatMap(provider -> provider.authenticate(request))
-            .onErrorReturn(false)
+            .onErrorResume(exception -> onAuthenticationProviderErrorHandler(targetProvider, exception))
             .defaultIfEmpty(false));
   }
 
