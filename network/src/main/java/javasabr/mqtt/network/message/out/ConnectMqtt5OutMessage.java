@@ -237,28 +237,6 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         false);
   }
 
-  public ConnectMqtt5OutMessage(String clientId, int keepAlive, long sessionExpiryInterval) {
-    this(
-        StringUtils.EMPTY,
-        StringUtils.EMPTY,
-        clientId,
-        ArrayUtils.EMPTY_BYTE_ARRAY,
-        ArrayUtils.EMPTY_BYTE_ARRAY,
-        QoS.AT_MOST_ONCE,
-        keepAlive,
-        false,
-        false,
-        EMPTY_USER_PROPERTIES,
-        StringUtils.EMPTY,
-        ArrayUtils.EMPTY_BYTE_ARRAY,
-        sessionExpiryInterval,
-        MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET,
-        MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET,
-        MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET,
-        false,
-        false);
-  }
-
   public ConnectMqtt5OutMessage(
       String username,
       String willTopic,
