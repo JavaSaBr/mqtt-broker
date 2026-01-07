@@ -49,8 +49,12 @@ public class DefaultMessageOutFactoryService implements MessageOutFactoryService
 
   @Override
   public MqttMessageOutFactory resolveFactory(MqttConnection connection) {
-    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-    MqttVersion mqttVersion = connectionConfig.mqttVersion();
+    MqttClientConnectionConfig clientConfig = connection.clientConnectionConfig();
+    return resolveFactory(clientConfig.mqttVersion());
+  }
+
+  @Override
+  public MqttMessageOutFactory resolveFactory(MqttVersion mqttVersion) {
     try {
       //noinspection DataFlowIssue
       return messageOutFactories[mqttVersion.version()];

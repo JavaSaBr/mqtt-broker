@@ -34,25 +34,24 @@ public abstract class AbstractNetworkMqttUserReleaseHandler<T extends AbstractNe
   }
 
   protected Mono<?> releaseImpl(T user) {
-
     String clientId = user.clientId();
-    user.clientId(StringUtils.EMPTY);
-
     if (StringUtils.isEmpty(clientId)) {
-      log.warning(user.clientId(), "[%s] This client is already released or rejected"::formatted);
+      log.warning(user.ipAddress(), "[%s] Client is already released or rejected"::formatted);
       return Mono.empty();
     }
-
+    user.clientId(StringUtils.EMPTY);
+    
     NetworkMqttSession session = user.session();
     Mono<?> asyncActions = null;
-
     if (session != null) {
       subscriptionService.cleanSubscriptions(user, session);
       MqttClientConnectionConfig connectionConfig = user.connectionConfig();
       if (connectionConfig.sessionsEnabled()) {
-        asyncActions = sessionService.store(clientId, session, connectionConfig.sessionExpiryInterval());
-        user.session(null);
+        asyncActions = sessionService.store(clientId, session);
+      } else {
+        asyncActions = sessionService.delete(clientId, session);
       }
+      user.session(null);
     }
 
     if (asyncActions != null) {

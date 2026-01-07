@@ -33,7 +33,7 @@ public abstract class FieldsValidatedMqttInMessageHandler<U extends NetworkMqttU
   }
 
   @Override
-  protected final void processValidMessage(MqttConnection connection, U user, M message) {
+  protected void processValidMessage(MqttConnection connection, U user, M message) {
     for (MqttInMessageFieldValidator<? super U, M> fieldValidator : fieldValidators) {
       if (fieldValidator.isNotValid(connection, user, message)) {
         return;

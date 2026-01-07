@@ -3,7 +3,7 @@ plugins {
   id("groovy")
 }
 
-description = "Provide all nesessary dependencies for writing tests"
+description = "Provide all necessary dependencies for writing tests"
 
 dependencies {
   api libs.rlib.logger.impl
@@ -15,4 +15,5 @@ dependencies {
   api libs.groovy.all
   api libs.byte.buddy.dep
   api libs.objenesis
+  api libs.project.reactor.core
 }

@@ -20,7 +20,6 @@ import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import org.jspecify.annotations.Nullable;
@@ -36,7 +35,7 @@ public abstract class MqttMessageOutFactory {
       String requestedClientId,
       long requestedSessionExpiryInterval,
       int requestedKeepAlive,
-      int requestedReceiveMax,
+      int requestedReceiveMaxPublishes,
       String reason,
       String serverReference,
       String responseInformation,
@@ -51,7 +50,7 @@ public abstract class MqttMessageOutFactory {
       String requestedClientId,
       long requestedSessionExpiryInterval,
       int requestedKeepAlive,
-      int requestedReceiveMax) {
+      int requestedReceiveMaxPublishes) {
     return newConnectAck(
         user,
         reasonCode,
@@ -59,13 +58,13 @@ public abstract class MqttMessageOutFactory {
         requestedClientId,
         requestedSessionExpiryInterval,
         requestedKeepAlive,
-        requestedReceiveMax,
+        requestedReceiveMaxPublishes,
         StringUtils.EMPTY,
         StringUtils.EMPTY,
         StringUtils.EMPTY,
         StringUtils.EMPTY,
         ArrayUtils.EMPTY_BYTE_ARRAY,
-        MutableArray.ofType(StringPair.class));
+        MqttMessage.EMPTY_USER_PROPERTIES);
   }
 
   public MqttOutMessage newConnectAck(NetworkMqttUser user, ConnectAckReasonCode reasonCode) {
@@ -75,7 +74,7 @@ public abstract class MqttMessageOutFactory {
         reasonCode,
         false,
         StringUtils.EMPTY,
-        connectionConfig.sessionExpiryInterval(),
+        connectionConfig.sessionExpiryIntervalInSecs(),
         connectionConfig.keepAlive(),
         connectionConfig.receiveMaxPublishes(),
         StringUtils.EMPTY,
@@ -83,7 +82,7 @@ public abstract class MqttMessageOutFactory {
         StringUtils.EMPTY,
         StringUtils.EMPTY,
         ArrayUtils.EMPTY_BYTE_ARRAY,
-        MutableArray.ofType(StringPair.class));
+        MqttMessage.EMPTY_USER_PROPERTIES);
   }
 
   public MqttOutMessage newPublish(
@@ -104,7 +103,7 @@ public abstract class MqttMessageOutFactory {
         PayloadFormat.UNDEFINED,
         null,
         null,
-        MutableArray.ofType(StringPair.class));
+        MqttMessage.EMPTY_USER_PROPERTIES);
   }
 
   public abstract MqttOutMessage newPublish(

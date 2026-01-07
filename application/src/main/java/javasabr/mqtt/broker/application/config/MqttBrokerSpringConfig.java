@@ -11,6 +11,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthenticationService;
@@ -30,12 +31,12 @@ import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
-import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
+import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
 import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
@@ -51,6 +52,7 @@ import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandle
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
+import javasabr.mqtt.service.message.validator.ClientIdMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.MqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
@@ -164,18 +166,26 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
+  ClientIdMqttInMessageFieldValidator clientIdMqttInMessageFieldValidator(
+      MessageOutFactoryService messageOutFactoryService) {
+    return new ClientIdMqttInMessageFieldValidator(messageOutFactoryService);
+  }
+  
+  @Bean
   MqttInMessageHandler connectInMqttInMessageHandler(
       ClientIdRegistry clientIdRegistry,
       AuthenticationService authenticationService,
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
-      MessageOutFactoryService messageOutFactoryService) {
+      MessageOutFactoryService messageOutFactoryService,
+      List<? extends MqttInMessageFieldValidator<? super ExternalNetworkMqttUser, ConnectMqttInMessage>> fieldValidators) {
     return new ConnectInMqttInMessageHandler(
         clientIdRegistry,
         authenticationService,
         sessionService,
         subscriptionService,
-        messageOutFactoryService);
+        messageOutFactoryService,
+        fieldValidators);
   }
 
   @Bean
@@ -391,10 +401,6 @@ public class MqttBrokerSpringConfig {
             "mqtt.external.connection.topic.alias.maximum",
             int.class,
             0),
-        env.getProperty(
-            "mqtt.external.connection.default.session.expiration.time",
-            long.class,
-            MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT),
         env.getProperty(
             "mqtt.external.connection.keep.alive.enabled",
             boolean.class,

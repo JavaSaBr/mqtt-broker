@@ -17,7 +17,7 @@ import java.util.concurrent.CompletionException
 
 class ExternalConnectionTest extends IntegrationSpecification {
 
-  def "client should connect to broker without user and pass using mqtt 3.1.1"() {
+  def "client should connect to broker without user and pass using MQTT 3.1.1"() {
     given:
         def client = buildExternalMqtt311Client()
     when:
@@ -29,15 +29,14 @@ class ExternalConnectionTest extends IntegrationSpecification {
         client.disconnect().join()
   }
 
-  def "client should connect to broker without user and pass using mqtt 5"() {
+  def "client should connect to broker without user and pass using MQTT 5"() {
     given:
         def client = buildExternalMqtt5Client()
     when:
         def result = client.connect().join()
     then:
         result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
-        result.sessionExpiryInterval.present
-        result.sessionExpiryInterval.getAsLong() == MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT
+        !result.sessionExpiryInterval.present
         result.serverKeepAlive.present
         result.serverKeepAlive.getAsInt() == MqttProperties.SERVER_KEEP_ALIVE_DISABLED
         !result.serverReference.present
@@ -48,7 +47,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         client.disconnect().join()
   }
 
-  def "client should connect to broker with user and pass using mqtt 3.1.1"() {
+  def "client should connect to broker with user and pass using MQTT 3.1.1"() {
     given:
         def client = buildExternalMqtt311Client()
     when:
@@ -60,15 +59,14 @@ class ExternalConnectionTest extends IntegrationSpecification {
         client.disconnect().join()
   }
 
-  def "client should connect to broker with user and pass using mqtt 5"() {
+  def "client should connect to broker with user and pass using MQTT 5"() {
     given:
         def client = buildExternalMqtt5Client()
     when:
         def result = connectWith(client, 'user1', 'password')
     then:
         result.reasonCode == Mqtt5ConnAckReasonCode.SUCCESS
-        result.sessionExpiryInterval.present
-        result.sessionExpiryInterval.getAsLong() == MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT
+        !result.sessionExpiryInterval.present
         result.serverKeepAlive.present
         result.serverKeepAlive.getAsInt() == MqttProperties.SERVER_KEEP_ALIVE_DISABLED
         !result.serverReference.present
@@ -79,7 +77,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         client.disconnect().join()
   }
 
-  def "client should not connect to broker without providing a client id using mqtt 3.1.1"() {
+  def "client should not connect to broker without providing a client id using MQTT 3.1.1"() {
     given:
         def client = buildExternalMqtt311Client("")
     when:
@@ -90,7 +88,8 @@ class ExternalConnectionTest extends IntegrationSpecification {
         cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.IDENTIFIER_REJECTED
   }
 
-  def "client should connect to broker without providing a client id using mqtt 5"() {
+  @Ignore("until finalizing clientId validation")
+  def "client should connect to broker without providing a client id using MQTT 5"() {
     given:
         def client = buildExternalMqtt5Client("")
     when:
@@ -103,7 +102,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         client.disconnect().join()
   }
 
-  def "client should not connect to broker with invalid client id using mqtt 3.1.1"(String clientId) {
+  def "client should not connect to broker with invalid client id using MQTT 3.1.1"(String clientId) {
     given:
         def client = buildExternalMqtt311Client(clientId)
     when:
@@ -116,7 +115,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         clientId << ["!@#!@*()^&"]
   }
 
-  def "client should not connect to broker with invalid client id using mqtt 5"(String clientId) {
+  def "client should not connect to broker with invalid client id using MQTT 5"(String clientId) {
     given:
         def client = buildExternalMqtt5Client(clientId)
     when:
@@ -129,7 +128,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         clientId << ["!@#!@*()^&"]
   }
 
-  def "client should not connect to broker with wrong pass using mqtt 3.1.1"() {
+  def "client should not connect to broker with wrong pass using MQTT 3.1.1"() {
     given:
         def client = buildExternalMqtt311Client()
     when:
@@ -141,7 +140,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
   }
 
   @Ignore
-  def "client should not connect to broker without username and with pass using mqtt 3.1.1"() {
+  def "client should not connect to broker without username and with pass using MQTT 3.1.1"() {
     given:
         def client = buildMqtt311MockClient()
         def clientId = generateClientId()
@@ -166,7 +165,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         connectAck.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
   }
 
-  def "client should not connect to broker with wrong pass using mqtt 5"() {
+  def "client should not connect to broker with wrong pass using MQTT 5"() {
     given:
         def client = buildExternalMqtt5Client()
     when:

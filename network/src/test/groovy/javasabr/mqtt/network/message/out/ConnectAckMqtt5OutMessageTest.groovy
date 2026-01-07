@@ -25,7 +25,7 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             MqttVersion.MQTT_5,
             240,
             250,
-            maxMessageSize,
+            testMaxMessageSize,
             300,
             30,
             false,
@@ -49,8 +49,8 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             reasonString,
             serverReference,
             responseInformation,
-            authMethod,
-            authData,
+            testAuthMethod,
+            testAuthData,
             testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -71,7 +71,7 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         inMessage.sessionPresent() == sessionPresent
         inMessage.sessionExpiryInterval() == 240
         inMessage.receiveMaxPublishes() == 250
-        inMessage.maxMessageSize() == maxMessageSize
+        inMessage.maxMessageSize() == testMaxMessageSize
         inMessage.assignedClientId() == mqtt5ClientId
         inMessage.topicAliasMaxValue() == 300
         inMessage.reason() == reasonString
@@ -79,8 +79,8 @@ class ConnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         inMessage.serverKeepAlive() == 30
         inMessage.responseInformation() == responseInformation
         inMessage.serverReference() == serverReference
-        inMessage.authenticationData() == authData
-        inMessage.authenticationMethod() == authMethod
+        inMessage.authenticationData() == testAuthData
+        inMessage.authenticationMethod() == testAuthMethod
         !NumberUtils.toBoolean(inMessage.wildcardSubscriptionAvailable())
         !NumberUtils.toBoolean(inMessage.subscriptionIdAvailable())
         !NumberUtils.toBoolean(inMessage.sharedSubscriptionAvailable())

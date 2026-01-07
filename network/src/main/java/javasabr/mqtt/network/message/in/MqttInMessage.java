@@ -128,7 +128,21 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
   protected void readPayload(MqttConnection connection, ByteBuffer buffer) {}
 
-  protected void readProperties(MqttConnection connection, ByteBuffer buffer, Set<MqttMessageProperty> availableProperties) {
+  protected void readProperties(
+      MqttConnection connection,
+      ByteBuffer buffer,
+      Set<MqttMessageProperty> availableProperties) {
+    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
+    int maxStringLength = connectionConfig.maxStringLength();
+    int maxBinarySize = connectionConfig.maxBinarySize();
+    readProperties(buffer, availableProperties, maxStringLength, maxBinarySize);
+  }
+
+  protected void readProperties(
+      ByteBuffer buffer, 
+      Set<MqttMessageProperty> availableProperties,
+      int maxStringLength,
+      int maxBinarySize) {
 
     int propertiesLength = MqttDataUtils.readMbi(buffer);
     if (propertiesLength == MqttDataUtils.UNKNOWN_LENGTH) {
@@ -138,8 +152,6 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     }
 
     int lastPositionInBuffer = buffer.position() + propertiesLength;
-    MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
-
     while (buffer.position() < lastPositionInBuffer) {
       MqttMessageProperty property = MqttMessageProperty.byId(readByteUnsigned(buffer));
       if (!availableProperties.contains(property)) {
@@ -164,17 +176,17 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
           break;
         }
         case UTF_8_STRING: {
-          applyProperty(property, readString(buffer, connectionConfig.maxStringLength()));
+          applyProperty(property, readString(buffer, maxStringLength));
           break;
         }
         case UTF_8_STRING_PAIR: {
-          String name = readString(buffer, connectionConfig.maxStringLength());
-          String value = readString(buffer, connectionConfig.maxStringLength());
+          String name = readString(buffer, maxStringLength);
+          String value = readString(buffer, maxStringLength);
           applyProperty(property, new StringPair(name, value));
           break;
         }
         case BINARY: {
-          applyProperty(property, readBytes(buffer, connectionConfig.maxBinarySize()));
+          applyProperty(property, readBytes(buffer, maxBinarySize));
           break;
         }
         default: {
@@ -196,12 +208,13 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
 
   protected void applyProperty(MqttMessageProperty property, StringPair value) {
     switch (property) {
-      case USER_PROPERTY:
+      case USER_PROPERTY: {
         if (userProperties == null) {
           userProperties = MutableArray.ofType(StringPair.class);
         }
         userProperties.add(value);
         break;
+      }
     }
   }
 
@@ -270,7 +283,7 @@ public abstract class MqttInMessage extends AbstractReadableNetworkPacket<MqttCo
     throw new MalformedProtocolMqttException(
         "Property:[%s] is already presented in message:[%s]".formatted(property, name()));
   }
-
+  
   @Override
   public String name() {
     return messageType().name();

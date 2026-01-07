@@ -21,9 +21,7 @@ public enum MqttVersion {
   private static final Map<String, @Nullable MqttVersion[]> NAME_LEVEL_VERSIONS;
 
   static {
-
     var map = new HashMap<String, @Nullable MqttVersion[]>();
-
     for (MqttVersion mqttVersion : values()) {
       if (mqttVersion.version < 0) {
         continue;
@@ -62,19 +60,20 @@ public enum MqttVersion {
     return ordinal() < version.ordinal();
   }
 
+  public boolean isEqualOrHigherThan(MqttVersion version) {
+    return ordinal() >= version.ordinal();
+  }
+  
   public static MqttVersion of(String name, byte level) {
-
     if (level < 0) {
       return MqttVersion.UNKNOWN;
     }
-
     @Nullable MqttVersion[] availableVersions = NAME_LEVEL_VERSIONS.get(name);
     if (availableVersions == null) {
       return MqttVersion.UNKNOWN;
     } else if (availableVersions.length <= level || availableVersions[level] == null) {
       return MqttVersion.UNKNOWN;
     }
-
     //noinspection DataFlowIssue
     return availableVersions[level];
   }

@@ -11,8 +11,8 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 5.0"() {
     given:
         def propertiesBuffer = BufferUtils.prepareBuffer(512) {
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, testAuthMethod)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, testAuthData)
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
           it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
         }
@@ -27,16 +27,16 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result
         inMessage.reasonCode() == AuthenticateReasonCode.SUCCESS
-        inMessage.authenticationMethod() == authMethod
-        inMessage.authenticationData() == authData
+        inMessage.authenticationMethod() == testAuthMethod
+        inMessage.authenticationData() == testAuthData
         inMessage.reason() == reasonString
         inMessage.userProperties() == testUserProperties
     when:
         def propertiesBuffer2 = BufferUtils.prepareBuffer(512) {
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, testAuthMethod)
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
           it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, testAuthData)
         }
         def dataBuffer2 = BufferUtils.prepareBuffer(512) {
           it.put(AuthenticateReasonCode.CONTINUE_AUTHENTICATION)
@@ -48,14 +48,14 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result2
         inMessage2.reasonCode() == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
-        inMessage2.authenticationMethod() == authMethod
-        inMessage2.authenticationData() == authData
+        inMessage2.authenticationMethod() == testAuthMethod
+        inMessage2.authenticationData() == testAuthData
         inMessage2.reason() == reasonString
         inMessage2.userProperties() == testUserProperties
     when:
         def propertiesBuffer3 = BufferUtils.prepareBuffer(512) {
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, testAuthMethod)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, testAuthData)
         }
         def dataBuffer3 = BufferUtils.prepareBuffer(512) {
           it.put(AuthenticateReasonCode.CONTINUE_AUTHENTICATION)
@@ -67,8 +67,8 @@ class AuthenticationMqttInMessageTest extends BaseMqttInMessageTest {
     then:
         result3
         inMessage3.reasonCode() == AuthenticateReasonCode.CONTINUE_AUTHENTICATION
-        inMessage3.authenticationMethod() == authMethod
-        inMessage3.authenticationData() == authData
+        inMessage3.authenticationMethod() == testAuthMethod
+        inMessage3.authenticationData() == testAuthData
         inMessage3.reason() == null
         inMessage3.userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
     when:

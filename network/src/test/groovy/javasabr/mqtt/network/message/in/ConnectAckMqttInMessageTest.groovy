@@ -50,19 +50,19 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.REASON_STRING, reasonString)
           it.putProperty(MqttMessageProperty.SERVER_REFERENCE, serverReference)
           it.putProperty(MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, mqtt311ClientId)
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, authData)
-          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, authMethod)
-          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, maxMessageSize)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_DATA, testAuthData)
+          it.putProperty(MqttMessageProperty.AUTHENTICATION_METHOD, testAuthMethod)
+          it.putProperty(MqttMessageProperty.MAXIMUM_MESSAGE_SIZE, testMaxMessageSize)
           it.putProperty(MqttMessageProperty.MAXIMUM_QOS, QoS.AT_LEAST_ONCE.ordinal())
-          it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMaxPublishes)
+          it.putProperty(MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, testReceiveMaxPublishes)
           it.putProperty(MqttMessageProperty.RETAIN_AVAILABLE, retainAvailable)
           it.putProperty(MqttMessageProperty.RESPONSE_INFORMATION, responseInformation)
           it.putProperty(MqttMessageProperty.SERVER_KEEP_ALIVE, serverKeepAlive)
-          it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, sessionExpiryInterval)
+          it.putProperty(MqttMessageProperty.SESSION_EXPIRY_INTERVAL, testSessionExpiryInterval)
           it.putProperty(MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE, sharedSubscriptionAvailable)
           it.putProperty(MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE, wildcardSubscriptionAvailable)
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE, subscriptionIdAvailable)
-          it.putProperty(MqttMessageProperty.TOPIC_ALIAS_MAXIMUM, topicAliasMaxValue)
+          it.putProperty(MqttMessageProperty.TOPIC_ALIAS_MAXIMUM, testTopicAliasMaxValue)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           it.putBoolean(sessionPresent)
@@ -80,14 +80,14 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.serverReference() == serverReference
         inMessage.reason() == reasonString
         inMessage.assignedClientId() == mqtt311ClientId
-        inMessage.authenticationData() == authData
-        inMessage.authenticationMethod() == authMethod
-        inMessage.maxMessageSize() == maxMessageSize
+        inMessage.authenticationData() == testAuthData
+        inMessage.authenticationMethod() == testAuthMethod
+        inMessage.maxMessageSize() == testMaxMessageSize
         inMessage.maxQos() == QoS.AT_LEAST_ONCE
-        inMessage.receiveMaxPublishes() == receiveMaxPublishes
+        inMessage.receiveMaxPublishes() == testReceiveMaxPublishes
         inMessage.responseInformation() == responseInformation
         inMessage.serverKeepAlive() == serverKeepAlive
-        inMessage.sessionExpiryInterval() == sessionExpiryInterval
+        inMessage.sessionExpiryInterval() == testSessionExpiryInterval
         NumberUtils.toBoolean(inMessage.sharedSubscriptionAvailable()) == sharedSubscriptionAvailable
         NumberUtils.toBoolean(inMessage.wildcardSubscriptionAvailable()) == wildcardSubscriptionAvailable
         NumberUtils.toBoolean(inMessage.subscriptionIdAvailable()) == subscriptionIdAvailable
@@ -135,22 +135,22 @@ class ConnectAckMqttInMessageTest extends BaseMqttInMessageTest {
         inMessage.exception().message == "Property:[$property] is already presented in message:[$MqttMessageType.CONNECT_ACK]"
     where:
         property                                              | value
-        MqttMessageProperty.AUTHENTICATION_DATA               | authData
+        MqttMessageProperty.AUTHENTICATION_DATA               | testAuthData
         MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER        | mqtt5ClientId
         MqttMessageProperty.REASON_STRING                     | reasonString
         MqttMessageProperty.RESPONSE_INFORMATION              | responseInformation
-        MqttMessageProperty.AUTHENTICATION_METHOD             | authMethod
+        MqttMessageProperty.AUTHENTICATION_METHOD             | testAuthMethod
         MqttMessageProperty.SERVER_REFERENCE                  | serverReference
         MqttMessageProperty.WILDCARD_SUBSCRIPTION_AVAILABLE   | wildcardSubscriptionAvailable
         MqttMessageProperty.SHARED_SUBSCRIPTION_AVAILABLE     | sharedSubscriptionAvailable
         MqttMessageProperty.SUBSCRIPTION_IDENTIFIER_AVAILABLE | subscriptionIdAvailable
         MqttMessageProperty.RETAIN_AVAILABLE                  | retainAvailable
-        MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES         | receiveMaxPublishes
+        MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES         | testReceiveMaxPublishes
         MqttMessageProperty.MAXIMUM_QOS                       | QoS.EXACTLY_ONCE.level()
         MqttMessageProperty.SERVER_KEEP_ALIVE                 | serverKeepAlive
-        MqttMessageProperty.TOPIC_ALIAS_MAXIMUM               | topicAliasMaxValue
-        MqttMessageProperty.SESSION_EXPIRY_INTERVAL           | sessionExpiryInterval
-        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE              | maxMessageSize
+        MqttMessageProperty.TOPIC_ALIAS_MAXIMUM               | testTopicAliasMaxValue
+        MqttMessageProperty.SESSION_EXPIRY_INTERVAL           | testSessionExpiryInterval
+        MqttMessageProperty.MAXIMUM_MESSAGE_SIZE              | testMaxMessageSize
   }
 
   def "should validate invalid properties in message"(MqttMessageProperty property, Object value, String expectedMessage) {

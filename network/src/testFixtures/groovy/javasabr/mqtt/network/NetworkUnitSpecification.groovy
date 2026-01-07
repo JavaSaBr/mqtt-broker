@@ -1,9 +1,9 @@
 package javasabr.mqtt.network
 
-
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
+import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
@@ -20,6 +20,7 @@ import javasabr.rlib.collections.array.IntArray
 import spock.lang.Shared
 
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 class NetworkUnitSpecification extends UnitSpecification {
@@ -38,29 +39,33 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final mqtt311ClientId = "testMqtt311ClientId"
   public static final mqtt5ClientId = "testMqtt5ClientId"
   public static final testMessageId = 1234 as short
-  public static final userName = "testUser"
-  public static final userPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
-  public static final keepAlive = 120
-  public static final sessionExpiryInterval = 300
+  public static final testUserName = "testUser"
+  public static final testUserPassword = "testPassword".getBytes(StandardCharsets.UTF_8)
+  public static final testKeepAlive = 120
+  public static final testSessionExpiryInterval = 300
   public static final testMessageExpiryInterval = 60
+  public static final testWillMessageExpiryInterval = 90
+  public static final testWillDelayInterval = 10
   public static final testTopicAlias = 252
-  public static final receiveMaxPublishes = 10
-  public static final maxMessageSize = 1024
+  public static final testReceiveMaxPublishes = 10
+  public static final testMaxMessageSize = 1024
   public static final maxStringLength = 256
   public static final maxBinarySize = 1024
   public static final maxTopicLevels = 10
-  public static final topicAliasMaxValue = 32
+  public static final testTopicAliasMaxValue = 32
   public static final subscriptionId = 637
   public static final subscriptionId2 = 623
   public static final serverKeepAlive = 1200
   public static final requestResponseInformation = true
   public static final requestProblemInformation = true
   public static final responseInformation = "responseInformation"
-  public static final authMethod = "testAuthMethod"
-  public static final authData = "testAuthData".getBytes(StandardCharsets.UTF_8)
+  public static final testAuthMethod = "testAuthMethod"
+  public static final testAuthData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
   public static final publishTopic = TopicName.valueOf("publish/Topic")
   public static final testResponseTopic = TopicName.valueOf("response/Topic")
+  public static final testWillTopic = TopicName.valueOf("will/Topic")
+  public static final testWillResponseTopic = TopicName.valueOf("will/response/Topic")
   public static final topicFilter = "topic/Filter"
   public static final topicFilter1Obj311 = Subscription.minimal(TopicFilter.valueOf(topicFilter), QoS.AT_LEAST_ONCE)
   public static final topicFilter1Obj5 = new Subscription(
@@ -85,6 +90,7 @@ class NetworkUnitSpecification extends UnitSpecification {
 
   public static final serverReference = "serverReference"
   public static final testContentType = "application/json"
+  public static final testWillContentType = "application/json"
   public static final subscribeAckReasonCodes = Array.typed(
       SubscribeAckReasonCode,
       SubscribeAckReasonCode.GRANTED_QOS_1,
@@ -103,12 +109,20 @@ class NetworkUnitSpecification extends UnitSpecification {
       new StringPair("key2", "val2"),
       new StringPair("key3", "val3"))
 
+  public static final testWillUserProperties = Array.typed(
+      StringPair,
+      new StringPair("will_key1", "val1"),
+      new StringPair("will_key2", "val2"))
+
   public static final testSubscriptionIds = IntArray.of(subscriptionId, subscriptionId2)
   public static final topicFilters = Array.of(topicFilter, topicFilter2)
   public static final subscriptionsObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
   public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
   public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
   public static final testCorrelationData = "correlationData".getBytes(StandardCharsets.UTF_8)
+  public static final testWillPayload = "willPayload".getBytes(StandardCharsets.UTF_8)
+  public static final testWillPayloadFormat = PayloadFormat.UTF8_STRING.code() as byte
+  public static final testWillCorrelationData = "willCorrelationData".getBytes(StandardCharsets.UTF_8)
   public static final clientIdGenerator = new AtomicInteger(1)
 
   @Shared
@@ -129,14 +143,13 @@ class NetworkUnitSpecification extends UnitSpecification {
   MqttServerConnectionConfig defaultServerConnectionConfig() {
     return serverConnectionConfig(
         maxQos,
-        maxMessageSize,
+        testMaxMessageSize,
         maxStringLength,
         maxBinarySize,
         maxTopicLevels,
         serverKeepAlive,
-        receiveMaxPublishes,
-        topicAliasMaxValue,
-        sessionExpiryInterval,
+        testReceiveMaxPublishes,
+        testTopicAliasMaxValue,
         keepAliveEnabled,
         sessionsEnabled,
         retainAvailable,
@@ -150,11 +163,11 @@ class NetworkUnitSpecification extends UnitSpecification {
         defaultServerConnectionConfig,
         maxQos,
         MqttVersion.MQTT_3_1_1,
-        sessionExpiryInterval,
-        receiveMaxPublishes,
-        maxMessageSize,
-        topicAliasMaxValue,
-        keepAlive,
+        testSessionExpiryInterval,
+        testReceiveMaxPublishes,
+        testMaxMessageSize,
+        testTopicAliasMaxValue,
+        testKeepAlive,
         false,
         false)
   }
@@ -164,11 +177,11 @@ class NetworkUnitSpecification extends UnitSpecification {
         defaultServerConnectionConfig,
         maxQos,
         MqttVersion.MQTT_5,
-        sessionExpiryInterval,
-        receiveMaxPublishes,
-        maxMessageSize,
-        topicAliasMaxValue,
-        keepAlive,
+        testSessionExpiryInterval,
+        testReceiveMaxPublishes,
+        testMaxMessageSize,
+        testTopicAliasMaxValue,
+        testKeepAlive,
         false,
         false)
   }
@@ -196,7 +209,6 @@ class NetworkUnitSpecification extends UnitSpecification {
       int serverKeepAlive,
       int receiveMaxPublishes,
       int topicAliasMaxValue,
-      long sessionExpiryInterval,
       boolean keepAliveEnabled,
       boolean sessionsEnabled,
       boolean retainAvailable,
@@ -212,7 +224,6 @@ class NetworkUnitSpecification extends UnitSpecification {
         serverKeepAlive,
         receiveMaxPublishes,
         topicAliasMaxValue,
-        sessionExpiryInterval,
         keepAliveEnabled,
         sessionsEnabled,
         retainAvailable,
@@ -236,7 +247,7 @@ class NetworkUnitSpecification extends UnitSpecification {
         serverConnectionConfig,
         maxQos,
         mqttVersion,
-        sessionExpiryInterval,
+        Duration.ofSeconds(sessionExpiryInterval),
         receiveMaxPublishes,
         maxPacketSize,
         topicAliasMaxValue,

@@ -12,9 +12,9 @@ import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
 import javasabr.mqtt.service.impl.DefaultPublishReceivingService
-import javasabr.mqtt.service.impl.InMemoryRetainMessageService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.DisabledAuthorizationService
+import javasabr.mqtt.service.impl.InMemoryRetainMessageService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
@@ -41,6 +41,7 @@ import spock.lang.Specification
 
 import java.nio.channels.AsynchronousSocketChannel
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract class IntegrationServiceSpecification extends Specification {
@@ -127,7 +128,6 @@ abstract class IntegrationServiceSpecification extends Specification {
       MqttProperties.SERVER_KEEP_ALIVE_DEFAULT,
       MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_DEFAULT,
       MqttProperties.TOPIC_ALIAS_MAX_DEFAULT,
-      0,
       true,
       true,
       true,
@@ -149,7 +149,7 @@ abstract class IntegrationServiceSpecification extends Specification {
         serverConnectionConfig,
         { MqttConnection ownedConnection ->
           def generatedClientId = "mockedClient_${clientIdGenerator.incrementAndGet()}"
-          def createdSession = defaultMqttSessionService.create(generatedClientId).block()
+          def createdSession = defaultMqttSessionService.createClean(generatedClientId).block()
           def user = new TestExternalNetworkMqttUser(ownedConnection, Mock(NetworkMqttUserReleaseHandler))
           user.session(createdSession)
           user.clientId(generatedClientId)
@@ -160,7 +160,7 @@ abstract class IntegrationServiceSpecification extends Specification {
         serverConnectionConfig,
         serverConnectionConfig.maxQos(),
         mqttVersion,
-        MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT,
+        MqttProperties.SESSION_EXPIRY_DURATION_DISABLED,
         serverConnectionConfig.receiveMaxPublishes(),
         serverConnectionConfig.maxMessageSize(),
         serverConnectionConfig.topicAliasMaxValue(),

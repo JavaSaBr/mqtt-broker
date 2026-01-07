@@ -1,6 +1,7 @@
 package javasabr.mqtt.network.message.out;
 
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
@@ -315,7 +316,7 @@ public class ConnectAckMqtt5OutMessage extends ConnectAckMqtt311OutMessage {
     writeProperty(
         buffer,
         MqttMessageProperty.SESSION_EXPIRY_INTERVAL,
-        connectionConfig.sessionExpiryInterval(),
+        connectionConfig.sessionExpiryIntervalInSecs(),
         requestedSessionExpiryInterval);
     if (requestedClientId != null) {
       writeProperty(buffer, MqttMessageProperty.ASSIGNED_CLIENT_IDENTIFIER, clientId, requestedClientId);
