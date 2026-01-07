@@ -27,6 +27,8 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   final Thread cleanThread;
 
   final int cleanIntervalInMs;
+  final int maxNotExpirableSessions;
+  final int maxExpirableStoredSessions;
   volatile boolean closed;
 
   public InMemoryMqttSessionService(int cleanIntervalInMs) {
