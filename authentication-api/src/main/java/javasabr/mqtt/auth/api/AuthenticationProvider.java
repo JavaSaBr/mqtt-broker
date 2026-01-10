@@ -6,5 +6,7 @@ public interface AuthenticationProvider {
 
   AuthenticationMethod getAuthenticationMethod();
 
+  boolean supports(MqttCredentials credentials);
+
   Mono<Boolean> authenticate(MqttCredentials credentials);
 }

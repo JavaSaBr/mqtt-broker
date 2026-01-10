@@ -5,14 +5,12 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
-import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
-import javasabr.mqtt.auth.service.config.property.DefaultProviderProperties;
 import lombok.CustomLog;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -23,15 +21,14 @@ import org.springframework.context.annotation.Import;
     DatabaseCredentialsSourceSpringConfig.class,
     FileCredentialsSourceSpringConfig.class
 })
-@EnableConfigurationProperties(DefaultProviderProperties.class)
 public class AuthenticationServiceSpringConfig {
 
   @Bean
   AuthenticationService authenticationService(
       List<AuthenticationProvider> availableProviders,
-      DefaultProviderProperties defaultProviderProperties) {
+      @Value("${authentication.provider.anonymous.enabled}") boolean allowAnonymous) {
     log.info("Initializing AuthenticationService...");
-    return new DefaultAuthenticationService(availableProviders, defaultProviderProperties);
+    return new DefaultAuthenticationService(availableProviders, allowAnonymous);
   }
 
   @Bean
@@ -40,11 +37,5 @@ public class AuthenticationServiceSpringConfig {
   @ConditionalOnBean(CredentialsSource.class)
   AuthenticationProvider basicAuthenticationProvider(List<CredentialsSource> configuredCredentialsSources) {
     return new BasicAuthenticationProvider(configuredCredentialsSources);
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "authentication.provider.anonymous.enabled", havingValue = "true")
-  AuthenticationProvider anonymousAuthenticationProvider() {
-    return new AnonymousAuthenticationProvider();
   }
 }

@@ -9,14 +9,18 @@ import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
+import javasabr.rlib.common.util.ArrayUtils;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BasicAuthenticationProvider implements AuthenticationProvider {
+
+  private static final byte MIN_PRINTABLE_ASCII = ' '; // 32
+  private static final byte MAX_PRINTABLE_ASCII = '~'; // 126
 
   Array<CredentialsSource> credentialsSources;
 
@@ -43,5 +47,19 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     return "{ \"authenticationMethod\": \"%s\", \"credentialSource\": %s }".formatted(
         getAuthenticationMethod(),
         credentialsSources);
+  }
+
+  @Override
+  public boolean supports(MqttCredentials credentials) {
+    byte[] password = credentials.password();
+    if (StringUtils.isEmpty(credentials.username()) || ArrayUtils.isEmpty(password)) {
+      return false;
+    }
+    for (byte charByte : password) {
+      if (charByte < MIN_PRINTABLE_ASCII || charByte > MAX_PRINTABLE_ASCII) {
+        return false;
+      }
+    }
+    return true;
   }
 }

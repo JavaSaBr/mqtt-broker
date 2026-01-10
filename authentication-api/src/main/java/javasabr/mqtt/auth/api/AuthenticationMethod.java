@@ -15,18 +15,17 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum AuthenticationMethod {
-  X509("x509"),
-  IP_CIDR("cidr"),
-  JWT("jwt"),
-  OAUTH2("oauth2"),
-  BASIC("basic"),
-  LDAP("ldap"),
-  ANONYMOUS("anonymous");
+  X509("x509", 1),
+  JWT("jwt", 3),
+  OAUTH2("oauth2", 4),
+  BASIC("basic", 5),
+  LDAP("ldap", 6);
 
   private static final RefToRefDictionary<String, AuthenticationMethod> CACHE = Arrays.stream(values())
       .collect(DictionaryCollectors.toRefToRefDictionary(AuthenticationMethod::value, Function.identity()));
 
   String value;
+  int priority;
 
   public static AuthenticationMethod fromValue(String value) {
     return CACHE.get(value);

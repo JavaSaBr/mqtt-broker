@@ -1,12 +1,11 @@
 package javasabr.mqtt.broker.application.service
 
-import javasabr.mqtt.auth.api.AuthenticationMethod
+
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.AuthenticationService
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.api.CredentialsSourceType
 import javasabr.mqtt.auth.api.MqttCredentials
-import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -74,10 +73,5 @@ class AuthenticationServiceTest extends IntegrationSpecification {
           expectedSourceTypes.remove(credentialsSource.type)
         }
         expectedSourceTypes.isEmpty()
-    and:
-        verifyEach(authenticationProviders) { provider ->
-          provider.authenticationMethod != AuthenticationMethod.ANONYMOUS
-          !(provider instanceof AnonymousAuthenticationProvider)
-        }
   }
 }

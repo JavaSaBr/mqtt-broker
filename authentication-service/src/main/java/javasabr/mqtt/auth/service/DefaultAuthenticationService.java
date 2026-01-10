@@ -1,5 +1,6 @@
 package javasabr.mqtt.auth.service;
 
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -10,60 +11,58 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
-import javasabr.mqtt.auth.service.config.property.DefaultProviderProperties;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @CustomLog
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
-  private static Mono<? extends Boolean> onAnonymousProviderErrorHandler(Throwable exception) {
-    log.error("Anonymous authentication provider threw an error: %s".formatted(exception.getMessage()));
-    return Mono.just(false);
-  }
+  Map<AuthenticationMethod, AuthenticationProvider> availableProvidersMap;
+  Array<AuthenticationProvider> availableProvidersArray;
+  boolean allowAnonymous;
 
-  private static Mono<? extends Boolean> onAuthenticationProviderErrorHandler(
-      @Nullable AuthenticationProvider provider,
-      Throwable exception) {
-    String authenticationMethod = provider == null ? null : provider.getAuthenticationMethod().value();
-    log.error("%s authentication provider threw an error: %s".formatted(authenticationMethod, exception.getMessage()));
-    return Mono.just(false);
-  }
-
-  Map<AuthenticationMethod, AuthenticationProvider> availableProviders;
-  @Nullable AuthenticationProvider defaultProvider;
-  AuthenticationProvider anonymousProvider;
-
-  public DefaultAuthenticationService(
-      List<AuthenticationProvider> configuredProviders,
-      DefaultProviderProperties defaultProviderProperties) {
-
+  public DefaultAuthenticationService(List<AuthenticationProvider> configuredProviders, boolean allowAnonymous) {
     if (configuredProviders.isEmpty()) {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
-    this.availableProviders = configuredProviders.stream()
+    this.allowAnonymous = allowAnonymous;
+    this.availableProvidersMap = configuredProviders.stream()
         .collect(Collectors.toMap(
             AuthenticationProvider::getAuthenticationMethod,
             Function.identity(),
             DefaultAuthenticationService::onDuplicateProviderErrorHandler,
             () -> new EnumMap<>(AuthenticationMethod.class)));
+    this.availableProvidersArray = configuredProviders.stream()
+        .sorted(Comparator.comparingInt(provider -> provider.getAuthenticationMethod().priority()))
+        .collect(ArrayCollectors.toArray(AuthenticationProvider.class));
+    log.info(this.availableProvidersMap, DefaultAuthenticationService::buildServiceDescription);
+  }
 
-    this.anonymousProvider = availableProviders.get(AuthenticationMethod.ANONYMOUS);
-    AuthenticationMethod defaultMethod = defaultProviderProperties.method();
-    if (defaultMethod == null && anonymousProvider == null) {
-      throw new AuthenticationConfigException("Default authenticator method is not configured");
+  @Override
+  public Mono<Boolean> authenticate(MqttCredentials mqttCredentials) {
+    if (mqttCredentials.isAnonymous()) {
+      return Mono.just(allowAnonymous);
+    } else if (mqttCredentials.isMethodDefined()) {
+      AuthenticationProvider provider = availableProvidersMap.get(mqttCredentials.authenticationMethod());
+      return provider == null ? Mono.just(false) : authenticateSafe(provider, mqttCredentials);
+    } else {
+      return Flux.fromIterable(availableProvidersArray)
+          .filter(provider -> provider.supports(mqttCredentials))
+          .concatMap(provider -> authenticateSafe(provider, mqttCredentials))
+          .any(Boolean::booleanValue);
     }
-    this.defaultProvider = defaultMethod == null ? null : availableProviders.get(defaultMethod);
-    if (defaultProvider == null && anonymousProvider == null) {
-      throw new AuthenticationConfigException("Default [%s] authentication provider is not configured"
-          .formatted(defaultMethod.value()));
-    }
+  }
 
-    log.info(this.availableProviders, DefaultAuthenticationService::buildServiceDescription);
+  private Mono<Boolean> authenticateSafe(AuthenticationProvider provider, MqttCredentials request) {
+    return provider.authenticate(request)
+        .onErrorResume(exception -> onAuthenticationProviderErrorHandler(provider, exception));
   }
 
   private static AuthenticationProvider onDuplicateProviderErrorHandler(
@@ -73,19 +72,12 @@ public class DefaultAuthenticationService implements AuthenticationService {
         .formatted(first.getAuthenticationMethod()));
   }
 
-  @Override
-  public Mono<Boolean> authenticate(MqttCredentials request) {
-    AuthenticationMethod authenticationMethod = request.authenticationMethod();
-    AuthenticationProvider targetProvider =
-        authenticationMethod == null ? defaultProvider : availableProviders.get(authenticationMethod);
-    return Mono.justOrEmpty(anonymousProvider)
-        .flatMap(provider -> provider.authenticate(request))
-        .onErrorResume(DefaultAuthenticationService::onAnonymousProviderErrorHandler)
-        .filter(Boolean::booleanValue)
-        .switchIfEmpty(Mono.justOrEmpty(targetProvider)
-            .flatMap(provider -> provider.authenticate(request))
-            .onErrorResume(exception -> onAuthenticationProviderErrorHandler(targetProvider, exception))
-            .defaultIfEmpty(false));
+  private static Mono<? extends Boolean> onAuthenticationProviderErrorHandler(
+      @Nullable AuthenticationProvider provider,
+      Throwable exception) {
+    String authenticationMethod = provider == null ? null : provider.getAuthenticationMethod().value();
+    log.error("%s authentication provider threw an error: %s".formatted(authenticationMethod, exception.getMessage()));
+    return Mono.just(false);
   }
 
   private static String buildServiceDescription(Map<AuthenticationMethod, AuthenticationProvider> providers) {

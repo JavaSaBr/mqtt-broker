@@ -6,7 +6,6 @@ import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider
-import javasabr.mqtt.auth.service.AnonymousAuthenticationProvider
 import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.env.PropertiesPropertySourceLoader
@@ -16,7 +15,6 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
-import static javasabr.mqtt.auth.api.AuthenticationMethod.ANONYMOUS
 import static javasabr.mqtt.auth.api.AuthenticationMethod.BASIC
 
 class AuthenticationProviderTest extends IntegrationSpecification {
@@ -45,43 +43,9 @@ class AuthenticationProviderTest extends IntegrationSpecification {
     }
   }
 
-  @TestPropertySource(properties = [
-      "authentication.provider.anonymous.enabled=true",
-      "authentication.provider.basic.enabled=true",
-      "authentication.credentials-source.file.enabled=true",
-      "authentication.provider.default.method=basic"
-  ])
-  static class AnonymousProviderTest extends AuthenticationProviderTest {
-
-    def "should create file credentials source and basic authentication provider"() {
-      expect:
-          authenticationProviders.any { provider ->
-            provider.authenticationMethod == ANONYMOUS && provider instanceof AnonymousAuthenticationProvider
-          }
-      and:
-          authenticationProviders.any { provider ->
-            provider.authenticationMethod == BASIC && provider instanceof BasicAuthenticationProvider
-          }
-    }
-  }
-
-  @TestPropertySource(properties = [
-      "authentication.provider.anonymous.enabled=true"
-  ])
-  static class AnonymousProvider2Test extends AuthenticationProviderTest {
-
-    def "should create anonymous authentication provider"() {
-      expect:
-          verifyEach(authenticationProviders) { provider ->
-            provider.authenticationMethod == ANONYMOUS
-            provider instanceof AnonymousAuthenticationProvider
-          }
-    }
-  }
-
   static class EmptyProviderTest extends Specification {
 
-    def "should fail start application context without any authentication provider"(String[] properties) {
+    def "should fail start application context without any authentication provider"() {
       given:
           PropertySource propertySource = new PropertiesPropertySourceLoader()
               .load("test-props", new ClassPathResource("application-test.properties")).getFirst()
@@ -93,7 +57,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
               }
       when:
           appContext
-              .withPropertyValues(properties)
+              .withPropertyValues("authentication.provider.anonymous.enabled=false")
               .run({ context ->
                 if (context.startupFailure) {
                   throw context.startupFailure
@@ -103,24 +67,8 @@ class AuthenticationProviderTest extends IntegrationSpecification {
           def exception = thrown(Exception)
           with(rootCauseOf(exception)) { rootCause ->
             assert rootCause instanceof AuthenticationConfigException
-            assert message == errorMessage
+            assert message == "Authenticator providers are not configured"
           }
-      where:
-          properties                                             | errorMessage
-          [
-              "authentication.provider.anonymous.enabled=false"
-          ]                                                      | "Authenticator providers are not configured"
-          [
-              "authentication.provider.anonymous.enabled=false",
-              "authentication.provider.basic.enabled=true",
-              "authentication.credentials-source.file.enabled=true"
-          ]                                                      | "Default authenticator method is not configured"
-          [
-              "authentication.provider.default.method=jwt",
-              "authentication.provider.anonymous.enabled=false",
-              "authentication.provider.basic.enabled=true",
-              "authentication.credentials-source.file.enabled=true"
-          ]                                                      | "Default [jwt] authentication provider is not configured"
     }
   }
 
