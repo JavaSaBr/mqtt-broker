@@ -1,7 +1,6 @@
 package javasabr.mqtt.model.topic;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Map;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;

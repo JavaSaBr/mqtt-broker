@@ -87,13 +87,23 @@ public class InMemoryActiveSubscriptions implements ActiveSubscriptions {
     }
     return result;
   }
-  
+
   public void clear() {
     long stamp = lock.writeLock();
     try {
       subscriptions.clear();
     } finally {
       lock.unlockWrite(stamp);
+    }
+  }
+  
+  @Override
+  public boolean isEmpty() {
+    long stamp = lock.readLock();
+    try {
+      return subscriptions.isEmpty();
+    } finally {
+      lock.unlockRead(stamp);
     }
   }
 }

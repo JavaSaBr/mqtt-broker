@@ -1,7 +1,6 @@
 package javasabr.mqtt.model;
 
 import java.time.Duration;
-import org.jspecify.annotations.Nullable;
 
 public record MqttClientConnectionConfig(
     MqttServerConnectionConfig server,

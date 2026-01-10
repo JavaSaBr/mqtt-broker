@@ -20,5 +20,4 @@ public interface MqttSession {
 
   ActiveSubscriptions activeSubscriptions();
   TopicNameMapping topicNameMapping();
-  
 }

@@ -15,7 +15,6 @@ import javasabr.mqtt.test.support.BaseSpecification
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
-import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
