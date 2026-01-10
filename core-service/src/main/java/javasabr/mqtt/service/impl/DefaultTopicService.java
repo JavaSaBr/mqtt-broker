@@ -39,7 +39,7 @@ public class DefaultTopicService implements TopicService {
   @Override
   public TopicName createTopicName(NetworkMqttUser user, String rawTopicName) {
     if (!TopicValidator.validateTopicName(rawTopicName)) {
-      log.warning(user.clientId(), rawTopicName, "[%s] Invalid topic name:[%s]"::formatted);
+      log.warning(user.clientId(), rawTopicName, "[%s] Invalid topic dbName:[%s]"::formatted);
       return TopicName.INVALID_TOPIC_NAME;
     }
     return TopicName.valueOf(rawTopicName);

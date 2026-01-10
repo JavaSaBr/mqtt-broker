@@ -32,7 +32,7 @@ public class DatabaseCredentialsSourceFactories {
         databaseCredentialsSourceProperties.driver().value(),
         databaseCredentialsSourceProperties.host(),
         databaseCredentialsSourceProperties.port(),
-        databaseCredentialsSourceProperties.name());
+        databaseCredentialsSourceProperties.dbName());
     return Flyway.configure()
         .dataSource(databaseUrl, adminDatabaseCredentials.username(), adminDatabaseCredentials.password())
         .load();
@@ -48,7 +48,7 @@ public class DatabaseCredentialsSourceFactories {
         "lock_timeout", databaseTimeoutsProperties.lockTimeout(),
         "statement_timeout", databaseTimeoutsProperties.statementTimeout());
     ConnectionFactoryOptions connectionFactoryOptions = ConnectionFactoryOptions.builder()
-        .option(DATABASE, databaseConnectionProperties.name())
+        .option(DATABASE, databaseConnectionProperties.dbName())
         .option(DRIVER, databaseConnectionProperties.driver().value())
         .option(HOST, databaseConnectionProperties.host())
         .option(PORT, databaseConnectionProperties.port())

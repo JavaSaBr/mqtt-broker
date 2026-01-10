@@ -8,7 +8,6 @@ import javasabr.mqtt.auth.provider.BasicAuthenticationProvider;
 import javasabr.mqtt.auth.service.DefaultAuthenticationService;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +33,6 @@ public class AuthenticationServiceSpringConfig {
   @Bean
   @ConditionalOnClass(name = "javasabr.mqtt.auth.provider.BasicAuthenticationProvider")
   @ConditionalOnProperty(name = "authentication.provider.basic.enabled", havingValue = "true")
-  @ConditionalOnBean(CredentialsSource.class)
   AuthenticationProvider basicAuthenticationProvider(List<CredentialsSource> configuredCredentialsSources) {
     return new BasicAuthenticationProvider(configuredCredentialsSources);
   }
