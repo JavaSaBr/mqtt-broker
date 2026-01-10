@@ -38,7 +38,7 @@ class ConnectInMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def connectAck = mqttUser.nextSentMessage(ConnectAckMqtt311OutMessage)
         connectAck.reasonCode() == ConnectAckReasonCode.SUCCESS
         !connectAck.sessionPresent()
-    then:
+    and:
         mqttUser.clientId() == testClientId
         with(mqttUser.connectionConfig()) {
           mqttVersion() == MqttVersion.MQTT_3_1_1
@@ -84,7 +84,7 @@ class ConnectInMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           requestedKeepAlive() == testKeepAliveTime
           requestedReceiveMaxPublishes() == MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET
         }
-    then:
+    and:
         mqttUser.clientId() == testClientId
         with(mqttUser.connectionConfig()) {
           mqttVersion() == MqttVersion.MQTT_5
@@ -132,7 +132,7 @@ class ConnectInMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         def connectAck = mqttUser.nextSentMessage(ConnectAckMqtt5OutMessage)
         connectAck.reasonCode() == ConnectAckReasonCode.SUCCESS
         !connectAck.sessionPresent()
-    then:
+    and:
         mqttUser.clientId() == testClientId
         with(mqttUser.connectionConfig()) {
           mqttVersion() == MqttVersion.MQTT_5
