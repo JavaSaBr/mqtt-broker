@@ -204,13 +204,35 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         keepAlive,
         false,
         false,
-        Array.empty(StringPair.class),
+        EMPTY_USER_PROPERTIES,
         StringUtils.EMPTY,
         ArrayUtils.EMPTY_BYTE_ARRAY,
         MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET,
-        MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET,
-        MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET,
-        MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET,
+        MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET,
+        MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET,
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+        false,
+        false);
+  }
+
+  public ConnectMqtt5OutMessage(String clientId, int keepAlive, long sessionExpiryInterval) {
+    this(
+        StringUtils.EMPTY,
+        StringUtils.EMPTY,
+        clientId,
+        ArrayUtils.EMPTY_BYTE_ARRAY,
+        ArrayUtils.EMPTY_BYTE_ARRAY,
+        QoS.AT_MOST_ONCE,
+        keepAlive,
+        false,
+        false,
+        EMPTY_USER_PROPERTIES,
+        StringUtils.EMPTY,
+        ArrayUtils.EMPTY_BYTE_ARRAY,
+        sessionExpiryInterval,
+        MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET,
+        MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET,
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
         false,
         false);
   }
@@ -282,12 +304,12 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
     writeNotEmptyProperty(buffer, MqttMessageProperty.AUTHENTICATION_DATA, authenticationData);
     writeProperty(buffer, MqttMessageProperty.REQUEST_RESPONSE_INFORMATION, requestResponseInformation, false);
     writeProperty(buffer, MqttMessageProperty.REQUEST_PROBLEM_INFORMATION, requestProblemInformation, false);
-    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMax, MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET);
+    writeProperty(buffer, MqttMessageProperty.RECEIVE_MAXIMUM_PUBLISHES, receiveMax, MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET);
     writeProperty(
         buffer,
         MqttMessageProperty.TOPIC_ALIAS_MAXIMUM,
         topicAliasMaximum,
-        MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET);
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET);
     writeProperty(
         buffer,
         MqttMessageProperty.SESSION_EXPIRY_INTERVAL,
@@ -297,7 +319,7 @@ public class ConnectMqtt5OutMessage extends ConnectMqtt311OutMessage {
         buffer,
         MqttMessageProperty.MAXIMUM_MESSAGE_SIZE,
         maximumPacketSize,
-        MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET);
+        MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET);
   }
 
   protected void writeWillProperties(ByteBuffer buffer) {}

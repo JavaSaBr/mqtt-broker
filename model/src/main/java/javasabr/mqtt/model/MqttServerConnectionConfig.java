@@ -13,7 +13,6 @@ public record MqttServerConnectionConfig(
     int minKeepAliveTime,
     int receiveMaxPublishes,
     int topicAliasMaxValue,
-    long defaultSessionExpiryInterval,
     boolean keepAliveEnabled,
     boolean sessionsEnabled,
     boolean retainAvailable,
@@ -30,7 +29,6 @@ public record MqttServerConnectionConfig(
       int minKeepAliveTime,
       int receiveMaxPublishes,
       int topicAliasMaxValue,
-      long defaultSessionExpiryInterval,
       boolean keepAliveEnabled,
       boolean sessionsEnabled,
       boolean retainAvailable,
@@ -40,8 +38,8 @@ public record MqttServerConnectionConfig(
     this.maxQos = maxQos;
     this.maxMessageSize = NumberUtils.validate(
         maxMessageSize,
-        MqttProperties.MAXIMUM_MESSAGE_SIZE_MIN,
-        MqttProperties.MAXIMUM_MESSAGE_SIZE_MAX);
+        MqttProperties.MAX_MESSAGE_SIZE_MIN,
+        MqttProperties.MAX_MESSAGE_SIZE_MAX);
     this.maxStringLength = NumberUtils.validate(
         maxStringLength,
         1,
@@ -61,9 +59,8 @@ public record MqttServerConnectionConfig(
     this.receiveMaxPublishes = receiveMaxPublishes;
     this.topicAliasMaxValue = NumberUtils.validate(
         topicAliasMaxValue,
-        MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED,
+        MqttProperties.TOPIC_ALIAS_MAX_DISABLED,
         MqttProperties.TOPIC_ALIAS_MAX);
-    this.defaultSessionExpiryInterval = defaultSessionExpiryInterval;
     this.keepAliveEnabled = keepAliveEnabled;
     this.sessionsEnabled = sessionsEnabled;
     this.retainAvailable = retainAvailable;
@@ -99,6 +96,24 @@ public record MqttServerConnectionConfig(
   public MqttServerConnectionConfig withRetainAvailable(boolean retainAvailable) {
     return toBuilder()
         .retainAvailable(retainAvailable)
+        .build();
+  }
+
+  public MqttServerConnectionConfig withTopicAliasMaxValue(int topicAliasMaxValue) {
+    return toBuilder()
+        .topicAliasMaxValue(NumberUtils.validate(
+            topicAliasMaxValue,
+            MqttProperties.TOPIC_ALIAS_MAX_DISABLED,
+            MqttProperties.TOPIC_ALIAS_MAX))
+        .build();
+  }
+
+  public MqttServerConnectionConfig withMinKeepAliveTime(int minKeepAliveTime) {
+    return toBuilder()
+        .minKeepAliveTime(NumberUtils.validate(
+            minKeepAliveTime,
+            MqttProperties.SERVER_KEEP_ALIVE_MIN,
+            MqttProperties.SERVER_KEEP_ALIVE_MAX))
         .build();
   }
 }

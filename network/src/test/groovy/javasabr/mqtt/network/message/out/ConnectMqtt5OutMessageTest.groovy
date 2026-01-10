@@ -1,54 +1,62 @@
 package javasabr.mqtt.network.message.out
 
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage
 import javasabr.rlib.common.util.ArrayUtils
 import javasabr.rlib.common.util.BufferUtils
+import javasabr.rlib.common.util.NumberUtils
 
 class ConnectMqtt5OutMessageTest extends BaseMqttOutMessageTest {
 
   def "should write message correctly"() {
     given:
         def outMessage = new ConnectMqtt5OutMessage(
-            userName,
+            testUserName,
             "",
             mqtt311ClientId,
-            userPassword,
+            testUserPassword,
             ArrayUtils.EMPTY_BYTE_ARRAY,
             QoS.AT_MOST_ONCE,
-            keepAlive,
+            testKeepAlive,
             willRetain,
             cleanStart,
             testUserProperties,
-            authMethod,
-            authData,
-            sessionExpiryInterval,
-            receiveMaxPublishes,
-            maxMessageSize,
-            topicAliasMaxValue,
+            testAuthMethod,
+            testAuthData,
+            testSessionExpiryInterval,
+            testReceiveMaxPublishes,
+            testMaxMessageSize,
+            testTopicAliasMaxValue,
             requestResponseInformation,
             requestProblemInformation)
+    when:
+        def typeAndFlags = outMessage.messageTypeAndFlags()
+        byte type = NumberUtils.getHighByteBits(typeAndFlags);
+        byte info = NumberUtils.getLowByteBits(typeAndFlags);
+    then:
+        MqttMessageType.fromByte(type) == MqttMessageType.CONNECT
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           outMessage.write(defaultMqtt5Connection, it)
         }
-        def reader = new ConnectMqttInMessage(0b0001_0000 as byte)
+        def reader = new ConnectMqttInMessage(info)
         def result = reader.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
     then:
         result
-        reader.username() == userName
+        reader.username() == testUserName
         reader.clientId() == mqtt311ClientId
-        reader.password() == userPassword
-        reader.keepAlive() == keepAlive
+        reader.password() == testUserPassword
+        reader.keepAlive() == testKeepAlive
         reader.userProperties() == testUserProperties
         reader.cleanStart() == cleanStart
         reader.willRetain() == willRetain
-        reader.authenticationMethod() == authMethod
-        reader.authenticationData() == authData
-        reader.sessionExpiryInterval() == sessionExpiryInterval
-        reader.receiveMaxPublishes() == receiveMaxPublishes
-        reader.maxPacketSize() == maxMessageSize
-        reader.topicAliasMaxValue() == topicAliasMaxValue
+        reader.authenticationMethod() == testAuthMethod
+        reader.authenticationData() == testAuthData
+        reader.sessionExpiryInterval() == testSessionExpiryInterval
+        reader.receiveMaxPublishes() == testReceiveMaxPublishes
+        reader.maxMessageSize() == testMaxMessageSize
+        reader.topicAliasMaxValue() == testTopicAliasMaxValue
         reader.requestResponseInformation() == requestResponseInformation
         reader.requestProblemInformation() == requestProblemInformation
   }

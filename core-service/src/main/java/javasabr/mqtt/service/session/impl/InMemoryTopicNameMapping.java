@@ -49,7 +49,17 @@ public class InMemoryTopicNameMapping implements TopicNameMapping {
       lock.unlockRead(stamp);
     }
   }
-  
+
+  @Override
+  public int size() {
+    long stamp = lock.readLock();
+    try {
+      return topicNameAliases.size();
+    } finally {
+      lock.unlockRead(stamp);
+    }
+  }
+
   public void clear() {
     long stamp = lock.writeLock();
     try {

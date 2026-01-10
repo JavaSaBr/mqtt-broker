@@ -9,4 +9,6 @@ public interface TopicNameMapping {
 
   @Nullable
   TopicName resolve(int topicAlias);
+  
+  int size();
 }

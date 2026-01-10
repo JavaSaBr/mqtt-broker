@@ -28,6 +28,8 @@ import static javasabr.mqtt.broker.application.MqttClientFactory.generateClientI
 
 class PublishRetryTest extends IntegrationSpecification {
 
+  private static final int testSessionExpiryIntervalInSecs = 120
+  
   @Autowired
   MqttSessionService mqttSessionService
 
@@ -98,7 +100,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, testSessionExpiryIntervalInSecs))
     then:
         with(subscriber.readNext() as ConnectAckMqttInMessage) {
           reasonCode() == ConnectAckReasonCode.SUCCESS
@@ -129,7 +131,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, testSessionExpiryIntervalInSecs))
     then:
         with(subscriber.readNext() as ConnectAckMqttInMessage) {
           reasonCode() == ConnectAckReasonCode.SUCCESS
@@ -228,7 +230,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         publisher.connect().join()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, testSessionExpiryIntervalInSecs))
     then:
         with(subscriber.readNext() as ConnectAckMqttInMessage) {
           reasonCode() == ConnectAckReasonCode.SUCCESS
@@ -259,7 +261,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, testSessionExpiryIntervalInSecs))
     then:
         with(subscriber.readNext() as ConnectAckMqttInMessage) {
           reasonCode() == ConnectAckReasonCode.SUCCESS
@@ -272,7 +274,7 @@ class PublishRetryTest extends IntegrationSpecification {
     when:
         subscriber.disconnect()
         subscriber.connect()
-        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive))
+        subscriber.send(new ConnectMqtt5OutMessage(serviceId, keepAlive, testSessionExpiryIntervalInSecs))
         subscriber.send(new PublishReceivedMqtt5OutMessage(
             receivedPublish.messageId(),
             PublishReceivedReasonCode.SUCCESS

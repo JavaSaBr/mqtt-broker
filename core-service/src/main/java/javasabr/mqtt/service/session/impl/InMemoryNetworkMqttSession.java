@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.session.impl;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
@@ -9,17 +10,16 @@ import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @CustomLog
 @Accessors
-@ToString(of = "clientId")
-@EqualsAndHashCode(of = "clientId")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
   
+  @EqualsAndHashCode.Include
   final String clientId;
   final AtomicInteger messageIdGenerator;
 
@@ -38,7 +38,7 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   @Getter
   @Setter
-  volatile long expirationTime = -1;
+  volatile Duration expiryInterval;
 
   public InMemoryNetworkMqttSession(String clientId) {
     this.clientId = clientId;
@@ -49,6 +49,7 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
     this.outProcessingPublishes = new InMemoryProcessingPublishes(this);
     this.activeSubscriptions = new InMemoryActiveSubscriptions();
     this.topicNameMapping = new InMemoryTopicNameMapping();
+    this.expiryInterval = MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
   }
 
   @Override

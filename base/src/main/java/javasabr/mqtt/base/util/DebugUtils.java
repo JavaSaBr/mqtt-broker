@@ -58,7 +58,11 @@ public class DebugUtils {
       }
 
       if (fields == null || fields.contains(name)) {
-        writer.serializeAsProperty(pojo, jsonGenerator, context);
+        try {
+          writer.serializeAsProperty(pojo, jsonGenerator, context);
+        } catch (IllegalAccessException ignore) {
+          // ignore
+        }
       }
     }
 

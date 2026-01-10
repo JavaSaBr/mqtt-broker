@@ -89,7 +89,7 @@ public class DisconnectMqtt5OutMessage extends DisconnectMqtt311OutMessage {
           buffer,
           MqttMessageProperty.SESSION_EXPIRY_INTERVAL,
           sessionExpiryInterval,
-          MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT);
+          MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED);
     }
   }
 }

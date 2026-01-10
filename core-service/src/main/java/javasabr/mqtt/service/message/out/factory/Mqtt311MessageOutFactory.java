@@ -45,7 +45,7 @@ public class Mqtt311MessageOutFactory extends MqttMessageOutFactory {
       String requestedClientId,
       long requestedSessionExpiryInterval,
       int requestedKeepAlive,
-      int requestedReceiveMax,
+      int requestedReceiveMaxPublishes,
       String reason,
       String serverReference,
       String responseInformation,

@@ -1,15 +1,16 @@
 package javasabr.mqtt.model.session;
 
+import java.time.Duration;
+import org.jspecify.annotations.Nullable;
+
 public interface MqttSession {
   
   String clientId();
 
   int generateMessageId();
-
-  /**
-   * @return the expiration time in ms or -1 if it should not be expired now.
-   */
-  long expirationTime();
+  
+  @Nullable
+  Duration expiryInterval();
   
   MessageTacker inMessageTracker();
   MessageTacker outMessageTracker();
@@ -19,5 +20,4 @@ public interface MqttSession {
 
   ActiveSubscriptions activeSubscriptions();
   TopicNameMapping topicNameMapping();
-  
 }

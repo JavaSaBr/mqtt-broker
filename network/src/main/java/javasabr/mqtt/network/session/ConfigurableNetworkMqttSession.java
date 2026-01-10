@@ -1,6 +1,8 @@
 package javasabr.mqtt.network.session;
 
+import java.time.Duration;
+
 public interface ConfigurableNetworkMqttSession extends NetworkMqttSession {
  
-  void expirationTime(long expirationTime);
+  void expiryInterval(Duration expiryInterval);
 }

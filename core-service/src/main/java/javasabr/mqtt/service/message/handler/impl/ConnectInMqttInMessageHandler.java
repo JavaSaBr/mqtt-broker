@@ -1,20 +1,16 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import static javasabr.mqtt.base.util.ReactorUtils.ifTrue;
-import static javasabr.mqtt.model.MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET;
-import static javasabr.mqtt.model.MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET;
-import static javasabr.mqtt.model.MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET;
-import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_DISABLED;
-import static javasabr.mqtt.model.MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET;
 import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
-import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
 import javasabr.mqtt.auth.api.AuthenticationMethod;
-import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.AuthenticationService;
+import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
+import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
 import javasabr.mqtt.model.exception.ConnectionRejectException;
@@ -24,11 +20,13 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
+import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.message.validator.ClientIdMqttInMessageFieldValidator;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -39,7 +37,7 @@ import reactor.core.publisher.Mono;
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConnectInMqttInMessageHandler
-    extends AbstractMqttInMessageHandler<ExternalNetworkMqttUser, ConnectMqttInMessage> {
+    extends FieldsValidatedMqttInMessageHandler<ExternalNetworkMqttUser, ConnectMqttInMessage> {
 
   ClientIdRegistry clientIdRegistry;
   AuthenticationService authenticationService;
@@ -52,7 +50,11 @@ public class ConnectInMqttInMessageHandler
       MqttSessionService sessionService,
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, ConnectMqttInMessage.class, messageOutFactoryService);
+    super(
+        ExternalNetworkMqttUser.class,
+        ConnectMqttInMessage.class, 
+        messageOutFactoryService,
+        List.of(new ClientIdMqttInMessageFieldValidator(messageOutFactoryService)));
     this.clientIdRegistry = clientIdRegistry;
     this.authenticationService = authenticationService;
     this.sessionService = sessionService;
@@ -75,6 +77,14 @@ public class ConnectInMqttInMessageHandler
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
     resolveClientConnectionConfig(user, message);
+    super.processValidMessage(connection, user, message);
+  }
+
+  @Override
+  protected void processMessageWithValidFields(
+      MqttConnection connection,
+      ExternalNetworkMqttUser user,
+      ConnectMqttInMessage message) {
     MqttCredentials mqttCredentials = new MqttCredentials(
         message.username(),
         message.password(),
@@ -87,10 +97,10 @@ public class ConnectInMqttInMessageHandler
             message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))
         .flatMap(ifTrue(
             user,
-            message, this::restoreSession, CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(user, connectAckReasonCode)))
+            message, this::restoreSession, ConnectAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, connectAckReasonCode -> reject(user, connectAckReasonCode)))
         .subscribe();
   }
-
+  
   private void reject(ExternalNetworkMqttUser user, ConnectAckReasonCode connectAckReasonCode) {
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
@@ -123,84 +133,102 @@ public class ConnectInMqttInMessageHandler
             .map(ifTrue(newClientId, user::clientId)));
   }
 
-  private Mono<Boolean> restoreSession(ConfigurableNetworkMqttUser user, ConnectMqttInMessage packet) {
-    if (packet.cleanStart()) {
+  private Mono<Boolean> restoreSession(ConfigurableNetworkMqttUser user, ConnectMqttInMessage message) {
+    if (message.cleanStart()) {
       return sessionService
-          .create(user.clientId())
-          .flatMap(session -> onConnected(user, packet, session, false));
+          .createClean(user.clientId())
+          .flatMap(session -> onConnected(user, session, message, false));
     } else {
       return sessionService
           .restore(user.clientId())
-          .flatMap(session -> onConnected(user, packet, session, true))
+          .flatMap(session -> onConnected(user, session, message, true))
           .switchIfEmpty(Mono.defer(() -> sessionService
-              .create(user.clientId())
-              .flatMap(session -> onConnected(user, packet, session, false))));
+              .createClean(user.clientId())
+              .flatMap(session -> onConnected(user, session, message, false))));
     }
   }
 
-  private void resolveClientConnectionConfig(ConfigurableNetworkMqttUser user, ConnectMqttInMessage packet) {
+  private void resolveClientConnectionConfig(
+      ConfigurableNetworkMqttUser user,
+      ConnectMqttInMessage message) {
 
     MqttConnection connection = user.connection();
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
 
     // select result keep alive time
-    int minimalKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), packet.keepAlive());
-    int keepAlive = serverConfig.keepAliveEnabled() ? minimalKeepAliveTime : SERVER_KEEP_ALIVE_DISABLED;
-
-    // select result session expiry interval
-    long sessionExpiryInterval = serverConfig.sessionsEnabled()
-                                 ? packet.sessionExpiryInterval()
-                                 : SESSION_EXPIRY_INTERVAL_DISABLED;
-
-    if (sessionExpiryInterval == SESSION_EXPIRY_INTERVAL_IS_NOT_SET) {
-      sessionExpiryInterval = serverConfig.defaultSessionExpiryInterval();
-    }
+    int minKeepAliveTime = Math.max(serverConfig.minKeepAliveTime(), message.keepAlive());
+    int keepAlive = serverConfig.keepAliveEnabled() ? minKeepAliveTime : MqttProperties.SERVER_KEEP_ALIVE_DISABLED;
 
     // select result receive max
-    int receiveMaxPublishes = packet.receiveMaxPublishes() == RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
+    int receiveMaxPublishes = message.receiveMaxPublishes() == MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET
                               ? serverConfig.receiveMaxPublishes()
-                              : Math.min(packet.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
+                              : Math.min(message.receiveMaxPublishes(), serverConfig.receiveMaxPublishes());
 
-    // select result maximum packet size
-    var maximumPacketSize = packet.maxPacketSize() == MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
-                            ? serverConfig.maxMessageSize()
-                            : Math.min(packet.maxPacketSize(), serverConfig.maxMessageSize());
+    // select result maximum message size
+    var maxMessageSize = message.maxMessageSize() == MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET
+                         ? serverConfig.maxMessageSize()
+                         : Math.min(message.maxMessageSize(), serverConfig.maxMessageSize());
 
     // select result topic alias maximum
-    var topicAliasMaxValue = packet.topicAliasMaxValue() == TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
-                             ? TOPIC_ALIAS_MAXIMUM_DISABLED
-                             : Math.min(packet.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
+    var topicAliasMaxValue = message.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET
+                             ? MqttProperties.TOPIC_ALIAS_MAX_DISABLED
+                             : Math.min(message.topicAliasMaxValue(), serverConfig.topicAliasMaxValue());
 
     connection.configure(new MqttClientConnectionConfig(
         serverConfig,
         serverConfig.maxQos(),
-        packet.mqttVersion(),
-        sessionExpiryInterval,
+        message.mqttVersion(),
+        resolveSessionExpiryInterval(message, serverConfig),
         receiveMaxPublishes,
-        maximumPacketSize,
+        maxMessageSize,
         topicAliasMaxValue,
         keepAlive,
-        packet.requestResponseInformation(),
-        packet.requestProblemInformation()));
+        message.requestResponseInformation(),
+        message.requestProblemInformation()));
+  }
+  
+  private Duration resolveSessionExpiryInterval(
+      ConnectMqttInMessage message, 
+      MqttServerConnectionConfig serverConfig) {
+    // do not store such sessions after closing connection
+    if (!serverConfig.sessionsEnabled()) {
+      return MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
+    }
+    long expiryInterval = message.sessionExpiryInterval();
+    return switch (expiryInterval) {
+      case MqttProperties.SESSION_EXPIRY_INTERVAL_INFINITY -> MqttProperties.SESSION_EXPIRY_DURATION_INFINITY;
+      case MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED -> MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
+      default -> Duration.ofSeconds(expiryInterval);
+    };
   }
 
   private Mono<Boolean> onConnected(
       ConfigurableNetworkMqttUser user,
-      ConnectMqttInMessage message,
       NetworkMqttSession session,
+      ConnectMqttInMessage message,
       boolean sessionRestored) {
 
     MqttConnection connection = user.connection();
     MqttServerConnectionConfig serverConfig = connection.serverConnectionConfig();
     MqttClientConnectionConfig clientConfig = connection.clientConnectionConfig();
 
+    if (session instanceof ConfigurableNetworkMqttSession configurableSession) {
+      configurableSession.expiryInterval(clientConfig.sessionExpiryInterval());
+    }
+
     // if it was closed in parallel
     if (connection.closed() && serverConfig.sessionsEnabled()) {
       // store the session again
-      return sessionService.store(user.clientId(), session, clientConfig.sessionExpiryInterval());
+      return sessionService.store(user.clientId(), session);
     }
 
     user.session(session);
+
+    // already validated
+    String requestedClientId = Objects.requireNonNull(message.clientId());
+    long requestedSessionExpiryInterval = message.sessionExpiryInterval();
+    int requestedKeepAlive = message.keepAlive();
+    int requestedReceiveMaxPublishes = message.receiveMaxPublishes();
 
     var connectAck = messageOutFactoryService
         .resolveFactory(user)
@@ -208,10 +236,10 @@ public class ConnectInMqttInMessageHandler
             user,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
-            message.clientId(),
-            message.sessionExpiryInterval(),
-            message.keepAlive(),
-            message.receiveMaxPublishes());
+            requestedClientId,
+            requestedSessionExpiryInterval,
+            requestedKeepAlive,
+            requestedReceiveMaxPublishes);
 
     subscriptionService.restoreSubscriptions(user, session);
 
@@ -221,12 +249,10 @@ public class ConnectInMqttInMessageHandler
   }
 
   private boolean onSentConnAck(ConfigurableNetworkMqttUser user, NetworkMqttSession session, boolean result) {
-
     if (!result) {
       log.warning(user.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
       return false;
     }
-
     session.resendNotConfirmedPublishesTo(user);
     return true;
   }

@@ -4,7 +4,6 @@ import java.util.Collection;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publishing.Publish;
-import javasabr.mqtt.model.subscriber.SingleSubscriber;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;

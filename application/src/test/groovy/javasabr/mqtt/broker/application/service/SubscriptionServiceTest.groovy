@@ -27,6 +27,7 @@ class SubscriptionServiceTest extends IntegrationSpecification {
     when:
         subscriber.connectWith()
             .cleanStart(true)
+            .sessionExpiryInterval(120)
             .send()
             .join()
         subscriber.subscribeWith()

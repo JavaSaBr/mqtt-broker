@@ -13,7 +13,7 @@ class DisconnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             testUserProperties,
             reasonString,
             serverReference,
-            sessionExpiryInterval)
+            testSessionExpiryInterval)
     when:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
           packet.write(defaultMqtt5Connection, it)
@@ -26,6 +26,6 @@ class DisconnectAckMqtt5OutMessageTest extends BaseMqttOutMessageTest {
         reader.userProperties() == testUserProperties
         reader.reason == reasonString
         reader.serverReference == serverReference
-        reader.sessionExpiryInterval == sessionExpiryInterval
+        reader.sessionExpiryInterval == testSessionExpiryInterval
   }
 }

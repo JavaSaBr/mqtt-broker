@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 import javasabr.rlib.collections.dictionary.DictionaryCollectors;
 import javasabr.rlib.collections.dictionary.RefToRefDictionary;
+import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,6 @@ public enum AuthenticationMethod {
   int priority;
 
   public static AuthenticationMethod fromValue(String value) {
-    return CACHE.get(value);
+    return StringUtils.isEmpty(value) ? null : CACHE.get(value);
   }
 }

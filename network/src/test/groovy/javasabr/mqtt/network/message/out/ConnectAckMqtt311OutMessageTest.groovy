@@ -42,11 +42,11 @@ class ConnectAckMqtt311OutMessageTest extends BaseMqttOutMessageTest {
         reader.subscriptionIdAvailable() == MqttProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE_IS_NOT_SET
         reader.sharedSubscriptionAvailable() == MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IS_NOT_SET
         reader.retainAvailable() == MqttProperties.RETAIN_AVAILABLE_IS_NOT_SET
-        reader.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAXIMUM_IS_NOT_SET
+        reader.topicAliasMaxValue() == MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET
         reader.serverKeepAlive() == MqttProperties.SERVER_KEEP_ALIVE_IS_NOT_SET
-        reader.receiveMaxPublishes() == MqttProperties.RECEIVE_MAXIMUM_PUBLISHES_IS_NOT_SET
+        reader.receiveMaxPublishes() == MqttProperties.RECEIVE_MAX_PUBLISHES_IS_NOT_SET
         reader.sessionExpiryInterval() == MqttProperties.SESSION_EXPIRY_INTERVAL_IS_NOT_SET
-        reader.maxMessageSize() == MqttProperties.MAXIMUM_MESSAGE_SIZE_IS_NOT_SET
+        reader.maxMessageSize() == MqttProperties.MAX_MESSAGE_SIZE_IS_NOT_SET
         reader.userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
   }
 }

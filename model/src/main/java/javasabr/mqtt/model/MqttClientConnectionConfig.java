@@ -1,10 +1,12 @@
 package javasabr.mqtt.model;
 
+import java.time.Duration;
+
 public record MqttClientConnectionConfig(
     MqttServerConnectionConfig server,
     QoS maxQos,
     MqttVersion mqttVersion,
-    long sessionExpiryInterval,
+    Duration sessionExpiryInterval,
     int receiveMaxPublishes,
     int maxMessageSize,
     int topicAliasMaxValue,
@@ -42,5 +44,9 @@ public record MqttClientConnectionConfig(
 
   public int maxBinarySize() {
     return server.maxBinarySize();
+  }
+
+  public long sessionExpiryIntervalInSecs() {
+    return sessionExpiryInterval.toSeconds();
   }
 }

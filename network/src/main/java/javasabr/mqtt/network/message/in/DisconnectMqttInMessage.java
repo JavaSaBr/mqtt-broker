@@ -75,7 +75,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
     this.reasonCode = DisconnectReasonCode.NORMAL_DISCONNECTION;
     this.reason = StringUtils.EMPTY;
     this.serverReference = StringUtils.EMPTY;
-    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_DEFAULT;
+    this.sessionExpiryInterval = MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED;
   }
 
   @Override
@@ -92,7 +92,7 @@ public class DisconnectMqttInMessage extends MqttInMessage {
   protected void readImpl(MqttConnection connection, ByteBuffer buffer) {
     this.sessionExpiryInterval = connection
         .clientConnectionConfig()
-        .sessionExpiryInterval();
+        .sessionExpiryIntervalInSecs();
     super.readImpl(connection, buffer);
   }
 

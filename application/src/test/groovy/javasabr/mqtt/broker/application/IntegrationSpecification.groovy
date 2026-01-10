@@ -10,17 +10,17 @@ import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.MqttMockClient
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
+import javasabr.mqtt.test.support.BaseSpecification
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
-import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringJUnitConfig(classes = MqttBrokerTestConfig)
-class IntegrationSpecification extends Specification {
+class IntegrationSpecification extends BaseSpecification {
 
   public static final encoding = StandardCharsets.UTF_8
   public static final topicFilter = "topic/Filter"
@@ -95,7 +95,7 @@ class IntegrationSpecification extends Specification {
         serverConnConfig,
         serverConnConfig.maxQos(),
         MqttVersion.MQTT_5,
-        MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED,
+        null,
         serverConnConfig.receiveMaxPublishes(),
         serverConnConfig.maxMessageSize(),
         serverConnConfig.topicAliasMaxValue(),
@@ -123,7 +123,7 @@ class IntegrationSpecification extends Specification {
         serverConnConfig,
         serverConnConfig.maxQos(),
         MqttVersion.MQTT_3_1_1,
-        MqttProperties.SESSION_EXPIRY_INTERVAL_DISABLED,
+        null,
         serverConnConfig.receiveMaxPublishes(),
         serverConnConfig.maxMessageSize(),
         serverConnConfig.topicAliasMaxValue(),
