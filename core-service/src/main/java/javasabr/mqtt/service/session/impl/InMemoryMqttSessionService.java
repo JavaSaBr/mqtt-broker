@@ -20,6 +20,9 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
 
+  public static final int HARD_SESSIONS_LIMIT = 200;
+  public static final int MAX_SESSIONS = 100;
+  
   final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> activeSessions;
   final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> storedSessions;
   final LockableRefToRefDictionary<String, ExpirableSession> storedExpirableSessions;
@@ -29,10 +32,23 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   final int cleanIntervalInMs;
   final int maxNotExpirableSessions;
   final int maxExpirableStoredSessions;
+  final int hardSessionsLimit;
+  
   volatile boolean closed;
 
   public InMemoryMqttSessionService(int cleanIntervalInMs) {
+    this(cleanIntervalInMs, MAX_SESSIONS, MAX_SESSIONS, HARD_SESSIONS_LIMIT);
+  }
+  
+  public InMemoryMqttSessionService(
+      int cleanIntervalInMs,
+      int maxNotExpirableSessions,
+      int maxExpirableStoredSessions,
+      int hardSessionsLimit) {
     this.cleanIntervalInMs = cleanIntervalInMs;
+    this.maxNotExpirableSessions = maxNotExpirableSessions;
+    this.maxExpirableStoredSessions = maxExpirableStoredSessions;
+    this.hardSessionsLimit = hardSessionsLimit;
     this.activeSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.storedExpirableSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.storedSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
@@ -280,10 +296,19 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     cleanThread.interrupt();
   }
 
-  private record ExpirableSession(long expireAfter, InMemoryNetworkMqttSession session) {
+  
+  private class ExpirableSession() {
+    long storedAt, long expireAfter, InMemoryNetworkMqttSession session;
     private static ExpirableSession of(Duration expiryInterval, InMemoryNetworkMqttSession session) {
-      long expireAfter = System.currentTimeMillis() + expiryInterval.toMillis();
-      return new ExpirableSession(expireAfter, session);
+      long currentTime = System.currentTimeMillis();
+      long expireAfter = currentTime + expiryInterval.toMillis();
+      return new ExpirableSession(currentTime, expireAfter, session);
+    }
+  }
+
+  private record NotExpirableSession(long storedAt, InMemoryNetworkMqttSession session) {
+    private static NotExpirableSession of(InMemoryNetworkMqttSession session) {
+      return new NotExpirableSession(System.currentTimeMillis(), session);
     }
   }
 }
