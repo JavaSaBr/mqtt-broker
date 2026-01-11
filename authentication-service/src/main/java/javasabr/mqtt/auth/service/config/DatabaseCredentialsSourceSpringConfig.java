@@ -20,7 +20,7 @@ import org.springframework.context.annotation.DependsOn;
 public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean
-  DatabasePoolProperties databasePoolPropertiesRecord(
+  DatabasePoolProperties credentialsSourceDatabasePoolProperties(
       @Value("${authentication.credentials-source.database.pool.max-idle-time-seconds}") int maxIdleTimeSeconds,
       @Value("${authentication.credentials-source.database.pool.initial-size}") int initialSize,
       @Value("${authentication.credentials-source.database.pool.max-size}") int maxSize) {
@@ -28,7 +28,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   }
 
   @Bean
-  DatabaseConnectionProperties databaseConnectionPropertiesRecord(
+  DatabaseConnectionProperties credentialsSourceDatabaseConnectionProperties(
       @Value("${authentication.credentials-source.database.driver}") String driver,
       @Value("${authentication.credentials-source.database.host}") String host,
       @Value("${authentication.credentials-source.database.port}") int port,
@@ -37,7 +37,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   }
 
   @Bean
-  DatabaseTimeouts databaseTimeoutsPropertiesRecord(
+  DatabaseTimeouts credentialsSourceDatabaseTimeoutsProperties(
       @Value("${authentication.credentials-source.database.timeout.lock-timeout-seconds}") int lockTimeoutSeconds,
       @Value("${authentication.credentials-source.database.timeout.statement-timeout-seconds}")
       int statementTimeoutSeconds) {
@@ -45,11 +45,11 @@ public class DatabaseCredentialsSourceSpringConfig {
   }
 
   @Bean
-  @DependsOn("flyway")
-  CredentialsSource dbCredentialsSource(
+  @DependsOn("credentialsSourceFlyway")
+  CredentialsSource databaseCredentialsSource(
       DatabasePoolProperties databasePoolProperties,
       DatabaseTimeouts databaseTimeoutsProperties,
-      DatabaseConnectionProperties databaseConnectionProperties ,
+      DatabaseConnectionProperties databaseConnectionProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     return DatabaseCredentialsSourceBuilders.databaseCredentialsSource()
         .databasePoolProperties(databasePoolProperties)
@@ -60,7 +60,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   }
 
   @Bean(initMethod = "migrate")
-  Flyway flyway(
+  Flyway credentialsSourceFlyway(
       DatabaseConnectionProperties databaseCredentialsSourceProperties,
       DatabaseCredentials adminDatabaseCredentials) {
     return DatabaseCredentialsSourceBuilders.flyway()
