@@ -1,10 +1,12 @@
-package javasabr.mqtt.auth.api;
+package javasabr.mqtt.auth.api.file;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
+import javasabr.mqtt.auth.api.CredentialsSource;
+import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.rlib.collections.dictionary.DictionaryCollectors;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;

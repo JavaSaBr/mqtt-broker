@@ -5,7 +5,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
-import javasabr.mqtt.auth.api.InMemoryCredentialsSource;
+import javasabr.mqtt.auth.api.file.InMemoryCredentialsSource;
 import javasabr.mqtt.auth.api.exception.CredentialsSourceException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

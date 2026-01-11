@@ -17,7 +17,7 @@ import java.util.Map;
 import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
-import javasabr.mqtt.auth.api.database.DatabaseTimeoutsProperties;
+import javasabr.mqtt.auth.api.database.DatabaseTimeouts;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import lombok.Builder;
 import org.flywaydb.core.Flyway;
@@ -41,7 +41,7 @@ public class DatabaseCredentialsSourceFactories {
   @Builder(builderMethodName = "databaseCredentialsSource")
   private static DatabaseCredentialsSource createDatabaseCredentialsSource(
       DatabasePoolProperties databasePoolProperties,
-      DatabaseTimeoutsProperties databaseTimeoutsProperties,
+      DatabaseTimeouts databaseTimeoutsProperties,
       DatabaseConnectionProperties databaseConnectionProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     Map<String, String> timeoutOptions = Map.of(
