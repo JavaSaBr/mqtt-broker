@@ -5,7 +5,7 @@ import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
 import javasabr.mqtt.auth.api.database.DatabaseTimeouts;
-import javasabr.mqtt.auth.credentials.source.config.DatabaseCredentialsSourceFactories;
+import javasabr.mqtt.auth.credentials.source.config.DatabaseCredentialsSourceBuilders;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -51,7 +51,7 @@ public class DatabaseCredentialsSourceSpringConfig {
       DatabaseTimeouts databaseTimeoutsProperties,
       DatabaseConnectionProperties databaseConnectionProperties ,
       DatabaseCredentials readerDatabaseCredentials) {
-    return DatabaseCredentialsSourceFactories.databaseCredentialsSource()
+    return DatabaseCredentialsSourceBuilders.databaseCredentialsSource()
         .databasePoolProperties(databasePoolProperties)
         .databaseTimeoutsProperties(databaseTimeoutsProperties)
         .databaseConnectionProperties(databaseConnectionProperties)
@@ -63,7 +63,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   Flyway flyway(
       DatabaseConnectionProperties databaseCredentialsSourceProperties,
       DatabaseCredentials adminDatabaseCredentials) {
-    return DatabaseCredentialsSourceFactories.flyway()
+    return DatabaseCredentialsSourceBuilders.flyway()
         .databaseCredentialsSourceProperties(databaseCredentialsSourceProperties)
         .adminDatabaseCredentials(adminDatabaseCredentials)
         .build();

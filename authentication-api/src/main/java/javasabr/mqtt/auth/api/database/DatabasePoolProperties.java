@@ -5,16 +5,16 @@ import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
 
 public record DatabasePoolProperties(Duration maxIdleTime, int initialSize, int maxSize) {
   public DatabasePoolProperties(int maxIdleTimeSeconds, int initialSize, int maxSize) {
-    if (maxIdleTimeSeconds <= 0) {
-      throw new AuthenticationConfigException("Database pool max idle time '%s' is not valid".formatted(
-          maxIdleTimeSeconds));
-    }
-    if (initialSize <= 0) {
-      throw new AuthenticationConfigException("Database pool initial size '%s' is not valid".formatted(initialSize));
-    }
-    if (maxSize <= 0) {
-      throw new AuthenticationConfigException("Database pool max size '%s' is not valid".formatted(maxSize));
-    }
+    assertPositive(maxIdleTimeSeconds, "Database pool max idle time '%s' is not valid");
+    assertPositive(initialSize, "Database pool initial size '%s' is not valid");
+    assertPositive(maxSize, "Database pool max size '%s' is not valid");
+
     this(Duration.ofSeconds(maxIdleTimeSeconds), initialSize, maxSize);
+  }
+
+  public static void assertPositive(int value, String message) {
+    if (value <= 0) {
+      throw new AuthenticationConfigException(message.formatted(value));
+    }
   }
 }

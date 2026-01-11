@@ -22,7 +22,8 @@ import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import lombok.Builder;
 import org.flywaydb.core.Flyway;
 
-public class DatabaseCredentialsSourceFactories {
+@SuppressWarnings("unused")
+public class DatabaseCredentialsSourceBuilders {
 
   @Builder(builderMethodName = "flyway")
   private static Flyway createFlyway(

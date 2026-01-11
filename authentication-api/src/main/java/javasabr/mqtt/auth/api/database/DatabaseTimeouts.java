@@ -1,18 +1,13 @@
 package javasabr.mqtt.auth.api.database;
 
-import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
+import static javasabr.mqtt.auth.api.database.DatabasePoolProperties.assertPositive;
 
 public record DatabaseTimeouts(String lockTimeout, String statementTimeout) {
 
   public DatabaseTimeouts(int lockTimeoutSeconds, int statementTimeoutSeconds) {
-    if (lockTimeoutSeconds <= 0) {
-      throw new AuthenticationConfigException("Database lock timeout '%s' is not valid".formatted(
-          lockTimeoutSeconds));
-    }
-    if (statementTimeoutSeconds <= 0) {
-      throw new AuthenticationConfigException("Database statement timeout '%s' is not valid".formatted(
-          statementTimeoutSeconds));
-    }
+    assertPositive(lockTimeoutSeconds, "Database lock timeout '%s' is not valid");
+    assertPositive(statementTimeoutSeconds, "Database statement timeout '%s' is not valid");
+
     this("%ss".formatted(lockTimeoutSeconds), "%ss".formatted(statementTimeoutSeconds));
   }
 }
