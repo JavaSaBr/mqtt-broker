@@ -73,8 +73,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 
 @Import({
-    GroovyDslBasedAclServiceSpringConfig.class,
-    AuthenticationServiceSpringConfig.class
+    AuthenticationServiceSpringConfig.class,
+    GroovyDslBasedAclServiceSpringConfig.class
 })
 @CustomLog
 @Configuration(proxyBeanMethods = false)

@@ -1,4 +1,4 @@
-package javasabr.mqtt.auth.api.file;
+package javasabr.mqtt.auth.credentials.source;
 
 import java.io.IOException;
 import java.io.InputStream;
