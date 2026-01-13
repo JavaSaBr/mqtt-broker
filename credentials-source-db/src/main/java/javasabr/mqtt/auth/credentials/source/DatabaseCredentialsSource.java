@@ -89,13 +89,11 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   }
 
   private Mono<Boolean> executeCredentialsQuery(Connection connection, MqttCredentials credentials) {
-    Publisher<? extends Result> credentialsQuery = connection.createStatement(CREDENTIALS_QUERY)
+    Publisher<? extends Result> credentialsQueryPublisher = connection.createStatement(CREDENTIALS_QUERY)
         .bind("$1", credentials.username())
         .bind("$2", credentials.password())
         .execute();
-    return Mono.from(credentialsQuery)
-        .flatMap(DatabaseCredentialsSource::isCredentialsRecordFound)
-        .defaultIfEmpty(false);
+    return Mono.from(credentialsQueryPublisher).flatMap(DatabaseCredentialsSource::isCredentialsRecordFound);
   }
 
   private static Mono<Boolean> isCredentialsRecordFound(Result result) {

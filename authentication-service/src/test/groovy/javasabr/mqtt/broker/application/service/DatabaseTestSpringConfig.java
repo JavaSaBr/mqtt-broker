@@ -32,7 +32,7 @@ public class DatabaseTestSpringConfig {
   }
 
   @Bean
-  public DynamicPropertyRegistrar configurePostgresSQLProperties(PostgreSQLContainer container) {
+  public DynamicPropertyRegistrar configurePostgresSQLContainerPort(PostgreSQLContainer container) {
     return registry -> registry.add(
         "authentication.credentials-source.database.port",
         () -> container.getMappedPort(5432));

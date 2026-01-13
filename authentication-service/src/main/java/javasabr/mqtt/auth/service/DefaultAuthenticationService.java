@@ -51,7 +51,9 @@ public class DefaultAuthenticationService implements AuthenticationService {
     } else if (mqttCredentials.isMethodDefined()) {
       AuthenticationMethod authenticationMethod = mqttCredentials.authenticationMethod();
       AuthenticationProvider provider = availableProvidersMap.get(authenticationMethod);
-      return provider == null ? returnFalseAndLog(mqttCredentials) : authenticateSafe(provider, mqttCredentials);
+      return provider == null
+             ? onAuthenticationProviderNotFoundHandler(mqttCredentials)
+             : authenticateSafe(provider, mqttCredentials);
     } else {
       return Flux.fromIterable(availableProvidersArray)
           .filter(provider -> provider.supports(mqttCredentials))
@@ -60,7 +62,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
   }
 
-  private Mono<Boolean> returnFalseAndLog(MqttCredentials request) {
+  private Mono<Boolean> onAuthenticationProviderNotFoundHandler(MqttCredentials request) {
     log.debug(request.clientId(), request.authenticationMethod(),
         "%s Uses unsupported authentication method '%s'"::formatted);
     return Mono.just(false);

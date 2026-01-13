@@ -26,7 +26,7 @@ public class AuthenticationServiceSpringConfig {
   AuthenticationService authenticationService(
       List<AuthenticationProvider> availableProviders,
       @Value("${authentication.provider.anonymous.enabled}") boolean allowAnonymous) {
-    log.info("Initializing DefaultAuthenticationService...");
+    log.info("Initializing AuthenticationService...");
     return new DefaultAuthenticationService(availableProviders, allowAnonymous);
   }
 

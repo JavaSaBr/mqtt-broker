@@ -26,7 +26,7 @@ public class DatabaseCredentialsSourceSpringConfig {
       @Value("${authentication.credentials-source.database.pool.max-idle-time-seconds}") int maxIdleTimeSeconds,
       @Value("${authentication.credentials-source.database.pool.initial-size}") int initialSize,
       @Value("${authentication.credentials-source.database.pool.max-size}") int maxSize) {
-    log.info("Initializing DatabasePoolProperties...");
+    log.info("Initializing CredentialsSourceDatabasePoolProperties...");
     return new DatabasePoolProperties(maxIdleTimeSeconds, initialSize, maxSize);
   }
 
@@ -36,7 +36,7 @@ public class DatabaseCredentialsSourceSpringConfig {
       @Value("${authentication.credentials-source.database.host}") String host,
       @Value("${authentication.credentials-source.database.port}") int port,
       @Value("${authentication.credentials-source.database.name}") String name) {
-    log.info("Initializing DatabaseConnectionProperties...");
+    log.info("Initializing CredentialsSourceDatabaseConnectionProperties...");
     return new DatabaseConnectionProperties(driver, host, port, name);
   }
 
@@ -45,7 +45,7 @@ public class DatabaseCredentialsSourceSpringConfig {
       @Value("${authentication.credentials-source.database.timeout.lock-timeout-seconds}") int lockTimeoutSeconds,
       @Value("${authentication.credentials-source.database.timeout.statement-timeout-seconds}")
       int statementTimeoutSeconds) {
-    log.info("Initializing DatabaseTimeoutProperties...");
+    log.info("Initializing CredentialsSourceDatabaseTimeoutsProperties...");
     return new DatabaseTimeoutProperties(lockTimeoutSeconds, statementTimeoutSeconds);
   }
 
@@ -69,7 +69,7 @@ public class DatabaseCredentialsSourceSpringConfig {
   org.flywaydb.core.Flyway credentialsSourceFlyway(
       DatabaseConnectionProperties credentialsSourceDatabaseConnectionProperties,
       DatabaseCredentials adminDatabaseCredentials) {
-    log.info("Initializing Flyway...");
+    log.info("Initializing CredentialsSourceFlyway...");
     return FlywayBuilder.create()
         .databaseConnectionProperties(credentialsSourceDatabaseConnectionProperties)
         .adminDatabaseCredentials(adminDatabaseCredentials)
