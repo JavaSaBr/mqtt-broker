@@ -27,13 +27,13 @@ public class DatabaseCredentialsSourceBuilders {
 
   @Builder(builderMethodName = "flyway")
   private static Flyway createFlyway(
-      DatabaseConnectionProperties databaseCredentialsSourceProperties,
+      DatabaseConnectionProperties databaseConnectionProperties,
       DatabaseCredentials adminDatabaseCredentials) {
     String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
-        databaseCredentialsSourceProperties.driver().value(),
-        databaseCredentialsSourceProperties.host(),
-        databaseCredentialsSourceProperties.port(),
-        databaseCredentialsSourceProperties.dbName());
+        databaseConnectionProperties.driver().value(),
+        databaseConnectionProperties.host(),
+        databaseConnectionProperties.port(),
+        databaseConnectionProperties.dbName());
     return Flyway.configure()
         .dataSource(databaseUrl, adminDatabaseCredentials.username(), adminDatabaseCredentials.password())
         .load();

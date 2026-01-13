@@ -61,10 +61,10 @@ public class DatabaseCredentialsSourceSpringConfig {
 
   @Bean(initMethod = "migrate")
   Flyway credentialsSourceFlyway(
-      DatabaseConnectionProperties databaseCredentialsSourceProperties,
+      DatabaseConnectionProperties credentialsSourceDatabaseConnectionProperties,
       DatabaseCredentials adminDatabaseCredentials) {
     return DatabaseCredentialsSourceBuilders.flyway()
-        .databaseCredentialsSourceProperties(databaseCredentialsSourceProperties)
+        .databaseConnectionProperties(credentialsSourceDatabaseConnectionProperties)
         .adminDatabaseCredentials(adminDatabaseCredentials)
         .build();
   }

@@ -2,11 +2,12 @@ package javasabr.mqtt.auth.api;
 
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
+import org.jspecify.annotations.Nullable;
 
 public record MqttCredentials(
     String username,
     byte[] password,
-    AuthenticationMethod authenticationMethod,
+    @Nullable AuthenticationMethod authenticationMethod,
     byte[] authenticationData) {
 
   public boolean isAnonymous() {
