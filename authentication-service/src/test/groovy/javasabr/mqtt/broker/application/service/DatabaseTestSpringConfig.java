@@ -24,6 +24,7 @@ public class DatabaseTestSpringConfig {
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   public PostgreSQLContainer postgreSQLContainer() {
+    //noinspection resource
     return new PostgreSQLContainer("postgres:9.6.12")
         .withDatabaseName("testdb")
         .withUsername("user")

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Accessors
@@ -23,7 +24,7 @@ public enum DatabaseDriver {
 
   String value;
 
-  public static DatabaseDriver fromValue(String value) {
+  public static @Nullable DatabaseDriver fromValue(String value) {
     return StringUtils.isEmpty(value) ? null : CACHE.get(value);
   }
 }

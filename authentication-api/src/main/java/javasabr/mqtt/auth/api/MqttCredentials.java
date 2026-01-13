@@ -5,6 +5,7 @@ import javasabr.rlib.common.util.StringUtils;
 import org.jspecify.annotations.Nullable;
 
 public record MqttCredentials(
+    String clientId,
     String username,
     byte[] password,
     @Nullable AuthenticationMethod authenticationMethod,

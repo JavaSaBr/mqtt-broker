@@ -85,7 +85,9 @@ public class ConnectInMqttInMessageHandler
       MqttConnection connection,
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
+
     MqttCredentials mqttCredentials = new MqttCredentials(
+        message.clientId(),
         message.username(),
         message.password(),
         AuthenticationMethod.fromValue(message.authenticationMethod()),

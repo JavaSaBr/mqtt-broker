@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @Getter
 @Accessors
@@ -28,7 +29,7 @@ public enum AuthenticationMethod {
   String value;
   int priority;
 
-  public static AuthenticationMethod fromValue(String value) {
+  public static @Nullable AuthenticationMethod fromValue(String value) {
     return StringUtils.isEmpty(value) ? null : CACHE.get(value);
   }
 }

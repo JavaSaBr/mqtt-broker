@@ -14,8 +14,6 @@ dependencies {
   compileOnlyApi projects.credentialsSourceFile
   compileOnlyApi projects.authenticationProviderBasic
   implementation libs.springboot.starter.autoconfigure
-  implementation libs.springboot.starter.log4j2
-  implementation libs.rlib.logger.slf4j
 
   testImplementation projects.credentialsSourceDb
   testImplementation projects.credentialsSourceFile

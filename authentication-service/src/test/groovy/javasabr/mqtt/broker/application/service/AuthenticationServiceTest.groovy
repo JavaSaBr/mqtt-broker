@@ -29,8 +29,9 @@ class AuthenticationServiceTest extends IntegrationSpecification {
 
   def "should authenticate credentials according test database"() {
     given:
+        def clientId = "clientId"
         def passwordBytes = password.getBytes(StandardCharsets.UTF_8)
-        def request = new MqttCredentials(userName, passwordBytes, null, new byte[0])
+        def request = new MqttCredentials(clientId, userName, passwordBytes, null, new byte[0])
     when:
         def result = authenticationService.authenticate(request).block()
     then:

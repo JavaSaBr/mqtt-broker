@@ -16,7 +16,6 @@ import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -50,8 +49,9 @@ public class DefaultAuthenticationService implements AuthenticationService {
     if (mqttCredentials.isAnonymous()) {
       return Mono.just(allowAnonymous);
     } else if (mqttCredentials.isMethodDefined()) {
-      AuthenticationProvider provider = availableProvidersMap.get(mqttCredentials.authenticationMethod());
-      return provider == null ? Mono.just(false) : authenticateSafe(provider, mqttCredentials);
+      AuthenticationMethod authenticationMethod = mqttCredentials.authenticationMethod();
+      AuthenticationProvider provider = availableProvidersMap.get(authenticationMethod);
+      return provider == null ? returnFalseAndLog(mqttCredentials) : authenticateSafe(provider, mqttCredentials);
     } else {
       return Flux.fromIterable(availableProvidersArray)
           .filter(provider -> provider.supports(mqttCredentials))
@@ -60,23 +60,34 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
   }
 
-  private Mono<Boolean> authenticateSafe(AuthenticationProvider provider, MqttCredentials request) {
-    return provider.authenticate(request)
-        .onErrorResume(exception -> onAuthenticationProviderErrorHandler(provider, exception));
+  private Mono<Boolean> returnFalseAndLog(MqttCredentials request) {
+    log.debug(request.clientId(), request.authenticationMethod(),
+        "%s Uses unsupported authentication method '%s'"::formatted);
+    return Mono.just(false);
+  }
+
+  private Mono<Boolean> authenticateSafe(AuthenticationProvider provider, MqttCredentials mqttCredentials) {
+    return provider.authenticate(mqttCredentials)
+        .onErrorResume(exception -> onAuthenticationProviderErrorHandler(provider, mqttCredentials, exception));
   }
 
   private static AuthenticationProvider onDuplicateProviderErrorHandler(
       AuthenticationProvider first,
       AuthenticationProvider second) {
-    throw new AuthenticationConfigException("There are several [%s] authentication providers"
+    throw new AuthenticationConfigException("Duplicate authentication provider [%s] found"
         .formatted(first.getAuthenticationMethod()));
   }
 
   private static Mono<? extends Boolean> onAuthenticationProviderErrorHandler(
-      @Nullable AuthenticationProvider provider,
+      AuthenticationProvider provider,
+      MqttCredentials mqttCredentials,
       Throwable exception) {
-    String authenticationMethod = provider == null ? null : provider.getAuthenticationMethod().value();
-    log.error("%s authentication provider threw an error: %s".formatted(authenticationMethod, exception.getMessage()));
+    String clientId = mqttCredentials.clientId();
+    String authenticationMethod = provider.getAuthenticationMethod().value();
+    log.error("%s Authentication provider '%s' threw an error: %s".formatted(
+        clientId,
+        authenticationMethod,
+        exception.getMessage()));
     return Mono.just(false);
   }
 

@@ -8,7 +8,7 @@ import org.flywaydb.core.Flyway;
 public class FlywayBuilder {
 
   @SuppressWarnings("unused")
-  @Builder(builderMethodName = "create", builderClassName = "FlywaySupport")
+  @Builder(builderMethodName = "create", builderClassName = "InnerBuilder")
   private static Flyway createFlyway(
       DatabaseConnectionProperties databaseConnectionProperties,
       DatabaseCredentials adminDatabaseCredentials) {

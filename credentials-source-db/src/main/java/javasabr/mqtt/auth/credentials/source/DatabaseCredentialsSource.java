@@ -22,7 +22,7 @@ import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
-import javasabr.mqtt.auth.api.database.DatabaseTimeouts;
+import javasabr.mqtt.auth.api.database.DatabaseTimeoutProperties;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.experimental.FieldDefaults;
@@ -46,7 +46,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   @Builder
   public DatabaseCredentialsSource(
       DatabasePoolProperties databasePoolProperties,
-      DatabaseTimeouts databaseTimeoutsProperties,
+      DatabaseTimeoutProperties databaseTimeoutsProperties,
       DatabaseConnectionProperties databaseConnectionProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     Map<String, String> timeoutOptions = Map.of(
