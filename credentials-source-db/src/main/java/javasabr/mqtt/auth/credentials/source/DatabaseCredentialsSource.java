@@ -1,18 +1,34 @@
 package javasabr.mqtt.auth.credentials.source;
 
+import static io.r2dbc.postgresql.PostgresqlConnectionFactoryProvider.OPTIONS;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
+import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
+
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
 import io.r2dbc.spi.Result;
+import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.api.MqttCredentials;
+import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
+import javasabr.mqtt.auth.api.database.DatabaseCredentials;
+import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
+import javasabr.mqtt.auth.api.database.DatabaseTimeouts;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.Builder;
 import lombok.experimental.FieldDefaults;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DatabaseCredentialsSource implements CredentialsSource {
 
@@ -25,11 +41,33 @@ public class DatabaseCredentialsSource implements CredentialsSource {
        LIMIT 1
       """;
 
-  private static Mono<Boolean> isCredentialsRecordFound(Result result) {
-    return Mono.from(result.map((_, _) -> true)).defaultIfEmpty(false);
-  }
-
   ConnectionFactory connectionFactory;
+
+  @Builder
+  public DatabaseCredentialsSource(
+      DatabasePoolProperties databasePoolProperties,
+      DatabaseTimeouts databaseTimeoutsProperties,
+      DatabaseConnectionProperties databaseConnectionProperties,
+      DatabaseCredentials readerDatabaseCredentials) {
+    Map<String, String> timeoutOptions = Map.of(
+        "lock_timeout", databaseTimeoutsProperties.lockTimeout(),
+        "statement_timeout", databaseTimeoutsProperties.statementTimeout());
+    ConnectionFactoryOptions connectionFactoryOptions = ConnectionFactoryOptions.builder()
+        .option(DATABASE, databaseConnectionProperties.dbName())
+        .option(DRIVER, databaseConnectionProperties.driver().value())
+        .option(HOST, databaseConnectionProperties.host())
+        .option(PORT, databaseConnectionProperties.port())
+        .option(USER, readerDatabaseCredentials.username())
+        .option(PASSWORD, readerDatabaseCredentials.password())
+        .option(OPTIONS, timeoutOptions).build();
+    ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
+    ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
+        .maxIdleTime(databasePoolProperties.maxIdleTime())
+        .maxSize(databasePoolProperties.maxSize())
+        .initialSize(databasePoolProperties.initialSize())
+        .build();
+    this.connectionFactory = new ConnectionPool(configuration);
+  }
 
   @Override
   public CredentialsSourceType getType() {
@@ -58,5 +96,9 @@ public class DatabaseCredentialsSource implements CredentialsSource {
     return Mono.from(credentialsQuery)
         .flatMap(DatabaseCredentialsSource::isCredentialsRecordFound)
         .defaultIfEmpty(false);
+  }
+
+  private static Mono<Boolean> isCredentialsRecordFound(Result result) {
+    return Mono.from(result.map((_, _) -> true)).defaultIfEmpty(false);
   }
 }
