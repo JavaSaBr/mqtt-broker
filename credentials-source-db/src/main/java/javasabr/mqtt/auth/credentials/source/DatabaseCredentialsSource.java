@@ -3,7 +3,6 @@ package javasabr.mqtt.auth.credentials.source;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Result;
-import java.util.Objects;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.api.MqttCredentials;
@@ -19,14 +18,15 @@ public class DatabaseCredentialsSource implements CredentialsSource {
 
   @SuppressWarnings("SqlNoDataSourceInspection")
   private static final String CREDENTIALS_QUERY = """
-      SELECT COUNT(*) > 0
+      SELECT 1
         FROM user_credentials
        WHERE username = $1
-         AND password = $2;
+         AND password = $2
+       LIMIT 1
       """;
 
   private static Mono<Boolean> isCredentialsRecordFound(Result result) {
-    return Mono.from(result.map((row, _) -> Objects.equals(row.get(0, Boolean.class), Boolean.TRUE)));
+    return Mono.from(result.map((_, _) -> true)).defaultIfEmpty(false);
   }
 
   ConnectionFactory connectionFactory;
