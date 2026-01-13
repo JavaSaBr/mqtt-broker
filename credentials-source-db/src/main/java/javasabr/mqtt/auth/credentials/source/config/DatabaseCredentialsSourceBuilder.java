@@ -23,7 +23,7 @@ import lombok.Builder;
 import org.flywaydb.core.Flyway;
 
 @SuppressWarnings("unused")
-public class DatabaseCredentialsSourceBuilders {
+public class DatabaseCredentialsSourceBuilder {
 
   @Builder(builderMethodName = "flyway")
   private static Flyway createFlyway(
