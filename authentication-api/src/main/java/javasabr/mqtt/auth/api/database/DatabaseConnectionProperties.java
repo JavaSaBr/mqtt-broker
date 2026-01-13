@@ -1,5 +1,7 @@
 package javasabr.mqtt.auth.api.database;
 
+import javasabr.mqtt.base.util.PropertyAssert;
+
 public record DatabaseConnectionProperties(DatabaseDriver driver, String host, int port, String dbName) {
 
   public DatabaseConnectionProperties(String driver, String host, int port, String dbName) {

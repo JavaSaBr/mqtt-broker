@@ -1,6 +1,7 @@
 package javasabr.mqtt.auth.api.database;
 
 import java.time.Duration;
+import javasabr.mqtt.base.util.PropertyAssert;
 
 public record DatabasePoolProperties(Duration maxIdleTime, int initialSize, int maxSize) {
 

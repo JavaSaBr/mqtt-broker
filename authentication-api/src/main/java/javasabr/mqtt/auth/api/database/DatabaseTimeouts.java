@@ -1,5 +1,7 @@
 package javasabr.mqtt.auth.api.database;
 
+import javasabr.mqtt.base.util.PropertyAssert;
+
 public record DatabaseTimeouts(String lockTimeout, String statementTimeout) {
 
   public DatabaseTimeouts(int lockTimeoutSeconds, int statementTimeoutSeconds) {
