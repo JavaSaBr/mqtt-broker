@@ -23,8 +23,8 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DefaultAuthenticationService implements AuthenticationService {
 
-  Map<AuthenticationMethod, AuthenticationProvider> availableProvidersMap;
-  Array<AuthenticationProvider> availableProvidersArray;
+  Map<AuthenticationMethod, AuthenticationProvider> authMethodToProvider;
+  Array<AuthenticationProvider> providers;
   boolean allowAnonymous;
 
   public DefaultAuthenticationService(List<AuthenticationProvider> configuredProviders, boolean allowAnonymous) {
@@ -32,16 +32,16 @@ public class DefaultAuthenticationService implements AuthenticationService {
       throw new AuthenticationConfigException("Authenticator providers are not configured");
     }
     this.allowAnonymous = allowAnonymous;
-    this.availableProvidersMap = configuredProviders.stream()
+    this.authMethodToProvider = configuredProviders.stream()
         .collect(Collectors.toMap(
             AuthenticationProvider::getAuthenticationMethod,
             Function.identity(),
             DefaultAuthenticationService::onDuplicateProviderErrorHandler,
             () -> new EnumMap<>(AuthenticationMethod.class)));
-    this.availableProvidersArray = configuredProviders.stream()
+    this.providers = configuredProviders.stream()
         .sorted(Comparator.comparingInt(provider -> provider.getAuthenticationMethod().priority()))
         .collect(ArrayCollectors.toArray(AuthenticationProvider.class));
-    log.info(this.availableProvidersMap, DefaultAuthenticationService::buildServiceDescription);
+    log.info(this.authMethodToProvider, DefaultAuthenticationService::buildServiceDescription);
   }
 
   @Override
@@ -50,14 +50,14 @@ public class DefaultAuthenticationService implements AuthenticationService {
       return Mono.just(allowAnonymous);
     } else if (mqttCredentials.isMethodDefined()) {
       AuthenticationMethod authenticationMethod = mqttCredentials.authenticationMethod();
-      AuthenticationProvider provider = availableProvidersMap.get(authenticationMethod);
+      AuthenticationProvider provider = authMethodToProvider.get(authenticationMethod);
       return provider == null
              ? onAuthenticationProviderNotFoundHandler(mqttCredentials)
-             : authenticateSafe(provider, mqttCredentials);
+             : tryToAuthenticate(provider, mqttCredentials);
     } else {
-      return Flux.fromIterable(availableProvidersArray)
+      return Flux.fromIterable(providers)
           .filter(provider -> provider.supports(mqttCredentials))
-          .concatMap(provider -> authenticateSafe(provider, mqttCredentials))
+          .concatMap(provider -> tryToAuthenticate(provider, mqttCredentials))
           .any(Boolean::booleanValue);
     }
   }
@@ -68,7 +68,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     return Mono.just(false);
   }
 
-  private Mono<Boolean> authenticateSafe(AuthenticationProvider provider, MqttCredentials mqttCredentials) {
+  private Mono<Boolean> tryToAuthenticate(AuthenticationProvider provider, MqttCredentials mqttCredentials) {
     return provider.authenticate(mqttCredentials)
         .onErrorResume(exception -> onAuthenticationProviderErrorHandler(provider, mqttCredentials, exception));
   }

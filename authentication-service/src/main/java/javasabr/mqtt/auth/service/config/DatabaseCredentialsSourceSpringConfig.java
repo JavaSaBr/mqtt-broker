@@ -8,6 +8,7 @@ import javasabr.mqtt.auth.api.database.DatabaseTimeoutProperties;
 import javasabr.mqtt.auth.credentials.source.DatabaseCredentialsSource;
 import javasabr.mqtt.auth.credentials.source.FlywayBuilder;
 import lombok.CustomLog;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -52,21 +53,21 @@ public class DatabaseCredentialsSourceSpringConfig {
   @Bean
   @DependsOn("credentialsSourceFlyway")
   CredentialsSource databaseCredentialsSource(
-      DatabasePoolProperties databasePoolProperties,
-      DatabaseTimeoutProperties databaseTimeoutsProperties,
-      DatabaseConnectionProperties databaseConnectionProperties,
+      DatabasePoolProperties credentialsSourceDatabasePoolProperties,
+      DatabaseTimeoutProperties credentialsSourceDatabaseTimeoutsProperties,
+      DatabaseConnectionProperties credentialsSourceDatabaseConnectionProperties,
       DatabaseCredentials readerDatabaseCredentials) {
     log.info("Initializing DatabaseCredentialsSource...");
     return DatabaseCredentialsSource.builder()
-        .databasePoolProperties(databasePoolProperties)
-        .databaseTimeoutsProperties(databaseTimeoutsProperties)
-        .databaseConnectionProperties(databaseConnectionProperties)
+        .databasePoolProperties(credentialsSourceDatabasePoolProperties)
+        .databaseTimeoutsProperties(credentialsSourceDatabaseTimeoutsProperties)
+        .databaseConnectionProperties(credentialsSourceDatabaseConnectionProperties)
         .readerDatabaseCredentials(readerDatabaseCredentials)
         .build();
   }
 
   @Bean(initMethod = "migrate")
-  org.flywaydb.core.Flyway credentialsSourceFlyway(
+  Flyway credentialsSourceFlyway(
       DatabaseConnectionProperties credentialsSourceDatabaseConnectionProperties,
       DatabaseCredentials adminDatabaseCredentials) {
     log.info("Initializing CredentialsSourceFlyway...");

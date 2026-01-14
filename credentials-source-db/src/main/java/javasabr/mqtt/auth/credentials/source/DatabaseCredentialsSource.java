@@ -14,7 +14,6 @@ import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
-import io.r2dbc.spi.Result;
 import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
@@ -26,7 +25,6 @@ import javasabr.mqtt.auth.api.database.DatabaseTimeoutProperties;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.experimental.FieldDefaults;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -89,14 +87,13 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   }
 
   private Mono<Boolean> executeCredentialsQuery(Connection connection, MqttCredentials credentials) {
-    Publisher<? extends Result> credentialsQueryPublisher = connection.createStatement(CREDENTIALS_QUERY)
+    return Mono.from(connection
+        .createStatement(CREDENTIALS_QUERY)
         .bind("$1", credentials.username())
         .bind("$2", credentials.password())
-        .execute();
-    return Mono.from(credentialsQueryPublisher).flatMap(DatabaseCredentialsSource::isCredentialsRecordFound);
-  }
-
-  private static Mono<Boolean> isCredentialsRecordFound(Result result) {
-    return Mono.from(result.map((_, _) -> true)).defaultIfEmpty(false);
+        .execute())
+        .map(result -> result.map((_, _) -> true))
+        .flatMap(Mono::from)
+        .defaultIfEmpty(false);
   }
 }
