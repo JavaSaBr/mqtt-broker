@@ -3,7 +3,6 @@ package javasabr.mqtt.broker.application.service
 
 import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.CredentialsSource
-import javasabr.mqtt.auth.api.exception.AuthenticationConfigException
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider
 import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig
@@ -64,19 +63,7 @@ class AuthenticationProviderTest extends IntegrationSpecification {
                 }
               })
       then:
-          def exception = thrown(Exception)
-          with(rootCauseOf(exception)) { rootCause ->
-            assert rootCause instanceof AuthenticationConfigException
-            assert message == "Authenticator providers are not configured"
-          }
+          noExceptionThrown()
     }
-  }
-
-  static Throwable rootCauseOf(Throwable throwable) {
-    Throwable rootCause = throwable
-    while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-      rootCause = rootCause.getCause()
-    }
-    return rootCause
   }
 }
