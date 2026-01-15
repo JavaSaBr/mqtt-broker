@@ -23,7 +23,7 @@ public class FileCredentialsSourceSpringConfig {
     return new FileProperties(path);
   }
 
-  @Bean(initMethod = "init")
+  @Bean
   FileCredentialsSource fileCredentialsSource(FileProperties fileCredentialsSourceProperties) {
     log.info("Initializing FileCredentialsSource...");
     return new FileCredentialsSource(fileCredentialsSourceProperties.path());
