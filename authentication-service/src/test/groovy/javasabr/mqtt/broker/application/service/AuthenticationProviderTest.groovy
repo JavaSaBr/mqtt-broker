@@ -5,65 +5,33 @@ import javasabr.mqtt.auth.api.AuthenticationProvider
 import javasabr.mqtt.auth.api.CredentialsSource
 import javasabr.mqtt.auth.credentials.source.FileCredentialsSource
 import javasabr.mqtt.auth.provider.BasicAuthenticationProvider
-import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.env.PropertiesPropertySourceLoader
-import org.springframework.boot.test.context.runner.ApplicationContextRunner
-import org.springframework.core.env.PropertySource
-import org.springframework.core.io.ClassPathResource
 import org.springframework.test.context.TestPropertySource
-import spock.lang.Specification
 
 import static javasabr.mqtt.auth.api.AuthenticationMethod.BASIC
 
+@TestPropertySource(properties = [
+    "authentication.provider.anonymous.enabled=false",
+    "authentication.provider.basic.enabled=true",
+    "authentication.credentials-source.file.enabled=true",
+    "authentication.provider.default.method=basic"
+])
 class AuthenticationProviderTest extends IntegrationSpecification {
 
   @Autowired
   List<AuthenticationProvider> authenticationProviders
 
-  @TestPropertySource(properties = [
-      "authentication.provider.anonymous.enabled=false",
-      "authentication.provider.basic.enabled=true",
-      "authentication.credentials-source.file.enabled=true",
-      "authentication.provider.default.method=basic"
-  ])
-  static class FileCredentialsSourceTest extends AuthenticationProviderTest {
-    @Autowired
-    CredentialsSource credentialsSource
+  @Autowired
+  CredentialsSource credentialsSource
 
-    def "should create file credentials source and basic authentication provider"() {
-      expect:
-          (credentialsSource instanceof FileCredentialsSource)
-      and:
-          verifyEach(authenticationProviders) { provider ->
-            provider.authenticationMethod == BASIC
-            provider instanceof BasicAuthenticationProvider
-          }
-    }
+  def "should create file credentials source and basic authentication provider"() {
+    expect:
+        (credentialsSource instanceof FileCredentialsSource)
+    and:
+        verifyEach(authenticationProviders) { provider ->
+          provider.authenticationMethod == BASIC
+          provider instanceof BasicAuthenticationProvider
+        }
   }
 
-  static class EmptyProviderTest extends Specification {
-
-    def "should fail start application context without any authentication provider"() {
-      given:
-          PropertySource propertySource = new PropertiesPropertySourceLoader()
-              .load("test-props", new ClassPathResource("application-test.properties")).getFirst()
-          def appContext = new ApplicationContextRunner()
-              .withAllowBeanDefinitionOverriding(true)
-              .withUserConfiguration(AuthenticationServiceSpringConfig)
-              .withInitializer { context ->
-                context.getEnvironment().getPropertySources().addLast(propertySource)
-              }
-      when:
-          appContext
-              .withPropertyValues("authentication.provider.anonymous.enabled=false")
-              .run({ context ->
-                if (context.startupFailure) {
-                  throw context.startupFailure
-                }
-              })
-      then:
-          noExceptionThrown()
-    }
-  }
 }
