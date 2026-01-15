@@ -134,7 +134,7 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
         def storeResult = fromAsync(sessionService.store(testClientId, sessionToStore))
     then:
         storeResult
-        sessionService.storedSessions.containsKey(testClientId)
+        sessionService.storedNotExpirableSessions.containsKey(testClientId)
     cleanup:
         sessionService.close()
   }

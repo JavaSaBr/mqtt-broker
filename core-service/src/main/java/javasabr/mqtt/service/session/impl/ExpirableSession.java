@@ -1,0 +1,25 @@
+package javasabr.mqtt.service.session.impl;
+
+import java.time.Duration;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
+
+@Getter
+@Accessors
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+class ExpirableSession extends NotExpirableSession {
+  long expireAfter;
+
+  static ExpirableSession of(Duration expiryInterval, InMemoryNetworkMqttSession session) {
+    long currentTime = System.currentTimeMillis();
+    long expireAfter = currentTime + expiryInterval.toMillis();
+    return new ExpirableSession(currentTime, session, expireAfter);
+  }
+
+  private ExpirableSession(long storedAt, InMemoryNetworkMqttSession session, long expireAfter) {
+    super(storedAt, session);
+    this.expireAfter = expireAfter;
+  }
+}
