@@ -53,14 +53,12 @@ class ExpiredSessionCleaner {
     try {
       for (ExpirableSession expirableSession : expiredSessions) {
         InMemoryNetworkMqttSession session = expirableSession.session();
-        ExpirableSession currentlyStored = sessions.remove(session.clientId());
+        ExpirableSession currentlyStored = sessions.get(session.clientId());
         if (expirableSession == currentlyStored) {
           // nothing was changed during this iteration
           log.info(session.clientId(), "[%] Removed expired session"::formatted);
+          sessions.remove(session.clientId());
           session.clear();
-        } else if (currentlyStored != null) {
-          // return back the other instance of stored session for the same client id
-          sessions.put(session.clientId(), currentlyStored);
         }
       }
     } finally {

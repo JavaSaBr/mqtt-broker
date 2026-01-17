@@ -1,6 +1,6 @@
 [versions]
 # https://gitlab.com/JavaSaBr/maven-repo/-/packages
-rlib = "10.0.alpha9"
+rlib = "10.0.alpha10"
 # https://mvnrepository.com/artifact/org.projectlombok/lombok
 lombok = "1.18.38"
 # https://mvnrepository.com/artifact/org.jspecify/jspecify

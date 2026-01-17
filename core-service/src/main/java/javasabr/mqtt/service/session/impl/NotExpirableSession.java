@@ -1,5 +1,8 @@
 package javasabr.mqtt.service.session.impl;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
+import javasabr.mqtt.base.util.DebugUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Accessors
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class NotExpirableSession {
   long storedAt;
@@ -16,5 +19,15 @@ class NotExpirableSession {
 
   static NotExpirableSession of(InMemoryNetworkMqttSession session) {
     return new NotExpirableSession(System.currentTimeMillis(), session);
+  }
+
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
+  }
+
+  @JsonValue
+  public Map<?, ?> jsonDebugValue() {
+    return Map.of("storeAt", storedAt, "clientId", session.clientId());
   }
 }

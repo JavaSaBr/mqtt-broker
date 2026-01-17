@@ -4,9 +4,11 @@ import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import lombok.AccessLevel;
+import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+@CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class OldestSessionCleaner<T extends NotExpirableSession> {
@@ -36,7 +38,8 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
 
     long youngest = 0;
     int index = 0;
-    int cleanupSize = Math.min(Math.max(foundSessions - limit, cleanupBatchSize), foundSessions);
+    int extraSessions = foundSessions - limit;
+    int cleanupSize = Math.min(extraSessions + cleanupBatchSize, foundSessions);
 
     // initial fill the array for removing sessions
     for (; index < cleanupSize; index++) {
@@ -49,13 +52,13 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
     for (; index < foundSessions; index++) {
       T session = sessionsToCheck.get(index);
       long storedAt = session.storedAt();
-      if (storedAt < youngest) {
+      if (storedAt > youngest) {
         continue;
       }
       // replace one from the initial array to the older session
       long nextYoungest = 0;
-      for (int i = 0, size = sessionsToCheck.size(); i < size; i++) {
-        T sessionToCheck = sessionsToCheck.get(i);
+      for (int i = 0, size = sessionsToCleanup.size(); i < size; i++) {
+        T sessionToCheck = sessionsToCleanup.get(i);
         if (sessionToCheck.storedAt() == youngest) {
           nextYoungest = Math.max(storedAt, nextYoungest);
           sessionsToCleanup.replace(i, session);
