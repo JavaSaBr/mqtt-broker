@@ -9,7 +9,7 @@
 - **Primary Language**: Java 25 with Java Preview Features enabled
 - **Test Language**: Groovy (Spock Framework)
 - **Build Tool**: Gradle 9.1.0
-- **Framework**: Spring Boot 4.0.0-M1 (for application module)
+- **Framework**: Spring Boot 3.5.8 (4.0.0-M1 plugin for application module)
 - **Core Library**: RLib (javasabr.rlib) - custom collections and network libraries hosted on GitLab Maven repository
 
 ## Project Structure
