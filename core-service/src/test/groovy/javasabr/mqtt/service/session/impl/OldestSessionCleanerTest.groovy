@@ -37,4 +37,51 @@ class OldestSessionCleanerTest extends UnitSpecification {
     then:
         exists == 0
   }
+
+  def "should remove only 10 the oldest sessions"() {
+    given:
+        def allSessions = DictionaryFactory
+            .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)
+        def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
+        def random = ThreadLocalRandom.current()
+        def shouldBeRemoved = MutableArray.ofType(String)
+        50.times {
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def notExpirableSession = new NotExpirableSession(it + 1, session)
+          allSessions.put(session.clientId(), notExpirableSession)
+          if (it < 10) {
+            shouldBeRemoved.add(session.clientId())
+          }
+        }
+    when:
+        cleaner.cleanup()
+    then:
+        allSessions.size() == 40
+    when:
+        int exists = 0
+        for (def clientId in shouldBeRemoved) {
+          if (allSessions.containsKey(clientId)) {
+            exists++
+          }
+        }
+    then:
+        exists == 0
+  }
+
+  def "should not remove any sessions"() {
+    given:
+        def allSessions = DictionaryFactory
+            .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)
+        def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
+        def random = ThreadLocalRandom.current()
+        49.times {
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def notExpirableSession = new NotExpirableSession(it + 1, session)
+          allSessions.put(session.clientId(), notExpirableSession)
+        }
+    when:
+        cleaner.cleanup()
+    then:
+        allSessions.size() == 49
+  }
 }
