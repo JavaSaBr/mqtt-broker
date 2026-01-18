@@ -69,11 +69,14 @@ public class DatabaseCredentialsSourceSpringConfig {
   @Bean(initMethod = "migrate")
   Flyway credentialsSourceFlyway(
       DatabaseConnectionProperties credentialsSourceDatabaseConnectionProperties,
-      DatabaseCredentials adminDatabaseCredentials) {
+      DatabaseCredentials adminDatabaseCredentials,
+      @Value("${authentication.credentials-source.database.migration.location:classpath:db/migration}")
+      String databaseMigrationLocation) {
     log.info("Initializing CredentialsSourceFlyway...");
     return FlywayBuilder.create()
         .databaseConnectionProperties(credentialsSourceDatabaseConnectionProperties)
         .adminDatabaseCredentials(adminDatabaseCredentials)
+        .databaseMigrationLocations(new String[]{databaseMigrationLocation})
         .build();
   }
 }

@@ -39,7 +39,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
        LIMIT 1
       """;
 
-  ConnectionFactory connectionFactory;
+  ConnectionPool connectionPool;
 
   @Builder
   public DatabaseCredentialsSource(
@@ -65,7 +65,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
         .maxSize(databasePoolProperties.maxSize())
         .initialSize(databasePoolProperties.initialSize())
         .build();
-    this.connectionFactory = new ConnectionPool(configuration);
+    this.connectionPool = new ConnectionPool(configuration);
   }
 
   @Override
@@ -76,14 +76,14 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   @Override
   public Mono<Boolean> isCredentialsValid(MqttCredentials credentials) {
     return Mono.usingWhen(
-            connectionFactory.create(),
+            connectionPool.create(),
             connection -> verifyCredentials(connection, credentials),
             Connection::close);
   }
 
   @Override
   public String toString() {
-    String dbDriver = connectionFactory.getMetadata().getName();
+    String dbDriver = connectionPool.getMetadata().getName();
     return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getType(), dbDriver);
   }
 

@@ -1,5 +1,6 @@
 package javasabr.mqtt.auth.credentials.source;
 
+import java.util.List;
 import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import lombok.Builder;
@@ -11,7 +12,8 @@ public class FlywayBuilder {
   @Builder(builderMethodName = "create", builderClassName = "InnerBuilder")
   private static Flyway createFlyway(
       DatabaseConnectionProperties databaseConnectionProperties,
-      DatabaseCredentials adminDatabaseCredentials) {
+      DatabaseCredentials adminDatabaseCredentials,
+      String[] databaseMigrationLocations) {
     String databaseUrl = "jdbc:%s://%s:%s/%s".formatted(
         databaseConnectionProperties.driver().value(),
         databaseConnectionProperties.host(),
@@ -19,6 +21,7 @@ public class FlywayBuilder {
         databaseConnectionProperties.dbName());
     return Flyway.configure()
         .dataSource(databaseUrl, adminDatabaseCredentials.username(), adminDatabaseCredentials.password())
+        .locations(databaseMigrationLocations)
         .load();
   }
 }
