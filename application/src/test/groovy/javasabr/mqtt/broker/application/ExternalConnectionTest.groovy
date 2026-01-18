@@ -5,14 +5,8 @@ import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCo
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5ConnAckException
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import javasabr.mqtt.model.MqttProperties
-import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.reason.code.ConnectAckReasonCode
-import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage
-import javasabr.mqtt.network.message.out.ConnectMqtt311OutMessage
-import javasabr.rlib.common.util.ArrayUtils
 import spock.lang.Ignore
 
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletionException
 
 class ExternalConnectionTest extends IntegrationSpecification {
@@ -139,33 +133,7 @@ class ExternalConnectionTest extends IntegrationSpecification {
         cause.mqttMessage.returnCode == Mqtt3ConnAckReturnCode.BAD_USER_NAME_OR_PASSWORD
   }
 
-  @Ignore
-  def "client should not connect to broker without username and with pass using MQTT 3.1.1"() {
-    given:
-        def client = buildMqtt311MockClient()
-        def clientId = generateClientId()
-    when:
-
-        client.connect()
-        client.send(new ConnectMqtt311OutMessage(
-            "",
-            "",
-            clientId,
-            "wrongPassword".getBytes(StandardCharsets.UTF_8),
-            ArrayUtils.EMPTY_BYTE_ARRAY,
-            QoS.AT_MOST_ONCE,
-            keepAlive,
-            false,
-            false
-        ))
-
-        def connectAck = client.readNext() as ConnectAckMqttInMessage
-
-    then:
-        connectAck.reasonCode == ConnectAckReasonCode.BAD_USER_NAME_OR_PASSWORD
-  }
-
-  def "client should not connect to broker with wrong pass using MQTT 5"() {
+  def "client should not connect to broker with wrong pass using mqtt 5"() {
     given:
         def client = buildExternalMqtt5Client()
     when:

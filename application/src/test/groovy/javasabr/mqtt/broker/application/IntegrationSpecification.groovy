@@ -1,6 +1,5 @@
 package javasabr.mqtt.broker.application
 
-import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
@@ -17,7 +16,6 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 @TestPropertySource("classpath:application-test.properties")
@@ -30,8 +28,6 @@ class IntegrationSpecification extends BaseSpecification {
   public static final clientId = "testClientId"
   public static final keepAlive = 120
 
-  private static final idGenerator = new AtomicInteger(1)
-
   @Autowired
   InetSocketAddress externalNetworkAddress
 
@@ -39,65 +35,23 @@ class IntegrationSpecification extends BaseSpecification {
   MqttServerConnectionConfig externalConnectionConfig
 
   def buildExternalMqtt311Client() {
-    return buildMqtt311Client(generateClientId(), externalNetworkAddress)
+    return buildExternalMqtt311Client(generateClientId())
   }
 
   def buildExternalMqtt5Client() {
-    return buildMqtt5Client(generateClientId(), externalNetworkAddress)
+    return buildExternalMqtt5Client(generateClientId())
   }
 
   def buildExternalMqtt311Client(String clientId) {
-    return MqttClient.builder()
-        .identifier(clientId)
-        .serverHost(externalNetworkAddress.getHostName())
-        .serverPort(externalNetworkAddress.getPort())
-        .useMqttVersion3()
-        .build()
-        .toAsync()
-  }
-
-  def buildMqtt311Client(String clientId, InetSocketAddress address) {
-    return MqttClient.builder()
-        .identifier(clientId)
-        .serverHost(address.getHostName())
-        .serverPort(address.getPort())
-        .useMqttVersion3()
-        .addDisconnectedListener {
-          println "[${clientId}|mqtt311] disconnected:[${it.cause.message}]"
-        }
-        .build()
-        .toAsync()
+    return MqttClientFactory.buildMqtt311Client(clientId, externalNetworkAddress)
   }
 
   def buildExternalMqtt5Client(String clientId) {
-    return MqttClient.builder()
-        .identifier(clientId)
-        .serverHost(externalNetworkAddress.getHostName())
-        .serverPort(externalNetworkAddress.getPort())
-        .useMqttVersion5()
-        .build()
-        .toAsync()
-  }
-
-  def buildMqtt5Client(String clientId, InetSocketAddress address) {
-    return MqttClient.builder()
-        .identifier(clientId)
-        .serverHost(address.getHostName())
-        .serverPort(address.getPort())
-        .useMqttVersion5()
-        .addDisconnectedListener {
-          println "[${clientId}|mqtt5] disconnected:[${it.cause.message}]"
-        }
-        .build()
-        .toAsync()
+    return MqttClientFactory.buildMqtt5Client(clientId, externalNetworkAddress)
   }
 
   def generateClientId() {
-    return generateClientId("Default")
-  }
-
-  def generateClientId(String prefix) {
-    return prefix + "_" + idGenerator.incrementAndGet()
+    return MqttClientFactory.generateClientId("Default")
   }
 
   def connectWith(Mqtt3AsyncClient client, String user, String pass) {

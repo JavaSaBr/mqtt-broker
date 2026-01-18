@@ -6,6 +6,9 @@ import static javasabr.mqtt.model.reason.code.ConnectAckReasonCode.BAD_USER_NAME
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import javasabr.mqtt.auth.api.AuthenticationMethod;
+import javasabr.mqtt.auth.api.AuthenticationService;
+import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
@@ -20,13 +23,11 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
-import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.message.validator.ClientIdMqttInMessageFieldValidator;
 import javasabr.mqtt.service.session.MqttSessionService;
-import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -84,10 +85,15 @@ public class ConnectInMqttInMessageHandler
       MqttConnection connection,
       ExternalNetworkMqttUser user,
       ConnectMqttInMessage message) {
-    String username = Objects.requireNonNullElse(message.username(), StringUtils.EMPTY);
-    byte[] password = Objects.requireNonNullElse(message.password(), ArrayUtils.EMPTY_BYTE_ARRAY);
+
+    MqttCredentials mqttCredentials = new MqttCredentials(
+        message.clientId(),
+        message.username(),
+        message.password(),
+        AuthenticationMethod.fromValue(message.authenticationMethod()),
+        message.authenticationData());
     authenticationService
-        .auth(username, password)
+        .authenticate(mqttCredentials)
         .flatMap(ifTrue(
             user,
             message, this::registerClient, BAD_USER_NAME_OR_PASSWORD, connectAckReasonCode -> reject(user, connectAckReasonCode)))
@@ -232,9 +238,9 @@ public class ConnectInMqttInMessageHandler
             user,
             ConnectAckReasonCode.SUCCESS,
             sessionRestored,
-            requestedClientId, 
+            requestedClientId,
             requestedSessionExpiryInterval,
-            requestedKeepAlive, 
+            requestedKeepAlive,
             requestedReceiveMaxPublishes);
 
     subscriptionService.restoreSubscriptions(user, session);

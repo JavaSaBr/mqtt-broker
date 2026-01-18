@@ -1,5 +1,7 @@
 package javasabr.mqtt.service
 
+import javasabr.mqtt.auth.api.AuthenticationService
+import javasabr.mqtt.auth.api.MqttCredentials
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
@@ -54,7 +56,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
       36)
   
   @Shared
-  AuthenticationService defaultAuthenticationService = { String userName, byte[] password ->
+  AuthenticationService defaultAuthenticationService = { MqttCredentials _ ->
     return Mono.just(true)
   }
   

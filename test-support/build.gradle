@@ -10,6 +10,8 @@ dependencies {
   api libs.hivemq.mqtt.client
   api libs.moquette.broker
   api libs.spring.test
+  api libs.springboot.test
+  api libs.assertj.core
   api libs.spock.core
   api libs.spock.spring
   api libs.groovy.all

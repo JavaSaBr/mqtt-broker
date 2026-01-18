@@ -3,6 +3,8 @@ package javasabr.mqtt.broker.application.config;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
+import javasabr.mqtt.auth.api.AuthenticationService;
+import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
@@ -11,11 +13,9 @@ import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
-import javasabr.mqtt.service.AuthenticationService;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
-import javasabr.mqtt.service.CredentialSource;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
@@ -31,11 +31,9 @@ import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
-import javasabr.mqtt.service.impl.FileCredentialsSource;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
 import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
-import javasabr.mqtt.service.impl.SimpleAuthenticationService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
@@ -75,6 +73,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 
 @Import({
+    AuthenticationServiceSpringConfig.class,
     GroovyDslBasedAclServiceSpringConfig.class
 })
 @CustomLog
@@ -102,21 +101,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  CredentialSource credentialSource(
-      @Value("${credentials.source.file.name:credentials}") String fileName) {
-    return new FileCredentialsSource(fileName);
-  }
-
-  @Bean
-  AuthenticationService authenticationService(
-      CredentialSource credentialSource,
-      @Value("${authentication.allow.anonymous:false}") boolean allowAnonymousAuth) {
-    return new SimpleAuthenticationService(credentialSource, allowAnonymousAuth);
-  }
-  
-  @Bean
   @ConditionalOnProperty(
-      name = "acl.engine.type", 
+      name = "acl.engine.type",
       havingValue = "disabled", 
       matchIfMissing = true)
   AuthorizationService authorizationService() {
@@ -178,7 +164,7 @@ public class MqttBrokerSpringConfig {
   MqttInMessageHandler publishCompleteMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
     return new PublishCompleteMqttInMessageHandler(messageOutFactoryService);
   }
-  
+
   @Bean
   MqttInMessageHandler publishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,

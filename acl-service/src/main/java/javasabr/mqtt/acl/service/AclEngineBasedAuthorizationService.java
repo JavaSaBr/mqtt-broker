@@ -26,7 +26,7 @@ public abstract class AclEngineBasedAuthorizationService implements Authorizatio
   }
 
   // we know that writing this to not volatile field will not apply it for all threads immediately,
-  // but for us it's not critical comparing to cost of reading volatile field
+  // but for us, it's not critical comparing to cost of reading volatile field
   protected synchronized void switchTo(AclEngine newEngine) {
     this.engine = newEngine;
   }
