@@ -39,4 +39,22 @@ class ExpiredSessionCleanerTest extends UnitSpecification {
     then:
         exists == 0
   }
+
+  def "should not cleanup any expired sessions"() {
+    given:
+        def allSessions = DictionaryFactory
+            .stampedLockBasedRefToRefDictionary(String, ExpirableSession)
+        def cleaner = new ExpiredSessionCleaner(allSessions)
+        def random = ThreadLocalRandom.current()
+        def currentTime = System.currentTimeMillis()
+        60.times {
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def expirableSession = new ExpirableSession(it + 1, session, currentTime + 10_000)
+          allSessions.put(session.clientId(), expirableSession)
+        }
+    when:
+        cleaner.cleanup()
+    then:
+        allSessions.size() == 60
+  }
 }

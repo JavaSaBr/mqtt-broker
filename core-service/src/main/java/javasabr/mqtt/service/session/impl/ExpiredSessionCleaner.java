@@ -8,6 +8,22 @@ import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+/**
+ * Periodically cleans up expired MQTT sessions from the in-memory session store.
+ *
+ * <p>This class is responsible for identifying and removing sessions that have exceeded
+ * their expiration time. It uses a two-phase approach:
+ * <ol>
+ *   <li>Collects all sessions under a read lock to minimize contention</li>
+ *   <li>Removes expired sessions under a write lock, verifying they haven't been
+ *       replaced during the collection phase</li>
+ * </ol>
+ *
+ * <p>The cleanup process is thread-safe and synchronized to prevent concurrent
+ * cleanup operations from interfering with each other.
+ *
+ * @since 0.0.1
+ */
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
