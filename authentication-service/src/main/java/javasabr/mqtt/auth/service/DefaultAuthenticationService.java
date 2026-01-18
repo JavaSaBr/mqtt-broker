@@ -86,10 +86,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
       Throwable exception) {
     String clientId = mqttCredentials.clientId();
     String authenticationMethod = provider.getAuthenticationMethod().value();
-    log.error("%s Authentication provider '%s' threw an error: %s".formatted(
+    log.error(
         clientId,
         authenticationMethod,
-        exception.getMessage()));
+        exception.getMessage(),
+        "%s Authentication provider '%s' threw an error: %s"::formatted);
     return Mono.just(false);
   }
 
