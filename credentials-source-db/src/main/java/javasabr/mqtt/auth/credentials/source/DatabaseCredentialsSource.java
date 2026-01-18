@@ -57,7 +57,8 @@ public class DatabaseCredentialsSource implements CredentialsSource {
         .option(PORT, databaseConnectionProperties.port())
         .option(USER, readerDatabaseCredentials.username())
         .option(PASSWORD, readerDatabaseCredentials.password())
-        .option(OPTIONS, timeoutOptions).build();
+        .option(OPTIONS, timeoutOptions)
+        .build();
     ConnectionFactory connectionFactory = ConnectionFactories.get(connectionFactoryOptions);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
         .maxIdleTime(databasePoolProperties.maxIdleTime())
@@ -76,7 +77,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   public Mono<Boolean> isCredentialsValid(MqttCredentials credentials) {
     return Mono.usingWhen(
             connectionFactory.create(),
-            connection -> executeCredentialsQuery(connection, credentials),
+            connection -> verifyCredentials(connection, credentials),
             Connection::close);
   }
 
@@ -86,7 +87,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
     return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getType(), dbDriver);
   }
 
-  private Mono<Boolean> executeCredentialsQuery(Connection connection, MqttCredentials credentials) {
+  private Mono<Boolean> verifyCredentials(Connection connection, MqttCredentials credentials) {
     return Mono.from(connection
         .createStatement(CREDENTIALS_QUERY)
         .bind("$1", credentials.username())
