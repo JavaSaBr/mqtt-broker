@@ -8,9 +8,6 @@ import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@CustomLog
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 /**
  * Selects and removes the oldest stored sessions when the total number of sessions
  * exceeds a configured {@link #limit}.
@@ -44,6 +41,9 @@ import lombok.experimental.FieldDefaults;
  * @param <T> type of stored session, which must expose a stable {@link NotExpirableSession#storedAt()}
  *            timestamp and an underlying {@link InMemoryNetworkMqttSession} used for lookup/removal.
  */
+@CustomLog
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class OldestSessionCleaner<T extends NotExpirableSession> {
 
   MutableArray<T> sessionsToCheck = ArrayFactory.mutableArray(NotExpirableSession.class);
@@ -54,7 +54,7 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
   int cleanupBatchSize;
   
   public synchronized void cleanup() {
-    if (sessions.size() < limit) {
+    if (sessions.size() <= limit) {
       return;
     }
     long stamp = sessions.readLock();
@@ -90,11 +90,13 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
       }
       // replace one from the initial array to the older session
       long nextYoungest = 0;
+      boolean replaced = false;
       for (int i = 0, size = sessionsToCleanup.size(); i < size; i++) {
         T sessionToCheck = sessionsToCleanup.get(i);
-        if (sessionToCheck.storedAt() == youngest) {
+        if (sessionToCheck.storedAt() == youngest && !replaced) {
           nextYoungest = Math.max(storedAt, nextYoungest);
           sessionsToCleanup.replace(i, session);
+          replaced = true;
         } else {
           nextYoungest = Math.max(sessionToCheck.storedAt(), nextYoungest);
         }

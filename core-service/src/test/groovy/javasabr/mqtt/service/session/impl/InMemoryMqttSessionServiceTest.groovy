@@ -157,4 +157,18 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
     cleanup:
         sessionService.close()
   }
+
+  def "should store expirable session correctly"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_9"
+        def sessionToStore = fromAsync(sessionService.createClean(testClientId)) as ConfigurableNetworkMqttSession
+        sessionToStore.expiryInterval(Duration.ofSeconds(120))
+    when:
+        def storeResult = fromAsync(sessionService.store(testClientId, sessionToStore))
+    then:
+        storeResult
+        sessionService.storedExpirableSessions.containsKey(testClientId)
+    cleanup:
+        sessionService.close()
+  }
 }

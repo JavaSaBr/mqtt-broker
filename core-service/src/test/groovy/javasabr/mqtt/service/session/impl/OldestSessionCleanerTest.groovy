@@ -38,14 +38,14 @@ class OldestSessionCleanerTest extends UnitSpecification {
         exists == 0
   }
 
-  def "should remove only 10 the oldest sessions"() {
+  def "should remove only 11 the oldest sessions"() {
     given:
         def allSessions = DictionaryFactory
             .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)
         def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
         def random = ThreadLocalRandom.current()
         def shouldBeRemoved = MutableArray.ofType(String)
-        50.times {
+        51.times {
           def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
           def notExpirableSession = new NotExpirableSession(it + 1, session)
           allSessions.put(session.clientId(), notExpirableSession)
@@ -74,7 +74,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
             .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)
         def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
         def random = ThreadLocalRandom.current()
-        49.times {
+        50.times {
           def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
           def notExpirableSession = new NotExpirableSession(it + 1, session)
           allSessions.put(session.clientId(), notExpirableSession)
@@ -82,6 +82,23 @@ class OldestSessionCleanerTest extends UnitSpecification {
     when:
         cleaner.cleanup()
     then:
-        allSessions.size() == 49
+        allSessions.size() == 50
+  }
+
+  def "should remove only 11 the oldest sessions even when all have the same storedAt"() {
+    given:
+        def allSessions = DictionaryFactory
+            .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)
+        def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
+        def random = ThreadLocalRandom.current()
+        51.times {
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def notExpirableSession = new NotExpirableSession(5, session)
+          allSessions.put(session.clientId(), notExpirableSession)
+        }
+    when:
+        cleaner.cleanup()
+    then:
+        allSessions.size() == 40
   }
 }
