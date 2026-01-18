@@ -11,6 +11,39 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+/**
+ * Selects and removes the oldest stored sessions when the total number of sessions
+ * exceeds a configured {@link #limit}.
+ * <p>
+ * The cleaner works in two phases:
+ * <ol>
+ *   <li>It takes a snapshot of all current sessions under a read lock and populates
+ *   {@link #sessionsToCheck}.</li>
+ *   <li>It then selects up to {@code extraSessions + cleanupBatchSize} candidates to
+ *   remove, where {@code extraSessions = currentSessions - limit}. The initial
+ *   candidate set is filled from the first {@code cleanupSize} sessions and tracks
+ *   the "youngest" {@code storedAt} timestamp among them. While scanning the
+ *   remaining sessions, any session older than or equal to the current youngest
+ *   candidate replaces a younger candidate, and the youngest boundary is updated.
+ *   This yields a small set containing the oldest sessions without fully sorting
+ *   the entire collection.</li>
+ * </ol>
+ * After the candidate set is built, the cleaner acquires a write lock and removes
+ * only those candidates that are still present and unchanged in {@link #sessions}.
+ * <p>
+ * Parameters:
+ * <ul>
+ *   <li>{@link #limit} – maximum allowed number of stored sessions. If the current
+ *   number of sessions is below this value, {@link #cleanup()} is a no-op.</li>
+ *   <li>{@link #cleanupBatchSize} – number of additional sessions (beyond the
+ *   minimum required {@code extraSessions}) considered during each cleanup run.
+ *   A larger batch size means more candidates are examined per run, which can
+ *   reduce how often cleanup is needed at the cost of slightly more work per call.</li>
+ * </ul>
+ *
+ * @param <T> type of stored session, which must expose a stable {@link NotExpirableSession#storedAt()}
+ *            timestamp and an underlying {@link InMemoryNetworkMqttSession} used for lookup/removal.
+ */
 class OldestSessionCleaner<T extends NotExpirableSession> {
 
   MutableArray<T> sessionsToCheck = ArrayFactory.mutableArray(NotExpirableSession.class);
@@ -41,7 +74,7 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
     int extraSessions = foundSessions - limit;
     int cleanupSize = Math.min(extraSessions + cleanupBatchSize, foundSessions);
 
-    // initial fill the array for removing sessions
+    // Initially fill the array for removing sessions
     for (; index < cleanupSize; index++) {
       T session = sessionsToCheck.get(index);
       sessionsToCleanup.add(session);
@@ -77,6 +110,7 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
         T current = sessions.get(session.clientId());
         if (current == expectedStoredSession) {
           sessions.remove(session.clientId());
+          session.clear();
         }
       }
     } finally {

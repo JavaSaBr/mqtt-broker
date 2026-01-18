@@ -28,6 +28,6 @@ class NotExpirableSession {
 
   @JsonValue
   public Map<?, ?> jsonDebugValue() {
-    return Map.of("storeAt", storedAt, "clientId", session.clientId());
+    return Map.of("storedAt", storedAt, "clientId", session.clientId());
   }
 }

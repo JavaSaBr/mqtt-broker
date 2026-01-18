@@ -56,7 +56,7 @@ class ExpiredSessionCleaner {
         ExpirableSession currentlyStored = sessions.get(session.clientId());
         if (expirableSession == currentlyStored) {
           // nothing was changed during this iteration
-          log.info(session.clientId(), "[%] Removed expired session"::formatted);
+          log.info(session.clientId(), "[%s] Removed expired session"::formatted);
           sessions.remove(session.clientId());
           session.clear();
         }
