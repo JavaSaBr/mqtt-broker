@@ -1,30 +1,28 @@
 package javasabr.mqtt.auth.api.database;
 
-import java.util.Arrays;
-import java.util.function.Function;
-import javasabr.rlib.collections.dictionary.DictionaryCollectors;
-import javasabr.rlib.collections.dictionary.RefToRefDictionary;
-import javasabr.rlib.common.util.StringUtils;
+import java.util.Collection;
+import java.util.Set;
+import javasabr.rlib.common.AliasedEnum;
+import javasabr.rlib.common.util.AliasedEnumMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.Nullable;
 
 @Getter
 @Accessors
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum DatabaseDriver {
+public enum DatabaseDriver implements AliasedEnum<DatabaseDriver> {
   POSTGRESQL("postgresql");
 
-  private static final RefToRefDictionary<String, DatabaseDriver> CACHE = Arrays.stream(values())
-      .collect(DictionaryCollectors.toRefToRefDictionary(DatabaseDriver::value, Function.identity()));
+  public static final AliasedEnumMap<DatabaseDriver> BY_ALIAS = new AliasedEnumMap<>(DatabaseDriver.class);
 
   String value;
 
-  public static @Nullable DatabaseDriver fromValue(String value) {
-    return StringUtils.isEmpty(value) ? null : CACHE.get(value);
+  @Override
+  public Collection<String> aliases() {
+    return Set.of(value);
   }
 }

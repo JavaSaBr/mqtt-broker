@@ -9,7 +9,7 @@ public record DatabaseConnectionProperties(DatabaseDriver driver, String host, i
     PropertyAssert.positive(port, "Database port");
     PropertyAssert.notEmpty(dbName, "Database name");
     PropertyAssert.notEmpty(driver, "Database driver");
-    DatabaseDriver databaseDriver = DatabaseDriver.fromValue(driver);
+    DatabaseDriver databaseDriver = DatabaseDriver.BY_ALIAS.resolve(driver);
     PropertyAssert.notNull(databaseDriver, "Database driver '%s' is not supported", driver);
 
     this(databaseDriver, host, port, dbName);

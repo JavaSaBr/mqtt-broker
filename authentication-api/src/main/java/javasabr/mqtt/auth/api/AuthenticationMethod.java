@@ -1,9 +1,9 @@
 package javasabr.mqtt.auth.api;
 
-import java.util.Arrays;
-import java.util.function.Function;
-import javasabr.rlib.collections.dictionary.DictionaryCollectors;
-import javasabr.rlib.collections.dictionary.RefToRefDictionary;
+import java.util.Collection;
+import java.util.List;
+import javasabr.rlib.common.AliasedEnum;
+import javasabr.rlib.common.util.AliasedEnumMap;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,20 +16,25 @@ import org.jspecify.annotations.Nullable;
 @Accessors
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum AuthenticationMethod {
+public enum AuthenticationMethod implements AliasedEnum<AuthenticationMethod> {
   X509("x509", 1),
   JWT("jwt", 3),
   OAUTH2("oauth2", 4),
   BASIC("basic", 5),
   LDAP("ldap", 6);
 
-  private static final RefToRefDictionary<String, AuthenticationMethod> CACHE = Arrays.stream(values())
-      .collect(DictionaryCollectors.toRefToRefDictionary(AuthenticationMethod::value, Function.identity()));
+  public static final AliasedEnumMap<AuthenticationMethod> MAP = new AliasedEnumMap<>(AuthenticationMethod.class);
 
   String value;
   int priority;
 
-  public static @Nullable AuthenticationMethod fromValue(String value) {
-    return StringUtils.isEmpty(value) ? null : CACHE.get(value);
+  @Nullable
+  public static AuthenticationMethod fromValue(@Nullable String value) {
+    return StringUtils.isEmpty(value) ? null : MAP.resolve(value);
+  }
+
+  @Override
+  public Collection<String> aliases() {
+    return List.of(value);
   }
 }

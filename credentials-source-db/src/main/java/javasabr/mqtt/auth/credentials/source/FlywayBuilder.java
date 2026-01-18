@@ -1,6 +1,5 @@
 package javasabr.mqtt.auth.credentials.source;
 
-import java.util.List;
 import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import lombok.Builder;
