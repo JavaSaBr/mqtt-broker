@@ -6,13 +6,23 @@ lombok = "1.18.38"
 # https://mvnrepository.com/artifact/org.jspecify/jspecify
 jspecify = "1.0.0"
 # https://mvnrepository.com/artifact/org.testcontainers/testcontainers
-testcontainers = "1.21.3"
+testcontainers = "2.0.3"
 # https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
 junit-jupiter = "5.13.4"
 # https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
 junit-platform-launcher = "1.13.4"
 # https://mvnrepository.com/artifact/io.projectreactor/reactor-core
 project-reactor = "3.7.8"
+# https://mvnrepository.com/artifact/io.r2dbc/r2dbc-spi
+r2dbc = "1.0.0.RELEASE"
+# https://mvnrepository.com/artifact/io.r2dbc/r2dbc-pool
+r2dbc-pool="1.0.2.RELEASE"
+# https://mvnrepository.com/artifact/org.postgresql/r2dbc-postgresql
+r2dbc-postgresql="1.1.1.RELEASE"
+# https://mvnrepository.com/artifact/org.postgresql/postgresql
+jdbc-postgres="42.7.8"
+# https://mvnrepository.com/artifact/org.flywaydb/flyway-core
+flyway="11.19.0"
 # https://mvnrepository.com/artifact/org.spockframework/spock-core
 spock = "2.4-M6-groovy-4.0"
 # https://mvnrepository.com/artifact/org.apache.groovy/groovy-all
@@ -21,6 +31,8 @@ groovy = "4.0.28"
 springboot = '3.5.8'
 # https://mvnrepository.com/artifact/org.springframework/spring-core
 spring = '6.2.15'
+# https://mvnrepository.com/artifact/org.assertj/assertj-core
+assertj = '3.24.2'
 # https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
 byte-buddy = "1.17.6"
 # https://mvnrepository.com/artifact/org.objenesis/objenesis
@@ -44,13 +56,25 @@ spring-context = { module = "org.springframework:spring-context", version.ref = 
 springboot-starter-core = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springboot" }
 springboot-starter-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springboot" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2", version.ref = "springboot" }
+springboot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "springboot" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers"}
+testcontainers-spock = { module = "org.testcontainers:testcontainers-spock", version.ref = "testcontainers"}
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers"}
 project-reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "project-reactor" }
+r2dbc-spi = { module ='io.r2dbc:r2dbc-spi', version.ref = "r2dbc"}
+r2dbc-pool = { module = 'io.r2dbc:r2dbc-pool', version.ref = "r2dbc-pool"}
+r2dbc-postgresql = { module = 'org.postgresql:r2dbc-postgresql', version.ref = "r2dbc-postgresql"}
+jdbc-postgres = { module = 'org.postgresql:postgresql', version.ref = "jdbc-postgres"}
+flyway-core = { module = 'org.flywaydb:flyway-core', version.ref = "flyway"}
+flyway-postgresql = { module = 'org.flywaydb:flyway-database-postgresql', version.ref = "flyway"}
 jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 
+spring-r2dbc = { module = "org.springframework:spring-r2dbc", version.ref = "spring" }
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
 spock-spring = { module = "org.spockframework:spock-spring", version.ref = "spock" }

@@ -30,9 +30,11 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.withType(JavaCompile).configureEach {
-  options.compilerArgs += "--enable-preview"
+  options.compilerArgs.addAll([
+      '--enable-preview',
+      '-parameters'
+  ])
 }
-
 
 processResources {
   filter(ReplaceTokens, tokens: [])

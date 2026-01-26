@@ -13,6 +13,8 @@ import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCo
 
 import java.util.concurrent.CompletableFuture
 
+import static javasabr.mqtt.broker.application.MqttClientFactory.generateClientId
+
 class ConnectSubscribePublishTest extends IntegrationSpecification {
 
   def "should deliver publish message QoS 0 using mqtt 3.1.1"() {

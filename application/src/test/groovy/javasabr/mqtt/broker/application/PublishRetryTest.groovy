@@ -24,6 +24,8 @@ import javasabr.mqtt.service.session.MqttSessionService
 import javasabr.rlib.collections.array.Array
 import org.springframework.beans.factory.annotation.Autowired
 
+import static javasabr.mqtt.broker.application.MqttClientFactory.generateClientId
+
 class PublishRetryTest extends IntegrationSpecification {
 
   private static final int testSessionExpiryIntervalInSecs = 120

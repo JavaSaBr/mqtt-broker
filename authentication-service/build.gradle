@@ -1,0 +1,26 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+  id("groovy")
+}
+
+description = "Authentication service interface"
+
+dependencies {
+  api projects.base
+  api projects.model
+  api projects.authenticationApi
+  compileOnlyApi projects.credentialsSourceDb
+  compileOnlyApi projects.credentialsSourceFile
+  compileOnlyApi projects.authenticationProviderBasic
+  implementation libs.springboot.starter.autoconfigure
+
+  testImplementation projects.credentialsSourceDb
+  testImplementation projects.credentialsSourceFile
+  testImplementation projects.authenticationProviderBasic
+  testImplementation libs.testcontainers.core
+  testImplementation libs.testcontainers.postgresql
+  testImplementation libs.testcontainers.spock
+  testImplementation projects.testSupport
+  testFixturesApi projects.testSupport
+}

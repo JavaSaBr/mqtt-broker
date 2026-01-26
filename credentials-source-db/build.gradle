@@ -1,0 +1,21 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+  id("groovy")
+}
+
+description = "Database-based Credentials Source Provider"
+
+dependencies {
+  api projects.base
+  api projects.authenticationApi
+  implementation libs.r2dbc.spi
+  implementation libs.r2dbc.pool
+  implementation libs.r2dbc.postgresql
+  implementation libs.jdbc.postgres
+  api libs.flyway.core
+  implementation libs.flyway.postgresql
+
+  testImplementation projects.testSupport
+  testFixturesApi projects.testSupport
+}

@@ -1,3 +1,4 @@
+//file:noinspection SpringJavaInjectionPointsAutowiringInspection
 package javasabr.mqtt.broker.application.config
 
 import javasabr.mqtt.network.MqttConnection
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.Import
 import java.util.concurrent.ThreadLocalRandom
 
 @Import([
-    MqttBrokerSpringConfig,
+    MqttBrokerSpringConfig
 ])
 @Configuration(proxyBeanMethods = false)
 class MqttBrokerTestConfig {
@@ -25,7 +26,7 @@ class MqttBrokerTestConfig {
       try {
         externalNetwork.start(address)
         return address;
-      } catch (RuntimeException e) {
+      } catch (RuntimeException ignored) {
       }
     }
     throw new RuntimeException()
@@ -41,6 +42,6 @@ class MqttBrokerTestConfig {
                             ConnectionService connectionService,
                             InetSocketAddress externalNetworkAddress) {
     externalNetwork.onAccept(connectionService::processAcceptedConnection);
-    return null;
+    return null
   }
 }
