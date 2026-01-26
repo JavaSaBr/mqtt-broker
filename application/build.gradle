@@ -30,6 +30,7 @@ configurations.each {
 
 bootRun {
   mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
+  jvmArgs += "--enable-preview"
 }
 
 bootJar {
