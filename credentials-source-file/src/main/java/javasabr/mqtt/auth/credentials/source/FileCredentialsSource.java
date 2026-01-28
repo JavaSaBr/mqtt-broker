@@ -1,11 +1,14 @@
 package javasabr.mqtt.auth.credentials.source;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.api.exception.CredentialsSourceException;
+import javasabr.mqtt.base.util.DebugUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
@@ -36,11 +39,16 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   public CredentialsSourceType getType() {
     return CredentialsSourceType.FILE;
   }
-
+  
   @Override
   public String toString() {
-    return "{ \"credentialsSource\": \"%s\", \"filePath\": \"%s\" }".formatted(
-        getType(),
-        fileName.getPath());
+    return DebugUtils.toJsonString(this);
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    return Map.of(
+        "type", getType(),
+        "filePath", fileName);
   }
 }

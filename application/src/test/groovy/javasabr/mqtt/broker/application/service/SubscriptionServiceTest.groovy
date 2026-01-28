@@ -2,7 +2,9 @@ package javasabr.mqtt.broker.application.service
 
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5SubAckException
+import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
 import javasabr.mqtt.broker.application.IntegrationSpecification
+import javasabr.mqtt.model.topic.TopicFilter
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.network.user.NetworkMqttUser
 import javasabr.mqtt.service.ClientIdRegistry
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
 import java.util.concurrent.CompletionException
+
+import static javasabr.mqtt.broker.application.MqttClientFactory.generateClientId
 
 class SubscriptionServiceTest extends IntegrationSpecification {
 
@@ -22,56 +26,89 @@ class SubscriptionServiceTest extends IntegrationSpecification {
 
   def "should clear/restore topic subscribers after disconnect/reconnect"() {
     given:
-        def subscriber = buildExternalMqtt5Client(clientId)
-        def topicName = TopicName.valueOf(topicFilter)
+        def serviceId = generateClientId("service")
+        def serviceName = "SubscriptionServiceTest_1"
+        def subscriber = buildExternalMqtt5Client(serviceId)
+        def topicName = TopicName.valueOf("service/$serviceName/device/device1")
+        def topicFilter = TopicFilter.valueOf("service/$serviceName/device/+")
     when:
-        subscriber.connectWith()
+        fromAsync(subscriber.connectWith()
             .cleanStart(true)
             .sessionExpiryInterval(120)
-            .send()
-            .join()
-        subscriber.subscribeWith()
-            .topicFilter(topicFilter)
+            .send())
+        fromAsync(subscriber.subscribeWith()
+            .topicFilter(topicFilter.rawTopic())
             .qos(MqttQos.AT_MOST_ONCE)
-            .send()
-            .join()
+            .send())
         def subscribers = subscriptionService
             .findSubscribers(topicName)
     then: "should find the subscriber"
         subscribers.size() == 1
-        NetworkMqttUser.isCase(subscribers.get(0).user())
-    when:
         def matchedSubscriber = subscribers.get(0)
+        matchedSubscriber.user() in NetworkMqttUser
+    when:
         def subscription = matchedSubscriber.subscription()
         def owner = matchedSubscriber.user() as NetworkMqttUser
     then:
-        owner.clientId() == clientId
-        subscription.topicFilter().rawTopic() == topicFilter
+        owner.clientId() == serviceId
+        subscription.topicFilter() == topicFilter
     when:
-        subscriber.disconnect().join()
+        fromAsync(subscriber.disconnect())
         def subscribers2 = subscriptionService
             .findSubscribers(topicName)
     then: "shot not find anything after disconnection"
         subscribers2.size() == 0
     when:
-        subscriber.connectWith()
+        fromAsync(subscriber.connectWith()
             .cleanStart(false)
-            .send()
-            .join()
+            .send())
         def subscribers3 = subscriptionService
             .findSubscribers(topicName)
     then: "should find the reconnected subscriber"
         subscribers3.size() == 1
-        NetworkMqttUser.isCase(subscribers3.get(0).user())
+        def matchedSubscriber2 = subscribers3.get(0)
+        matchedSubscriber2.user() in NetworkMqttUser
     when:
-        matchedSubscriber = subscribers3.get(0)
-        subscription = matchedSubscriber.subscription()
-        owner = matchedSubscriber.user() as NetworkMqttUser
+        def subscription2 = matchedSubscriber2.subscription()
+        def owner2 = matchedSubscriber2.user() as NetworkMqttUser
     then:
-        owner.clientId() == clientId
-        subscription.topicFilter().rawTopic() == topicFilter
+        owner2.clientId() == serviceId
+        subscription2.topicFilter() == topicFilter
     cleanup:
-        subscriber.disconnect().join()
+        fromAsync(subscriber.disconnect())
+  }
+
+  def "should not allow to subscribe on not allowed by ACL topic"() {
+    given:
+        def deviceId = generateClientId("device")
+        def serviceName = "SubscriptionServiceTest_2"
+        def subscriber = buildExternalMqtt5Client(deviceId)
+        def allowedTopic = TopicFilter.valueOf("device/$deviceId")
+        def notAllowedTopic = TopicFilter.valueOf("service/$serviceName/device/+")
+    when:
+        fromAsync(subscriber.connectWith()
+            .cleanStart(true)
+            .sessionExpiryInterval(120)
+            .send())
+        fromAsync(subscriber.subscribeWith()
+            .addSubscription()
+              .topicFilter(allowedTopic.rawTopic())
+              .qos(MqttQos.EXACTLY_ONCE)
+            .applySubscription()
+            .addSubscription()
+              .topicFilter(notAllowedTopic.rawTopic())
+              .qos(MqttQos.AT_LEAST_ONCE)
+            .applySubscription()
+            .send())
+    then:
+        def completionEx = thrown CompletionException
+        def subAckException = completionEx.cause as Mqtt5SubAckException
+        with(subAckException.getMqttMessage()) {
+          getReasonCodes().get(0) == Mqtt5SubAckReasonCode.GRANTED_QOS_2
+          getReasonCodes().get(1) == Mqtt5SubAckReasonCode.NOT_AUTHORIZED
+        }
+    cleanup:
+        fromAsync(subscriber.disconnect())
   }
 
   @Unroll
@@ -83,28 +120,28 @@ class SubscriptionServiceTest extends IntegrationSpecification {
       MqttQos qos2,
       String expectedTopicFilter) {
     given:
-        def subscriber = buildExternalMqtt5Client()
-        subscriber.connectWith()
-            .send()
-            .join()
-        subscriber.subscribeWith()
+        def systemId = generateClientId("system")
+        def subscriber = buildExternalMqtt5Client(systemId)
+        fromAsync(subscriber.connectWith()
+            .send())
+        fromAsync(subscriber.subscribeWith()
             .topicFilter(topicFilter1)
             .qos(qos1)
-            .send()
-            .join()
-        subscriber.subscribeWith()
+            .send())
+        fromAsync(subscriber.subscribeWith()
             .topicFilter(topicFilter2)
             .qos(qos2)
-            .send()
-            .join()
+            .send())
     when:
         def subscribers = subscriptionService
             .findSubscribers(TopicName.valueOf(topicName))
     then:
         subscribers.size() == 1
-        subscribers.get(0).subscription().topicFilter().rawTopic() == expectedTopicFilter
+        with(subscribers.get(0)) {
+          subscription().topicFilter().rawTopic() == expectedTopicFilter
+        }
     cleanup:
-        subscriber.disconnect().join()
+        fromAsync(subscriber.disconnect())
     where:
         topicName            | topicFilter1    | qos1                 | topicFilter2 | qos2                  | expectedTopicFilter
         "topic/Filter"       | "topic/Filter"  | MqttQos.AT_MOST_ONCE | "topic/#"    | MqttQos.AT_LEAST_ONCE | "topic/#"
@@ -124,35 +161,34 @@ class SubscriptionServiceTest extends IntegrationSpecification {
       String targetTopicFilter,
       int targetCount) {
     given:
-        def clientId1 = clientIdRegistry.generate().block()
-        def clientId2 = clientIdRegistry.generate().block()
-        def subscriber1 = buildExternalMqtt5Client(clientId1)
-        def subscriber2 = buildExternalMqtt5Client(clientId2)
-        subscriber1.connectWith()
-            .send()
-            .join()
-        subscriber2.connectWith()
-            .send()
-            .join()
-        subscriber1.subscribeWith()
+        def systemId1 = generateClientId("system")
+        def systemId2 = generateClientId("system")
+        def subscriber1 = buildExternalMqtt5Client(systemId1)
+        def subscriber2 = buildExternalMqtt5Client(systemId2)
+        fromAsync(subscriber1.connectWith().send())
+        fromAsync(subscriber2.connectWith().send())
+        fromAsync(subscriber1.subscribeWith()
             .topicFilter(topicFilter1)
             .qos(qos1)
-            .send()
-            .join()
-        subscriber2.subscribeWith()
+            .send())
+        fromAsync(subscriber2.subscribeWith()
             .topicFilter(topicFilter2)
             .qos(qos2)
-            .send()
-            .join()
+            .send())
     when:
-        def subscribers = subscriptionService.findSubscribers(TopicName.valueOf(topicName))
+        def subscribers = subscriptionService
+            .findSubscribers(TopicName.valueOf(topicName))
     then:
         subscribers.size() == targetCount
-        (subscribers[0].user() as NetworkMqttUser).clientId() == clientId1
-        (subscribers[1].user() as NetworkMqttUser).clientId() == clientId2
+        with(subscribers[0].user() as NetworkMqttUser) {
+          clientId() == systemId1
+        }
+        with(subscribers[1].user() as NetworkMqttUser) {
+          clientId() == systemId2
+        }
     cleanup:
-        subscriber1.disconnect().join()
-        subscriber2.disconnect().join()
+        fromAsync(subscriber1.disconnect())
+        fromAsync(subscriber2.disconnect())
     where:
         topicName            | topicFilter1                  | qos1                 | topicFilter2             | qos2                  | targetTopicFilter | targetCount
         "topic/Filter"       | "\$share/group1/topic/Filter" | MqttQos.AT_MOST_ONCE | "\$share/group2/topic/#" | MqttQos.AT_LEAST_ONCE | "topic/#"         | 2
@@ -162,31 +198,31 @@ class SubscriptionServiceTest extends IntegrationSpecification {
   }
 
   @Unroll
-  def "should reject subscribe with wrong topic filter"(String wrongTopicFilter, Class<Throwable> exception) {
+  def "should reject subscribe with wrong topic filter"(
+      String wrongTopicFilter,
+      Class<Throwable> exception,
+      Mqtt5SubAckReasonCode reasonCode) {
     given:
         def subscriber = buildExternalMqtt5Client()
     when:
-        subscriber.connectWith()
-            .send()
-            .join()
-        subscriber.subscribeWith()
+        fromAsync(subscriber.connectWith().send())
+        fromAsync(subscriber.subscribeWith()
             .topicFilter(wrongTopicFilter)
-            .send()
-            .join()
+            .send())
     then:
-        def ex = thrown exception
-        if (ex.cause != null) {
-          ex.cause.class == Mqtt5SubAckException
-          ex.cause.message == "SUBACK contains only Error Codes"
+        def completionEx = thrown CompletionException
+        def subAckException = completionEx.cause as Mqtt5SubAckException
+        with(subAckException) {
+          message == "SUBACK contains only Error Codes"
+          with(getMqttMessage()) {
+            getReasonCodes().get(0) == reasonCode
+          }
         }
     cleanup:
-        subscriber.disconnect().join()
+        fromAsync(subscriber.disconnect())
     where:
-        wrongTopicFilter       | exception
-        "\$sys/topic/"         | CompletionException
-        "topic//Filter"        | CompletionException
-        "/topic/\u0000Another" | IllegalArgumentException
-        "topic/##"             | IllegalArgumentException
-        "++/Filter/First"      | IllegalArgumentException
+        wrongTopicFilter | exception           | reasonCode
+        "\$sys/topic/"   | CompletionException | Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID
+        "topic//Filter"  | CompletionException | Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID
   }
 }

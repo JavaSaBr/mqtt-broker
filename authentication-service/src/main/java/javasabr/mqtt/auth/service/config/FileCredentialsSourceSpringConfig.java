@@ -19,13 +19,11 @@ public class FileCredentialsSourceSpringConfig {
   @Bean
   FileProperties fileCredentialsSourceProperties(
       @Value("${authentication.credentials-source.file.path}") URI path) {
-    log.info("Initializing FileCredentialsSourceProperties...");
     return new FileProperties(path);
   }
 
   @Bean
   FileCredentialsSource fileCredentialsSource(FileProperties fileCredentialsSourceProperties) {
-    log.info("Initializing FileCredentialsSource...");
     return new FileCredentialsSource(fileCredentialsSourceProperties.path());
   }
 }

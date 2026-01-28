@@ -51,6 +51,9 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   def defaultTopicService = new DefaultTopicService()
   
   @Shared
+  def authorizationService = new DisabledAuthorizationService();
+  
+  @Shared
   def defaultClientIdRegistry = new InMemoryClientIdRegistry(
       "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_",
       36)
@@ -80,7 +83,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   def inMemoryRetainMessageService = new InMemoryRetainMessageService()
 
   @Shared
-  def defaultSubscriptionService = new InMemorySubscriptionService()
+  def defaultSubscriptionService = new InMemorySubscriptionService(authorizationService)
 
   @Shared
   def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(

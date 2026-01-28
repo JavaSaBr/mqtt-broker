@@ -29,7 +29,6 @@ public class AuthenticationServiceSpringConfig {
   @ConditionalOnClass(name = "javasabr.mqtt.auth.provider.BasicAuthenticationProvider")
   @ConditionalOnProperty(name = "authentication.provider.basic.enabled", havingValue = "true")
   AuthenticationProvider basicAuthenticationProvider(List<CredentialsSource> configuredCredentialsSources) {
-    log.info("Initializing BasicAuthenticationProvider...");
     return new BasicAuthenticationProvider(configuredCredentialsSources);
   }
 
@@ -38,14 +37,12 @@ public class AuthenticationServiceSpringConfig {
   AuthenticationService authenticationService(
       List<AuthenticationProvider> availableProviders,
       @Value("${authentication.provider.anonymous.enabled:false}") boolean allowAnonymous) {
-    log.info("Initializing AuthenticationService...");
     return new DefaultAuthenticationService(availableProviders, allowAnonymous);
   }
 
   @Bean
   @ConditionalOnMissingBean(AuthenticationService.class)
   AuthenticationService noOpAuthenticationService() {
-    log.info("Initializing NoOpAuthenticationService...");
     return new NoOpAuthenticationService();
   }
 }
