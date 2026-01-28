@@ -124,7 +124,7 @@ public class SubscribeMqttInMessageHandler extends
           .resolveFactory(user)
           .newDisconnect(user, DisconnectReasonCode.ofCode(reasonCode.code())));
     } else {
-      // no any sense to send it if we are going to disconnect this client
+      // No sense sending retained messages if we are going to disconnect this client
       sendRetainedMessages(user, subscribeResults);
     }
   }

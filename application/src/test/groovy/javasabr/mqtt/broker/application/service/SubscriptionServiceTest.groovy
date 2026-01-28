@@ -200,7 +200,6 @@ class SubscriptionServiceTest extends IntegrationSpecification {
   @Unroll
   def "should reject subscribe with wrong topic filter"(
       String wrongTopicFilter,
-      Class<Throwable> exception,
       Mqtt5SubAckReasonCode reasonCode) {
     given:
         def subscriber = buildExternalMqtt5Client()
@@ -221,8 +220,8 @@ class SubscriptionServiceTest extends IntegrationSpecification {
     cleanup:
         fromAsync(subscriber.disconnect())
     where:
-        wrongTopicFilter | exception           | reasonCode
-        "\$sys/topic/"   | CompletionException | Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID
-        "topic//Filter"  | CompletionException | Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID
+        wrongTopicFilter | reasonCode
+        "\$sys/topic/"   | Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID
+        "topic//Filter"  | Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID
   }
 }
