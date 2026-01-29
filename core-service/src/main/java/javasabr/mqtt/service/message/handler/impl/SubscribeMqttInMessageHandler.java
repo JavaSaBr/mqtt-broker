@@ -32,7 +32,6 @@ import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
-import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -110,21 +109,23 @@ public class SubscribeMqttInMessageHandler extends
 
     Array<SubscriptionResult> subscribeResults = subscriptionService
         .subscribe(user, session, subscriptions);
-    sendSubscribeResults(user, session, subscribeMessage, subscribeResults);
-    sendRetainedMessages(user, subscribeResults);
 
+    sendSubscribeResults(user, session, subscribeMessage, subscribeResults);
+    
     SubscriptionResult anyDisconnectResult = subscribeResults
         .iterations()
         .reversedArgs()
         .findAny(DISCONNECT_CASES, (codes, candidate) -> codes.contains(candidate.subscribeAckReasonCode()));
 
     if (anyDisconnectResult != null) {
-      SubscribeAckReasonCode subackReasonCode = anyDisconnectResult.subscribeAckReasonCode();
-      log.info(user.clientId(), subackReasonCode, "[%s] Will be forced closing by reason:[%s]"::formatted);
-      DisconnectReasonCode reasonCode = DisconnectReasonCode.ofCode(subackReasonCode.code());
-      MqttMessageOutFactory mqttMessageOutFactory = messageOutFactoryService.resolveFactory(user);
-      MqttOutMessage disconnectMessage = mqttMessageOutFactory.newDisconnect(user, reasonCode);
-      user.closeWithReason(disconnectMessage);
+      SubscribeAckReasonCode reasonCode = anyDisconnectResult.subscribeAckReasonCode();
+      log.info(user.clientId(), reasonCode, "[%s] Will be forced closing by reason:[%s]"::formatted);
+      user.closeWithReason(messageOutFactoryService
+          .resolveFactory(user)
+          .newDisconnect(user, DisconnectReasonCode.ofCode(reasonCode.code())));
+    } else {
+      // No sense sending retained messages if we are going to disconnect this client
+      sendRetainedMessages(user, subscribeResults);
     }
   }
 
@@ -203,7 +204,7 @@ public class SubscribeMqttInMessageHandler extends
     if (subscribeResults.isEmpty()) {
       return;
     }
-    IdentityHashMap<Publish, Subscription> uniqueRetainedMessages = null;
+    Map<Publish, Subscription> uniqueRetainedMessages = null;
     for (SubscriptionResult subscriptionResult : subscribeResults) {
       Subscription subscription = subscriptionResult.newSubscription();
       if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {

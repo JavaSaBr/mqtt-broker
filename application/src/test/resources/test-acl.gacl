@@ -36,3 +36,12 @@ allowSubscribe {
     match('service/+/instance/{clientId}')
   }
 }
+
+allowSubscribe {
+  users {
+    clientId startsWith("system_")
+  }
+  topics {
+    anyTopic()
+  }
+}

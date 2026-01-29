@@ -16,6 +16,7 @@ import javasabr.mqtt.model.subscription.SubscriptionResult;
 import javasabr.mqtt.model.topic.SharedTopicFilter;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -39,8 +40,10 @@ public class InMemorySubscriptionService implements SubscriptionService {
       new SubscriptionResult(SubscribeAckReasonCode.WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
 
   ConcurrentSubscriberTree subscriberTree;
+  AuthorizationService authorizationService;
 
-  public InMemorySubscriptionService() {
+  public InMemorySubscriptionService(AuthorizationService authorizationService) {
+    this.authorizationService = authorizationService;
     this.subscriberTree = new ConcurrentSubscriberTree();
   }
 
@@ -77,6 +80,9 @@ public class InMemorySubscriptionService implements SubscriptionService {
       return SHARED_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     } else if (!connectionConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
       return WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
+    } else if (!authorizationService.authorizeSubscribe(user, topicFilter)) {
+      log.warning(user.clientId(), topicFilter, "[%s] Not authorized for subscribing to:[%s]"::formatted);
+      return new SubscriptionResult(SubscribeAckReasonCode.NOT_AUTHORIZED, null, null);
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();
     SingleSubscriber previousSubscriber = subscriberTree.subscribe(user, newSubscription);
