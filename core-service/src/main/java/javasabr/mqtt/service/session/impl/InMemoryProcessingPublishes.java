@@ -37,7 +37,7 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
           publish.messageId(),
           new InProcessPublish(publish, callback, retryer));
       if (existing != null) {
-        throw new IllegalArgumentException("The publish with id:" + publish.messageId() + "is already exist");
+        throw new IllegalArgumentException("The publish with id:[%d] already exists".formatted(publish.messageId()));
       }
     } finally {
       lock.unlockWrite(stamp);

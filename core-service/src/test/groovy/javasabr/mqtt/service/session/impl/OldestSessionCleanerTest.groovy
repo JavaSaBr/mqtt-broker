@@ -38,7 +38,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
         exists == 0
   }
 
-  def "should remove only 11 the oldest sessions"() {
+  def "should remove only the 11 oldest sessions"() {
     given:
         def allSessions = DictionaryFactory
             .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)
@@ -85,7 +85,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
         allSessions.size() == 50
   }
 
-  def "should remove only 11 the oldest sessions even when all have the same storedAt"() {
+  def "should remove only the 11 oldest sessions even when all have the same storedAt"() {
     given:
         def allSessions = DictionaryFactory
             .stampedLockBasedRefToRefDictionary(String, NotExpirableSession)

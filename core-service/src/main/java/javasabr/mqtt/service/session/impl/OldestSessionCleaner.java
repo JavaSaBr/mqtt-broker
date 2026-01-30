@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 /**
- * Selects and removes the oldest stored sessions when the total number of sessions
- * exceeds a configured {@link #limit}.
+ * Selects and removes the oldest stored sessions when the total number of sessions exceeds a configured
+ * {@link #limit}.
  * <p>
  * The cleaner works in two phases:
  * <ol>
@@ -37,9 +37,10 @@ import lombok.experimental.FieldDefaults;
  *   A larger batch size means more candidates are examined per run, which can
  *   reduce how often cleanup is needed at the cost of slightly more work per call.</li>
  * </ul>
- *
- * @param <T> type of stored session, which must expose a stable {@link NotExpirableSession#storedAt()}
- *            timestamp and an underlying {@link InMemoryNetworkMqttSession} used for lookup/removal.
+ * <p>
+ * Type parameter {@code <T>} is the type of stored session, which must expose a stable
+ * {@link NotExpirableSession#storedAt()} timestamp and an underlying
+ * {@link InMemoryNetworkMqttSession} used for lookup/removal.
  */
 @CustomLog
 @RequiredArgsConstructor
