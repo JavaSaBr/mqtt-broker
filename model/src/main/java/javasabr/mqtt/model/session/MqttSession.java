@@ -1,6 +1,7 @@
 package javasabr.mqtt.model.session;
 
 import java.time.Duration;
+import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
 public interface MqttSession {
@@ -8,6 +9,7 @@ public interface MqttSession {
   String clientId();
 
   int generateMessageId();
+  UUID generateDataId();
   
   @Nullable
   Duration expiryInterval();
