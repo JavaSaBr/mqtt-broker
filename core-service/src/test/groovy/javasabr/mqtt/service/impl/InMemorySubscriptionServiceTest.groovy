@@ -15,7 +15,7 @@ import javasabr.rlib.collections.array.Array
 
 class InMemorySubscriptionServiceTest extends IntegrationServiceSpecification {
 
-  def subscriptionService = new InMemorySubscriptionService()
+  def subscriptionService = new InMemorySubscriptionService(authorizationService)
 
   def "should subscribe with expected results in default settings"() {
     given:

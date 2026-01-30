@@ -32,7 +32,7 @@ springboot = '3.5.8'
 # https://mvnrepository.com/artifact/org.springframework/spring-core
 spring = '6.2.15'
 # https://mvnrepository.com/artifact/org.assertj/assertj-core
-assertj = '3.24.2'
+assertj = '3.27.7'
 # https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
 byte-buddy = "1.17.6"
 # https://mvnrepository.com/artifact/org.objenesis/objenesis

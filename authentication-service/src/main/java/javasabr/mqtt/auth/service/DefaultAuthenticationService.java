@@ -11,6 +11,7 @@ import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.api.MqttCredentials;
 import javasabr.mqtt.auth.api.exception.AuthenticationConfigException;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.AccessLevel;
@@ -94,20 +95,10 @@ public class DefaultAuthenticationService implements AuthenticationService {
     return Mono.just(false);
   }
 
-  private static String buildServiceDescription(Map<AuthenticationMethod, AuthenticationProvider> providers) {
-
-    var builder = new StringBuilder()
-        .append("[\n");
-    for (AuthenticationProvider provider : providers.values()) {
-      builder
-          .append("  ")
-          .append(provider)
-          .append(",\n");
-    }
-    builder
-        .delete(builder.length() - 2, builder.length())
-        .append("\n]");
-
-    return "Loaded total [%s] authentication method: %s".formatted(providers.size(), builder);
+  private static String buildServiceDescription(
+      Map<AuthenticationMethod, AuthenticationProvider> providers) {
+    return "Loaded total [%s] authentication method: %s".formatted(
+        providers.size(), 
+        DebugUtils.toJsonString(providers.values()));
   }
 }

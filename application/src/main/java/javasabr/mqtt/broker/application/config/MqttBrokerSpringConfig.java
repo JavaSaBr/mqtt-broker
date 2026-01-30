@@ -119,8 +119,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService() {
-    return new InMemorySubscriptionService();
+  SubscriptionService subscriptionService(AuthorizationService authorizationService) {
+    return new InMemorySubscriptionService(authorizationService);
   }
 
   @Bean
