@@ -96,8 +96,17 @@ public class MqttBrokerSpringConfig {
 
   @Bean
   MqttSessionService mqttSessionService(
-      @Value("${sessions.clean.thread.interval:60000}") int cleanInterval) {
-    return new InMemoryMqttSessionService(cleanInterval);
+      @Value("${in.memory.session.service.clean.interval.ms:60000}") int cleanInterval,
+      @Value("${in.memory.session.service.max.not.expirable.sessions:1000}") int maxNotExpirableSessions,
+      @Value("${in.memory.session.service.max.expirable.sessions:1000}") int maxExpirableStoredSessions,
+      @Value("${in.memory.session.service.hard.sessions.limit:20000}") int hardSessionsLimit,
+      @Value("${in.memory.session.service.cleanup.batch.size:50}") int cleanupBatchSize) {
+    return new InMemoryMqttSessionService(
+        cleanInterval, 
+        maxNotExpirableSessions,
+        maxExpirableStoredSessions, 
+        hardSessionsLimit, 
+        cleanupBatchSize);
   }
 
   @Bean
@@ -110,8 +119,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriptionService subscriptionService() {
-    return new InMemorySubscriptionService();
+  SubscriptionService subscriptionService(AuthorizationService authorizationService) {
+    return new InMemorySubscriptionService(authorizationService);
   }
 
   @Bean

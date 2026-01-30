@@ -23,9 +23,8 @@ import java.util.concurrent.atomic.AtomicReference
 class IntegrationSpecification extends BaseSpecification {
 
   public static final encoding = StandardCharsets.UTF_8
-  public static final topicFilter = "topic/Filter"
   public static final publishPayload = "publishPayload".getBytes(encoding)
-  public static final clientId = "testClientId"
+  public static final testClientId = "testClientId"
   public static final keepAlive = 120
 
   @Autowired
@@ -111,7 +110,7 @@ class IntegrationSpecification extends BaseSpecification {
       user() >> Stub(ConfigurableNetworkMqttUser) {
         connectionConfig() >> clientConnConfig
         connection() >> connectionRef.get()
-        clientId() >> clientId
+        clientId() >> testClientId
       }
     }
     connectionRef.set(connection)
@@ -139,7 +138,7 @@ class IntegrationSpecification extends BaseSpecification {
       user() >> Stub(ConfigurableNetworkMqttUser) {
         connectionConfig() >> clientConnConfig
         connection() >> connectionRef.get()
-        clientId() >> clientId
+        clientId() >> testClientId
       }
     }
     connectionRef.set(connection)

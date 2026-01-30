@@ -27,6 +27,9 @@
     <Logger name="javasabr.mqtt.service.session.impl.InMemoryMqttSessionService" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>
+    <Logger name="javasabr.mqtt.service.impl.InMemorySubscriptionService" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
     <Root level="INFO">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Root>

@@ -33,11 +33,12 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
   public void register(Publish publish, TrackableMessageCallback callback, PublishRetryer retryer) {
     long stamp = lock.writeLock();
     try {
-      InProcessPublish exist = processing.get(publish.messageId());
-      if (exist != null) {
-        throw new IllegalArgumentException("The publish with id:" + publish.messageId() + "is already exist");
+      InProcessPublish existing = processing.putIfAbsent(
+          publish.messageId(),
+          new InProcessPublish(publish, callback, retryer));
+      if (existing != null) {
+        throw new IllegalArgumentException("The publish with id:[%d] already exists".formatted(publish.messageId()));
       }
-      processing.put(publish.messageId(), new InProcessPublish(publish, callback, retryer));
     } finally {
       lock.unlockWrite(stamp);
     }

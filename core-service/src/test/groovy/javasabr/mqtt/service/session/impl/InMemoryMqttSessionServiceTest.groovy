@@ -134,7 +134,7 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
         def storeResult = fromAsync(sessionService.store(testClientId, sessionToStore))
     then:
         storeResult
-        sessionService.storedSessions.containsKey(testClientId)
+        sessionService.storedNotExpirableSessions.containsKey(testClientId)
     cleanup:
         sessionService.close()
   }
@@ -154,6 +154,20 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
     then:
         def exception = thrown(IllegalStateException)
         exception.message == "Client:[InMemoryMqttSessionServiceTest_8] already has active session"
+    cleanup:
+        sessionService.close()
+  }
+
+  def "should store expirable session correctly"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_9"
+        def sessionToStore = fromAsync(sessionService.createClean(testClientId)) as ConfigurableNetworkMqttSession
+        sessionToStore.expiryInterval(Duration.ofSeconds(120))
+    when:
+        def storeResult = fromAsync(sessionService.store(testClientId, sessionToStore))
+    then:
+        storeResult
+        sessionService.storedExpirableSessions.containsKey(testClientId)
     cleanup:
         sessionService.close()
   }

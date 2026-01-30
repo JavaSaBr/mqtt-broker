@@ -2,11 +2,14 @@ package javasabr.mqtt.auth.provider;
 
 import static java.util.Comparator.comparingInt;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.List;
+import java.util.Map;
 import javasabr.mqtt.auth.api.AuthenticationMethod;
 import javasabr.mqtt.auth.api.AuthenticationProvider;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.MqttCredentials;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayCollectors;
 import javasabr.rlib.common.util.ArrayUtils;
@@ -44,9 +47,14 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
   @Override
   public String toString() {
-    return "{ \"authenticationMethod\": \"%s\", \"credentialSource\": %s }".formatted(
-        getAuthenticationMethod(),
-        credentialsSources);
+    return DebugUtils.toJsonString(this);
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    return Map.of(
+        "authenticationMethod", getAuthenticationMethod(), 
+        "credentialSources", credentialsSources);
   }
 
   @Override
