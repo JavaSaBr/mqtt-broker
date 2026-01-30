@@ -5,8 +5,6 @@ import java.time.Duration;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.session.MqttSessionService;
-import javasabr.rlib.collections.array.ArrayFactory;
-import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.common.util.ThreadUtils;
@@ -20,20 +18,48 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryMqttSessionService implements MqttSessionService, Closeable {
 
+  public static final int HARD_SESSIONS_LIMIT = 500;
+  public static final int MAX_SESSIONS = 300;
+  public static final int CLEANUP_BATCH_SIZE = 30;
+  
   final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> activeSessions;
-  final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> storedSessions;
+  final LockableRefToRefDictionary<String, NotExpirableSession> storedNotExpirableSessions;
   final LockableRefToRefDictionary<String, ExpirableSession> storedExpirableSessions;
 
   final Thread cleanThread;
+  final OldestSessionCleaner<ExpirableSession> expirableOldestSessionCleaner;
+  final OldestSessionCleaner<NotExpirableSession> notExpirableOldestSessionCleaner;
+  final ExpiredSessionCleaner expiredSessionCleaner;
 
   final int cleanIntervalInMs;
+  final int hardSessionsLimit;
+  
   volatile boolean closed;
 
   public InMemoryMqttSessionService(int cleanIntervalInMs) {
+    this(cleanIntervalInMs, MAX_SESSIONS, MAX_SESSIONS, HARD_SESSIONS_LIMIT, CLEANUP_BATCH_SIZE);
+  }
+  
+  public InMemoryMqttSessionService(
+      int cleanIntervalInMs,
+      int maxNotExpirableSessions,
+      int maxExpirableStoredSessions,
+      int hardSessionsLimit,
+      int cleanupBatchSize) {
     this.cleanIntervalInMs = cleanIntervalInMs;
+    this.hardSessionsLimit = hardSessionsLimit;
     this.activeSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.storedExpirableSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
-    this.storedSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.storedNotExpirableSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.expirableOldestSessionCleaner = new OldestSessionCleaner<>(
+        storedExpirableSessions, 
+        maxExpirableStoredSessions, 
+        cleanupBatchSize);
+    this.notExpirableOldestSessionCleaner = new OldestSessionCleaner<>(
+        storedNotExpirableSessions, 
+        maxNotExpirableSessions,
+        cleanupBatchSize);
+    this.expiredSessionCleaner = new ExpiredSessionCleaner(storedExpirableSessions);
     this.cleanThread = new Thread(this::cleanup, "InMemoryMqttSessionService-Cleanup");
     this.cleanThread.setPriority(Thread.MIN_PRIORITY);
     this.cleanThread.setDaemon(true);
@@ -99,18 +125,19 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
         throw new IllegalStateException("Client:[%s] has another active session".formatted(clientId));
       }
       activeSessions.remove(clientId);
-      Duration expiryInterval = currentActiveSession.expiryInterval();
-      if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_DISABLED) {
-        return Mono.just(false);
-      } else if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
-        storeNotExpirableSession(clientId, currentActiveSession);
-      } else {
-        storeExpirableSession(clientId, expiryInterval, currentActiveSession);
-      }
-      return Mono.just(true);
     } finally {
       activeSessions.writeUnlock(stamp);
     }
+    InMemoryNetworkMqttSession storableSession = (InMemoryNetworkMqttSession) session;
+    Duration expiryInterval = session.expiryInterval();
+    if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_DISABLED) {
+      return Mono.just(false);
+    } else if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
+      storeNotExpirableSession(clientId, storableSession);
+    } else {
+      storeExpirableSession(clientId, expiryInterval, storableSession);
+    }
+    return Mono.just(true);
   }
 
   @Override
@@ -137,36 +164,39 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       ExpirableSession expirableSession = storedExpirableSessions.remove(clientId);
       if (expirableSession != null) {
         log.debug(clientId, "[%s] Restored expirable session"::formatted);
-        return expirableSession.session();
+        return expirableSession.wrapped();
       }
     } finally {
       storedExpirableSessions.writeUnlock(stamp);
     }
     // try to find stored not expirable session to restore
-    stamp = storedSessions.writeLock();
+    stamp = storedNotExpirableSessions.writeLock();
     try {
-      InMemoryNetworkMqttSession notExpirableSession = storedSessions.remove(clientId);
+      NotExpirableSession notExpirableSession = storedNotExpirableSessions.remove(clientId);
       if (notExpirableSession != null) {
         log.debug(clientId, "[%s] Restored not expirable session"::formatted);
-        return notExpirableSession;
+        return notExpirableSession.wrapped();
       }
     } finally {
-      storedSessions.writeUnlock(stamp);
+      storedNotExpirableSessions.writeUnlock(stamp);
     }
     return null;
   }
   
   private void storeNotExpirableSession(String clientId, InMemoryNetworkMqttSession activeSession) {
-    long stamp = storedSessions.writeLock();
+    if (storedNotExpirableSessions.size() > hardSessionsLimit) {
+      notExpirableOldestSessionCleaner.cleanup();
+    }
+    long stamp = storedNotExpirableSessions.writeLock();
     try {
-      InMemoryNetworkMqttSession previous = storedSessions.get(clientId);
+      NotExpirableSession previous = storedNotExpirableSessions.get(clientId);
       if (previous != null) {
         throw new IllegalStateException("Client:[%s] already has stored not expirable session".formatted(clientId));
       }
-      storedSessions.put(clientId, activeSession);
+      storedNotExpirableSessions.put(clientId, NotExpirableSession.of(activeSession));
       log.info(clientId, "[%s] Stored not expirable session"::formatted);
     } finally {
-      storedSessions.writeUnlock(stamp);
+      storedNotExpirableSessions.writeUnlock(stamp);
     }
   }
 
@@ -174,6 +204,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       String clientId,
       Duration expiryInterval,
       InMemoryNetworkMqttSession currentActiveSession) {
+    if (storedExpirableSessions.size() > hardSessionsLimit) {
+      expirableOldestSessionCleaner.cleanup();
+    }
     long stamp = storedExpirableSessions.writeLock();
     try {
       ExpirableSession previous = storedExpirableSessions.get(clientId);
@@ -194,94 +227,39 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       ExpirableSession expirableSession = storedExpirableSessions.remove(clientId);
       if (expirableSession != null) {
         log.debug(clientId, "[%s] Discard expirable session"::formatted);
-        expirableSession.session().clear();
+        expirableSession.wrapped().clear();
         return;
       }
     } finally {
       storedExpirableSessions.writeUnlock(stamp);
     }
     // try to find stored not expirable session to discard
-    stamp = storedSessions.writeLock();
+    stamp = storedNotExpirableSessions.writeLock();
     try {
-      InMemoryNetworkMqttSession storedSession = storedSessions.remove(clientId);
+      NotExpirableSession storedSession = storedNotExpirableSessions.remove(clientId);
       if (storedSession != null) {
         log.debug(clientId, "[%s] Discard not expirable session"::formatted);
-        storedSession.clear();
+        storedSession.wrapped().clear();
         return;
       }
     } finally {
-      storedSessions.writeUnlock(stamp);
+      storedNotExpirableSessions.writeUnlock(stamp);
     }
     log.debug(clientId, "[%s] No any stored session to discard"::formatted);
   }
 
   private void cleanup() {
-    var sessionsToCheck = ArrayFactory.mutableArray(ExpirableSession.class);
-    var expiredSessions = ArrayFactory.mutableArray(ExpirableSession.class);
     while (!closed) {
       ThreadUtils.sleep(cleanIntervalInMs);
-      if (storedExpirableSessions.isEmpty()) {
-        continue;
-      }
-      long stamp = storedExpirableSessions.readLock();
-      try {
-        storedExpirableSessions.values(sessionsToCheck);
-      } finally {
-        storedExpirableSessions.readUnlock(stamp);
-      }
-      if (sessionsToCheck.isEmpty()) {
-        continue;
-      }
-      collectExpiredSessions(sessionsToCheck, expiredSessions);
-      if (!expiredSessions.isEmpty()) {
-        deleteExpiredSessions(expiredSessions);
-        expiredSessions.clear();
-      }
-      sessionsToCheck.clear();
+      expiredSessionCleaner.cleanup();
+      expirableOldestSessionCleaner.cleanup();
+      notExpirableOldestSessionCleaner.cleanup();
     }
   }
-
-  private void collectExpiredSessions(
-      MutableArray<ExpirableSession> sessionsToCheck,
-      MutableArray<ExpirableSession> expiredSessions) {
-    long currentTime = System.currentTimeMillis();
-    for (ExpirableSession expirableSession : sessionsToCheck) {
-      if (expirableSession.expireAfter() < currentTime) {
-        expiredSessions.add(expirableSession);
-      }
-    }
-  }
-
-  private void deleteExpiredSessions(MutableArray<ExpirableSession> expiredSessions) {
-    long stamp = storedExpirableSessions.writeLock();
-    try {
-      for (ExpirableSession expirableSession : expiredSessions) {
-        InMemoryNetworkMqttSession session = expirableSession.session();
-        ExpirableSession currentlyStored = storedExpirableSessions.remove(session.clientId());
-        if (expirableSession == currentlyStored) {
-          // nothing was changed during this iteration
-          log.info(session.clientId(), "[%] Removed expired session"::formatted);
-          session.clear();
-        } else if (currentlyStored != null) {
-          // return back the other instance of stored session for the same client id
-          storedExpirableSessions.put(session.clientId(), currentlyStored);
-        }
-      }
-    } finally {
-      storedExpirableSessions.writeUnlock(stamp);
-    }
-  }
-
+  
   @Override
   public void close() {
     closed = true;
     cleanThread.interrupt();
-  }
-
-  private record ExpirableSession(long expireAfter, InMemoryNetworkMqttSession session) {
-    private static ExpirableSession of(Duration expiryInterval, InMemoryNetworkMqttSession session) {
-      long expireAfter = System.currentTimeMillis() + expiryInterval.toMillis();
-      return new ExpirableSession(expireAfter, session);
-    }
   }
 }

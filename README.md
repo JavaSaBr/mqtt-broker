@@ -16,7 +16,7 @@ and v5.0 protocol versions based on core library: https://github.com/JavaSaBr/RL
         - [ ] Password Flag
         - [ ] Keep Alive
       - [ ] CONNECT Properties
-        - [ ] Session Expiry Interval
+        - [X] Session Expiry Interval
         - [ ] Receive Maximum
         - [ ] Maximum Packet Size
         - [ ] Topic Alias Maximum
@@ -42,7 +42,7 @@ and v5.0 protocol versions based on core library: https://github.com/JavaSaBr/RL
       - [X] Base handling
       - [ ] Session Present
       - [ ] CONNACK Properties
-        - [ ] Session Expiry Interval
+        - [X] Session Expiry Interval
         - [ ] Receive Maximum
         - [X] Maximum QoS
         - [ ] Retain Available
@@ -125,15 +125,15 @@ and v5.0 protocol versions based on core library: https://github.com/JavaSaBr/RL
     - [ ] Authentication exchange
       - [X] Base handling
       - [ ] AUTH Properties
-        - [ ] Authentication Method
-        - [ ] Authentication Data
+        - [X] Authentication Method
+        - [X] Authentication Data
         - [ ] Reason String
         - [ ] User Property
 2. Extra features:
-   - [ ] ACL Service
-     - [ ] Disabled ACL
-     - [ ] Static file based ACL
-   - [ ] Authentication Service
+   - [X] ACL Service
+     - [X] Disabled ACL
+     - [X] Static file based ACL
+   - [X] Authentication Service
 
 ## Dependencies for building
 ### java 25+
