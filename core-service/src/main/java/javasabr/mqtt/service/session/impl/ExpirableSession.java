@@ -25,12 +25,12 @@ class ExpirableSession extends NotExpirableSession {
     this.expireAfter = expireAfter;
   }
 
-  @Override
   @JsonValue
+  @Override
   public Map<?, ?> jsonDebugValue() {
     return Map.of(
         "storedAt", storedAt(),
         "expireAfter", expireAfter,
-        "clientId", session().clientId());
+        "clientId", wrapped().clientId());
   }
 }

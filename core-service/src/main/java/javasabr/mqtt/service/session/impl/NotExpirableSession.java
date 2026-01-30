@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class NotExpirableSession {
   long storedAt;
-  InMemoryNetworkMqttSession session;
+  InMemoryNetworkMqttSession wrapped;
 
   static NotExpirableSession of(InMemoryNetworkMqttSession session) {
     return new NotExpirableSession(System.currentTimeMillis(), session);
@@ -28,6 +28,6 @@ class NotExpirableSession {
 
   @JsonValue
   public Map<?, ?> jsonDebugValue() {
-    return Map.of("storedAt", storedAt, "clientId", session.clientId());
+    return Map.of("storedAt", storedAt, "clientId", wrapped.clientId());
   }
 }

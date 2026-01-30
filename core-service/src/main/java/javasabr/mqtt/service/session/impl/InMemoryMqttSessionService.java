@@ -164,7 +164,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       ExpirableSession expirableSession = storedExpirableSessions.remove(clientId);
       if (expirableSession != null) {
         log.debug(clientId, "[%s] Restored expirable session"::formatted);
-        return expirableSession.session();
+        return expirableSession.wrapped();
       }
     } finally {
       storedExpirableSessions.writeUnlock(stamp);
@@ -175,7 +175,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       NotExpirableSession notExpirableSession = storedNotExpirableSessions.remove(clientId);
       if (notExpirableSession != null) {
         log.debug(clientId, "[%s] Restored not expirable session"::formatted);
-        return notExpirableSession.session();
+        return notExpirableSession.wrapped();
       }
     } finally {
       storedNotExpirableSessions.writeUnlock(stamp);
@@ -227,7 +227,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       ExpirableSession expirableSession = storedExpirableSessions.remove(clientId);
       if (expirableSession != null) {
         log.debug(clientId, "[%s] Discard expirable session"::formatted);
-        expirableSession.session().clear();
+        expirableSession.wrapped().clear();
         return;
       }
     } finally {
@@ -239,7 +239,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       NotExpirableSession storedSession = storedNotExpirableSessions.remove(clientId);
       if (storedSession != null) {
         log.debug(clientId, "[%s] Discard not expirable session"::formatted);
-        storedSession.session().clear();
+        storedSession.wrapped().clear();
         return;
       }
     } finally {

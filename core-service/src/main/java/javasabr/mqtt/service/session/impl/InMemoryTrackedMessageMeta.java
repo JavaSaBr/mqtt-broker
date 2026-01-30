@@ -1,5 +1,7 @@
 package javasabr.mqtt.service.session.impl;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ReasonCode;
@@ -18,10 +20,6 @@ import org.jspecify.annotations.Nullable;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
-
-  static {
-    DebugUtils.registerIncludedFields("messageType", "reasonCode");
-  }
   
   MqttMessageType messageType;
   @Nullable
@@ -30,5 +28,12 @@ public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
   @Override
   public String toString() {
     return DebugUtils.toJsonString(this);
+  }
+
+  @JsonValue
+  public Map<?, ?> jsonDebugValue() {
+    return Map.of(
+        "messageType", messageType,
+        "reasonCode", String.valueOf(reasonCode));
   }
 }

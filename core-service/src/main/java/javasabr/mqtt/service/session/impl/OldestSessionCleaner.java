@@ -108,11 +108,11 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
     stamp = sessions.writeLock();
     try {
       for (T expectedStoredSession : sessionsToCleanup) {
-        InMemoryNetworkMqttSession session = expectedStoredSession.session();
-        T current = sessions.get(session.clientId());
-        if (current == expectedStoredSession) {
-          sessions.remove(session.clientId());
-          session.clear();
+        InMemoryNetworkMqttSession wrapped = expectedStoredSession.wrapped();
+        String clientId = wrapped.clientId();
+        if (sessions.remove(clientId, expectedStoredSession)) {
+          log.info(clientId, "[%s] Removed oldest session"::formatted);
+          wrapped.clear();
         }
       }
     } finally {

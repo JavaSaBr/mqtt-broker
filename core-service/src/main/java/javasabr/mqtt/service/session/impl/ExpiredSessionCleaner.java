@@ -68,13 +68,12 @@ class ExpiredSessionCleaner {
     long stamp = sessions.writeLock();
     try {
       for (ExpirableSession expirableSession : expiredSessions) {
-        InMemoryNetworkMqttSession session = expirableSession.session();
-        ExpirableSession currentlyStored = sessions.get(session.clientId());
-        if (expirableSession == currentlyStored) {
+        InMemoryNetworkMqttSession wrapped = expirableSession.wrapped();
+        String clientId = wrapped.clientId();
+        if (sessions.remove(clientId, expirableSession)) {
           // nothing was changed during this iteration
-          log.info(session.clientId(), "[%s] Removed expired session"::formatted);
-          sessions.remove(session.clientId());
-          session.clear();
+          log.info(clientId, "[%s] Removed expired session"::formatted);
+          wrapped.clear();
         }
       }
     } finally {
