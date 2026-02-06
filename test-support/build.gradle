@@ -9,6 +9,8 @@ dependencies {
   api libs.rlib.logger.impl
   api libs.hivemq.mqtt.client
   api libs.moquette.broker
+  api libs.legacy.jackson.core
+  api libs.bundles.netty.bundle
   api libs.spring.test
   api libs.springboot.test
   api libs.assertj.core
