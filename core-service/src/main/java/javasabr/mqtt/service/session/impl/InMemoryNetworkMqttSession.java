@@ -1,7 +1,9 @@
 package javasabr.mqtt.service.session.impl;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
@@ -21,7 +23,9 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
   
   @EqualsAndHashCode.Include
   final String clientId;
+  final long internalId;
   final AtomicInteger messageIdGenerator;
+  final AtomicLong dataIdGenerator;
 
   @Getter
   final InMemoryMessageTacker inMessageTracker;
@@ -40,9 +44,11 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
   @Setter
   volatile Duration expiryInterval;
 
-  public InMemoryNetworkMqttSession(String clientId) {
+  public InMemoryNetworkMqttSession(String clientId, long internalId) {
     this.clientId = clientId;
+    this.internalId = internalId;
     this.messageIdGenerator = new AtomicInteger(0);
+    this.dataIdGenerator = new AtomicLong();
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
     this.inProcessingPublishes = new InMemoryProcessingPublishes(this);
@@ -62,6 +68,11 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
       }
     } while (nextId >= MqttProperties.MAXIMUM_PACKET_ID);
     return nextId;
+  }
+
+  @Override
+  public UUID generateDataId() {
+    return new UUID(internalId, dataIdGenerator.incrementAndGet());
   }
 
   @Override

@@ -17,6 +17,7 @@ import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.PublishDataStorage;
 import javasabr.mqtt.service.PublishDeliveringService;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.RetainMessageService;
@@ -55,6 +56,7 @@ import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandle
 import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler;
 import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler;
+import javasabr.mqtt.service.publish.impl.InMemoryPublishDataStorage;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
 import javasabr.rlib.network.NetworkFactory;
@@ -122,6 +124,11 @@ public class MqttBrokerSpringConfig {
   SubscriptionService subscriptionService(AuthorizationService authorizationService) {
     return new InMemorySubscriptionService(authorizationService);
   }
+  
+  @Bean
+  PublishDataStorage publishDataStorage() {
+    return new InMemoryPublishDataStorage();
+  }
 
   @Bean
   RetainMessageService retainMessageService() {
@@ -179,12 +186,14 @@ public class MqttBrokerSpringConfig {
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      AuthorizationService authorizationService) {
+      AuthorizationService authorizationService,
+      PublishDataStorage publishDataStorage) {
     return new PublishMqttInMessageHandler(
         publishReceivingService,
         messageOutFactoryService,
         topicService,
-        authorizationService);
+        authorizationService,
+        publishDataStorage);
   }
 
   @Bean

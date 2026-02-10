@@ -4,6 +4,7 @@ import java.util.List;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.publishing.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.TopicNameMapping;
@@ -15,6 +16,7 @@ import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.PublishDataStorage;
 import javasabr.mqtt.service.PublishReceivingService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
@@ -27,6 +29,7 @@ import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
@@ -37,12 +40,14 @@ public class PublishMqttInMessageHandler
   PublishReceivingService publishReceivingService;
   TopicService topicService;
   AuthorizationService authorizationService;
+  PublishDataStorage publishDataStorage;
 
   public PublishMqttInMessageHandler(
       PublishReceivingService publishReceivingService,
       MessageOutFactoryService messageOutFactoryService,
-      TopicService topicService, 
-      AuthorizationService authorizationService) {
+      TopicService topicService,
+      AuthorizationService authorizationService, 
+      PublishDataStorage publishDataStorage) {
     super(
         ExternalNetworkMqttUser.class, 
         PublishMqttInMessage.class, 
@@ -57,6 +62,7 @@ public class PublishMqttInMessageHandler
     this.publishReceivingService = publishReceivingService;
     this.topicService = topicService;
     this.authorizationService = authorizationService;
+    this.publishDataStorage = publishDataStorage;
   }
 
   @Override
@@ -82,8 +88,16 @@ public class PublishMqttInMessageHandler
 
     byte[] payload = message.payload();
     TopicName responseTopicName = resolveResponseTopic(user, message);
+    
+    // already tested in message validators
+    @SuppressWarnings("DataFlowIssue") 
+    PublishData storedPublishData = publishDataStorage.store(
+        session.generateDataId(),
+        message.contentType(),
+        message.payloadFormat(),
+        payload,
+        message.correlationData());
 
-    //noinspection DataFlowIssue everything is already validated
     Publish publish = new Publish(
         message.messageId(),
         message.qos(),
