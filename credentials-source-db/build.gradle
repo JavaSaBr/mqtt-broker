@@ -15,6 +15,7 @@ dependencies {
   implementation libs.jdbc.postgres
   api libs.flyway.core
   implementation libs.flyway.postgresql
+  implementation libs.bundles.netty.bundle
 
   testImplementation projects.testSupport
   testFixturesApi projects.testSupport
