@@ -20,11 +20,11 @@ import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
-class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandlerTest {
+class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should provide feedback for accepted publish with subscribers"() {
     given:
-        def publishInHandler = new Qos2MqttPublishInMessageHandler(
+        def publishInHandler = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -50,7 +50,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             .session()
             .inMessageTracker()
     when:
-        publishInHandler.handle(client3, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, expectedTopicName, testPayload))
+        publishInHandler.process(client3, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, expectedTopicName, testPayload))
     then: 'sender should have feedback of first phase'
         with(client3.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.SUCCESS
@@ -85,7 +85,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
 
   def "should provide feedback for accepted publish without any subscriber"() {
     given:
-        def publishInHandler = new Qos2MqttPublishInMessageHandler(
+        def publishInHandler = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -97,7 +97,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
     when:
-        publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        publishInHandler.process(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then: 'sender should have feedback that no matched subscribers'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -125,7 +125,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
 
   def "should disconnect by reason that message id is missed"() {
     given:
-        def publishInHandler = new Qos2MqttPublishInMessageHandler(
+        def publishInHandler = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -134,7 +134,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishInMessageHandlerTest/3")
     when:
-        publishInHandler.handle(user, Publish.minimal(
+        publishInHandler.process(user, Publish.minimal(
             MqttProperties.MESSAGE_ID_IS_NOT_SET,
             QoS.EXACTLY_ONCE,
             topicName,
@@ -149,7 +149,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
 
   def "should provide feedback that message id is already used"() {
     given:
-        def publishInHandler = new Qos2MqttPublishInMessageHandler(
+        def publishInHandler = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -162,7 +162,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
     when:
-        publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        publishInHandler.process(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
@@ -176,7 +176,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
 
   def "should provide feedback for duplicated publish as well"() {
     given:
-        def publishInHandler = new Qos2MqttPublishInMessageHandler(
+        def publishInHandler = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -189,7 +189,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH, PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS)
     when:
-        publishInHandler.handle(user, Publish
+        publishInHandler.process(user, Publish
             .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
             .withDuplicated())
     then:
@@ -205,7 +205,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
 
   def "should not provide feedback for duplicated publish after accepting publish release"() {
     given:
-        def publishInHandler = new Qos2MqttPublishInMessageHandler(
+        def publishInHandler = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -217,7 +217,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
     when: 'init floy by original publish'
-        publishInHandler.handle(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        publishInHandler.process(user, Publish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -229,7 +229,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
         }
     when: 'send duplicated before publish release'
-        publishInHandler.handle(user, Publish
+        publishInHandler.process(user, Publish
             .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
             .withDuplicated())
     then: 'server should return the same feedback for duplicated as for original'
@@ -258,7 +258,7 @@ class Qos2MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
           messageType() == MqttMessageType.PUBLISH_COMPLETE
         }
     when: 'send duplicated after publish release'
-        publishInHandler.handle(user, Publish
+        publishInHandler.process(user, Publish
             .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
             .withDuplicated())
     then: 'server should return that this message id is already used because publish complete is in progress of sending'

@@ -28,7 +28,7 @@ import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.PublishDispatcher;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
@@ -52,19 +52,19 @@ public class SubscribeMqttInMessageHandler extends
   SubscriptionService subscriptionService;
   TopicService topicService;
   RetainMessageService retainMessageService;
-  PublishDeliveringService publishDeliveringService;
+  PublishDispatcher publishDispatcher;
 
   public SubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
       RetainMessageService retainMessageService,
-      PublishDeliveringService publishDeliveringService) {
+      PublishDispatcher publishDispatcher) {
     super(ExternalNetworkMqttUser.class, SubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
     this.topicService = topicService;
     this.retainMessageService = retainMessageService;
-    this.publishDeliveringService = publishDeliveringService;
+    this.publishDispatcher = publishDispatcher;
   }
 
   @Override
@@ -226,7 +226,7 @@ public class SubscribeMqttInMessageHandler extends
       return;
     }
     for (Map.Entry<Publish, Subscription> retainedMessageEntry : uniqueRetainedMessages.entrySet()) {
-      publishDeliveringService.startDelivering(
+      publishDispatcher.dispatchToSubscriber(
           retainedMessageEntry.getKey(),
           user,
           retainedMessageEntry.getValue());

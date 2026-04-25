@@ -23,13 +23,13 @@ import org.jspecify.annotations.Nullable;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class TrackableMqttPublishOutMessageHandler extends
-    AbstractMqttPublishOutMessageHandler<ExternalNetworkMqttUser> {
+public abstract class TrackableSubscriberPublishSender extends
+    AbstractSubscriberPublishSender<ExternalNetworkMqttUser> {
 
   TrackableMessageCallback trackableMessageCallback;
   PublishRetryer publishRetryer;
 
-  protected TrackableMqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+  protected TrackableSubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
     super(ExternalNetworkMqttUser.class, messageOutFactoryService);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
     this.publishRetryer = this::retryDelivering;

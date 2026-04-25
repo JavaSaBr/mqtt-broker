@@ -8,11 +8,11 @@ import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
-class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandlerTest {
+class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should not provide any feedback for accepted publish with subscribers"() {
     given:
-        def publishInHandler = new Qos0MqttPublishInMessageHandler(
+        def publishInHandler = new Qos0IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -34,7 +34,7 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
             user2.session(),
             Array.of(Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)))
     when:
-        publishInHandler.handle(user3, Publish.minimal(QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
+        publishInHandler.process(user3, Publish.minimal(QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
     then: 'sender should not have any feedback'
         user3.isEmpty()
     then: 'subscribers should receive the publish'
@@ -48,7 +48,7 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
 
   def "should not provide any feedback for accepted publish without any subscriber"() {
     given:
-        def publishInHandler = new Qos0MqttPublishInMessageHandler(
+        def publishInHandler = new Qos0IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -57,7 +57,7 @@ class Qos0MqttPublishInMessageHandlerTest extends QosMqttPublishInMessageHandler
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos0MqttPublishInMessageHandlerTest/2")
     when:
-        publishInHandler.handle(user, Publish.minimal(QoS.AT_MOST_ONCE, topicName, testPayload))
+        publishInHandler.process(user, Publish.minimal(QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should not have any feedback'
         user.isEmpty()
   }

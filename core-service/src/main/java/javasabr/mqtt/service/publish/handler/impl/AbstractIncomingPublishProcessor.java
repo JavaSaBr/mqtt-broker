@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.publish.handler.impl;
 
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
@@ -9,10 +9,10 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.PublishDispatcher;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
+import javasabr.mqtt.service.publish.handler.IncomingPublishProcessor;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
@@ -23,17 +23,17 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttUser>
-    implements MqttPublishInMessageHandler {
+public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser>
+    implements IncomingPublishProcessor {
 
   Class<U> expectedUserType;
   SubscriptionService subscriptionService;
-  PublishDeliveringService publishDeliveringService;
+  PublishDispatcher publishDispatcher;
   MessageOutFactoryService messageOutFactoryService;
   RetainMessageService retainMessageService;
 
   @Override
-  public final void handle(NetworkMqttUser user, Publish publish) {
+  public final void process(NetworkMqttUser user, Publish publish) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;
@@ -109,7 +109,7 @@ public abstract class AbstractMqttPublishInMessageHandler<U extends NetworkMqttU
   }
 
   protected void startDelivering(Publish publish, SingleSubscriber subscriber) {
-    publishDeliveringService.startDelivering(publish, subscriber.user(), subscriber.subscription());
+    publishDispatcher.dispatchToSubscriber(publish, subscriber.user(), subscriber.subscription());
   }
 
   protected void sendFeedback(U user, MqttOutMessage response) {

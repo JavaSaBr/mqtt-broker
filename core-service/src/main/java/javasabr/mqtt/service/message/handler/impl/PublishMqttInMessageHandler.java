@@ -5,7 +5,7 @@ import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.publish.PublishData;
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.ReceivedPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.model.topic.TopicName;
@@ -17,7 +17,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDataStorage;
-import javasabr.mqtt.service.PublishReceivingService;
+import javasabr.mqtt.service.IncomingPublishRouter;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
@@ -29,7 +29,6 @@ import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
@@ -37,13 +36,13 @@ import org.jspecify.annotations.Nullable;
 public class PublishMqttInMessageHandler
     extends FieldsValidatedMqttInMessageHandler<ExternalNetworkMqttUser, PublishMqttInMessage> {
 
-  PublishReceivingService publishReceivingService;
+  IncomingPublishRouter incomingPublishRouter;
   TopicService topicService;
   AuthorizationService authorizationService;
   PublishDataStorage publishDataStorage;
 
   public PublishMqttInMessageHandler(
-      PublishReceivingService publishReceivingService,
+      IncomingPublishRouter incomingPublishRouter,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
       AuthorizationService authorizationService, 
@@ -59,7 +58,7 @@ public class PublishMqttInMessageHandler
             new PublishTopicAliasMqttInMessageFieldValidator(messageOutFactoryService),
             new PublishQosMqttInMessageFieldValidator(messageOutFactoryService),
             new PublishPayloadMqttInMessageFieldValidator(messageOutFactoryService)));
-    this.publishReceivingService = publishReceivingService;
+    this.incomingPublishRouter = incomingPublishRouter;
     this.topicService = topicService;
     this.authorizationService = authorizationService;
     this.publishDataStorage = publishDataStorage;
@@ -86,7 +85,6 @@ public class PublishMqttInMessageHandler
       return;
     }
 
-    byte[] payload = message.payload();
     TopicName responseTopicName = resolveResponseTopic(user, message);
     
     // already tested in message validators
@@ -95,26 +93,23 @@ public class PublishMqttInMessageHandler
         session.generateDataId(),
         message.contentType(),
         message.payloadFormat(),
-        payload,
+        message.payload(),
         message.correlationData());
 
-    Publish publish = new Publish(
+    ReceivedPublish receivedPublish = new ReceivedPublish(
         message.messageId(),
         message.qos(),
         finalTopicName,
         responseTopicName,
-        payload,
+        storedPublishData,
         message.duplicate(),
         message.retain(),
-        message.contentType(),
         message.subscriptionIds(),
-        message.correlationData(),
         message.messageExpiryInterval(),
         message.topicAlias(),
-        message.payloadFormat(),
         message.userProperties());
 
-    publishReceivingService.processPublish(user, publish);
+    incomingPublishRouter.route(user, receivedPublish);
   }
   
   @Nullable
@@ -125,7 +120,7 @@ public class PublishMqttInMessageHandler
 
     TopicNameMapping topicNameMapping = session.topicNameMapping();
     String rawTopicName = message.rawTopicName();
-    boolean providedRawTopicName = !StringUtils.isEmpty(rawTopicName);
+    boolean providedRawTopicName = StringUtils.isNotEmpty(rawTopicName);
     int topicAlias = message.topicAlias();
 
     TopicName topicNameByAlias;

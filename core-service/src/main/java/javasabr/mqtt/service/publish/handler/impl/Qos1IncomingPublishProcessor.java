@@ -2,7 +2,7 @@ package javasabr.mqtt.service.publish.handler.impl;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
@@ -10,7 +10,7 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.PublishDispatcher;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -20,17 +20,16 @@ import lombok.experimental.FieldDefaults;
 
 @CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class Qos1MqttPublishInMessageHandler extends TrackableMqttPublishInMessageHandler<ExternalNetworkMqttUser> {
+public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProcessor<ExternalNetworkMqttUser> {
 
-  public Qos1MqttPublishInMessageHandler(
+  public Qos1IncomingPublishProcessor(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService,
+      PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
       RetainMessageService retainMessageService) {
     super(
         ExternalNetworkMqttUser.class,
-        subscriptionService,
-        publishDeliveringService,
+        subscriptionService, publishDispatcher,
         messageOutFactoryService,
         retainMessageService);
   }

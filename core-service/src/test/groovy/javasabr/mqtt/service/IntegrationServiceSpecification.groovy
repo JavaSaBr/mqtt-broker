@@ -10,8 +10,8 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
-import javasabr.mqtt.service.impl.DefaultPublishDeliveringService
-import javasabr.mqtt.service.impl.DefaultPublishReceivingService
+import javasabr.mqtt.service.impl.DefaultPublishDispatcher
+import javasabr.mqtt.service.impl.DefaultIncomingPublishRouter
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.DisabledAuthorizationService
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry
@@ -20,12 +20,12 @@ import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
-import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler
-import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishOutMessageHandler
-import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler
-import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandler
-import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler
-import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler
+import javasabr.mqtt.service.publish.handler.impl.Qos0IncomingPublishProcessor
+import javasabr.mqtt.service.publish.handler.impl.Qos0SubscriberPublishSender
+import javasabr.mqtt.service.publish.handler.impl.Qos1IncomingPublishProcessor
+import javasabr.mqtt.service.publish.handler.impl.Qos1SubscriberPublishSender
+import javasabr.mqtt.service.publish.handler.impl.Qos2IncomingPublishProcessor
+import javasabr.mqtt.service.publish.handler.impl.Qos2SubscriberPublishSender
 import javasabr.mqtt.service.session.MqttSessionService
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService
 import javasabr.mqtt.test.support.BaseSpecification
@@ -73,10 +73,10 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   ])
 
   @Shared
-  def defaultPublishDeliveringService = new DefaultPublishDeliveringService([
-      new Qos0MqttPublishOutMessageHandler(defaultMessageOutFactoryService),
-      new Qos1MqttPublishOutMessageHandler(defaultMessageOutFactoryService),
-      new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+  def defaultPublishDeliveringService = new DefaultPublishDispatcher([
+      new Qos0SubscriberPublishSender(defaultMessageOutFactoryService),
+      new Qos1SubscriberPublishSender(defaultMessageOutFactoryService),
+      new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
   ])
 
   @Shared
@@ -86,21 +86,21 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   def defaultSubscriptionService = new InMemorySubscriptionService(authorizationService)
 
   @Shared
-  def qos0MqttPublishInMessageHandler = new Qos0MqttPublishInMessageHandler(
+  def qos0MqttPublishInMessageHandler = new Qos0IncomingPublishProcessor(
       defaultSubscriptionService,
       defaultPublishDeliveringService,
       defaultMessageOutFactoryService,
       inMemoryRetainMessageService)
 
   @Shared
-  def publishReceivingService = new DefaultPublishReceivingService([
+  def publishReceivingService = new DefaultIncomingPublishRouter([
       qos0MqttPublishInMessageHandler,
-      new Qos1MqttPublishInMessageHandler(
+      new Qos1IncomingPublishProcessor(
           defaultSubscriptionService,
           defaultPublishDeliveringService,
           defaultMessageOutFactoryService,
           inMemoryRetainMessageService),
-      new Qos2MqttPublishInMessageHandler(
+      new Qos2IncomingPublishProcessor(
           defaultSubscriptionService,
           defaultPublishDeliveringService,
           defaultMessageOutFactoryService,

@@ -14,9 +14,9 @@ import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
-public class Qos1MqttPublishOutMessageHandler extends TrackableMqttPublishOutMessageHandler {
+public class Qos1SubscriberPublishSender extends TrackableSubscriberPublishSender {
 
-  public Qos1MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+  public Qos1SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
     super(messageOutFactoryService);
   }
 

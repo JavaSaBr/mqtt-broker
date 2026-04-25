@@ -2,7 +2,7 @@ package javasabr.mqtt.service.publish.handler.impl
 
 import javasabr.mqtt.service.IntegrationServiceSpecification
 
-abstract class QosMqttPublishInMessageHandlerTest extends IntegrationServiceSpecification {
+abstract class QosIncomingPublishProcessorTest extends IntegrationServiceSpecification {
   static {
     //LoggerManager.enable(AbstractMqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
     //LoggerManager.enable(TrackableMqttPublishInMessageHandler.class, LoggerLevel.DEBUG)

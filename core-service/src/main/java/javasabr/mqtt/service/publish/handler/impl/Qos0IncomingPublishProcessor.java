@@ -3,27 +3,26 @@ package javasabr.mqtt.service.publish.handler.impl;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDeliveringService;
+import javasabr.mqtt.service.PublishDispatcher;
 import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 
-public class Qos0MqttPublishInMessageHandler extends AbstractMqttPublishInMessageHandler<ExternalNetworkMqttUser> {
+public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcessor<ExternalNetworkMqttUser> {
 
-  public Qos0MqttPublishInMessageHandler(
+  public Qos0IncomingPublishProcessor(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService,
+      PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
       RetainMessageService retainMessageService) {
     super(
         ExternalNetworkMqttUser.class,
-        subscriptionService,
-        publishDeliveringService,
+        subscriptionService, publishDispatcher,
         messageOutFactoryService,
         retainMessageService);
   }

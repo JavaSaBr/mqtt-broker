@@ -18,11 +18,11 @@ import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishReleaseMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 
-class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandlerTest {
+class Qos2SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should deliver publish to subscriber"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos2MqttPublishOutMessageHandlerTest/1")
@@ -44,7 +44,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should wait for receive-complete responses for publish"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -109,7 +109,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should correctly handle publish receive when no stored trackable meta about the publish"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -155,7 +155,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error receiving unexpected response message for first stage"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -191,7 +191,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error receiving unexpected response message for second stage"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -238,7 +238,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error for unexpected flow state for publish received"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
@@ -277,7 +277,7 @@ class Qos2MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandl
 
   def "should handle as protocol error for unexpected flow state for publish complete"() {
     given:
-        def publishOutHandler = new Qos2MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()

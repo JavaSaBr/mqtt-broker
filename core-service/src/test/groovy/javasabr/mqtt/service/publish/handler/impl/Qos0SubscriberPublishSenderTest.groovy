@@ -7,11 +7,11 @@ import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 
-class Qos0MqttPublishOutMessageHandlerTest extends QosMqttPublishOutMessageHandlerTest {
+class Qos0SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should deliver publish to subscriber"() {
     given:
-        def publishOutHandler = new Qos0MqttPublishOutMessageHandler(defaultMessageOutFactoryService)
+        def publishOutHandler = new Qos0SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos0MqttPublishOutMessageHandlerTest/1")
