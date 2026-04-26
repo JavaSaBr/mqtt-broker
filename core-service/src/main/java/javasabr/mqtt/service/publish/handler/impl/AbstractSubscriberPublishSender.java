@@ -33,16 +33,16 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
       log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
       return;
     }
-    Publish publishToSend = reconstruct(expectedUser, session, publish);
-    if (publishToSend != null) {
-      handleImpl(expectedUser, session, publishToSend);
+    Publish outgoingPublish = buildOutgoing(expectedUser, session, publish);
+    if (outgoingPublish != null) {
+      sendToSubscriberImpl(expectedUser, session, outgoingPublish);
     }
   }
 
   @Nullable
-  protected abstract Publish reconstruct(U user, MqttSession session, Publish original);
+  protected abstract Publish buildOutgoing(U user, MqttSession session, Publish incoming);
 
-  protected void handleImpl(U user, MqttSession session, Publish publish) {
+  protected void sendToSubscriberImpl(U user, MqttSession session, Publish publish) {
     send(user, publish);
   }
 
@@ -56,10 +56,8 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
             publish.duplicated(),
             publish.topicName(),
             publish.topicAlias(),
-            publish.payload(),
-            publish.payloadFormat(),
+            publish.data(),
             publish.responseTopicName(),
-            publish.correlationData(),
             publish.userProperties()));
   }
 }

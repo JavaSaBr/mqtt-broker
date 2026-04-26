@@ -4,8 +4,8 @@ import java.util.List;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.PublishData;
-import javasabr.mqtt.model.publish.ReceivedPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.TopicNameMapping;
 import javasabr.mqtt.model.topic.TopicName;
@@ -15,9 +15,9 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.PublishMqttInMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.AuthorizationService;
+import javasabr.mqtt.service.IncomingPublishRouter;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDataStorage;
-import javasabr.mqtt.service.IncomingPublishRouter;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.message.validator.PublishMessageExpiryIntervalMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishPayloadMqttInMessageFieldValidator;
@@ -96,7 +96,7 @@ public class PublishMqttInMessageHandler
         message.payload(),
         message.correlationData());
 
-    ReceivedPublish receivedPublish = new ReceivedPublish(
+    IncomingPublish incomingPublish = new IncomingPublish(
         message.messageId(),
         message.qos(),
         finalTopicName,
@@ -109,7 +109,7 @@ public class PublishMqttInMessageHandler
         message.topicAlias(),
         message.userProperties());
 
-    incomingPublishRouter.route(user, receivedPublish);
+    incomingPublishRouter.route(user, incomingPublish);
   }
   
   @Nullable

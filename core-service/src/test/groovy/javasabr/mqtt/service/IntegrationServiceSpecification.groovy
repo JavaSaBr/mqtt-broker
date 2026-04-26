@@ -9,13 +9,13 @@ import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
+import javasabr.mqtt.service.impl.DefaultIncomingPublishRouter
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultPublishDispatcher
-import javasabr.mqtt.service.impl.DefaultIncomingPublishRouter
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.DisabledAuthorizationService
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry
-import javasabr.mqtt.service.impl.InMemoryRetainMessageService
+import javasabr.mqtt.service.impl.InMemoryRetainPublishService
 import javasabr.mqtt.service.impl.InMemorySubscriptionService
 import javasabr.mqtt.service.message.handler.impl.PublishReleaseMqttInMessageHandler
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
@@ -80,7 +80,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   ])
 
   @Shared
-  def inMemoryRetainMessageService = new InMemoryRetainMessageService()
+  def inMemoryRetainMessageService = new InMemoryRetainPublishService()
 
   @Shared
   def defaultSubscriptionService = new InMemorySubscriptionService(authorizationService)

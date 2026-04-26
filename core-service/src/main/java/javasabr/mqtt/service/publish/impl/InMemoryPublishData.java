@@ -40,6 +40,11 @@ public class InMemoryPublishData implements PublishData {
   }
 
   @Override
+  public boolean isEmpty() {
+    return payloadSize < 1;
+  }
+
+  @Override
   public void writePayloadTo(ByteBuffer buffer) {
     buffer.put(payload);
   }

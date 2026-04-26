@@ -19,7 +19,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainMessageService;
+import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
 import lombok.AccessLevel;
@@ -36,12 +36,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
+      RetainPublishService retainPublishService) {
     super(
         ExternalNetworkMqttUser.class,
         subscriptionService, publishDispatcher,
-        messageOutFactoryService,
-        retainMessageService);
+        messageOutFactoryService, retainPublishService);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
   }
 

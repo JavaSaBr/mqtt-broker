@@ -16,24 +16,24 @@ import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
+import javasabr.mqtt.service.IncomingPublishRouter;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDataStorage;
 import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.IncomingPublishRouter;
-import javasabr.mqtt.service.RetainMessageService;
+import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
+import javasabr.mqtt.service.impl.DefaultIncomingPublishRouter;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultPublishDispatcher;
-import javasabr.mqtt.service.impl.DefaultIncomingPublishRouter;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
-import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
+import javasabr.mqtt.service.impl.InMemoryRetainPublishService;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
@@ -131,8 +131,8 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  RetainMessageService retainMessageService() {
-    return new InMemoryRetainMessageService();
+  RetainPublishService retainMessageService() {
+    return new InMemoryRetainPublishService();
   }
 
   @Bean
@@ -216,13 +216,12 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      RetainMessageService retainMessageService,
+      RetainPublishService retainPublishService,
       PublishDispatcher publishDispatcher) {
     return new SubscribeMqttInMessageHandler(
         subscriptionService,
         messageOutFactoryService,
-        topicService,
-        retainMessageService, publishDispatcher);
+        topicService, retainPublishService, publishDispatcher);
   }
 
   @Bean
@@ -267,12 +266,11 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
+      RetainPublishService retainPublishService) {
     return new Qos0IncomingPublishProcessor(
         subscriptionService,
         publishDispatcher,
-        messageOutFactoryService,
-        retainMessageService);
+        messageOutFactoryService, retainPublishService);
   }
 
   @Bean
@@ -280,12 +278,11 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
+      RetainPublishService retainPublishService) {
     return new Qos1IncomingPublishProcessor(
         subscriptionService,
         publishDispatcher,
-        messageOutFactoryService,
-        retainMessageService);
+        messageOutFactoryService, retainPublishService);
   }
 
   @Bean
@@ -293,12 +290,11 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
+      RetainPublishService retainPublishService) {
     return new Qos2IncomingPublishProcessor(
         subscriptionService, 
         publishDispatcher,
-        messageOutFactoryService,
-        retainMessageService);
+        messageOutFactoryService, retainPublishService);
   }
 
   @Bean

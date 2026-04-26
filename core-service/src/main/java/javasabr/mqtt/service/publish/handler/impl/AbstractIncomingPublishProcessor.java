@@ -10,7 +10,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainMessageService;
+import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.handler.IncomingPublishProcessor;
 import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
@@ -30,7 +30,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   SubscriptionService subscriptionService;
   PublishDispatcher publishDispatcher;
   MessageOutFactoryService messageOutFactoryService;
-  RetainMessageService retainMessageService;
+  RetainPublishService retainPublishService;
 
   @Override
   public final void process(NetworkMqttUser user, Publish publish) {
@@ -91,7 +91,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       Publish publish,
       int matchedSubscribers) {
     if (publish.retained()) {
-      retainMessageService.retain(publish);
+      retainPublishService.retain(publish);
     }
   }
 

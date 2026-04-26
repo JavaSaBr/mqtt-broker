@@ -16,6 +16,8 @@ public interface PublishData {
   int payloadSize();
   int correlationDataSize();
   
+  boolean isEmpty();
+  
   void writePayloadTo(ByteBuffer buffer);
   void writeCorrelationDataTo(ByteBuffer buffer);
 }

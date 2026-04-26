@@ -1,6 +1,5 @@
 package javasabr.mqtt.model.publish;
 
-import java.util.UUID;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.topic.TopicName;
@@ -8,7 +7,7 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
 import org.jspecify.annotations.Nullable;
 
-public interface Publish {
+public sealed interface Publish permits IncomingPublish, OutgoingPublish, TrackableOutgoingPublish {
   int messageId();
 
   QoS qos();
@@ -18,7 +17,7 @@ public interface Publish {
   @Nullable 
   TopicName responseTopicName();
 
-  UUID dataId();
+  PublishData data();
 
   boolean duplicated();
 
@@ -31,4 +30,8 @@ public interface Publish {
   int topicAlias();
   
   Array<StringPair> userProperties();
+
+  Publish withDuplicated();
+  
+  Publish withoutRetained();
 }

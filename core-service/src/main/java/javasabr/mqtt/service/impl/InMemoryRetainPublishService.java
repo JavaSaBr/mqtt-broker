@@ -1,25 +1,27 @@
 package javasabr.mqtt.service.impl;
 
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
-import javasabr.mqtt.service.RetainMessageService;
+import javasabr.mqtt.service.RetainPublishService;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class InMemoryRetainMessageService implements RetainMessageService {
+public class InMemoryRetainPublishService implements RetainPublishService {
 
   ConcurrentRetainedMessageTree retainedMessageTree;
 
-  public InMemoryRetainMessageService() {
+  public InMemoryRetainPublishService() {
     this.retainedMessageTree = new ConcurrentRetainedMessageTree();
   }
 
   @Override
   public void retain(Publish publish) {
-    if (publish.payload().length == 0) {
+    PublishData data = publish.data();
+    if (data.isEmpty()) {
       retainedMessageTree.removeRetainedMessage(publish.topicName());
     } else {
       retainedMessageTree.addRetainedMessage(publish);
@@ -27,7 +29,7 @@ public class InMemoryRetainMessageService implements RetainMessageService {
   }
 
   @Override
-  public Array<Publish> findRetainedMessages(TopicFilter topicFilter) {
+  public Array<Publish> findRetainedPublishes(TopicFilter topicFilter) {
     return retainedMessageTree.getRetainedMessages(topicFilter);
   }
 }

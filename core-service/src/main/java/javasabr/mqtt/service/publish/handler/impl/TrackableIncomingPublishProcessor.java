@@ -11,7 +11,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainMessageService;
+import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
 
 public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUser> extends
@@ -22,12 +22,11 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
+      RetainPublishService retainPublishService) {
     super(
         expectedClientType,
         subscriptionService, publishDispatcher,
-        messageOutFactoryService,
-        retainMessageService);
+        messageOutFactoryService, retainPublishService);
   }
 
   @Override

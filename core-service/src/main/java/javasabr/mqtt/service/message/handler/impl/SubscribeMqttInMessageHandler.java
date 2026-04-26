@@ -14,7 +14,7 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
@@ -29,7 +29,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainMessageService;
+import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.rlib.collections.array.Array;
@@ -51,19 +51,19 @@ public class SubscribeMqttInMessageHandler extends
 
   SubscriptionService subscriptionService;
   TopicService topicService;
-  RetainMessageService retainMessageService;
+  RetainPublishService retainPublishService;
   PublishDispatcher publishDispatcher;
 
   public SubscribeMqttInMessageHandler(
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      RetainMessageService retainMessageService,
+      RetainPublishService retainPublishService,
       PublishDispatcher publishDispatcher) {
     super(ExternalNetworkMqttUser.class, SubscribeMqttInMessage.class, messageOutFactoryService);
     this.subscriptionService = subscriptionService;
     this.topicService = topicService;
-    this.retainMessageService = retainMessageService;
+    this.retainPublishService = retainPublishService;
     this.publishDispatcher = publishDispatcher;
   }
 
@@ -125,7 +125,7 @@ public class SubscribeMqttInMessageHandler extends
           .newDisconnect(user, DisconnectReasonCode.ofCode(reasonCode.code())));
     } else {
       // No sense sending retained messages if we are going to disconnect this client
-      sendRetainedMessages(user, subscribeResults);
+      sendRetainedPublishes(user, subscribeResults);
     }
   }
 
@@ -200,32 +200,32 @@ public class SubscribeMqttInMessageHandler extends
             .remove(messageId));
   }
 
-  private void sendRetainedMessages(MqttUser user, Array<SubscriptionResult> subscribeResults) {
+  private void sendRetainedPublishes(MqttUser user, Array<SubscriptionResult> subscribeResults) {
     if (subscribeResults.isEmpty()) {
       return;
     }
-    Map<Publish, Subscription> uniqueRetainedMessages = null;
+    Map<Publish, Subscription> uniqueRetainedPublishes = null;
     for (SubscriptionResult subscriptionResult : subscribeResults) {
       Subscription subscription = subscriptionResult.newSubscription();
       if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {
         continue;
       }
       boolean retainAsPublished = subscription.retainAsPublished();
-      Array<Publish> retainedMessages = retainMessageService.findRetainedMessages(subscription.topicFilter());
-      for (Publish retainedMessage : retainedMessages) {
+      Array<Publish> retainedPublishes = retainPublishService.findRetainedPublishes(subscription.topicFilter());
+      for (Publish publish : retainedPublishes) {
         if (!retainAsPublished) {
-          retainedMessage = retainedMessage.withoutRetain();
+          publish = publish.withoutRetained();
         }
-        if (uniqueRetainedMessages == null) {
-          uniqueRetainedMessages = new IdentityHashMap<>();
+        if (uniqueRetainedPublishes == null) {
+          uniqueRetainedPublishes = new IdentityHashMap<>();
         }
-        uniqueRetainedMessages.merge(retainedMessage, subscription, Subscription::higherQoS);
+        uniqueRetainedPublishes.merge(publish, subscription, Subscription::higherQoS);
       }
     }
-    if (uniqueRetainedMessages == null) {
+    if (uniqueRetainedPublishes == null) {
       return;
     }
-    for (Map.Entry<Publish, Subscription> retainedMessageEntry : uniqueRetainedMessages.entrySet()) {
+    for (Map.Entry<Publish, Subscription> retainedMessageEntry : uniqueRetainedPublishes.entrySet()) {
       publishDispatcher.dispatchToSubscriber(
           retainedMessageEntry.getKey(),
           user,
@@ -238,8 +238,10 @@ public class SubscribeMqttInMessageHandler extends
       return false;
     } else {
       SubscribeRetainHandling retainHandling = subscription.retainHandling();
-      return retainHandling == SEND || (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST
-                                            && subscriptionResult.isNotExistedPreviously());
+      boolean isHandlingRequired = retainHandling == SEND;
+      isHandlingRequired |= (retainHandling == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST 
+                                 && subscriptionResult.isNotExistedPreviously());
+      return isHandlingRequired;
     }
   }
 }
