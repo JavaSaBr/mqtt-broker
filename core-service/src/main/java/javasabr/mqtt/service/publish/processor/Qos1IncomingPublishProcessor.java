@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.publish.handler.impl;
+package javasabr.mqtt.service.publish.processor;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
@@ -10,10 +10,9 @@ import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
+import javasabr.mqtt.service.publish.PublishDispatcher;
+import javasabr.mqtt.service.publish.RetainPublishService;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -86,7 +85,7 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       Publish publish,
-      PublishHandlingResult handlingResult) {
+      PublishProcessingResult handlingResult) {
     super.handleError(user, session, publish, handlingResult);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService

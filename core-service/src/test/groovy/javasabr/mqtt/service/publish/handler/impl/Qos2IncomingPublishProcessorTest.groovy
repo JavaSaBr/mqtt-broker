@@ -18,6 +18,7 @@ import javasabr.mqtt.network.message.out.PublishCompleteMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+import javasabr.mqtt.service.publish.processor.Qos2IncomingPublishProcessor
 import javasabr.rlib.collections.array.Array
 
 class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {

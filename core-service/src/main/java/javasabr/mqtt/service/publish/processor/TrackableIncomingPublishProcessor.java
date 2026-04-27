@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.publish.handler.impl;
+package javasabr.mqtt.service.publish.processor;
 
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
@@ -10,9 +10,9 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.PublishDispatcher;
+import javasabr.mqtt.service.publish.RetainPublishService;
 
 public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUser> extends
     AbstractIncomingPublishProcessor<U> {

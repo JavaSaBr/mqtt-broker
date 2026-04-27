@@ -6,6 +6,7 @@ import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.model.subscription.Subscription
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+import javasabr.mqtt.service.publish.processor.Qos0IncomingPublishProcessor
 import javasabr.rlib.collections.array.Array
 
 class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {

@@ -14,6 +14,7 @@ import javasabr.mqtt.network.message.in.PublishReceivedMqttInMessage
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+import javasabr.mqtt.service.publish.sender.Qos1SubscriberPublishSender
 
 class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 

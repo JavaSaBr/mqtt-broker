@@ -1,4 +1,4 @@
-package javasabr.mqtt.service;
+package javasabr.mqtt.service.publish;
 
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publish.Publish;

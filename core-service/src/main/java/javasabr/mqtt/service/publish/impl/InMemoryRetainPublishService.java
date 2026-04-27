@@ -1,10 +1,10 @@
-package javasabr.mqtt.service.impl;
+package javasabr.mqtt.service.publish.impl;
 
 import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
-import javasabr.mqtt.service.RetainPublishService;
+import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;

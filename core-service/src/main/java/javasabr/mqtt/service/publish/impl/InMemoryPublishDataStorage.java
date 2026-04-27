@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.impl;
 import java.util.UUID;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.publish.PublishData;
-import javasabr.mqtt.service.PublishDataStorage;
+import javasabr.mqtt.service.publish.PublishDataStorage;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import lombok.AccessLevel;

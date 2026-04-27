@@ -14,6 +14,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+import javasabr.mqtt.service.publish.processor.Qos1IncomingPublishProcessor
 import javasabr.rlib.collections.array.Array
 
 class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {

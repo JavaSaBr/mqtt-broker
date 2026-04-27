@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.publish.handler.impl;
+package javasabr.mqtt.service.publish.processor;
 
 import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.session.MessageTacker;
@@ -9,11 +9,9 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDispatcher;
-import javasabr.mqtt.service.RetainPublishService;
 import javasabr.mqtt.service.SubscriptionService;
-import javasabr.mqtt.service.publish.handler.IncomingPublishProcessor;
-import javasabr.mqtt.service.publish.handler.PublishHandlingResult;
+import javasabr.mqtt.service.publish.PublishDispatcher;
+import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -64,13 +62,13 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
 
     int count = 0;
     for (SingleSubscriber subscriber : subscribers) {
-      PublishHandlingResult checkResult = checkSubscriber(user, publish, subscriber);
+      PublishProcessingResult checkResult = checkSubscriber(user, publish, subscriber);
       if (checkResult.error()) {
         log.debug(user.clientId(), checkResult, subscriber,
             "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
         handleError(user, session, publish, checkResult);
         return;
-      } else if(checkResult == PublishHandlingResult.SUCCESS) {
+      } else if(checkResult == PublishProcessingResult.SUCCESS) {
         count++;
       }
     }
@@ -99,13 +97,13 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       U user,
       NetworkMqttSession session,
       Publish publish,
-      PublishHandlingResult handlingResult) {}
+      PublishProcessingResult handlingResult) {}
 
-  protected PublishHandlingResult checkSubscriber(
+  protected PublishProcessingResult checkSubscriber(
       U user,
       Publish publish,
       SingleSubscriber subscriber) {
-    return PublishHandlingResult.SUCCESS;
+    return PublishProcessingResult.SUCCESS;
   }
 
   protected void startDelivering(Publish publish, SingleSubscriber subscriber) {

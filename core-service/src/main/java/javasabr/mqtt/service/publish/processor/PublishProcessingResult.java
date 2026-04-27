@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.publish.handler;
+package javasabr.mqtt.service.publish.processor;
 
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public enum PublishHandlingResult {
+public enum PublishProcessingResult {
   SUCCESS(false, PublishAckReasonCode.SUCCESS, PublishReceivedReasonCode.SUCCESS),
   SKIPPED(false, PublishAckReasonCode.SUCCESS, PublishReceivedReasonCode.SUCCESS),
 

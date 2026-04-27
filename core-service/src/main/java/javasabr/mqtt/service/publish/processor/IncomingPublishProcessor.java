@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.publish.handler;
+package javasabr.mqtt.service.publish.processor;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.publish.Publish;

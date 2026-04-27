@@ -1,4 +1,4 @@
-package javasabr.mqtt.service;
+package javasabr.mqtt.service.publish;
 
 import java.util.UUID;
 import javasabr.mqtt.model.PayloadFormat;

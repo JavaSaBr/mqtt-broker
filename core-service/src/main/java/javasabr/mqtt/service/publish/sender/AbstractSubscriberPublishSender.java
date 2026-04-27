@@ -1,11 +1,10 @@
-package javasabr.mqtt.service.publish.handler.impl;
+package javasabr.mqtt.service.publish.sender;
 
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.publish.handler.SubscriberPublishSender;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;

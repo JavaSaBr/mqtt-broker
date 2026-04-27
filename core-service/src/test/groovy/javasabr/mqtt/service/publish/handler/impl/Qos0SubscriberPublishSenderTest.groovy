@@ -6,6 +6,7 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.publishing.Publish
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+import javasabr.mqtt.service.publish.sender.Qos0SubscriberPublishSender
 
 class Qos0SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
