@@ -40,10 +40,10 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
   }
 
   @Override
-  protected void handleImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected void processImpl(U user, NetworkMqttSession session, Publish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
-    super.handleImpl(user, session, publish);
+    super.processImpl(user, session, publish);
   }
 
   protected void handleMissedMessageId(U client) {

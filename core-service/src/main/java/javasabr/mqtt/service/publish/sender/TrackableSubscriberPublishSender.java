@@ -33,7 +33,7 @@ public abstract class TrackableSubscriberPublishSender extends
   protected TrackableSubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
     super(ExternalNetworkMqttUser.class, messageOutFactoryService);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
-    this.publishRetryer = this::retryDelivering;
+    this.publishRetryer = this::retrySending;
   }
 
   @Nullable
@@ -77,7 +77,7 @@ public abstract class TrackableSubscriberPublishSender extends
       TrackableMqttMessage message,
       @Nullable TrackedMessageMeta trackedMessageMeta);
 
-  protected final void retryDelivering(MqttUser user, MqttSession session, Publish publish) {
+  protected final void retrySending(MqttUser user, MqttSession session, Publish publish) {
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     String clientId = networkMqttUser.clientId();
     int messageId = publish.messageId();

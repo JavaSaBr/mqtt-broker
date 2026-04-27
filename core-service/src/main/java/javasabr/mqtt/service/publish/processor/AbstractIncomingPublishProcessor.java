@@ -43,7 +43,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       return;
     }
     if (validateImpl(expectedUser, session, publish)) {
-      handleImpl(expectedUser, session, publish);
+      processImpl(expectedUser, session, publish);
     }
   }
 
@@ -51,7 +51,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     return true;
   }
 
-  protected void handleImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected void processImpl(U user, NetworkMqttSession session, Publish publish) {
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -77,7 +77,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     handleSuccess(user, session, publish, count);
 
     for (SingleSubscriber subscriber : subscribers) {
-      startDelivering(publish, subscriber);
+      dispatchToSubscriber(publish, subscriber);
     }
   }
 
@@ -106,7 +106,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     return PublishProcessingResult.SUCCESS;
   }
 
-  protected void startDelivering(Publish publish, SingleSubscriber subscriber) {
+  protected void dispatchToSubscriber(Publish publish, SingleSubscriber subscriber) {
     publishDispatcher.dispatchToSubscriber(publish, subscriber.user(), subscriber.subscription());
   }
 
