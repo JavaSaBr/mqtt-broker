@@ -21,7 +21,7 @@ public class InMemoryRetainPublishService implements RetainPublishService {
   @Override
   public void retain(Publish publish) {
     PublishData data = publish.data();
-    if (data.isEmpty()) {
+    if (data.isPayloadEmpty()) {
       retainedMessageTree.removeRetainedMessage(publish.topicName());
     } else {
       retainedMessageTree.addRetainedMessage(publish);

@@ -6,9 +6,9 @@ import java.util.Set;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
-import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.rlib.collections.array.Array;
@@ -148,10 +148,8 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
 
   @Nullable
   TopicName responseTopic;
-  byte @Nullable [] correlationData;
 
   Array<StringPair> userProperties;
-  PayloadFormat payloadFormat;
 
   int topicAlias;
 
@@ -161,17 +159,13 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
       boolean retain,
       boolean duplicate,
       TopicName topicName,
-      byte[] payload,
+      PublishData data,
       int topicAlias,
-      PayloadFormat payloadFormat,
       @Nullable TopicName responseTopic,
-      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
-    super(messageId, qos, retain, duplicate, topicName, payload);
+    super(messageId, qos, retain, duplicate, topicName, data);
     this.topicAlias = topicAlias;
-    this.payloadFormat = payloadFormat;
     this.responseTopic = responseTopic;
-    this.correlationData = correlationData;
     this.userProperties = userProperties;
   }
 
@@ -189,7 +183,7 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
   protected void writeProperties(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc511988586
     String rawResponseTopic = responseTopic == null ? null : responseTopic.rawTopic();
-    writeProperty(buffer, MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR, payloadFormat.code());
+    writeProperty(buffer, MqttMessageProperty.PAYLOAD_FORMAT_INDICATOR, data.payloadFormat().code());
     writeProperty(
         buffer,
         MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL,
@@ -197,7 +191,11 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
         MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET);
     writeProperty(buffer, MqttMessageProperty.TOPIC_ALIAS, topicAlias, MqttProperties.TOPIC_ALIAS_NOT_SET);
     writeNotEmptyProperty(buffer, MqttMessageProperty.RESPONSE_TOPIC, rawResponseTopic);
-    writeNotEmptyProperty(buffer, MqttMessageProperty.CORRELATION_DATA, correlationData);
     writeStringPairProperties(buffer, MqttMessageProperty.USER_PROPERTY, userProperties);
+
+    if (!data.isCorrelationDataEmpty()) {
+      buffer.put(MqttMessageProperty.CORRELATION_DATA.id());
+      data.writeCorrelationDataTo(buffer);
+    }
   }
 }

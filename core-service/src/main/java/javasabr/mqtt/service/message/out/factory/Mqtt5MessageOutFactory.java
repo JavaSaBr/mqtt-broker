@@ -2,9 +2,9 @@ package javasabr.mqtt.service.message.out.factory;
 
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
@@ -76,10 +76,8 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
       boolean duplicate,
       TopicName topicName,
       int topicAlias,
-      byte[] payload,
-      PayloadFormat payloadFormat,
+      PublishData data,
       @Nullable TopicName responseTopic,
-      byte @Nullable [] correlationData,
       Array<StringPair> userProperties) {
     return new PublishMqtt5OutMessage(
         messageId,
@@ -87,11 +85,9 @@ public class Mqtt5MessageOutFactory extends Mqtt311MessageOutFactory {
         retain,
         duplicate,
         topicName,
-        payload,
+        data,
         topicAlias,
-        payloadFormat,
         responseTopic,
-        correlationData,
         userProperties);
   }
 

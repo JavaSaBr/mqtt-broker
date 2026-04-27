@@ -3,7 +3,7 @@ package javasabr.mqtt.service.session.impl;
 import java.util.concurrent.locks.StampedLock;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.model.session.PublishRetryer;

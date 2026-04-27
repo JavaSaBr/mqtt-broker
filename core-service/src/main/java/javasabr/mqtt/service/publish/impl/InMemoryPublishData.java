@@ -40,8 +40,13 @@ public class InMemoryPublishData implements PublishData {
   }
 
   @Override
-  public boolean isEmpty() {
+  public boolean isPayloadEmpty() {
     return payloadSize < 1;
+  }
+
+  @Override
+  public boolean isCorrelationDataEmpty() {
+    return correlationDataSize < 1;
   }
 
   @Override

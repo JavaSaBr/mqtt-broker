@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.network.MqttConnection;
 import lombok.AccessLevel;
@@ -23,7 +24,7 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
   }
 
   QoS qos;
-  byte[] payload;
+  PublishData data;
   TopicName topicName;
 
   boolean retain;
@@ -35,12 +36,12 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
       boolean retain,
       boolean duplicate,
       TopicName topicName,
-      byte[] payload) {
+      PublishData data) {
     super(messageId);
     this.qos = qos;
     this.retain = retain;
     this.duplicate = duplicate;
-    this.payload = payload;
+    this.data = data;
     this.topicName = topicName;
   }
 
@@ -56,7 +57,7 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
 
   @Override
   public int expectedLength(MqttConnection connection) {
-    return 7 + payload.length;
+    return 7 + data.payloadSize();
   }
 
   @Override
@@ -83,6 +84,6 @@ public class PublishMqtt311OutMessage extends TrackableMqttOutMessage {
   @Override
   protected void writePayload(MqttConnection connection, ByteBuffer buffer) {
     // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc384800413
-    buffer.put(payload);
+    data.writePayloadTo(buffer);
   }
 }
