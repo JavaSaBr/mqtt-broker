@@ -16,7 +16,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
         def random = ThreadLocalRandom.current()
         def shouldBeRemoved = MutableArray.ofType(String)
         60.times {
-          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it", 1)
           def notExpirableSession = new NotExpirableSession(it + 1, session)
           allSessions.put(session.clientId(), notExpirableSession)
           if (it < 20) {
@@ -46,7 +46,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
         def random = ThreadLocalRandom.current()
         def shouldBeRemoved = MutableArray.ofType(String)
         51.times {
-          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it", 2)
           def notExpirableSession = new NotExpirableSession(it + 1, session)
           allSessions.put(session.clientId(), notExpirableSession)
           if (it < 10) {
@@ -75,7 +75,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
         def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
         def random = ThreadLocalRandom.current()
         50.times {
-          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it", 3)
           def notExpirableSession = new NotExpirableSession(it + 1, session)
           allSessions.put(session.clientId(), notExpirableSession)
         }
@@ -92,7 +92,7 @@ class OldestSessionCleanerTest extends UnitSpecification {
         def cleaner = new OldestSessionCleaner<NotExpirableSession>(allSessions, 50, 10)
         def random = ThreadLocalRandom.current()
         51.times {
-          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it", 4)
           def notExpirableSession = new NotExpirableSession(5, session)
           allSessions.put(session.clientId(), notExpirableSession)
         }

@@ -1,11 +1,11 @@
-package javasabr.mqtt.service.publish.handler.impl
+package javasabr.mqtt.service.publish.processor
 
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttProtocolErrors
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.message.MqttMessageType
-import javasabr.mqtt.model.publishing.Publish
+import javasabr.mqtt.model.publish.IncomingPublish
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.mqtt.model.subscription.Subscription
@@ -14,14 +14,13 @@ import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
-import javasabr.mqtt.service.publish.processor.Qos1IncomingPublishProcessor
 import javasabr.rlib.collections.array.Array
 
 class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should provide feedback for accepted publish with subscribers"() {
     given:
-        def publishInHandler = new Qos1IncomingPublishProcessor(
+        def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
@@ -32,8 +31,8 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def client1 = subscriber1.user() as TestExternalNetworkMqttUser
         def client2 = subscriber2.user() as TestExternalNetworkMqttUser
         def client3 = publisher.user() as TestExternalNetworkMqttUser
-        def topicFilter = defaultTopicService.createTopicFilter(client1, "Qos1MqttPublishInMessageHandlerTest/1")
-        def expectedTopicName = defaultTopicService.createTopicName(client1, "Qos1MqttPublishInMessageHandlerTest/1")
+        def topicFilter = defaultTopicService.createTopicFilter(client1, "Qos1IncomingPublishProcessorTest/1")
+        def expectedTopicName = defaultTopicService.createTopicName(client1, "Qos1IncomingPublishProcessorTest/1")
         def expectedMessageId = 35
         defaultSubscriptionService.subscribe(
             client1,
@@ -47,7 +46,7 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
             .session()
             .inMessageTracker()
     when:
-        publishInHandler.process(client3, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
+        processor.process(client3, IncomingPublish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
     then: 'sender should have feedback'
         with(client3.nextSentMessage(PublishAckMqtt5OutMessage)) {
           reasonCode() == PublishAckReasonCode.SUCCESS
@@ -67,19 +66,19 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should provide feedback for accepted publish without any subscriber"() {
     given:
-        def publishInHandler = new Qos1IncomingPublishProcessor(
+        def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
             inMemoryRetainMessageService)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
-        def topicName = defaultTopicService.createTopicName(user, "Qos1MqttPublishInMessageHandlerTest/2")
+        def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/2")
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
     when:
-        publishInHandler.process(user, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
+        processor.process(user, IncomingPublish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should have feedback that no matched subscribers'
         with(user.nextSentMessage(PublishAckMqtt5OutMessage)) {
           reasonCode() == PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -92,16 +91,16 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should disconnect by reason that message id is missed"() {
     given:
-        def publishInHandler = new Qos1IncomingPublishProcessor(
+        def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
             inMemoryRetainMessageService)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
-        def topicName = defaultTopicService.createTopicName(user, "Qos1MqttPublishInMessageHandlerTest/3")
+        def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/3")
     when:
-        publishInHandler.process(user, Publish.minimal(
+        processor.process(user, IncomingPublish.minimal(
             MqttProperties.MESSAGE_ID_IS_NOT_SET,
             QoS.AT_MOST_ONCE,
             topicName,
@@ -116,20 +115,20 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should provide feedback that message id is already used"() {
     given:
-        def publishInHandler = new Qos1IncomingPublishProcessor(
+        def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
             inMemoryRetainMessageService)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
-        def topicName = defaultTopicService.createTopicName(user, "Qos1MqttPublishInMessageHandlerTest/4")
+        def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/4")
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
     when:
-        publishInHandler.process(user, Publish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
+        processor.process(user, IncomingPublish.minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
     then:
         with(user.nextSentMessage(PublishAckMqtt5OutMessage)) {
           reasonCode() == PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE
@@ -143,20 +142,20 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should skip handling duplicated publish"() {
     given:
-        def publishInHandler = new Qos1IncomingPublishProcessor(
+        def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
             defaultPublishDeliveringService,
             defaultMessageOutFactoryService,
             inMemoryRetainMessageService)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
-        def topicName = defaultTopicService.createTopicName(user, "Qos1MqttPublishInMessageHandlerTest/5")
+        def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/5")
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH)
     when:
-        publishInHandler.process(user, Publish
+        processor.process(user, IncomingPublish
             .minimal(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload)
             .withDuplicated())
     then:

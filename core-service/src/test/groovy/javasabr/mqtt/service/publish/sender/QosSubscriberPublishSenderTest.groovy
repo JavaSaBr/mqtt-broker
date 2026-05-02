@@ -1,4 +1,4 @@
-package javasabr.mqtt.service.publish.handler.impl
+package javasabr.mqtt.service.publish.sender
 
 import javasabr.mqtt.service.IntegrationServiceSpecification
 

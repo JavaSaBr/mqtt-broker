@@ -7,7 +7,6 @@ import javasabr.mqtt.model.message.MqttMessageType
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.subscription.RequestedSubscription
-import javasabr.mqtt.model.subscription.TestPublishFactory
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage
 import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
@@ -20,6 +19,8 @@ import javasabr.rlib.collections.array.MutableArray
 import javasabr.rlib.common.util.ThreadUtils
 import javasabr.rlib.logger.api.LoggerLevel
 import javasabr.rlib.logger.api.LoggerManager
+
+import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublishWithRetain
 
 class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification {
 
@@ -296,7 +297,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions.addAll(requestedSubscriptions)
         }}
     and:
-        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
@@ -334,7 +335,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions.addAll(requestedSubscriptions)
         }}
     and:
-        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
@@ -373,10 +374,10 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions.addAll(requestedSubscriptions)
         }}
     and:
-        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     and:
-        def publishWithoutRetain = TestPublishFactory.makePublishWithoutRetain("topic/filter/1", "payload2")
+        def publishWithoutRetain = incomingPublishWithRetain("topic/filter/1", "payload2")
         inMemoryRetainMessageService.retain(publishWithoutRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
@@ -409,7 +410,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions.addAll(requestedSubscriptions)
         }}
     and:
-        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
@@ -440,7 +441,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions.addAll(requestedSubscriptions)
         }}
     and:
-        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
@@ -484,7 +485,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
           this.subscriptions.addAll(requestedSubscriptions)
         }}
     and:
-        def publishWithRetain = TestPublishFactory.makePublishWithRetain("topic/filter/1", "payload1")
+        def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
         inMemoryRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)

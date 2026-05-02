@@ -1,16 +1,19 @@
-package javasabr.mqtt.service.publish.impl;
+package javasabr.mqtt.model.publish.impl;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
 import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.publish.PublishData;
 import javasabr.rlib.common.util.ArrayUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
 @Getter
 @Accessors
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryPublishData implements PublishData {
   
   UUID id;
@@ -57,6 +60,7 @@ public class InMemoryPublishData implements PublishData {
   @Override
   public void writeCorrelationDataTo(ByteBuffer buffer) {
     if (correlationData != null) {
+      buffer.putShort((short) correlationData.length);
       buffer.put(correlationData);
     }
   }

@@ -18,7 +18,7 @@ class ExpiredSessionCleanerTest extends UnitSpecification {
         def currentTime = System.currentTimeMillis()
         60.times {
           def expiredAt = it < 30 ? 1 : currentTime + 10_000;
-          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it", 1)
           def expirableSession = new ExpirableSession(it + 1, session, expiredAt)
           allSessions.put(session.clientId(), expirableSession)
           if (it < 30) {
@@ -48,7 +48,7 @@ class ExpiredSessionCleanerTest extends UnitSpecification {
         def random = ThreadLocalRandom.current()
         def currentTime = System.currentTimeMillis()
         60.times {
-          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it")
+          def session = new InMemoryNetworkMqttSession("session_${random.nextInt()}_$it", 2)
           def expirableSession = new ExpirableSession(it + 1, session, currentTime + 10_000)
           allSessions.put(session.clientId(), expirableSession)
         }

@@ -7,6 +7,7 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
@@ -19,6 +20,7 @@ import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
 import javasabr.mqtt.service.publish.impl.DefaultIncomingPublishRouter
 import javasabr.mqtt.service.publish.impl.DefaultPublishDispatcher
+import javasabr.mqtt.service.publish.impl.InMemoryPublishDataStorage
 import javasabr.mqtt.service.publish.impl.InMemoryRetainPublishService
 import javasabr.mqtt.service.publish.processor.Qos0IncomingPublishProcessor
 import javasabr.mqtt.service.publish.processor.Qos1IncomingPublishProcessor
@@ -42,13 +44,20 @@ import java.util.concurrent.atomic.AtomicInteger
 abstract class IntegrationServiceSpecification extends BaseSpecification {
 
   @Shared
-  def testPayload = "testpayload".getBytes(StandardCharsets.UTF_8)
-
+  def testPayloadString = "testpayload"
+  @Shared
+  def testPayloadBytes = testPayloadString.getBytes(StandardCharsets.UTF_8)
+  @Shared
+  def testPayload = PublishData.wrap(testPayloadBytes)
+  
   @Shared
   def clientIdGenerator = new AtomicInteger()
 
   @Shared
   def defaultTopicService = new DefaultTopicService()
+  
+  @Shared
+  def defaultPublishDataStorage = new InMemoryPublishDataStorage()
   
   @Shared
   def authorizationService = new DisabledAuthorizationService();

@@ -1,8 +1,10 @@
 package javasabr.mqtt.model.subscription
 
-import javasabr.mqtt.model.PayloadFormat
+import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.publishing.Publish
+import javasabr.mqtt.model.data.type.StringPair
+import javasabr.mqtt.model.publish.IncomingPublish
+import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -11,57 +13,63 @@ import static java.nio.charset.StandardCharsets.UTF_8
 
 class TestPublishFactory {
 
-  static def makePublish(String topicName) {
-    return new Publish(
-        1,
-        QoS.AT_MOST_ONCE,
+  static def incomingQos0Publish(String topicName) {
+    return new IncomingPublish(
+        MqttProperties.MESSAGE_ID_IS_NOT_SET,
+        QoS.AT_LEAST_ONCE,
         TopicName.valueOf(topicName),
         null,
-        "payload".getBytes(UTF_8),
+        PublishData.wrap("payload".getBytes(UTF_8)),
         false,
-        true,
-        null,
-        IntArray.of(30),
-        null,
+        false,
+        IntArray.empty(),
         60000,
-        1,
-        PayloadFormat.UTF8_STRING,
-        Array.of());
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+        Array.empty(StringPair));
+  }
+  
+  static def incomingPublish(QoS qos, String topicName, String payload) {
+    return new IncomingPublish(
+        MqttProperties.MESSAGE_ID_IS_NOT_SET,
+        qos,
+        TopicName.valueOf(topicName),
+        null,
+        PublishData.wrap(payload.getBytes(UTF_8)),
+        false,
+        false,
+        IntArray.empty(),
+        60000,
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+        Array.empty(StringPair));
   }
 
-  static def makePublishWithRetain(String topicName, String payload) {
-    return new Publish(
+  static def incomingPublish(QoS qos, TopicName topicName, PublishData payload) {
+    return new IncomingPublish(
+        MqttProperties.MESSAGE_ID_IS_NOT_SET,
+        qos,
+        topicName,
+        null,
+        payload,
+        false,
+        false,
+        IntArray.empty(),
+        60000,
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+        Array.empty(StringPair));
+  }
+  
+  static def incomingPublishWithRetain(String topicName, String payload) {
+    return new IncomingPublish(
         1,
         QoS.AT_MOST_ONCE,
         TopicName.valueOf(topicName),
         null,
-        payload.getBytes(UTF_8),
+        PublishData.wrap(payload.getBytes(UTF_8)),
         false,
         true,
-        null,
         IntArray.of(30),
-        null,
         60000,
         1,
-        PayloadFormat.UTF8_STRING,
-        Array.of());
-  }
-
-  static def makePublishWithoutRetain(String topicName, String payload) {
-    return new Publish(
-        1,
-        QoS.AT_MOST_ONCE,
-        TopicName.valueOf(topicName),
-        null,
-        payload.getBytes(UTF_8),
-        false,
-        false,
-        null,
-        IntArray.of(30),
-        null,
-        60000,
-        1,
-        PayloadFormat.UTF8_STRING,
-        Array.of());
+        Array.empty(StringPair));
   }
 }
