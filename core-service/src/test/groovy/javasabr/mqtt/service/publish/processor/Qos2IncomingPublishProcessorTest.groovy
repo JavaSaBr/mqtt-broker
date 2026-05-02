@@ -5,7 +5,6 @@ import javasabr.mqtt.model.MqttProtocolErrors
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.message.MqttMessageType
-import javasabr.mqtt.model.publish.IncomingPublish
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
@@ -19,6 +18,8 @@ import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
+
+import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
 
 class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
@@ -50,7 +51,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
             .session()
             .inMessageTracker()
     when:
-        processor.process(client3, IncomingPublish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, expectedTopicName, testPayload))
+        processor.process(client3, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, expectedTopicName, testPayload))
     then: 'sender should have feedback of first phase'
         with(client3.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.SUCCESS
@@ -97,7 +98,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
     when:
-        processor.process(user, IncomingPublish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then: 'sender should have feedback that no matched subscribers'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -134,7 +135,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/3")
     when:
-        processor.process(user, IncomingPublish.minimal(
+        processor.process(user, incomingPublish(
             MqttProperties.MESSAGE_ID_IS_NOT_SET,
             QoS.EXACTLY_ONCE,
             topicName,
@@ -162,7 +163,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
     when:
-        processor.process(user, IncomingPublish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
@@ -189,9 +190,10 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH, PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS)
     when:
-        processor.process(user, IncomingPublish
-            .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
-            .withDuplicated())
+        processor.process(
+            user, 
+            incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
+                .withDuplicated())
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -217,7 +219,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
     when: 'init floy by original publish'
-        processor.process(user, IncomingPublish.minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -229,9 +231,10 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
         }
     when: 'send duplicated before publish release'
-        processor.process(user, IncomingPublish
-            .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
-            .withDuplicated())
+        processor.process(
+            user, 
+            incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
+                .withDuplicated())
     then: 'server should return the same feedback for duplicated as for original'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -258,9 +261,10 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
           messageType() == MqttMessageType.PUBLISH_COMPLETE
         }
     when: 'send duplicated after publish release'
-        processor.process(user, IncomingPublish
-            .minimal(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
-            .withDuplicated())
+        processor.process(
+            user, 
+            incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
+                .withDuplicated())
     then: 'server should return that this message id is already used because publish complete is in progress of sending'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE

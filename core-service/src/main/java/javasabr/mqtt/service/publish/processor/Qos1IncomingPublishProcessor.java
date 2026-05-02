@@ -28,8 +28,10 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
       RetainPublishService retainPublishService) {
     super(
         ExternalNetworkMqttUser.class,
-        subscriptionService, publishDispatcher,
-        messageOutFactoryService, retainPublishService);
+        subscriptionService, 
+        publishDispatcher,
+        messageOutFactoryService,
+        retainPublishService);
   }
 
   @Override

@@ -59,9 +59,7 @@ public class InMemoryPublishData implements PublishData {
 
   @Override
   public void writeCorrelationDataTo(ByteBuffer buffer) {
-    if (correlationData != null) {
-      buffer.putShort((short) correlationData.length);
-      buffer.put(correlationData);
-    }
+    //noinspection DataFlowIssue caller should check it
+    buffer.put(correlationData);
   }
 }

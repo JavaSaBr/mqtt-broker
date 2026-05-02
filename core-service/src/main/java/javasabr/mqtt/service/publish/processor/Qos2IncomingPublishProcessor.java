@@ -38,8 +38,10 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       RetainPublishService retainPublishService) {
     super(
         ExternalNetworkMqttUser.class,
-        subscriptionService, publishDispatcher,
-        messageOutFactoryService, retainPublishService);
+        subscriptionService, 
+        publishDispatcher,
+        messageOutFactoryService,
+        retainPublishService);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
   }
 

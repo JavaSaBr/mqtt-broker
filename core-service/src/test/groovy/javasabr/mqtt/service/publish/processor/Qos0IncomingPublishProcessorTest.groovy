@@ -3,10 +3,11 @@ package javasabr.mqtt.service.publish.processor
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.subscription.Subscription
-import javasabr.mqtt.model.subscription.TestPublishFactory
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
+
+import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
 
 class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
@@ -34,7 +35,7 @@ class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
             user2.session(),
             Array.of(Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)))
     when:
-        processor.process(user3, TestPublishFactory.incomingPublish(QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
+        processor.process(user3, incomingPublish(QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
     then: 'sender should not have any feedback'
         user3.isEmpty()
     then: 'subscribers should receive the publish'
@@ -57,7 +58,7 @@ class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos0IncomingPublishProcessorTest/2")
     when:
-        processor.process(user, TestPublishFactory.incomingPublish(QoS.AT_MOST_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish(QoS.AT_MOST_ONCE, topicName, testPayload))
     then: 'sender should not have any feedback'
         user.isEmpty()
   }

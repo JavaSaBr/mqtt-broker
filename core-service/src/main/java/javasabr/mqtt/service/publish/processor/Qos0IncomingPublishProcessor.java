@@ -22,8 +22,10 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
       RetainPublishService retainPublishService) {
     super(
         ExternalNetworkMqttUser.class,
-        subscriptionService, publishDispatcher,
-        messageOutFactoryService, retainPublishService);
+        subscriptionService,
+        publishDispatcher,
+        messageOutFactoryService,
+        retainPublishService);
   }
 
   @Override

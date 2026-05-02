@@ -57,6 +57,21 @@ class TestPublishFactory {
         MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
         Array.empty(StringPair));
   }
+
+  static def incomingPublish(int messageId, QoS qos, TopicName topicName, PublishData payload) {
+    return new IncomingPublish(
+        messageId,
+        qos,
+        topicName,
+        null,
+        payload,
+        false,
+        false,
+        IntArray.empty(),
+        60000,
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+        Array.empty(StringPair));
+  }
   
   static def incomingPublishWithRetain(String topicName, String payload) {
     return new IncomingPublish(

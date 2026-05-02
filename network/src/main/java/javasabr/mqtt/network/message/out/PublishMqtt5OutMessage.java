@@ -193,8 +193,10 @@ public class PublishMqtt5OutMessage extends PublishMqtt311OutMessage {
     writeNotEmptyProperty(buffer, MqttMessageProperty.RESPONSE_TOPIC, rawResponseTopic);
     writeStringPairProperties(buffer, MqttMessageProperty.USER_PROPERTY, userProperties);
 
-    if (!data.isCorrelationDataEmpty()) {
+    int correlationDataSize = data.correlationDataSize();
+    if (correlationDataSize > 0) {
       buffer.put(MqttMessageProperty.CORRELATION_DATA.id());
+      buffer.putShort((short) correlationDataSize);
       data.writeCorrelationDataTo(buffer);
     }
   }

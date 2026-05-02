@@ -15,6 +15,8 @@ import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 
+import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
+
 class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should deliver publish to subscriber"() {
@@ -134,7 +136,7 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/4")
         def originalMessageId = 60
-        def testPublish = IncomingPublish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = incomingPublish(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
         sender.sendToSubscriber(testPublish, user)
@@ -170,7 +172,7 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/5")
         def originalMessageId = 60
-        def testPublish = IncomingPublish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = incomingPublish(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
         sender.sendToSubscriber(testPublish, user)

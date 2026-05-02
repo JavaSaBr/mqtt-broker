@@ -25,8 +25,10 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
       RetainPublishService retainPublishService) {
     super(
         expectedClientType,
-        subscriptionService, publishDispatcher,
-        messageOutFactoryService, retainPublishService);
+        subscriptionService, 
+        publishDispatcher,
+        messageOutFactoryService, 
+        retainPublishService);
   }
 
   @Override

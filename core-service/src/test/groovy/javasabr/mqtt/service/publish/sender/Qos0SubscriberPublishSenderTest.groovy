@@ -3,9 +3,10 @@ package javasabr.mqtt.service.publish.sender
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.model.publish.IncomingPublish
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+
+import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
 
 class Qos0SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
@@ -16,7 +17,7 @@ class Qos0SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos0MqttPublishOutMessageHandlerTest/1")
         def originalMessageId = 60
-        def testPublish = IncomingPublish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
+        def testPublish = incomingPublish(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()
     when:
         sender.sendToSubscriber(testPublish, user)
