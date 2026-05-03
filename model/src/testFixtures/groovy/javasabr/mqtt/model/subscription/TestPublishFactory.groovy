@@ -16,7 +16,7 @@ class TestPublishFactory {
   static def incomingQos0Publish(String topicName) {
     return new IncomingPublish(
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
-        QoS.AT_LEAST_ONCE,
+        QoS.AT_MOST_ONCE,
         TopicName.valueOf(topicName),
         null,
         PublishData.wrap("payload".getBytes(UTF_8)),
