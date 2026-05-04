@@ -66,6 +66,12 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
+  protected void processImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, IncomingPublish publish) {
+    super.processImpl(user, session, publish);
+    dispatchToSubscriber(user, session, publish);
+  }
+
+  @Override
   protected void handleNoMatchedSubscribers(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session, 
@@ -79,22 +85,19 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleSuccess(
+  protected void handleMatchedSubscribers(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       IncomingPublish publish,
       int matchedSubscribers) {
-    super.handleSuccess(user, session, publish, matchedSubscribers);
-    if (publish.retained()) {
-      retainPublishService.retain(publish);
-    }
+    super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.SUCCESS);
     sendFeedback(user, session, response, messageId);
   }
-
+  
   @Override
   protected void handleError(
       ExternalNetworkMqttUser user,

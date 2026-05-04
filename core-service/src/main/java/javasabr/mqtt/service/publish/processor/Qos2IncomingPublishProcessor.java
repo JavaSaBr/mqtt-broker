@@ -76,17 +76,13 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       handleMessageIdIsInUse(user, messagedId, publish);
       return false;
     }
-
     return true;
   }
 
   @Override
-  protected void handleNoMatchedSubscribers(
-      ExternalNetworkMqttUser user, 
-      NetworkMqttSession session,
-      IncomingPublish publish) {
-    super.handleNoMatchedSubscribers(user, session, publish);
-    var reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
+  protected void processImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, IncomingPublish publish) {
+    super.processImpl(user, session, publish);
+    var reasonCode = PublishReceivedReasonCode.SUCCESS;
     updateSessionState(session, publish, reasonCode);
     sendFeedback(
         user,
@@ -96,21 +92,32 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleSuccess(
-      ExternalNetworkMqttUser user,
+  protected void handleNoMatchedSubscribers(
+      ExternalNetworkMqttUser user, 
       NetworkMqttSession session,
-      IncomingPublish publish,
-      int matchedSubscribers) {
-    super.handleSuccess(user, session, publish, matchedSubscribers);
-    var reasonCode = PublishReceivedReasonCode.SUCCESS;
-    updateSessionState(session, publish, reasonCode);
+      IncomingPublish publish) {
+    super.handleNoMatchedSubscribers(user, session, publish);
     sendFeedback(
         user,
         messageOutFactoryService
             .resolveFactory(user)
-            .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.SUCCESS));
+            .newPublishCompleted(publish.messageId(), PublishCompletedReasonCode.SUCCESS));
   }
 
+  @Override
+  protected void handleMatchedSubscribers(
+      ExternalNetworkMqttUser user,
+      NetworkMqttSession session,
+      IncomingPublish publish,
+      int matchedSubscribers) {
+    super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
+    sendFeedback(
+        user,
+        messageOutFactoryService
+            .resolveFactory(user)
+            .newPublishCompleted(publish.messageId(), PublishCompletedReasonCode.SUCCESS));
+  }
+  
   private void updateSessionState(
       NetworkMqttSession session,
       IncomingPublish publish, 
@@ -177,48 +184,33 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     String clientId = networkMqttUser.clientId();
     int messageId = message.messageId();
 
+    if (!(publish instanceof IncomingPublish incomingPublish)) {
+      log.warning(clientId, publish.getClass(), messageId, 
+          "[%s] Not expected publish type:[%s] for messageId:[%d]"::formatted);
+      return true;
+    }
+
     MessageTacker messageTacker = session.inMessageTracker();
     TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
     if (messageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
-      if (publish instanceof IncomingPublish incomingPublish) {
-        incomingPublishStorage.remove(incomingPublish);
-      }
+      incomingPublishStorage.remove(incomingPublish);
       return true;
     }
 
     if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
       log.warning(clientId, messageMeta, messageId, 
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
-      if (publish instanceof IncomingPublish incomingPublish) {
-        incomingPublishStorage.remove(incomingPublish);
-      }
+      incomingPublishStorage.remove(incomingPublish);
       return true;
-    } else if (!(message instanceof PublishReleaseMqttInMessage release)) {
+    } else if (message.messageType() != MqttMessageType.PUBLISH_RELEASE) {
       log.warning(clientId, message.messageType(), "[%s] Not expected message:[%s]"::formatted);
-      if (publish instanceof IncomingPublish incomingPublish) {
-        incomingPublishStorage.remove(incomingPublish);
-      }
+      incomingPublishStorage.remove(incomingPublish);
       return true;
     }
 
     messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
-
-    // for QoS 2 only when we sure that this publish is fully correctly 
-    // received we can register it to retain storage
-    if (publish.retained()) {
-      if (publish instanceof IncomingPublish incoming) {
-        retainPublishService.retain(incoming);
-      } else {
-        throw new IllegalStateException("Unexpected type of publish:[%s], expected 'incoming'".formatted(publish));
-      }
-    }
-
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(networkMqttUser)
-        .newPublishCompleted(message.messageId(), PublishCompletedReasonCode.SUCCESS);
-
-    sendFeedback(networkMqttUser, session, response, messageId);
+    dispatchToSubscriber(networkMqttUser, (NetworkMqttSession) session, incomingPublish);
     return true;
   }
 }

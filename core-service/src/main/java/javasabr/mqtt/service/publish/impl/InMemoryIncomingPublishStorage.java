@@ -63,4 +63,19 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
       storedPublishes.writeUnlock(stamp);
     }
   }
+
+  @Override
+  public void remove(IncomingPublish publish) {
+    
+  }
+
+  @Override
+  public void increaseConsumerCount(IncomingPublish publish, int count) {
+
+  }
+
+  @Override
+  public void decreaseConsumerCount(IncomingPublish publish, int count) {
+
+  }
 }

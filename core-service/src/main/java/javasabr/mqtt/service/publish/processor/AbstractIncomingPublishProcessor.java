@@ -54,6 +54,13 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   }
 
   protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
+  }
+
+  protected void dispatchToSubscriber(U user, NetworkMqttSession session, IncomingPublish publish) {
+    if (publish.retained()) {
+      retainPublishService.retain(publish);
+    }
+    
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -62,43 +69,48 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       return;
     }
 
-    int count = 0;
+    int matchedSubscribers = subscribers.size();
+    log.debug(matchedSubscribers, "Starting dispatching publish to [%s] subscribers"::formatted);
+    incomingPublishStorage.increaseConsumerCount(publish, matchedSubscribers);
+    
+    int skipped = 0;
     for (SingleSubscriber subscriber : subscribers) {
       PublishProcessingResult checkResult = checkSubscriber(user, publish, subscriber);
       if (checkResult.error()) {
         log.debug(user.clientId(), checkResult, subscriber,
             "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
-        handleError(user, session, publish, checkResult);
-        return;
+        skipped++;
       } else if(checkResult == PublishProcessingResult.SUCCESS) {
-        count++;
+        dispatchToSubscriber(publish, subscriber);
       }
     }
 
-    if (count > 0) {
-      incomingPublishStorage.increaseConsumerCount(publish, count);
-    } else if (!publish.retained()) {
-      incomingPublishStorage.remove(publish);
+    if (skipped > 0) {
+      incomingPublishStorage.decreaseConsumerCount(publish, skipped);
     }
-    
-    handleSuccess(user, session, publish, count);
 
-    log.debug(count, "Started delivering publish to [%s] subscribers"::formatted);
-    for (SingleSubscriber subscriber : subscribers) {
-      dispatchToSubscriber(publish, subscriber);
+    int result = matchedSubscribers - skipped;
+    if (result > 0) {
+      handleMatchedSubscribers(user, session, publish, result);
+    } else {
+      handleNoMatchedSubscribers(user, session, publish);
     }
   }
 
   protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {
-    incomingPublishStorage.remove(publish);
+    if (!publish.retained()) {
+      incomingPublishStorage.remove(publish);
+    }
   }
 
-  protected void handleSuccess(
-      U user,
-      NetworkMqttSession session,
-      IncomingPublish publish,
-      int matchedSubscribers) {}
-
+  protected void handleMatchedSubscribers(
+      U user, 
+      NetworkMqttSession session, 
+      IncomingPublish publish, 
+      int matchedSubscribers) {
+    log.debug(matchedSubscribers, "Dispatched publish in the result to [%s] subscribers"::formatted);
+  }
+  
   protected void handleError(
       U user,
       NetworkMqttSession session,
