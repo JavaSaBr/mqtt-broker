@@ -8,13 +8,13 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
 import org.jspecify.annotations.Nullable;
 
-public record TrackableOutgoingPublish(
+public record TrackableSimpleOutgoingPublish(
     Publish incomingPublish,
     int messageId,
     boolean duplicated,
     boolean retained,
     QoS qos,
-    IntArray subscriptionIds) implements Publish {
+    IntArray subscriptionIds) implements OutgoingPublish {
   
   @Override
   public TopicName topicName() {
@@ -52,7 +52,7 @@ public record TrackableOutgoingPublish(
     if (duplicated()) {
       return this;
     } else {
-      return new TrackableOutgoingPublish(incomingPublish, messageId, true, retained, qos, subscriptionIds);
+      return new TrackableSimpleOutgoingPublish(incomingPublish, messageId, true, retained, qos, subscriptionIds);
     }
   }
 
@@ -61,7 +61,7 @@ public record TrackableOutgoingPublish(
     if (!retained()) {
       return this;
     } else {
-      return new TrackableOutgoingPublish(incomingPublish, messageId, duplicated, false, qos, subscriptionIds);
+      return new TrackableSimpleOutgoingPublish(incomingPublish, messageId, duplicated, false, qos, subscriptionIds);
     }
   }
 }

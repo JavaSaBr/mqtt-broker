@@ -4,8 +4,10 @@ import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
+import javasabr.mqtt.model.publish.IncomingPublish;
+import javasabr.mqtt.model.publish.OutgoingPublish;
 import javasabr.mqtt.model.publish.Publish;
-import javasabr.mqtt.model.publish.TrackableOutgoingPublish;
+import javasabr.mqtt.model.publish.TrackableSimpleOutgoingPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
@@ -38,8 +40,11 @@ public abstract class TrackableSubscriberPublishSender extends
 
   @Nullable
   @Override
-  protected Publish buildOutgoing(ExternalNetworkMqttUser user, MqttSession session, Publish incoming) {
-    return new TrackableOutgoingPublish(
+  protected OutgoingPublish buildOutgoing(
+      ExternalNetworkMqttUser user, 
+      MqttSession session, 
+      IncomingPublish incoming) {
+    return new TrackableSimpleOutgoingPublish(
         incoming,
         // generate new uniq message id for specific user
         session.generateMessageId(),
@@ -50,14 +55,17 @@ public abstract class TrackableSubscriberPublishSender extends
   }
 
   @Override
-  protected final void sendToSubscriberImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
+  protected final void sendToSubscriberImpl(
+      ExternalNetworkMqttUser user, 
+      MqttSession session, 
+      OutgoingPublish outgoing) {
     // register message id
     MessageTacker messageTacker = session.outMessageTracker();
-    messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
+    messageTacker.add(outgoing.messageId(), MqttMessageType.PUBLISH);
     // register callback and retrier
     ProcessingPublishes processingPublishes = session.outProcessingPublishes();
-    processingPublishes.register(publish, trackableMessageCallback, publishRetryer);
-    super.sendToSubscriberImpl(user, session, publish);
+    processingPublishes.register(outgoing, trackableMessageCallback, publishRetryer);
+    super.sendToSubscriberImpl(user, session, outgoing);
   }
 
   protected final boolean handleReceivedTrackableMessage(

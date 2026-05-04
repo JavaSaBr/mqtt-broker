@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 public record SimpleOutgoingPublish(
     Publish incomingPublish, 
     boolean retained,
-    IntArray subscriptionIds) implements Publish {
+    IntArray subscriptionIds) implements OutgoingPublish {
 
   @Override
   public int messageId() {

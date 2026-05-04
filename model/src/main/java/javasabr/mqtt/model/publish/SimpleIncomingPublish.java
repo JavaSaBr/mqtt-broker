@@ -24,7 +24,7 @@ public record SimpleIncomingPublish(
     Array<StringPair> userProperties) implements IncomingPublish {
   
   @Override
-  public Publish withDuplicated() {
+  public IncomingPublish withDuplicated() {
     if (duplicated()) {
       return this;
     } else {
@@ -45,7 +45,7 @@ public record SimpleIncomingPublish(
   }
 
   @Override
-  public Publish withoutRetained() {
+  public IncomingPublish withoutRetained() {
     if (!retained()) {
       return this;
     } else {

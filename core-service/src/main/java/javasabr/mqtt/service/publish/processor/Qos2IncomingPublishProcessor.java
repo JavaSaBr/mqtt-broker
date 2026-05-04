@@ -190,7 +190,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     // for QoS 2 only when we sure that this publish is fully correctly 
     // received we can register it to retain storage
     if (publish.retained()) {
-      retainPublishService.retain(publish);
+      if (publish instanceof IncomingPublish incoming) {
+        retainPublishService.retain(incoming);
+      } else {
+        throw new IllegalStateException("Unexpected type of publish:[%s], expected 'incoming'".formatted(publish));
+      }
     }
 
     MqttOutMessage response = messageOutFactoryService
