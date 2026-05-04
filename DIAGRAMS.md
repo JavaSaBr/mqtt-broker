@@ -11,7 +11,8 @@ graph LR
     Pub -- Routed Message --> Network
 ```
 
-## Sequence Diagram: Client Connection & Publish
+## Sequence Diagrams
+### Client Connection & Publish
 ```mermaid
 sequenceDiagram
     participant C as MQTT Client
@@ -32,6 +33,79 @@ sequenceDiagram
     PM->>ACL: Check Publish Permission
     ACL-->>PM: Permission Result
     PM->>PM: Process PUBLISH
+```
+
+### Subscription Flow
+```mermaid
+sequenceDiagram
+    participant C as MQTT Client
+    participant Conn as MqttConnection
+    participant H as SubscribeHandler
+    participant S as SubscriptionService
+    participant R as RetainService
+    participant D as PublishDispatcher
+
+    C->>Conn: SUBSCRIBE
+    Conn->>H: process message
+    H->>S: subscribe(...)
+    S-->>H: results
+    H-->>C: SUBACK
+    H->>R: find retained
+    R-->>H: messages
+    H->>D: dispatch
+    D-->>C: PUBLISH (retained)
+```
+
+### QoS 1 & 2 Handshake
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant B as Broker
+    
+    rect rgb(240, 240, 240)
+    Note over C, B: QoS 1: At Least Once
+    C->>B: PUBLISH (QoS 1)
+    B-->>C: PUBACK
+    end
+
+    rect rgb(220, 230, 240)
+    Note over C, B: QoS 2: Exactly Once
+    C->>B: PUBLISH (QoS 2)
+    B-->>C: PUBREC
+    C->>B: PUBREL
+    B-->>C: PUBCOMP
+    end
+```
+
+### Disconnect & Will Message (LWT)
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant B as Broker
+    participant S as Subscribers
+
+    Note over C, B: Abnormal Disconnect
+    C-x B: Connection Lost / Timeout
+    B->>S: PUBLISH Will Message
+```
+
+### Unsubscribe & Ping
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant B as Broker
+
+    rect rgb(240, 240, 240)
+    Note over C, B: Unsubscribe
+    C->>B: UNSUBSCRIBE
+    B-->>C: UNSUBACK
+    end
+
+    rect rgb(220, 230, 240)
+    Note over C, B: Heartbeat
+    C->>B: PINGREQ
+    B-->>C: PINGRESP
+    end
 ```
 
 ## UML Activity Diagram: Message Processing
@@ -86,27 +160,6 @@ graph TD
     DBCS[DB Credentials Source] -.-> AuthA
 ```
 
-## Sequence Diagram: Subscription Flow
-```mermaid
-sequenceDiagram
-    participant C as MQTT Client
-    participant Conn as MqttConnection
-    participant H as SubscribeHandler
-    participant S as SubscriptionService
-    participant R as RetainService
-    participant D as PublishDispatcher
-
-    C->>Conn: SUBSCRIBE
-    Conn->>H: process message
-    H->>S: subscribe(...)
-    S-->>H: results
-    H-->>C: SUBACK
-    H->>R: find retained
-    R-->>H: messages
-    H->>D: dispatch
-    D-->>C: PUBLISH (retained)
-```
-
 ## Deployment Diagram
 Typical deployment structure of the MQTT Broker.
 ```mermaid
@@ -127,56 +180,4 @@ graph TB
     App -- "MQTT (1883/8883)" --> Net
     Auth -- JDBC --> DB
     Auth -- File I/O --> FS
-```
-
-## QoS 1 & 2 Handshake
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    
-    rect rgb(240, 240, 240)
-    Note over C, B: QoS 1: At Least Once
-    C->>B: PUBLISH (QoS 1)
-    B-->>C: PUBACK
-    end
-
-    rect rgb(220, 230, 240)
-    Note over C, B: QoS 2: Exactly Once
-    C->>B: PUBLISH (QoS 2)
-    B-->>C: PUBREC
-    C->>B: PUBREL
-    B-->>C: PUBCOMP
-    end
-```
-
-## Disconnect & Will Message (LWT)
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    participant S as Subscribers
-
-    Note over C, B: Abnormal Disconnect
-    C-x B: Connection Lost / Timeout
-    B->>S: PUBLISH Will Message
-```
-
-## Unsubscribe & Ping
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant B as Broker
-
-    rect rgb(240, 240, 240)
-    Note over C, B: Unsubscribe
-    C->>B: UNSUBSCRIBE
-    B-->>C: UNSUBACK
-    end
-
-    rect rgb(220, 230, 240)
-    Note over C, B: Heartbeat
-    C->>B: PINGREQ
-    B-->>C: PINGRESP
-    end
 ```
