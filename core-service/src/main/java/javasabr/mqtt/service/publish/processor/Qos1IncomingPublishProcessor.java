@@ -2,7 +2,7 @@ package javasabr.mqtt.service.publish.processor;
 
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
@@ -40,7 +40,10 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected boolean validateImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(
+      ExternalNetworkMqttUser user, 
+      NetworkMqttSession session, 
+      IncomingPublish publish) {
     if (!super.validateImpl(user, session, publish)) {
       return false;
     }
@@ -59,7 +62,10 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleNoMatchedSubscribers(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
+  protected void handleNoMatchedSubscribers(
+      ExternalNetworkMqttUser user,
+      NetworkMqttSession session, 
+      IncomingPublish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
@@ -72,9 +78,12 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   protected void handleSuccess(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
-      Publish publish,
+      IncomingPublish publish,
       int matchedSubscribers) {
     super.handleSuccess(user, session, publish, matchedSubscribers);
+    if (publish.retained()) {
+      retainPublishService.retain(publish);
+    }
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
@@ -86,7 +95,7 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   protected void handleError(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
-      Publish publish,
+      IncomingPublish publish,
       PublishProcessingResult handlingResult) {
     super.handleError(user, session, publish, handlingResult);
     int messageId = publish.messageId();

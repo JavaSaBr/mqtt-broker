@@ -4,6 +4,7 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
@@ -51,7 +52,10 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected boolean validateImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(
+      ExternalNetworkMqttUser user,
+      NetworkMqttSession session,
+      IncomingPublish publish) {
     if (!super.validateImpl(user, session, publish)) {
       return false;
     }
@@ -73,7 +77,10 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleNoMatchedSubscribers(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
+  protected void handleNoMatchedSubscribers(
+      ExternalNetworkMqttUser user, 
+      NetworkMqttSession session,
+      IncomingPublish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
     var reasonCode = PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS;
     updateSessionState(session, publish, reasonCode);
@@ -88,7 +95,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   protected void handleSuccess(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
-      Publish publish,
+      IncomingPublish publish,
       int matchedSubscribers) {
     super.handleSuccess(user, session, publish, matchedSubscribers);
     var reasonCode = PublishReceivedReasonCode.SUCCESS;
@@ -100,7 +107,10 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
             .newPublishReceived(publish.messageId(), PublishReceivedReasonCode.SUCCESS));
   }
 
-  private void updateSessionState(NetworkMqttSession session, Publish publish, PublishReceivedReasonCode reasonCode) {
+  private void updateSessionState(
+      NetworkMqttSession session,
+      IncomingPublish publish, 
+      PublishReceivedReasonCode reasonCode) {
     // store response reason code for duplicated publishes
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.update(publish.messageId(), MqttMessageType.PUBLISH, reasonCode);
@@ -113,7 +123,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   protected void handleError(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
-      Publish publish,
+      IncomingPublish publish,
       PublishProcessingResult handlingResult) {
     super.handleError(user, session, publish, handlingResult);
 
@@ -150,7 +160,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
   }
 
-  private boolean handleReceivedTrackableMessage(MqttUser user, MqttSession session, TrackableMqttMessage message) {
+  private boolean handleReceivedTrackableMessage(
+      MqttUser user,
+      MqttSession session, 
+      TrackableMqttMessage message,
+      Publish publish) {
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     String clientId = networkMqttUser.clientId();
     int messageId = message.messageId();
@@ -172,6 +186,12 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     }
 
     messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
+
+    // for QoS 2 only when we sure that this publish is fully correctly 
+    // received we can register it to retain storage
+    if (publish.retained()) {
+      retainPublishService.retain(publish);
+    }
 
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(networkMqttUser)

@@ -42,11 +42,13 @@ import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.mqtt.service.publish.IncomingPublishRouter;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDataStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.mqtt.service.publish.impl.DefaultIncomingPublishRouter;
 import javasabr.mqtt.service.publish.impl.DefaultPublishDispatcher;
+import javasabr.mqtt.service.publish.impl.InMemoryIncomingPublishStorage;
 import javasabr.mqtt.service.publish.impl.InMemoryPublishDataStorage;
 import javasabr.mqtt.service.publish.impl.InMemoryRetainPublishService;
 import javasabr.mqtt.service.publish.processor.IncomingPublishProcessor;
@@ -126,6 +128,11 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
+  IncomingPublishStorage incomingPublishStorage() {
+    return new InMemoryIncomingPublishStorage();
+  }
+  
+  @Bean
   PublishDataStorage publishDataStorage() {
     return new InMemoryPublishDataStorage();
   }
@@ -187,13 +194,15 @@ public class MqttBrokerSpringConfig {
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
       AuthorizationService authorizationService,
-      PublishDataStorage publishDataStorage) {
+      PublishDataStorage publishDataStorage,
+      IncomingPublishStorage incomingPublishStorage) {
     return new PublishMqttInMessageHandler(
         incomingPublishRouter,
         messageOutFactoryService,
         topicService,
         authorizationService,
-        publishDataStorage);
+        publishDataStorage,
+        incomingPublishStorage);
   }
 
   @Bean

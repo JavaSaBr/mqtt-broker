@@ -24,6 +24,7 @@ import javasabr.mqtt.service.message.validator.PublishResponseTopicMqttInMessage
 import javasabr.mqtt.service.message.validator.PublishRetainMqttInMessageFieldValidator;
 import javasabr.mqtt.service.message.validator.PublishTopicAliasMqttInMessageFieldValidator;
 import javasabr.mqtt.service.publish.IncomingPublishRouter;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDataStorage;
 import javasabr.rlib.common.util.StringUtils;
 import lombok.AccessLevel;
@@ -40,13 +41,15 @@ public class PublishMqttInMessageHandler
   TopicService topicService;
   AuthorizationService authorizationService;
   PublishDataStorage publishDataStorage;
+  IncomingPublishStorage incomingPublishStorage;
 
   public PublishMqttInMessageHandler(
       IncomingPublishRouter incomingPublishRouter,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      AuthorizationService authorizationService, 
-      PublishDataStorage publishDataStorage) {
+      AuthorizationService authorizationService,
+      PublishDataStorage publishDataStorage,
+      IncomingPublishStorage incomingPublishStorage) {
     super(
         ExternalNetworkMqttUser.class, 
         PublishMqttInMessage.class, 
@@ -62,6 +65,7 @@ public class PublishMqttInMessageHandler
     this.topicService = topicService;
     this.authorizationService = authorizationService;
     this.publishDataStorage = publishDataStorage;
+    this.incomingPublishStorage = incomingPublishStorage;
   }
 
   @Override
@@ -95,8 +99,8 @@ public class PublishMqttInMessageHandler
         message.payloadFormat(),
         message.payload(),
         message.correlationData());
-
-    IncomingPublish incomingPublish = new IncomingPublish(
+    IncomingPublish incomingPublish = incomingPublishStorage.store(
+        session.generatePublishId(),
         message.messageId(),
         message.qos(),
         finalTopicName,

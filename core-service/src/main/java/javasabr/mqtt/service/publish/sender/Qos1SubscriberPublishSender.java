@@ -3,6 +3,7 @@ package javasabr.mqtt.service.publish.sender;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
@@ -27,10 +28,11 @@ public class Qos1SubscriberPublishSender extends TrackableSubscriberPublishSende
 
   @Override
   protected boolean handleReceivedTrackableMessageImpl(
-      ExternalNetworkMqttUser user, 
+      ExternalNetworkMqttUser user,
       MqttSession session,
       TrackableMqttMessage message,
-      @Nullable TrackedMessageMeta trackedMessageMeta) {
+      @Nullable TrackedMessageMeta trackedMessageMeta,
+      Publish publish) {
     
     int messageId = message.messageId();
     String clientId = user.clientId();

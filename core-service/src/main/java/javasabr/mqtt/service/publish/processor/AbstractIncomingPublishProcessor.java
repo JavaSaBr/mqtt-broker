@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.publish.processor;
 
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
@@ -31,7 +31,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   RetainPublishService retainPublishService;
 
   @Override
-  public final void process(NetworkMqttUser user, Publish publish) {
+  public final void process(NetworkMqttUser user, IncomingPublish publish) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;
@@ -47,11 +47,11 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     }
   }
 
-  protected boolean validateImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     return true;
   }
 
-  protected void processImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -81,32 +81,28 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     }
   }
 
-  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, Publish publish) {}
+  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {}
 
   protected void handleSuccess(
       U user,
       NetworkMqttSession session,
-      Publish publish,
-      int matchedSubscribers) {
-    if (publish.retained()) {
-      retainPublishService.retain(publish);
-    }
-  }
+      IncomingPublish publish,
+      int matchedSubscribers) {}
 
   protected void handleError(
       U user,
       NetworkMqttSession session,
-      Publish publish,
+      IncomingPublish publish,
       PublishProcessingResult handlingResult) {}
 
   protected PublishProcessingResult checkSubscriber(
       U user,
-      Publish publish,
+      IncomingPublish publish,
       SingleSubscriber subscriber) {
     return PublishProcessingResult.SUCCESS;
   }
 
-  protected void dispatchToSubscriber(Publish publish, SingleSubscriber subscriber) {
+  protected void dispatchToSubscriber(IncomingPublish publish, SingleSubscriber subscriber) {
     publishDispatcher.dispatchToSubscriber(publish, subscriber.user(), subscriber.subscription());
   }
 

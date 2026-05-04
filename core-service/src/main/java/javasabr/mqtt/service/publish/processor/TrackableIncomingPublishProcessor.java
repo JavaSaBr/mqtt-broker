@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.processor;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
@@ -32,7 +32,7 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
   }
 
   @Override
-  protected boolean validateImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     int messagedId = publish.messageId();
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
       handleMissedMessageId(user);
@@ -42,7 +42,7 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
   }
 
   @Override
-  protected void processImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
     super.processImpl(user, session, publish);

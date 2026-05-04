@@ -3,8 +3,8 @@ package javasabr.mqtt.model.subscription
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
-import javasabr.mqtt.model.publish.IncomingPublish
 import javasabr.mqtt.model.publish.PublishData
+import javasabr.mqtt.model.publish.SimpleIncomingPublish
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -14,7 +14,7 @@ import static java.nio.charset.StandardCharsets.UTF_8
 class TestPublishFactory {
 
   static def incomingQos0Publish(String topicName) {
-    return new IncomingPublish(
+    return new SimpleIncomingPublish(
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         QoS.AT_MOST_ONCE,
         TopicName.valueOf(topicName),
@@ -29,7 +29,7 @@ class TestPublishFactory {
   }
   
   static def incomingPublish(QoS qos, String topicName, String payload) {
-    return new IncomingPublish(
+    return new SimpleIncomingPublish(
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos,
         TopicName.valueOf(topicName),
@@ -44,7 +44,7 @@ class TestPublishFactory {
   }
 
   static def incomingPublish(QoS qos, TopicName topicName, PublishData payload) {
-    return new IncomingPublish(
+    return new SimpleIncomingPublish(
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos,
         topicName,
@@ -59,7 +59,7 @@ class TestPublishFactory {
   }
 
   static def incomingPublish(int messageId, QoS qos, TopicName topicName, PublishData payload) {
-    return new IncomingPublish(
+    return new SimpleIncomingPublish(
         messageId,
         qos,
         topicName,
@@ -74,7 +74,7 @@ class TestPublishFactory {
   }
   
   static def incomingPublishWithRetain(String topicName, String payload) {
-    return new IncomingPublish(
+    return new SimpleIncomingPublish(
         1,
         QoS.AT_MOST_ONCE,
         TopicName.valueOf(topicName),

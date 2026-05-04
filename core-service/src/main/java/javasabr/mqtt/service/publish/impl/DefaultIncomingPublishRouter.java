@@ -2,7 +2,7 @@ package javasabr.mqtt.service.publish.impl;
 
 import java.util.Collection;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.publish.IncomingPublishRouter;
 import javasabr.mqtt.service.publish.processor.IncomingPublishProcessor;
@@ -44,7 +44,7 @@ public class DefaultIncomingPublishRouter implements IncomingPublishRouter {
   }
   
   @Override
-  public void route(NetworkMqttUser user, Publish publish) {
+  public void route(NetworkMqttUser user, IncomingPublish publish) {
     log.debug(user.clientId(), publish, "[%s] Start processing publish:%s"::formatted);
     QoS qos = publish.qos();
     try {

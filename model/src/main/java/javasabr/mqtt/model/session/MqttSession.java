@@ -10,6 +10,7 @@ public interface MqttSession {
 
   int generateMessageId();
   UUID generateDataId();
+  UUID generatePublishId();
   
   @Nullable
   Duration expiryInterval();

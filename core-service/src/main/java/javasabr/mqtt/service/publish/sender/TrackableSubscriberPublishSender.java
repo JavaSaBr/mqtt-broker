@@ -63,19 +63,21 @@ public abstract class TrackableSubscriberPublishSender extends
   protected final boolean handleReceivedTrackableMessage(
       MqttUser user, 
       MqttSession session,
-      TrackableMqttMessage message) {
+      TrackableMqttMessage message,
+      Publish publish) {
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     int messageId = message.messageId();
     MessageTacker messageTacker = session.outMessageTracker();
     TrackedMessageMeta trackedMessageMeta = messageTacker.stored(messageId);
-    return handleReceivedTrackableMessageImpl(networkMqttUser, session, message, trackedMessageMeta);
+    return handleReceivedTrackableMessageImpl(networkMqttUser, session, message, trackedMessageMeta, publish);
   }
 
   protected abstract boolean handleReceivedTrackableMessageImpl(
       ExternalNetworkMqttUser user,
       MqttSession session,
       TrackableMqttMessage message,
-      @Nullable TrackedMessageMeta trackedMessageMeta);
+      @Nullable TrackedMessageMeta trackedMessageMeta,
+      Publish publish);
 
   protected final void retrySending(MqttUser user, MqttSession session, Publish publish) {
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);

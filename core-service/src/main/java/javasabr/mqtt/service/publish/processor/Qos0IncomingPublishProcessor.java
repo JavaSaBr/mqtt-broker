@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.processor;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
@@ -34,7 +34,10 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
   }
 
   @Override
-  protected boolean validateImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(
+      ExternalNetworkMqttUser user, 
+      NetworkMqttSession session, 
+      IncomingPublish publish) {
     int messageId = publish.messageId();
     if (messageId != MqttProperties.MESSAGE_ID_IS_NOT_SET) {
       handleNotExpectedMessageId(user);
@@ -48,5 +51,17 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NOT_EXPECTED_MESSAGE_ID);
     user.closeWithReason(response);
+  }
+
+  @Override
+  protected void handleSuccess(
+      ExternalNetworkMqttUser user,
+      NetworkMqttSession session,
+      IncomingPublish publish,
+      int matchedSubscribers) {
+    super.handleSuccess(user, session, publish, matchedSubscribers);
+    if (publish.retained()) {
+      retainPublishService.retain(publish);
+    }
   }
 }
