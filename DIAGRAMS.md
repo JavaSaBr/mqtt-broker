@@ -1,4 +1,5 @@
-## Data Flow Diagram (High-Level)
+## Data Flow Diagram
+### High-Level
 ```mermaid
 graph LR
     Client((MQTT Client)) -- TCP Connection --> Network[Network Layer]
@@ -9,6 +10,43 @@ graph LR
     ACL -- Granted/Denied --> Core
     Core -- Publish Message --> Pub[Publishing Service]
     Pub -- Routed Message --> Network
+```
+
+### Mid-Level
+```mermaid
+graph TD
+    Client((MQTT Client)) <--> Conn[MqttConnection]
+    Conn <--> NetUser[Network User]
+    NetUser --> Handlers[Packet Handlers]
+
+    subgraph Security
+        Handlers -- Credentials --> AuthSvc[Auth Service]
+        AuthSvc -- Provider --> AuthProv[Auth Provider]
+        AuthProv -- JDBC --> DBSrc[(DB Source)]
+        AuthProv -- Read --> FileSrc[(File Source)]
+        Handlers -- Topic+User --> ACLSvc[ACL Service]
+        ACLSvc -- Evaluate --> ACLPol{ACL Policy}
+    end
+
+    subgraph Core Services
+        Handlers -- Raw Topic --> TopicSvc[Topic Service]
+        TopicSvc -- Filter/Name --> Handlers
+        Handlers -- Subscribe --> SubSvc[Subscription Service]
+        SubSvc -- matches --> SubTree[Subscriber Tree]
+        Handlers -- findRetained --> RetainSvc[Retain Service]
+        RetainSvc -- matches --> RetainTree[Retain Tree]
+    end
+
+    subgraph Publishing Engine
+        Handlers -- Publish --> PubRouter[Publish Router]
+        PubRouter -- QoS 0/1/2 --> QoSProcs[QoS Processors]
+        QoSProcs -- Find --> SubSvc
+        QoSProcs -- Dispatch --> PubDisp[Publish Dispatcher]
+        PubDisp -- Store --> RetainSvc
+        RetainSvc -- update --> RetainTree
+        PubDisp -- send --> NetUser
+        QoSProcs -- QoS > 0 --> PDS[(Publish Data Storage)]
+    end
 ```
 
 ## Sequence Diagrams
@@ -75,6 +113,24 @@ sequenceDiagram
     C->>B: PUBREL
     B-->>C: PUBCOMP
     end
+```
+
+### Session & Message Tracking
+Manages the state of QoS 1/2 messages, ensuring "Exactly Once" delivery and handling Packet ID lifecycle.
+```mermaid
+sequenceDiagram
+    participant U as Network User
+    participant P as ProcessingPublishes
+    participant R as Retryer
+    participant T as Message Tacker
+
+    Note over U, T: QoS 1/2 Outbound
+    U->>P: register(publish)
+    P->>R: start retry loop
+    R->>U: send (DUP=1)
+    U->>P: receive ACK
+    P->>R: stop
+    P->>T: remove(messageId)
 ```
 
 ### Disconnect & Will Message (LWT)
