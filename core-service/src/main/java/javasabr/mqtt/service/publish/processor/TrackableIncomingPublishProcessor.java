@@ -11,6 +11,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 
@@ -22,20 +23,22 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     super(
         expectedClientType,
         subscriptionService, 
         publishDispatcher,
         messageOutFactoryService, 
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Override
   protected boolean validateImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     int messagedId = publish.messageId();
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      handleMissedMessageId(user);
+      handleMissedMessageId(user, publish);
       return false;
     }
     return super.validateImpl(user, session, publish);
@@ -48,10 +51,11 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
     super.processImpl(user, session, publish);
   }
 
-  protected void handleMissedMessageId(U client) {
+  protected void handleMissedMessageId(U user, IncomingPublish publish) {
+    incomingPublishStorage.remove(publish);
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
+    user.closeWithReason(response);
   }
 }

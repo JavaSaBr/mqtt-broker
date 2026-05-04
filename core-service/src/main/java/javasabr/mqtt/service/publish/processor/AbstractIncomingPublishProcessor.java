@@ -10,6 +10,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.rlib.collections.array.Array;
@@ -29,6 +30,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   PublishDispatcher publishDispatcher;
   MessageOutFactoryService messageOutFactoryService;
   RetainPublishService retainPublishService;
+  IncomingPublishStorage incomingPublishStorage;
 
   @Override
   public final void process(NetworkMqttUser user, IncomingPublish publish) {
@@ -73,15 +75,23 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       }
     }
 
-    log.debug(count, "Started delivering publish to [%s] subscribers"::formatted);
+    if (count > 0) {
+      incomingPublishStorage.increaseConsumerCount(publish, count);
+    } else if (!publish.retained()) {
+      incomingPublishStorage.remove(publish);
+    }
+    
     handleSuccess(user, session, publish, count);
 
+    log.debug(count, "Started delivering publish to [%s] subscribers"::formatted);
     for (SingleSubscriber subscriber : subscribers) {
       dispatchToSubscriber(publish, subscriber);
     }
   }
 
-  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {}
+  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {
+    incomingPublishStorage.remove(publish);
+  }
 
   protected void handleSuccess(
       U user,
@@ -93,7 +103,9 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       U user,
       NetworkMqttSession session,
       IncomingPublish publish,
-      PublishProcessingResult handlingResult) {}
+      PublishProcessingResult handlingResult) {
+    incomingPublishStorage.remove(publish);
+  }
 
   protected PublishProcessingResult checkSubscriber(
       U user,

@@ -11,6 +11,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 import lombok.AccessLevel;
@@ -25,13 +26,15 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     super(
         ExternalNetworkMqttUser.class,
         subscriptionService, 
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Override
@@ -52,10 +55,11 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta alreadyInProcess = messageTacker.stored(messagedId);
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we can skip it
+      //FIXME need to be sure that the new duplicated publish instance is referenced to original
       if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
         return false;
       }
-      handleMessageIdIsInUse(user, messagedId);
+      handleMessageIdIsInUse(user, messagedId, publish);
       return false;
     }
     return true;
@@ -105,7 +109,11 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     sendFeedback(user, session, response, messageId);
   }
 
-  private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
+  private void handleMessageIdIsInUse(
+      ExternalNetworkMqttUser user, 
+      int messageId, 
+      IncomingPublish publish) {
+    incomingPublishStorage.remove(publish);
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));

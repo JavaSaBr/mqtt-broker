@@ -10,6 +10,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 
@@ -19,13 +20,15 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     super(
         ExternalNetworkMqttUser.class,
         subscriptionService,
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Override
@@ -40,13 +43,14 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
       IncomingPublish publish) {
     int messageId = publish.messageId();
     if (messageId != MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      handleNotExpectedMessageId(user);
+      handleNotExpectedMessageId(user, publish);
       return false;
     }
     return super.validateImpl(user, session, publish);
   }
 
-  private void handleNotExpectedMessageId(ExternalNetworkMqttUser user) {
+  private void handleNotExpectedMessageId(ExternalNetworkMqttUser user, IncomingPublish publish) {
+    incomingPublishStorage.remove(publish);
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NOT_EXPECTED_MESSAGE_ID);

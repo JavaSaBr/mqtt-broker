@@ -20,6 +20,7 @@ import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory
 import javasabr.mqtt.service.publish.impl.DefaultIncomingPublishRouter
 import javasabr.mqtt.service.publish.impl.DefaultPublishDispatcher
+import javasabr.mqtt.service.publish.impl.InMemoryIncomingPublishStorage
 import javasabr.mqtt.service.publish.impl.InMemoryPublishDataStorage
 import javasabr.mqtt.service.publish.impl.InMemoryRetainPublishService
 import javasabr.mqtt.service.publish.processor.Qos0IncomingPublishProcessor
@@ -58,6 +59,9 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   
   @Shared
   def defaultPublishDataStorage = new InMemoryPublishDataStorage()
+  
+  @Shared
+  def defaultIncomingPublishStorage = new InMemoryIncomingPublishStorage()
   
   @Shared
   def authorizationService = new DisabledAuthorizationService();
@@ -99,7 +103,8 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
       defaultSubscriptionService,
       defaultPublishDeliveringService,
       defaultMessageOutFactoryService,
-      inMemoryRetainMessageService)
+      inMemoryRetainMessageService,
+      defaultIncomingPublishStorage)
 
   @Shared
   def publishReceivingService = new DefaultIncomingPublishRouter([
@@ -108,12 +113,14 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
           defaultSubscriptionService,
           defaultPublishDeliveringService,
           defaultMessageOutFactoryService,
-          inMemoryRetainMessageService),
+          inMemoryRetainMessageService,
+          defaultIncomingPublishStorage),
       new Qos2IncomingPublishProcessor(
           defaultSubscriptionService,
           defaultPublishDeliveringService,
           defaultMessageOutFactoryService,
-          inMemoryRetainMessageService)
+          inMemoryRetainMessageService,
+          defaultIncomingPublishStorage)
   ])
 
   @Shared

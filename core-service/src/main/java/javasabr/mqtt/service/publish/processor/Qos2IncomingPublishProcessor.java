@@ -20,6 +20,7 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 import lombok.AccessLevel;
@@ -36,13 +37,15 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     super(
         ExternalNetworkMqttUser.class,
         subscriptionService, 
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
   }
 
@@ -65,11 +68,12 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta alreadyInProcess = messageTacker.stored(messagedId);
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we should ack response
+      //FIXME need to be sure that the new duplicated publish instance is referenced to original
       if (publish.duplicated() && (alreadyInProcess.messageType() == MqttMessageType.PUBLISH)) {
         handleDuplicated(user, messagedId, alreadyInProcess);
         return false;
       }
-      handleMessageIdIsInUse(user, messagedId);
+      handleMessageIdIsInUse(user, messagedId, publish);
       return false;
     }
 
@@ -154,7 +158,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
             .newPublishReceived(messageId, reasonCode));
   }
 
-  private void handleMessageIdIsInUse(ExternalNetworkMqttUser user, int messageId) {
+  private void handleMessageIdIsInUse(
+      ExternalNetworkMqttUser user, 
+      int messageId, 
+      IncomingPublish publish) {
+    incomingPublishStorage.remove(publish);
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
@@ -173,15 +181,24 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
     if (messageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      if (publish instanceof IncomingPublish incomingPublish) {
+        incomingPublishStorage.remove(incomingPublish);
+      }
       return true;
     }
 
     if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
       log.warning(clientId, messageMeta, messageId, 
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
+      if (publish instanceof IncomingPublish incomingPublish) {
+        incomingPublishStorage.remove(incomingPublish);
+      }
       return true;
     } else if (!(message instanceof PublishReleaseMqttInMessage release)) {
       log.warning(clientId, message.messageType(), "[%s] Not expected message:[%s]"::formatted);
+      if (publish instanceof IncomingPublish incomingPublish) {
+        incomingPublishStorage.remove(incomingPublish);
+      }
       return true;
     }
 

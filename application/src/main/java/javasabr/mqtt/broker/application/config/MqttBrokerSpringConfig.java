@@ -277,12 +277,14 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     return new Qos0IncomingPublishProcessor(
         subscriptionService,
         publishDispatcher,
         messageOutFactoryService, 
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Bean
@@ -290,12 +292,14 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     return new Qos1IncomingPublishProcessor(
         subscriptionService,
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Bean
@@ -303,12 +307,14 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     return new Qos2IncomingPublishProcessor(
         subscriptionService, 
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Bean

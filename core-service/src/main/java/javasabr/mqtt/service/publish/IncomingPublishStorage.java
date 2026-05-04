@@ -25,4 +25,10 @@ public interface IncomingPublishStorage {
       long messageExpiryInterval,
       int topicAlias,
       Array<StringPair> userProperties);
+  
+  void remove(IncomingPublish publish);
+  
+  void increaseConsumerCount(IncomingPublish publish, int count);
+  
+  void decreaseConsumerCount(IncomingPublish publish, int count);
 }
