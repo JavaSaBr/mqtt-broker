@@ -258,7 +258,7 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  PublishDispatcher publishDeliveringService(
+  PublishDispatcher publishDispatcher(
       Collection<? extends SubscriberPublishSender> knownSubscriberPublishSenders) {
     return new DefaultPublishDispatcher(knownSubscriberPublishSenders);
   }
@@ -303,7 +303,7 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  IncomingPublishRouter incomingPublishProcessor(
+  IncomingPublishRouter IncomingPublishRouter(
       Collection<? extends IncomingPublishProcessor> knownIncomingPublishProcessors) {
     return new DefaultIncomingPublishRouter(knownIncomingPublishProcessors);
   }

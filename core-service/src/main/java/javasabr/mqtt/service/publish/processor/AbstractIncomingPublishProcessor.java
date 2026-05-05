@@ -68,7 +68,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
             "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
         handleError(user, session, publish, checkResult);
         return;
-      } else if(checkResult == PublishProcessingResult.SUCCESS) {
+      } else if (checkResult == PublishProcessingResult.SUCCESS) {
         count++;
       }
     }
