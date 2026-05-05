@@ -53,6 +53,29 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
         sessionService.close()
   }
 
+  def "should discard stored not expirable session and create a fresh"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_2_1"
+        def oldSession = fromAsync(sessionService.createClean(testClientId)) as ConfigurableNetworkMqttSession
+        oldSession.expiryInterval(MqttProperties.SESSION_EXPIRY_DURATION_INFINITY)
+        def topicNameMappingFromOldSession = oldSession.topicNameMapping()
+        topicNameMappingFromOldSession.update(1, TopicName.valueOf("topic/1"))
+        topicNameMappingFromOldSession.update(2, TopicName.valueOf("topic/2"))
+        waitForAsync(sessionService.store(testClientId, oldSession))
+    when:
+        def freshSession = fromAsync(sessionService.createClean(testClientId))
+    then:
+        freshSession !== oldSession
+        with(freshSession) {
+          clientId() == testClientId
+          topicNameMapping() !== topicNameMappingFromOldSession
+          topicNameMapping().size() == 0
+        }
+        topicNameMappingFromOldSession.size() == 0
+    cleanup:
+        sessionService.close()
+  }
+
   def "should not allow to create a new session if we already have some active"() {
     given:
         def testClientId = "InMemoryMqttSessionServiceTest_3"
@@ -91,6 +114,42 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
         sessionService.close()
   }
 
+  def "should restore not expirable old session"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_4_1"
+        def oldSession = fromAsync(sessionService.createClean(testClientId)) as ConfigurableNetworkMqttSession
+        oldSession.expiryInterval(MqttProperties.SESSION_EXPIRY_DURATION_INFINITY)
+        def topicNameMappingFromOldSession = oldSession.topicNameMapping()
+        topicNameMappingFromOldSession.update(1, TopicName.valueOf("topic/1"))
+        topicNameMappingFromOldSession.update(2, TopicName.valueOf("topic/2"))
+        topicNameMappingFromOldSession.update(3, TopicName.valueOf("topic/3"))
+    when:
+        def storeResult = fromAsync(sessionService.store(testClientId, oldSession))
+        def restoredSession = fromAsync(sessionService.restore(testClientId))
+    then:
+        storeResult
+        restoredSession == oldSession
+        !sessionService.storedNotExpirableSessions.containsKey(testClientId)
+        with(restoredSession) {
+          clientId() == testClientId
+          topicNameMapping() == topicNameMappingFromOldSession
+          topicNameMapping().size() == 3
+        }
+    cleanup:
+        sessionService.close()
+  }
+
+  def "should return nothing when stored session does not exist"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_4_2"
+    when:
+        def restoredSession = fromAsync(sessionService.restore(testClientId))
+    then:
+        restoredSession == null
+    cleanup:
+        sessionService.close()
+  }
+
   def "should not store not storable session"() {
     given:
         def testClientId = "InMemoryMqttSessionServiceTest_5"
@@ -121,6 +180,41 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
     then:
         def exception = thrown(IllegalStateException)
         exception.message == "Client:[InMemoryMqttSessionServiceTest_6] has another active session"
+    cleanup:
+        sessionService.close()
+  }
+
+  def "should delete active session and clear state"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_6_1"
+        def activeSession = fromAsync(sessionService.createClean(testClientId)) as ConfigurableNetworkMqttSession
+        def topicNameMapping = activeSession.topicNameMapping()
+        topicNameMapping.update(1, TopicName.valueOf("topic/1"))
+        topicNameMapping.update(2, TopicName.valueOf("topic/2"))
+    when:
+        def deleteResult = fromAsync(sessionService.delete(testClientId, activeSession))
+        def freshSession = fromAsync(sessionService.createClean(testClientId))
+    then:
+        deleteResult
+        freshSession !== activeSession
+        topicNameMapping.size() == 0
+        freshSession.clientId() == testClientId
+        freshSession.topicNameMapping().size() == 0
+    cleanup:
+        sessionService.close()
+  }
+
+  def "should not delete if there is another active session"() {
+    given:
+        def testClientId = "InMemoryMqttSessionServiceTest_6_2"
+        def testFakeClientId = "InMemoryMqttSessionServiceTest_6_2-fake"
+        waitForAsync(sessionService.createClean(testClientId))
+        def activeSession = fromAsync(sessionService.createClean(testFakeClientId))
+    when:
+        waitForAsync(sessionService.delete(testClientId, activeSession))
+    then:
+        def exception = thrown(IllegalStateException)
+        exception.message == "Client:[InMemoryMqttSessionServiceTest_6_2] has another active session"
     cleanup:
         sessionService.close()
   }

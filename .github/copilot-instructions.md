@@ -77,6 +77,9 @@ The repository is organized into the following modules:
 ./gradlew :network:test
 ./gradlew :core-service:test
 
+# Run a single Spock spec while iterating on one area
+./gradlew :core-service:test --tests 'javasabr.mqtt.service.session.impl.InMemoryMqttSessionServiceTest'
+
 # Tests use JUnit Platform with Groovy/Spock
 # Tests run with maxParallelForks=2, forkEvery=100
 ```
@@ -166,6 +169,9 @@ The repository is organized into the following modules:
 ### Testing Conventions
 - **Framework**: Spock (Groovy-based BDD framework)
 - **Test location**: `src/test/groovy/` directories
+- **Base specs**: Use `UnitSpecification` for isolated unit tests and `IntegrationServiceSpecification` for service-level tests that need shared broker fixtures or helper services
+- **Async helpers**: Use `fromAsync(...)` and `waitForAsync(...)` from `BaseSpecification` to unwrap `Mono` and `CompletionStage` results in tests
+- **Lifecycle cleanup**: If a test creates a service with its own lifecycle or background thread (for example `InMemoryMqttSessionService`), close it in a Spock `cleanup:` block
 - **Test fixtures**: Available in network and model modules (testFixtures source set)
 - **Parallel execution**: Tests run with 2 parallel forks, forking every 100 tests
 
@@ -231,8 +237,11 @@ The codebase contains TODO comments in several classes related to MQTT protocol 
 ### When Writing Tests
 1. Use Spock framework (Groovy syntax)
 2. Place in `src/test/groovy/` maintaining package structure
-3. Test fixtures can be used from network and model modules
-4. Tests automatically run with preview features enabled
+3. Prefer `UnitSpecification` for low-level unit tests and `IntegrationServiceSpecification` when existing shared services, mocked connections, or broker-oriented fixtures are useful
+4. For async service APIs returning `Mono` or `CompletionStage`, use `fromAsync(...)` for returned values and `waitForAsync(...)` when only completion matters
+5. Close manually created services or clients in `cleanup:` when they own resources or background work
+6. Test fixtures can be used from network and model modules
+7. Tests automatically run with preview features enabled
 
 ### When Modifying Build Configuration
 - Root `build.gradle`: Only for repository-wide settings and custom tasks
