@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
 
-  LockableRefToRefDictionary<UUID, SimpleIncomingPublish> storedPublishes;
+  LockableRefToRefDictionary<UUID, StoredIncomingPublish> storedPublishes;
 
   public InMemoryIncomingPublishStorage() {
     this.storedPublishes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
@@ -57,7 +57,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
           messageExpiryInterval,
           topicAlias,
           userProperties);
-      storedPublishes.put(incomingPublish.id(), incomingPublish);
+      storedPublishes.put(incomingPublish.id(), new StoredIncomingPublish(incomingPublish));
       return incomingPublish;
     } finally {
       storedPublishes.writeUnlock(stamp);
@@ -66,16 +66,60 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
 
   @Override
   public void remove(IncomingPublish publish) {
-    
+    long stamp = storedPublishes.writeLock();
+    try {
+      storedPublishes.remove(publish.id());
+    } finally {
+      storedPublishes.writeUnlock(stamp);
+    }
   }
 
   @Override
   public void increaseConsumerCount(IncomingPublish publish, int count) {
-
+    if (count < 1) {
+      throw new IllegalArgumentException("Consumers count should be positive");
+    }
+    long stamp = storedPublishes.writeLock();
+    try {
+      StoredIncomingPublish storedPublish = storedPublishes.get(publish.id());
+      if (storedPublish == null) {
+        return;
+      }
+      storedPublish.consumerCount += count;
+    } finally {
+      storedPublishes.writeUnlock(stamp);
+    }
   }
 
   @Override
   public void decreaseConsumerCount(IncomingPublish publish, int count) {
+    if (count < 1) {
+      throw new IllegalArgumentException("Consumers count should be positive");
+    }
+    long stamp = storedPublishes.writeLock();
+    try {
+      StoredIncomingPublish storedPublish = storedPublishes.get(publish.id());
+      if (storedPublish == null) {
+        return;
+      }
+      int result = storedPublish.consumerCount - count;
+      if (result <= 0) {
+        storedPublishes.remove(publish.id());
+      } else {
+        storedPublish.consumerCount = result;
+      }
+    } finally {
+      storedPublishes.writeUnlock(stamp);
+    }
+  }
 
+  static class StoredIncomingPublish {
+
+    final SimpleIncomingPublish publish;
+    int consumerCount;
+
+    StoredIncomingPublish(SimpleIncomingPublish publish) {
+      this.publish = publish;
+    }
   }
 }
