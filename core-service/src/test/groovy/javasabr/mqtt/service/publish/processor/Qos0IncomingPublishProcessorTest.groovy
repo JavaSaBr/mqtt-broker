@@ -15,9 +15,10 @@ class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos0IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def subscriber1 = mockedExternalConnection(MqttVersion.MQTT_5)
         def subscriber2 = mockedExternalConnection(MqttVersion.MQTT_5)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
@@ -51,9 +52,10 @@ class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos0IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos0IncomingPublishProcessorTest/2")

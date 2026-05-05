@@ -1,13 +1,15 @@
 package javasabr.mqtt.service.publish.processor
 
 import javasabr.mqtt.service.IntegrationServiceSpecification
+import javasabr.rlib.logger.api.LoggerLevel
+import javasabr.rlib.logger.api.LoggerManager
 
 abstract class QosIncomingPublishProcessorTest extends IntegrationServiceSpecification {
   static {
-    //LoggerManager.enable(AbstractMqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
-    //LoggerManager.enable(TrackableMqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
-    //LoggerManager.enable(Qos0MqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
-    //LoggerManager.enable(Qos1MqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
-    //LoggerManager.enable(Qos2MqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
+    LoggerManager.enable(AbstractIncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    LoggerManager.enable(TrackableIncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    LoggerManager.enable(Qos0IncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    LoggerManager.enable(Qos1IncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    LoggerManager.enable(Qos2IncomingPublishProcessor.class, LoggerLevel.DEBUG)
   }
 }

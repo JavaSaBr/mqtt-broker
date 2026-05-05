@@ -86,40 +86,40 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   ])
 
   @Shared
-  def defaultPublishDeliveringService = new DefaultPublishDispatcher([
+  def defaultPublishDispatcher = new DefaultPublishDispatcher([
       new Qos0SubscriberPublishSender(defaultMessageOutFactoryService),
       new Qos1SubscriberPublishSender(defaultMessageOutFactoryService),
       new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
   ])
 
   @Shared
-  def inMemoryRetainMessageService = new InMemoryRetainPublishService()
+  def defaultRetainMessageService = new InMemoryRetainPublishService()
 
   @Shared
   def defaultSubscriptionService = new InMemorySubscriptionService(authorizationService)
 
   @Shared
-  def qos0MqttPublishInMessageHandler = new Qos0IncomingPublishProcessor(
+  def qos0IncomingPublishProcessor = new Qos0IncomingPublishProcessor(
       defaultSubscriptionService,
-      defaultPublishDeliveringService,
+      defaultPublishDispatcher,
       defaultMessageOutFactoryService,
-      inMemoryRetainMessageService,
+      defaultRetainMessageService,
       defaultIncomingPublishStorage)
 
   @Shared
-  def publishReceivingService = new DefaultIncomingPublishRouter([
-      qos0MqttPublishInMessageHandler,
+  def defaultIncomingPublishRouter = new DefaultIncomingPublishRouter([
+      qos0IncomingPublishProcessor,
       new Qos1IncomingPublishProcessor(
           defaultSubscriptionService,
-          defaultPublishDeliveringService,
+          defaultPublishDispatcher,
           defaultMessageOutFactoryService,
-          inMemoryRetainMessageService,
+          defaultRetainMessageService,
           defaultIncomingPublishStorage),
       new Qos2IncomingPublishProcessor(
           defaultSubscriptionService,
-          defaultPublishDeliveringService,
+          defaultPublishDispatcher,
           defaultMessageOutFactoryService,
-          inMemoryRetainMessageService,
+          defaultRetainMessageService,
           defaultIncomingPublishStorage)
   ])
 

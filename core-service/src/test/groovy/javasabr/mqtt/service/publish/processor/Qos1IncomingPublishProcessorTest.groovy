@@ -23,9 +23,10 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def subscriber1 = mockedExternalConnection(MqttVersion.MQTT_5)
         def subscriber2 = mockedExternalConnection(MqttVersion.MQTT_5)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
@@ -69,9 +70,10 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/2")
@@ -94,9 +96,10 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/3")
@@ -118,9 +121,10 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/4")
@@ -145,9 +149,10 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos1IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/5")

@@ -15,8 +15,6 @@ import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
-import javasabr.mqtt.network.message.in.PublishReleaseMqttInMessage;
-import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
@@ -99,9 +97,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     super.handleNoMatchedSubscribers(user, session, publish);
     sendFeedback(
         user,
+        session,
         messageOutFactoryService
             .resolveFactory(user)
-            .newPublishCompleted(publish.messageId(), PublishCompletedReasonCode.SUCCESS));
+            .newPublishCompleted(publish.messageId(), PublishCompletedReasonCode.SUCCESS),
+        publish.messageId());
   }
 
   @Override
@@ -113,9 +113,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
     sendFeedback(
         user,
+        session,
         messageOutFactoryService
             .resolveFactory(user)
-            .newPublishCompleted(publish.messageId(), PublishCompletedReasonCode.SUCCESS));
+            .newPublishCompleted(publish.messageId(), PublishCompletedReasonCode.SUCCESS),
+        publish.messageId());
   }
   
   private void updateSessionState(

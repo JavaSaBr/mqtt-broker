@@ -15,6 +15,7 @@ class TestPublishFactory {
 
   static def incomingQos0Publish(String topicName) {
     return new SimpleIncomingPublish(
+        UUID.randomUUID(),
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         QoS.AT_MOST_ONCE,
         TopicName.valueOf(topicName),
@@ -30,6 +31,7 @@ class TestPublishFactory {
   
   static def incomingPublish(QoS qos, String topicName, String payload) {
     return new SimpleIncomingPublish(
+        UUID.randomUUID(),
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos,
         TopicName.valueOf(topicName),
@@ -45,6 +47,7 @@ class TestPublishFactory {
 
   static def incomingPublish(QoS qos, TopicName topicName, PublishData payload) {
     return new SimpleIncomingPublish(
+        UUID.randomUUID(),
         MqttProperties.MESSAGE_ID_IS_NOT_SET,
         qos,
         topicName,
@@ -60,6 +63,7 @@ class TestPublishFactory {
 
   static def incomingPublish(int messageId, QoS qos, TopicName topicName, PublishData payload) {
     return new SimpleIncomingPublish(
+        UUID.randomUUID(),
         messageId,
         qos,
         topicName,
@@ -75,6 +79,7 @@ class TestPublishFactory {
   
   static def incomingPublishWithRetain(String topicName, String payload) {
     return new SimpleIncomingPublish(
+        UUID.randomUUID(),
         1,
         QoS.AT_MOST_ONCE,
         TopicName.valueOf(topicName),
