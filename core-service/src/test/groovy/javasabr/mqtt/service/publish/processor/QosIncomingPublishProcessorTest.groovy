@@ -1,0 +1,13 @@
+package javasabr.mqtt.service.publish.processor
+
+import javasabr.mqtt.service.IntegrationServiceSpecification
+
+abstract class QosIncomingPublishProcessorTest extends IntegrationServiceSpecification {
+  static {
+    //LoggerManager.enable(AbstractMqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(TrackableMqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(Qos0MqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(Qos1MqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(Qos2MqttPublishInMessageHandler.class, LoggerLevel.DEBUG)
+  }
+}

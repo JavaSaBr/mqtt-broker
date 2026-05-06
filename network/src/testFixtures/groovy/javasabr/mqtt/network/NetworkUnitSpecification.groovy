@@ -7,6 +7,7 @@ import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.SubscribeRetainHandling
 import javasabr.mqtt.model.data.type.StringPair
+import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode
 import javasabr.mqtt.model.reason.code.UnsubscribeAckReasonCode
 import javasabr.mqtt.model.subscription.Subscription
@@ -62,7 +63,7 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final testAuthMethod = "testAuthMethod"
   public static final testAuthData = "testAuthData".getBytes(StandardCharsets.UTF_8)
   public static final reasonString = "reasonString"
-  public static final publishTopic = TopicName.valueOf("publish/Topic")
+  public static final testPublishTopic = TopicName.valueOf("publish/Topic")
   public static final testResponseTopic = TopicName.valueOf("response/Topic")
   public static final testWillTopic = TopicName.valueOf("will/Topic")
   public static final testWillResponseTopic = TopicName.valueOf("will/response/Topic")
@@ -118,8 +119,16 @@ class NetworkUnitSpecification extends UnitSpecification {
   public static final topicFilters = Array.of(topicFilter, topicFilter2)
   public static final subscriptionsObj311 = Array.of(topicFilter1Obj311, topicFilter2Obj311)
   public static final topicFiltersObj5 = Array.of(topicFilter1Obj5, topicFilter2Obj5)
-  public static final publishPayload = "publishPayload".getBytes(StandardCharsets.UTF_8)
-  public static final testCorrelationData = "correlationData".getBytes(StandardCharsets.UTF_8)
+  public static final testPublishPayloadBytes = "publishPayload".getBytes(StandardCharsets.UTF_8)
+  public static final testCorrelationDataBytes = "correlationData".getBytes(StandardCharsets.UTF_8)
+  public static final testPublishPayload = PublishData.wrap(testPublishPayloadBytes)
+  public static final testPublishPayloadWithCorrelation = PublishData.wrap(
+      testPublishPayloadBytes,
+      testCorrelationDataBytes)
+  public static final testPublishPayloadUtf8WithCorrelation = PublishData.wrap(
+      testPublishPayloadBytes, 
+      PayloadFormat.UTF8_STRING, 
+      testCorrelationDataBytes)
   public static final testWillPayload = "willPayload".getBytes(StandardCharsets.UTF_8)
   public static final testWillPayloadFormat = PayloadFormat.UTF8_STRING.code() as byte
   public static final testWillCorrelationData = "willCorrelationData".getBytes(StandardCharsets.UTF_8)

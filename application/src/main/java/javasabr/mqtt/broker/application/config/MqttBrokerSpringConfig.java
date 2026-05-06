@@ -17,22 +17,16 @@ import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.MessageOutFactoryService;
-import javasabr.mqtt.service.PublishDeliveringService;
-import javasabr.mqtt.service.PublishReceivingService;
-import javasabr.mqtt.service.RetainMessageService;
 import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
 import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
-import javasabr.mqtt.service.impl.DefaultPublishDeliveringService;
-import javasabr.mqtt.service.impl.DefaultPublishReceivingService;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
 import javasabr.mqtt.service.impl.InMemoryClientIdRegistry;
-import javasabr.mqtt.service.impl.InMemoryRetainMessageService;
 import javasabr.mqtt.service.impl.InMemorySubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
@@ -47,14 +41,22 @@ import javasabr.mqtt.service.message.handler.impl.UnsubscribeMqttInMessageHandle
 import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
-import javasabr.mqtt.service.publish.handler.MqttPublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.MqttPublishOutMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos0MqttPublishOutMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos1MqttPublishOutMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishInMessageHandler;
-import javasabr.mqtt.service.publish.handler.impl.Qos2MqttPublishOutMessageHandler;
+import javasabr.mqtt.service.publish.IncomingPublishRouter;
+import javasabr.mqtt.service.publish.PublishDataStorage;
+import javasabr.mqtt.service.publish.PublishDispatcher;
+import javasabr.mqtt.service.publish.RetainPublishService;
+import javasabr.mqtt.service.publish.impl.DefaultIncomingPublishRouter;
+import javasabr.mqtt.service.publish.impl.DefaultPublishDispatcher;
+import javasabr.mqtt.service.publish.impl.InMemoryPublishDataStorage;
+import javasabr.mqtt.service.publish.impl.InMemoryRetainPublishService;
+import javasabr.mqtt.service.publish.processor.IncomingPublishProcessor;
+import javasabr.mqtt.service.publish.processor.Qos0IncomingPublishProcessor;
+import javasabr.mqtt.service.publish.processor.Qos1IncomingPublishProcessor;
+import javasabr.mqtt.service.publish.processor.Qos2IncomingPublishProcessor;
+import javasabr.mqtt.service.publish.sender.Qos0SubscriberPublishSender;
+import javasabr.mqtt.service.publish.sender.Qos1SubscriberPublishSender;
+import javasabr.mqtt.service.publish.sender.Qos2SubscriberPublishSender;
+import javasabr.mqtt.service.publish.sender.SubscriberPublishSender;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
 import javasabr.rlib.network.NetworkFactory;
@@ -122,10 +124,15 @@ public class MqttBrokerSpringConfig {
   SubscriptionService subscriptionService(AuthorizationService authorizationService) {
     return new InMemorySubscriptionService(authorizationService);
   }
+  
+  @Bean
+  PublishDataStorage publishDataStorage() {
+    return new InMemoryPublishDataStorage();
+  }
 
   @Bean
-  RetainMessageService retainMessageService() {
-    return new InMemoryRetainMessageService();
+  RetainPublishService retainMessageService() {
+    return new InMemoryRetainPublishService();
   }
 
   @Bean
@@ -176,15 +183,17 @@ public class MqttBrokerSpringConfig {
 
   @Bean
   MqttInMessageHandler publishMqttInMessageHandler(
-      PublishReceivingService publishReceivingService,
+      IncomingPublishRouter incomingPublishRouter,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      AuthorizationService authorizationService) {
+      AuthorizationService authorizationService,
+      PublishDataStorage publishDataStorage) {
     return new PublishMqttInMessageHandler(
-        publishReceivingService,
+        incomingPublishRouter,
         messageOutFactoryService,
         topicService,
-        authorizationService);
+        authorizationService,
+        publishDataStorage);
   }
 
   @Bean
@@ -207,14 +216,14 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
-      RetainMessageService retainMessageService,
-      PublishDeliveringService publishDeliveringService) {
+      RetainPublishService retainPublishService,
+      PublishDispatcher publishDispatcher) {
     return new SubscribeMqttInMessageHandler(
         subscriptionService,
         messageOutFactoryService,
         topicService,
-        retainMessageService,
-        publishDeliveringService);
+        retainPublishService, 
+        publishDispatcher);
   }
 
   @Bean
@@ -234,69 +243,69 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos0MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0MqttPublishOutMessageHandler(messageOutFactoryService);
+  SubscriberPublishSender qos0SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos0SubscriberPublishSender(messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos1MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1MqttPublishOutMessageHandler(messageOutFactoryService);
+  SubscriberPublishSender qos1SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos1SubscriberPublishSender(messageOutFactoryService);
   }
 
   @Bean
-  MqttPublishOutMessageHandler qos2MqttPublishOutMessageHandler(MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2MqttPublishOutMessageHandler(messageOutFactoryService);
+  SubscriberPublishSender qos2SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
+    return new Qos2SubscriberPublishSender(messageOutFactoryService);
   }
 
   @Bean
-  PublishDeliveringService publishDeliveringService(
-      Collection<? extends MqttPublishOutMessageHandler> knownPublishOutHandlers) {
-    return new DefaultPublishDeliveringService(knownPublishOutHandlers);
+  PublishDispatcher publishDispatcher(
+      Collection<? extends SubscriberPublishSender> knownSubscriberPublishSenders) {
+    return new DefaultPublishDispatcher(knownSubscriberPublishSenders);
   }
 
   @Bean
-  MqttPublishInMessageHandler qos0MqttPublishInMessageHandler(
+  IncomingPublishProcessor qos0IncomingPublishProcessor(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService,
+      PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
-    return new Qos0MqttPublishInMessageHandler(
+      RetainPublishService retainPublishService) {
+    return new Qos0IncomingPublishProcessor(
         subscriptionService,
-        publishDeliveringService,
-        messageOutFactoryService,
-        retainMessageService);
+        publishDispatcher,
+        messageOutFactoryService, 
+        retainPublishService);
   }
 
   @Bean
-  MqttPublishInMessageHandler qos1MqttPublishInMessageHandler(
+  IncomingPublishProcessor qos1IncomingPublishProcessor(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService,
+      PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
-    return new Qos1MqttPublishInMessageHandler(
+      RetainPublishService retainPublishService) {
+    return new Qos1IncomingPublishProcessor(
         subscriptionService,
-        publishDeliveringService,
+        publishDispatcher,
         messageOutFactoryService,
-        retainMessageService);
+        retainPublishService);
   }
 
   @Bean
-  MqttPublishInMessageHandler qos2MqttPublishInMessageHandler(
+  IncomingPublishProcessor qos2IncomingPublishProcessor(
       SubscriptionService subscriptionService,
-      PublishDeliveringService publishDeliveringService,
+      PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainMessageService retainMessageService) {
-    return new Qos2MqttPublishInMessageHandler(
-        subscriptionService,
-        publishDeliveringService,
+      RetainPublishService retainPublishService) {
+    return new Qos2IncomingPublishProcessor(
+        subscriptionService, 
+        publishDispatcher,
         messageOutFactoryService,
-        retainMessageService);
+        retainPublishService);
   }
 
   @Bean
-  PublishReceivingService publishReceivingService(
-      Collection<? extends MqttPublishInMessageHandler> knownPublishInHandlers) {
-    return new DefaultPublishReceivingService(knownPublishInHandlers);
+  IncomingPublishRouter IncomingPublishRouter(
+      Collection<? extends IncomingPublishProcessor> knownIncomingPublishProcessors) {
+    return new DefaultIncomingPublishRouter(knownIncomingPublishProcessors);
   }
 
   @Bean

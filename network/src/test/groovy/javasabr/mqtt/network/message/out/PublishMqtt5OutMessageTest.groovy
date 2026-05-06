@@ -16,12 +16,10 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             QoS.EXACTLY_ONCE,
             true,
             true,
-            publishTopic,
-            publishPayload,
+            testPublishTopic,
+            testPublishPayloadWithCorrelation,
             testTopicAlias,
-            PayloadFormat.BINARY,
             testResponseTopic,
-            testCorrelationData,
             testUserProperties)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
@@ -43,13 +41,13 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
           qos() == QoS.EXACTLY_ONCE
           retain()
           duplicate()
-          payload() == publishPayload
-          rawTopicName() == publishTopic.rawTopic()
+          payload() == testPublishPayloadBytes
+          rawTopicName() == testPublishTopic.rawTopic()
           userProperties() == testUserProperties
           topicAlias() == testTopicAlias
           payloadFormat() == PayloadFormat.BINARY
           rawResponseTopicName() == testResponseTopic.rawTopic()
-          correlationData() == testCorrelationData
+          correlationData() == testCorrelationDataBytes
         }
     when:
         def outMessage2 = new PublishMqtt5OutMessage(
@@ -57,12 +55,10 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
             QoS.AT_MOST_ONCE,
             false,
             false,
-            publishTopic,
-            publishPayload,
+            testPublishTopic,
+            testPublishPayloadUtf8WithCorrelation,
             testTopicAlias,
-            PayloadFormat.UTF8_STRING,
             testResponseTopic,
-            testCorrelationData,
             testUserProperties)
         def typeAndFlags2 = outMessage2.messageTypeAndFlags()
         byte type2 = NumberUtils.getHighByteBits(typeAndFlags2);
@@ -83,13 +79,13 @@ class PublishMqtt5OutMessageTest extends BaseMqttOutMessageTest {
           qos() == QoS.AT_MOST_ONCE
           !retain()
           !duplicate()
-          payload() == publishPayload
-          rawTopicName() == publishTopic.rawTopic()
+          payload() == testPublishPayloadBytes
+          rawTopicName() == testPublishTopic.rawTopic()
           userProperties() == testUserProperties
           topicAlias() == testTopicAlias
           payloadFormat() == PayloadFormat.UTF8_STRING
           rawResponseTopicName() == testResponseTopic.rawTopic()
-          correlationData() == testCorrelationData
+          correlationData() == testCorrelationDataBytes
         }
   }
 }

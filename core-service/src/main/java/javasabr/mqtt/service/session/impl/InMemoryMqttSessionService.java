@@ -2,6 +2,7 @@ package javasabr.mqtt.service.session.impl;
 
 import java.io.Closeable;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicLong;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.session.MqttSessionService;
@@ -26,6 +27,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   final LockableRefToRefDictionary<String, NotExpirableSession> storedNotExpirableSessions;
   final LockableRefToRefDictionary<String, ExpirableSession> storedExpirableSessions;
 
+  final AtomicLong internalIdGenerator;
   final Thread cleanThread;
   final OldestSessionCleaner<ExpirableSession> expirableOldestSessionCleaner;
   final OldestSessionCleaner<NotExpirableSession> notExpirableOldestSessionCleaner;
@@ -51,6 +53,7 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
     this.activeSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.storedExpirableSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.storedNotExpirableSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.internalIdGenerator = new AtomicLong(0);
     this.expirableOldestSessionCleaner = new OldestSessionCleaner<>(
         storedExpirableSessions, 
         maxExpirableStoredSessions, 
@@ -76,7 +79,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
       if (currentActiveSession != null) {
         throw new IllegalStateException("Client:[%s] already has active session".formatted(clientId));
       }
-      InMemoryNetworkMqttSession newCleanSession = new InMemoryNetworkMqttSession(clientId);
+      InMemoryNetworkMqttSession newCleanSession = new InMemoryNetworkMqttSession(
+          clientId,
+          internalIdGenerator.incrementAndGet());
       activeSessions.put(clientId, newCleanSession);
       log.debug(clientId, "[%s] Created new clean session"::formatted);
       return Mono.just(newCleanSession);

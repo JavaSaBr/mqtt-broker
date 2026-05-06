@@ -1,0 +1,37 @@
+package javasabr.mqtt.model.publish;
+
+import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.data.type.StringPair;
+import javasabr.mqtt.model.topic.TopicName;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.IntArray;
+import org.jspecify.annotations.Nullable;
+
+public sealed interface Publish permits IncomingPublish, OutgoingPublish, TrackableOutgoingPublish {
+  int messageId();
+
+  QoS qos();
+
+  TopicName topicName();
+
+  @Nullable 
+  TopicName responseTopicName();
+
+  PublishData data();
+
+  boolean duplicated();
+
+  boolean retained();
+  
+  IntArray subscriptionIds();
+  
+  long messageExpiryInterval();
+
+  int topicAlias();
+  
+  Array<StringPair> userProperties();
+
+  Publish withDuplicated();
+  
+  Publish withoutRetained();
+}

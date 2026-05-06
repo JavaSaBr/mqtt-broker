@@ -14,9 +14,9 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
   def "should read message correctly as MQTT 3.1.1"() {
     given:
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putString(publishTopic.toString())
+          it.putString(testPublishTopic.toString())
           it.putShort(testMessageId)
-          it.put(publishPayload)
+          it.put(testPublishPayloadBytes)
         }
     when:
         def inMessage = new PublishMqttInMessage(0b0110_0011 as byte)
@@ -31,7 +31,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           subscriptionIds() == IntArray.empty()
           contentType() == null
           correlationData() == null
-          payload() == publishPayload
+          payload() == testPublishPayloadBytes
           messageId() == testMessageId
           userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
           messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
@@ -47,17 +47,17 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.MESSAGE_EXPIRY_INTERVAL, testMessageExpiryInterval)
           it.putProperty(MqttMessageProperty.TOPIC_ALIAS, testTopicAlias)
           it.putProperty(MqttMessageProperty.RESPONSE_TOPIC, testResponseTopic.rawTopic())
-          it.putProperty(MqttMessageProperty.CORRELATION_DATA, testCorrelationData)
+          it.putProperty(MqttMessageProperty.CORRELATION_DATA, testCorrelationDataBytes)
           it.putProperty(MqttMessageProperty.USER_PROPERTY, testUserProperties)
           it.putProperty(MqttMessageProperty.SUBSCRIPTION_IDENTIFIER, testSubscriptionIds)
           it.putProperty(MqttMessageProperty.CONTENT_TYPE, testContentType)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putString(publishTopic.toString())
+          it.putString(testPublishTopic.toString())
           it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
-          it.put(publishPayload)
+          it.put(testPublishPayloadBytes)
         }
     when:
         def inMessage = new PublishMqttInMessage(0b0110_0011 as byte)
@@ -71,8 +71,8 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           rawResponseTopicName() == testResponseTopic.rawTopic()
           subscriptionIds() == testSubscriptionIds
           contentType() == testContentType
-          correlationData() == testCorrelationData
-          payload() == publishPayload
+          correlationData() == testCorrelationDataBytes
+          payload() == testPublishPayloadBytes
           messageId() == testMessageId
           userProperties() == testUserProperties
           messageExpiryInterval() == testMessageExpiryInterval
@@ -81,10 +81,10 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         }
     when:
         dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putString(publishTopic.toString())
+          it.putString(testPublishTopic.toString())
           it.putShort(testMessageId)
           it.putMbi(0)
-          it.put(publishPayload)
+          it.put(testPublishPayloadBytes)
         }
         inMessage = new PublishMqttInMessage(0b0110_0011 as byte)
         result = inMessage.read(defaultMqtt5Connection, dataBuffer, dataBuffer.limit())
@@ -98,7 +98,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           subscriptionIds() == IntArray.empty()
           contentType() == null
           correlationData() == null
-          payload() == publishPayload
+          payload() == testPublishPayloadBytes
           messageId() == testMessageId
           userProperties() == MqttInMessage.EMPTY_USER_PROPERTIES
           messageExpiryInterval() == MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
@@ -113,11 +113,11 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(MqttMessageProperty.SERVER_KEEP_ALIVE, 1)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putString(publishTopic.toString())
+          it.putString(testPublishTopic.toString())
           it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
-          it.put(publishPayload)
+          it.put(testPublishPayloadBytes)
         }
     when: 'use not available property'
         def inMessage = new PublishMqttInMessage(0b0110_0011 as byte)
@@ -137,7 +137,7 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
           it.putProperty(property, value)
         }
         def dataBuffer = BufferUtils.prepareBuffer(512) {
-          it.putString(publishTopic.toString())
+          it.putString(testPublishTopic.toString())
           it.putShort(testMessageId)
           it.putMbi(propertiesBuffer.limit())
           it.put(propertiesBuffer)
@@ -156,6 +156,6 @@ class PublishMqttInMessageTest extends BaseMqttInMessageTest {
         MqttMessageProperty.TOPIC_ALIAS      | testTopicAlias
         MqttMessageProperty.RESPONSE_TOPIC   | testResponseTopic.rawTopic()
         MqttMessageProperty.CONTENT_TYPE     | testContentType
-        MqttMessageProperty.CORRELATION_DATA | testCorrelationData
+        MqttMessageProperty.CORRELATION_DATA | testCorrelationDataBytes
   }
 }

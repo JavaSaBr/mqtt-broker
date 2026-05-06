@@ -3,10 +3,10 @@ package javasabr.mqtt.service.message.out.factory;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.model.PayloadFormat;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.message.MqttMessage;
+import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.reason.code.AuthenticateReasonCode;
 import javasabr.mqtt.model.reason.code.ConnectAckReasonCode;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
@@ -91,7 +91,7 @@ public abstract class MqttMessageOutFactory {
       boolean retain,
       boolean duplicate,
       TopicName topicName,
-      byte[] payload) {
+      PublishData publishData) {
     return newPublish(
         messageId,
         qos,
@@ -99,9 +99,7 @@ public abstract class MqttMessageOutFactory {
         duplicate,
         topicName,
         MqttProperties.TOPIC_ALIAS_NOT_SET,
-        payload,
-        PayloadFormat.UNDEFINED,
-        null,
+        publishData,
         null,
         MqttMessage.EMPTY_USER_PROPERTIES);
   }
@@ -113,10 +111,8 @@ public abstract class MqttMessageOutFactory {
       boolean duplicate,
       TopicName topicName,
       int topicAlias,
-      byte[] payload,
-      PayloadFormat payloadFormat,
+      PublishData publishData,
       @Nullable TopicName responseTopic,
-      byte @Nullable [] correlationData,
       Array<StringPair> userProperties);
 
   public abstract MqttOutMessage newPublishAck(

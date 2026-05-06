@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.session;
 
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.publishing.Publish;
+import javasabr.mqtt.model.publish.Publish;
 
 public interface PublishRetryer {
 

@@ -15,8 +15,8 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
             QoS.EXACTLY_ONCE,
             true,
             true,
-            publishTopic,
-            publishPayload)
+            testPublishTopic,
+            testPublishPayload)
     when:
         def typeAndFlags = outMessage.messageTypeAndFlags()
         byte type = NumberUtils.getHighByteBits(typeAndFlags);
@@ -37,8 +37,8 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
           qos() == QoS.EXACTLY_ONCE
           retain()
           duplicate()
-          payload() == publishPayload
-          rawTopicName() == publishTopic.rawTopic()
+          payload() == testPublishPayloadBytes
+          rawTopicName() == testPublishTopic.rawTopic()
           userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         }
     when:
@@ -47,8 +47,8 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
             QoS.AT_MOST_ONCE,
             false,
             false,
-            publishTopic,
-            publishPayload)
+            testPublishTopic,
+            testPublishPayload)
         def typeAndFlags2 = outMessage2.messageTypeAndFlags()
         byte type2 = NumberUtils.getHighByteBits(typeAndFlags2);
         byte info2 = NumberUtils.getLowByteBits(typeAndFlags2);
@@ -68,8 +68,8 @@ class PublishMqtt311OutMessageTest extends BaseMqttOutMessageTest {
           qos() == QoS.AT_MOST_ONCE
           !retain()
           !duplicate()
-          payload() == publishPayload
-          rawTopicName() == publishTopic.rawTopic()
+          payload() == testPublishPayloadBytes
+          rawTopicName() == testPublishTopic.rawTopic()
           userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         }
   }
