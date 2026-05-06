@@ -1,14 +1,14 @@
 package javasabr.mqtt.service.publish.impl
 
+import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.model.topic.TopicName
+import javasabr.mqtt.network.message.in.MqttInMessage
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
-
-import java.util.UUID
 
 import static java.nio.charset.StandardCharsets.UTF_8
 
@@ -17,44 +17,47 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should store incoming publish with all attributes"() {
     given:
         def storage = new InMemoryIncomingPublishStorage()
-        def publishId = UUID.randomUUID()
-        def mainTopicName = TopicName.valueOf("topic/main")
-        def replyTopicName = TopicName.valueOf("topic/response")
-        def publishData = PublishData.wrap("payload".getBytes(UTF_8))
-        def subscriberIds = IntArray.of(10, 20)
-        def publishUserProperties = Array.of(
+        def testPublishId = UUID.randomUUID()
+        def testTopicAlias = 7
+        def testMessageId = 15
+        def testQos = QoS.EXACTLY_ONCE
+        def testTopicName = TopicName.valueOf("topic/main")
+        def testResponseTopicName = TopicName.valueOf("topic/response")
+        def testData = PublishData.wrap("payload".getBytes(UTF_8))
+        def testSubscriptionIds = IntArray.of(10, 20)
+        def testUserProperties = Array.of(
             new StringPair("key-1", "value-1"),
             new StringPair("key-2", "value-2"))
     when:
         def incomingPublish = storage.store(
-            publishId,
-            15,
-            QoS.EXACTLY_ONCE,
-            mainTopicName,
-            replyTopicName,
-            publishData,
+            testPublishId,
+            testMessageId,
+            testQos,
+            testTopicName,
+            testResponseTopicName,
+            testData,
             true,
             true,
-            subscriberIds,
+            testSubscriptionIds,
             60_000,
-            7,
-            publishUserProperties)
+            testTopicAlias,
+            testUserProperties)
     then:
         storage.storedPublishes.size() == 1
-        storage.storedPublishes.containsKey(publishId)
+        storage.storedPublishes.containsKey(testPublishId)
         with(incomingPublish) {
-          id() == publishId
-          messageId() == 15
-          qos() == QoS.EXACTLY_ONCE
-          topicName() == mainTopicName
-          responseTopicName() == replyTopicName
-          data() == publishData
+          id() == testPublishId
+          messageId() == testMessageId
+          qos() == testQos
+          topicName() == testTopicName
+          responseTopicName() == testResponseTopicName
+          data() == testData
           duplicated()
           retained()
-          subscriptionIds() == subscriberIds
+          subscriptionIds() == testSubscriptionIds
           messageExpiryInterval() == 60_000
-          topicAlias() == 7
-          userProperties() == publishUserProperties
+          topicAlias() == testTopicAlias
+          userProperties() == testUserProperties
         }
   }
 
@@ -63,34 +66,37 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         def storage = new InMemoryIncomingPublishStorage()
         def publishId = UUID.randomUUID()
         def topicName = TopicName.valueOf("topic/main")
-        def publishData = PublishData.wrap("payload".getBytes(UTF_8))
+        def data = PublishData.wrap("payload".getBytes(UTF_8))
+        def testMessageId1 = 6
+        def testMessageId2 = 9
         storage.store(
             publishId,
-            1,
+            testMessageId1,
             QoS.AT_LEAST_ONCE,
             topicName,
             null,
-            publishData,
+            data,
             false,
             false,
             IntArray.empty(),
             60_000,
-            0,
-            Array.empty(StringPair))
+            MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+            MqttInMessage.EMPTY_USER_PROPERTIES)
+
     when:
         storage.store(
             publishId,
-            2,
+            testMessageId2,
             QoS.AT_MOST_ONCE,
             topicName,
             null,
-            publishData,
+            data,
             false,
             false,
             IntArray.empty(),
             30_000,
-            0,
-            Array.empty(StringPair))
+            MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+            MqttInMessage.EMPTY_USER_PROPERTIES)
     then:
         def exception = thrown(IllegalArgumentException)
         exception.message == "Publish with id:[${publishId}] already exists"
@@ -100,7 +106,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should remove stored incoming publish"() {
     given:
         def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = storePublish(storage)
+        def incomingPublish = createAndStorePublish(storage)
     when:
         storage.remove(incomingPublish)
     then:
@@ -111,7 +117,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should keep stored publish until all consumers are handled"() {
     given:
         def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = storePublish(storage)
+        def incomingPublish = createAndStorePublish(storage)
         storage.increaseConsumerCount(incomingPublish, 3)
     when:
         storage.decreaseConsumerCount(incomingPublish, 2)
@@ -124,21 +130,23 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         storage.storedPublishes.isEmpty()
   }
 
-  def "should ignore consumer count update for missing publish"() {
+  def "should not allow to change consumer count update for missing publish"() {
     given:
         def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = storePublish(storage)
+        def incomingPublish = createAndStorePublish(storage)
         storage.remove(incomingPublish)
     when:
         storage.increaseConsumerCount(incomingPublish, 1)
     then:
+        def exception = thrown(IllegalArgumentException)
+        exception.message == "Unknown publish:[${incomingPublish.id()}]"
         storage.storedPublishes.isEmpty()
   }
 
   def "should remove stored publish when consumer count is decreased below zero"() {
     given:
         def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = storePublish(storage)
+        def incomingPublish = createAndStorePublish(storage)
         storage.increaseConsumerCount(incomingPublish, 1)
     when:
         storage.decreaseConsumerCount(incomingPublish, 2)
@@ -146,7 +154,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         storage.storedPublishes.isEmpty()
   }
 
-  private static def storePublish(InMemoryIncomingPublishStorage storage) {
+  private static def createAndStorePublish(InMemoryIncomingPublishStorage storage) {
     return storage.store(
         UUID.randomUUID(),
         1,

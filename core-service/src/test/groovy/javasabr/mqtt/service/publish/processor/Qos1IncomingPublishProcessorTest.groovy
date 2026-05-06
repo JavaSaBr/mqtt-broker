@@ -47,8 +47,13 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def inMessageTracker = client3
             .session()
             .inMessageTracker()
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.AT_LEAST_ONCE,
+            expectedTopicName,
+            testPayloadBytes)
     when:
-        processor.process(client3, incomingPublish(expectedMessageId, QoS.AT_MOST_ONCE, expectedTopicName, testPayload))
+        processor.process(client3, incomingPublish)
     then: 'sender should have feedback'
         with(client3.nextSentMessage(PublishAckMqtt5OutMessage)) {
           reasonCode() == PublishAckReasonCode.SUCCESS
@@ -80,8 +85,13 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.AT_LEAST_ONCE,
+            topicName,
+            testPayloadBytes)
     when:
-        processor.process(user, incomingPublish(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish)
     then: 'sender should have feedback that no matched subscribers'
         with(user.nextSentMessage(PublishAckMqtt5OutMessage)) {
           reasonCode() == PublishAckReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -103,12 +113,12 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/3")
-    when:
-        processor.process(user, incomingPublish(
-            MqttProperties.MESSAGE_ID_IS_NOT_SET,
-            QoS.AT_MOST_ONCE,
+        def incomingPublish = prepareIncomingPublish(
+            QoS.AT_LEAST_ONCE,
             topicName,
-            testPayload))
+            testPayloadBytes)
+    when:
+        processor.process(user, incomingPublish)
     then:
         with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
           reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
@@ -132,8 +142,13 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.AT_LEAST_ONCE,
+            topicName,
+            testPayloadBytes)
     when:
-        processor.process(user, incomingPublish(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish)
     then:
         with(user.nextSentMessage(PublishAckMqtt5OutMessage)) {
           reasonCode() == PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE
@@ -160,11 +175,13 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH)
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId, 
+            QoS.AT_LEAST_ONCE,
+            topicName,
+            testPayloadBytes)
     when:
-        processor.process(
-            user, 
-            incomingPublish(expectedMessageId, QoS.AT_MOST_ONCE, topicName, testPayload)
-                .withDuplicated())
+        processor.process(user, incomingPublish.withDuplicated())
     then:
         user.isEmpty()
   }

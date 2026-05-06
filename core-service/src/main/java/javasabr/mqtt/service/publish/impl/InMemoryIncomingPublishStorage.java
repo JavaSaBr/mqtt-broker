@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.publish.impl;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.publish.IncomingPublish;
@@ -13,12 +14,17 @@ import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.CustomLog;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
+@CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
-
+  
   LockableRefToRefDictionary<UUID, StoredIncomingPublish> storedPublishes;
 
   public InMemoryIncomingPublishStorage() {
@@ -66,6 +72,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
 
   @Override
   public void remove(IncomingPublish publish) {
+    log.debug(publish, "Removing publish:[%s] from storage..."::formatted);
     long stamp = storedPublishes.writeLock();
     try {
       storedPublishes.remove(publish.id());
@@ -79,16 +86,19 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     if (count < 1) {
       throw new IllegalArgumentException("Consumers count should be positive");
     }
-    long stamp = storedPublishes.writeLock();
+    StoredIncomingPublish storedPublish;
+    long stamp = storedPublishes.readLock();
     try {
-      StoredIncomingPublish storedPublish = storedPublishes.get(publish.id());
+      storedPublish = storedPublishes.get(publish.id());
       if (storedPublish == null) {
-        return;
+        throw new IllegalArgumentException("Unknown publish:[%s]".formatted(publish.id()));
       }
-      storedPublish.consumerCount += count;
     } finally {
-      storedPublishes.writeUnlock(stamp);
+      storedPublishes.readUnlock(stamp);
     }
+    storedPublish
+        .consumerCount()
+        .addAndGet(count);
   }
 
   @Override
@@ -96,30 +106,29 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     if (count < 1) {
       throw new IllegalArgumentException("Consumers count should be positive");
     }
-    long stamp = storedPublishes.writeLock();
+    StoredIncomingPublish storedPublish;
+    long stamp = storedPublishes.readLock();
     try {
-      StoredIncomingPublish storedPublish = storedPublishes.get(publish.id());
+      storedPublish = storedPublishes.get(publish.id());
       if (storedPublish == null) {
-        return;
-      }
-      int result = storedPublish.consumerCount - count;
-      if (result <= 0) {
-        storedPublishes.remove(publish.id());
-      } else {
-        storedPublish.consumerCount = result;
+        throw new IllegalArgumentException("Unknown publish:[%s]".formatted(publish.id()));
       }
     } finally {
-      storedPublishes.writeUnlock(stamp);
+      storedPublishes.readUnlock(stamp);
+    }
+    int result = storedPublish
+        .consumerCount()
+        .accumulateAndGet(count, (current, delta) -> current - delta);
+    if (result < 1) {
+      remove(publish);
     }
   }
 
-  static class StoredIncomingPublish {
-
-    final SimpleIncomingPublish publish;
-    int consumerCount;
-
-    StoredIncomingPublish(SimpleIncomingPublish publish) {
-      this.publish = publish;
-    }
+  @Getter
+  @RequiredArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  private static class StoredIncomingPublish {
+    final IncomingPublish publish;
+    final AtomicInteger consumerCount = new AtomicInteger(0);
   }
 }

@@ -318,7 +318,7 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  IncomingPublishRouter IncomingPublishRouter(
+  IncomingPublishRouter incomingPublishRouter(
       Collection<? extends IncomingPublishProcessor> knownIncomingPublishProcessors) {
     return new DefaultIncomingPublishRouter(knownIncomingPublishProcessors);
   }
