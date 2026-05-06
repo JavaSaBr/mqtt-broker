@@ -52,7 +52,7 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
   }
 
   protected void handleMissedMessageId(U user, IncomingPublish publish) {
-    incomingPublishStorage.remove(publish);
+    incomingPublishStorage.removeIfExist(publish);
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);

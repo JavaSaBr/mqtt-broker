@@ -56,7 +56,7 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
   }
 
   private void handleNotExpectedMessageId(ExternalNetworkMqttUser user, IncomingPublish publish) {
-    incomingPublishStorage.remove(publish);
+    incomingPublishStorage.removeIfExist(publish);
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NOT_EXPECTED_MESSAGE_ID);

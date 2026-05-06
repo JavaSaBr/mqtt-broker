@@ -171,7 +171,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user, 
       int messageId, 
       IncomingPublish publish) {
-    incomingPublishStorage.remove(publish);
+    incomingPublishStorage.removeIfExist(publish);
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
@@ -210,6 +210,8 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       incomingPublishStorage.remove(incomingPublish);
       return true;
     }
+    
+    //FIXME No cleanup path when a QoS 2 session closes before PUBREL
 
     messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
     dispatchToSubscriber(networkMqttUser, (NetworkMqttSession) session, incomingPublish);

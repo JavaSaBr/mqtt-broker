@@ -99,20 +99,26 @@ public class PublishMqttInMessageHandler
         message.payloadFormat(),
         message.payload(),
         message.correlationData());
-    IncomingPublish incomingPublish = incomingPublishStorage.store(
-        session.generatePublishId(),
-        message.messageId(),
-        message.qos(),
-        finalTopicName,
-        responseTopicName,
-        storedPublishData,
-        message.duplicate(),
-        message.retain(),
-        message.subscriptionIds(),
-        message.messageExpiryInterval(),
-        message.topicAlias(),
-        message.userProperties());
 
+    IncomingPublish incomingPublish;
+    try {
+      incomingPublish = incomingPublishStorage.store(
+          session.generatePublishId(),
+          message.messageId(),
+          message.qos(),
+          finalTopicName,
+          responseTopicName,
+          storedPublishData,
+          message.duplicate(),
+          message.retain(),
+          message.subscriptionIds(),
+          message.messageExpiryInterval(),
+          message.topicAlias(),
+          message.userProperties());
+    } catch (IllegalArgumentException e) {
+      publishDataStorage.removeById(storedPublishData.id());
+      throw e;
+    }
     incomingPublishRouter.route(user, incomingPublish);
   }
   

@@ -12,6 +12,9 @@ import org.jspecify.annotations.Nullable;
 
 public interface IncomingPublishStorage {
 
+  /**
+   * @throws IllegalArgumentException for duplicated publish
+   */
   IncomingPublish store(
       UUID publishId,
       int messageId,
@@ -25,10 +28,21 @@ public interface IncomingPublishStorage {
       long messageExpiryInterval,
       int topicAlias,
       Array<StringPair> userProperties);
-  
+
+  /**
+   * @throws IllegalArgumentException for unknown publish
+   */
   void remove(IncomingPublish publish);
   
+  void removeIfExist(IncomingPublish publish);
+  
+  /**
+   * @throws IllegalArgumentException for unknown publish
+   */
   void increaseConsumerCount(IncomingPublish publish, int count);
   
+  /**
+   * @throws IllegalArgumentException for unknown publish
+   */
   void decreaseConsumerCount(IncomingPublish publish, int count);
 }

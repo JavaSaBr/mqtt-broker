@@ -74,9 +74,33 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     log.debug(publish, "Removing publish:[%s] from storage..."::formatted);
     long stamp = storedPublishes.writeLock();
     try {
-      storedPublishes.remove(publish.id());
+      removeWithoutLock(publish);
     } finally {
       storedPublishes.writeUnlock(stamp);
+    }
+  }
+
+  @Override
+  public void removeIfExist(IncomingPublish publish) {
+    long stamp = storedPublishes.writeLock();
+    try {
+      if (storedPublishes.containsKey(publish.id())) {
+        removeWithoutLock(publish);
+      }
+    } finally {
+      storedPublishes.writeUnlock(stamp);
+    }
+  }
+  
+  private void removeWithoutLock(IncomingPublish publish) {
+    StoredIncomingPublish stored = storedPublishes.remove(publish.id());
+    if (stored == null) {
+      throw new IllegalArgumentException("Unknown publish:[%s]".formatted(publish.id()));
+    } else if (stored.consumerCount.get() > 0) {
+      log.warning(
+          "Removed publish:[%s] still has [%s] consumers".formatted(
+          publish.id(),
+          stored.consumerCount));
     }
   }
 
@@ -118,8 +142,13 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     int result = storedPublish
         .consumerCount()
         .accumulateAndGet(count, (current, delta) -> current - delta);
-    if (result < 1) {
-      remove(publish);
+    if (result == 0) {
+      if (!publish.retained()) {
+        remove(publish);
+      }
+    } else if (result < 0) {
+      throw new IllegalArgumentException(
+          "Unexpected result of decreaseConsumerCount:[%s] for publish:[%s]".formatted(result, publish.id()));
     }
   }
 

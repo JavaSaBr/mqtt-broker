@@ -80,15 +80,13 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
         log.debug(user.clientId(), checkResult, subscriber,
             "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
         skipped++;
-      } else if(checkResult == PublishProcessingResult.SUCCESS) {
+      } else if (checkResult == PublishProcessingResult.SUCCESS) {
         dispatchToSubscriber(publish, subscriber);
       }
     }
-
     if (skipped > 0) {
       incomingPublishStorage.decreaseConsumerCount(publish, skipped);
     }
-
     int result = matchedSubscribers - skipped;
     if (result > 0) {
       handleMatchedSubscribers(user, session, publish, result);
@@ -99,7 +97,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
 
   protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {
     if (!publish.retained()) {
-      incomingPublishStorage.remove(publish);
+      incomingPublishStorage.removeIfExist(publish);
     }
   }
 

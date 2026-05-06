@@ -116,7 +116,7 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user, 
       int messageId, 
       IncomingPublish publish) {
-    incomingPublishStorage.remove(publish);
+    incomingPublishStorage.removeIfExist(publish);
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));

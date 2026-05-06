@@ -143,7 +143,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         storage.storedPublishes.isEmpty()
   }
 
-  def "should remove stored publish when consumer count is decreased below zero"() {
+  def "should throw exception when consumer count is decreased below zero"() {
     given:
         def storage = new InMemoryIncomingPublishStorage()
         def incomingPublish = createAndStorePublish(storage)
@@ -151,7 +151,9 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
     when:
         storage.decreaseConsumerCount(incomingPublish, 2)
     then:
-        storage.storedPublishes.isEmpty()
+        def exception = thrown(IllegalArgumentException)
+        exception.message == "Unexpected result of decreaseConsumerCount:[-1] for publish:[${incomingPublish.id()}]"
+        storage.storedPublishes.containsKey(incomingPublish.id())
   }
 
   private static def createAndStorePublish(InMemoryIncomingPublishStorage storage) {
