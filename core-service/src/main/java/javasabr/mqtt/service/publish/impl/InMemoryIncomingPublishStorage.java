@@ -14,7 +14,6 @@ import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

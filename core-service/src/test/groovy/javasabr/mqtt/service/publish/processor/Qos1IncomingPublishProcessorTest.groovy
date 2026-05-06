@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.publish.processor
 
-import javasabr.mqtt.model.MqttProperties
+
 import javasabr.mqtt.model.MqttProtocolErrors
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
@@ -14,8 +14,6 @@ import javasabr.mqtt.network.message.out.PublishAckMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
-
-import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
 
 class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 

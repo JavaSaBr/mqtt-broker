@@ -19,8 +19,6 @@ import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
-import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
-
 class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should provide feedback for accepted publish with subscribers"() {
