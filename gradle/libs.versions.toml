@@ -16,7 +16,7 @@ r2dbc-pool="1.0.2.RELEASE"
 # https://mvnrepository.com/artifact/org.postgresql/r2dbc-postgresql
 r2dbc-postgresql="1.1.1.RELEASE"
 # https://mvnrepository.com/artifact/org.postgresql/postgresql
-jdbc-postgres="42.7.8"
+jdbc-postgres="42.7.11"
 # https://mvnrepository.com/artifact/org.flywaydb/flyway-core
 flyway="11.19.0"
 # https://mvnrepository.com/artifact/org.spockframework/spock-core
