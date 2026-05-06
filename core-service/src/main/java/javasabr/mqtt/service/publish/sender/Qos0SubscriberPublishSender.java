@@ -23,10 +23,10 @@ public class Qos0SubscriberPublishSender extends AbstractSubscriberPublishSender
 
   @Nullable
   @Override
-  protected OutgoingPublish buildOutgoing(
+  protected OutgoingPublish buildOutgoingPublish(
       ExternalNetworkMqttUser user,
       MqttSession session,
-      IncomingPublish incoming) {
-    return new SimpleOutgoingPublish(incoming, incoming.retained(), IntArray.EMPTY);
+      IncomingPublish incomingPublish) {
+    return new SimpleOutgoingPublish(incomingPublish, incomingPublish.retained(), IntArray.EMPTY);
   }
 }

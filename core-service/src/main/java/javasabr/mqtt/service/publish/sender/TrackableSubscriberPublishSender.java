@@ -40,16 +40,16 @@ public abstract class TrackableSubscriberPublishSender extends
 
   @Nullable
   @Override
-  protected OutgoingPublish buildOutgoing(
+  protected OutgoingPublish buildOutgoingPublish(
       ExternalNetworkMqttUser user, 
       MqttSession session, 
-      IncomingPublish incoming) {
+      IncomingPublish incomingPublish) {
     return new TrackableSimpleOutgoingPublish(
-        incoming,
+        incomingPublish,
         // generate new uniq message id for specific user
         session.generateMessageId(),
         false,
-        incoming.retained(),
+        incomingPublish.retained(),
         qos(),
         IntArray.EMPTY);
   }
@@ -58,14 +58,14 @@ public abstract class TrackableSubscriberPublishSender extends
   protected final void sendToSubscriberImpl(
       ExternalNetworkMqttUser user, 
       MqttSession session, 
-      OutgoingPublish outgoing) {
+      OutgoingPublish outgoingPublish) {
     // register message id
     MessageTacker messageTacker = session.outMessageTracker();
-    messageTacker.add(outgoing.messageId(), MqttMessageType.PUBLISH);
+    messageTacker.add(outgoingPublish.messageId(), MqttMessageType.PUBLISH);
     // register callback and retrier
     ProcessingPublishes processingPublishes = session.outProcessingPublishes();
-    processingPublishes.register(outgoing, trackableMessageCallback, publishRetryer);
-    super.sendToSubscriberImpl(user, session, outgoing);
+    processingPublishes.register(outgoingPublish, trackableMessageCallback, publishRetryer);
+    super.sendToSubscriberImpl(user, session, outgoingPublish);
   }
 
   protected final boolean handleReceivedTrackableMessage(

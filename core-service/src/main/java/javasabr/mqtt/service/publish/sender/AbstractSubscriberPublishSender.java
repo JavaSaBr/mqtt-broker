@@ -23,7 +23,7 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
   MessageOutFactoryService messageOutFactoryService;
 
   @Override
-  public final void sendToSubscriber(IncomingPublish incoming, MqttUser user) {
+  public final void sendToSubscriber(IncomingPublish incomingPublish, MqttUser user) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;
@@ -34,17 +34,23 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
       log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
       return;
     }
-    OutgoingPublish outgoing = buildOutgoing(expectedUser, session, incoming);
-    if (outgoing != null) {
-      sendToSubscriberImpl(expectedUser, session, outgoing);
+    OutgoingPublish outgoingPublish = buildOutgoingPublish(expectedUser, session, incomingPublish);
+    if (outgoingPublish != null) {
+      sendToSubscriberImpl(expectedUser, session, outgoingPublish);
     }
   }
 
   @Nullable
-  protected abstract OutgoingPublish buildOutgoing(U user, MqttSession session, IncomingPublish incoming);
+  protected abstract OutgoingPublish buildOutgoingPublish(
+      U user, 
+      MqttSession session, 
+      IncomingPublish incoming);
 
-  protected void sendToSubscriberImpl(U user, MqttSession session, OutgoingPublish outgoing) {
-    send(user, outgoing);
+  protected void sendToSubscriberImpl(
+      U user, 
+      MqttSession session, 
+      OutgoingPublish outgoingPublish) {
+    send(user, outgoingPublish);
   }
 
   protected void send(U user, Publish publish) {
