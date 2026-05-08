@@ -10,8 +10,10 @@ import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.rlib.collections.array.IntArray;
+import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
 
+@CustomLog
 public class Qos0SubscriberPublishSender extends AbstractSubscriberPublishSender<ExternalNetworkMqttUser> {
 
   public Qos0SubscriberPublishSender(
@@ -45,6 +47,11 @@ public class Qos0SubscriberPublishSender extends AbstractSubscriberPublishSender
         .thenAccept(_ -> {
           IncomingPublish source = outgoingPublish.source();
           incomingPublishStorage.decreaseConsumerCount(source, 1);
+        })
+        .whenComplete((_, ex) -> {
+          if (ex != null) {
+            log.error(ex);
+          }
         });
   }
 }
