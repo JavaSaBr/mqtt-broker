@@ -3,10 +3,11 @@ package javasabr.mqtt.service.publish.sender;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.OutgoingPublish;
-import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.session.MqttSession;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
 
   Class<U> expectedUserType;
   MessageOutFactoryService messageOutFactoryService;
+  IncomingPublishStorage incomingPublishStorage;
 
   @Override
   public final void sendToSubscriber(IncomingPublish incomingPublish, MqttUser user) {
@@ -44,7 +46,7 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
   protected abstract OutgoingPublish buildOutgoingPublish(
       U user, 
       MqttSession session, 
-      IncomingPublish incoming);
+      IncomingPublish incomingPublish);
 
   protected void sendToSubscriberImpl(
       U user, 
@@ -53,18 +55,26 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
     send(user, outgoingPublish);
   }
 
-  protected void send(U user, Publish publish) {
-    user.sendInBackground(messageOutFactoryService
+  protected void send(U user, OutgoingPublish outgoingPublish) {
+    MqttOutMessage mqttOutMessage = messageOutFactoryService
         .resolveFactory(user)
         .newPublish(
-            publish.messageId(),
-            publish.qos(),
-            publish.retained(),
-            publish.duplicated(),
-            publish.topicName(),
-            publish.topicAlias(),
-            publish.data(),
-            publish.responseTopicName(),
-            publish.userProperties()));
+            outgoingPublish.messageId(),
+            outgoingPublish.qos(),
+            outgoingPublish.retained(),
+            outgoingPublish.duplicated(),
+            outgoingPublish.topicName(),
+            outgoingPublish.topicAlias(),
+            outgoingPublish.data(),
+            outgoingPublish.responseTopicName(),
+            outgoingPublish.userProperties());
+    send(user, outgoingPublish, mqttOutMessage);
+  }
+
+  protected void send(
+      U user, 
+      OutgoingPublish outgoingPublish, 
+      MqttOutMessage mqttOutMessage) {
+    user.sendInBackground(mqttOutMessage);
   }
 }

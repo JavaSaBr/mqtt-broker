@@ -18,6 +18,7 @@ import javasabr.mqtt.model.session.TrackedMessageMeta;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.rlib.collections.array.IntArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
@@ -32,8 +33,10 @@ public abstract class TrackableSubscriberPublishSender extends
   TrackableMessageCallback trackableMessageCallback;
   PublishRetryer publishRetryer;
 
-  protected TrackableSubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
-    super(ExternalNetworkMqttUser.class, messageOutFactoryService);
+  protected TrackableSubscriberPublishSender(
+      MessageOutFactoryService messageOutFactoryService,
+      IncomingPublishStorage incomingPublishStorage) {
+    super(ExternalNetworkMqttUser.class, messageOutFactoryService, incomingPublishStorage);
     this.trackableMessageCallback = this::handleReceivedTrackableMessage;
     this.publishRetryer = this::retrySending;
   }
@@ -88,6 +91,9 @@ public abstract class TrackableSubscriberPublishSender extends
       Publish publish);
 
   protected final void retrySending(MqttUser user, MqttSession session, Publish publish) {
+    if (!(publish instanceof OutgoingPublish outgoingPublish)) {
+      throw new IllegalArgumentException("Unexpected publish type:[%s]".formatted(publish));
+    }
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     String clientId = networkMqttUser.clientId();
     int messageId = publish.messageId();
@@ -95,34 +101,46 @@ public abstract class TrackableSubscriberPublishSender extends
     TrackedMessageMeta trackedMessageMeta = outMessageTracker.stored(messageId);
     if (trackedMessageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
     } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
       log.warning(clientId, trackedMessageMeta, messageId,
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
+      incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
     } else {
       log.debug(clientId, messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
-      send(networkMqttUser, publish.withDuplicated());
+      send(networkMqttUser, outgoingPublish.withDuplicated());
     }
   }
 
   protected void handleNotExpectedFlowState(
       ExternalNetworkMqttUser user,
       MqttMessageType trackedMessageType,
-      MqttMessageType expectedTrackedMessageType) {
+      MqttMessageType expectedTrackedMessageType,
+      OutgoingPublish outgoingPublish) {
     MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(user);
     String reason = MqttProtocolErrors.UNEXPECTED_FLOW_STATE.formatted(
         trackedMessageType,
         expectedTrackedMessageType);
-    user.closeWithReason(messageOutFactory.newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, reason));
+    user.closeWithReason(messageOutFactory.newDisconnect(
+        user,
+        DisconnectReasonCode.PROTOCOL_ERROR, 
+        reason));
+    incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
   }
 
   protected void handleNotExpectedResponseMessage(
       ExternalNetworkMqttUser user,
       TrackableMqttMessage receivedMessage,
-      MqttMessageType expectedMessageType) {
+      MqttMessageType expectedMessageType,
+      OutgoingPublish outgoingPublish) {
     MqttMessageOutFactory messageOutFactory = messageOutFactoryService.resolveFactory(user);
     String reason = MqttProtocolErrors.UNEXPECTED_RESPONSE_MESSAGE.formatted(
         receivedMessage.messageType(),
         expectedMessageType);
-    user.closeWithReason(messageOutFactory.newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, reason));
+    user.closeWithReason(messageOutFactory.newDisconnect(
+        user, 
+        DisconnectReasonCode.PROTOCOL_ERROR,
+        reason));
+    incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
   }
 }

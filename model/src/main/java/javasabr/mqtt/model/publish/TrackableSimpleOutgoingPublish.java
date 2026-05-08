@@ -9,7 +9,7 @@ import javasabr.rlib.collections.array.IntArray;
 import org.jspecify.annotations.Nullable;
 
 public record TrackableSimpleOutgoingPublish(
-    Publish incomingPublish,
+    IncomingPublish source,
     int messageId,
     boolean duplicated,
     boolean retained,
@@ -18,23 +18,23 @@ public record TrackableSimpleOutgoingPublish(
   
   @Override
   public TopicName topicName() {
-    return incomingPublish.topicName();
+    return source.topicName();
   }
   
   @Nullable
   @Override
   public TopicName responseTopicName() {
-    return incomingPublish.responseTopicName();
+    return source.responseTopicName();
   }
 
   @Override
   public PublishData data() {
-    return incomingPublish.data();
+    return source.data();
   }
 
   @Override
   public long messageExpiryInterval() {
-    return incomingPublish.messageExpiryInterval();
+    return source.messageExpiryInterval();
   }
 
   @Override
@@ -44,24 +44,24 @@ public record TrackableSimpleOutgoingPublish(
 
   @Override
   public Array<StringPair> userProperties() {
-    return incomingPublish.userProperties();
+    return source.userProperties();
   }
 
   @Override
-  public Publish withDuplicated() {
+  public OutgoingPublish withDuplicated() {
     if (duplicated()) {
       return this;
     } else {
-      return new TrackableSimpleOutgoingPublish(incomingPublish, messageId, true, retained, qos, subscriptionIds);
+      return new TrackableSimpleOutgoingPublish(source, messageId, true, retained, qos, subscriptionIds);
     }
   }
 
   @Override
-  public Publish withoutRetained() {
+  public OutgoingPublish withoutRetained() {
     if (!retained()) {
       return this;
     } else {
-      return new TrackableSimpleOutgoingPublish(incomingPublish, messageId, duplicated, false, qos, subscriptionIds);
+      return new TrackableSimpleOutgoingPublish(source, messageId, duplicated, false, qos, subscriptionIds);
     }
   }
 }
