@@ -44,9 +44,8 @@ public class Qos0SubscriberPublishSender extends AbstractSubscriberPublishSender
     // for QoS 0 we don't need any confirmation from client side
     user
         .sendAsync(mqttOutMessage)
-        .thenAccept(_ -> incomingPublishStorage
-            .decreaseConsumerCount(outgoingPublish.source(), 1))
         .whenComplete((_, ex) -> {
+          incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
           if (ex != null) {
             log.error(ex);
           }

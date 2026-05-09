@@ -77,13 +77,13 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
 
   @Nullable
   private IncomingPublish clearRetainedPublish() {
-    IncomingPublish retained = retainedPublishes.get();
-    // we should exist retained publish only if this thread do this clean
-    if (retained != null && retainedPublishes.compareAndSet(retained, null)) {
-      return retained;
-    } else {
-      return retained;
+    for (int i = 0; i < REWRITE_MAX_ATTEMPTS; i++) {
+      IncomingPublish prevPublish = retainedPublishes.get();
+      if (prevPublish == null || retainedPublishes.compareAndSet(prevPublish, null)) {
+        return prevPublish;
+      }
     }
+    throw new IllegalStateException("Can't clear retained publish");
   }
 
   public void collectRetainedPublishes(int level, TopicFilter topicFilter, ArrayBuilder<IncomingPublish> result) {
