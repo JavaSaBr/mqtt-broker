@@ -55,8 +55,8 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta alreadyInProcess = messageTacker.stored(messagedId);
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we can skip it
-      //FIXME need to be sure that the new duplicated publish instance is referenced to original
       if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
+        handleDuplicated(publish);
         return false;
       }
       handleMessageIdIsInUse(user, messagedId, publish);
@@ -98,20 +98,6 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     sendFeedback(user, session, response, messageId);
   }
   
-  @Override
-  protected void handleError(
-      ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      IncomingPublish publish,
-      PublishProcessingResult handlingResult) {
-    super.handleError(user, session, publish, handlingResult);
-    int messageId = publish.messageId();
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(user)
-        .newPublishAck(publish.messageId(), handlingResult.ackReasonCode());
-    sendFeedback(user, session, response, messageId);
-  }
-
   private void handleMessageIdIsInUse(
       ExternalNetworkMqttUser user, 
       int messageId, 
@@ -120,5 +106,11 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     user.sendInBackground(messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
+  }
+  
+  private void handleDuplicated(IncomingPublish publish) {
+    // FIXME need to add check if the prev message was fully drop and not delivered
+    // no any sense to keep skipped duplicated message on our side
+    incomingPublishStorage.removeIfExist(publish);
   }
 }

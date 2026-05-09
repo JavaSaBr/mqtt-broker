@@ -57,10 +57,18 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   }
 
   protected void dispatchToSubscriber(U user, NetworkMqttSession session, IncomingPublish publish) {
-    if (publish.retained()) {
-      retainPublishService.retain(publish);
-    }
+    // mark + 1 during dispatching process
+    incomingPublishStorage.increaseConsumerCount(publish, 1);
     
+    if (publish.retained()) {
+      // to avoid auto-removing retained publish we should add +1 long time consumer
+      incomingPublishStorage.increaseConsumerCount(publish, 1);
+      IncomingPublish prevRetainedPublish = retainPublishService.retain(publish);
+      if (prevRetainedPublish != null) {
+        incomingPublishStorage.decreaseConsumerCount(prevRetainedPublish, 1);
+      }
+    }
+
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -96,9 +104,8 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   }
 
   protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {
-    if (!publish.retained()) {
-      incomingPublishStorage.removeIfExist(publish);
-    }
+    // unmark + 1 from dispatching process
+    incomingPublishStorage.decreaseConsumerCount(publish, 1);
   }
 
   protected void handleMatchedSubscribers(
@@ -107,14 +114,8 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       IncomingPublish publish, 
       int matchedSubscribers) {
     log.debug(matchedSubscribers, "Dispatched publish in the result to [%s] subscribers"::formatted);
-  }
-  
-  protected void handleError(
-      U user,
-      NetworkMqttSession session,
-      IncomingPublish publish,
-      PublishProcessingResult handlingResult) {
-    incomingPublishStorage.remove(publish);
+    // unmark + 1 from dispatching process
+    incomingPublishStorage.decreaseConsumerCount(publish, 1);
   }
 
   protected PublishProcessingResult checkSubscriber(

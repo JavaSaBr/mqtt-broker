@@ -66,9 +66,8 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta alreadyInProcess = messageTacker.stored(messagedId);
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we should ack response
-      //FIXME need to be sure that the new duplicated publish instance is referenced to original
-      if (publish.duplicated() && (alreadyInProcess.messageType() == MqttMessageType.PUBLISH)) {
-        handleDuplicated(user, messagedId, alreadyInProcess);
+      if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
+        handleDuplicated(user, messagedId, alreadyInProcess, publish);
         return false;
       }
       handleMessageIdIsInUse(user, messagedId, publish);
@@ -132,30 +131,11 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     processingPublishes.register(publish, trackableMessageCallback, PublishRetryer.NO_OPS);
   }
 
-  @Override
-  protected void handleError(
+  private void handleDuplicated(
       ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      IncomingPublish publish,
-      PublishProcessingResult handlingResult) {
-    super.handleError(user, session, publish, handlingResult);
-
-    int messageId = publish.messageId();
-    PublishReceivedReasonCode reasonCode = handlingResult.receivedReasonCode();
-
-    MessageTacker messageTacker = session.inMessageTracker();
-    messageTacker.update(messageId, MqttMessageType.PUBLISH, reasonCode);
-
-    sendFeedback(
-        user,
-        session,
-        messageOutFactoryService
-            .resolveFactory(user)
-            .newPublishReceived(messageId, reasonCode),
-        messageId);
-  }
-
-  private void handleDuplicated(ExternalNetworkMqttUser user, int messageId, TrackedMessageMeta alreadyInProcess) {
+      int messageId, 
+      TrackedMessageMeta alreadyInProcess,
+      IncomingPublish incomingPublish) {
     PublishReceivedReasonCode reasonCode = PublishReceivedReasonCode.SUCCESS;
     if (alreadyInProcess.reasonCode() instanceof PublishReceivedReasonCode receivedReasonCode) {
       reasonCode = receivedReasonCode;
@@ -165,6 +145,9 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
         messageOutFactoryService
             .resolveFactory(user)
             .newPublishReceived(messageId, reasonCode));
+    // FIXME need to add check if the prev message was fully drop and not delivered
+    // no any sense to keep duplicated message on our side
+    incomingPublishStorage.removeIfExist(incomingPublish);
   }
 
   private void handleMessageIdIsInUse(

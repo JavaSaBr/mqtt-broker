@@ -22,6 +22,8 @@ import org.jspecify.annotations.Nullable;
 class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
 
   private final static Supplier<RetainedPublishNode> NODE_FACTORY = RetainedPublishNode::new;
+  
+  private static final int REWRITE_MAX_ATTEMPTS = 1000;
 
   static {
     DebugUtils.registerIncludedFields("childNodes", "retainedMessage");
@@ -38,34 +40,50 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
     return NODE_FACTORY;
   }
 
-  public void addRetainedPublish(int level, IncomingPublish publish, TopicName topicName) {
-    var child = getOrCreateChildNode(topicName.segment(level));
+  @Nullable
+  public IncomingPublish addRetainedPublish(int level, IncomingPublish publish, TopicName topicName) {
+    RetainedPublishNode child = getOrCreateChildNode(topicName.segment(level));
     int nextLevel = level + 1;
     boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
-      child.setRetainedPublishes(publish);
+      return child.setRetainedPublishes(publish);
     } else {
-      child.addRetainedPublish(nextLevel, publish, topicName);
+      return child.addRetainedPublish(nextLevel, publish, topicName);
     }
   }
 
-  public void removeRetainedPublish(int level, TopicName topicName) {
-    var child = getOrCreateChildNode(topicName.segment(level));
+  @Nullable
+  public IncomingPublish removeRetainedPublish(int level, TopicName topicName) {
+    RetainedPublishNode child = getOrCreateChildNode(topicName.segment(level));
     int nextLevel = level + 1;
     boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
-      child.clearRetainedPublish();
+      return child.clearRetainedPublish();
     } else {
-      child.removeRetainedPublish(nextLevel, topicName);
+      return child.removeRetainedPublish(nextLevel, topicName);
     }
   }
 
-  private void setRetainedPublishes(IncomingPublish value) {
-    retainedPublishes.set(value);
+  @Nullable
+  private IncomingPublish setRetainedPublishes(IncomingPublish newPublish) {
+    for (int i = 0; i < REWRITE_MAX_ATTEMPTS; i++) {
+      IncomingPublish prevPublish = retainedPublishes.get();
+      if (retainedPublishes.compareAndSet(prevPublish, newPublish)) {
+        return prevPublish;
+      }
+    }
+    throw new IllegalStateException("Can't rewrite retained publish for:[%s]".formatted(newPublish));
   }
 
-  private void clearRetainedPublish() {
-    retainedPublishes.set(null);
+  @Nullable
+  private IncomingPublish clearRetainedPublish() {
+    IncomingPublish retained = retainedPublishes.get();
+    // we should exist retained publish only if this thread do this clean
+    if (retained != null && retainedPublishes.compareAndSet(retained, null)) {
+      return retained;
+    } else {
+      return retained;
+    }
   }
 
   public void collectRetainedPublishes(int level, TopicFilter topicFilter, ArrayBuilder<IncomingPublish> result) {
