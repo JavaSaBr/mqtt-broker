@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.publish.impl;
 
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.tree.ConcurrentRetainedMessageTree;
@@ -19,7 +19,7 @@ public class InMemoryRetainPublishService implements RetainPublishService {
   }
 
   @Override
-  public void retain(Publish publish) {
+  public void retain(IncomingPublish publish) {
     PublishData data = publish.data();
     if (data.isPayloadEmpty()) {
       retainedMessageTree.removeRetainedMessage(publish.topicName());
@@ -29,7 +29,7 @@ public class InMemoryRetainPublishService implements RetainPublishService {
   }
 
   @Override
-  public Array<Publish> findRetainedPublishes(TopicFilter topicFilter) {
+  public Array<IncomingPublish> findRetainedPublishes(TopicFilter topicFilter) {
     return retainedMessageTree.getRetainedMessages(topicFilter);
   }
 }

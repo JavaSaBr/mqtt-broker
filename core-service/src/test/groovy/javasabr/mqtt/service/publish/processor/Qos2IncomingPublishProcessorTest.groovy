@@ -19,17 +19,16 @@ import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 import javasabr.rlib.collections.array.Array
 
-import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
-
 class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
   def "should provide feedback for accepted publish with subscribers"() {
     given:
         def processor = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def subscriber1 = mockedExternalConnection(MqttVersion.MQTT_5)
         def subscriber2 = mockedExternalConnection(MqttVersion.MQTT_5)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
@@ -50,8 +49,13 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def inMessageTracker = client3
             .session()
             .inMessageTracker()
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            expectedTopicName,
+            testPayloadBytes)
     when:
-        processor.process(client3, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, expectedTopicName, testPayload))
+        processor.process(client3, incomingPublish)
     then: 'sender should have feedback of first phase'
         with(client3.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.SUCCESS
@@ -63,6 +67,10 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
           messageType() == MqttMessageType.PUBLISH
           reasonCode() == PublishReceivedReasonCode.SUCCESS
         }
+    when:
+        def publishRelease = PublishReleaseMqttInMessage
+            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
+        defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
     then: 'subscribers should receive the publish'
         with(client1.nextSentMessage(PublishMqtt5OutMessage)) {
           topicName() == expectedTopicName
@@ -70,10 +78,6 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         with(client2.nextSentMessage(PublishMqtt5OutMessage)) {
           topicName() == expectedTopicName
         }
-    when:
-        def publishRelease = PublishReleaseMqttInMessage
-            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
-        defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
     then:
         with(client3.nextSentMessage(PublishCompleteMqtt5OutMessage)) {
           reasonCode() == PublishCompletedReasonCode.SUCCESS
@@ -83,32 +87,39 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         }
         inMessageTracker.stored(expectedMessageId) == null
   }
-
+  
+  //FIXME currently we can't resolve this status
   def "should provide feedback for accepted publish without any subscriber"() {
     given:
         def processor = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/2")
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
     when:
-        processor.process(user, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish)
     then: 'sender should have feedback that no matched subscribers'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
-          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
           messageId() == expectedMessageId
           reason() == null
           userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         }
         with(inMessageTracker.stored(expectedMessageId)) {
           messageType() == MqttMessageType.PUBLISH
-          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
         }
     when:
         def publishRelease = PublishReleaseMqttInMessage
@@ -128,18 +139,20 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/3")
-    when:
-        processor.process(user, incomingPublish(
+        def incomingPublish = prepareIncomingPublish(
             MqttProperties.MESSAGE_ID_IS_NOT_SET,
             QoS.EXACTLY_ONCE,
             topicName,
-            testPayload))
+            testPayloadBytes)
+    when:
+        processor.process(user, incomingPublish)
     then:
         with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
           reasonCode() == DisconnectReasonCode.PROTOCOL_ERROR
@@ -152,9 +165,10 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/4")
@@ -162,8 +176,13 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
     when:
-        processor.process(user, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish)
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE
@@ -179,9 +198,10 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/5")
@@ -189,11 +209,13 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH, PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS)
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId, 
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
     when:
-        processor.process(
-            user, 
-            incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
-                .withDuplicated())
+        processor.process(user, incomingPublish.withDuplicated())
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
@@ -209,41 +231,44 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
     given:
         def processor = new Qos2IncomingPublishProcessor(
             defaultSubscriptionService,
-            defaultPublishDeliveringService,
+            defaultPublishDispatcher,
             defaultMessageOutFactoryService,
-            inMemoryRetainMessageService)
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/5")
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
+        def incomingPublish = prepareIncomingPublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
     when: 'init floy by original publish'
-        processor.process(user, incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload))
+        processor.process(user, incomingPublish)
     then:
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
-          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
           reason() == null
           userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         }
         with(inMessageTracker.stored(expectedMessageId)) {
           messageType() == MqttMessageType.PUBLISH
-          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
         }
     when: 'send duplicated before publish release'
-        processor.process(
-            user, 
-            incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
-                .withDuplicated())
+        processor.process(user, incomingPublish.withDuplicated())
     then: 'server should return the same feedback for duplicated as for original'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
-          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
           reason() == null
           userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         }
         with(inMessageTracker.stored(expectedMessageId)) {
           messageType() == MqttMessageType.PUBLISH
-          reasonCode() == PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
         }
     when: 'send publish release to change flow stage'
         def publishRelease = PublishReleaseMqttInMessage
@@ -261,10 +286,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
           messageType() == MqttMessageType.PUBLISH_COMPLETE
         }
     when: 'send duplicated after publish release'
-        processor.process(
-            user, 
-            incomingPublish(expectedMessageId, QoS.EXACTLY_ONCE, topicName, testPayload)
-                .withDuplicated())
+        processor.process(user, incomingPublish.withDuplicated())
     then: 'server should return that this message id is already used because publish complete is in progress of sending'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE

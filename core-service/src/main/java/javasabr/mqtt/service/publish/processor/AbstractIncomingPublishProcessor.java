@@ -1,6 +1,6 @@
 package javasabr.mqtt.service.publish.processor;
 
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.subscriber.SingleSubscriber;
@@ -10,6 +10,7 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.rlib.collections.array.Array;
@@ -29,9 +30,10 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   PublishDispatcher publishDispatcher;
   MessageOutFactoryService messageOutFactoryService;
   RetainPublishService retainPublishService;
+  IncomingPublishStorage incomingPublishStorage;
 
   @Override
-  public final void process(NetworkMqttUser user, Publish publish) {
+  public final void process(NetworkMqttUser user, IncomingPublish publish) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
       return;
@@ -47,11 +49,18 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     }
   }
 
-  protected boolean validateImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     return true;
   }
 
-  protected void processImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
+  }
+
+  protected void dispatchToSubscriber(U user, NetworkMqttSession session, IncomingPublish publish) {
+    if (publish.retained()) {
+      retainPublishService.retain(publish);
+    }
+    
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
@@ -60,53 +69,62 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       return;
     }
 
-    int count = 0;
+    int matchedSubscribers = subscribers.size();
+    log.debug(matchedSubscribers, "Starting dispatching publish to [%s] subscribers"::formatted);
+    incomingPublishStorage.increaseConsumerCount(publish, matchedSubscribers);
+    
+    int skipped = 0;
     for (SingleSubscriber subscriber : subscribers) {
       PublishProcessingResult checkResult = checkSubscriber(user, publish, subscriber);
       if (checkResult.error()) {
         log.debug(user.clientId(), checkResult, subscriber,
             "[%s] Found error:[%s] for subscriber:[%s] during checking"::formatted);
-        handleError(user, session, publish, checkResult);
-        return;
+        skipped++;
       } else if (checkResult == PublishProcessingResult.SUCCESS) {
-        count++;
+        dispatchToSubscriber(publish, subscriber);
       }
     }
-
-    log.debug(count, "Started delivering publish to [%s] subscribers"::formatted);
-    handleSuccess(user, session, publish, count);
-
-    for (SingleSubscriber subscriber : subscribers) {
-      dispatchToSubscriber(publish, subscriber);
+    if (skipped > 0) {
+      incomingPublishStorage.decreaseConsumerCount(publish, skipped);
+    }
+    int result = matchedSubscribers - skipped;
+    if (result > 0) {
+      handleMatchedSubscribers(user, session, publish, result);
+    } else {
+      handleNoMatchedSubscribers(user, session, publish);
     }
   }
 
-  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, Publish publish) {}
+  protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {
+    if (!publish.retained()) {
+      incomingPublishStorage.removeIfExist(publish);
+    }
+  }
 
-  protected void handleSuccess(
-      U user,
-      NetworkMqttSession session,
-      Publish publish,
+  protected void handleMatchedSubscribers(
+      U user, 
+      NetworkMqttSession session, 
+      IncomingPublish publish, 
       int matchedSubscribers) {
-    if (publish.retained()) {
-      retainPublishService.retain(publish);
-    }
+    log.debug(matchedSubscribers, "Dispatched publish in the result to [%s] subscribers"::formatted);
   }
-
+  
   protected void handleError(
       U user,
       NetworkMqttSession session,
-      Publish publish,
-      PublishProcessingResult handlingResult) {}
+      IncomingPublish publish,
+      PublishProcessingResult handlingResult) {
+    incomingPublishStorage.remove(publish);
+  }
 
   protected PublishProcessingResult checkSubscriber(
       U user,
-      Publish publish,
+      IncomingPublish publish,
       SingleSubscriber subscriber) {
     return PublishProcessingResult.SUCCESS;
   }
 
-  protected void dispatchToSubscriber(Publish publish, SingleSubscriber subscriber) {
+  protected void dispatchToSubscriber(IncomingPublish publish, SingleSubscriber subscriber) {
     publishDispatcher.dispatchToSubscriber(publish, subscriber.user(), subscriber.subscription());
   }
 

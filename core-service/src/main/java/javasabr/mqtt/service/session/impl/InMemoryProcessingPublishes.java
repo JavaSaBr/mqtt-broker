@@ -53,7 +53,11 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
         return false;
       }
       TrackableMessageCallback callback = inProcessPublish.callback();
-      boolean shouldBeDeregister = callback.accept(user, session, message);
+      boolean shouldBeDeregister = callback.accept(
+          user, 
+          session, 
+          message,
+          inProcessPublish.publish());
       if (shouldBeDeregister) {
         processing.remove(message.messageId());
       }

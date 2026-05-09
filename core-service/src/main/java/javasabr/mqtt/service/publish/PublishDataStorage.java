@@ -10,8 +10,6 @@ public interface PublishDataStorage {
   @Nullable
   PublishData findById(UUID dataId);
   
-  void store(PublishData publishData);
-
   PublishData store(
       UUID dataId,
       @Nullable String contentType,

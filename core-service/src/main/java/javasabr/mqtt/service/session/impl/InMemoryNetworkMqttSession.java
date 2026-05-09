@@ -26,6 +26,7 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
   final long internalId;
   final AtomicInteger messageIdGenerator;
   final AtomicLong dataIdGenerator;
+  final AtomicLong publishIdGenerator;
 
   @Getter
   final InMemoryMessageTacker inMessageTracker;
@@ -48,7 +49,8 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
     this.clientId = clientId;
     this.internalId = internalId;
     this.messageIdGenerator = new AtomicInteger(0);
-    this.dataIdGenerator = new AtomicLong();
+    this.dataIdGenerator = new AtomicLong(0);
+    this.publishIdGenerator = new AtomicLong(0);
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
     this.inProcessingPublishes = new InMemoryProcessingPublishes(this);
@@ -73,6 +75,11 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
   @Override
   public UUID generateDataId() {
     return new UUID(internalId, dataIdGenerator.incrementAndGet());
+  }
+
+  @Override
+  public UUID generatePublishId() {
+    return new UUID(internalId, publishIdGenerator.incrementAndGet());
   }
 
   @Override

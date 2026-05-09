@@ -1,8 +1,9 @@
 package javasabr.mqtt.service.publish.sender;
 
 import javasabr.mqtt.model.QoS;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.OutgoingPublish;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.SimpleOutgoingPublish;
 import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -22,10 +23,10 @@ public class Qos0SubscriberPublishSender extends AbstractSubscriberPublishSender
 
   @Nullable
   @Override
-  protected Publish buildOutgoing(
+  protected OutgoingPublish buildOutgoingPublish(
       ExternalNetworkMqttUser user,
       MqttSession session,
-      Publish incoming) {
-    return new OutgoingPublish(incoming, incoming.retained(), IntArray.EMPTY);
+      IncomingPublish incomingPublish) {
+    return new SimpleOutgoingPublish(incomingPublish, incomingPublish.retained(), IntArray.EMPTY);
   }
 }

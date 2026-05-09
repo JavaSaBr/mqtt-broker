@@ -7,7 +7,8 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
 import org.jspecify.annotations.Nullable;
 
-public sealed interface Publish permits IncomingPublish, OutgoingPublish, TrackableOutgoingPublish {
+public interface Publish {
+  
   int messageId();
 
   QoS qos();

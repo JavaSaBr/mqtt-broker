@@ -15,7 +15,7 @@ class Qos0SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def sender = new Qos0SubscriberPublishSender(defaultMessageOutFactoryService)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
-        def testTopicName = defaultTopicService.createTopicName(user, "Qos0MqttPublishOutMessageHandlerTest/1")
+        def testTopicName = defaultTopicService.createTopicName(user, "Qos0SubscriberPublishSenderTest/1")
         def originalMessageId = 60
         def testPublish = incomingPublish(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
             .withDuplicated()

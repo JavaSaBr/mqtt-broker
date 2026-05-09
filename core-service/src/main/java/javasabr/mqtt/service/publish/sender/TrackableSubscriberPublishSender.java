@@ -4,8 +4,10 @@ import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
+import javasabr.mqtt.model.publish.IncomingPublish;
+import javasabr.mqtt.model.publish.OutgoingPublish;
 import javasabr.mqtt.model.publish.Publish;
-import javasabr.mqtt.model.publish.TrackableOutgoingPublish;
+import javasabr.mqtt.model.publish.TrackableSimpleOutgoingPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.MqttSession;
@@ -38,44 +40,52 @@ public abstract class TrackableSubscriberPublishSender extends
 
   @Nullable
   @Override
-  protected Publish buildOutgoing(ExternalNetworkMqttUser user, MqttSession session, Publish incoming) {
-    return new TrackableOutgoingPublish(
-        incoming,
+  protected OutgoingPublish buildOutgoingPublish(
+      ExternalNetworkMqttUser user, 
+      MqttSession session, 
+      IncomingPublish incomingPublish) {
+    return new TrackableSimpleOutgoingPublish(
+        incomingPublish,
         // generate new uniq message id for specific user
         session.generateMessageId(),
         false,
-        incoming.retained(),
+        incomingPublish.retained(),
         qos(),
         IntArray.EMPTY);
   }
 
   @Override
-  protected final void sendToSubscriberImpl(ExternalNetworkMqttUser user, MqttSession session, Publish publish) {
+  protected final void sendToSubscriberImpl(
+      ExternalNetworkMqttUser user, 
+      MqttSession session, 
+      OutgoingPublish outgoingPublish) {
     // register message id
     MessageTacker messageTacker = session.outMessageTracker();
-    messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
+    messageTacker.add(outgoingPublish.messageId(), MqttMessageType.PUBLISH);
     // register callback and retrier
     ProcessingPublishes processingPublishes = session.outProcessingPublishes();
-    processingPublishes.register(publish, trackableMessageCallback, publishRetryer);
-    super.sendToSubscriberImpl(user, session, publish);
+    processingPublishes.register(outgoingPublish, trackableMessageCallback, publishRetryer);
+    super.sendToSubscriberImpl(user, session, outgoingPublish);
   }
 
   protected final boolean handleReceivedTrackableMessage(
       MqttUser user, 
       MqttSession session,
-      TrackableMqttMessage message) {
+      TrackableMqttMessage message,
+      Publish publish) {
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     int messageId = message.messageId();
     MessageTacker messageTacker = session.outMessageTracker();
     TrackedMessageMeta trackedMessageMeta = messageTacker.stored(messageId);
-    return handleReceivedTrackableMessageImpl(networkMqttUser, session, message, trackedMessageMeta);
+    return handleReceivedTrackableMessageImpl(networkMqttUser, session, message, trackedMessageMeta, publish);
   }
 
   protected abstract boolean handleReceivedTrackableMessageImpl(
       ExternalNetworkMqttUser user,
       MqttSession session,
       TrackableMqttMessage message,
-      @Nullable TrackedMessageMeta trackedMessageMeta);
+      @Nullable TrackedMessageMeta trackedMessageMeta,
+      Publish publish);
 
   protected final void retrySending(MqttUser user, MqttSession session, Publish publish) {
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);

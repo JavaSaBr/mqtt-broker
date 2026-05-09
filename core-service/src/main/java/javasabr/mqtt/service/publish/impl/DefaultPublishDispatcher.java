@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.impl;
 import java.util.Collection;
 import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.subscription.Subscription;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.sender.SubscriberPublishSender;
@@ -45,7 +45,7 @@ public class DefaultPublishDispatcher implements PublishDispatcher {
   }
 
   @Override
-  public void dispatchToSubscriber(Publish publish, MqttUser user, Subscription subscription) {
+  public void dispatchToSubscriber(IncomingPublish publish, MqttUser user, Subscription subscription) {
     try {
       //noinspection DataFlowIssue
       publishSenders[subscription.qos().level()].sendToSubscriber(publish, user);

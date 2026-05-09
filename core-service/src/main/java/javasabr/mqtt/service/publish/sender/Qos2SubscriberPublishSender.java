@@ -3,6 +3,7 @@ package javasabr.mqtt.service.publish.sender;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
+import javasabr.mqtt.model.publish.Publish;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
@@ -33,7 +34,8 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
       ExternalNetworkMqttUser user,
       MqttSession session,
       TrackableMqttMessage message,
-      @Nullable TrackedMessageMeta trackedMessageMeta) {
+      @Nullable TrackedMessageMeta trackedMessageMeta,
+      Publish publish) {
     if (message instanceof PublishReceivedMqttInMessage publishReceived) {
       return handlePublishReceive(user, session, message, trackedMessageMeta, publishReceived);
     } else if (message instanceof PublishCompleteMqttInMessage publishComplete) {

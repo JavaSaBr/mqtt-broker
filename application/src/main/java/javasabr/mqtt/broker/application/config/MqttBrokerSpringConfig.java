@@ -42,11 +42,13 @@ import javasabr.mqtt.service.message.out.factory.Mqtt311MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.Mqtt5MessageOutFactory;
 import javasabr.mqtt.service.message.out.factory.MqttMessageOutFactory;
 import javasabr.mqtt.service.publish.IncomingPublishRouter;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDataStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.mqtt.service.publish.impl.DefaultIncomingPublishRouter;
 import javasabr.mqtt.service.publish.impl.DefaultPublishDispatcher;
+import javasabr.mqtt.service.publish.impl.InMemoryIncomingPublishStorage;
 import javasabr.mqtt.service.publish.impl.InMemoryPublishDataStorage;
 import javasabr.mqtt.service.publish.impl.InMemoryRetainPublishService;
 import javasabr.mqtt.service.publish.processor.IncomingPublishProcessor;
@@ -126,6 +128,11 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
+  IncomingPublishStorage incomingPublishStorage() {
+    return new InMemoryIncomingPublishStorage();
+  }
+  
+  @Bean
   PublishDataStorage publishDataStorage() {
     return new InMemoryPublishDataStorage();
   }
@@ -187,13 +194,15 @@ public class MqttBrokerSpringConfig {
       MessageOutFactoryService messageOutFactoryService,
       TopicService topicService,
       AuthorizationService authorizationService,
-      PublishDataStorage publishDataStorage) {
+      PublishDataStorage publishDataStorage,
+      IncomingPublishStorage incomingPublishStorage) {
     return new PublishMqttInMessageHandler(
         incomingPublishRouter,
         messageOutFactoryService,
         topicService,
         authorizationService,
-        publishDataStorage);
+        publishDataStorage,
+        incomingPublishStorage);
   }
 
   @Bean
@@ -268,12 +277,14 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     return new Qos0IncomingPublishProcessor(
         subscriptionService,
         publishDispatcher,
         messageOutFactoryService, 
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Bean
@@ -281,12 +292,14 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     return new Qos1IncomingPublishProcessor(
         subscriptionService,
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Bean
@@ -294,16 +307,18 @@ public class MqttBrokerSpringConfig {
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     return new Qos2IncomingPublishProcessor(
         subscriptionService, 
         publishDispatcher,
         messageOutFactoryService,
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Bean
-  IncomingPublishRouter IncomingPublishRouter(
+  IncomingPublishRouter incomingPublishRouter(
       Collection<? extends IncomingPublishProcessor> knownIncomingPublishProcessors) {
     return new DefaultIncomingPublishRouter(knownIncomingPublishProcessors);
   }
