@@ -80,7 +80,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   protected void processImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, IncomingPublish publish) {
     super.processImpl(user, session, publish);
     var reasonCode = PublishReceivedReasonCode.SUCCESS;
-    updateSessionState(session, publish, reasonCode);
+    updateSessionState(user, session, publish, reasonCode);
     sendFeedback(
         user,
         messageOutFactoryService
@@ -120,12 +120,16 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
   
   private void updateSessionState(
+      ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       IncomingPublish publish, 
       PublishReceivedReasonCode reasonCode) {
+    int messageId = publish.messageId();
+    log.debug(user.clientId(), messageId, publish.id(), 
+        "[%s] Update tracking messageId:[%s] for publish:[%s] to PUBLISH"::formatted);
     // store response reason code for duplicated publishes
     MessageTacker messageTacker = session.inMessageTracker();
-    messageTacker.update(publish.messageId(), MqttMessageType.PUBLISH, reasonCode);
+    messageTacker.update(messageId, MqttMessageType.PUBLISH, reasonCode);
     // store callback to handle publish release
     ProcessingPublishes processingPublishes = session.inProcessingPublishes();
     processingPublishes.register(publish, trackableMessageCallback, PublishRetryer.NO_OPS);
@@ -135,27 +139,26 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user,
       int messageId, 
       TrackedMessageMeta alreadyInProcess,
-      IncomingPublish incomingPublish) {
+      IncomingPublish publish) {
     PublishReceivedReasonCode reasonCode = PublishReceivedReasonCode.SUCCESS;
     if (alreadyInProcess.reasonCode() instanceof PublishReceivedReasonCode receivedReasonCode) {
       reasonCode = receivedReasonCode;
     }
+    log.warning(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
     sendFeedback(
         user,
         messageOutFactoryService
             .resolveFactory(user)
             .newPublishReceived(messageId, reasonCode));
-    // FIXME need to add check if the prev message was fully drop and not delivered
-    // no any sense to keep duplicated message on our side
-    incomingPublishStorage.removeIfExist(incomingPublish);
   }
 
   private void handleMessageIdIsInUse(
       ExternalNetworkMqttUser user, 
       int messageId, 
       IncomingPublish publish) {
-    incomingPublishStorage.removeIfExist(publish);
-    user.sendInBackground(messageOutFactoryService
+    log.warning(user.clientId(), messageId, publish.id(),
+        "[%s] Detected conflicted messageId:[%s] from publish:[%s]"::formatted);
+    sendFeedback(user, messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
   }
@@ -165,10 +168,13 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       MqttSession session, 
       TrackableMqttMessage message,
       Publish publish) {
+    log.debug(user.clientId(), message.messageType(), message, 
+        "[%s] Received trackable message:[%s] -> %s"::formatted);
+    
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     String clientId = networkMqttUser.clientId();
     int messageId = message.messageId();
-
+    
     if (!(publish instanceof IncomingPublish incomingPublish)) {
       log.warning(clientId, publish.getClass(), messageId, 
           "[%s] Not expected publish type:[%s] for messageId:[%d]"::formatted);
@@ -195,8 +201,9 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     }
     
     //FIXME No cleanup path when a QoS 2 session closes before PUBREL
-
     messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
+    log.debug(user.clientId(), messageId, incomingPublish.id(),
+        "[%s] Update tracking messageId:[%s] for publish:[%s] to PUBLISH_COMPLETE"::formatted);
     dispatchToSubscriber(networkMqttUser, (NetworkMqttSession) session, incomingPublish);
     return true;
   }

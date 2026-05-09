@@ -6,6 +6,9 @@ import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser
 import javasabr.mqtt.network.message.out.MqttOutMessage
 import javasabr.rlib.collections.array.MutableArray
+import javasabr.rlib.logger.api.Logger
+import javasabr.rlib.logger.api.LoggerLevel
+import javasabr.rlib.logger.api.LoggerManager
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
@@ -14,6 +17,12 @@ import java.util.concurrent.TimeUnit
 
 class TestExternalNetworkMqttUser extends ExternalNetworkMqttUser {
 
+  private static final Logger log = LoggerManager.getLogger(TestExternalNetworkMqttUser)
+  
+  static {
+    LoggerManager.enable(TestExternalNetworkMqttUser.class, LoggerLevel.DEBUG)
+  }
+  
   private static final Executor DELAYED_EXECUTOR = CompletableFuture.delayedExecutor(5000, TimeUnit.MILLISECONDS)
 
   private final MutableArray<MqttOutMessage> sentMessages
@@ -54,6 +63,7 @@ class TestExternalNetworkMqttUser extends ExternalNetworkMqttUser {
 
   @Override
   CompletableFuture<Boolean> closeWithReason(MqttOutMessage message) {
+    log.debug(clientId(), message, "[%s] Close connection with reason: %s"::formatted);
     sentMessages.add(message)
     if (!returnCompletedFeatures) {
       return CompletableFuture.supplyAsync({ true }, DELAYED_EXECUTOR);

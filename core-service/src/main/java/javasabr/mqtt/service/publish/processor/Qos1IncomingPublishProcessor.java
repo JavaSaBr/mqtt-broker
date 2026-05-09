@@ -56,7 +56,7 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we can skip it
       if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
-        handleDuplicated(publish);
+        log.warning(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
         return false;
       }
       handleMessageIdIsInUse(user, messagedId, publish);
@@ -99,18 +99,13 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
   
   private void handleMessageIdIsInUse(
-      ExternalNetworkMqttUser user, 
+      ExternalNetworkMqttUser user,
       int messageId, 
       IncomingPublish publish) {
-    incomingPublishStorage.removeIfExist(publish);
-    user.sendInBackground(messageOutFactoryService
+    log.warning(user.clientId(), messageId, publish.id(),
+        "[%s] Detected conflicted messageId:[%s] from publish:[%s]"::formatted);
+    sendFeedback(user, messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
-  }
-  
-  private void handleDuplicated(IncomingPublish publish) {
-    // FIXME need to add check if the prev message was fully drop and not delivered
-    // no any sense to keep skipped duplicated message on our side
-    incomingPublishStorage.removeIfExist(publish);
   }
 }

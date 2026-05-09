@@ -33,7 +33,7 @@ class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
             user2,
             user2.session(),
             Array.of(Subscription.minimal(topicFilter, QoS.AT_MOST_ONCE)))
-        def incomingPublish = prepareIncomingPublish(QoS.AT_MOST_ONCE, expectedTopicName, testPayloadBytes)
+        def incomingPublish = preparePublish(QoS.AT_MOST_ONCE, expectedTopicName, testPayloadBytes)
     when:
         processor.process(user3, incomingPublish)
     then: 'sender should not have any feedback'
@@ -58,7 +58,7 @@ class Qos0IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos0IncomingPublishProcessorTest/2")
-        def incomingPublish = prepareIncomingPublish(QoS.AT_MOST_ONCE, topicName, testPayloadBytes)
+        def incomingPublish = preparePublish(QoS.AT_MOST_ONCE, topicName, testPayloadBytes)
     when:
         processor.process(user, incomingPublish)
     then: 'sender should not have any feedback'

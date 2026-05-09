@@ -16,12 +16,14 @@ import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 @Getter
 @CustomLog
+@Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqttUser {
 
@@ -79,6 +81,7 @@ public abstract class AbstractNetworkMqttUser implements ConfigurableNetworkMqtt
 
   @Override
   public CompletableFuture<Boolean> closeWithReason(MqttOutMessage message) {
+    log.debug(clientId(), message, "[%s] Close connection with reason: %s"::formatted);
     return sendAsync(message)
         .thenApply(sent -> {
           connection.close();

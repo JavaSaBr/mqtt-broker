@@ -27,7 +27,7 @@ public record SimpleIncomingPublish(
     Array<StringPair> userProperties) implements IncomingPublish {
 
   static {
-    DebugUtils.registerIncludedFields("id", "messageId", "topicName", "data");
+    DebugUtils.registerIncludedFields("id", "messageId", "topicName", "data", "retained", "duplicated");
   }
   
   @Override
@@ -78,7 +78,9 @@ public record SimpleIncomingPublish(
         "id", id,
         "messageId", messageId,
         "topicName", topicName,
-        "data", data);
+        "data", data,
+        "retained", retained,
+        "duplicated", duplicated);
   }
   
   @Override

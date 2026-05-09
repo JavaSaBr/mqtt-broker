@@ -48,7 +48,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     long stamp = storedPublishes.writeLock();
     try {
       if (storedPublishes.containsKey(publishId)) {
-        throw new IllegalArgumentException("Publish with id:[%s] already exists".formatted(publishId));
+        throw new IllegalArgumentException("Publish:[%s] already exists".formatted(publishId));
       }
       incomingPublish = new SimpleIncomingPublish(
           publishId,
@@ -124,7 +124,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     int result = storedPublish
         .consumerCount()
         .addAndGet(count);
-    log.debug(result, publish, "Increased consumers to [%s] for publish:[%s]"::formatted);
+    log.debug(result, publish, "Increased consumers to [%s] for publish: %s"::formatted);
   }
 
   @Override
@@ -145,7 +145,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     int result = storedPublish
         .consumerCount()
         .accumulateAndGet(count, (current, delta) -> current - delta);
-    log.debug(result, publish, "Decreased consumers to [%s] for publish:[%s]"::formatted);
+    log.debug(result, publish, "Decreased consumers to [%s] for publish: %s"::formatted);
     if (result == 0) {
       if (!publish.retained()) {
         remove(publish);

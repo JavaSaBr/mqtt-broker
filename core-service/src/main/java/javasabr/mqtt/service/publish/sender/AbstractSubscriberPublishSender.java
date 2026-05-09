@@ -28,17 +28,21 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
   public final void sendToSubscriber(IncomingPublish incomingPublish, MqttUser user) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
+      incomingPublishStorage.decreaseConsumerCount(incomingPublish, 1);
       return;
     }
     U expectedUser = expectedUserType.cast(user);
     MqttSession session = expectedUser.session();
     if (session == null) {
       log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+      incomingPublishStorage.decreaseConsumerCount(incomingPublish, 1);
       return;
     }
     OutgoingPublish outgoingPublish = buildOutgoingPublish(expectedUser, session, incomingPublish);
     if (outgoingPublish != null) {
       sendToSubscriberImpl(expectedUser, session, outgoingPublish);
+    } else {
+      incomingPublishStorage.decreaseConsumerCount(incomingPublish, 1);
     }
   }
 

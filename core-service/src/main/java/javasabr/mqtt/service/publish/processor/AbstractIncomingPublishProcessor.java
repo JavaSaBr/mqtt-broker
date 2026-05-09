@@ -35,28 +35,39 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   @Override
   public final void process(NetworkMqttUser user, IncomingPublish publish) {
     if (!expectedUserType.isInstance(user)) {
-      log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
+      log.warning(user.clientId(), user.getClass(), publish.id(), 
+          "[%s] Not expected user of type:[%s], publish:[%s] will be dropped"::formatted);
+      incomingPublishStorage.removeIfExist(publish);
       return;
     }
     U expectedUser = expectedUserType.cast(user);
     NetworkMqttSession session = expectedUser.session();
     if (session == null) {
-      log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+      log.warning(user.clientId(), publish.id(), 
+          "[%s] Session is already closed, publish:[%s] will be dropped"::formatted);
+      incomingPublishStorage.removeIfExist(publish);
       return;
     }
     if (validateImpl(expectedUser, session, publish)) {
       processImpl(expectedUser, session, publish);
+      log.debug(user.clientId(), publish.id(), "[%s] Finished processing valid publish:[%s]"::formatted);
+    } else {
+      log.debug(user.clientId(), publish.id(), "[%s] Remove invalid publish:[%s]"::formatted);
+      incomingPublishStorage.removeIfExist(publish);
     }
   }
 
   protected boolean validateImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
+    log.debug(user.clientId(), publish, "[%s] Started validating publish:%s"::formatted);
     return true;
   }
 
   protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
+    log.debug(user.clientId(), publish.id(), "[%s] Started processing valid publish:[%s]"::formatted);
   }
 
   protected void dispatchToSubscriber(U user, NetworkMqttSession session, IncomingPublish publish) {
+    log.debug(user.clientId(), publish.id(), "[%s] Started dispatching publish:[%s]"::formatted);
     // mark + 1 during dispatching process
     incomingPublishStorage.increaseConsumerCount(publish, 1);
     
@@ -72,13 +83,11 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     TopicName topicName = publish.topicName();
     Array<SingleSubscriber> subscribers = subscriptionService.findSubscribers(topicName);
     if (subscribers.isEmpty()) {
-      log.debug(user.clientId(), publish, "[%s] Not found any subscriber for publish: [%s]"::formatted);
       handleNoMatchedSubscribers(user, session, publish);
       return;
     }
 
     int matchedSubscribers = subscribers.size();
-    log.debug(matchedSubscribers, "Starting dispatching publish to [%s] subscribers"::formatted);
     incomingPublishStorage.increaseConsumerCount(publish, matchedSubscribers);
     
     int skipped = 0;
@@ -104,6 +113,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   }
 
   protected void handleNoMatchedSubscribers(U user, NetworkMqttSession session, IncomingPublish publish) {
+    log.debug(user.clientId(), publish.id(), "[%s] Not found any subscriber for publish:[%s]"::formatted);
     // unmark + 1 from dispatching process
     incomingPublishStorage.decreaseConsumerCount(publish, 1);
   }
@@ -113,7 +123,8 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       NetworkMqttSession session, 
       IncomingPublish publish, 
       int matchedSubscribers) {
-    log.debug(matchedSubscribers, "Dispatched publish in the result to [%s] subscribers"::formatted);
+    log.debug(user.clientId(), publish.id(), matchedSubscribers,
+        "[%s] Dispatched publish:[%s] to [%s] subscribers"::formatted);
     // unmark + 1 from dispatching process
     incomingPublishStorage.decreaseConsumerCount(publish, 1);
   }
@@ -130,6 +141,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   }
 
   protected void sendFeedback(U user, MqttOutMessage response) {
+    log.debug(user.clientId(), response.messageType(), response, "[%s] Send feedback:[%s] -> %s"::formatted);
     user.sendInBackground(response);
   }
 
@@ -138,6 +150,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
       MqttSession session,
       MqttOutMessage response,
       int messageId) {
+    log.debug(user.clientId(), response.messageType(), response, "[%s] Send feedback:[%s] -> %s"::formatted);
     MessageTacker messageTacker = session.inMessageTracker();
     user.sendAsync(response)
         .thenAccept(_ -> messageTacker.remove(messageId));

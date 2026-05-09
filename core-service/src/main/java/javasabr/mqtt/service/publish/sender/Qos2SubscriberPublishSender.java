@@ -44,7 +44,7 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
       throw new IllegalArgumentException("Unexpected publish type:[%s]".formatted(publish));
     }
     if (message instanceof PublishReceivedMqttInMessage publishReceived) {
-      return handlePublishReceive(
+      return handlePublishReceived(
           user,
           session,
           message, 
@@ -75,7 +75,7 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
   /**
    * @return true if need to cancel the flow
    */
-  private boolean handlePublishReceive(
+  private boolean handlePublishReceived(
       ExternalNetworkMqttUser user,
       MqttSession session,
       TrackableMqttMessage message,
