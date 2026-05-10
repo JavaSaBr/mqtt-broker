@@ -20,7 +20,7 @@ import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
-import javasabr.mqtt.service.publish.exception.AlreadyRemovedPublishStorageException;
+import javasabr.mqtt.service.publish.exception.NotScheduledForRemovalPublishStorageException;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
@@ -172,25 +172,25 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
     if (messageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
-      incomingPublishStorage.cancelScheduledRemovalIfExist(publish);
+      incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
       return true;
     } else if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
       log.warning(clientId, messageMeta, messageId, 
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
-      incomingPublishStorage.cancelScheduledRemovalIfExist(publish);
+      incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
       return true;
     } else if (message.messageType() != MqttMessageType.PUBLISH_RELEASE) {
       log.warning(clientId, message.messageType(), "[%s] Not expected message:[%s]"::formatted);
-      incomingPublishStorage.cancelScheduledRemovalIfExist(publish);
+      incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
       return true;
     }
     
     try {
       incomingPublishStorage.cancelScheduledRemoval(publish);
-    } catch (AlreadyRemovedPublishStorageException e) {
+    } catch (NotScheduledForRemovalPublishStorageException e) {
       // we waited for the 'PUBLISH_RELEASE' too long and we already dropped the original publish
       log.warning(user.clientId(), messageId, publish.id(),
           "[%s] 'PUBLISH_RELEASE' message for publish:[%s] and messageId:[%s] came too late"::formatted);

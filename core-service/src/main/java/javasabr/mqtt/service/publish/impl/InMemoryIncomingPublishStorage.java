@@ -13,8 +13,8 @@ import javasabr.mqtt.model.publish.SimpleIncomingPublish;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDataStorage;
-import javasabr.mqtt.service.publish.exception.AlreadyRemovedPublishStorageException;
-import javasabr.mqtt.service.publish.exception.AlreadyScheduledPublishStorageException;
+import javasabr.mqtt.service.publish.exception.AlreadyScheduledForRemovalPublishStorageException;
+import javasabr.mqtt.service.publish.exception.NotScheduledForRemovalPublishStorageException;
 import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
@@ -37,21 +37,21 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
 
   final PublishDataStorage publishDataStorage;
   final LockableRefToRefDictionary<UUID, StoredIncomingPublish> storedPublishes;
-  final LockableRefToRefDictionary<UUID, ScheduledForRemovalIncomingPublish> scheduledForRemovalPublishes;
-  final Thread cleanThread;
+  final LockableRefToRefDictionary<UUID, ScheduledRemovalEntry> scheduledRemovalsByPublishId;
+  final Thread cleanupThread;
 
-  final int cleanIntervalInMs;
+  final int cleanupIntervalInMs;
   volatile boolean closed;
   
-  public InMemoryIncomingPublishStorage(PublishDataStorage publishDataStorage, int cleanIntervalInMs) {
+  public InMemoryIncomingPublishStorage(PublishDataStorage publishDataStorage, int cleanupIntervalInMs) {
     this.publishDataStorage = publishDataStorage;
     this.storedPublishes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
-    this.scheduledForRemovalPublishes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
-    this.cleanIntervalInMs = cleanIntervalInMs;
-    this.cleanThread = new Thread(this::cleanup, "InMemoryIncomingPublishStorage-Cleanup");
-    this.cleanThread.setPriority(Thread.MIN_PRIORITY);
-    this.cleanThread.setDaemon(true);
-    this.cleanThread.start();
+    this.scheduledRemovalsByPublishId = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.cleanupIntervalInMs = cleanupIntervalInMs;
+    this.cleanupThread = new Thread(this::cleanup, "InMemoryIncomingPublishStorage-Cleanup");
+    this.cleanupThread.setPriority(Thread.MIN_PRIORITY);
+    this.cleanupThread.setDaemon(true);
+    this.cleanupThread.start();
   }
 
   @Override
@@ -93,6 +93,15 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
     }
     log.debug(incomingPublish, "Registered publish in storage: %s"::formatted);
     return incomingPublish;
+  }
+
+  private boolean containsById(UUID publishId) {
+    long stamp = storedPublishes.readLock();
+    try {
+      return storedPublishes.containsKey(publishId);
+    } finally {
+      storedPublishes.readUnlock(stamp);
+    }
   }
 
   @Override
@@ -196,73 +205,76 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
 
   @Override
   public void scheduleRemoval(IncomingPublish publish, Duration delay) {
+    if (!containsById(publish.id())) {
+      throw new UnknownPublishStorageException("Unknown publish:[%s]".formatted(publish.id()), publish.id());
+    }
     log.debug(publish.id(), delay, "Schedule removal for publish:[%s] with delay:[%s]"::formatted);
-    long stamp = scheduledForRemovalPublishes.writeLock();
+    long stamp = scheduledRemovalsByPublishId.writeLock();
     try {
-      if (scheduledForRemovalPublishes.containsKey(publish.id())) {
-        throw new AlreadyScheduledPublishStorageException(
+      if (scheduledRemovalsByPublishId.containsKey(publish.id())) {
+        throw new AlreadyScheduledForRemovalPublishStorageException(
             "Publish:[%s] is already scheduled for removal".formatted(publish.id()));
       }
-      var mustBeRemovedAfter = System.currentTimeMillis() + delay.toMillis();
-      var scheduled = new ScheduledForRemovalIncomingPublish(publish.id(), mustBeRemovedAfter);
-      scheduledForRemovalPublishes.put(publish.id(), scheduled);
+      var removeAfterInMs = System.currentTimeMillis() + delay.toMillis();
+      var scheduledRemovalEntry = new ScheduledRemovalEntry(publish.id(), removeAfterInMs);
+      scheduledRemovalsByPublishId.put(publish.id(), scheduledRemovalEntry);
     } finally {
-      scheduledForRemovalPublishes.writeUnlock(stamp);
+      scheduledRemovalsByPublishId.writeUnlock(stamp);
     }
   }
 
   @Override
   public void cancelScheduledRemoval(IncomingPublish publish) {
     log.debug(publish.id(), "Cancel scheduled removal for publish:[%s]"::formatted);
-    long stamp = scheduledForRemovalPublishes.writeLock();
+    long stamp = scheduledRemovalsByPublishId.writeLock();
     try {
-      ScheduledForRemovalIncomingPublish removed = scheduledForRemovalPublishes.remove(publish.id());
+      ScheduledRemovalEntry removed = scheduledRemovalsByPublishId.remove(publish.id());
       if (removed == null) {
-        throw new AlreadyRemovedPublishStorageException(
+        throw new NotScheduledForRemovalPublishStorageException(
             "Publish:[%s] is already cancelled".formatted(publish.id()));
       }
     } finally {
-      scheduledForRemovalPublishes.writeUnlock(stamp);
+      scheduledRemovalsByPublishId.writeUnlock(stamp);
     }
   }
 
   @Override
-  public void cancelScheduledRemovalIfExist(IncomingPublish publish) {
+  public void cancelScheduledRemovalIfScheduled(IncomingPublish publish) {
     log.debug(publish.id(), "Cancel scheduled removal for publish:[%s] if it exists"::formatted);
-    long stamp = scheduledForRemovalPublishes.writeLock();
+    long stamp = scheduledRemovalsByPublishId.writeLock();
     try {
-      scheduledForRemovalPublishes.remove(publish.id());
+      scheduledRemovalsByPublishId.remove(publish.id());
     } finally {
-      scheduledForRemovalPublishes.writeUnlock(stamp);
+      scheduledRemovalsByPublishId.writeUnlock(stamp);
     }
   }
 
   private void cleanup() {
     MutableArray<UUID> localContainer = ArrayFactory.mutableArray(UUID.class, 500);
-    var mapOperations = scheduledForRemovalPublishes.operations();
+    var mapOperations = scheduledRemovalsByPublishId.operations();
     
     while (!closed) {
-      ThreadUtils.sleep(cleanIntervalInMs);
-      if (scheduledForRemovalPublishes.isEmpty()) {
+      ThreadUtils.sleep(cleanupIntervalInMs);
+      if (scheduledRemovalsByPublishId.isEmpty()) {
         continue;
       }
       localContainer.clear();
-      long stamp = scheduledForRemovalPublishes.readLock();
+      long stamp = scheduledRemovalsByPublishId.readLock();
       try {
         long currentInMs = System.currentTimeMillis();
-        for (ScheduledForRemovalIncomingPublish scheduled : scheduledForRemovalPublishes) {
-          if (scheduled.mustBeRemovedAfterInMs() < currentInMs) {
-            localContainer.add(scheduled.publishId());
+        for (ScheduledRemovalEntry scheduledRemovalEntry : scheduledRemovalsByPublishId) {
+          if (scheduledRemovalEntry.removeAfterInMs() < currentInMs) {
+            localContainer.add(scheduledRemovalEntry.publishId());
           }
         }
       } finally {
-        scheduledForRemovalPublishes.readUnlock(stamp);
+        scheduledRemovalsByPublishId.readUnlock(stamp);
       }
       if (localContainer.isEmpty()) {
         continue;
       }
       for (UUID publishId : localContainer) {
-        ScheduledForRemovalIncomingPublish removedFromMap = mapOperations.getInWriteLock(
+        ScheduledRemovalEntry removedFromMap = mapOperations.getInWriteLock(
             publishId,
             MutableRefToRefDictionary::remove);
         if (removedFromMap != null) {
@@ -286,11 +298,5 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
     final AtomicInteger consumerCount = new AtomicInteger(0);
   }
 
-  @Getter
-  @RequiredArgsConstructor
-  @FieldDefaults(level = AccessLevel.PRIVATE)
-  private static class ScheduledForRemovalIncomingPublish {
-    final UUID publishId;
-    final long mustBeRemovedAfterInMs;
-  }
+  private record ScheduledRemovalEntry(UUID publishId, long removeAfterInMs) {}
 }

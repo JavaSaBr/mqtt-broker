@@ -7,8 +7,8 @@ import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicName;
-import javasabr.mqtt.service.publish.exception.AlreadyRemovedPublishStorageException;
-import javasabr.mqtt.service.publish.exception.AlreadyScheduledPublishStorageException;
+import javasabr.mqtt.service.publish.exception.AlreadyScheduledForRemovalPublishStorageException;
+import javasabr.mqtt.service.publish.exception.NotScheduledForRemovalPublishStorageException;
 import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
@@ -41,16 +41,17 @@ public interface IncomingPublishStorage {
   void removeIfExist(IncomingPublish publish);
 
   /**
-   * @throws AlreadyScheduledPublishStorageException when this publish is already scheduled
+   * @throws AlreadyScheduledForRemovalPublishStorageException when this publish is already scheduled for removal
+   * @throws UnknownPublishStorageException for unknown publish
    */
   void scheduleRemoval(IncomingPublish publish, Duration delay);
 
   /**
-   * @throws AlreadyRemovedPublishStorageException when this publish is already removed from the storage.
+   * @throws NotScheduledForRemovalPublishStorageException when this publish has no scheduled removal entry.
    */
   void cancelScheduledRemoval(IncomingPublish publish);
 
-  void cancelScheduledRemovalIfExist(IncomingPublish publish);
+  void cancelScheduledRemovalIfScheduled(IncomingPublish publish);
   
   /**
    * @throws UnknownPublishStorageException for unknown publish
