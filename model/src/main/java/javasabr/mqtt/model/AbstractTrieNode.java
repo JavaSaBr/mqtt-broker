@@ -1,6 +1,9 @@
 package javasabr.mqtt.model;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
@@ -9,8 +12,12 @@ import org.jspecify.annotations.Nullable;
 
 public abstract class AbstractTrieNode<T> {
 
+  static {
+    DebugUtils.registerIncludedFields("childNodes");
+  }
+  
   @Nullable
-  volatile LockableRefToRefDictionary<String, T> childNodes;
+  protected volatile LockableRefToRefDictionary<String, T> childNodes;
 
   protected abstract Supplier<T> getNodeFactory();
 
@@ -30,7 +37,7 @@ public abstract class AbstractTrieNode<T> {
   }
 
   protected T getOrCreateChildNode(String segment) {
-    var childNodes = getOrCreateChildNodes();
+    LockableRefToRefDictionary<String, T> childNodes = getOrCreateChildNodes();
     long stamp = childNodes.readLock();
     try {
       T topicFilterNode = childNodes.get(segment);
@@ -85,7 +92,14 @@ public abstract class AbstractTrieNode<T> {
       localChildNodes.readUnlock(stamp);
     }
   }
-
+  
+  @JsonValue
+  Object jsonDebugValue() {
+    Map<String, Object> result = new HashMap<>(1);
+    result.put("childNodes", childNodes);
+    return result;
+  }
+  
   @Override
   public String toString() {
     return DebugUtils.toJsonString(this);
