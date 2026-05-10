@@ -23,7 +23,7 @@ public abstract class ProcessingOutPublishesMqttInMessageHandler<M extends MqttI
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       M message) {
-    ProcessingPublishes processingPublishes = session.outProcessingPublishes();
+    ProcessingPublishes processingPublishes = session.outgoingProcessingPublishes();
     processingPublishes.apply(user, message);
   }
 }

@@ -22,8 +22,8 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
           clientId() == testClientId
           topicNameMapping().size() == 0
           activeSubscriptions().isEmpty()
-          inProcessingPublishes().size() == 0
-          outProcessingPublishes().size() == 0
+          incomingProcessingPublishes().size() == 0
+          outgoingProcessingPublishes().size() == 0
         }
     cleanup:
         sessionService.close()

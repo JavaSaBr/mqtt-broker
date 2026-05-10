@@ -5,6 +5,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javasabr.mqtt.model.MqttProperties;
+import javasabr.mqtt.model.publish.IncomingPublish;
+import javasabr.mqtt.model.publish.OutgoingPublish;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import lombok.AccessLevel;
@@ -33,9 +35,9 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
   @Getter
   final InMemoryMessageTacker outMessageTracker;
   @Getter
-  final InMemoryProcessingPublishes inProcessingPublishes;
+  final InMemoryProcessingPublishes<IncomingPublish> incomingProcessingPublishes;
   @Getter
-  final InMemoryProcessingPublishes outProcessingPublishes;
+  final InMemoryProcessingPublishes<OutgoingPublish> outgoingProcessingPublishes;
   @Getter
   final InMemoryActiveSubscriptions activeSubscriptions;
   @Getter
@@ -53,8 +55,8 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
     this.publishIdGenerator = new AtomicLong(0);
     this.inMessageTracker = new InMemoryMessageTacker();
     this.outMessageTracker = new InMemoryMessageTacker();
-    this.inProcessingPublishes = new InMemoryProcessingPublishes(this);
-    this.outProcessingPublishes = new InMemoryProcessingPublishes(this);
+    this.incomingProcessingPublishes = new InMemoryProcessingPublishes<>(this);
+    this.outgoingProcessingPublishes = new InMemoryProcessingPublishes<>(this);
     this.activeSubscriptions = new InMemoryActiveSubscriptions();
     this.topicNameMapping = new InMemoryTopicNameMapping();
     this.expiryInterval = MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
@@ -89,14 +91,14 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
 
   @Override
   public int resendNotConfirmedPublishesTo(NetworkMqttUser user) {
-    return outProcessingPublishes.resendTo(user);
+    return outgoingProcessingPublishes.resendTo(user);
   }
   
   public void clear() {
     inMessageTracker.clear();
     outMessageTracker.clear();
-    inProcessingPublishes.clear();
-    outProcessingPublishes.clear();
+    incomingProcessingPublishes.clear();
+    outgoingProcessingPublishes.clear();
     activeSubscriptions.clear();
     topicNameMapping.clear();
   }

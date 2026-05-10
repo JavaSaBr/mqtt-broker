@@ -66,7 +66,7 @@ public abstract class TrackableSubscriberPublishSender extends
     MessageTacker messageTacker = session.outMessageTracker();
     messageTacker.add(outgoingPublish.messageId(), MqttMessageType.PUBLISH);
     // register callback and retrier
-    ProcessingPublishes processingPublishes = session.outProcessingPublishes();
+    ProcessingPublishes processingPublishes = session.outgoingProcessingPublishes();
     processingPublishes.register(outgoingPublish, trackableMessageCallback, publishRetryer);
     super.sendToSubscriberImpl(user, session, outgoingPublish);
   }

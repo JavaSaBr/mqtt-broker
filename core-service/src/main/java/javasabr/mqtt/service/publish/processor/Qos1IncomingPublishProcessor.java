@@ -66,7 +66,10 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void processImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, IncomingPublish publish) {
+  protected void processImpl(
+      ExternalNetworkMqttUser user, 
+      NetworkMqttSession session, 
+      IncomingPublish publish) {
     super.processImpl(user, session, publish);
     dispatchToSubscriber(user, session, publish);
   }

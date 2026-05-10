@@ -4,9 +4,9 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.message.TrackableMqttMessage;
 import javasabr.mqtt.model.publish.Publish;
 
-public interface ProcessingPublishes {
+public interface ProcessingPublishes<P extends Publish> {
 
-  void register(Publish publish, TrackableMessageCallback callback, PublishRetryer retryer);
+  void register(P publish, TrackableMessageCallback<P> callback, PublishRetryer retryer);
 
   /**
    * @return true if was found some callback for this message

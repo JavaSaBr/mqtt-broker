@@ -68,20 +68,20 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
             reasonCode() == null
           }
         }
-        with(session.outProcessingPublishes()) {
+        with(session.outgoingProcessingPublishes()) {
           size() == 1
         }
     when: 'send publish ack'
         def publishAck = PublishAckMqttInMessage
             .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
-            .outProcessingPublishes()
+            .outgoingProcessingPublishes()
             .apply(user, publishAck)
     then:
         with(session.outMessageTracker()) {
           stored(publish.messageId()) == null
         }
-        with(session.outProcessingPublishes()) {
+        with(session.outgoingProcessingPublishes()) {
           size() == 0
         }
     then: 'user should not receive any new message'
@@ -115,7 +115,7 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
             reasonCode() == null
           }
         }
-        with(session.outProcessingPublishes()) {
+        with(session.outgoingProcessingPublishes()) {
           size() == 1
         }
     when: 'remove trackable info and send publish ack'
@@ -125,13 +125,13 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def publishAck = PublishAckMqttInMessage
             .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
-            .outProcessingPublishes()
+            .outgoingProcessingPublishes()
             .apply(user, publishAck)
     then:
         with(session.outMessageTracker()) {
           stored(publish.messageId()) == null
         }
-        with(session.outProcessingPublishes()) {
+        with(session.outgoingProcessingPublishes()) {
           size() == 0
         }
     then: 'user should not receive any new message'
@@ -165,14 +165,14 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
             reasonCode() == null
           }
         }
-        with(session.outProcessingPublishes()) {
+        with(session.outgoingProcessingPublishes()) {
           size() == 1
         }
     when: 'send unexpected publish receive to get protocol error'
         def publishReceive = PublishReceivedMqttInMessage
             .of(publish.messageId(), PublishReceivedReasonCode.SUCCESS)
         session
-            .outProcessingPublishes()
+            .outgoingProcessingPublishes()
             .apply(user, publishReceive)
     then:
         with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {
@@ -206,7 +206,7 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
             reasonCode() == null
           }
         }
-        with(session.outProcessingPublishes()) {
+        with(session.outgoingProcessingPublishes()) {
           size() == 1
         }
     when: 'change trackable info to publish release and send publish ack'
@@ -216,7 +216,7 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def publishAck = PublishAckMqttInMessage
             .of(publish.messageId(), PublishAckReasonCode.SUCCESS)
         session
-            .outProcessingPublishes()
+            .outgoingProcessingPublishes()
             .apply(user, publishAck)
     then:
         with(user.nextSentMessage(DisconnectMqtt5OutMessage)) {

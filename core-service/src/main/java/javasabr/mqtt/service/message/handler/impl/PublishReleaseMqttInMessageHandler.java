@@ -37,7 +37,7 @@ public class PublishReleaseMqttInMessageHandler
 
     int messageId = releaseMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
-    ProcessingPublishes processingPublishes = session.inProcessingPublishes();
+    ProcessingPublishes processingPublishes = session.incomingProcessingPublishes();
 
     if (releaseMessage.reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND) {
       log.warning(user.clientId(), messageId, "[%s] Client doesnt know about messageId:[%d]"::formatted);

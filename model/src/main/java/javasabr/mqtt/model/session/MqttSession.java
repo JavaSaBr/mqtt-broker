@@ -2,6 +2,8 @@ package javasabr.mqtt.model.session;
 
 import java.time.Duration;
 import java.util.UUID;
+import javasabr.mqtt.model.publish.IncomingPublish;
+import javasabr.mqtt.model.publish.OutgoingPublish;
 import org.jspecify.annotations.Nullable;
 
 public interface MqttSession {
@@ -18,8 +20,8 @@ public interface MqttSession {
   MessageTacker inMessageTracker();
   MessageTacker outMessageTracker();
 
-  ProcessingPublishes inProcessingPublishes();
-  ProcessingPublishes outProcessingPublishes();
+  ProcessingPublishes<IncomingPublish> incomingProcessingPublishes();
+  ProcessingPublishes<OutgoingPublish> outgoingProcessingPublishes();
 
   ActiveSubscriptions activeSubscriptions();
   TopicNameMapping topicNameMapping();

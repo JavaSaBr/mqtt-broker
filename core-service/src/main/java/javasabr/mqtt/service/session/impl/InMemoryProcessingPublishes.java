@@ -15,12 +15,15 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class InMemoryProcessingPublishes implements ProcessingPublishes {
+public class InMemoryProcessingPublishes<P extends Publish> implements ProcessingPublishes<P> {
 
-  record InProcessPublish(Publish publish, TrackableMessageCallback callback, PublishRetryer retryer) {}
+  record InProcessPublish<P extends Publish>(
+      P publish, 
+      TrackableMessageCallback<P> callback, 
+      PublishRetryer retryer) {}
 
   MqttSession session;
-  MutableIntToRefDictionary<InProcessPublish> processing;
+  MutableIntToRefDictionary<InProcessPublish<P>> processing;
   StampedLock lock;
 
   public InMemoryProcessingPublishes(NetworkMqttSession session) {
@@ -30,12 +33,12 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
   }
 
   @Override
-  public void register(Publish publish, TrackableMessageCallback callback, PublishRetryer retryer) {
+  public void register(P publish, TrackableMessageCallback<P> callback, PublishRetryer retryer) {
     long stamp = lock.writeLock();
     try {
-      InProcessPublish existing = processing.putIfAbsent(
+      InProcessPublish<P> existing = processing.putIfAbsent(
           publish.messageId(),
-          new InProcessPublish(publish, callback, retryer));
+          new InProcessPublish<>(publish, callback, retryer));
       if (existing != null) {
         throw new IllegalArgumentException("The publish with id:[%d] already exists".formatted(publish.messageId()));
       }
@@ -48,11 +51,11 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
   public boolean apply(MqttUser user, TrackableMqttMessage message) {
     long stamp = lock.writeLock();
     try {
-      InProcessPublish inProcessPublish = processing.get(message.messageId());
+      InProcessPublish<P> inProcessPublish = processing.get(message.messageId());
       if (inProcessPublish == null) {
         return false;
       }
-      TrackableMessageCallback callback = inProcessPublish.callback();
+      TrackableMessageCallback<P> callback = inProcessPublish.callback();
       boolean shouldBeDeregister = callback.accept(
           user, 
           session, 
@@ -74,7 +77,7 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
     int counter = 0;
     long stamp = lock.writeLock();
     try {
-      for (InProcessPublish inProcessPublish : processing) {
+      for (InProcessPublish<P> inProcessPublish : processing) {
         PublishRetryer retryer = inProcessPublish.retryer();
         retryer.retry(user, session, inProcessPublish.publish);
         counter++;
@@ -89,7 +92,7 @@ public class InMemoryProcessingPublishes implements ProcessingPublishes {
   public boolean remove(TrackableMqttMessage message) {
     long stamp = lock.writeLock();
     try {
-      InProcessPublish inProcessPublish = processing.remove(message.messageId());
+      InProcessPublish<P> inProcessPublish = processing.remove(message.messageId());
       return inProcessPublish != null;
     } finally {
       lock.unlockWrite(stamp);

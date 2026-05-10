@@ -1,11 +1,15 @@
 package javasabr.mqtt.service.publish;
 
+import java.time.Duration;
 import java.util.UUID;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.service.publish.exception.AlreadyRemovedPublishStorageException;
+import javasabr.mqtt.service.publish.exception.AlreadyScheduledPublishStorageException;
+import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
 import org.jspecify.annotations.Nullable;
@@ -30,19 +34,31 @@ public interface IncomingPublishStorage {
       Array<StringPair> userProperties);
 
   /**
-   * @throws IllegalArgumentException for unknown publish
+   * @throws UnknownPublishStorageException for unknown publish
    */
   void remove(IncomingPublish publish);
   
   void removeIfExist(IncomingPublish publish);
+
+  /**
+   * @throws AlreadyScheduledPublishStorageException when this publish is already scheduled
+   */
+  void scheduleRemoval(IncomingPublish publish, Duration delay);
+
+  /**
+   * @throws AlreadyRemovedPublishStorageException when this publish is already removed from the storage.
+   */
+  void cancelScheduledRemoval(IncomingPublish publish);
+
+  void cancelScheduledRemovalIfExist(IncomingPublish publish);
   
   /**
-   * @throws IllegalArgumentException for unknown publish
+   * @throws UnknownPublishStorageException for unknown publish
    */
   void increaseConsumerCount(IncomingPublish publish, int count);
   
   /**
-   * @throws IllegalArgumentException for unknown publish
+   * @throws UnknownPublishStorageException for unknown publish
    */
   void decreaseConsumerCount(IncomingPublish publish, int count);
 }

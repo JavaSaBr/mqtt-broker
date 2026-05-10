@@ -133,8 +133,10 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
-  IncomingPublishStorage incomingPublishStorage(PublishDataStorage publishDataStorage) {
-    return new InMemoryIncomingPublishStorage(publishDataStorage);
+  IncomingPublishStorage incomingPublishStorage(
+      PublishDataStorage publishDataStorage,
+      @Value("${in.memory.incoming.publish.storage.clean.interval.ms:60000}") int cleanInterval) {
+    return new InMemoryIncomingPublishStorage(publishDataStorage, cleanInterval);
   }
   
   @Bean

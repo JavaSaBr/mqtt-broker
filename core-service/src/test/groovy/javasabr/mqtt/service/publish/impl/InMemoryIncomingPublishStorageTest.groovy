@@ -6,6 +6,7 @@ import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.network.message.in.MqttInMessage
+import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
@@ -17,7 +18,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should store incoming publish with all attributes"() {
     given:
         def dataStorage = new InMemoryPublishDataStorage()
-        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def testPublishId = UUID.randomUUID()
         def testTopicAlias = 7
         def testMessageId = 15
@@ -65,7 +67,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should not allow to store incoming publish twice with the same id"() {
     given:
         def dataStorage = new InMemoryPublishDataStorage()
-        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def publishId = UUID.randomUUID()
         def topicName = TopicName.valueOf("topic/main")
         def data = PublishData.wrap("payload".getBytes(UTF_8))
@@ -108,7 +111,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should remove stored incoming publish"() {
     given:
         def dataStorage = new InMemoryPublishDataStorage()
-        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def incomingPublish = createAndStorePublish(publishStorage)
     when:
         publishStorage.remove(incomingPublish)
@@ -120,7 +124,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should keep stored publish until all consumers are handled"() {
     given:
         def dataStorage = new InMemoryPublishDataStorage()
-        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def incomingPublish = createAndStorePublish(publishStorage)
         publishStorage.increaseConsumerCount(incomingPublish, 3)
     when:
@@ -137,21 +142,24 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
   def "should not allow to change consumer count update for missing publish"() {
     given:
         def dataStorage = new InMemoryPublishDataStorage()
-        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def incomingPublish = createAndStorePublish(publishStorage)
         publishStorage.remove(incomingPublish)
     when:
         publishStorage.increaseConsumerCount(incomingPublish, 1)
     then:
-        def exception = thrown(IllegalArgumentException)
+        def exception = thrown(UnknownPublishStorageException)
         exception.message == "Unknown publish:[${incomingPublish.id()}]"
+        exception.id() == incomingPublish.id()
         publishStorage.storedPublishes.isEmpty()
   }
 
   def "should throw exception when consumer count is decreased below zero"() {
     given:
         def dataStorage = new InMemoryPublishDataStorage()
-        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def incomingPublish = createAndStorePublish(publishStorage)
         publishStorage.increaseConsumerCount(incomingPublish, 1)
     when:
