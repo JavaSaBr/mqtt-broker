@@ -47,7 +47,7 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
     int nextLevel = level + 1;
     boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
-      return child.setRetainedPublishes(publish);
+      return child.setRetainedPublish(publish);
     } else {
       return child.addRetainedPublish(nextLevel, publish, topicName);
     }
@@ -69,7 +69,7 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
   }
 
   @Nullable
-  private IncomingPublish setRetainedPublishes(IncomingPublish newPublish) {
+  private IncomingPublish setRetainedPublish(IncomingPublish newPublish) {
     return retainedPublish.getAndSet(newPublish);
   }
 
@@ -130,7 +130,7 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
   Object jsonDebugValue() {
     Map<String, Object> result = new HashMap<>(2);
     result.put("childNodes", childNodes);
-    result.put("retainedPublish", retainedPublish);
+    result.put("retainedPublish", retainedPublish.get());
     return result;
   }
 }
