@@ -90,6 +90,8 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
         messageOutFactoryService
             .resolveFactory(user)
             .newPublishReceived(publish.messageId(), reasonCode));
+    // FIXME timed-out QoS 2 publishes also need session-state cleanup
+    // (inMessageTracker + incomingProcessingPublishes), otherwise the messageId stays busy until PUBREL arrives.
     incomingPublishStorage.scheduleRemoval(publish, NOT_CONFIRMED_REMOVAL_DELAY);
   }
 
