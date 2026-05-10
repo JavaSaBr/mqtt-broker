@@ -61,7 +61,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   def defaultPublishDataStorage = new InMemoryPublishDataStorage()
   
   @Shared
-  def defaultIncomingPublishStorage = new InMemoryIncomingPublishStorage()
+  def defaultIncomingPublishStorage = new InMemoryIncomingPublishStorage(defaultPublishDataStorage)
   
   @Shared
   def authorizationService = new DisabledAuthorizationService();

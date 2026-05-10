@@ -9,6 +9,7 @@ import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.publish.SimpleIncomingPublish;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.service.publish.IncomingPublishStorage;
+import javasabr.mqtt.service.publish.PublishDataStorage;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.IntArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
@@ -24,9 +25,11 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
   
+  PublishDataStorage publishDataStorage;
   LockableRefToRefDictionary<UUID, StoredIncomingPublish> storedPublishes;
 
-  public InMemoryIncomingPublishStorage() {
+  public InMemoryIncomingPublishStorage(PublishDataStorage publishDataStorage) {
+    this.publishDataStorage = publishDataStorage;
     this.storedPublishes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
   }
 
@@ -73,23 +76,31 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
 
   @Override
   public void remove(IncomingPublish publish) {
+    PublishData data = publish.data();
     long stamp = storedPublishes.writeLock();
     try {
       removeWithoutLock(publish);
     } finally {
       storedPublishes.writeUnlock(stamp);
     }
+    publishDataStorage.removeById(data.id());
   }
 
   @Override
   public void removeIfExist(IncomingPublish publish) {
+    PublishData data = publish.data();
+    boolean wasRemoved = false;
     long stamp = storedPublishes.writeLock();
     try {
       if (storedPublishes.containsKey(publish.id())) {
         removeWithoutLock(publish);
+        wasRemoved = true;
       }
     } finally {
       storedPublishes.writeUnlock(stamp);
+    }
+    if (wasRemoved) {
+      publishDataStorage.removeById(data.id());
     }
   }
   

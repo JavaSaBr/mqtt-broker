@@ -126,17 +126,17 @@ public class MqttBrokerSpringConfig {
   SubscriptionService subscriptionService(AuthorizationService authorizationService) {
     return new InMemorySubscriptionService(authorizationService);
   }
-  
-  @Bean
-  IncomingPublishStorage incomingPublishStorage() {
-    return new InMemoryIncomingPublishStorage();
-  }
-  
+
   @Bean
   PublishDataStorage publishDataStorage() {
     return new InMemoryPublishDataStorage();
   }
-
+  
+  @Bean
+  IncomingPublishStorage incomingPublishStorage(PublishDataStorage publishDataStorage) {
+    return new InMemoryIncomingPublishStorage(publishDataStorage);
+  }
+  
   @Bean
   RetainPublishService retainMessageService() {
     return new InMemoryRetainPublishService();

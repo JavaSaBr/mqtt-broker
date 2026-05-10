@@ -16,7 +16,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
 
   def "should store incoming publish with all attributes"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
+        def dataStorage = new InMemoryPublishDataStorage()
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
         def testPublishId = UUID.randomUUID()
         def testTopicAlias = 7
         def testMessageId = 15
@@ -29,7 +30,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             new StringPair("key-1", "value-1"),
             new StringPair("key-2", "value-2"))
     when:
-        def incomingPublish = storage.store(
+        def incomingPublish = publishStorage.store(
             testPublishId,
             testMessageId,
             testQos,
@@ -43,8 +44,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             testTopicAlias,
             testUserProperties)
     then:
-        storage.storedPublishes.size() == 1
-        storage.storedPublishes.containsKey(testPublishId)
+        publishStorage.storedPublishes.size() == 1
+        publishStorage.storedPublishes.containsKey(testPublishId)
         with(incomingPublish) {
           id() == testPublishId
           messageId() == testMessageId
@@ -63,13 +64,14 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
 
   def "should not allow to store incoming publish twice with the same id"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
+        def dataStorage = new InMemoryPublishDataStorage()
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
         def publishId = UUID.randomUUID()
         def topicName = TopicName.valueOf("topic/main")
         def data = PublishData.wrap("payload".getBytes(UTF_8))
         def testMessageId1 = 6
         def testMessageId2 = 9
-        storage.store(
+        publishStorage.store(
             publishId,
             testMessageId1,
             QoS.AT_LEAST_ONCE,
@@ -84,7 +86,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             MqttInMessage.EMPTY_USER_PROPERTIES)
 
     when:
-        storage.store(
+        publishStorage.store(
             publishId,
             testMessageId2,
             QoS.AT_MOST_ONCE,
@@ -100,60 +102,64 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
     then:
         def exception = thrown(IllegalArgumentException)
         exception.message == "Publish:[${publishId}] already exists"
-        storage.storedPublishes.size() == 1
+        publishStorage.storedPublishes.size() == 1
   }
 
   def "should remove stored incoming publish"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def incomingPublish = createAndStorePublish(publishStorage)
     when:
-        storage.remove(incomingPublish)
+        publishStorage.remove(incomingPublish)
     then:
-        storage.storedPublishes.isEmpty()
-        !storage.storedPublishes.containsKey(incomingPublish.id())
+        publishStorage.storedPublishes.isEmpty()
+        !publishStorage.storedPublishes.containsKey(incomingPublish.id())
   }
 
   def "should keep stored publish until all consumers are handled"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
-        storage.increaseConsumerCount(incomingPublish, 3)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.increaseConsumerCount(incomingPublish, 3)
     when:
-        storage.decreaseConsumerCount(incomingPublish, 2)
+        publishStorage.decreaseConsumerCount(incomingPublish, 2)
     then:
-        storage.storedPublishes.size() == 1
-        storage.storedPublishes.containsKey(incomingPublish.id())
+        publishStorage.storedPublishes.size() == 1
+        publishStorage.storedPublishes.containsKey(incomingPublish.id())
     when:
-        storage.decreaseConsumerCount(incomingPublish, 1)
+        publishStorage.decreaseConsumerCount(incomingPublish, 1)
     then:
-        storage.storedPublishes.isEmpty()
+        publishStorage.storedPublishes.isEmpty()
   }
 
   def "should not allow to change consumer count update for missing publish"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
-        storage.remove(incomingPublish)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.remove(incomingPublish)
     when:
-        storage.increaseConsumerCount(incomingPublish, 1)
+        publishStorage.increaseConsumerCount(incomingPublish, 1)
     then:
         def exception = thrown(IllegalArgumentException)
         exception.message == "Unknown publish:[${incomingPublish.id()}]"
-        storage.storedPublishes.isEmpty()
+        publishStorage.storedPublishes.isEmpty()
   }
 
   def "should throw exception when consumer count is decreased below zero"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
-        storage.increaseConsumerCount(incomingPublish, 1)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.increaseConsumerCount(incomingPublish, 1)
     when:
-        storage.decreaseConsumerCount(incomingPublish, 2)
+        publishStorage.decreaseConsumerCount(incomingPublish, 2)
     then:
         def exception = thrown(IllegalArgumentException)
         exception.message == "Unexpected result of decreaseConsumerCount:[-1] for publish:[${incomingPublish.id()}]"
-        storage.storedPublishes.containsKey(incomingPublish.id())
+        publishStorage.storedPublishes.containsKey(incomingPublish.id())
   }
 
   private static def createAndStorePublish(InMemoryIncomingPublishStorage storage) {
