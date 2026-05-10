@@ -276,6 +276,13 @@ The codebase contains TODO comments in several classes related to MQTT protocol 
 - `buildSrc/`: Shared build logic used across all modules
 - Never remove `--enable-preview` from Java compilation or test tasks
 
+### When Writing Summary Files
+- Match the requested comparison base exactly (for example `develop` vs current branch, or part-3 vs part-2) and do not mix in changes from earlier parts unless the user asks for full branch scope
+- Focus on meaningful behavioral and architectural changes, not raw diff noise or minor refactors
+- Group related changes into a few clear themes such as storage lifecycle, publish flow, retained handling, sender behavior, tests, and wiring
+- When useful, describe publish or lifecycle changes as short ASCII flow diagrams so ownership transfer and terminal cleanup are easy to follow
+- If the user asks for part-only scope, keep only the delta introduced in that part and remove inherited history from earlier summaries
+
 ## Validation Steps
 
 Before submitting changes, verify locally:
