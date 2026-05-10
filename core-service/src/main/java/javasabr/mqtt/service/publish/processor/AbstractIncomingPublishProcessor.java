@@ -73,7 +73,9 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     
     if (publish.retained()) {
       // to avoid auto-removing retained publish we should add +1 long time consumer
-      incomingPublishStorage.increaseConsumerCount(publish, 1);
+      if (!publish.data().isPayloadEmpty()) {
+        incomingPublishStorage.increaseConsumerCount(publish, 1);
+      }
       IncomingPublish prevRetainedPublish = retainPublishService.retain(publish);
       if (prevRetainedPublish != null) {
         incomingPublishStorage.decreaseConsumerCount(prevRetainedPublish, 1);

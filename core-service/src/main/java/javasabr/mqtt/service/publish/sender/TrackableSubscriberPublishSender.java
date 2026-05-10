@@ -101,11 +101,9 @@ public abstract class TrackableSubscriberPublishSender extends
     TrackedMessageMeta trackedMessageMeta = outMessageTracker.stored(messageId);
     if (trackedMessageMeta == null) {
       log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
-      incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
     } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
       log.warning(clientId, trackedMessageMeta, messageId,
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
-      incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
     } else {
       log.debug(clientId, messageId, "[%s] Retry to deliver publish:[%s]"::formatted);
       send(networkMqttUser, outgoingPublish.withDuplicated());

@@ -23,8 +23,6 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
 
   private final static Supplier<RetainedPublishNode> NODE_FACTORY = RetainedPublishNode::new;
   
-  private static final int REWRITE_MAX_ATTEMPTS = 1000;
-
   static {
     DebugUtils.registerIncludedFields("childNodes", "retainedMessage");
   }
@@ -66,24 +64,12 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
 
   @Nullable
   private IncomingPublish setRetainedPublishes(IncomingPublish newPublish) {
-    for (int i = 0; i < REWRITE_MAX_ATTEMPTS; i++) {
-      IncomingPublish prevPublish = retainedPublishes.get();
-      if (retainedPublishes.compareAndSet(prevPublish, newPublish)) {
-        return prevPublish;
-      }
-    }
-    throw new IllegalStateException("Can't rewrite retained publish for:[%s]".formatted(newPublish));
+    return retainedPublishes.getAndSet(newPublish);
   }
 
   @Nullable
   private IncomingPublish clearRetainedPublish() {
-    for (int i = 0; i < REWRITE_MAX_ATTEMPTS; i++) {
-      IncomingPublish prevPublish = retainedPublishes.get();
-      if (prevPublish == null || retainedPublishes.compareAndSet(prevPublish, null)) {
-        return prevPublish;
-      }
-    }
-    throw new IllegalStateException("Can't clear retained publish");
+    return retainedPublishes.getAndSet(null);
   }
 
   public void collectRetainedPublishes(int level, TopicFilter topicFilter, ArrayBuilder<IncomingPublish> result) {
