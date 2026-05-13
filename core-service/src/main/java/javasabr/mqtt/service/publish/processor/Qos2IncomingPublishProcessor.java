@@ -29,7 +29,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProcessor<ExternalNetworkMqttUser> {
 
-  private static final Duration NOT_CONFIRMED_REMOVAL_DELAY = Duration.ofSeconds(60 * 15);
+  private static final Duration NOT_CONFIRMED_REMOVAL_DELAY = Duration.ofMinutes(15);
   
   TrackableMessageCallback<IncomingPublish> trackableMessageCallback;
 

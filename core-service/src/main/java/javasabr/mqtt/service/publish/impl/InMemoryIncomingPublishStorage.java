@@ -106,14 +106,14 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
 
   @Override
   public void remove(IncomingPublish publish) {
-    PublishData data = publish.data();
+    IncomingPublish wasRemoved;
     long stamp = storedPublishes.writeLock();
     try {
-      removeWithoutLock(publish.id());
+      wasRemoved = removeWithoutLock(publish.id());
     } finally {
       storedPublishes.writeUnlock(stamp);
     }
-    publishDataStorage.removeById(data.id());
+    publishDataStorage.removeById(wasRemoved.data().id());
   }
 
   @Override

@@ -1,10 +1,12 @@
 package javasabr.mqtt.service.session.impl;
 
+import java.time.Duration;
 import java.util.concurrent.locks.StampedLock;
 import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
+import javasabr.rlib.collections.array.MutableIntArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
 import lombok.AccessLevel;
@@ -40,26 +42,39 @@ public class InMemoryMessageTacker implements MessageTacker {
 
   @Override
   public void add(int messageId, MqttMessageType messageType, @Nullable ReasonCode reasonCode) {
+    add(messageId, messageType, reasonCode, null);
+  }
+
+  @Override
+  public void add(
+      int messageId,
+      MqttMessageType messageType,
+      @Nullable ReasonCode reasonCode,
+      @Nullable Duration expiration) {
+    InMemoryTrackedMessageMeta messageMeta = new InMemoryTrackedMessageMeta(
+        messageType,
+        reasonCode,
+        messageId, 
+        expiration == null ? 0L : System.currentTimeMillis() + expiration.toMillis());
     long stamp = lock.writeLock();
     try {
-      messageIdToMeta.put(messageId, new InMemoryTrackedMessageMeta(messageType, reasonCode));
+      messageIdToMeta.put(messageId, messageMeta);
     } finally {
       lock.unlockWrite(stamp);
     }
   }
 
   @Override
-  public boolean update(int messageId, MqttMessageType messageType, @Nullable ReasonCode reasonCode) {
+  public TrackedMessageMeta update(int messageId, MqttMessageType messageType, @Nullable ReasonCode reasonCode) {
     long stamp = lock.writeLock();
     try {
       InMemoryTrackedMessageMeta current = messageIdToMeta.get(messageId);
-      if (current != null) {
-        current.messageType(messageType);
-        current.reasonCode(reasonCode);
-        return false;
+      if (current == null) {
+        throw new IllegalArgumentException("Message not found: " + messageId);
       }
-      messageIdToMeta.put(messageId, new InMemoryTrackedMessageMeta(messageType, reasonCode));
-      return true;
+      current.messageType(messageType);
+      current.reasonCode(reasonCode);
+      return current;
     } finally {
       lock.unlockWrite(stamp);
     }
@@ -82,6 +97,37 @@ public class InMemoryMessageTacker implements MessageTacker {
       messageIdToMeta.clear();
     } finally {
       lock.unlockWrite(stamp);
+    }
+  }
+  
+  public void cleanupExpired(long currentTimeInMs, MutableIntArray calculation) {
+    if (messageIdToMeta.isEmpty()) {
+      return;
+    }
+    long stamp = lock.readLock();
+    try {
+      for (InMemoryTrackedMessageMeta messageMeta : messageIdToMeta) {
+        if (messageMeta.expiredAt() > 0 && messageMeta.expiredAt() < currentTimeInMs) {
+          calculation.add(messageMeta.messageId());
+        }
+      }
+    } finally {
+      lock.unlockRead(stamp);
+    }
+    if (!calculation.isEmpty()) {
+      stamp = lock.writeLock();
+      try {
+        for (int i = 0, size = calculation.size(); i < size; i++) {
+          int messageId = calculation.get(i);
+          InMemoryTrackedMessageMeta exist = messageIdToMeta.get(messageId);
+          if (exist != null && exist.expiredAt() > 0 && exist.expiredAt() < currentTimeInMs) {
+            messageIdToMeta.remove(messageId);
+          }
+        }
+      } finally {
+        lock.unlockWrite(stamp);
+      }
+      calculation.clear();
     }
   }
 }

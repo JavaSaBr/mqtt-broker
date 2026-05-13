@@ -9,7 +9,7 @@ import java.time.Duration
 
 class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
   
-  InMemoryMqttSessionService sessionService = new InMemoryMqttSessionService(60_000)
+  InMemoryMqttSessionService sessionService = new InMemoryMqttSessionService(60_000, 60_000)
  
   def "should create a fresh session"() {
     given:

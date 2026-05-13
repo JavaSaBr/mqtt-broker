@@ -101,12 +101,14 @@ public class MqttBrokerSpringConfig {
   @Bean
   MqttSessionService mqttSessionService(
       @Value("${in.memory.session.service.clean.interval.ms:60000}") int cleanInterval,
+      @Value("${in.memory.session.service.update.interval.ms:60000}") int updateIntervalInMs,
       @Value("${in.memory.session.service.max.not.expirable.sessions:1000}") int maxNotExpirableSessions,
       @Value("${in.memory.session.service.max.expirable.sessions:1000}") int maxExpirableStoredSessions,
       @Value("${in.memory.session.service.hard.sessions.limit:20000}") int hardSessionsLimit,
       @Value("${in.memory.session.service.cleanup.batch.size:50}") int cleanupBatchSize) {
     return new InMemoryMqttSessionService(
-        cleanInterval, 
+        cleanInterval,
+        updateIntervalInMs,
         maxNotExpirableSessions,
         maxExpirableStoredSessions, 
         hardSessionsLimit, 

@@ -1,8 +1,9 @@
 package javasabr.mqtt.service.publish.impl
 
-import java.nio.ByteBuffer
 import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.test.support.UnitSpecification
+
+import java.nio.ByteBuffer
 
 import static java.nio.charset.StandardCharsets.UTF_8
 

@@ -10,4 +10,6 @@ public interface TrackedMessageMeta {
 
   @Nullable
   ReasonCode reasonCode();
+  
+  long expiredAt();
 }

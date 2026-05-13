@@ -9,6 +9,7 @@ import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.publish.OutgoingPublish;
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
+import javasabr.rlib.collections.array.MutableIntArray;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.EqualsAndHashCode;
@@ -101,5 +102,10 @@ public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSessio
     outgoingProcessingPublishes.clear();
     activeSubscriptions.clear();
     topicNameMapping.clear();
+  }
+ 
+  public void update(long currentTimeInMs, MutableIntArray calculation) {
+    inMessageTracker.cleanupExpired(currentTimeInMs, calculation);
+    outMessageTracker.cleanupExpired(currentTimeInMs, calculation);
   }
 }

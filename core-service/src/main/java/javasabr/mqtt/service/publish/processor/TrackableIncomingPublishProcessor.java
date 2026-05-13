@@ -1,5 +1,6 @@
 package javasabr.mqtt.service.publish.processor;
 
+import java.time.Duration;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
@@ -19,6 +20,8 @@ import lombok.CustomLog;
 @CustomLog
 public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUser> extends
     AbstractIncomingPublishProcessor<U> {
+
+  private static final Duration META_EXPIRATION = Duration.ofMinutes(10);
 
   public TrackableIncomingPublishProcessor(
       Class<U> expectedClientType,
@@ -49,7 +52,7 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
   @Override
   protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
-    messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
+    messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH, null, META_EXPIRATION);
     log.debug(user.clientId(), publish.messageId(), publish.id(), 
         "[%s] Register tracking messageId:[%s] for publish:[%s]"::formatted);
     super.processImpl(user, session, publish);
