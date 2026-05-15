@@ -265,7 +265,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   private void cleanup() {
     while (!closed) {
-      ThreadUtils.sleep(cleanupIntervalInMs);
+      if (ThreadUtils.sleep(cleanupIntervalInMs)) {
+        continue;
+      }
       expiredSessionCleaner.cleanup();
       expirableOldestSessionCleaner.cleanup();
       notExpirableOldestSessionCleaner.cleanup();

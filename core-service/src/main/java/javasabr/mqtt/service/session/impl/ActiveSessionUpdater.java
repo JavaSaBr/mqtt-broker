@@ -2,12 +2,14 @@ package javasabr.mqtt.service.session.impl;
 
 import java.io.IOException;
 import javasabr.rlib.collections.array.ArrayFactory;
-import javasabr.rlib.collections.array.MutableIntArray;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.common.util.ThreadUtils;
+import lombok.CustomLog;
 
+@CustomLog
 public class ActiveSessionUpdater implements AutoCloseable {
-  
+
+  public static final int SESSIONS_PART_SIZE = 100;
   final LockableRefToRefDictionary<String, InMemoryNetworkMqttSession> activeSessions;
   final Thread updateThread;
 
@@ -25,25 +27,29 @@ public class ActiveSessionUpdater implements AutoCloseable {
   }
 
   public void update() {
-    MutableIntArray calculations = ArrayFactory.mutableIntArray();
+    var calculations = ArrayFactory.mutableIntArray();
+    var sessions = ArrayFactory.mutableArray(InMemoryNetworkMqttSession.class);
     while (!closed) {
-      ThreadUtils.sleep(updateIntervalInMs);
-      if (activeSessions.isEmpty()) {
+      if (ThreadUtils.sleep(updateIntervalInMs)) {
+        continue;
+      } else if (activeSessions.isEmpty()) {
         continue;
       }
-      long stamp = activeSessions.readLock();
-      try {
-        long currentTimeInMs = System.currentTimeMillis();
-        int counter = 0;
-        for (InMemoryNetworkMqttSession activeSession : activeSessions) {
-          if (counter % 50 == 0) {
-            currentTimeInMs = System.currentTimeMillis();
-          }
-          counter++;
-          activeSession.update(currentTimeInMs, calculations);
+      int partIndex = 0;
+      while (partIndex >= 0) {
+        long stamp = activeSessions.readLock();
+        try {
+          partIndex = activeSessions.values(sessions, partIndex, SESSIONS_PART_SIZE);
+        } finally {
+          activeSessions.readUnlock(stamp);
         }
-      } finally {
-        activeSessions.readUnlock(stamp);
+        if (!sessions.isEmpty()) {
+          long currentTimeInMs = System.currentTimeMillis();
+          for (InMemoryNetworkMqttSession activeSession : sessions) {
+            activeSession.update(currentTimeInMs, calculations);
+          }
+          sessions.clear();
+        }
       }
     }
   }

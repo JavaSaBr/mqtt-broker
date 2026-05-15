@@ -2,11 +2,9 @@ package javasabr.mqtt.service.session.impl
 
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.message.MqttMessageType
-import javasabr.mqtt.model.session.MessageTacker
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.network.session.ConfigurableNetworkMqttSession
 import javasabr.mqtt.service.IntegrationServiceSpecification
-import javasabr.rlib.common.util.ThreadUtils
 import javasabr.rlib.logger.api.LoggerLevel
 import javasabr.rlib.logger.api.LoggerManager
 
@@ -302,7 +300,7 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
         messageTracker2.add(13, MqttMessageType.PUBLISH, null, Duration.ofMinutes(100))
         messageTracker2.add(14, MqttMessageType.PUBLISH, null, Duration.ofMillis(100))
     then:
-        ThreadUtils.sleep(1000)
+        Thread.sleep(1000)
     then:
         messageTracker1.stored(11) == null
         messageTracker1.stored(12) != null
