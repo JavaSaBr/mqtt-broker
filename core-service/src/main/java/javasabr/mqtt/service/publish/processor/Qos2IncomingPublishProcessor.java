@@ -29,7 +29,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProcessor<ExternalNetworkMqttUser> {
 
-  private static final Duration NOT_CONFIRMED_REMOVAL_DELAY = Duration.ofMinutes(15);
+  /**
+   * We keep publish data +5 mins from keeping message meta to avoid race conditions
+   */
+  private static final Duration NOT_CONFIRMED_REMOVAL_DELAY = META_EXPIRATION.plusMinutes(5);
   
   TrackableMessageCallback<IncomingPublish> trackableMessageCallback;
 
@@ -90,8 +93,6 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
         messageOutFactoryService
             .resolveFactory(user)
             .newPublishReceived(publish.messageId(), reasonCode));
-    // FIXME timed-out QoS 2 publishes also need session-state cleanup
-    // (inMessageTracker + incomingProcessingPublishes), otherwise the messageId stays busy until PUBREL arrives.
     incomingPublishStorage.scheduleRemoval(publish, NOT_CONFIRMED_REMOVAL_DELAY);
   }
 

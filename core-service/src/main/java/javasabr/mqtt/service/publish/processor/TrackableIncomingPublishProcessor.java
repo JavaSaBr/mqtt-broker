@@ -21,7 +21,7 @@ import lombok.CustomLog;
 public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUser> extends
     AbstractIncomingPublishProcessor<U> {
 
-  private static final Duration META_EXPIRATION = Duration.ofMinutes(10);
+  protected static final Duration META_EXPIRATION = Duration.ofMinutes(10);
 
   public TrackableIncomingPublishProcessor(
       Class<U> expectedClientType,
