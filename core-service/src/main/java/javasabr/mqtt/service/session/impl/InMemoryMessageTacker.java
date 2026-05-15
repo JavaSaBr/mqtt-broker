@@ -10,9 +10,11 @@ import javasabr.rlib.collections.array.MutableIntArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
 import lombok.AccessLevel;
+import lombok.CustomLog;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
+@CustomLog
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryMessageTacker implements MessageTacker {
 
@@ -62,6 +64,7 @@ public class InMemoryMessageTacker implements MessageTacker {
     } finally {
       lock.unlockWrite(stamp);
     }
+    log.debug(messageMeta, "Registered new message meta: %s"::formatted);
   }
 
   @Override
@@ -74,6 +77,7 @@ public class InMemoryMessageTacker implements MessageTacker {
       }
       current.messageType(messageType);
       current.reasonCode(reasonCode);
+      log.debug(current, "Updated message meta: %s"::formatted);
       return current;
     } finally {
       lock.unlockWrite(stamp);
@@ -83,12 +87,15 @@ public class InMemoryMessageTacker implements MessageTacker {
   @Nullable
   @Override
   public TrackedMessageMeta remove(int messageId) {
+    TrackedMessageMeta removed;
     long stamp = lock.writeLock();
     try {
-      return messageIdToMeta.remove(messageId);
+      removed = messageIdToMeta.remove(messageId);
     } finally {
       lock.unlockWrite(stamp);
     }
+    log.debug(removed, "Removed message meta: %s"::formatted);
+    return removed;
   }
 
   public void clear() {
@@ -115,6 +122,7 @@ public class InMemoryMessageTacker implements MessageTacker {
       lock.unlockRead(stamp);
     }
     if (!calculation.isEmpty()) {
+      log.debug(calculation, "Found expired message meta to remove:%s"::formatted);
       stamp = lock.writeLock();
       try {
         for (int i = 0, size = calculation.size(); i < size; i++) {

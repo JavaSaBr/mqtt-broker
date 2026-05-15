@@ -36,6 +36,7 @@ public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
   @JsonValue
   public Map<?, ?> jsonDebugValue() {
     return Map.of(
+        "messageId", messageId,
         "messageType", messageType,
         "reasonCode", String.valueOf(reasonCode),
         "expiredAt", expiredAt);
