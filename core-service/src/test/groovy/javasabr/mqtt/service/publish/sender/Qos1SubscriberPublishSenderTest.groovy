@@ -150,7 +150,7 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/4")
         def originalMessageId = 60
-        def testPublish =prepareIncomingPublish(
+        def testPublish = prepareIncomingPublish(
             originalMessageId,
             QoS.EXACTLY_ONCE,
             testTopicName,
