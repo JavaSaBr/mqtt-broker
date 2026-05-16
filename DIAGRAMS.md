@@ -203,6 +203,7 @@ graph TD
     Core --> Net[Network Layer]
     Core --> ACLE[ACL Engine]
     Core --> AuthA[Authentication API]
+    Core --> IPS[Incoming Publish Storage]
 
     ACLS --> ACLE
     ACLS --> Core
@@ -236,4 +237,164 @@ graph TB
     App -- "MQTT (1883/8883)" --> Net
     Auth -- JDBC --> DB
     Auth -- File I/O --> FS
+```
+
+## Incoming Publish Storage
+This service provides a centralized global store for incoming `PUBLISH` messages, ensuring safe multi-consumer tracking and lifecycle management (especially for retained messages).
+
+### Message Processing Data Flow
+```mermaid
+graph TD
+    Handler[PublishMqttInMessageHandler] -- "1. store" --> Storage[IncomingPublishStorage]
+    Handler -- "2. route by QoS" --> Router[IncomingPublishRouter]
+    Router -- QoS 0 --> Qos0[Qos0IncomingPublishProcessor]
+    Router -- QoS 1 --> Qos1[Qos1IncomingPublishProcessor]
+    Router -- QoS 2 --> Qos2[Qos2IncomingPublishProcessor]
+
+    subgraph QoS 0 & 1 - Immediate Dispatch
+        Qos0 -- "3. processImpl → dispatch" --> Dispatch[dispatchToSubscriber]
+        Qos1 -- "3. processImpl → dispatch" --> Dispatch
+    end
+
+    subgraph QoS 2 - Two-Phase
+        Qos2 -- "processImpl → send PUBREC" --> SendPUBREC[Send PUBREC + Register Callback]
+        SendPUBREC -. "PUBREL arrives" .-> HandlePUBREL[handleReceivedTrackableMessage]
+        HandlePUBREL -- "3. dispatch" --> Dispatch
+    end
+
+    subgraph Dispatch & Consumer Counting
+        Dispatch -- "4. +1 dispatch marker" --> Storage
+        Dispatch -- "5. +1 retain marker" --> Storage
+        Dispatch -- "6. retain" --> Retain[RetainPublishService]
+        Retain -- "prevRetained? -1" --> Storage
+        Dispatch -- "7. findSubscribers" --> SubService[SubscriptionService]
+        SubService -- "+N per matched subscriber" --> Storage
+        Dispatch -- "8. checkSubscriber, skip? -N skipped" --> Storage
+        Dispatch -- "9. -1 dispatch marker released" --> Storage
+    end
+
+    Dispatch -- "10. per subscriber" --> Sender[SubscriberPublishSender]
+
+    subgraph Sender - Decrement on Completion
+        Sender -- "QoS0: -1 after async send\n QoS1: -1 on PUBACK\n QoS2: -1 on PUBCOMP\n early exit: -1" --> Storage
+    end
+
+    Storage -- "14. counter == 0 and not retained → auto-remove" --> Cleanup[Cleanup]
+```
+
+### Storage Lifecycle & Consumer Counting
+This diagram illustrates the lifecycle of a `PUBLISH` message and how the reference counter in `IncomingPublishStorage` is managed during dispatch.
+
+```mermaid
+sequenceDiagram
+    participant P as IncomingPublishProcessor
+    participant IPS as IncomingPublishStorage
+    participant R as RetainPublishService
+    participant S as SubscriptionService
+    participant D as PublishDispatcher
+    participant SS as SubscriberPublishSender
+
+    Note over P: dispatchToSubscriber(publish)
+    P->>IPS: increaseConsumerCount(publish, 1) [dispatch marker]
+
+    alt publish.retained() and payload not empty
+        P->>IPS: increaseConsumerCount(publish, 1) [retain hold]
+        P->>R: retain(publish)
+        R-->>P: prevRetained (or null)
+        alt prevRetained != null
+            P->>IPS: decreaseConsumerCount(prevRetained, 1) [release old retain]
+        end
+    end
+
+    P->>S: findSubscribers(topicName)
+    S-->>P: subscribers (N matched)
+
+    alt N == 0
+        P->>IPS: decreaseConsumerCount(publish, 1) [release dispatch marker]
+    else N > 0
+        P->>IPS: increaseConsumerCount(publish, N) [one per subscriber]
+        loop For each subscriber
+            P->>P: checkSubscriber(publish, subscriber)
+            alt check passes
+                P->>D: dispatchToSubscriber(publish, subscriber)
+                D->>SS: sendToSubscriber(incomingPublish, subscriber)
+            else check fails (skipped)
+                Note over P: skipped++
+            end
+        end
+        alt skipped > 0
+            P->>IPS: decreaseConsumerCount(publish, skipped) [release skipped holds]
+        end
+        alt matched > 0
+            P->>IPS: decreaseConsumerCount(publish, 1) [release dispatch marker]
+        else matched == 0
+            P->>IPS: decreaseConsumerCount(publish, 1) [release dispatch marker]
+        end
+    end
+
+    Note over SS: Per-subscriber delivery completion
+    alt QoS 0
+        SS->>IPS: decreaseConsumerCount(outgoingPublish.source(), 1) [async send complete]
+    else QoS 1
+        SS->>IPS: decreaseConsumerCount(outgoingPublish.source(), 1) [PUBACK received]
+    else QoS 2
+        Note over SS: PUBLISH -> PUBREC(success) -> PUBREL -> PUBCOMP
+        SS->>IPS: decreaseConsumerCount(outgoingPublish.source(), 1) [PUBCOMP received]
+    end
+
+    Note over IPS: When counter reaches 0 and not retained → auto-remove
+```
+
+### QoS 2 Inbound Two-Phase Processing
+QoS 2 splits processing into two phases: receiving the PUBLISH (sending PUBREC) and processing on PUBREL.
+
+```mermaid
+sequenceDiagram
+    participant C as Publisher Client
+    participant Q2 as Qos2IncomingPublishProcessor
+    participant IPS as IncomingPublishStorage
+    participant T as InMessageTracker
+    participant PP as ProcessingPublishes
+    participant D as dispatchToSubscriber
+
+    C->>Q2: PUBLISH (QoS 2)
+    Q2->>T: register(messageId, PUBLISH)
+    Q2->>PP: register(publish, callback, retryer)
+    Q2-->>C: PUBREC (success)
+    Note over Q2,IPS: Publish sits in storage with counter = 0
+
+    C->>Q2: PUBREL
+    Q2->>T: update(messageId, PUBLISH_COMPLETE)
+    Q2->>D: dispatchToSubscriber(publish)
+    Note over D: Full consumer counting lifecycle runs here
+    D-->>Q2: dispatch complete
+    Q2-->>C: PUBCOMP
+```
+
+### Sender Error & Early-Exit Paths
+Every terminal path in the sender must decrement the consumer count. This diagram shows the non-happy paths.
+
+```mermaid
+sequenceDiagram
+    participant P as PublishDispatcher
+    participant S as AbstractSubscriberPublishSender
+    participant IPS as IncomingPublishStorage
+
+    P->>S: sendToSubscriber(incomingPublish, subscriber)
+
+    alt wrong user type
+        S->>IPS: decreaseConsumerCount(incomingPublish, 1)
+    else session is null
+        S->>IPS: decreaseConsumerCount(incomingPublish, 1)
+    else buildOutgoingPublish returns null
+        S->>IPS: decreaseConsumerCount(incomingPublish, 1)
+    else QoS 1 unexpected flow state
+        S->>IPS: decreaseConsumerCount(outgoingPublish.source(), 1)
+        S->>S: disconnect subscriber
+    else QoS 2 PUBREC with error
+        S->>IPS: decreaseConsumerCount(outgoingPublish.source(), 1)
+        Note over S: cancel flow, remove tracker
+    else QoS 2 unknown tracked meta
+        S->>IPS: decreaseConsumerCount(outgoingPublish.source(), 1)
+    end
 ```
