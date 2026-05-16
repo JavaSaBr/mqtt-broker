@@ -3,6 +3,7 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.data.type.StringPair;
@@ -25,6 +26,10 @@ import org.jspecify.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DisconnectMqtt5OutMessage extends DisconnectMqtt311OutMessage {
 
+  static {
+    DebugUtils.registerIncludedFields("reasonCode", "reason");
+  }
+  
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         If the Session Expiry Interval is absent, the Session Expiry Interval in the CONNECT packet is used.

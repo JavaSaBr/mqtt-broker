@@ -9,7 +9,7 @@ import javasabr.rlib.collections.array.IntArray;
 import org.jspecify.annotations.Nullable;
 
 public record SimpleOutgoingPublish(
-    Publish incomingPublish, 
+    IncomingPublish source, 
     boolean retained,
     IntArray subscriptionIds) implements OutgoingPublish {
 
@@ -25,18 +25,18 @@ public record SimpleOutgoingPublish(
 
   @Override
   public TopicName topicName() {
-    return incomingPublish.topicName();
+    return source.topicName();
   }
   
   @Nullable
   @Override
   public TopicName responseTopicName() {
-    return incomingPublish.responseTopicName();
+    return source.responseTopicName();
   }
 
   @Override
   public PublishData data() {
-    return incomingPublish.data();
+    return source.data();
   }
 
   @Override
@@ -46,7 +46,7 @@ public record SimpleOutgoingPublish(
 
   @Override
   public long messageExpiryInterval() {
-    return incomingPublish.messageExpiryInterval();
+    return source.messageExpiryInterval();
   }
 
   @Override
@@ -56,20 +56,20 @@ public record SimpleOutgoingPublish(
 
   @Override
   public Array<StringPair> userProperties() {
-    return incomingPublish.userProperties();
+    return source.userProperties();
   }
 
   @Override
-  public Publish withDuplicated() {
+  public OutgoingPublish withDuplicated() {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Publish withoutRetained() {
+  public OutgoingPublish withoutRetained() {
     if (!retained()) {
       return this;
     } else {
-      return new SimpleOutgoingPublish(incomingPublish, false, subscriptionIds);
+      return new SimpleOutgoingPublish(source, false, subscriptionIds);
     }
   }
 }

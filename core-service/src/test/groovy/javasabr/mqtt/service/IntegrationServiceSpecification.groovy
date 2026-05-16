@@ -87,9 +87,9 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
 
   @Shared
   def defaultPublishDispatcher = new DefaultPublishDispatcher([
-      new Qos0SubscriberPublishSender(defaultMessageOutFactoryService),
-      new Qos1SubscriberPublishSender(defaultMessageOutFactoryService),
-      new Qos2SubscriberPublishSender(defaultMessageOutFactoryService)
+      new Qos0SubscriberPublishSender(defaultMessageOutFactoryService, defaultIncomingPublishStorage),
+      new Qos1SubscriberPublishSender(defaultMessageOutFactoryService, defaultIncomingPublishStorage),
+      new Qos2SubscriberPublishSender(defaultMessageOutFactoryService, defaultIncomingPublishStorage)
   ])
 
   @Shared

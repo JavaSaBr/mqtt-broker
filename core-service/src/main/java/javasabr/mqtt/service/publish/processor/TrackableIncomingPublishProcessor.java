@@ -14,7 +14,9 @@ import javasabr.mqtt.service.SubscriptionService;
 import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
+import lombok.CustomLog;
 
+@CustomLog
 public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUser> extends
     AbstractIncomingPublishProcessor<U> {
 
@@ -48,11 +50,13 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
   protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
+    log.debug(user.clientId(), publish.messageId(), publish.id(), 
+        "[%s] Register tracking messageId:[%s] for publish:[%s]"::formatted);
     super.processImpl(user, session, publish);
   }
 
   protected void handleMissedMessageId(U user, IncomingPublish publish) {
-    incomingPublishStorage.removeIfExist(publish);
+    log.debug(user.clientId(), publish.id(), "[%s] Missed required messageId in publish:[%s]"::formatted);
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);

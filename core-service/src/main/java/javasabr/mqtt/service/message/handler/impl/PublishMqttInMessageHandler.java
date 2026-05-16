@@ -99,7 +99,7 @@ public class PublishMqttInMessageHandler
         message.payloadFormat(),
         message.payload(),
         message.correlationData());
-
+    
     IncomingPublish incomingPublish;
     try {
       incomingPublish = incomingPublishStorage.store(
@@ -119,6 +119,7 @@ public class PublishMqttInMessageHandler
       publishDataStorage.removeById(storedPublishData.id());
       throw e;
     }
+    
     incomingPublishRouter.route(user, incomingPublish);
   }
   

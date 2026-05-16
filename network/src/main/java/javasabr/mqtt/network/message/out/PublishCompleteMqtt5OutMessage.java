@@ -3,6 +3,7 @@ package javasabr.mqtt.network.message.out;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.MqttMessageProperty;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
@@ -22,7 +23,11 @@ import org.jspecify.annotations.Nullable;
 @Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublishCompleteMqtt5OutMessage extends PublishCompleteMqtt311OutMessage {
-
+ 
+  static {
+    DebugUtils.registerIncludedFields("reasonCode", "reason");
+  }
+  
   private static final Set<MqttMessageProperty> AVAILABLE_PROPERTIES = EnumSet.of(
       /*
         Followed by the UTF-8 Encoded String representing the reason associated with this response. This

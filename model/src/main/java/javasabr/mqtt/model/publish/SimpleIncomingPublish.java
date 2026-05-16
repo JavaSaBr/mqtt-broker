@@ -1,6 +1,9 @@
 package javasabr.mqtt.model.publish;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Map;
 import java.util.UUID;
+import javasabr.mqtt.base.util.DebugUtils;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.data.type.StringPair;
 import javasabr.mqtt.model.topic.TopicName;
@@ -22,6 +25,10 @@ public record SimpleIncomingPublish(
     long messageExpiryInterval,
     int topicAlias,
     Array<StringPair> userProperties) implements IncomingPublish {
+
+  static {
+    DebugUtils.registerIncludedFields("id", "messageId", "topicName", "data", "retained", "duplicated");
+  }
   
   @Override
   public IncomingPublish withDuplicated() {
@@ -63,5 +70,21 @@ public record SimpleIncomingPublish(
           topicAlias,
           userProperties);
     }
+  }
+
+  @JsonValue
+  public Object jsonDebugValue() {
+    return Map.of(
+        "id", id,
+        "messageId", messageId,
+        "topicName", topicName,
+        "data", data,
+        "retained", retained,
+        "duplicated", duplicated);
+  }
+  
+  @Override
+  public String toString() {
+    return DebugUtils.toJsonString(this);
   }
 }

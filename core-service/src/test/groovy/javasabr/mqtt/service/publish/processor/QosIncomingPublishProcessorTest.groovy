@@ -9,19 +9,20 @@ import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.network.message.in.MqttInMessage
 import javasabr.mqtt.service.IntegrationServiceSpecification
 import javasabr.rlib.collections.array.IntArray
-import javasabr.rlib.logger.api.LoggerLevel
-import javasabr.rlib.logger.api.LoggerManager
 
 abstract class QosIncomingPublishProcessorTest extends IntegrationServiceSpecification {
+  
   static {
-    LoggerManager.enable(AbstractIncomingPublishProcessor.class, LoggerLevel.DEBUG)
-    LoggerManager.enable(TrackableIncomingPublishProcessor.class, LoggerLevel.DEBUG)
-    LoggerManager.enable(Qos0IncomingPublishProcessor.class, LoggerLevel.DEBUG)
-    LoggerManager.enable(Qos1IncomingPublishProcessor.class, LoggerLevel.DEBUG)
-    LoggerManager.enable(Qos2IncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(AbstractNetworkMqttUser.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(AbstractIncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(TrackableIncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(Qos0IncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(Qos1IncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(Qos2IncomingPublishProcessor.class, LoggerLevel.DEBUG)
+    //LoggerManager.enable(InMemoryIncomingPublishStorage, LoggerLevel.DEBUG)
   }
 
-  protected def prepareIncomingPublish(QoS qos, TopicName topicName, byte[] payload) {
+  protected def preparePublish(QoS qos, TopicName topicName, byte[] payload) {
     PublishData data = preparePublishData(payload)
     return defaultIncomingPublishStorage.store(
         UUID.randomUUID(),
@@ -38,7 +39,7 @@ abstract class QosIncomingPublishProcessorTest extends IntegrationServiceSpecifi
         MqttInMessage.EMPTY_USER_PROPERTIES)
   }
 
-  protected IncomingPublish prepareIncomingPublish(
+  protected IncomingPublish preparePublish(
       int messageId, 
       QoS qos, 
       TopicName topicName, 
@@ -52,6 +53,27 @@ abstract class QosIncomingPublishProcessorTest extends IntegrationServiceSpecifi
         null,
         data,
         false,
+        false,
+        IntArray.empty(),
+        60_000,
+        MqttProperties.TOPIC_ALIAS_MAX_IS_NOT_SET,
+        MqttInMessage.EMPTY_USER_PROPERTIES)
+  }
+
+  protected IncomingPublish prepareDuplicatedPublish(
+      int messageId,
+      QoS qos,
+      TopicName topicName,
+      byte[] payload) {
+    PublishData data = preparePublishData(payload)
+    return defaultIncomingPublishStorage.store(
+        UUID.randomUUID(),
+        messageId,
+        qos,
+        topicName,
+        null,
+        data,
+        true,
         false,
         IntArray.empty(),
         60_000,

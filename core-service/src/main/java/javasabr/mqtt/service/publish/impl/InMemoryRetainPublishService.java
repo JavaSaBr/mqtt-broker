@@ -8,6 +8,7 @@ import javasabr.mqtt.service.publish.RetainPublishService;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryRetainPublishService implements RetainPublishService {
@@ -18,13 +19,14 @@ public class InMemoryRetainPublishService implements RetainPublishService {
     this.retainedMessageTree = new ConcurrentRetainedMessageTree();
   }
 
+  @Nullable
   @Override
-  public void retain(IncomingPublish publish) {
+  public IncomingPublish retain(IncomingPublish publish) {
     PublishData data = publish.data();
     if (data.isPayloadEmpty()) {
-      retainedMessageTree.removeRetainedMessage(publish.topicName());
+      return retainedMessageTree.removeRetainedMessage(publish.topicName());
     } else {
-      retainedMessageTree.addRetainedMessage(publish);
+      return retainedMessageTree.addRetainedMessage(publish);
     }
   }
 

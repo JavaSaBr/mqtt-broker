@@ -1,5 +1,8 @@
 package javasabr.mqtt.model.topic.tree;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import javasabr.mqtt.base.util.DebugUtils;
@@ -22,55 +25,62 @@ import org.jspecify.annotations.Nullable;
 class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
 
   private final static Supplier<RetainedPublishNode> NODE_FACTORY = RetainedPublishNode::new;
-
+  
   static {
-    DebugUtils.registerIncludedFields("childNodes", "retainedMessage");
+    DebugUtils.registerIncludedFields("retainedPublish");
   }
 
   private static MutableArray<RetainedPublishNode> childNodesFactory() {
     return ArrayFactory.mutableArray(RetainedPublishNode.class);
   }
 
-  final AtomicReference<@Nullable IncomingPublish> retainedPublishes = new AtomicReference<>();
+  final AtomicReference<@Nullable IncomingPublish> retainedPublish = new AtomicReference<>();
 
   @Override
   protected Supplier<RetainedPublishNode> getNodeFactory() {
     return NODE_FACTORY;
   }
 
-  public void addRetainedPublish(int level, IncomingPublish publish, TopicName topicName) {
-    var child = getOrCreateChildNode(topicName.segment(level));
+  @Nullable
+  public IncomingPublish addRetainedPublish(int level, IncomingPublish publish, TopicName topicName) {
+    RetainedPublishNode child = getOrCreateChildNode(topicName.segment(level));
     int nextLevel = level + 1;
     boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
-      child.setRetainedPublishes(publish);
+      return child.setRetainedPublish(publish);
     } else {
-      child.addRetainedPublish(nextLevel, publish, topicName);
+      return child.addRetainedPublish(nextLevel, publish, topicName);
     }
   }
 
-  public void removeRetainedPublish(int level, TopicName topicName) {
-    var child = getOrCreateChildNode(topicName.segment(level));
+  @Nullable
+  public IncomingPublish removeRetainedPublish(int level, TopicName topicName) {
+    RetainedPublishNode child = getChildNode(topicName.segment(level));
+    if (child == null) {
+      return null;
+    }
     int nextLevel = level + 1;
     boolean isLastLevel = (nextLevel == topicName.levelsCount());
     if (isLastLevel) {
-      child.clearRetainedPublish();
+      return child.clearRetainedPublish();
     } else {
-      child.removeRetainedPublish(nextLevel, topicName);
+      return child.removeRetainedPublish(nextLevel, topicName);
     }
   }
 
-  private void setRetainedPublishes(IncomingPublish value) {
-    retainedPublishes.set(value);
+  @Nullable
+  private IncomingPublish setRetainedPublish(IncomingPublish newPublish) {
+    return retainedPublish.getAndSet(newPublish);
   }
 
-  private void clearRetainedPublish() {
-    retainedPublishes.set(null);
+  @Nullable
+  private IncomingPublish clearRetainedPublish() {
+    return retainedPublish.getAndSet(null);
   }
 
   public void collectRetainedPublishes(int level, TopicFilter topicFilter, ArrayBuilder<IncomingPublish> result) {
     if (level == topicFilter.levelsCount()) {
-      IncomingPublish publish = retainedPublishes.get();
+      IncomingPublish publish = retainedPublish.get();
       if (publish != null) {
         result.add(publish);
       }
@@ -104,16 +114,23 @@ class RetainedPublishNode extends AbstractTrieNode<RetainedPublishNode> {
   }
 
   private void collectEverything(RetainedPublishNode node, ArrayBuilder<IncomingPublish> result) {
-    IncomingPublish publish = node.retainedPublishes.get();
+    IncomingPublish publish = node.retainedPublish.get();
     if (publish != null) {
       result.add(publish);
     }
-
     var childNodes = node.getChildNodes(RetainedPublishNode::childNodesFactory);
     if (childNodes != null) {
       for (RetainedPublishNode childNode : childNodes) {
         collectEverything(childNode, result);
       }
     }
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    Map<String, Object> result = new HashMap<>(2);
+    result.put("childNodes", childNodes);
+    result.put("retainedPublish", retainedPublish.get());
+    return result;
   }
 }

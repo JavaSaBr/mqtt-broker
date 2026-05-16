@@ -170,6 +170,15 @@ The repository is organized into the following modules:
 - **Strict managed-state contracts**: For storages and services that manage registered runtime state, prefer explicit failures on invalid operations over silent no-ops when the misuse indicates a programming error
 - **Runtime-aligned tests**: When a stricter contract is introduced, update integration tests to create objects through the same storage/service path used in production instead of relaxing the implementation to accept detached objects
 - **Concurrency tradeoffs**: If a design uses shared wrappers with atomics after map lookup, treat that as an intentional lifecycle tradeoff; otherwise keep lookup, mutation, and removal under the same lock when stronger consistency matters
+- **Lifecycle accounting**: When runtime objects are reference-counted or consumer-counted, model every temporary and long-lived owner explicitly (for example dispatch phase, retained ownership, subscriber delivery) and balance each `+1` with a clearly defined `-1`
+- **Outgoing publish wrappers**: Keep `OutgoingPublish` implementations as transport wrappers around the source `IncomingPublish`; delivery variants may change messageId, QoS, duplicated/retained flags, and subscription IDs, but should reuse the source message content and metadata
+- **Tracking before send**: For tracked delivery flows, register message-tracker state, callbacks, and retry handlers before the first network send so retries and response handlers never observe an untracked publish
+- **Sender cleanup**: If subscriber delivery contributes to lifecycle accounting, every terminal sender path must release that ownership: success, async failure, invalid user type, missing session, invalid flow state, and abandoned delivery
+- **Protocol error handling**: When a tracked publish flow receives an unexpected response type or phase, treat it as a protocol violation: close the client with the appropriate MQTT error and complete lifecycle cleanup instead of only logging the mismatch
+- **Retained replacement contracts**: Retain services and retained-tree helpers should return the previous retained publish when replacing or removing retained state so lifecycle ownership can be transferred correctly
+- **Retained delete semantics**: Keep the rule that an empty retained payload removes retained state inside the retain service/tree layer instead of scattering that decision across callers
+- **CAS return rules**: In CAS-based remove/clear helpers, only the thread that successfully changes the shared state should return the removed object; failed CAS attempts should return `null`, not stale references
+- **Debug payload policy**: Prefer compact debug output for payload-bearing objects (IDs, sizes, metadata) rather than logging raw payload bytes
 
 ### Testing Conventions
 - **Framework**: Spock (Groovy-based BDD framework)
@@ -250,12 +259,13 @@ The codebase contains TODO comments in several classes related to MQTT protocol 
 4. In integration tests, prefer the shared fixtures from `IntegrationServiceSpecification` when that matches how the application wires services together
 5. When a contract depends on storage membership or service-managed state, create test objects through the real storage/service helper path instead of directly instantiating detached domain objects
 6. If implementation behavior was intentionally tightened to reject misuse, update integration tests to follow the real lifecycle instead of preserving old tolerant assumptions
-7. For async service APIs returning `Mono` or `CompletionStage`, use `fromAsync(...)` for returned values and `waitForAsync(...)` when only completion matters
-8. Prefer explicit `test...` fixture variable names and descriptive helper names such as `createAndStorePublish(...)` when the helper both arranges data and performs an action
-9. Prefer domain constants and shared empty values over magic literals when building MQTT test messages and publishes
-10. Close manually created services or clients in `cleanup:` when they own resources or background work
-11. Test fixtures can be used from network and model modules
-12. Tests automatically run with preview features enabled
+7. When lifecycle accounting depends on sender completion or retained replacement, add tests for both success and terminal error paths, not just the happy path
+8. For async service APIs returning `Mono` or `CompletionStage`, use `fromAsync(...)` for returned values and `waitForAsync(...)` when only completion matters
+9. Prefer explicit `test...` fixture variable names and descriptive helper names such as `createAndStorePublish(...)` when the helper both arranges data and performs an action
+10. Prefer domain constants and shared empty values over magic literals when building MQTT test messages and publishes
+11. Close manually created services or clients in `cleanup:` when they own resources or background work
+12. Test fixtures can be used from network and model modules
+13. Tests automatically run with preview features enabled
 
 ### When Modifying Build Configuration
 - Root `build.gradle`: Only for repository-wide settings and custom tasks
