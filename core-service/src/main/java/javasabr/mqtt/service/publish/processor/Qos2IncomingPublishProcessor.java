@@ -104,12 +104,12 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleMatchedSubscribers(
+  protected void handleDispatchedToSubscribers(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       IncomingPublish publish,
       int matchedSubscribers) {
-    super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
+    super.handleDispatchedToSubscribers(user, session, publish, matchedSubscribers);
     sendFeedback(
         user,
         session,
