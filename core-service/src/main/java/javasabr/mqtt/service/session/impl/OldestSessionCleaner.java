@@ -47,6 +47,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class OldestSessionCleaner<T extends NotExpirableSession> {
 
+  private static final int PART_SIZE = 400;
+  
   MutableArray<T> sessionsToCheck = ArrayFactory.mutableArray(NotExpirableSession.class);
   MutableArray<T> sessionsToCleanup = ArrayFactory.mutableArray(NotExpirableSession.class);
   
@@ -55,25 +57,31 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
   int cleanupBatchSize;
   
   public synchronized void cleanup() {
-    if (sessions.size() <= limit) {
+    int allSessionsCount = sessions.size();
+    if (allSessionsCount <= limit) {
       return;
     }
-    long stamp = sessions.readLock();
-    try {
-      sessions.values(sessionsToCheck);
-    } finally {
-      sessions.readUnlock(stamp);
-    }
-    int foundSessions = sessionsToCheck.size();
-    if (foundSessions < limit) {
-      sessionsToCheck.clear();
-      return;
-    }
-
     long youngest = 0;
     int index = 0;
-    int extraSessions = foundSessions - limit;
-    int cleanupSize = Math.min(extraSessions + cleanupBatchSize, foundSessions);
+    int extraSessions = allSessionsCount - limit;
+    int cleanupSize = Math.min(extraSessions + cleanupBatchSize, allSessionsCount);
+    int partIndex = 0;
+    
+    while (partIndex >= 0) {
+      long stamp = sessions.readLock();
+      try {
+        partIndex = sessions.values(sessionsToCheck, partIndex, PART_SIZE);
+      } finally {
+        sessions.readUnlock(stamp);
+      }
+
+      // Initially fill the array for removing sessions
+      for (; index < cleanupSize; index++) {
+        T session = sessionsToCheck.get(index);
+        sessionsToCleanup.add(session);
+        youngest = Math.max(youngest, session.storedAt());
+      }
+    }
 
     // Initially fill the array for removing sessions
     for (; index < cleanupSize; index++) {
