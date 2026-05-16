@@ -73,7 +73,8 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     
     if (publish.retained()) {
       // to avoid auto-removing retained publish we should add +1 long time consumer
-      if (!publish.data().isPayloadEmpty()) {
+      boolean cleanupRetained = publish.data().isPayloadEmpty();
+      if (!cleanupRetained) {
         incomingPublishStorage.increaseConsumerCount(publish, 1);
       }
       IncomingPublish prevRetainedPublish = retainPublishService.retain(publish);
@@ -108,7 +109,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     }
     int result = matchedSubscribers - skipped;
     if (result > 0) {
-      handleMatchedSubscribers(user, session, publish, result);
+      handleDispatchedToSubscribers(user, session, publish, result);
     } else {
       handleNoMatchedSubscribers(user, session, publish);
     }
@@ -120,7 +121,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     incomingPublishStorage.decreaseConsumerCount(publish, 1);
   }
 
-  protected void handleMatchedSubscribers(
+  protected void handleDispatchedToSubscribers(
       U user, 
       NetworkMqttSession session, 
       IncomingPublish publish, 

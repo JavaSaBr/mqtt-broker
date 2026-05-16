@@ -13,7 +13,7 @@ import javasabr.rlib.collections.array.IntArray
 import javasabr.rlib.logger.api.LoggerLevel
 import javasabr.rlib.logger.api.LoggerManager
 
-abstract class QosSubscriberPublishSenderTest extends IntegrationServiceSpecification {
+abstract class QosSubscriberPublishSenderSpecification extends IntegrationServiceSpecification {
   
   static {
     LoggerManager.enable(InMemoryIncomingPublishStorage, LoggerLevel.DEBUG)
