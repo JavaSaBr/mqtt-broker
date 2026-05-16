@@ -36,8 +36,8 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         defaultSubscriptionService,
         defaultMessageOutFactoryService,
         defaultTopicService,
-        inMemoryRetainMessageService,
-        defaultPublishDeliveringService)
+        defaultRetainMessageService,
+        defaultPublishDispatcher)
   }
 
   def "should close connection by reason that session is already closed"() {
@@ -298,7 +298,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.retain(publishWithRetain)
+        defaultRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:
@@ -336,7 +336,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.retain(publishWithRetain)
+        defaultRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:
@@ -375,10 +375,10 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.retain(publishWithRetain)
+        defaultRetainMessageService.retain(publishWithRetain)
     and:
         def publishWithoutRetain = incomingPublishWithRetain("topic/filter/1", "payload2")
-        inMemoryRetainMessageService.retain(publishWithoutRetain)
+        defaultRetainMessageService.retain(publishWithoutRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:
@@ -411,7 +411,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.retain(publishWithRetain)
+        defaultRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
@@ -442,7 +442,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.retain(publishWithRetain)
+        defaultRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage)
     then:
@@ -486,7 +486,7 @@ class SubscribeMqttInMessageHandlerTest extends IntegrationServiceSpecification 
         }}
     and:
         def publishWithRetain = incomingPublishWithRetain("topic/filter/1", "payload1")
-        inMemoryRetainMessageService.retain(publishWithRetain)
+        defaultRetainMessageService.retain(publishWithRetain)
     when:
         subscribeMessageHandler.processValidMessage(mqttConnection, subscribeMessage1)
     then:

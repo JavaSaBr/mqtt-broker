@@ -1,12 +1,17 @@
 package javasabr.mqtt.service.publish;
 
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.rlib.collections.array.Array;
+import org.jspecify.annotations.Nullable;
 
 public interface RetainPublishService {
 
-  void retain(Publish publish);
+  /**
+   * @return the prev. removed retained message or null.
+   */
+  @Nullable
+  IncomingPublish retain(IncomingPublish publish);
 
-  Array<Publish> findRetainedPublishes(TopicFilter topicFilter);
+  Array<IncomingPublish> findRetainedPublishes(TopicFilter topicFilter);
 }

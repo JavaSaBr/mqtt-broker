@@ -1,10 +1,13 @@
 package javasabr.mqtt.service.publish.sender;
 
 import javasabr.mqtt.model.MqttUser;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
+import javasabr.mqtt.model.publish.OutgoingPublish;
 import javasabr.mqtt.model.session.MqttSession;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
@@ -19,44 +22,63 @@ public abstract class AbstractSubscriberPublishSender<U extends NetworkMqttUser>
 
   Class<U> expectedUserType;
   MessageOutFactoryService messageOutFactoryService;
+  IncomingPublishStorage incomingPublishStorage;
 
   @Override
-  public final void sendToSubscriber(Publish publish, MqttUser user) {
+  public final void sendToSubscriber(IncomingPublish incomingPublish, MqttUser user) {
     if (!expectedUserType.isInstance(user)) {
       log.warning(user.clientId(), user.getClass(), "[%s] Not expected user of type:[%s]"::formatted);
+      incomingPublishStorage.decreaseConsumerCount(incomingPublish, 1);
       return;
     }
     U expectedUser = expectedUserType.cast(user);
     MqttSession session = expectedUser.session();
     if (session == null) {
       log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+      incomingPublishStorage.decreaseConsumerCount(incomingPublish, 1);
       return;
     }
-    Publish outgoingPublish = buildOutgoing(expectedUser, session, publish);
+    OutgoingPublish outgoingPublish = buildOutgoingPublish(expectedUser, session, incomingPublish);
     if (outgoingPublish != null) {
       sendToSubscriberImpl(expectedUser, session, outgoingPublish);
+    } else {
+      incomingPublishStorage.decreaseConsumerCount(incomingPublish, 1);
     }
   }
 
   @Nullable
-  protected abstract Publish buildOutgoing(U user, MqttSession session, Publish incoming);
+  protected abstract OutgoingPublish buildOutgoingPublish(
+      U user, 
+      MqttSession session, 
+      IncomingPublish incomingPublish);
 
-  protected void sendToSubscriberImpl(U user, MqttSession session, Publish publish) {
-    send(user, publish);
+  protected void sendToSubscriberImpl(
+      U user, 
+      MqttSession session, 
+      OutgoingPublish outgoingPublish) {
+    send(user, outgoingPublish);
   }
 
-  protected void send(U user, Publish publish) {
-    user.sendInBackground(messageOutFactoryService
+  protected void send(U user, OutgoingPublish outgoingPublish) {
+    MqttOutMessage mqttOutMessage = messageOutFactoryService
         .resolveFactory(user)
         .newPublish(
-            publish.messageId(),
-            publish.qos(),
-            publish.retained(),
-            publish.duplicated(),
-            publish.topicName(),
-            publish.topicAlias(),
-            publish.data(),
-            publish.responseTopicName(),
-            publish.userProperties()));
+            outgoingPublish.messageId(),
+            outgoingPublish.qos(),
+            outgoingPublish.retained(),
+            outgoingPublish.duplicated(),
+            outgoingPublish.topicName(),
+            outgoingPublish.topicAlias(),
+            outgoingPublish.data(),
+            outgoingPublish.responseTopicName(),
+            outgoingPublish.userProperties());
+    send(user, outgoingPublish, mqttOutMessage);
+  }
+
+  protected void send(
+      U user, 
+      OutgoingPublish outgoingPublish, 
+      MqttOutMessage mqttOutMessage) {
+    user.sendInBackground(mqttOutMessage);
   }
 }

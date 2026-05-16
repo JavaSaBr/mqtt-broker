@@ -14,7 +14,7 @@ import javasabr.mqtt.model.MqttUser;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.model.SubscribeRetainHandling;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
@@ -204,15 +204,16 @@ public class SubscribeMqttInMessageHandler extends
     if (subscribeResults.isEmpty()) {
       return;
     }
-    Map<Publish, Subscription> uniqueRetainedPublishes = null;
+    Map<IncomingPublish, Subscription> uniqueRetainedPublishes = null;
     for (SubscriptionResult subscriptionResult : subscribeResults) {
       Subscription subscription = subscriptionResult.newSubscription();
       if (subscription == null || !isRetainHandlingRequired(subscription, subscriptionResult)) {
         continue;
       }
       boolean retainAsPublished = subscription.retainAsPublished();
-      Array<Publish> retainedPublishes = retainPublishService.findRetainedPublishes(subscription.topicFilter());
-      for (Publish publish : retainedPublishes) {
+      Array<IncomingPublish> retainedPublishes = retainPublishService
+          .findRetainedPublishes(subscription.topicFilter());
+      for (IncomingPublish publish : retainedPublishes) {
         if (!retainAsPublished) {
           publish = publish.withoutRetained();
         }
@@ -225,7 +226,7 @@ public class SubscribeMqttInMessageHandler extends
     if (uniqueRetainedPublishes == null) {
       return;
     }
-    for (Map.Entry<Publish, Subscription> retainedMessageEntry : uniqueRetainedPublishes.entrySet()) {
+    for (Map.Entry<IncomingPublish, Subscription> retainedMessageEntry : uniqueRetainedPublishes.entrySet()) {
       publishDispatcher.dispatchToSubscriber(
           retainedMessageEntry.getKey(),
           user,

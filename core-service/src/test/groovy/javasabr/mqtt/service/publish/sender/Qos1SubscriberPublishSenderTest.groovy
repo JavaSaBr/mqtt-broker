@@ -4,7 +4,6 @@ import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttVersion
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.message.MqttMessageType
-import javasabr.mqtt.model.publish.IncomingPublish
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode
 import javasabr.mqtt.model.reason.code.PublishAckReasonCode
 import javasabr.mqtt.model.reason.code.PublishReceivedReasonCode
@@ -15,26 +14,29 @@ import javasabr.mqtt.network.message.out.DisconnectMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
 
-import static javasabr.mqtt.model.subscription.TestPublishFactory.incomingPublish
-
-class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
+class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderSpecification {
 
   def "should deliver publish to subscriber"() {
     given:
-        def sender = new Qos1SubscriberPublishSender(defaultMessageOutFactoryService)
+        def sender = new Qos1SubscriberPublishSender(
+            defaultMessageOutFactoryService, 
+            defaultIncomingPublishStorage)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/1")
         def originalMessageId = 60
-        def testPublish = IncomingPublish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
-            .withDuplicated()
+        def testPublish = prepareIncomingPublish(
+            originalMessageId,
+            QoS.EXACTLY_ONCE,
+            testTopicName,
+            testPayloadBytes)
     when:
         sender.sendToSubscriber(testPublish, user)
     then:
         with(user.nextSentMessage(PublishMqtt5OutMessage)) {
           qos() == QoS.AT_LEAST_ONCE
           !duplicate()
-          data() == testPayload
+          data() == testPublish.data()
           topicName() == testTopicName
           messageId() != MqttProperties.MESSAGE_ID_IS_NOT_SET
           topicAlias() == MqttProperties.TOPIC_ALIAS_NOT_SET
@@ -43,14 +45,19 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should wait for ack response for publish"() {
     given:
-        def sender = new Qos1SubscriberPublishSender(defaultMessageOutFactoryService)
+        def sender = new Qos1SubscriberPublishSender(
+            defaultMessageOutFactoryService, 
+            defaultIncomingPublishStorage)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/2")
         def originalMessageId = 60
-        def testPublish = IncomingPublish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
-            .withDuplicated()
+        def testPublish = prepareIncomingPublish(
+            originalMessageId,
+            QoS.EXACTLY_ONCE,
+            testTopicName,
+            testPayloadBytes)
     when:
         sender.sendToSubscriber(testPublish, user)
     then:
@@ -85,14 +92,19 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should correctly handle publish ack when no stored trackable meta about the publish"() {
     given:
-        def sender = new Qos1SubscriberPublishSender(defaultMessageOutFactoryService)
+        def sender = new Qos1SubscriberPublishSender(
+            defaultMessageOutFactoryService, 
+            defaultIncomingPublishStorage)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/3")
         def originalMessageId = 60
-        def testPublish = IncomingPublish.minimal(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
-            .withDuplicated()
+        def testPublish = prepareIncomingPublish(
+            originalMessageId,
+            QoS.EXACTLY_ONCE,
+            testTopicName,
+            testPayloadBytes)
     when:
         sender.sendToSubscriber(testPublish, user)
     then:
@@ -130,14 +142,19 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should handle as protocol error receiving unexpected response message"() {
     given:
-        def sender = new Qos1SubscriberPublishSender(defaultMessageOutFactoryService)
+        def sender = new Qos1SubscriberPublishSender(
+            defaultMessageOutFactoryService, 
+            defaultIncomingPublishStorage)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/4")
         def originalMessageId = 60
-        def testPublish = incomingPublish(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
-            .withDuplicated()
+        def testPublish = prepareIncomingPublish(
+            originalMessageId,
+            QoS.EXACTLY_ONCE,
+            testTopicName,
+            testPayloadBytes)
     when:
         sender.sendToSubscriber(testPublish, user)
     then:
@@ -166,14 +183,19 @@ class Qos1SubscriberPublishSenderTest extends QosSubscriberPublishSenderTest {
 
   def "should handle as protocol error for unexpected flow state"() {
     given:
-        def sender = new Qos1SubscriberPublishSender(defaultMessageOutFactoryService)
+        def sender = new Qos1SubscriberPublishSender(
+            defaultMessageOutFactoryService, 
+            defaultIncomingPublishStorage)
         def connection = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = connection.user() as TestExternalNetworkMqttUser
         def session = user.session()
         def testTopicName = defaultTopicService.createTopicName(user, "Qos1SubscriberPublishSenderTest/5")
         def originalMessageId = 60
-        def testPublish = incomingPublish(originalMessageId, QoS.EXACTLY_ONCE, testTopicName, testPayload)
-            .withDuplicated()
+        def testPublish = prepareIncomingPublish(
+            originalMessageId,
+            QoS.EXACTLY_ONCE,
+            testTopicName,
+            testPayloadBytes)
     when:
         sender.sendToSubscriber(testPublish, user)
     then:

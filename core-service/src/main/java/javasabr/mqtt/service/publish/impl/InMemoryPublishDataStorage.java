@@ -30,20 +30,7 @@ public class InMemoryPublishDataStorage implements PublishDataStorage {
       idToPublishData.readUnlock(stamp);
     }
   }
-
-  @Override
-  public void store(PublishData publishData) {
-    long stamp = idToPublishData.writeLock();
-    try {
-      PublishData exist = idToPublishData.putIfAbsent(publishData.id(), publishData);
-      if (exist != null) {
-        throw new IllegalArgumentException("Publish data:%s already exists".formatted(publishData));
-      }
-    } finally {
-      idToPublishData.writeUnlock(stamp);
-    }
-  }
-
+  
   @Override
   public PublishData store(
       UUID dataId,
@@ -51,14 +38,22 @@ public class InMemoryPublishDataStorage implements PublishDataStorage {
       PayloadFormat payloadFormat,
       byte[] payload,
       byte @Nullable [] correlationData) {
-    var publishData = new InMemoryPublishData(
-        dataId, 
-        payloadFormat,
-        contentType,
-        payload, 
-        correlationData);
-    store(publishData);
-    return publishData;
+    long stamp = idToPublishData.writeLock();
+    try {
+      if (idToPublishData.containsKey(dataId)) {
+        throw new IllegalArgumentException("Publish data with id:[%s] already exists".formatted(dataId));
+      }
+      var publishData = new InMemoryPublishData(
+          dataId,
+          payloadFormat,
+          contentType,
+          payload,
+          correlationData);
+      idToPublishData.put(publishData.id(), publishData);
+      return publishData;
+    } finally {
+      idToPublishData.writeUnlock(stamp);
+    }
   }
 
   @Override

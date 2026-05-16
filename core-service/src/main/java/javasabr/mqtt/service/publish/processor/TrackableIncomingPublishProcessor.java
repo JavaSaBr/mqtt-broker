@@ -3,7 +3,7 @@ package javasabr.mqtt.service.publish.processor;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttProtocolErrors;
 import javasabr.mqtt.model.message.MqttMessageType;
-import javasabr.mqtt.model.publish.Publish;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.reason.code.DisconnectReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
@@ -11,9 +11,12 @@ import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.service.MessageOutFactoryService;
 import javasabr.mqtt.service.SubscriptionService;
+import javasabr.mqtt.service.publish.IncomingPublishStorage;
 import javasabr.mqtt.service.publish.PublishDispatcher;
 import javasabr.mqtt.service.publish.RetainPublishService;
+import lombok.CustomLog;
 
+@CustomLog
 public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUser> extends
     AbstractIncomingPublishProcessor<U> {
 
@@ -22,36 +25,41 @@ public abstract class TrackableIncomingPublishProcessor<U extends NetworkMqttUse
       SubscriptionService subscriptionService,
       PublishDispatcher publishDispatcher,
       MessageOutFactoryService messageOutFactoryService,
-      RetainPublishService retainPublishService) {
+      RetainPublishService retainPublishService,
+      IncomingPublishStorage incomingPublishStorage) {
     super(
         expectedClientType,
         subscriptionService, 
         publishDispatcher,
         messageOutFactoryService, 
-        retainPublishService);
+        retainPublishService,
+        incomingPublishStorage);
   }
 
   @Override
-  protected boolean validateImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected boolean validateImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     int messagedId = publish.messageId();
     if (messagedId == MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      handleMissedMessageId(user);
+      handleMissedMessageId(user, publish);
       return false;
     }
     return super.validateImpl(user, session, publish);
   }
 
   @Override
-  protected void processImpl(U user, NetworkMqttSession session, Publish publish) {
+  protected void processImpl(U user, NetworkMqttSession session, IncomingPublish publish) {
     MessageTacker messageTacker = session.inMessageTracker();
     messageTacker.add(publish.messageId(), MqttMessageType.PUBLISH);
+    log.debug(user.clientId(), publish.messageId(), publish.id(), 
+        "[%s] Register tracking messageId:[%s] for publish:[%s]"::formatted);
     super.processImpl(user, session, publish);
   }
 
-  protected void handleMissedMessageId(U client) {
+  protected void handleMissedMessageId(U user, IncomingPublish publish) {
+    log.debug(user.clientId(), publish.id(), "[%s] Missed required messageId in publish:[%s]"::formatted);
     MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(client)
-        .newDisconnect(client, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
-    client.closeWithReason(response);
+        .resolveFactory(user)
+        .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.MISSED_REQUIRED_MESSAGE_ID);
+    user.closeWithReason(response);
   }
 }
