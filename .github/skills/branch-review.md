@@ -25,6 +25,8 @@ Review a branch, commit range, or uncommitted diff for substantive issues in thi
 - Check CAS/remove helpers return removed objects only on successful mutation.
 - Check scheduled-cleanup APIs, exceptions, and fields are named after the actual state they manage.
 - Check background cleanup removes both the primary entry and any owned secondary resource.
+- Check `close()` implementations call `thread.interrupt()` in addition to setting the closed flag, so background threads don't sleep a full interval after shutdown.
+- Check paginated loops process the last page before breaking — a common mistake is fetching a page, detecting end-of-data, and breaking before scanning the fetched items.
 
 ## Test-aware review rules
 
