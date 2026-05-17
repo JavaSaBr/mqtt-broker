@@ -12,9 +12,7 @@ dependencies {
   implementation projects.aclService
   implementation projects.aclGroovyDsl
   implementation projects.authenticationService
-  implementation libs.rlib.logger.slf4j
   implementation libs.springboot.starter.core
-  implementation libs.springboot.starter.log4j2
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
@@ -24,11 +22,6 @@ dependencies {
 
 tasks.withType(GroovyCompile).configureEach {
   options.forkOptions.jvmArgs += "--enable-preview"
-}
-
-configurations.each {
-  it.exclude group: "org.slf4j", module: "slf4j-log4j12"
-  it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
 }
 
 bootRun {

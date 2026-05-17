@@ -7,7 +7,6 @@ description = "The module to embed MQTT Broker as a part to another application"
 
 dependencies {
   implementation projects.coreService
-  implementation libs.rlib.logger.slf4j
 
   testImplementation projects.testSupport
 }

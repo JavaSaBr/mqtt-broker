@@ -15,12 +15,21 @@ java {
 dependencies {
   compileOnly libs.jspecify
   compileOnly libs.lombok
+  implementation libs.rlib.logger.api
+  implementation libs.rlib.logger.slf4j
+  implementation libs.springboot.starter.log4j2
   annotationProcessor libs.lombok
 }
 
 test {
   useJUnitPlatform()
   failOnNoDiscoveredTests = false
+}
+
+sourceSets {
+  test {
+    runtimeClasspath = project.files(runtimeClasspath, rootProject.file('buildSrc/src/test/resources'))
+  }
 }
 
 tasks.withType(Test).configureEach {

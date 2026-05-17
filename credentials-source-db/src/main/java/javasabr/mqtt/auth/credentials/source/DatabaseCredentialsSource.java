@@ -8,6 +8,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
@@ -22,6 +23,7 @@ import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
 import javasabr.mqtt.auth.api.database.DatabaseTimeoutProperties;
+import javasabr.mqtt.base.util.DebugUtils;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.experimental.FieldDefaults;
@@ -83,8 +85,13 @@ public class DatabaseCredentialsSource implements CredentialsSource {
 
   @Override
   public String toString() {
+    return DebugUtils.toJsonString(this);
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
     String dbDriver = connectionPool.getMetadata().getName();
-    return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getType(), dbDriver);
+    return Map.of("credentialsSource", getType(), "databaseDriver", dbDriver);
   }
 
   private Mono<Boolean> verifyCredentials(Connection connection, MqttCredentials credentials) {

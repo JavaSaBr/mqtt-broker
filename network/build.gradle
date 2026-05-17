@@ -10,7 +10,6 @@ dependencies {
   api projects.model
   api libs.project.reactor.core
   api libs.rlib.network
-  api libs.rlib.logger.api
 
   testImplementation projects.testSupport
   testImplementation libs.rlib.logger.impl
