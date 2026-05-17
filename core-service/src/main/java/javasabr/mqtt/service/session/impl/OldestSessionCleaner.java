@@ -85,7 +85,7 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
       youngest = Math.max(youngest, session.storedAt());
     }
 
-    do {
+    for(int iteration = 0, maxIterations = 1000; iteration < maxIterations; iteration++) {
       // check the rest sessions to find older sessions than in the initial array
       for (int limit = sessionsToCheck.size(); index < limit; index++) {
         T session = sessionsToCheck.get(index);
@@ -120,7 +120,7 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
       } finally {
         sessions.readUnlock(stamp);
       }
-    } while (partIndex >= 0);
+    }
 
     // remove found sessions
     stamp = sessions.writeLock();
