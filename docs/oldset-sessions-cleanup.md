@@ -23,11 +23,11 @@ Internal temporary arrays:
 
 ```mermaid
 flowchart TD
-    A[Start cleanup] --> B[totalSessions = sessions.size()]
+    A[Start cleanup] --> B["totalSessions = sessions.size()"]
     B --> C{totalSessions > limit?}
     C -- No --> Z[Stop]
     C -- Yes --> D[cleanupImpl totalSessions]
-    D --> E[totalSessions = sessions.size()]
+    D --> E["totalSessions = sessions.size()"]
     E --> C
 ```
 
@@ -41,18 +41,18 @@ Important: each loop removes at most `cleanupBatchSize`, then re-checks size and
 
 ```mermaid
 flowchart TD
-    A[Read first page into sessionsToCheck under read lock] --> B[Seed sessionsToCleanup with first cleanupSize items]
-    B --> C[youngest = max storedAt among current candidates]
+    A["Read first page into sessionsToCheck under read lock"] --> B["Seed sessionsToCleanup with first cleanupSize items"]
+    B --> C["youngest = max storedAt among current candidates"]
     C --> D[Scan current page items from index]
-    D --> E{item.storedAt <= youngest?}
+    D --> E{"item.storedAt <= youngest?"}
     E -- No --> D
-    E -- Yes --> F[Replace one candidate with storedAt == youngest]
+    E -- Yes --> F["Replace one candidate with storedAt == youngest"]
     F --> G[Recompute youngest boundary]
     G --> D
     D --> H{page exhausted}
-    H --> I{partIndex < 0?}
+    H --> I{"partIndex < 0?"}
     I -- Yes --> J[Finish candidate selection]
-    I -- No --> K[Read next page into sessionsToCheck under read lock]
+    I -- No --> K["Read next page into sessionsToCheck under read lock"]
     K --> D
 ```
 
@@ -63,10 +63,10 @@ The outer scan loop is additionally bounded by `maxIterations = 1000` as a safet
 ```mermaid
 flowchart TD
     A[Acquire write lock] --> B[For each expectedStoredSession in sessionsToCleanup]
-    B --> C[clientId = expected.wrapped.clientId]
-    C --> D{sessions.remove(clientId, expectedStoredSession)?}
+    B --> C["clientId = expected.wrapped.clientId"]
+    C --> D{"sessions.remove(clientId, expectedStoredSession)?"}
     D -- No --> B
-    D -- Yes --> E[Log removal and wrapped.clear()]
+    D -- Yes --> E["Log removal and wrapped.clear()"]
     E --> B
     B --> F[Release write lock]
     F --> G[Clear temp arrays]

@@ -283,6 +283,12 @@ The codebase contains TODO comments in several classes related to MQTT protocol 
 - When useful, describe publish or lifecycle changes as short ASCII flow diagrams so ownership transfer and terminal cleanup are easy to follow
 - If the user asks for part-only scope, keep only the delta introduced in that part and remove inherited history from earlier summaries
 
+### When Writing Mermaid Diagrams
+- Always wrap node labels that contain special characters in double quotes: `()`, `.`, `<=`, `>=`, `<`, `>`, `=`, `[]`
+- Example: `B["totalSessions = sessions.size()"]` instead of `B[totalSessions = sessions.size()]`
+- This applies to all node shapes: rectangular `[]`, diamond `{}`, stadium `([])`, etc.
+- Failure to quote such labels causes Mermaid parse errors in GitHub and other renderers
+
 ## Validation Steps
 
 Before submitting changes, verify locally:
