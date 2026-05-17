@@ -2,7 +2,7 @@ package javasabr.mqtt.broker.application
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
-import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
+import javasabr.mqtt.broker.application.config.PlainNetworkTestConfig
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
@@ -12,6 +12,7 @@ import javasabr.mqtt.network.MqttMockClient
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import javasabr.mqtt.test.support.BaseSpecification
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 
@@ -19,7 +20,7 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
 
 @TestPropertySource("classpath:application-test.properties")
-@SpringJUnitConfig(classes = MqttBrokerTestConfig)
+@SpringJUnitConfig(classes = PlainNetworkTestConfig)
 class IntegrationSpecification extends BaseSpecification {
 
   public static final encoding = StandardCharsets.UTF_8
@@ -28,6 +29,7 @@ class IntegrationSpecification extends BaseSpecification {
   public static final keepAlive = 120
 
   @Autowired
+  @Qualifier("externalNetworkAddress")
   InetSocketAddress externalNetworkAddress
 
   @Autowired
