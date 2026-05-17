@@ -76,6 +76,7 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
     buffer.get();
     int dataSize = MqttDataUtils.readMbi(buffer);
     if (dataSize == -1) {
+      buffer.position(prevPos);
       return -1;
     }
 

@@ -81,24 +81,6 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return user;
   }
 
-  private NetworkPacketReader createPacketReader() {
-    return new MqttMessageReader(
-        this,
-        this::updateLastActivity,
-        this::handleReceivedValidPacket,
-        this::handleReceivedInvalidPacket,
-        maxPacketsByRead);
-  }
-
-  private NetworkPacketWriter createPacketWriter() {
-    return new MqttMessageWriter(
-        this,
-        this::updateLastActivity,
-        this::nextPacketToWrite,
-        this::serializedPacket,
-        this::handleSentPacket);
-  }
-
   @Override
   public String toString() {
     return remoteAddress;
@@ -108,5 +90,23 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   protected void doClose() {
     user.release().subscribe();
     super.doClose();
+  }
+
+  protected NetworkPacketReader createPacketReader() {
+    return new MqttMessageReader(
+        this,
+        this::updateLastActivity,
+        this::handleReceivedValidPacket,
+        this::handleReceivedInvalidPacket,
+        maxPacketsByRead);
+  }
+
+  protected NetworkPacketWriter createPacketWriter() {
+    return new MqttMessageWriter(
+        this,
+        this::updateLastActivity,
+        this::nextPacketToWrite,
+        this::serializedPacket,
+        this::handleSentPacket);
   }
 }
