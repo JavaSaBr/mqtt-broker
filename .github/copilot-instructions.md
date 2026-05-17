@@ -41,9 +41,6 @@ The repository is organized into the following modules:
 - **Docker** - Mentioned in README but not currently used in build process
 - **Network Access** - Required to download dependencies from GitLab Maven repository (https://gitlab.com/api/v4/projects/37512056/packages/maven)
 
-
-
-
 ### Important Configuration Files
 - `build.gradle` (root) - Main build configuration, version 0.0.1, defines buildSingleArtifact tasks
 - `settings.gradle` - Defines 11 project modules with type-safe project accessors enabled
