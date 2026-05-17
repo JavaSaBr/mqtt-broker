@@ -47,7 +47,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class OldestSessionCleaner<T extends NotExpirableSession> {
 
-  private static final int PART_SIZE = 400;
+  public static final int PART_SIZE = 400;
   
   MutableArray<T> sessionsToCheck = ArrayFactory.mutableArray(NotExpirableSession.class);
   MutableArray<T> sessionsToCleanup = ArrayFactory.mutableArray(NotExpirableSession.class);
@@ -55,63 +55,72 @@ class OldestSessionCleaner<T extends NotExpirableSession> {
   LockableRefToRefDictionary<String, T> sessions;
   int limit;
   int cleanupBatchSize;
-  
+
   public synchronized void cleanup() {
-    int allSessionsCount = sessions.size();
-    if (allSessionsCount <= limit) {
-      return;
+    int totalSessions = sessions.size();
+    while (totalSessions > limit) {
+      cleanupImpl(totalSessions);
+      totalSessions = sessions.size();
     }
+  }
+
+  private void cleanupImpl(int totalSessions) {
     long youngest = 0;
     int index = 0;
-    int extraSessions = allSessionsCount - limit;
-    int cleanupSize = Math.min(extraSessions + cleanupBatchSize, allSessionsCount);
-    int partIndex = 0;
+    int cleanupSize = Math.min(cleanupBatchSize, totalSessions);
     
-    while (partIndex >= 0) {
-      long stamp = sessions.readLock();
-      try {
-        partIndex = sessions.values(sessionsToCheck, partIndex, PART_SIZE);
-      } finally {
-        sessions.readUnlock(stamp);
-      }
-
-      // Initially fill the array for removing sessions
-      for (; index < cleanupSize; index++) {
-        T session = sessionsToCheck.get(index);
-        sessionsToCleanup.add(session);
-        youngest = Math.max(youngest, session.storedAt());
-      }
+    // take a first part
+    int partIndex = 0;
+    long stamp = sessions.readLock();
+    try {
+      partIndex = sessions.values(sessionsToCheck, partIndex, PART_SIZE);
+    } finally {
+      sessions.readUnlock(stamp);
     }
 
     // Initially fill the array for removing sessions
-    for (; index < cleanupSize; index++) {
+    for (int limit = Math.min(cleanupSize, sessionsToCheck.size()); index < limit; index++) {
       T session = sessionsToCheck.get(index);
       sessionsToCleanup.add(session);
       youngest = Math.max(youngest, session.storedAt());
     }
 
-    // check the rest sessions to find older sessions than in the initial array
-    for (; index < foundSessions; index++) {
-      T session = sessionsToCheck.get(index);
-      long storedAt = session.storedAt();
-      if (storedAt > youngest) {
-        continue;
-      }
-      // replace one from the initial array to the older session
-      long nextYoungest = 0;
-      boolean replaced = false;
-      for (int i = 0, size = sessionsToCleanup.size(); i < size; i++) {
-        T sessionToCheck = sessionsToCleanup.get(i);
-        if (sessionToCheck.storedAt() == youngest && !replaced) {
-          nextYoungest = Math.max(storedAt, nextYoungest);
-          sessionsToCleanup.replace(i, session);
-          replaced = true;
-        } else {
-          nextYoungest = Math.max(sessionToCheck.storedAt(), nextYoungest);
+    do {
+      // check the rest sessions to find older sessions than in the initial array
+      for (int limit = sessionsToCheck.size(); index < limit; index++) {
+        T session = sessionsToCheck.get(index);
+        long storedAt = session.storedAt();
+        if (storedAt > youngest) {
+          continue;
         }
+        // replace one from the initial array to the older session
+        long nextYoungest = 0;
+        boolean replaced = false;
+        for (int i = 0, size = sessionsToCleanup.size(); i < size; i++) {
+          T sessionToCheck = sessionsToCleanup.get(i);
+          if (sessionToCheck.storedAt() == youngest && !replaced) {
+            nextYoungest = Math.max(storedAt, nextYoungest);
+            sessionsToCleanup.replace(i, session);
+            replaced = true;
+          } else {
+            nextYoungest = Math.max(sessionToCheck.storedAt(), nextYoungest);
+          }
+        }
+        youngest = nextYoungest;
       }
-      youngest = nextYoungest;
-    }
+      if (partIndex < 0) {
+        break;
+      }
+      // take a next part for analyze
+      sessionsToCheck.clear();
+      index = 0;
+      stamp = sessions.readLock();
+      try {
+        partIndex = sessions.values(sessionsToCheck, partIndex, PART_SIZE);
+      } finally {
+        sessions.readUnlock(stamp);
+      }
+    } while (partIndex >= 0);
 
     // remove found sessions
     stamp = sessions.writeLock();

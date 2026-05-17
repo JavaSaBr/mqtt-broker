@@ -111,7 +111,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       NetworkMqttSession session,
       IncomingPublish publish,
       int matchedSubscribers) {
-    super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
+    super.handleDispatchedToSubscribers(user, session, publish, matchedSubscribers);
     sendFinalFeedback(user, session, publish, PublishCompletedReasonCode.SUCCESS);
   }
   
