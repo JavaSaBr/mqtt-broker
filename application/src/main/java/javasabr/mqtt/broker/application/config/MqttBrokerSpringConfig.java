@@ -78,7 +78,8 @@ import org.springframework.core.env.Environment;
 
 @Import({
     AuthenticationServiceSpringConfig.class,
-    GroovyDslBasedAclServiceSpringConfig.class
+    GroovyDslBasedAclServiceSpringConfig.class,
+    MqttTlsSpringConfig.class
 })
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -412,7 +413,7 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  MqttConnectionFactory externalConnectionFactory(
+  MqttConnectionFactory<MqttConnection> externalConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead) {
@@ -429,7 +430,7 @@ public class MqttBrokerSpringConfig {
   @Bean
   ServerNetwork<MqttConnection> externalNetwork(
       ServerNetworkConfig externalNetworkConfig,
-      MqttConnectionFactory externalConnectionFactory) {
+      MqttConnectionFactory<MqttConnection> externalConnectionFactory) {
     return NetworkFactory.serverNetwork(externalNetworkConfig, externalConnectionFactory::newConnection);
   }
 
