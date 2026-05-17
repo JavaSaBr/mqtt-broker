@@ -254,8 +254,9 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
     var mapOperations = scheduledRemovals.operations();
     
     while (!closed) {
-      ThreadUtils.sleep(cleanupIntervalInMs);
-      if (scheduledRemovals.isEmpty()) {
+      if (ThreadUtils.sleep(cleanupIntervalInMs)) {
+        continue;
+      } else if (scheduledRemovals.isEmpty()) {
         continue;
       }
       localContainer.clear();
@@ -288,6 +289,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
   @Override
   public void close() throws IOException {
     closed = true;
+    cleanupThread.interrupt();
   }
 
   @Getter

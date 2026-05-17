@@ -204,7 +204,17 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
           PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
       return true;
     }
-    messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
+
+    // if between read and update the stored meta it was expired and removed in the background
+    try {
+      messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
+    } catch (IllegalArgumentException e) {
+      log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
+      incomingPublishStorage.removeIfExist(publish);
+      return true;
+    }
+    
     log.debug(user.clientId(), messageId, publish.id(),
         "[%s] Update tracking messageId:[%s] for publish:[%s] to PUBLISH_COMPLETE"::formatted);
     dispatchToSubscriber(networkMqttUser, (NetworkMqttSession) session, publish);
