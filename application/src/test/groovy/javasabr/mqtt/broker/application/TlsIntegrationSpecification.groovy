@@ -8,7 +8,6 @@ import javasabr.mqtt.broker.application.config.TlsNetworkTestConfig
 import javasabr.mqtt.test.support.BaseSpecification
 import javasabr.mqtt.test.support.TestSslContexts
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 
@@ -24,7 +23,6 @@ class TlsIntegrationSpecification extends BaseSpecification {
   static TestSslContexts sslContexts = TestSslContexts.getInstance()
 
   @Autowired(required = false)
-  @Qualifier("tlsNetworkAddress")
   InetSocketAddress tlsNetworkAddress
 
   Mqtt5AsyncClient buildTlsMqtt5Client() {

@@ -1,7 +1,5 @@
 package javasabr.mqtt.broker.application.config
 
-
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
@@ -26,10 +24,10 @@ class PlainNetworkTestConfig {
 
   @Bean
   Void testExternalNetworkStarter(
-      @Qualifier("externalNetworkStarter") ApplicationListener<ApplicationStartedEvent> networkStarter,
+      ApplicationListener<ApplicationStartedEvent> externalNetworkStarter,
       ConfigurableApplicationContext applicationContext) {
     def event = new ApplicationStartedEvent(new SpringApplication(), new String[0], applicationContext, Duration.ZERO)
-    networkStarter.onApplicationEvent(event)
+    externalNetworkStarter.onApplicationEvent(event)
     return null
   }
 }

@@ -18,7 +18,6 @@ import javasabr.rlib.network.server.ServerNetwork;
 import javasabr.rlib.network.util.NetworkUtils;
 import javax.net.ssl.SSLContext;
 import lombok.CustomLog;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -161,11 +160,11 @@ public class MqttTlsSpringConfig {
   @Bean
   ApplicationListener<ApplicationStartedEvent> tlsNetworkStarter(
       ServerNetwork<MqttConnection> tlsNetwork,
-      @Qualifier("externalMqttConnectionService") ConnectionService connectionService,
+      ConnectionService externalMqttConnectionService,
       InetSocketAddress tlsNetworkAddress) {
     return _ -> {
       tlsNetwork.start(tlsNetworkAddress);
-      tlsNetwork.onAccept(connectionService::processAcceptedConnection);
+      tlsNetwork.onAccept(externalMqttConnectionService::processAcceptedConnection);
       log.info(tlsNetworkAddress, "Started TLS MQTT network by address:[%s]"::formatted);
     };
   }

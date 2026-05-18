@@ -12,7 +12,6 @@ import javasabr.mqtt.network.MqttMockClient
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import javasabr.mqtt.test.support.BaseSpecification
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 
@@ -29,7 +28,6 @@ class IntegrationSpecification extends BaseSpecification {
   public static final keepAlive = 120
 
   @Autowired
-  @Qualifier("externalNetworkAddress")
   InetSocketAddress externalNetworkAddress
 
   @Autowired
