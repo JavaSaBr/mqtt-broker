@@ -1,4 +1,4 @@
 @NullMarked
-package javasabr.mqtt.network.ssl;
+package javasabr.mqtt.network.message.ssl;
 
 import org.jspecify.annotations.NullMarked;

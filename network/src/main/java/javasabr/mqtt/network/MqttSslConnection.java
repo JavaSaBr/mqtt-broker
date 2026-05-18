@@ -4,8 +4,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.exception.SslProtocolException;
-import javasabr.mqtt.network.ssl.SslMqttMessageReader;
-import javasabr.mqtt.network.ssl.SslMqttMessageWriter;
+import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.ssl.SslMqttMessageReader;
+import javasabr.mqtt.network.message.ssl.SslMqttMessageWriter;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
@@ -36,9 +37,10 @@ public class MqttSslConnection extends MqttConnection {
       NetworkMqttUserFactory mqttUserFactory,
       SSLContext sslContext,
       TlsProperties tlsProperties,
-      boolean clientMode) {
+      boolean clientMode,
+      MqttPacketCreator mqttPacketCreator) {
     this.sslEngine = sslContext.createSSLEngine();
-    super(network, channel, bufferAllocator, maxPacketsByRead, serverConnectionConfig, mqttUserFactory);
+    super(network, channel, bufferAllocator, maxPacketsByRead, serverConnectionConfig, mqttUserFactory, mqttPacketCreator);
     this.sslEngine.setUseClientMode(clientMode);
     this.sslEngine.setNeedClientAuth(tlsProperties.requireClientCert());
     List<String> tlsProtocols = tlsProperties.tlsProtocols();
@@ -61,7 +63,8 @@ public class MqttSslConnection extends MqttConnection {
     super.sendImpl(packet);
   }
 
-  protected NetworkPacketReader createPacketReader() {
+  @Override
+  protected NetworkPacketReader createPacketReader(MqttPacketCreator mqttPacketCreator) {
     return new SslMqttMessageReader(
         this,
         this::updateLastActivity,
@@ -69,7 +72,8 @@ public class MqttSslConnection extends MqttConnection {
         this::handleReceivedInvalidPacket,
         sslEngine,
         this::sendInBackground,
-        maxPacketsByRead);
+        maxPacketsByRead,
+        mqttPacketCreator);
   }
 
   protected NetworkPacketWriter createPacketWriter() {

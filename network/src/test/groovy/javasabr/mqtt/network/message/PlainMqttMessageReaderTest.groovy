@@ -3,6 +3,7 @@ package javasabr.mqtt.network.message
 
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.NetworkUnitSpecification
+import javasabr.mqtt.network.message.plain.PlainMqttMessageReader
 import javasabr.rlib.network.Network
 import javasabr.rlib.network.ServerNetworkConfig
 import javasabr.rlib.network.impl.DefaultBufferAllocator
@@ -10,7 +11,7 @@ import javasabr.rlib.network.impl.DefaultBufferAllocator
 import java.nio.ByteBuffer
 import java.util.function.Consumer
 
-class MqttMessageReaderTest extends NetworkUnitSpecification {
+class PlainMqttMessageReaderTest extends NetworkUnitSpecification {
 
   def "readFullPacketLength should restore buffer position if MBI is incomplete"() {
     given:
@@ -25,9 +26,15 @@ class MqttMessageReaderTest extends NetworkUnitSpecification {
             network() >> network
             bufferAllocator() >> new DefaultBufferAllocator(config)
         }
-        
-        def reader = new MqttMessageReader(connection, {->}, {p ->} as Consumer, {p ->} as Consumer, 10)
-        
+
+        def reader = new PlainMqttMessageReader(
+            connection,
+            { -> },
+            { p -> } as Consumer,
+            { p -> } as Consumer,
+            10,
+            new MqttPacketCreator())
+
         def buffer = ByteBuffer.allocate(10)
         buffer.put((byte) 0x10)
         buffer.put((byte) 0x80)

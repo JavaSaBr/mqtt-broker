@@ -2,6 +2,7 @@ package javasabr.mqtt.network
 
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.network.message.MqttPacketCreator
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import javasabr.mqtt.network.user.NetworkMqttUserFactory
 import javasabr.rlib.network.Network
@@ -57,7 +58,8 @@ class MqttSslConnectionTest extends Specification {
             userFactory,
             SSLContext.getDefault(),
             tlsConfig,
-            false
+            false,
+            new MqttPacketCreator()
         )
 
     then:

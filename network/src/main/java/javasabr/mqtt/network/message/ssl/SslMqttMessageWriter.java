@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.ssl;
+package javasabr.mqtt.network.message.ssl;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;

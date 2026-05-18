@@ -8,6 +8,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.TlsProperties;
+import javasabr.mqtt.network.message.MqttPacketCreator;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.impl.MqttSslConnectionFactory;
@@ -115,7 +116,8 @@ public class MqttTlsSpringConfig {
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
       SSLContext sslContext,
       TlsProperties tlsProperties,
-      ServerNetworkConfig tlsNetworkConfig) {
+      ServerNetworkConfig tlsNetworkConfig,
+      MqttPacketCreator mqttPacketCreator) {
     DefaultBufferAllocator defaultBufferAllocator = new DefaultBufferAllocator(tlsNetworkConfig);
     return new MqttSslConnectionFactory(
         externalServerConnectionConfig,
@@ -123,7 +125,8 @@ public class MqttTlsSpringConfig {
         maxPacketsByRead,
         sslContext,
         tlsProperties,
-        defaultBufferAllocator);
+        defaultBufferAllocator,
+        mqttPacketCreator);
   }
 
   @Bean

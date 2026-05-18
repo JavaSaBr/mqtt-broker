@@ -5,6 +5,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSslConnection;
 import javasabr.mqtt.network.TlsProperties;
+import javasabr.mqtt.network.message.MqttPacketCreator;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
@@ -13,11 +14,12 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class MqttSslConnectionFactory extends DefaultMqttConnectionFactory {
+public class MqttSslConnectionFactory extends PlainMqttConnectionFactory {
 
   SSLContext sslContext;
   TlsProperties tlsPproperties;
   BufferAllocator bufferAllocator;
+  MqttPacketCreator mqttPacketCreator;
 
   public MqttSslConnectionFactory(
       MqttServerConnectionConfig serverConnectionConfig,
@@ -25,11 +27,13 @@ public class MqttSslConnectionFactory extends DefaultMqttConnectionFactory {
       int maxPacketsByRead,
       SSLContext sslContext,
       TlsProperties tlsProperties,
-      BufferAllocator bufferAllocator) {
-    super(serverConnectionConfig, clientFactory, maxPacketsByRead);
+      BufferAllocator bufferAllocator,
+      MqttPacketCreator mqttPacketCreator) {
+    super(serverConnectionConfig, clientFactory, maxPacketsByRead, mqttPacketCreator);
     this.sslContext = sslContext;
     this.tlsPproperties = tlsProperties;
     this.bufferAllocator = bufferAllocator;
+    this.mqttPacketCreator = mqttPacketCreator;
   }
 
   @Override
@@ -43,6 +47,7 @@ public class MqttSslConnectionFactory extends DefaultMqttConnectionFactory {
         clientFactory,
         sslContext,
         tlsPproperties,
-        false);
+        false,
+        mqttPacketCreator);
   }
 }

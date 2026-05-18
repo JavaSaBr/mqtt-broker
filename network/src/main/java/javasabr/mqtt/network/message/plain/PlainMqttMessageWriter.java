@@ -1,4 +1,4 @@
-package javasabr.mqtt.network.message;
+package javasabr.mqtt.network.message.plain;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -11,11 +11,11 @@ import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractNetworkPacketWriter;
 import org.jspecify.annotations.Nullable;
 
-public class MqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutMessage, MqttConnection> {
+public class PlainMqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutMessage, MqttConnection> {
 
   public static final int DATA_OFFSET = 5;
 
-  public MqttMessageWriter(
+  public PlainMqttMessageWriter(
       MqttConnection connection,
       Runnable updateActivityFunction,
       Supplier<@Nullable WritableNetworkPacket<MqttConnection>> packetProvider,

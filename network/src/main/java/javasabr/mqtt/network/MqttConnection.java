@@ -4,8 +4,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.network.message.MqttMessageReader;
-import javasabr.mqtt.network.message.MqttMessageWriter;
+import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.plain.PlainMqttMessageReader;
+import javasabr.mqtt.network.message.plain.PlainMqttMessageWriter;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
@@ -44,10 +45,11 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       BufferAllocator bufferAllocator,
       int maxPacketsByRead,
       MqttServerConnectionConfig serverConnectionConfig,
-      NetworkMqttUserFactory mqttUserFactory) {
+      NetworkMqttUserFactory mqttUserFactory,
+      MqttPacketCreator mqttPacketCreator) {
     super(network, channel, bufferAllocator, maxPacketsByRead);
     this.serverConnectionConfig = serverConnectionConfig;
-    this.packetReader = createPacketReader();
+    this.packetReader = createPacketReader(mqttPacketCreator);
     this.packetWriter = createPacketWriter();
     this.user = mqttUserFactory.createNetworkUser(this);
   }
@@ -81,17 +83,18 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return user;
   }
 
-  protected NetworkPacketReader createPacketReader() {
-    return new MqttMessageReader(
+  protected NetworkPacketReader createPacketReader(MqttPacketCreator mqttPacketCreator) {
+    return new PlainMqttMessageReader(
         this,
         this::updateLastActivity,
         this::handleReceivedValidPacket,
         this::handleReceivedInvalidPacket,
-        maxPacketsByRead);
+        maxPacketsByRead,
+        mqttPacketCreator);
   }
 
   protected NetworkPacketWriter createPacketWriter() {
-    return new MqttMessageWriter(
+    return new PlainMqttMessageWriter(
         this,
         this::updateLastActivity,
         this::nextPacketToWrite,

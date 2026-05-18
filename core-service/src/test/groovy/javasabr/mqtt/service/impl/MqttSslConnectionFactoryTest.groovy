@@ -2,6 +2,7 @@ package javasabr.mqtt.service.impl
 
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.QoS
+import javasabr.mqtt.network.message.MqttPacketCreator
 import javasabr.mqtt.network.user.NetworkMqttUserFactory
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import javasabr.mqtt.network.TlsProperties
@@ -54,7 +55,8 @@ class MqttSslConnectionFactoryTest extends Specification {
                 .keystoreType("type")
                 .tlsProtocols(["TLSv1.3"])
                 .build(),
-            allocator
+            allocator,
+            new MqttPacketCreator()
         )
         
         def network = Mock(Network) {

@@ -12,6 +12,7 @@ import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
+import javasabr.mqtt.network.message.MqttPacketCreator;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
@@ -22,7 +23,7 @@ import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
-import javasabr.mqtt.service.impl.DefaultMqttConnectionFactory;
+import javasabr.mqtt.service.impl.PlainMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
@@ -422,8 +423,18 @@ public class MqttBrokerSpringConfig {
   MqttConnectionFactory<MqttConnection> externalConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
-      @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead) {
-    return new DefaultMqttConnectionFactory(externalServerConnectionConfig, mqttUserFactory, maxPacketsByRead);
+      @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
+      MqttPacketCreator mqttPacketCreator) {
+    return new PlainMqttConnectionFactory(
+        externalServerConnectionConfig,
+        mqttUserFactory,
+        maxPacketsByRead,
+        mqttPacketCreator);
+  }
+
+  @Bean
+  MqttPacketCreator mqttPacketCreator() {
+    return new MqttPacketCreator();
   }
 
   @Bean
