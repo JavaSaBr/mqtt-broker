@@ -35,7 +35,7 @@ public class MqttSslConnection extends MqttConnection {
       MqttServerConnectionConfig serverConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       SSLContext sslContext,
-      MqttTlsProperties tlsProperties,
+      TlsProperties tlsProperties,
       boolean clientMode) {
     this.sslEngine = sslContext.createSSLEngine();
     super(network, channel, bufferAllocator, maxPacketsByRead, serverConnectionConfig, mqttUserFactory);

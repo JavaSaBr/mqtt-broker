@@ -81,17 +81,6 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return user;
   }
 
-  @Override
-  public String toString() {
-    return remoteAddress;
-  }
-
-  @Override
-  protected void doClose() {
-    user.release().subscribe();
-    super.doClose();
-  }
-
   protected NetworkPacketReader createPacketReader() {
     return new MqttMessageReader(
         this,
@@ -108,5 +97,16 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
         this::nextPacketToWrite,
         this::serializedPacket,
         this::handleSentPacket);
+  }
+
+  @Override
+  public String toString() {
+    return remoteAddress;
+  }
+
+  @Override
+  protected void doClose() {
+    user.release().subscribe();
+    super.doClose();
   }
 }

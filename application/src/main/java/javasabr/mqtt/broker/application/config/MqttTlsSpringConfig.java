@@ -7,7 +7,7 @@ import java.util.List;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
-import javasabr.mqtt.network.MqttTlsProperties;
+import javasabr.mqtt.network.TlsProperties;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.impl.MqttSslConnectionFactory;
@@ -20,11 +20,13 @@ import javax.net.ssl.SSLContext;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -32,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 public class MqttTlsSpringConfig {
 
   @Bean
-  MqttTlsProperties mqttTlsProperties(
+  TlsProperties mqttTlsProperties(
       @Value("${mqtt.tls.keystore-path:}") String keystorePath,
       @Value("${mqtt.tls.keystore-password:}") String keystorePassword,
       @Value("${mqtt.tls.keystore-type:PKCS12}") String keystoreType,
@@ -42,7 +44,7 @@ public class MqttTlsSpringConfig {
       @Value("${mqtt.tls.require-client-cert:true}") boolean requireClientCert,
       @Value("${mqtt.tls.tls-protocols:#{{'TLSv1.3'}}}") List<String> tlsProtocols,
       @Value("${mqtt.tls.cipher-suites:#{{}}}") List<String> cipherSuites) {
-    return MqttTlsProperties.builder()
+    return TlsProperties.builder()
         .requireClientCert(requireClientCert)
         .keystorePath(keystorePath)
         .keystorePassword(keystorePassword)
@@ -56,16 +58,47 @@ public class MqttTlsSpringConfig {
   }
 
   @Bean
-  SSLContext sslContext(MqttTlsProperties properties) throws IOException {
+  @ConditionalOnBooleanProperty(name = "mqtt.tls.require-client-cert", havingValue = false)
+  SSLContext sslContext(TlsProperties properties) throws IOException {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
+    Assert.hasText(keyStoreType, "keyStoreType is blank");
+    Assert.hasText(keyStorePath, "keyStorePath is blank");
+    Assert.hasText(keyStorePassword, "keyStorePassword is blank");
+
+    try (FileInputStream keyStoreData = new FileInputStream(keyStorePath)) {
+      return NetworkUtils.createSslContext(
+          keyStoreType,
+          keyStoreData,
+          keyStorePassword,
+          null,
+          null,
+          null);
+    }
+  }
+
+  @Bean
+  @ConditionalOnBooleanProperty(name = "mqtt.tls.require-client-cert", matchIfMissing = true)
+  SSLContext sslContextRequiringClientCert(TlsProperties properties) throws IOException {
+    String keyStoreType = properties.keystoreType();
+    String keyStorePath = properties.keystorePath();
+    String keyStorePassword = properties.keystorePassword();
+    Assert.hasText(keyStoreType, "keyStoreType is blank");
+    Assert.hasText(keyStorePath, "keyStorePath is blank");
+    Assert.hasText(keyStorePassword, "keyStorePassword is blank");
+
+    Assert.isTrue(properties.requireClientCert(), "requireClientCert is false");
+
     String trustStoreType = properties.truststoreType();
     String trustStorePath = properties.truststorePath();
     String trustStorePassword = properties.truststorePassword();
+    Assert.hasText(trustStoreType, "trustStoreType is blank");
+    Assert.hasText(trustStorePath, "trustStorePath is blank");
+    Assert.hasText(trustStorePassword, "trustStorePassword is blank");
 
     try (FileInputStream keyStoreData = new FileInputStream(keyStorePath);
-         FileInputStream trustStoreData = trustStorePath.isEmpty() ? null : new FileInputStream(trustStorePath)) {
+         FileInputStream trustStoreData = new FileInputStream(trustStorePath)) {
       return NetworkUtils.createSslContext(
           keyStoreType,
           keyStoreData,
@@ -82,15 +115,16 @@ public class MqttTlsSpringConfig {
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
       SSLContext sslContext,
-      MqttTlsProperties tlsProperties,
+      TlsProperties tlsProperties,
       ServerNetworkConfig tlsNetworkConfig) {
+    DefaultBufferAllocator defaultBufferAllocator = new DefaultBufferAllocator(tlsNetworkConfig);
     return new MqttSslConnectionFactory(
         externalServerConnectionConfig,
         mqttUserFactory,
         maxPacketsByRead,
         sslContext,
         tlsProperties,
-        new DefaultBufferAllocator(tlsNetworkConfig));
+        defaultBufferAllocator);
   }
 
   @Bean

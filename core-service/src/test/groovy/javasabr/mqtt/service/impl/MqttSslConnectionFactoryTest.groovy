@@ -4,7 +4,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.network.user.NetworkMqttUserFactory
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
-import javasabr.mqtt.network.MqttTlsProperties
+import javasabr.mqtt.network.TlsProperties
 import javasabr.rlib.network.impl.DefaultBufferAllocator
 import spock.lang.Specification
 import javasabr.rlib.network.Network
@@ -48,7 +48,7 @@ class MqttSslConnectionFactoryTest extends Specification {
             userFactory,
             100,
             SSLContext.getDefault(),
-            MqttTlsProperties.builder()
+            TlsProperties.builder()
                 .keystorePath("path")
                 .keystorePassword("pass")
                 .keystoreType("type")

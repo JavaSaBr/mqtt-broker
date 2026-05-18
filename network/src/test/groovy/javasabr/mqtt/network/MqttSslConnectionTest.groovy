@@ -16,7 +16,7 @@ class MqttSslConnectionTest extends Specification {
 
   def "should configure SSLEngine with TLS properties"() {
     given:
-        def tlsConfig = MqttTlsProperties.builder()
+        def tlsConfig = TlsProperties.builder()
             .keystorePath("path")
             .keystorePassword("pass")
             .keystoreType("type")

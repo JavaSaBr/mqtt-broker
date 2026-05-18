@@ -4,7 +4,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttSslConnection;
-import javasabr.mqtt.network.MqttTlsProperties;
+import javasabr.mqtt.network.TlsProperties;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class MqttSslConnectionFactory extends DefaultMqttConnectionFactory {
 
   SSLContext sslContext;
-  MqttTlsProperties tlsPproperties;
+  TlsProperties tlsPproperties;
   BufferAllocator bufferAllocator;
 
   public MqttSslConnectionFactory(
@@ -24,7 +24,7 @@ public class MqttSslConnectionFactory extends DefaultMqttConnectionFactory {
       NetworkMqttUserFactory clientFactory,
       int maxPacketsByRead,
       SSLContext sslContext,
-      MqttTlsProperties tlsProperties,
+      TlsProperties tlsProperties,
       BufferAllocator bufferAllocator) {
     super(serverConnectionConfig, clientFactory, maxPacketsByRead);
     this.sslContext = sslContext;
