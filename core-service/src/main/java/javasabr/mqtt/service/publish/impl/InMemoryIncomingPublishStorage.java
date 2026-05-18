@@ -44,12 +44,13 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
       long messageExpiryInterval,
       int topicAlias,
       Array<StringPair> userProperties) {
+    IncomingPublish incomingPublish;
     long stamp = storedPublishes.writeLock();
     try {
       if (storedPublishes.containsKey(publishId)) {
-        throw new IllegalArgumentException("Publish with id:[%s] already exists".formatted(publishId));
+        throw new IllegalArgumentException("Publish:[%s] already exists".formatted(publishId));
       }
-      var incomingPublish = new SimpleIncomingPublish(
+      incomingPublish = new SimpleIncomingPublish(
           publishId,
           messageId,
           qos,
@@ -63,15 +64,15 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
           topicAlias,
           userProperties);
       storedPublishes.put(incomingPublish.id(), new StoredIncomingPublish(incomingPublish));
-      return incomingPublish;
     } finally {
       storedPublishes.writeUnlock(stamp);
     }
+    log.debug(incomingPublish, "Registered publish in storage: %s"::formatted);
+    return incomingPublish;
   }
 
   @Override
   public void remove(IncomingPublish publish) {
-    log.debug(publish, "Removing publish:[%s] from storage..."::formatted);
     long stamp = storedPublishes.writeLock();
     try {
       removeWithoutLock(publish);
@@ -102,6 +103,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
           publish.id(),
           stored.consumerCount));
     }
+    log.debug(publish, "Removed publish from storage: %s"::formatted);
   }
 
   @Override
@@ -119,9 +121,10 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     } finally {
       storedPublishes.readUnlock(stamp);
     }
-    storedPublish
+    int result = storedPublish
         .consumerCount()
         .addAndGet(count);
+    log.debug(result, publish, "Increased consumers to [%s] for publish: %s"::formatted);
   }
 
   @Override
@@ -142,6 +145,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     int result = storedPublish
         .consumerCount()
         .accumulateAndGet(count, (current, delta) -> current - delta);
+    log.debug(result, publish, "Decreased consumers to [%s] for publish: %s"::formatted);
     if (result == 0) {
       if (!publish.retained()) {
         remove(publish);

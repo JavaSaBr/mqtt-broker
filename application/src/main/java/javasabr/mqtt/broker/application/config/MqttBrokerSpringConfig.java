@@ -253,18 +253,24 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  SubscriberPublishSender qos0SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
-    return new Qos0SubscriberPublishSender(messageOutFactoryService);
+  SubscriberPublishSender qos0SubscriberPublishSender(
+      MessageOutFactoryService messageOutFactoryService,
+      IncomingPublishStorage incomingPublishStorage) {
+    return new Qos0SubscriberPublishSender(messageOutFactoryService, incomingPublishStorage);
   }
 
   @Bean
-  SubscriberPublishSender qos1SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
-    return new Qos1SubscriberPublishSender(messageOutFactoryService);
+  SubscriberPublishSender qos1SubscriberPublishSender(
+      MessageOutFactoryService messageOutFactoryService,
+      IncomingPublishStorage incomingPublishStorage) {
+    return new Qos1SubscriberPublishSender(messageOutFactoryService, incomingPublishStorage);
   }
 
   @Bean
-  SubscriberPublishSender qos2SubscriberPublishSender(MessageOutFactoryService messageOutFactoryService) {
-    return new Qos2SubscriberPublishSender(messageOutFactoryService);
+  SubscriberPublishSender qos2SubscriberPublishSender(
+      MessageOutFactoryService messageOutFactoryService,
+      IncomingPublishStorage incomingPublishStorage) {
+    return new Qos2SubscriberPublishSender(messageOutFactoryService, incomingPublishStorage);
   }
 
   @Bean

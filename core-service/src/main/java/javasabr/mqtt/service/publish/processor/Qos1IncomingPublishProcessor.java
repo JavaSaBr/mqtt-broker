@@ -55,8 +55,8 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta alreadyInProcess = messageTacker.stored(messagedId);
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we can skip it
-      //FIXME need to be sure that the new duplicated publish instance is referenced to original
       if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
+        log.warning(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
         return false;
       }
       handleMessageIdIsInUse(user, messagedId, publish);
@@ -85,12 +85,12 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleMatchedSubscribers(
+  protected void handleDispatchedToSubscribers(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       IncomingPublish publish,
       int matchedSubscribers) {
-    super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
+    super.handleDispatchedToSubscribers(user, session, publish, matchedSubscribers);
     int messageId = publish.messageId();
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
@@ -98,26 +98,13 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     sendFeedback(user, session, response, messageId);
   }
   
-  @Override
-  protected void handleError(
-      ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      IncomingPublish publish,
-      PublishProcessingResult handlingResult) {
-    super.handleError(user, session, publish, handlingResult);
-    int messageId = publish.messageId();
-    MqttOutMessage response = messageOutFactoryService
-        .resolveFactory(user)
-        .newPublishAck(publish.messageId(), handlingResult.ackReasonCode());
-    sendFeedback(user, session, response, messageId);
-  }
-
   private void handleMessageIdIsInUse(
-      ExternalNetworkMqttUser user, 
+      ExternalNetworkMqttUser user,
       int messageId, 
       IncomingPublish publish) {
-    incomingPublishStorage.removeIfExist(publish);
-    user.sendInBackground(messageOutFactoryService
+    log.warning(user.clientId(), messageId, publish.id(),
+        "[%s] Detected conflicted messageId:[%s] from publish:[%s]"::formatted);
+    sendFeedback(user, messageOutFactoryService
         .resolveFactory(user)
         .newPublishAck(messageId, PublishAckReasonCode.PACKET_IDENTIFIER_IN_USE));
   }

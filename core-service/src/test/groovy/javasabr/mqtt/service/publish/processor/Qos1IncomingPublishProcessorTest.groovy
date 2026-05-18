@@ -45,7 +45,7 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def inMessageTracker = client3
             .session()
             .inMessageTracker()
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId,
             QoS.AT_LEAST_ONCE,
             expectedTopicName,
@@ -83,7 +83,7 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId,
             QoS.AT_LEAST_ONCE,
             topicName,
@@ -111,7 +111,7 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos1IncomingPublishProcessorTest/3")
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             QoS.AT_LEAST_ONCE,
             topicName,
             testPayloadBytes)
@@ -140,7 +140,7 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId,
             QoS.AT_LEAST_ONCE,
             topicName,
@@ -173,7 +173,7 @@ class Qos1IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH)
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId, 
             QoS.AT_LEAST_ONCE,
             topicName,

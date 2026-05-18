@@ -66,9 +66,8 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     TrackedMessageMeta alreadyInProcess = messageTacker.stored(messagedId);
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we should ack response
-      //FIXME need to be sure that the new duplicated publish instance is referenced to original
-      if (publish.duplicated() && (alreadyInProcess.messageType() == MqttMessageType.PUBLISH)) {
-        handleDuplicated(user, messagedId, alreadyInProcess);
+      if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
+        handleDuplicated(user, messagedId, alreadyInProcess, publish);
         return false;
       }
       handleMessageIdIsInUse(user, messagedId, publish);
@@ -81,7 +80,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   protected void processImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, IncomingPublish publish) {
     super.processImpl(user, session, publish);
     var reasonCode = PublishReceivedReasonCode.SUCCESS;
-    updateSessionState(session, publish, reasonCode);
+    updateSessionState(user, session, publish, reasonCode);
     sendFeedback(
         user,
         messageOutFactoryService
@@ -105,12 +104,12 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
 
   @Override
-  protected void handleMatchedSubscribers(
+  protected void handleDispatchedToSubscribers(
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       IncomingPublish publish,
       int matchedSubscribers) {
-    super.handleMatchedSubscribers(user, session, publish, matchedSubscribers);
+    super.handleDispatchedToSubscribers(user, session, publish, matchedSubscribers);
     sendFeedback(
         user,
         session,
@@ -121,45 +120,31 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
   }
   
   private void updateSessionState(
+      ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       IncomingPublish publish, 
       PublishReceivedReasonCode reasonCode) {
+    int messageId = publish.messageId();
+    log.debug(user.clientId(), messageId, publish.id(), 
+        "[%s] Update tracking messageId:[%s] for publish:[%s] to PUBLISH"::formatted);
     // store response reason code for duplicated publishes
     MessageTacker messageTacker = session.inMessageTracker();
-    messageTacker.update(publish.messageId(), MqttMessageType.PUBLISH, reasonCode);
+    messageTacker.update(messageId, MqttMessageType.PUBLISH, reasonCode);
     // store callback to handle publish release
     ProcessingPublishes processingPublishes = session.inProcessingPublishes();
     processingPublishes.register(publish, trackableMessageCallback, PublishRetryer.NO_OPS);
   }
 
-  @Override
-  protected void handleError(
+  private void handleDuplicated(
       ExternalNetworkMqttUser user,
-      NetworkMqttSession session,
-      IncomingPublish publish,
-      PublishProcessingResult handlingResult) {
-    super.handleError(user, session, publish, handlingResult);
-
-    int messageId = publish.messageId();
-    PublishReceivedReasonCode reasonCode = handlingResult.receivedReasonCode();
-
-    MessageTacker messageTacker = session.inMessageTracker();
-    messageTacker.update(messageId, MqttMessageType.PUBLISH, reasonCode);
-
-    sendFeedback(
-        user,
-        session,
-        messageOutFactoryService
-            .resolveFactory(user)
-            .newPublishReceived(messageId, reasonCode),
-        messageId);
-  }
-
-  private void handleDuplicated(ExternalNetworkMqttUser user, int messageId, TrackedMessageMeta alreadyInProcess) {
+      int messageId, 
+      TrackedMessageMeta alreadyInProcess,
+      IncomingPublish publish) {
     PublishReceivedReasonCode reasonCode = PublishReceivedReasonCode.SUCCESS;
     if (alreadyInProcess.reasonCode() instanceof PublishReceivedReasonCode receivedReasonCode) {
       reasonCode = receivedReasonCode;
     }
+    log.warning(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
     sendFeedback(
         user,
         messageOutFactoryService
@@ -171,8 +156,9 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user, 
       int messageId, 
       IncomingPublish publish) {
-    incomingPublishStorage.removeIfExist(publish);
-    user.sendInBackground(messageOutFactoryService
+    log.warning(user.clientId(), messageId, publish.id(),
+        "[%s] Detected conflicted messageId:[%s] from publish:[%s]"::formatted);
+    sendFeedback(user, messageOutFactoryService
         .resolveFactory(user)
         .newPublishReceived(messageId, PublishReceivedReasonCode.PACKET_IDENTIFIER_IN_USE));
   }
@@ -182,10 +168,13 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       MqttSession session, 
       TrackableMqttMessage message,
       Publish publish) {
+    log.debug(user.clientId(), message.messageType(), message, 
+        "[%s] Received trackable message:[%s] -> %s"::formatted);
+    
     ExternalNetworkMqttUser networkMqttUser = expectedUserType.cast(user);
     String clientId = networkMqttUser.clientId();
     int messageId = message.messageId();
-
+    
     if (!(publish instanceof IncomingPublish incomingPublish)) {
       log.warning(clientId, publish.getClass(), messageId, 
           "[%s] Not expected publish type:[%s] for messageId:[%d]"::formatted);
@@ -212,8 +201,9 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     }
     
     //FIXME No cleanup path when a QoS 2 session closes before PUBREL
-
     messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
+    log.debug(user.clientId(), messageId, incomingPublish.id(),
+        "[%s] Update tracking messageId:[%s] for publish:[%s] to PUBLISH_COMPLETE"::formatted);
     dispatchToSubscriber(networkMqttUser, (NetworkMqttSession) session, incomingPublish);
     return true;
   }

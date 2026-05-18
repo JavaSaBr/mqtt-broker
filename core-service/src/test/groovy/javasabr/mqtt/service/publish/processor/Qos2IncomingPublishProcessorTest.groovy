@@ -49,7 +49,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def inMessageTracker = client3
             .session()
             .inMessageTracker()
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId,
             QoS.EXACTLY_ONCE,
             expectedTopicName,
@@ -103,7 +103,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId,
             QoS.EXACTLY_ONCE,
             topicName,
@@ -146,7 +146,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
         def user = publisher.user() as TestExternalNetworkMqttUser
         def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/3")
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             MqttProperties.MESSAGE_ID_IS_NOT_SET,
             QoS.EXACTLY_ONCE,
             topicName,
@@ -176,7 +176,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.SUBSCRIBE)
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId,
             QoS.EXACTLY_ONCE,
             topicName,
@@ -209,7 +209,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
         inMessageTracker.add(expectedMessageId, MqttMessageType.PUBLISH, PublishReceivedReasonCode.NO_MATCHING_SUBSCRIBERS)
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
             expectedMessageId, 
             QoS.EXACTLY_ONCE,
             topicName,
@@ -241,7 +241,12 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
         def expectedMessageId = 35
         def session = user.session()
         def inMessageTracker = session.inMessageTracker()
-        def incomingPublish = prepareIncomingPublish(
+        def incomingPublish = preparePublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
+        def duplicatedPublish = prepareDuplicatedPublish(
             expectedMessageId,
             QoS.EXACTLY_ONCE,
             topicName,
@@ -259,7 +264,7 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
           reasonCode() == PublishReceivedReasonCode.SUCCESS
         }
     when: 'send duplicated before publish release'
-        processor.process(user, incomingPublish.withDuplicated())
+        processor.process(user, duplicatedPublish.withDuplicated())
     then: 'server should return the same feedback for duplicated as for original'
         with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
           reasonCode() == PublishReceivedReasonCode.SUCCESS

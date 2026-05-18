@@ -99,7 +99,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             MqttInMessage.EMPTY_USER_PROPERTIES)
     then:
         def exception = thrown(IllegalArgumentException)
-        exception.message == "Publish with id:[${publishId}] already exists"
+        exception.message == "Publish:[${publishId}] already exists"
         storage.storedPublishes.size() == 1
   }
 
