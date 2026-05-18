@@ -266,7 +266,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         publishStorage.cancelScheduledRemoval(incomingPublish)
     then:
         def exception = thrown(NotScheduledForRemovalPublishStorageException)
-        exception.message == "Publish:[${incomingPublish.id()}] is already cancelled"
+        exception.message == "Publish:[${incomingPublish.id()}] is not scheduled for removal"
         publishStorage.scheduledRemovals.isEmpty()
     cleanup:
         publishStorage.close()

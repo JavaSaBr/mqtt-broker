@@ -26,12 +26,12 @@ public class PublishPayloadMqttInMessageFieldValidator extends
   public boolean isNotValid(MqttConnection connection, NetworkMqttUser user, PublishMqttInMessage message) {
     byte[] payload = message.payload();
     if (payload == null) {
-      log.warning(user.clientId(), "[%s] Missed payload"::formatted);
+      log.warn(user.clientId(), "[%s] Missed payload"::formatted);
       return true;
     }
     PayloadFormat payloadFormat = message.payloadFormat();
     if (payloadFormat == PayloadFormat.INVALID) {
-      log.warning(user.clientId(), "[%s] Provided invalid PayloadFormat"::formatted);
+      log.warn(user.clientId(), "[%s] Provided invalid PayloadFormat"::formatted);
       handleInvalidPayloadFormat(user);
       return true;
     }

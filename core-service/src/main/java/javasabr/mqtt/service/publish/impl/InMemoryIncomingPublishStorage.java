@@ -143,7 +143,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
     if (stored == null) {
       throw new UnknownPublishStorageException("Unknown publish:[%s]".formatted(publishId), publishId);
     } else if (stored.consumerCount.get() > 0) {
-      log.warning("Removed publish:[%s] still has [%s] consumers".formatted(publishId, stored.consumerCount));
+      log.warn("Removed publish:[%s] still has [%s] consumers".formatted(publishId, stored.consumerCount));
     }
     log.debug(publishId, "Removed publish from storage: %s"::formatted);
     return stored.publish();
@@ -231,7 +231,7 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, C
       ScheduledRemovalEntry removed = scheduledRemovals.remove(publish.id());
       if (removed == null) {
         throw new NotScheduledForRemovalPublishStorageException(
-            "Publish:[%s] is already cancelled".formatted(publish.id()));
+            "Publish:[%s] is not scheduled for removal".formatted(publish.id()));
       }
     } finally {
       scheduledRemovals.writeUnlock(stamp);

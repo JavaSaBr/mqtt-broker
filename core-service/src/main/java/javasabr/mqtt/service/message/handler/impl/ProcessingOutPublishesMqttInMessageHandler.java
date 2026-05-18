@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.message.TrackableMqttMessage;
+import javasabr.mqtt.model.publish.OutgoingPublish;
 import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
@@ -23,7 +24,8 @@ public abstract class ProcessingOutPublishesMqttInMessageHandler<M extends MqttI
       ExternalNetworkMqttUser user,
       NetworkMqttSession session,
       M message) {
-    ProcessingPublishes processingPublishes = session.outgoingProcessingPublishes();
-    processingPublishes.apply(user, message);
+    session
+        .outgoingProcessingPublishes()
+        .apply(user, message);
   }
 }

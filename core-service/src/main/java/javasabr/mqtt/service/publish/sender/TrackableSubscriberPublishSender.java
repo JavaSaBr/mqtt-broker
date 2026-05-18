@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
 public abstract class TrackableSubscriberPublishSender extends
     AbstractSubscriberPublishSender<ExternalNetworkMqttUser> {
 
-  TrackableMessageCallback trackableMessageCallback;
+  TrackableMessageCallback<OutgoingPublish> trackableMessageCallback;
   PublishRetryer publishRetryer;
 
   protected TrackableSubscriberPublishSender(
@@ -63,11 +63,13 @@ public abstract class TrackableSubscriberPublishSender extends
       MqttSession session, 
       OutgoingPublish outgoingPublish) {
     // register message id
-    MessageTacker messageTacker = session.outMessageTracker();
-    messageTacker.add(outgoingPublish.messageId(), MqttMessageType.PUBLISH);
+    session
+        .outMessageTracker()
+        .add(outgoingPublish.messageId(), MqttMessageType.PUBLISH);
     // register callback and retrier
-    ProcessingPublishes processingPublishes = session.outgoingProcessingPublishes();
-    processingPublishes.register(outgoingPublish, trackableMessageCallback, publishRetryer);
+    session
+        .outgoingProcessingPublishes()
+        .register(outgoingPublish, trackableMessageCallback, publishRetryer);
     super.sendToSubscriberImpl(user, session, outgoingPublish);
   }
 
@@ -100,9 +102,9 @@ public abstract class TrackableSubscriberPublishSender extends
     MessageTacker outMessageTracker = session.outMessageTracker();
     TrackedMessageMeta trackedMessageMeta = outMessageTracker.stored(messageId);
     if (trackedMessageMeta == null) {
-      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
     } else if (trackedMessageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(clientId, trackedMessageMeta, messageId,
+      log.warn(clientId, trackedMessageMeta, messageId,
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
     } else {
       log.debug(clientId, messageId, "[%s] Retry to deliver publish:[%s]"::formatted);

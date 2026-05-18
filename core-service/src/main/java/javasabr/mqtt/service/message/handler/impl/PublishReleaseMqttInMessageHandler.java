@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.message.MqttMessageType;
+import javasabr.mqtt.model.publish.IncomingPublish;
 import javasabr.mqtt.model.reason.code.PublishCompletedReasonCode;
 import javasabr.mqtt.model.reason.code.PublishReleaseReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
@@ -37,11 +38,11 @@ public class PublishReleaseMqttInMessageHandler
 
     int messageId = releaseMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
-    ProcessingPublishes processingPublishes = session.incomingProcessingPublishes();
+    ProcessingPublishes<IncomingPublish> processingPublishes = session.incomingProcessingPublishes();
 
     if (releaseMessage.reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND) {
-      log.warning(user.clientId(), messageId, "[%s] Client doesnt know about messageId:[%d]"::formatted);
-      messageTacker.remove(messageId);
+      log.warn(user.clientId(), messageId, "[%s] Client doesnt know about messageId:[%d]"::formatted);
+      messageTacker.removeIfExist(messageId);
       processingPublishes.remove(releaseMessage);
       return;
     }

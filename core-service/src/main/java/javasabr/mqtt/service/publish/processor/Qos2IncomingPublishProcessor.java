@@ -102,7 +102,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       NetworkMqttSession session,
       IncomingPublish publish) {
     super.handleNoMatchedSubscribers(user, session, publish);
-    sendFinalFeedback(user, session, publish, PublishCompletedReasonCode.SUCCESS);
+    sendCompletedFeedback(user, session, publish, PublishCompletedReasonCode.SUCCESS);
   }
 
   @Override
@@ -112,7 +112,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       IncomingPublish publish,
       int matchedSubscribers) {
     super.handleDispatchedToSubscribers(user, session, publish, matchedSubscribers);
-    sendFinalFeedback(user, session, publish, PublishCompletedReasonCode.SUCCESS);
+    sendCompletedFeedback(user, session, publish, PublishCompletedReasonCode.SUCCESS);
   }
   
   private void updateSessionState(
@@ -141,7 +141,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     if (alreadyInProcess.reasonCode() instanceof PublishReceivedReasonCode receivedReasonCode) {
       reasonCode = receivedReasonCode;
     }
-    log.warning(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
+    log.warn(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
     sendFeedback(
         user,
         messageOutFactoryService
@@ -153,7 +153,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user, 
       int messageId, 
       IncomingPublish publish) {
-    log.warning(user.clientId(), messageId, publish.id(),
+    log.warn(user.clientId(), messageId, publish.id(),
         "[%s] Detected conflicted messageId:[%s] from publish:[%s]"::formatted);
     sendFeedback(user, messageOutFactoryService
         .resolveFactory(user)
@@ -174,18 +174,18 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     MessageTacker messageTacker = session.inMessageTracker();
     TrackedMessageMeta messageMeta = messageTacker.stored(messageId);
     if (messageMeta == null) {
-      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
       return true;
     } else if (messageMeta.messageType() != MqttMessageType.PUBLISH) {
-      log.warning(clientId, messageMeta, messageId, 
+      log.warn(clientId, messageMeta, messageId, 
           "[%s] Not expected tracked message meta:[%s] for messageId:[%d]"::formatted);
       incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
       return true;
     } else if (message.messageType() != MqttMessageType.PUBLISH_RELEASE) {
-      log.warning(clientId, message.messageType(), "[%s] Not expected message:[%s]"::formatted);
+      log.warn(clientId, message.messageType(), "[%s] Not expected message:[%s]"::formatted);
       incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
       return true;
@@ -195,9 +195,9 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
       incomingPublishStorage.cancelScheduledRemoval(publish);
     } catch (NotScheduledForRemovalPublishStorageException e) {
       // we waited for the 'PUBLISH_RELEASE' too long and we already dropped the original publish
-      log.warning(user.clientId(), messageId, publish.id(),
+      log.warn(user.clientId(), messageId, publish.id(),
           "[%s] 'PUBLISH_RELEASE' message for publish:[%s] and messageId:[%s] came too late"::formatted);
-      sendFinalFeedback(
+      sendCompletedFeedback(
           networkMqttUser, 
           session, 
           publish, 
@@ -221,7 +221,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     return true;
   }
   
-  private void sendFinalFeedback(
+  private void sendCompletedFeedback(
       ExternalNetworkMqttUser user,
       MqttSession session, 
       IncomingPublish publish,

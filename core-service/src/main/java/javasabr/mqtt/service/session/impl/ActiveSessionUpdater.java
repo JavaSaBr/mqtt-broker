@@ -26,7 +26,7 @@ public class ActiveSessionUpdater implements AutoCloseable {
     this.updateThread.start();
   }
 
-  public void update() {
+  private void update() {
     var calculations = ArrayFactory.mutableIntArray();
     var sessions = ArrayFactory.mutableArray(InMemoryNetworkMqttSession.class);
     while (!closed) {
@@ -55,7 +55,7 @@ public class ActiveSessionUpdater implements AutoCloseable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     closed = true;
     updateThread.interrupt();
   }

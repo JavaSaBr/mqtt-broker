@@ -6,6 +6,8 @@ import javasabr.mqtt.model.message.MqttMessageType;
 import javasabr.mqtt.model.reason.code.ReasonCode;
 import javasabr.mqtt.model.session.MessageTacker;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
+import javasabr.mqtt.model.session.exception.AlreadyRegisteredMessageMetaException;
+import javasabr.mqtt.model.session.exception.NotFoundMessageMetaException;
 import javasabr.rlib.collections.array.MutableIntArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.MutableIntToRefDictionary;
@@ -60,7 +62,12 @@ public class InMemoryMessageTacker implements MessageTacker {
         expiration == null ? 0L : System.currentTimeMillis() + expiration.toMillis());
     long stamp = lock.writeLock();
     try {
-      messageIdToMeta.put(messageId, messageMeta);
+      InMemoryTrackedMessageMeta exists = messageIdToMeta.get(messageId);
+      if (exists != null) {
+        throw new AlreadyRegisteredMessageMetaException(
+            messageId,
+            "Message mete:[%s] is already registered.".formatted(messageId));
+      } messageIdToMeta.put(messageId, messageMeta);
     } finally {
       lock.unlockWrite(stamp);
     }
@@ -73,7 +80,7 @@ public class InMemoryMessageTacker implements MessageTacker {
     try {
       InMemoryTrackedMessageMeta current = messageIdToMeta.get(messageId);
       if (current == null) {
-        throw new IllegalArgumentException("Message not found: " + messageId);
+        throw new NotFoundMessageMetaException(messageId, "Message meta:[%s] doesn't exist.".formatted(messageId));
       }
       current.messageType(messageType);
       current.reasonCode(reasonCode);
@@ -87,6 +94,23 @@ public class InMemoryMessageTacker implements MessageTacker {
   @Nullable
   @Override
   public TrackedMessageMeta remove(int messageId) {
+    TrackedMessageMeta removed;
+    long stamp = lock.writeLock();
+    try {
+      removed = messageIdToMeta.remove(messageId);
+      if (removed == null) {
+        throw new NotFoundMessageMetaException(messageId, "Message meta:[%s] doesn't exist.".formatted(messageId));
+      }
+    } finally {
+      lock.unlockWrite(stamp);
+    }
+    log.debug(removed, "Removed message meta: %s"::formatted);
+    return removed;
+  }
+  
+  @Nullable
+  @Override
+  public TrackedMessageMeta removeIfExist(int messageId) {
     TrackedMessageMeta removed;
     long stamp = lock.writeLock();
     try {

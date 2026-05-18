@@ -56,7 +56,7 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
     if (alreadyInProcess != null) {
       // in the case if we already process the fist publish attempt, we can skip it
       if (publish.duplicated() && alreadyInProcess.messageType() == MqttMessageType.PUBLISH) {
-        log.warning(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
+        log.warn(user.clientId(), publish.id(), "[%s] Detected duplicated publish:[%s]"::formatted);
         return false;
       }
       handleMessageIdIsInUse(user, messagedId, publish);
@@ -105,7 +105,7 @@ public class Qos1IncomingPublishProcessor extends TrackableIncomingPublishProces
       ExternalNetworkMqttUser user,
       int messageId, 
       IncomingPublish publish) {
-    log.warning(user.clientId(), messageId, publish.id(),
+    log.warn(user.clientId(), messageId, publish.id(),
         "[%s] Detected conflicted messageId:[%s] from publish:[%s]"::formatted);
     sendFeedback(user, messageOutFactoryService
         .resolveFactory(user)

@@ -43,21 +43,21 @@ public class Qos1SubscriberPublishSender extends TrackableSubscriberPublishSende
     int messageId = message.messageId();
     String clientId = user.clientId();
     if (trackedMessageMeta == null) {
-      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
       return true;
     }
     
     MqttMessageType trackedMessageType = trackedMessageMeta.messageType();
     if (trackedMessageType != MqttMessageType.PUBLISH) {
-      log.warning(clientId, trackedMessageMeta, messageId,
+      log.warn(clientId, trackedMessageMeta, messageId,
           "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
       handleNotExpectedFlowState(user, trackedMessageType, MqttMessageType.PUBLISH, outgoingPublish);
       return true;
     }
     
     if (!(message instanceof PublishAckMqttInMessage publishAck)) {
-      log.warning(clientId, message.messageType(), messageId, 
+      log.warn(clientId, message.messageType(), messageId, 
           "[%s] Not expected message type:%s for messageId:[%d]"::formatted);
       handleNotExpectedResponseMessage(user, message, MqttMessageType.PUBLISH_ACK, outgoingPublish);
       return true;
@@ -66,11 +66,11 @@ public class Qos1SubscriberPublishSender extends TrackableSubscriberPublishSende
     PublishAckReasonCode reasonCode = publishAck.reasonCode();
     if (reasonCode != PublishAckReasonCode.SUCCESS) {
       // just to note in logs, we can't do anything with this
-      log.warning(clientId, reasonCode, messageId, "[%s] Received error response:[%s] for publish:[%s]"::formatted);
+      log.warn(clientId, reasonCode, messageId, "[%s] Received error response:[%s] for publish:[%s]"::formatted);
     }
     
     MessageTacker messageTacker = session.outMessageTracker();
-    messageTacker.remove(messageId);
+    messageTacker.removeIfExist(messageId);
     
     log.debug(clientId, messageId, "[%s] Completed publish:[%s]"::formatted);
     incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);

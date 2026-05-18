@@ -57,6 +57,6 @@ public abstract class InMemoryCredentialsSource implements CredentialsSource {
   
   @JsonValue
   Object jsonDebugValue() {
-    return Map.of("credentials", credentials);
+    return Map.of("credentials", credentials.size());
   }
 }

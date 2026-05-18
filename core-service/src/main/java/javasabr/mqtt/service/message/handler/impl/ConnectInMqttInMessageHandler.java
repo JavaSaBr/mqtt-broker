@@ -252,7 +252,7 @@ public class ConnectInMqttInMessageHandler
 
   private boolean onSentConnAck(ConfigurableNetworkMqttUser user, NetworkMqttSession session, boolean result) {
     if (!result) {
-      log.warning(user.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
+      log.warn(user.clientId(), "Was issue with sending conn ack packet to client:[%s]"::formatted);
       return false;
     }
     session.resendNotConfirmedPublishesTo(user);

@@ -26,7 +26,7 @@ public class PublishRetainMqttInMessageFieldValidator extends
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     boolean retain = message.retain();
     if (retain && !connectionConfig.retainAvailable()) {
-      log.warning(user.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
+      log.warn(user.clientId(), "[%s] 'RETAIN' option is not supported"::formatted);
       handleNotSupportedRetain(user);
       return true;
     }

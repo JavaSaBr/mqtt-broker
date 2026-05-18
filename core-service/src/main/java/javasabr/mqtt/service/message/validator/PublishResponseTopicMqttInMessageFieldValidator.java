@@ -27,7 +27,7 @@ public class PublishResponseTopicMqttInMessageFieldValidator extends
     String rawResponseTopicName = message.rawResponseTopicName();
     if (rawResponseTopicName != null) {
       if (!TopicValidator.validateTopicName(rawResponseTopicName)) {
-        log.warning(user.clientId(), rawResponseTopicName, "[%s] Provided invalid ResponseTopic:[%s]"::formatted);
+        log.warn(user.clientId(), rawResponseTopicName, "[%s] Provided invalid ResponseTopic:[%s]"::formatted);
         handleInvalidResponseTopicName(user);
         return true;
       }

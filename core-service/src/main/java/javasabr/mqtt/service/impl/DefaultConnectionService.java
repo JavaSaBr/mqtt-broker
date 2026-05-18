@@ -62,7 +62,7 @@ public class DefaultConnectionService implements ConnectionService {
       ReadableNetworkPacket<MqttConnection> networkPacket) {
 
     if (!(networkPacket instanceof MqttInMessage mqttInMessage)) {
-      log.warning(networkPacket, "Received not processable network packet:[%s]"::formatted);
+      log.warn(networkPacket, "Received not processable network packet:[%s]"::formatted);
       return;
     }
 
@@ -77,7 +77,7 @@ public class DefaultConnectionService implements ConnectionService {
       //noinspection DataFlowIssue
       messageHandler.processValidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
+      log.warn(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
     }
   }
 
@@ -86,11 +86,11 @@ public class DefaultConnectionService implements ConnectionService {
       ReadableNetworkPacket<MqttConnection> networkPacket) {
 
     if (!(networkPacket instanceof MqttInMessage mqttInMessage)) {
-      log.warning(networkPacket, "Received not processable network packet:[%s]"::formatted);
+      log.warn(networkPacket, "Received not processable network packet:[%s]"::formatted);
       return;
     }
 
-    log.warning(
+    log.warn(
         connection.user().clientId(),
         mqttInMessage.name(),
         mqttInMessage,
@@ -101,7 +101,7 @@ public class DefaultConnectionService implements ConnectionService {
       //noinspection DataFlowIssue
       messageHandler.processInvalidMessage(connection, mqttInMessage);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
+      log.warn(mqttInMessage, "Received not supported MQTT message:[%s]"::formatted);
     }
   }
 

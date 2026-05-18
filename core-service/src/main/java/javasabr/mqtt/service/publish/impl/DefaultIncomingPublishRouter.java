@@ -51,7 +51,7 @@ public class DefaultIncomingPublishRouter implements IncomingPublishRouter {
       //noinspection DataFlowIssue
       incomingPublishProcessors[qos.level()].process(user, publish);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(user.clientId(), publish, "[%s] Received not supported publish:%s"::formatted);
+      log.warn(user.clientId(), publish, "[%s] Received not supported publish:%s"::formatted);
     }
   }
   

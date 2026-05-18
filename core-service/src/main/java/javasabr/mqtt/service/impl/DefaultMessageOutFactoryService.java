@@ -59,7 +59,7 @@ public class DefaultMessageOutFactoryService implements MessageOutFactoryService
       //noinspection DataFlowIssue
       return messageOutFactories[mqttVersion.version()];
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(mqttVersion, "Received not supported mqtt version:[%s]"::formatted);
+      log.warn(mqttVersion, "Received not supported mqtt version:[%s]"::formatted);
       throw new IllegalArgumentException("Unsupported MQTT version:[" + mqttVersion + "]");
     }
   }
