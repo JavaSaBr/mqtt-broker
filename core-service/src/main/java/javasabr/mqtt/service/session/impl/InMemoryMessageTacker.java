@@ -66,7 +66,7 @@ public class InMemoryMessageTacker implements MessageTacker {
       if (exists != null) {
         throw new AlreadyRegisteredMessageMetaException(
             messageId,
-            "Message mete:[%s] is already registered.".formatted(messageId));
+            "Message meta:[%s] is already registered.".formatted(messageId));
       } messageIdToMeta.put(messageId, messageMeta);
     } finally {
       lock.unlockWrite(stamp);

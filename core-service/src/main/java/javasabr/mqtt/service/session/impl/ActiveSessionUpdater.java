@@ -1,6 +1,5 @@
 package javasabr.mqtt.service.session.impl;
 
-import java.io.IOException;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
 import javasabr.rlib.common.util.ThreadUtils;

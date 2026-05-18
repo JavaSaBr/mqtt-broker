@@ -1,8 +1,6 @@
 package javasabr.mqtt.service.message.handler.impl;
 
 import javasabr.mqtt.model.message.TrackableMqttMessage;
-import javasabr.mqtt.model.publish.OutgoingPublish;
-import javasabr.mqtt.model.session.ProcessingPublishes;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.in.MqttInMessage;

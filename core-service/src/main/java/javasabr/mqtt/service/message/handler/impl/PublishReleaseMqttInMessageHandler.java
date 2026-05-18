@@ -41,7 +41,7 @@ public class PublishReleaseMqttInMessageHandler
     ProcessingPublishes<IncomingPublish> processingPublishes = session.incomingProcessingPublishes();
 
     if (releaseMessage.reasonCode() == PublishReleaseReasonCode.PACKET_IDENTIFIER_NOT_FOUND) {
-      log.warn(user.clientId(), messageId, "[%s] Client doesnt know about messageId:[%d]"::formatted);
+      log.warn(user.clientId(), messageId, "[%s] Client doesn't know about messageId:[%d]"::formatted);
       messageTacker.removeIfExist(messageId);
       processingPublishes.remove(releaseMessage);
       return;

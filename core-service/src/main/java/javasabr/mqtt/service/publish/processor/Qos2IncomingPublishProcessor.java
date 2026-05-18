@@ -13,6 +13,7 @@ import javasabr.mqtt.model.session.MqttSession;
 import javasabr.mqtt.model.session.PublishRetryer;
 import javasabr.mqtt.model.session.TrackableMessageCallback;
 import javasabr.mqtt.model.session.TrackedMessageMeta;
+import javasabr.mqtt.model.session.exception.NotFoundMessageMetaException;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.session.NetworkMqttSession;
 import javasabr.mqtt.service.MessageOutFactoryService;
@@ -208,7 +209,7 @@ public class Qos2IncomingPublishProcessor extends TrackableIncomingPublishProces
     // if between read and update the stored meta it was expired and removed in the background
     try {
       messageTacker.update(messageId, MqttMessageType.PUBLISH_COMPLETE, PublishCompletedReasonCode.SUCCESS);
-    } catch (IllegalArgumentException e) {
+    } catch (NotFoundMessageMetaException e) {
       log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       incomingPublishStorage.cancelScheduledRemovalIfScheduled(publish);
       incomingPublishStorage.removeIfExist(publish);
