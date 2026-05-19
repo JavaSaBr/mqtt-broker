@@ -36,7 +36,6 @@ public interface MessageTacker {
   /**
    * @throws NotFoundMessageMetaException if message meta doesn't exist for the message id.
    */
-  @Nullable
   TrackedMessageMeta remove(int messageId);
   
   @Nullable

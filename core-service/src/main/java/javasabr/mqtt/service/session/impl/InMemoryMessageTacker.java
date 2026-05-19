@@ -90,8 +90,7 @@ public class InMemoryMessageTacker implements MessageTacker {
       lock.unlockWrite(stamp);
     }
   }
-
-  @Nullable
+  
   @Override
   public TrackedMessageMeta remove(int messageId) {
     TrackedMessageMeta removed;
@@ -118,7 +117,7 @@ public class InMemoryMessageTacker implements MessageTacker {
     } finally {
       lock.unlockWrite(stamp);
     }
-    log.debug(removed, "Removed message meta: %s"::formatted);
+    log.debug(removed, "Removed if exist message meta: %s"::formatted);
     return removed;
   }
 

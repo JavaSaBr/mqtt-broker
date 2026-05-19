@@ -300,7 +300,10 @@ class InMemoryMqttSessionServiceTest extends IntegrationServiceSpecification {
         messageTracker2.add(13, MqttMessageType.PUBLISH, null, Duration.ofMinutes(100))
         messageTracker2.add(14, MqttMessageType.PUBLISH, null, Duration.ofMillis(100))
     then:
-        Thread.sleep(1000)
+        waitUntil {
+          messageTracker1.stored(11) == null 
+              && messageTracker2.stored(14) == null
+        }
     then:
         messageTracker1.stored(11) == null
         messageTracker1.stored(12) != null
