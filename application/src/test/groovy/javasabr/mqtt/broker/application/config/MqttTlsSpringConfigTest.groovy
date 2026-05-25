@@ -7,12 +7,17 @@ class MqttTlsSpringConfigTest extends UnitSpecification {
   def 'should map all properties correctly to MqttTlsProperties'() {
     given:
         def config = new MqttTlsSpringConfig()
-        
+
     when:
         def props = config.mqttTlsProperties(
-            "ks-path", "ks-pass", "JKS",
-            "ts-path", "ts-pass", "PKCS12",
-            true, ["TLSv1.2", "TLSv1.3"], ["CIPHER1"]
+            "ks-path",
+            "ks-pass",
+            "JKS",
+            "ts-path",
+            "ts-pass",
+            "PKCS12",
+            true, ["TLSv1.2", "TLSv1.3"],
+            ["CIPHER1"]
         )
 
     then:

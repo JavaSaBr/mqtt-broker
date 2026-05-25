@@ -103,13 +103,10 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
   }
 
   @Override
-  public String toString() {
-    return remoteAddress;
-  }
-
-  @Override
   protected void doClose() {
-    user.release().subscribe();
+    user.release()
+        .doOnError(e -> log.error(remoteAddress, e, "Failed to release user session [%s]"::formatted))
+        .subscribe();
     super.doClose();
   }
 }
