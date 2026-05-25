@@ -3,10 +3,10 @@ package javasabr.mqtt.network;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
-import javasabr.mqtt.network.exception.SslProtocolException;
+import javasabr.mqtt.network.exception.TlsProtocolException;
 import javasabr.mqtt.network.message.MqttPacketCreator;
-import javasabr.mqtt.network.message.ssl.SslMqttMessageReader;
-import javasabr.mqtt.network.message.ssl.SslMqttMessageWriter;
+import javasabr.mqtt.network.message.ssl.TlsMqttMessageReader;
+import javasabr.mqtt.network.message.ssl.TlsMqttMessageWriter;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
@@ -24,11 +24,11 @@ import lombok.experimental.FieldDefaults;
 @CustomLog
 @Accessors(fluent = true, chain = false)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class MqttSslConnection extends MqttConnection {
+public class TlsMqttConnection extends MqttConnection {
 
   SSLEngine sslEngine;
 
-  public MqttSslConnection(
+  public TlsMqttConnection(
       Network<MqttConnection> network,
       AsynchronousSocketChannel channel,
       BufferAllocator bufferAllocator,
@@ -54,7 +54,7 @@ public class MqttSslConnection extends MqttConnection {
     try {
       this.sslEngine.beginHandshake();
     } catch (SSLException e) {
-      throw new SslProtocolException("SSL handshake failed", e);
+      throw new TlsProtocolException("SSL handshake failed", e);
     }
   }
 
@@ -65,7 +65,7 @@ public class MqttSslConnection extends MqttConnection {
 
   @Override
   protected NetworkPacketReader createPacketReader(MqttPacketCreator mqttPacketCreator) {
-    return new SslMqttMessageReader(
+    return new TlsMqttMessageReader(
         this,
         this::updateLastActivity,
         this::handleReceivedValidPacket,
@@ -76,8 +76,9 @@ public class MqttSslConnection extends MqttConnection {
         mqttPacketCreator);
   }
 
+  @Override
   protected NetworkPacketWriter createPacketWriter() {
-    return new SslMqttMessageWriter(
+    return new TlsMqttMessageWriter(
         this,
         this::updateLastActivity,
         this::nextPacketToWrite,

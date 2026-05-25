@@ -12,13 +12,13 @@ import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
-public class SslMqttMessageReader
+public class TlsMqttMessageReader
     extends AbstractSslNetworkPacketReader<MqttInMessage, MqttConnection> {
 
   private static final int PACKET_LENGTH_POSITION = 2;
   private final MqttPacketCreator mqttPacketCreator;
 
-  public SslMqttMessageReader(
+  public TlsMqttMessageReader(
       MqttConnection connection,
       Runnable updateActivityFunction,
       Consumer<? super MqttInMessage> validPacketHandler,

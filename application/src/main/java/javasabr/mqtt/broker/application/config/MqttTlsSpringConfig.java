@@ -11,7 +11,7 @@ import javasabr.mqtt.network.TlsProperties;
 import javasabr.mqtt.network.message.MqttPacketCreator;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.ConnectionService;
-import javasabr.mqtt.service.impl.MqttSslConnectionFactory;
+import javasabr.mqtt.service.impl.TlsMqttConnectionFactory;
 import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.impl.DefaultBufferAllocator;
@@ -119,7 +119,7 @@ public class MqttTlsSpringConfig {
       ServerNetworkConfig tlsNetworkConfig,
       MqttPacketCreator mqttPacketCreator) {
     DefaultBufferAllocator defaultBufferAllocator = new DefaultBufferAllocator(tlsNetworkConfig);
-    return new MqttSslConnectionFactory(
+    return new TlsMqttConnectionFactory(
         externalServerConnectionConfig,
         mqttUserFactory,
         maxPacketsByRead,

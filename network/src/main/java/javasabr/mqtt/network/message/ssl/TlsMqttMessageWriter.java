@@ -11,13 +11,13 @@ import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractSslNetworkPacketWriter;
 import javax.net.ssl.SSLEngine;
 
-public class SslMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOutMessage, MqttConnection> {
+public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOutMessage, MqttConnection> {
 
   private static final int MAX_MBI_SIZE = 4;
   private static final int HEADER_TYPE_SIZE = 1;
   private static final int PAYLOAD_OFFSET = MAX_MBI_SIZE + HEADER_TYPE_SIZE;
 
-  public SslMqttMessageWriter(
+  public TlsMqttMessageWriter(
       MqttConnection connection,
       Runnable updateActivityFunction,
       Supplier<WritableNetworkPacket<MqttConnection>> packetProvider,

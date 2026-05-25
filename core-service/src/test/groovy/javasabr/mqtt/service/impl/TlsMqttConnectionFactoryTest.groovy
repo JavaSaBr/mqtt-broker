@@ -13,7 +13,7 @@ import javasabr.rlib.network.ServerNetworkConfig
 import java.nio.channels.AsynchronousSocketChannel
 import javax.net.ssl.SSLContext
 
-class MqttSslConnectionFactoryTest extends Specification {
+class TlsMqttConnectionFactoryTest extends Specification {
 
   def "should use a single shared BufferAllocator for all connections"() {
     given:
@@ -44,7 +44,7 @@ class MqttSslConnectionFactoryTest extends Specification {
             .build()
         def allocator = new DefaultBufferAllocator(networkConfig)
         
-        def factory = new MqttSslConnectionFactory(
+        def factory = new TlsMqttConnectionFactory(
             serverConfig,
             userFactory,
             100,

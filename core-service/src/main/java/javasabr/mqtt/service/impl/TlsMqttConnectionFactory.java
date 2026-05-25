@@ -3,7 +3,7 @@ package javasabr.mqtt.service.impl;
 import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttSslConnection;
+import javasabr.mqtt.network.TlsMqttConnection;
 import javasabr.mqtt.network.TlsProperties;
 import javasabr.mqtt.network.message.MqttPacketCreator;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
@@ -14,14 +14,14 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class MqttSslConnectionFactory extends PlainMqttConnectionFactory {
+public class TlsMqttConnectionFactory extends PlainMqttConnectionFactory {
 
   SSLContext sslContext;
-  TlsProperties tlsPproperties;
+  TlsProperties tlsProperties;
   BufferAllocator bufferAllocator;
   MqttPacketCreator mqttPacketCreator;
 
-  public MqttSslConnectionFactory(
+  public TlsMqttConnectionFactory(
       MqttServerConnectionConfig serverConnectionConfig,
       NetworkMqttUserFactory clientFactory,
       int maxPacketsByRead,
@@ -31,14 +31,14 @@ public class MqttSslConnectionFactory extends PlainMqttConnectionFactory {
       MqttPacketCreator mqttPacketCreator) {
     super(serverConnectionConfig, clientFactory, maxPacketsByRead, mqttPacketCreator);
     this.sslContext = sslContext;
-    this.tlsPproperties = tlsProperties;
+    this.tlsProperties = tlsProperties;
     this.bufferAllocator = bufferAllocator;
     this.mqttPacketCreator = mqttPacketCreator;
   }
 
   @Override
-  public MqttSslConnection newConnection(Network<MqttConnection> network, AsynchronousSocketChannel channel) {
-    return new MqttSslConnection(
+  public TlsMqttConnection newConnection(Network<MqttConnection> network, AsynchronousSocketChannel channel) {
+    return new TlsMqttConnection(
         network,
         channel,
         bufferAllocator,
@@ -46,7 +46,7 @@ public class MqttSslConnectionFactory extends PlainMqttConnectionFactory {
         serverConnectionConfig,
         clientFactory,
         sslContext,
-        tlsPproperties,
+        tlsProperties,
         false,
         mqttPacketCreator);
   }

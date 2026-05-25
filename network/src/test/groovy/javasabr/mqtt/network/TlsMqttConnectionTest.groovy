@@ -13,7 +13,7 @@ import spock.lang.Specification
 import javax.net.ssl.SSLContext
 import java.nio.channels.AsynchronousSocketChannel
 
-class MqttSslConnectionTest extends Specification {
+class TlsMqttConnectionTest extends Specification {
 
   def "should configure SSLEngine with TLS properties"() {
     given:
@@ -49,7 +49,7 @@ class MqttSslConnectionTest extends Specification {
         ServerNetworkConfig tlsNetworkConfig = ServerNetworkConfig.SimpleServerNetworkConfig.builder().build();
 
     when:
-        new MqttSslConnection(
+        new TlsMqttConnection(
             Stub(Network),
             Stub(AsynchronousSocketChannel),
             new DefaultBufferAllocator(tlsNetworkConfig),
