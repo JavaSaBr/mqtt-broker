@@ -1,8 +1,10 @@
 package javasabr.mqtt.broker.application.config;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
@@ -30,8 +32,8 @@ import org.springframework.util.Assert;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(name = "mqtt.tls.enabled", havingValue = "true")
-public class MqttTlsSpringConfig {
+@ConditionalOnProperty(name = "mqtt.external.tls.network.enabled", havingValue = "true")
+public class MqttExternalTlsNetworkConfig {
 
   @Bean
   TlsProperties mqttTlsProperties(
@@ -57,14 +59,14 @@ public class MqttTlsSpringConfig {
         .build();
   }
 
-  @Bean
+  @Bean("externalNetworkSslContext")
   @ConditionalOnBooleanProperty(name = "mqtt.tls.require-client-cert", havingValue = false)
   SSLContext sslContext(TlsProperties properties) throws IOException {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
 
-    try (FileInputStream keyStoreData = new FileInputStream(keyStorePath)) {
+    try (InputStream keyStoreData = Files.newInputStream(Paths.get(keyStorePath))) {
       return NetworkUtils.createSslContext(
           keyStoreType,
           keyStoreData,
@@ -75,7 +77,7 @@ public class MqttTlsSpringConfig {
     }
   }
 
-  @Bean
+  @Bean("externalNetworkSslContext")
   @ConditionalOnBooleanProperty(name = "mqtt.tls.require-client-cert", matchIfMissing = true)
   SSLContext sslContextRequiringClientCert(TlsProperties properties) throws IOException {
     String keyStoreType = properties.keystoreType();
@@ -89,8 +91,8 @@ public class MqttTlsSpringConfig {
     Assert.hasText(trustStorePath, "trustStorePath is blank");
     Assert.hasText(trustStorePassword, "trustStorePassword is blank");
 
-    try (FileInputStream keyStoreData = new FileInputStream(keyStorePath);
-         FileInputStream trustStoreData = new FileInputStream(trustStorePath)) {
+    try (InputStream keyStoreData = Files.newInputStream(Paths.get(keyStorePath));
+         InputStream trustStoreData = Files.newInputStream(Paths.get(trustStorePath))) {
       return NetworkUtils.createSslContext(
           keyStoreType,
           keyStoreData,
@@ -106,7 +108,7 @@ public class MqttTlsSpringConfig {
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
-      SSLContext sslContext,
+      SSLContext externalNetworkSslContext,
       TlsProperties tlsProperties,
       ServerNetworkConfig tlsNetworkConfig,
       MqttPacketCreator mqttPacketCreator) {
@@ -115,7 +117,7 @@ public class MqttTlsSpringConfig {
         externalServerConnectionConfig,
         mqttUserFactory,
         maxPacketsByRead,
-        sslContext,
+        externalNetworkSslContext,
         tlsProperties,
         defaultBufferAllocator,
         mqttPacketCreator);

@@ -2,11 +2,11 @@ package javasabr.mqtt.broker.application.config
 
 import javasabr.mqtt.test.support.UnitSpecification
 
-class MqttTlsSpringConfigTest extends UnitSpecification {
+class MqttExternalTlsNetworkConfigTest extends UnitSpecification {
 
   def 'should map all properties correctly to MqttTlsProperties'() {
     given:
-        def config = new MqttTlsSpringConfig()
+        def config = new MqttExternalTlsNetworkConfig()
 
     when:
         def props = config.mqttTlsProperties(
@@ -16,7 +16,8 @@ class MqttTlsSpringConfigTest extends UnitSpecification {
             "ts-path",
             "ts-pass",
             "PKCS12",
-            true, ["TLSv1.2", "TLSv1.3"],
+            true,
+            ["TLSv1.2", "TLSv1.3"],
             ["CIPHER1"]
         )
 

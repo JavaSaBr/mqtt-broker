@@ -1,6 +1,5 @@
 package javasabr.mqtt.broker.application.config;
 
-import java.net.InetSocketAddress;
 import java.util.Collection;
 import javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig;
 import javasabr.mqtt.auth.api.AuthenticationService;
@@ -8,8 +7,6 @@ import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
-import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
 import javasabr.mqtt.network.message.MqttPacketCreator;
@@ -23,7 +20,6 @@ import javasabr.mqtt.service.TopicService;
 import javasabr.mqtt.service.handler.client.ExternalNetworkMqttUserReleaseHandler;
 import javasabr.mqtt.service.impl.DefaultConnectionService;
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService;
-import javasabr.mqtt.service.impl.PlainMqttConnectionFactory;
 import javasabr.mqtt.service.impl.DefaultTopicService;
 import javasabr.mqtt.service.impl.DisabledAuthorizationService;
 import javasabr.mqtt.service.impl.ExternalNetworkMqttUserFactory;
@@ -62,14 +58,9 @@ import javasabr.mqtt.service.publish.sender.Qos2SubscriberPublishSender;
 import javasabr.mqtt.service.publish.sender.SubscriberPublishSender;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
-import javasabr.rlib.network.NetworkFactory;
-import javasabr.rlib.network.ServerNetworkConfig;
-import javasabr.rlib.network.server.ServerNetwork;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -80,7 +71,8 @@ import org.springframework.core.env.Environment;
 @Import({
     AuthenticationServiceSpringConfig.class,
     GroovyDslBasedAclServiceSpringConfig.class,
-    MqttTlsSpringConfig.class
+    MqttExternalPlainNetworkConfig.class,
+    MqttExternalTlsNetworkConfig.class
 })
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -398,68 +390,14 @@ public class MqttBrokerSpringConfig {
   }
 
   @Bean
-  ServerNetworkConfig externalNetworkConfig(
-      @Value("${mqtt.external.network.read.buffer.size:512}") int readBufferSize,
-      @Value("${mqtt.external.network.pending.buffer.size:1024}") int pendingBufferSize,
-      @Value("${mqtt.external.network.write.buffer.size:512}") int writeBufferSize,
-      @Value("${mqtt.external.network.thread.group.name:ExternalNetwork}") String threadGroupName,
-      @Value("${mqtt.external.network.thread.count:1}") int threadGroupMaxSize) {
-    return ServerNetworkConfig.SimpleServerNetworkConfig
-        .builder()
-        .readBufferSize(readBufferSize)
-        .pendingBufferSize(pendingBufferSize)
-        .writeBufferSize(writeBufferSize)
-        .threadGroupName(threadGroupName)
-        .threadGroupMaxSize(threadGroupMaxSize)
-        .build();
-  }
-
-  @Bean
   NetworkMqttUserFactory externalClientFactory(NetworkMqttUserReleaseHandler externalNetworkMqttUserReleaseHandler) {
     return new ExternalNetworkMqttUserFactory(externalNetworkMqttUserReleaseHandler);
   }
 
-  @Bean
-  MqttConnectionFactory<MqttConnection> externalConnectionFactory(
-      MqttServerConnectionConfig externalServerConnectionConfig,
-      NetworkMqttUserFactory mqttUserFactory,
-      @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
-      MqttPacketCreator mqttPacketCreator) {
-    return new PlainMqttConnectionFactory(
-        externalServerConnectionConfig,
-        mqttUserFactory,
-        maxPacketsByRead,
-        mqttPacketCreator);
-  }
 
   @Bean
   MqttPacketCreator mqttPacketCreator() {
     return new MqttPacketCreator();
   }
 
-  @Bean
-  InetSocketAddress externalNetworkAddress(
-      @Value("${mqtt.external.network.host:localhost}") String host,
-      @Value("${mqtt.external.network.port:1883}") int port) {
-    return new InetSocketAddress(host, port);
-  }
-
-  @Bean
-  ServerNetwork<MqttConnection> externalNetwork(
-      ServerNetworkConfig externalNetworkConfig,
-      MqttConnectionFactory<MqttConnection> externalConnectionFactory) {
-    return NetworkFactory.serverNetwork(externalNetworkConfig, externalConnectionFactory::newConnection);
-  }
-
-  @Bean
-  ApplicationListener<ApplicationStartedEvent> externalNetworkStarter(
-      ServerNetwork<MqttConnection> externalNetwork,
-      ConnectionService connectionService,
-      InetSocketAddress externalNetworkAddress) {
-    return _ -> {
-      externalNetwork.start(externalNetworkAddress);
-      externalNetwork.onAccept(connectionService::processAcceptedConnection);
-      log.info(externalNetworkAddress, "Started external MQTT network by address:[%s]"::formatted);
-    };
-  }
 }

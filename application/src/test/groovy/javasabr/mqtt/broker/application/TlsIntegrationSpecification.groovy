@@ -15,7 +15,7 @@ import org.springframework.test.context.TestPropertySource
     classes = [TlsNetworkTestConfig],
     initializers = [TestSslPropertiesInitializer])
 @TestPropertySource(
-    properties = ["mqtt.tls.enabled=true", "mqtt.tls.require-client-cert=false"],
+    properties = ["mqtt.external.tls.network.enabled=true", "mqtt.tls.require-client-cert=false"],
     locations = "classpath:application-test.properties")
 @Slf4j
 class TlsIntegrationSpecification extends BaseSpecification {
