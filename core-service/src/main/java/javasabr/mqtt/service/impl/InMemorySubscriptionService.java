@@ -81,7 +81,7 @@ public class InMemorySubscriptionService implements SubscriptionService {
     } else if (!connectionConfig.wildcardSubscriptionAvailable() && topicFilter.wildcard()) {
       return WILDCARD_SUBSCRIPTION_NOT_SUPPORTED_RESULT;
     } else if (!authorizationService.authorizeSubscribe(user, topicFilter)) {
-      log.warning(user.clientId(), topicFilter, "[%s] Not authorized for subscribing to:[%s]"::formatted);
+      log.warn(user.clientId(), topicFilter, "[%s] Not authorized for subscribing to:[%s]"::formatted);
       return new SubscriptionResult(SubscribeAckReasonCode.NOT_AUTHORIZED, null, null);
     }
     ActiveSubscriptions activeSubscriptions = session.activeSubscriptions();

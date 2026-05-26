@@ -1,5 +1,8 @@
 package javasabr.mqtt.service.publish.impl;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javasabr.mqtt.model.QoS;
@@ -9,10 +12,18 @@ import javasabr.mqtt.model.publish.PublishData;
 import javasabr.mqtt.model.publish.SimpleIncomingPublish;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.service.publish.IncomingPublishStorage;
+import javasabr.mqtt.service.publish.PublishDataStorage;
+import javasabr.mqtt.service.publish.exception.AlreadyScheduledForRemovalPublishStorageException;
+import javasabr.mqtt.service.publish.exception.NotScheduledForRemovalPublishStorageException;
+import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.IntArray;
+import javasabr.rlib.collections.array.MutableArray;
 import javasabr.rlib.collections.dictionary.DictionaryFactory;
 import javasabr.rlib.collections.dictionary.LockableRefToRefDictionary;
+import javasabr.rlib.collections.dictionary.MutableRefToRefDictionary;
+import javasabr.rlib.common.util.ThreadUtils;
 import lombok.AccessLevel;
 import lombok.CustomLog;
 import lombok.Getter;
@@ -21,13 +32,26 @@ import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
-  
-  LockableRefToRefDictionary<UUID, StoredIncomingPublish> storedPublishes;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class InMemoryIncomingPublishStorage implements IncomingPublishStorage, Closeable {
 
-  public InMemoryIncomingPublishStorage() {
+  final PublishDataStorage publishDataStorage;
+  final LockableRefToRefDictionary<UUID, StoredIncomingPublish> storedPublishes;
+  final LockableRefToRefDictionary<UUID, ScheduledRemovalEntry> scheduledRemovals;
+  final Thread cleanupThread;
+
+  final int cleanupIntervalInMs;
+  volatile boolean closed;
+  
+  public InMemoryIncomingPublishStorage(PublishDataStorage publishDataStorage, int cleanupIntervalInMs) {
+    this.publishDataStorage = publishDataStorage;
     this.storedPublishes = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.scheduledRemovals = DictionaryFactory.stampedLockBasedRefToRefDictionary();
+    this.cleanupIntervalInMs = cleanupIntervalInMs;
+    this.cleanupThread = new Thread(this::cleanup, "InMemoryIncomingPublishStorage-Cleanup");
+    this.cleanupThread.setPriority(Thread.MIN_PRIORITY);
+    this.cleanupThread.setDaemon(true);
+    this.cleanupThread.start();
   }
 
   @Override
@@ -71,39 +95,58 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     return incomingPublish;
   }
 
-  @Override
-  public void remove(IncomingPublish publish) {
-    long stamp = storedPublishes.writeLock();
+  private boolean containsById(UUID publishId) {
+    long stamp = storedPublishes.readLock();
     try {
-      removeWithoutLock(publish);
+      return storedPublishes.containsKey(publishId);
     } finally {
-      storedPublishes.writeUnlock(stamp);
+      storedPublishes.readUnlock(stamp);
     }
   }
 
   @Override
-  public void removeIfExist(IncomingPublish publish) {
+  public void remove(IncomingPublish publish) {
+    IncomingPublish wasRemoved;
     long stamp = storedPublishes.writeLock();
     try {
-      if (storedPublishes.containsKey(publish.id())) {
-        removeWithoutLock(publish);
+      wasRemoved = removeWithoutLock(publish.id());
+    } finally {
+      storedPublishes.writeUnlock(stamp);
+    }
+    publishDataStorage.removeById(wasRemoved.data().id());
+  }
+
+  @Override
+  public void removeIfExist(IncomingPublish publish) {
+    removeIfExist(publish.id());
+  }
+
+  private void removeIfExist(UUID publishId) {
+    IncomingPublish wasRemoved;
+    long stamp = storedPublishes.writeLock();
+    try {
+      if (storedPublishes.containsKey(publishId)) {
+        wasRemoved = removeWithoutLock(publishId);
+      } else {
+        wasRemoved = null;
       }
     } finally {
       storedPublishes.writeUnlock(stamp);
     }
+    if (wasRemoved != null) {
+      publishDataStorage.removeById(wasRemoved.data().id());
+    }
   }
   
-  private void removeWithoutLock(IncomingPublish publish) {
-    StoredIncomingPublish stored = storedPublishes.remove(publish.id());
+  private IncomingPublish removeWithoutLock(UUID publishId) {
+    StoredIncomingPublish stored = storedPublishes.remove(publishId);
     if (stored == null) {
-      throw new IllegalArgumentException("Unknown publish:[%s]".formatted(publish.id()));
+      throw new UnknownPublishStorageException("Unknown publish:[%s]".formatted(publishId), publishId);
     } else if (stored.consumerCount.get() > 0) {
-      log.warning(
-          "Removed publish:[%s] still has [%s] consumers".formatted(
-          publish.id(),
-          stored.consumerCount));
+      log.warn("Removed publish:[%s] still has [%s] consumers".formatted(publishId, stored.consumerCount));
     }
-    log.debug(publish, "Removed publish from storage: %s"::formatted);
+    log.debug(publishId, "Removed publish from storage: %s"::formatted);
+    return stored.publish();
   }
 
   @Override
@@ -116,7 +159,9 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     try {
       storedPublish = storedPublishes.get(publish.id());
       if (storedPublish == null) {
-        throw new IllegalArgumentException("Unknown publish:[%s]".formatted(publish.id()));
+        throw new UnknownPublishStorageException(
+            "Unknown publish:[%s]".formatted(publish.id()), 
+            publish.id());
       }
     } finally {
       storedPublishes.readUnlock(stamp);
@@ -137,7 +182,9 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     try {
       storedPublish = storedPublishes.get(publish.id());
       if (storedPublish == null) {
-        throw new IllegalArgumentException("Unknown publish:[%s]".formatted(publish.id()));
+        throw new UnknownPublishStorageException(
+            "Unknown publish:[%s]".formatted(publish.id()), 
+            publish.id());
       }
     } finally {
       storedPublishes.readUnlock(stamp);
@@ -156,6 +203,95 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     }
   }
 
+  @Override
+  public void scheduleRemoval(IncomingPublish publish, Duration delay) {
+    if (!containsById(publish.id())) {
+      throw new UnknownPublishStorageException("Unknown publish:[%s]".formatted(publish.id()), publish.id());
+    }
+    log.debug(publish.id(), delay, "Schedule removal for publish:[%s] with delay:[%s]"::formatted);
+    long stamp = scheduledRemovals.writeLock();
+    try {
+      if (scheduledRemovals.containsKey(publish.id())) {
+        throw new AlreadyScheduledForRemovalPublishStorageException(
+            "Publish:[%s] is already scheduled for removal".formatted(publish.id()));
+      }
+      var removeAfterInMs = System.currentTimeMillis() + delay.toMillis();
+      var scheduledRemovalEntry = new ScheduledRemovalEntry(publish.id(), removeAfterInMs);
+      scheduledRemovals.put(publish.id(), scheduledRemovalEntry);
+    } finally {
+      scheduledRemovals.writeUnlock(stamp);
+    }
+  }
+
+  @Override
+  public void cancelScheduledRemoval(IncomingPublish publish) {
+    log.debug(publish.id(), "Cancel scheduled removal for publish:[%s]"::formatted);
+    long stamp = scheduledRemovals.writeLock();
+    try {
+      ScheduledRemovalEntry removed = scheduledRemovals.remove(publish.id());
+      if (removed == null) {
+        throw new NotScheduledForRemovalPublishStorageException(
+            "Publish:[%s] is not scheduled for removal".formatted(publish.id()));
+      }
+    } finally {
+      scheduledRemovals.writeUnlock(stamp);
+    }
+  }
+
+  @Override
+  public void cancelScheduledRemovalIfScheduled(IncomingPublish publish) {
+    log.debug(publish.id(), "Cancel scheduled removal for publish:[%s] if it exists"::formatted);
+    long stamp = scheduledRemovals.writeLock();
+    try {
+      scheduledRemovals.remove(publish.id());
+    } finally {
+      scheduledRemovals.writeUnlock(stamp);
+    }
+  }
+
+  private void cleanup() {
+    MutableArray<UUID> localContainer = ArrayFactory.mutableArray(UUID.class, 500);
+    var mapOperations = scheduledRemovals.operations();
+    
+    while (!closed) {
+      if (ThreadUtils.sleep(cleanupIntervalInMs)) {
+        continue;
+      } else if (scheduledRemovals.isEmpty()) {
+        continue;
+      }
+      localContainer.clear();
+      long stamp = scheduledRemovals.readLock();
+      try {
+        long currentInMs = System.currentTimeMillis();
+        for (ScheduledRemovalEntry scheduledRemovalEntry : scheduledRemovals) {
+          if (scheduledRemovalEntry.removeAfterInMs() < currentInMs) {
+            localContainer.add(scheduledRemovalEntry.publishId());
+          }
+        }
+      } finally {
+        scheduledRemovals.readUnlock(stamp);
+      }
+      if (localContainer.isEmpty()) {
+        continue;
+      }
+      for (UUID publishId : localContainer) {
+        ScheduledRemovalEntry removedFromMap = mapOperations.getInWriteLock(
+            publishId,
+            MutableRefToRefDictionary::remove);
+        if (removedFromMap != null) {
+          removeIfExist(publishId);
+        }
+      }
+      localContainer.clear();
+    }
+  }
+
+  @Override
+  public void close() throws IOException {
+    closed = true;
+    cleanupThread.interrupt();
+  }
+
   @Getter
   @RequiredArgsConstructor
   @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -163,4 +299,6 @@ public class InMemoryIncomingPublishStorage implements IncomingPublishStorage {
     final IncomingPublish publish;
     final AtomicInteger consumerCount = new AtomicInteger(0);
   }
+
+  private record ScheduledRemovalEntry(UUID publishId, long removeAfterInMs) {}
 }

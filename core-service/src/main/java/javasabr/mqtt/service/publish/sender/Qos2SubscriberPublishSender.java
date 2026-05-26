@@ -61,7 +61,7 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
           outgoingPublish);
       return true;
     } else {
-      log.warning(user.clientId(), message.messageType(), message.messageId(),
+      log.warn(user.clientId(), message.messageType(), message.messageId(),
           "[%s] Not expected message type:[%s] for messageId:[%d]"::formatted);
       handleNotExpectedResponseMessage(
           user, 
@@ -89,7 +89,7 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
 
     // if we unknown this flow
     if (trackedMessageMeta == null) {
-      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       // for success reason code we should answer that we don't know what this flow
       if (reasonCode == PublishReceivedReasonCode.SUCCESS) {
         user.sendInBackground(messageOutFactoryService
@@ -102,7 +102,7 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
     
     MqttMessageType trackedMessageType = trackedMessageMeta.messageType();
     if (trackedMessageType != MqttMessageType.PUBLISH) {
-      log.warning(clientId, trackedMessageMeta, messageId,
+      log.warn(clientId, trackedMessageMeta, messageId,
           "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
       handleNotExpectedFlowState(
           user,
@@ -114,10 +114,10 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
 
     MessageTacker messageTacker = session.outMessageTracker();
     if (reasonCode != PublishReceivedReasonCode.SUCCESS) {
-      log.warning(clientId, reasonCode, messageId,
+      log.warn(clientId, reasonCode, messageId,
           "[%s] Received error response:[%s] for publish:[%s]"::formatted);
       // we can cancel the flow
-      messageTacker.remove(messageId);
+      messageTacker.removeIfExist(messageId);
       incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
       return true;
     }
@@ -145,14 +145,14 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
 
     // if we unknown this flow
     if (trackedMessageMeta == null) {
-      log.warning(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
+      log.warn(clientId, messageId, "[%s] No any stored information for messageId:[%d]"::formatted);
       incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
       return;
     }
 
     MqttMessageType trackedMessageType = trackedMessageMeta.messageType();
     if (trackedMessageType != MqttMessageType.PUBLISH_RELEASE) {
-      log.warning(clientId, trackedMessageMeta, messageId,
+      log.warn(clientId, trackedMessageMeta, messageId,
           "[%s] No expected message meta:[%s] for messageId:[%d]"::formatted);
       handleNotExpectedFlowState(
           user, 
@@ -164,13 +164,13 @@ public class Qos2SubscriberPublishSender extends TrackableSubscriberPublishSende
 
     PublishCompletedReasonCode reasonCode = publishComplete.reasonCode();
     if (reasonCode != PublishCompletedReasonCode.SUCCESS) {
-      log.warning(clientId, reasonCode, messageId,
+      log.warn(clientId, reasonCode, messageId,
           "[%s] Received error response:[%s] for publish:[%s]"::formatted);
     }
     
     // finish the flow
     MessageTacker messageTacker = session.outMessageTracker();
-    messageTacker.remove(messageId);
+    messageTacker.removeIfExist(messageId);
     incomingPublishStorage.decreaseConsumerCount(outgoingPublish.source(), 1);
   }
   

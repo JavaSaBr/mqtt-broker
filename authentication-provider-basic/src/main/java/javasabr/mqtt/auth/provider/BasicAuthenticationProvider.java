@@ -50,13 +50,6 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     return DebugUtils.toJsonString(this);
   }
 
-  @JsonValue
-  Object jsonDebugValue() {
-    return Map.of(
-        "authenticationMethod", getAuthenticationMethod(), 
-        "credentialSources", credentialsSources);
-  }
-
   @Override
   public boolean supports(MqttCredentials credentials) {
     byte[] password = credentials.password();
@@ -69,5 +62,12 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
       }
     }
     return true;
+  }
+  
+  @JsonValue
+  Object jsonDebugValue() {
+    return Map.of(
+        "authenticationMethod", getAuthenticationMethod(),
+        "credentialSources", credentialsSources);
   }
 }

@@ -43,19 +43,22 @@ public class Qos0IncomingPublishProcessor extends AbstractIncomingPublishProcess
       IncomingPublish publish) {
     int messageId = publish.messageId();
     if (messageId != MqttProperties.MESSAGE_ID_IS_NOT_SET) {
-      handleNotExpectedMessageId(user, publish);
+      handleNotExpectedMessageId(user);
       return false;
     }
     return super.validateImpl(user, session, publish);
   }
 
   @Override
-  protected void processImpl(ExternalNetworkMqttUser user, NetworkMqttSession session, IncomingPublish publish) {
+  protected void processImpl(
+      ExternalNetworkMqttUser user,
+      NetworkMqttSession session, 
+      IncomingPublish publish) {
     super.processImpl(user, session, publish);
     dispatchToSubscriber(user, session, publish);
   }
 
-  private void handleNotExpectedMessageId(ExternalNetworkMqttUser user, IncomingPublish publish) {
+  private void handleNotExpectedMessageId(ExternalNetworkMqttUser user) {
     MqttOutMessage response = messageOutFactoryService
         .resolveFactory(user)
         .newDisconnect(user, DisconnectReasonCode.PROTOCOL_ERROR, MqttProtocolErrors.NOT_EXPECTED_MESSAGE_ID);

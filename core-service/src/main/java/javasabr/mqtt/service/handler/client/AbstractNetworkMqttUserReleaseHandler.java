@@ -36,7 +36,7 @@ public abstract class AbstractNetworkMqttUserReleaseHandler<T extends AbstractNe
   protected Mono<?> releaseImpl(T user) {
     String clientId = user.clientId();
     if (StringUtils.isEmpty(clientId)) {
-      log.warning(user.ipAddress(), "[%s] Client is already released or rejected"::formatted);
+      log.warn(user.ipAddress(), "[%s] Client is already released or rejected"::formatted);
       return Mono.empty();
     }
     user.clientId(StringUtils.EMPTY);

@@ -52,8 +52,11 @@ public class DebugUtils {
       Class<?> declaringClass = member.getDeclaringClass();
       Set<String> fields = INCLUDED_DEBUG_PROPERTIES.get(declaringClass);
 
-      while (declaringClass != Object.class && fields == null) {
+      while (fields == null && declaringClass != Object.class) {
         declaringClass = declaringClass.getSuperclass();
+        if (declaringClass == null) {
+          break;
+        }
         fields = INCLUDED_DEBUG_PROPERTIES.get(declaringClass);
       }
 

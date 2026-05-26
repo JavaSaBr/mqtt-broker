@@ -13,7 +13,7 @@ public class TopicSegmentResolvers {
   public static TopicSegmentResolver findBySegment(String segment) {
     TopicSegmentResolver computableResolver = RESOLVERS.get(segment);
     if (computableResolver == null && containsVariable(segment)) {
-      log.warning(segment, "Segment:[%s] looks like variable but doesn't much any resolver"::formatted);
+      log.warn(segment, "Segment:[%s] looks like variable but doesn't much any resolver"::formatted);
     }
     return computableResolver == null ? new NoOpsTopicSegmentResolver(segment) : computableResolver;
   }

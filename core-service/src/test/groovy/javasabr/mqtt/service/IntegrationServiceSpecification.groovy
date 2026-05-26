@@ -61,7 +61,9 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   def defaultPublishDataStorage = new InMemoryPublishDataStorage()
   
   @Shared
-  def defaultIncomingPublishStorage = new InMemoryIncomingPublishStorage()
+  def defaultIncomingPublishStorage = new InMemoryIncomingPublishStorage(
+      defaultPublishDataStorage,
+      1000)
   
   @Shared
   def authorizationService = new DisabledAuthorizationService();
@@ -77,7 +79,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   }
   
   @Shared
-  MqttSessionService defaultSessionService = new InMemoryMqttSessionService(1000)
+  MqttSessionService defaultSessionService = new InMemoryMqttSessionService(1000, 100)
 
   @Shared
   def defaultMessageOutFactoryService = new DefaultMessageOutFactoryService([
@@ -130,7 +132,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
   def defaultBufferAllocator = new DefaultBufferAllocator(SimpleServerNetworkConfig.builder().build())
 
   @Shared
-  def defaultMqttSessionService = new InMemoryMqttSessionService(60_000)
+  def defaultMqttSessionService = new InMemoryMqttSessionService(60_000, 60_000)
 
   @Shared
   def disabledAclService = new DisabledAuthorizationService()

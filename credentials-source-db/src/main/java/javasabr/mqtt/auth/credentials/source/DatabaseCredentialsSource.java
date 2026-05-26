@@ -8,6 +8,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
@@ -85,6 +86,14 @@ public class DatabaseCredentialsSource implements CredentialsSource {
   public String toString() {
     String dbDriver = connectionPool.getMetadata().getName();
     return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getType(), dbDriver);
+  }
+
+  @JsonValue
+  Object jsonDebugValue() {
+    String dbDriver = connectionPool
+        .getMetadata()
+        .getName();
+    return Map.of("credentialsSource", getType(), "databaseDriver", dbDriver);
   }
 
   private Mono<Boolean> verifyCredentials(Connection connection, MqttCredentials credentials) {

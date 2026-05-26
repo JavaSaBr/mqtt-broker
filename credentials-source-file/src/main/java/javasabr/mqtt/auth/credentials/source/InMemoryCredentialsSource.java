@@ -1,9 +1,11 @@
 package javasabr.mqtt.auth.credentials.source;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import javasabr.mqtt.auth.api.CredentialsSource;
 import javasabr.mqtt.auth.api.MqttCredentials;
@@ -51,5 +53,10 @@ public abstract class InMemoryCredentialsSource implements CredentialsSource {
   @Override
   public Mono<Boolean> isCredentialsValid(MqttCredentials mqttCredentials) {
     return Mono.just(Arrays.equals(mqttCredentials.password(), credentials.get(mqttCredentials.username())));
+  }
+  
+  @JsonValue
+  Object jsonDebugValue() {
+    return Map.of("credentials", credentials.size());
   }
 }

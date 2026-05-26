@@ -24,6 +24,9 @@ public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
   MqttMessageType messageType;
   @Nullable
   ReasonCode reasonCode;
+  
+  int messageId;
+  long expiredAt;
 
   @Override
   public String toString() {
@@ -33,7 +36,9 @@ public class InMemoryTrackedMessageMeta implements TrackedMessageMeta {
   @JsonValue
   public Map<?, ?> jsonDebugValue() {
     return Map.of(
+        "messageId", messageId,
         "messageType", messageType,
-        "reasonCode", String.valueOf(reasonCode));
+        "reasonCode", String.valueOf(reasonCode),
+        "expiredAt", expiredAt);
   }
 }

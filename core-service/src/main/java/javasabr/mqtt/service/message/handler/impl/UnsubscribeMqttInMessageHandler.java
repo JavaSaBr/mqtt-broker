@@ -50,7 +50,7 @@ public class UnsubscribeMqttInMessageHandler
     int messageId = unsubscribeMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
     if (messageTacker.stored(messageId) != null) {
-      log.warning(user.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
+      log.warn(user.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
       handleMessageIdIsInUse(user, unsubscribeMessage);
       return;
     }
@@ -74,7 +74,7 @@ public class UnsubscribeMqttInMessageHandler
         .sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
-            .remove(messageId));
+            .removeIfExist(messageId));
   }
 
   private void handleMessageIdIsInUse(

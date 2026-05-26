@@ -1,6 +1,7 @@
 package javasabr.mqtt.service.session.impl;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 import javasabr.mqtt.model.MqttProperties;
@@ -28,27 +29,35 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   final LockableRefToRefDictionary<String, ExpirableSession> storedExpirableSessions;
 
   final AtomicLong internalIdGenerator;
-  final Thread cleanThread;
+  final Thread cleanupThread;
   final OldestSessionCleaner<ExpirableSession> expirableOldestSessionCleaner;
   final OldestSessionCleaner<NotExpirableSession> notExpirableOldestSessionCleaner;
   final ExpiredSessionCleaner expiredSessionCleaner;
+  final ActiveSessionUpdater activeSessionUpdater;
 
-  final int cleanIntervalInMs;
+  final int cleanupIntervalInMs;
   final int hardSessionsLimit;
   
   volatile boolean closed;
 
-  public InMemoryMqttSessionService(int cleanIntervalInMs) {
-    this(cleanIntervalInMs, MAX_SESSIONS, MAX_SESSIONS, HARD_SESSIONS_LIMIT, CLEANUP_BATCH_SIZE);
+  public InMemoryMqttSessionService(int cleanupIntervalInMs, int updateIntervalInMs) {
+    this(
+        cleanupIntervalInMs, 
+        updateIntervalInMs, 
+        MAX_SESSIONS,
+        MAX_SESSIONS, 
+        HARD_SESSIONS_LIMIT,
+        CLEANUP_BATCH_SIZE);
   }
   
   public InMemoryMqttSessionService(
-      int cleanIntervalInMs,
+      int cleanupIntervalInMs,
+      int updateIntervalInMs,
       int maxNotExpirableSessions,
       int maxExpirableStoredSessions,
       int hardSessionsLimit,
       int cleanupBatchSize) {
-    this.cleanIntervalInMs = cleanIntervalInMs;
+    this.cleanupIntervalInMs = cleanupIntervalInMs;
     this.hardSessionsLimit = hardSessionsLimit;
     this.activeSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
     this.storedExpirableSessions = DictionaryFactory.stampedLockBasedRefToRefDictionary();
@@ -63,10 +72,11 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
         maxNotExpirableSessions,
         cleanupBatchSize);
     this.expiredSessionCleaner = new ExpiredSessionCleaner(storedExpirableSessions);
-    this.cleanThread = new Thread(this::cleanup, "InMemoryMqttSessionService-Cleanup");
-    this.cleanThread.setPriority(Thread.MIN_PRIORITY);
-    this.cleanThread.setDaemon(true);
-    this.cleanThread.start();
+    this.activeSessionUpdater = new ActiveSessionUpdater(activeSessions, updateIntervalInMs);
+    this.cleanupThread = new Thread(this::cleanup, "InMemoryMqttSessionService-Cleanup");
+    this.cleanupThread.setPriority(Thread.MIN_PRIORITY);
+    this.cleanupThread.setDaemon(true);
+    this.cleanupThread.start();
   }
 
   @Override
@@ -122,25 +132,41 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   @Override
   public Mono<Boolean> store(String clientId, NetworkMqttSession session) {
+    Duration expiryInterval = session.expiryInterval();
+    boolean storable = expiryInterval != null && expiryInterval != MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
+
+    InMemoryNetworkMqttSession activeSession;
     // check if we already have an active session
     long stamp = activeSessions.writeLock();
     try {
-      InMemoryNetworkMqttSession currentActiveSession = activeSessions.get(clientId);
-      if (currentActiveSession != session) {
+      activeSession = activeSessions.get(clientId);
+      if (activeSession != session) {
         throw new IllegalStateException("Client:[%s] has another active session".formatted(clientId));
+      } else if (storable) {
+        // replace to a blocker constant to not allow to restore/create a new session 
+        // for the client id until finishing storing process
+        activeSessions.put(clientId, InMemoryNetworkMqttSession.BLOCKER);
+      } else {
+        activeSessions.remove(clientId);
       }
-      activeSessions.remove(clientId);
     } finally {
       activeSessions.writeUnlock(stamp);
     }
-    InMemoryNetworkMqttSession storableSession = (InMemoryNetworkMqttSession) session;
-    Duration expiryInterval = session.expiryInterval();
-    if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_DISABLED) {
+    if (!storable) {
       return Mono.just(false);
-    } else if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
-      storeNotExpirableSession(clientId, storableSession);
+    }
+    // store the session depends on expiration configuration
+    if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
+      storeNotExpirableSession(clientId, activeSession);
     } else {
-      storeExpirableSession(clientId, expiryInterval, storableSession);
+      storeExpirableSession(clientId, expiryInterval, activeSession);
+    }
+    // cleanup the blocker
+    stamp = activeSessions.writeLock();
+    try {
+      activeSessions.remove(clientId);
+    } finally {
+      activeSessions.writeUnlock(stamp);
     }
     return Mono.just(true);
   }
@@ -255,7 +281,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   private void cleanup() {
     while (!closed) {
-      ThreadUtils.sleep(cleanIntervalInMs);
+      if (ThreadUtils.sleep(cleanupIntervalInMs)) {
+        continue;
+      }
       expiredSessionCleaner.cleanup();
       expirableOldestSessionCleaner.cleanup();
       notExpirableOldestSessionCleaner.cleanup();
@@ -263,8 +291,9 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
   }
   
   @Override
-  public void close() {
+  public void close() throws IOException {
     closed = true;
-    cleanThread.interrupt();
+    cleanupThread.interrupt();
+    activeSessionUpdater.close();
   }
 }

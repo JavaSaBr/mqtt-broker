@@ -27,7 +27,7 @@ public class PublishQosMqttInMessageFieldValidator extends
     QoS requestedQos = message.qos();
     MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
     if (connectionConfig.maxQos().isLowerThan(requestedQos)) {
-      log.warning(user.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
+      log.warn(user.clientId(), requestedQos, "[%s] Requested QoS:[%s] is not supported"::formatted);
       handleNotSupportedQos(user);
       return true;
     }
