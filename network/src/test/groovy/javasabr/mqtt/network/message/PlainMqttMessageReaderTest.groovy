@@ -33,7 +33,7 @@ class PlainMqttMessageReaderTest extends NetworkUnitSpecification {
             { p -> } as Consumer,
             { p -> } as Consumer,
             10,
-            new MqttPacketCreator())
+            new MqttPacketCodec())
 
         def buffer = ByteBuffer.allocate(10)
         buffer.put((byte) 0x10)

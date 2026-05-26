@@ -2,7 +2,7 @@ package javasabr.mqtt.service.impl
 
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.network.message.MqttPacketCreator
+import javasabr.mqtt.network.message.MqttPacketCodec
 import javasabr.mqtt.network.user.NetworkMqttUserFactory
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import javasabr.mqtt.network.TlsProperties
@@ -56,7 +56,7 @@ class TlsMqttConnectionFactoryTest extends Specification {
                 .tlsProtocols(["TLSv1.3"])
                 .build(),
             allocator,
-            new MqttPacketCreator()
+            new MqttPacketCodec()
         )
         
         def network = Mock(Network) {

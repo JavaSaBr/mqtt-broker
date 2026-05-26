@@ -4,7 +4,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.Network;
 import javasabr.rlib.network.impl.DefaultBufferAllocator;
@@ -19,7 +19,7 @@ public class PlainMqttConnectionFactory implements MqttConnectionFactory {
   MqttServerConnectionConfig serverConnectionConfig;
   NetworkMqttUserFactory clientFactory;
   int maxPacketsByRead;
-  MqttPacketCreator mqttPacketCreator;
+  MqttPacketCodec mqttPacketCodec;
 
   @Override
   public MqttConnection newConnection(Network<MqttConnection> network, AsynchronousSocketChannel channel) {
@@ -30,7 +30,6 @@ public class PlainMqttConnectionFactory implements MqttConnectionFactory {
         bufferAllocator,
         maxPacketsByRead,
         serverConnectionConfig,
-        clientFactory,
-        mqttPacketCreator);
+        clientFactory, mqttPacketCodec);
   }
 }

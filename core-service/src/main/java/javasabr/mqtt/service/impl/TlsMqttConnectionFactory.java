@@ -5,7 +5,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.TlsMqttConnection;
 import javasabr.mqtt.network.TlsProperties;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.rlib.network.BufferAllocator;
 import javasabr.rlib.network.Network;
@@ -19,7 +19,7 @@ public class TlsMqttConnectionFactory extends PlainMqttConnectionFactory {
   SSLContext sslContext;
   TlsProperties tlsProperties;
   BufferAllocator bufferAllocator;
-  MqttPacketCreator mqttPacketCreator;
+  MqttPacketCodec mqttPacketCodec;
 
   public TlsMqttConnectionFactory(
       MqttServerConnectionConfig serverConnectionConfig,
@@ -28,12 +28,12 @@ public class TlsMqttConnectionFactory extends PlainMqttConnectionFactory {
       SSLContext sslContext,
       TlsProperties tlsProperties,
       BufferAllocator bufferAllocator,
-      MqttPacketCreator mqttPacketCreator) {
-    super(serverConnectionConfig, clientFactory, maxPacketsByRead, mqttPacketCreator);
+      MqttPacketCodec mqttPacketCodec) {
+    super(serverConnectionConfig, clientFactory, maxPacketsByRead, mqttPacketCodec);
     this.sslContext = sslContext;
     this.tlsProperties = tlsProperties;
     this.bufferAllocator = bufferAllocator;
-    this.mqttPacketCreator = mqttPacketCreator;
+    this.mqttPacketCodec = mqttPacketCodec;
   }
 
   @Override
@@ -47,7 +47,6 @@ public class TlsMqttConnectionFactory extends PlainMqttConnectionFactory {
         clientFactory,
         sslContext,
         tlsProperties,
-        false,
-        mqttPacketCreator);
+        false, mqttPacketCodec);
   }
 }

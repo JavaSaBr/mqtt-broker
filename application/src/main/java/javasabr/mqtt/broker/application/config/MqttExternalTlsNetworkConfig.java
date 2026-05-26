@@ -10,7 +10,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
 import javasabr.mqtt.network.TlsProperties;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.impl.TlsMqttConnectionFactory;
@@ -111,7 +111,7 @@ public class MqttExternalTlsNetworkConfig {
       SSLContext externalNetworkSslContext,
       TlsProperties tlsProperties,
       ServerNetworkConfig tlsNetworkConfig,
-      MqttPacketCreator mqttPacketCreator) {
+      MqttPacketCodec mqttPacketCodec) {
     DefaultBufferAllocator defaultBufferAllocator = new DefaultBufferAllocator(tlsNetworkConfig);
     return new TlsMqttConnectionFactory(
         externalServerConnectionConfig,
@@ -119,8 +119,7 @@ public class MqttExternalTlsNetworkConfig {
         maxPacketsByRead,
         externalNetworkSslContext,
         tlsProperties,
-        defaultBufferAllocator,
-        mqttPacketCreator);
+        defaultBufferAllocator, mqttPacketCodec);
   }
 
   @Bean

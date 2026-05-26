@@ -10,7 +10,7 @@ import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler
-import javasabr.mqtt.network.message.MqttPacketCreator
+import javasabr.mqtt.network.message.MqttPacketCodec
 import javasabr.mqtt.service.impl.DefaultMessageOutFactoryService
 import javasabr.mqtt.service.impl.DefaultTopicService
 import javasabr.mqtt.service.impl.DisabledAuthorizationService
@@ -173,7 +173,7 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
           user.clientId(generatedClientId)
           return user
         },
-        new MqttPacketCreator())
+        new MqttPacketCodec())
 
     connection.configure(new MqttClientConnectionConfig(
         serverConnectionConfig,
@@ -204,6 +204,6 @@ abstract class IntegrationServiceSpecification extends BaseSpecification {
         { MqttConnection ownedConnection ->
           return new TestExternalNetworkMqttUser(ownedConnection, Mock(NetworkMqttUserReleaseHandler))
         },
-        new MqttPacketCreator())
+        new MqttPacketCodec())
   }
 }

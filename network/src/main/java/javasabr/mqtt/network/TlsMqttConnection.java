@@ -4,7 +4,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.List;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.exception.TlsProtocolException;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.message.ssl.TlsMqttMessageReader;
 import javasabr.mqtt.network.message.ssl.TlsMqttMessageWriter;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
@@ -38,9 +38,9 @@ public class TlsMqttConnection extends MqttConnection {
       SSLContext sslContext,
       TlsProperties tlsProperties,
       boolean clientMode,
-      MqttPacketCreator mqttPacketCreator) {
+      MqttPacketCodec mqttPacketCodec) {
     this.sslEngine = sslContext.createSSLEngine();
-    super(network, channel, bufferAllocator, maxPacketsByRead, serverConnectionConfig, mqttUserFactory, mqttPacketCreator);
+    super(network, channel, bufferAllocator, maxPacketsByRead, serverConnectionConfig, mqttUserFactory, mqttPacketCodec);
     this.sslEngine.setUseClientMode(clientMode);
     this.sslEngine.setNeedClientAuth(tlsProperties.requireClientCert());
     List<String> tlsProtocols = tlsProperties.tlsProtocols();
@@ -64,7 +64,7 @@ public class TlsMqttConnection extends MqttConnection {
   }
 
   @Override
-  protected NetworkPacketReader createPacketReader(MqttPacketCreator mqttPacketCreator) {
+  protected NetworkPacketReader createPacketReader(MqttPacketCodec mqttPacketCodec) {
     return new TlsMqttMessageReader(
         this,
         this::updateLastActivity,
@@ -72,12 +72,11 @@ public class TlsMqttConnection extends MqttConnection {
         this::handleReceivedInvalidPacket,
         sslEngine,
         this::sendInBackground,
-        maxPacketsByRead,
-        mqttPacketCreator);
+        maxPacketsByRead, mqttPacketCodec);
   }
 
   @Override
-  protected NetworkPacketWriter createPacketWriter() {
+  protected NetworkPacketWriter createPacketWriter(MqttPacketCodec mqttPacketCodec) {
     return new TlsMqttMessageWriter(
         this,
         this::updateLastActivity,
@@ -85,6 +84,7 @@ public class TlsMqttConnection extends MqttConnection {
         this::serializedPacket,
         this::handleSentPacket,
         sslEngine,
-        this::queueAtFirst);
+        this::queueAtFirst,
+        mqttPacketCodec);
   }
 }

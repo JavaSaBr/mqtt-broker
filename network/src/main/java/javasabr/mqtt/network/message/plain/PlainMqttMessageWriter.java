@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.functions.ObjBoolConsumer;
 import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractNetworkPacketWriter;
@@ -13,25 +13,27 @@ import org.jspecify.annotations.Nullable;
 
 public class PlainMqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutMessage, MqttConnection> {
 
-  public static final int DATA_OFFSET = 5;
+  private final MqttPacketCodec mqttPacketCodec;
 
   public PlainMqttMessageWriter(
       MqttConnection connection,
       Runnable updateActivityFunction,
       Supplier<@Nullable WritableNetworkPacket<MqttConnection>> packetProvider,
       Consumer<WritableNetworkPacket<MqttConnection>> serializedToChannelPacketHandler,
-      ObjBoolConsumer<WritableNetworkPacket<MqttConnection>> sentPacketHandler) {
+      ObjBoolConsumer<WritableNetworkPacket<MqttConnection>> sentPacketHandler,
+      MqttPacketCodec mqttPacketCodec) {
     super(
         connection,
         updateActivityFunction,
         packetProvider,
         serializedToChannelPacketHandler,
         sentPacketHandler);
+    this.mqttPacketCodec = mqttPacketCodec;
   }
 
   @Override
   protected int totalSize(WritableNetworkPacket<MqttConnection> packet, int expectedLength) {
-    return DATA_OFFSET + expectedLength;
+    return mqttPacketCodec.calculateTotalSize(expectedLength);
   }
 
   @Override
@@ -40,7 +42,7 @@ public class PlainMqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutM
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
-    writeBuffer.clear().position(DATA_OFFSET);
+    mqttPacketCodec.prepareBuffer(writeBuffer);
     return true;
   }
 
@@ -50,20 +52,7 @@ public class PlainMqttMessageWriter extends AbstractNetworkPacketWriter<MqttOutM
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
-
-    int lastDataByteIndex = writeBuffer.position();
-    int dataLength = lastDataByteIndex - DATA_OFFSET;
-    int offset = 4 - MqttDataUtils.sizeOfMbi(dataLength);
-
-    writeBuffer
-        .position(offset)
-        .put((byte) packet.messageTypeAndFlags());
-
-    MqttDataUtils
-        .writeMbi(dataLength, writeBuffer)
-        .position(offset)
-        .limit(lastDataByteIndex);
-
+    mqttPacketCodec.finalizeHeader(packet, writeBuffer);
     return true;
   }
 }

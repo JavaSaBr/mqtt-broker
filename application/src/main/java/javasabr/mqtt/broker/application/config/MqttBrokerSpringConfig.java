@@ -9,7 +9,7 @@ import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.QoS;
 import javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler;
 import javasabr.mqtt.network.impl.ExternalNetworkMqttUser;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.AuthorizationService;
 import javasabr.mqtt.service.ClientIdRegistry;
@@ -396,8 +396,8 @@ public class MqttBrokerSpringConfig {
 
 
   @Bean
-  MqttPacketCreator mqttPacketCreator() {
-    return new MqttPacketCreator();
+  MqttPacketCodec mqttPacketCreator() {
+    return new MqttPacketCodec();
   }
 
 }

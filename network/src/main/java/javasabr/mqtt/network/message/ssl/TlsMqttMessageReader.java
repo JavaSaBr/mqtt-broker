@@ -3,7 +3,7 @@ package javasabr.mqtt.network.message.ssl;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractSslNetworkPacketReader;
@@ -16,7 +16,8 @@ public class TlsMqttMessageReader
     extends AbstractSslNetworkPacketReader<MqttInMessage, MqttConnection> {
 
   private static final int PACKET_LENGTH_POSITION = 2;
-  private final MqttPacketCreator mqttPacketCreator;
+
+  private final MqttPacketCodec mqttPacketCodec;
 
   public TlsMqttMessageReader(
       MqttConnection connection,
@@ -26,7 +27,7 @@ public class TlsMqttMessageReader
       SSLEngine sslEngine,
       Consumer<WritableNetworkPacket<MqttConnection>> packetWriter,
       int maxPacketsByRead,
-      MqttPacketCreator mqttPacketCreator) {
+      MqttPacketCodec mqttPacketCodec) {
     super(
         connection,
         updateActivityFunction,
@@ -35,7 +36,7 @@ public class TlsMqttMessageReader
         sslEngine,
         packetWriter,
         maxPacketsByRead);
-    this.mqttPacketCreator = mqttPacketCreator;
+    this.mqttPacketCodec = mqttPacketCodec;
   }
 
   @Override
@@ -45,7 +46,7 @@ public class TlsMqttMessageReader
 
   @Override
   protected int readFullPacketLength(ByteBuffer buffer) {
-    return mqttPacketCreator.readFullPacketLength(buffer);
+    return mqttPacketCodec.readFullPacketLength(buffer);
   }
 
   @Nullable
@@ -55,6 +56,6 @@ public class TlsMqttMessageReader
       int startPacketPosition,
       int packetLength,
       int dataLength) {
-    return mqttPacketCreator.createPacketFor(buffer, startPacketPosition);
+    return mqttPacketCodec.createPacketFor(buffer, startPacketPosition);
   }
 }

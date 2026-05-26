@@ -4,7 +4,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.message.plain.PlainMqttMessageReader;
 import javasabr.mqtt.network.message.plain.PlainMqttMessageWriter;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
@@ -46,11 +46,11 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       int maxPacketsByRead,
       MqttServerConnectionConfig serverConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
-      MqttPacketCreator mqttPacketCreator) {
+      MqttPacketCodec mqttPacketCodec) {
     super(network, channel, bufferAllocator, maxPacketsByRead);
     this.serverConnectionConfig = serverConnectionConfig;
-    this.packetReader = createPacketReader(mqttPacketCreator);
-    this.packetWriter = createPacketWriter();
+    this.packetReader = createPacketReader(mqttPacketCodec);
+    this.packetWriter = createPacketWriter(mqttPacketCodec);
     this.user = mqttUserFactory.createNetworkUser(this);
   }
 
@@ -83,23 +83,23 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return user;
   }
 
-  protected NetworkPacketReader createPacketReader(MqttPacketCreator mqttPacketCreator) {
+  protected NetworkPacketReader createPacketReader(MqttPacketCodec mqttPacketCodec) {
     return new PlainMqttMessageReader(
         this,
         this::updateLastActivity,
         this::handleReceivedValidPacket,
         this::handleReceivedInvalidPacket,
-        maxPacketsByRead,
-        mqttPacketCreator);
+        maxPacketsByRead, mqttPacketCodec);
   }
 
-  protected NetworkPacketWriter createPacketWriter() {
+  protected NetworkPacketWriter createPacketWriter(MqttPacketCodec mqttPacketCodec) {
     return new PlainMqttMessageWriter(
         this,
         this::updateLastActivity,
         this::nextPacketToWrite,
         this::serializedPacket,
-        this::handleSentPacket);
+        this::handleSentPacket,
+        mqttPacketCodec);
   }
 
   @Override

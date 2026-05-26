@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javasabr.mqtt.network.MqttConnection;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.message.out.MqttOutMessage;
-import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.functions.ObjBoolConsumer;
 import javasabr.rlib.network.packet.WritableNetworkPacket;
 import javasabr.rlib.network.packet.impl.AbstractSslNetworkPacketWriter;
@@ -13,9 +13,7 @@ import javax.net.ssl.SSLEngine;
 
 public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOutMessage, MqttConnection> {
 
-  private static final int MAX_MBI_SIZE = 4;
-  private static final int HEADER_TYPE_SIZE = 1;
-  private static final int PAYLOAD_OFFSET = MAX_MBI_SIZE + HEADER_TYPE_SIZE;
+  private final MqttPacketCodec mqttPacketCodec;
 
   public TlsMqttMessageWriter(
       MqttConnection connection,
@@ -24,7 +22,8 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
       Consumer<WritableNetworkPacket<MqttConnection>> serializedToChannelPacketHandler,
       ObjBoolConsumer<WritableNetworkPacket<MqttConnection>> sentPacketHandler,
       SSLEngine sslEngine,
-      Consumer<WritableNetworkPacket<MqttConnection>> queueAtFirst) {
+      Consumer<WritableNetworkPacket<MqttConnection>> queueAtFirst,
+      MqttPacketCodec mqttPacketCodec) {
     super(
         connection,
         updateActivityFunction,
@@ -33,11 +32,12 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
         sentPacketHandler,
         sslEngine,
         queueAtFirst);
+    this.mqttPacketCodec = mqttPacketCodec;
   }
 
   @Override
   protected int totalSize(WritableNetworkPacket<MqttConnection> packet, int expectedLength) {
-    return PAYLOAD_OFFSET + expectedLength;
+    return mqttPacketCodec.calculateTotalSize(expectedLength);
   }
 
   @Override
@@ -46,7 +46,7 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
-    writeBuffer.clear().position(PAYLOAD_OFFSET);
+    mqttPacketCodec.prepareBuffer(writeBuffer);
     return true;
   }
 
@@ -56,16 +56,7 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
-    int maxBufferPosition = writeBuffer.position();
-    int payloadSize = maxBufferPosition - PAYLOAD_OFFSET;
-    int messageTypeAndFlagsOffset = MAX_MBI_SIZE - MqttDataUtils.sizeOfMbi(payloadSize);
-    writeBuffer
-        .position(messageTypeAndFlagsOffset)
-        .put((byte) packet.messageTypeAndFlags());
-    MqttDataUtils
-        .writeMbi(payloadSize, writeBuffer)
-        .position(messageTypeAndFlagsOffset)
-        .limit(maxBufferPosition);
+    mqttPacketCodec.finalizeHeader(packet, writeBuffer);
     return true;
   }
 }

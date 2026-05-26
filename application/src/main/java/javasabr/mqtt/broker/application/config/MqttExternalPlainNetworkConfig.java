@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.MqttConnectionFactory;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
 import javasabr.mqtt.service.ConnectionService;
 import javasabr.mqtt.service.impl.PlainMqttConnectionFactory;
@@ -46,12 +46,11 @@ public class MqttExternalPlainNetworkConfig {
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
-      MqttPacketCreator mqttPacketCreator) {
+      MqttPacketCodec mqttPacketCodec) {
     return new PlainMqttConnectionFactory(
         externalServerConnectionConfig,
         mqttUserFactory,
-        maxPacketsByRead,
-        mqttPacketCreator);
+        maxPacketsByRead, mqttPacketCodec);
   }
 
   @Bean

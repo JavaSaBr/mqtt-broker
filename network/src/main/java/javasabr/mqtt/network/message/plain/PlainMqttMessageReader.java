@@ -3,7 +3,7 @@ package javasabr.mqtt.network.message.plain;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import javasabr.mqtt.network.MqttConnection;
-import javasabr.mqtt.network.message.MqttPacketCreator;
+import javasabr.mqtt.network.message.MqttPacketCodec;
 import javasabr.mqtt.network.message.in.MqttInMessage;
 import javasabr.rlib.network.packet.impl.AbstractNetworkPacketReader;
 import lombok.CustomLog;
@@ -14,7 +14,7 @@ public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMe
 
   private static final int PACKET_LENGTH_START_BYTE = 2;
 
-  private final MqttPacketCreator mqttPacketCreator;
+  private final MqttPacketCodec mqttPacketCodec;
 
   public PlainMqttMessageReader(
       MqttConnection connection,
@@ -22,9 +22,9 @@ public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMe
       Consumer<MqttInMessage> validPacketHandler,
       Consumer<MqttInMessage> invalidPacketHandler,
       int maxPacketsByRead,
-      MqttPacketCreator mqttPacketCreator) {
+      MqttPacketCodec mqttPacketCodec) {
     super(connection, updateActivityFunction, validPacketHandler, invalidPacketHandler, maxPacketsByRead);
-    this.mqttPacketCreator = mqttPacketCreator;
+    this.mqttPacketCodec = mqttPacketCodec;
   }
 
   @Override
@@ -34,7 +34,7 @@ public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMe
 
   @Override
   protected int readFullPacketLength(ByteBuffer buffer) {
-    return mqttPacketCreator.readFullPacketLength(buffer);
+    return mqttPacketCodec.readFullPacketLength(buffer);
   }
 
   @Nullable
@@ -44,6 +44,6 @@ public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMe
       int startPacketPosition,
       int packetLength,
       int dataLength) {
-    return mqttPacketCreator.createPacketFor(buffer, startPacketPosition);
+    return mqttPacketCodec.createPacketFor(buffer, startPacketPosition);
   }
 }
