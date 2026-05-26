@@ -5,6 +5,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.security.KeyStore
 
 /**
@@ -18,6 +19,7 @@ class TestSslContexts {
   private static final String KEY_ALG = "RSA"
   private static final String KEY_SIZE = "2048"
   private static final String VALIDITY = "365"
+  private static final String KEYTOOL_PATH = resolveKeytoolPath()
 
   private final Path tempDir
   private final Path serverKeystore
@@ -160,15 +162,25 @@ class TestSslContexts {
   }
 
   private static void runKeytool(String... args) {
-    String javaHome = System.getProperty("java.home")
-    String keytool = javaHome + "/bin/keytool"
-    ProcessBuilder pb = new ProcessBuilder([keytool] + args.toList())
+    ProcessBuilder pb = new ProcessBuilder([KEYTOOL_PATH] + args.toList())
     pb.redirectErrorStream(true)
     Process process = pb.start()
     int exitCode = process.waitFor()
     if (exitCode != 0) {
       String output = process.getInputStream().text
       throw new RuntimeException("keytool failed (exit ${exitCode}): ${output}")
+    }
+  }
+
+  private static String resolveKeytoolPath() {
+    def javaBinPath = Paths.get(System.getProperty("java.home"), "bin")
+    def keytoolFile = ['keytool.exe', 'keytool']
+        .collect { javaBinPath.resolve(it).toFile() }
+        .find { it.exists() }
+    if (keytoolFile) {
+      return keytoolFile.absolutePath
+    } else {
+      throw new RuntimeException("keytool not found")
     }
   }
 
