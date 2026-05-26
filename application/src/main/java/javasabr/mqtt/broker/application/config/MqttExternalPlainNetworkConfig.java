@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 @CustomLog
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "mqtt.external.plain.network.enabled", matchIfMissing = true)
-public class MqttExternalPlainNetworkConfig { 
+public class MqttExternalPlainNetworkConfig {
 
   @Bean
   ServerNetworkConfig externalNetworkConfig(
@@ -42,7 +42,7 @@ public class MqttExternalPlainNetworkConfig {
   }
 
   @Bean
-  MqttConnectionFactory<MqttConnection> externalConnectionFactory(
+  MqttConnectionFactory externalConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
@@ -64,7 +64,7 @@ public class MqttExternalPlainNetworkConfig {
   @Bean
   ServerNetwork<MqttConnection> externalNetwork(
       ServerNetworkConfig externalNetworkConfig,
-      MqttConnectionFactory<MqttConnection> externalConnectionFactory) {
+      MqttConnectionFactory externalConnectionFactory) {
     return NetworkFactory.serverNetwork(externalNetworkConfig, externalConnectionFactory::newConnection);
   }
 

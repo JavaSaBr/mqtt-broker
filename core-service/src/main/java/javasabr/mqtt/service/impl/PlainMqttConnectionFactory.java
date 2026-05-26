@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public class PlainMqttConnectionFactory implements MqttConnectionFactory<MqttConnection> {
+public class PlainMqttConnectionFactory implements MqttConnectionFactory {
 
   MqttServerConnectionConfig serverConnectionConfig;
   NetworkMqttUserFactory clientFactory;

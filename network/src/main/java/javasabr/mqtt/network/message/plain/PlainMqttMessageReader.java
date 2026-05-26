@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage, MqttConnection> {
 
   private static final int PACKET_LENGTH_START_BYTE = 2;
+
   private final MqttPacketCreator mqttPacketCreator;
 
   public PlainMqttMessageReader(

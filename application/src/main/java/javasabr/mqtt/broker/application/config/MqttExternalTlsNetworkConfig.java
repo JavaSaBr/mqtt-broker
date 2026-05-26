@@ -104,7 +104,7 @@ public class MqttExternalTlsNetworkConfig {
   }
 
   @Bean
-  MqttConnectionFactory<MqttConnection> tlsMqttConnectionFactory(
+  MqttConnectionFactory tlsMqttConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
@@ -150,7 +150,7 @@ public class MqttExternalTlsNetworkConfig {
   @Bean
   ServerNetwork<MqttConnection> tlsNetwork(
       ServerNetworkConfig tlsNetworkConfig,
-      MqttConnectionFactory<MqttConnection> tlsMqttConnectionFactory) {
+      MqttConnectionFactory tlsMqttConnectionFactory) {
     return NetworkFactory.serverNetwork(tlsNetworkConfig, tlsMqttConnectionFactory::newConnection);
   }
 
