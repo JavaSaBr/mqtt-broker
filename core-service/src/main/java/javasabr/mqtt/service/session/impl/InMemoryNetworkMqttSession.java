@@ -24,6 +24,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryNetworkMqttSession implements ConfigurableNetworkMqttSession {
   
+  static final InMemoryNetworkMqttSession BLOCKER = new InMemoryNetworkMqttSession("<blocker>", -1);
+  
   @EqualsAndHashCode.Include
   final String clientId;
   final long internalId;

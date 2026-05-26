@@ -132,25 +132,41 @@ public class InMemoryMqttSessionService implements MqttSessionService, Closeable
 
   @Override
   public Mono<Boolean> store(String clientId, NetworkMqttSession session) {
+    Duration expiryInterval = session.expiryInterval();
+    boolean storable = expiryInterval != null && expiryInterval != MqttProperties.SESSION_EXPIRY_DURATION_DISABLED;
+
+    InMemoryNetworkMqttSession activeSession;
     // check if we already have an active session
     long stamp = activeSessions.writeLock();
     try {
-      InMemoryNetworkMqttSession currentActiveSession = activeSessions.get(clientId);
-      if (currentActiveSession != session) {
+      activeSession = activeSessions.get(clientId);
+      if (activeSession != session) {
         throw new IllegalStateException("Client:[%s] has another active session".formatted(clientId));
+      } else if (storable) {
+        // replace to a blocker constant to not allow to restore/create a new session 
+        // for the client id until finishing storing process
+        activeSessions.put(clientId, InMemoryNetworkMqttSession.BLOCKER);
+      } else {
+        activeSessions.remove(clientId);
       }
-      activeSessions.remove(clientId);
     } finally {
       activeSessions.writeUnlock(stamp);
     }
-    InMemoryNetworkMqttSession storableSession = (InMemoryNetworkMqttSession) session;
-    Duration expiryInterval = session.expiryInterval();
-    if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_DISABLED) {
+    if (!storable) {
       return Mono.just(false);
-    } else if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
-      storeNotExpirableSession(clientId, storableSession);
+    }
+    // store the session depends on expiration configuration
+    if (expiryInterval == MqttProperties.SESSION_EXPIRY_DURATION_INFINITY) {
+      storeNotExpirableSession(clientId, activeSession);
     } else {
-      storeExpirableSession(clientId, expiryInterval, storableSession);
+      storeExpirableSession(clientId, expiryInterval, activeSession);
+    }
+    // cleanup the blocker
+    stamp = activeSessions.writeLock();
+    try {
+      activeSessions.remove(clientId);
+    } finally {
+      activeSessions.writeUnlock(stamp);
     }
     return Mono.just(true);
   }
