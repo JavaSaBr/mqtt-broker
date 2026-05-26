@@ -37,7 +37,7 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
 
   @Override
   protected int totalSize(WritableNetworkPacket<MqttConnection> packet, int expectedLength) {
-    return mqttPacketCodec.calculateTotalSize(expectedLength);
+    return mqttPacketCodec.calculateEncodedPacketSize(expectedLength);
   }
 
   @Override
@@ -46,7 +46,7 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
-    mqttPacketCodec.prepareBuffer(writeBuffer);
+    mqttPacketCodec.prepareEncodingBuffer(writeBuffer);
     return true;
   }
 
@@ -56,7 +56,7 @@ public class TlsMqttMessageWriter extends AbstractSslNetworkPacketWriter<MqttOut
       int expectedLength,
       int totalSize,
       ByteBuffer writeBuffer) {
-    mqttPacketCodec.finalizeHeader(packet, writeBuffer);
+    mqttPacketCodec.encodeHeader(packet, writeBuffer);
     return true;
   }
 }

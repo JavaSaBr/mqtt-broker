@@ -34,7 +34,7 @@ public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMe
 
   @Override
   protected int readFullPacketLength(ByteBuffer buffer) {
-    return mqttPacketCodec.readFullPacketLength(buffer);
+    return mqttPacketCodec.decodePacketLength(buffer);
   }
 
   @Nullable
@@ -44,6 +44,6 @@ public class PlainMqttMessageReader extends AbstractNetworkPacketReader<MqttInMe
       int startPacketPosition,
       int packetLength,
       int dataLength) {
-    return mqttPacketCodec.createPacketFor(buffer, startPacketPosition);
+    return mqttPacketCodec.decodePacket(buffer, startPacketPosition);
   }
 }

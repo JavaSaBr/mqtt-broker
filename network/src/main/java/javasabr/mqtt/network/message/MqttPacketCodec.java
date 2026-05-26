@@ -53,7 +53,7 @@ public final class MqttPacketCodec {
       DisconnectMqttInMessage::new,
       AuthenticationMqttInMessage::new);
 
-  public int readFullPacketLength(ByteBuffer buffer) {
+  public int decodePacketLength(ByteBuffer buffer) {
     int prevPos = buffer.position();
     buffer.get();
     int dataSize = MqttDataUtils.readMbi(buffer);
@@ -67,7 +67,7 @@ public final class MqttPacketCodec {
   }
 
   @Nullable
-  public MqttInMessage createPacketFor(ByteBuffer buffer, int startPacketPosition) {
+  public MqttInMessage decodePacket(ByteBuffer buffer, int startPacketPosition) {
     int firstByte = Byte.toUnsignedInt(buffer.get(startPacketPosition));
     byte type = NumberUtils.getHighByteBits(firstByte);
     byte info = NumberUtils.getLowByteBits(firstByte);
@@ -79,17 +79,17 @@ public final class MqttPacketCodec {
     }
   }
 
-  public int calculateTotalSize(int payloadLength) {
+  public int calculateEncodedPacketSize(int payloadLength) {
     return PAYLOAD_OFFSET + payloadLength;
-  }
+  }MqttPacketCodec
 
-  public void prepareBuffer(ByteBuffer buffer) {
+  public void prepareEncodingBuffer(ByteBuffer buffer) {
     buffer
         .clear()
         .position(PAYLOAD_OFFSET);
   }
 
-  public void finalizeHeader(MqttOutMessage packet, ByteBuffer buffer) {
+  public void encodeHeader(MqttOutMessage packet, ByteBuffer buffer) {
     int maxBufferPosition = buffer.position();
     int payloadSize = maxBufferPosition - PAYLOAD_OFFSET;
     int messageTypeAndFlagsOffset = MAX_MBI_SIZE - MqttDataUtils.sizeOfMbi(payloadSize);
