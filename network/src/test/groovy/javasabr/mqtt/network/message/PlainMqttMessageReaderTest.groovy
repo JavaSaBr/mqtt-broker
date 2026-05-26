@@ -15,16 +15,16 @@ class PlainMqttMessageReaderTest extends NetworkUnitSpecification {
 
   def "readFullPacketLength should restore buffer position if MBI is incomplete"() {
     given:
-        def config= ServerNetworkConfig.SimpleServerNetworkConfig.builder()
-              .readBufferSize(1024)
-              .pendingBufferSize(1024)
-              .build()
+        def config = ServerNetworkConfig.SimpleServerNetworkConfig.builder()
+            .readBufferSize(1024)
+            .pendingBufferSize(1024)
+            .build()
         def network = Stub(Network) {
-            config() >> config
+          config() >> config
         }
         def connection = Stub(MqttConnection) {
-            network() >> network
-            bufferAllocator() >> new DefaultBufferAllocator(config)
+          network() >> network
+          bufferAllocator() >> new DefaultBufferAllocator(config)
         }
 
         def reader = new PlainMqttMessageReader(
@@ -39,7 +39,7 @@ class PlainMqttMessageReaderTest extends NetworkUnitSpecification {
         buffer.put((byte) 0x10)
         buffer.put((byte) 0x80)
         buffer.flip()
-        
+
         def originalPosition = buffer.position()
 
     when:
