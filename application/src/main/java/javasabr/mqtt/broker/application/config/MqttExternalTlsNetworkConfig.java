@@ -63,9 +63,6 @@ public class MqttTlsSpringConfig {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
-    Assert.hasText(keyStoreType, "keyStoreType is blank");
-    Assert.hasText(keyStorePath, "keyStorePath is blank");
-    Assert.hasText(keyStorePassword, "keyStorePassword is blank");
 
     try (FileInputStream keyStoreData = new FileInputStream(keyStorePath)) {
       return NetworkUtils.createSslContext(
@@ -84,11 +81,6 @@ public class MqttTlsSpringConfig {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
-    Assert.hasText(keyStoreType, "keyStoreType is blank");
-    Assert.hasText(keyStorePath, "keyStorePath is blank");
-    Assert.hasText(keyStorePassword, "keyStorePassword is blank");
-
-    Assert.isTrue(properties.requireClientCert(), "requireClientCert is false");
 
     String trustStoreType = properties.truststoreType();
     String trustStorePath = properties.truststorePath();
