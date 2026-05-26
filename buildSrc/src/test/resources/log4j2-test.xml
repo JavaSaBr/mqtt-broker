@@ -2,7 +2,7 @@
 <Configuration>
   <Appenders>
     <Console name="BrokerConsoleTest" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{yyyy-mm-dd HH:mm:ss.SSS} %highlight{%-5level} --- %logger{1} : %msg%n%throwable"/>
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level} --- %logger{1} : %msg%n%throwable"/>
     </Console>
   </Appenders>
   <Loggers>
