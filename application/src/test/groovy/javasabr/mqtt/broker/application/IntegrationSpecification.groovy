@@ -28,7 +28,7 @@ class IntegrationSpecification extends BaseSpecification {
   public static final keepAlive = 120
 
   @Autowired
-  InetSocketAddress externalNetworkAddress
+  InetSocketAddress externalPlainNetworkAddress
 
   @Autowired
   MqttServerConnectionConfig externalConnectionConfig
@@ -42,11 +42,11 @@ class IntegrationSpecification extends BaseSpecification {
   }
 
   def buildExternalMqtt311Client(String clientId) {
-    return MqttClientFactory.buildMqtt311Client(clientId, externalNetworkAddress)
+    return MqttClientFactory.buildMqtt311Client(clientId, externalPlainNetworkAddress)
   }
 
   def buildExternalMqtt5Client(String clientId) {
-    return MqttClientFactory.buildMqtt5Client(clientId, externalNetworkAddress)
+    return MqttClientFactory.buildMqtt5Client(clientId, externalPlainNetworkAddress)
   }
 
   def generateClientId() {
@@ -75,16 +75,16 @@ class IntegrationSpecification extends BaseSpecification {
 
   def buildMqtt5MockClient() {
     return new MqttMockClient(
-        externalNetworkAddress.getHostName(),
-        externalNetworkAddress.getPort(),
+        externalPlainNetworkAddress.getHostName(),
+        externalPlainNetworkAddress.getPort(),
         mqtt5MockedConnection(externalConnectionConfig)
     )
   }
 
   def buildMqtt311MockClient() {
     return new MqttMockClient(
-        externalNetworkAddress.getHostName(),
-        externalNetworkAddress.getPort(),
+        externalPlainNetworkAddress.getHostName(),
+        externalPlainNetworkAddress.getPort(),
         mqtt311MockedConnection(externalConnectionConfig)
     )
   }

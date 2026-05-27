@@ -4,12 +4,12 @@ import javasabr.mqtt.test.support.UnitSpecification
 
 class MqttExternalTlsNetworkConfigTest extends UnitSpecification {
 
-  def 'should map all properties correctly to MqttTlsProperties'() {
+  def 'should map all properties correctly to externalTlsProperties'() {
     given:
         def config = new MqttExternalTlsNetworkConfig()
 
     when:
-        def props = config.mqttTlsProperties(
+        def props = config.externalTlsProperties(
             "ks-path",
             "ks-pass",
             "JKS",

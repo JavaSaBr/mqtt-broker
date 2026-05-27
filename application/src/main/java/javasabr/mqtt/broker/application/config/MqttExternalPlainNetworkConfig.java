@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 public class MqttExternalPlainNetworkConfig {
 
   @Bean
-  ServerNetworkConfig externalNetworkConfig(
+  ServerNetworkConfig externalPlainNetworkConfig(
       @Value("${mqtt.external.network.read.buffer.size:512}") int readBufferSize,
       @Value("${mqtt.external.network.pending.buffer.size:1024}") int pendingBufferSize,
       @Value("${mqtt.external.network.write.buffer.size:512}") int writeBufferSize,
@@ -42,7 +42,7 @@ public class MqttExternalPlainNetworkConfig {
   }
 
   @Bean
-  MqttConnectionFactory externalConnectionFactory(
+  MqttConnectionFactory externalPlainConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
@@ -54,28 +54,28 @@ public class MqttExternalPlainNetworkConfig {
   }
 
   @Bean
-  InetSocketAddress externalNetworkAddress(
+  InetSocketAddress externalPlainNetworkAddress(
       @Value("${mqtt.external.network.host:localhost}") String host,
       @Value("${mqtt.external.network.port:1883}") int port) {
     return new InetSocketAddress(host, port);
   }
 
   @Bean
-  ServerNetwork<MqttConnection> externalNetwork(
-      ServerNetworkConfig externalNetworkConfig,
-      MqttConnectionFactory externalConnectionFactory) {
-    return NetworkFactory.serverNetwork(externalNetworkConfig, externalConnectionFactory::newConnection);
+  ServerNetwork<MqttConnection> externalPlainNetwork(
+      ServerNetworkConfig externalPlainNetworkConfig,
+      MqttConnectionFactory externalPlainConnectionFactory) {
+    return NetworkFactory.serverNetwork(externalPlainNetworkConfig, externalPlainConnectionFactory::newConnection);
   }
 
   @Bean
-  ApplicationListener<ApplicationStartedEvent> externalNetworkStarter(
-      ServerNetwork<MqttConnection> externalNetwork,
+  ApplicationListener<ApplicationStartedEvent> externalPlainNetworkStarter(
+      ServerNetwork<MqttConnection> externalPlainNetwork,
       ConnectionService connectionService,
-      InetSocketAddress externalNetworkAddress) {
+      InetSocketAddress externalPlainNetworkAddress) {
     return _ -> {
-      externalNetwork.start(externalNetworkAddress);
-      externalNetwork.onAccept(connectionService::processAcceptedConnection);
-      log.info(externalNetworkAddress, "Started external MQTT network by address:[%s]"::formatted);
+      externalPlainNetwork.start(externalPlainNetworkAddress);
+      externalPlainNetwork.onAccept(connectionService::processAcceptedConnection);
+      log.info(externalPlainNetworkAddress, "Started external MQTT network by address:[%s]"::formatted);
     };
   }
 }

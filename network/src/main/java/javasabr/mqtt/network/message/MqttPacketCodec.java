@@ -81,7 +81,7 @@ public final class MqttPacketCodec {
 
   public int calculateEncodedPacketSize(int payloadLength) {
     return PAYLOAD_OFFSET + payloadLength;
-  }MqttPacketCodec
+  }
 
   public void prepareEncodingBuffer(ByteBuffer buffer) {
     buffer

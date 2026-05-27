@@ -1,7 +1,5 @@
 package javasabr.mqtt.broker.application.config
 
-
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
@@ -17,19 +15,23 @@ import java.time.Duration
 class TlsNetworkTestConfig {
 
   @Bean
-  InetSocketAddress tlsNetworkAddress() {
-    def socket = new ServerSocket(0)
-    def port = socket.localPort
-    socket.close()
-    return new InetSocketAddress("localhost", port)
+  ServerSocket externalTlsServerSocket() {
+    return new ServerSocket(0)
+  }
+
+  @Bean
+  InetSocketAddress externalTlsNetworkAddress(ServerSocket externalTlsServerSocket) {
+    return new InetSocketAddress("localhost", externalTlsServerSocket.localPort)
   }
 
   @Bean
   Void testTlsNetworkStarter(
-      @Qualifier("tlsNetworkStarter") ApplicationListener<ApplicationStartedEvent> tlsNetworkStarter,
-      ConfigurableApplicationContext applicationContext) {
+      ApplicationListener<ApplicationStartedEvent> externalTlsNetworkStarter,
+      ConfigurableApplicationContext applicationContext,
+      ServerSocket externalTlsServerSocket) {
     def event = new ApplicationStartedEvent(new SpringApplication(), new String[0], applicationContext, Duration.ZERO)
-    tlsNetworkStarter.onApplicationEvent(event)
+    externalTlsServerSocket.close()
+    externalTlsNetworkStarter.onApplicationEvent(event)
     return null
   }
 }

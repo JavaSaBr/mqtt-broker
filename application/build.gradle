@@ -22,6 +22,7 @@ dependencies {
 
 tasks.withType(GroovyCompile).configureEach {
   options.forkOptions.jvmArgs += "--enable-preview"
+  groovyOptions.parameters = true
 }
 
 bootRun {

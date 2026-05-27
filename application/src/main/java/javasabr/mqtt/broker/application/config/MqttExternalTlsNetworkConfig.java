@@ -36,16 +36,16 @@ import org.springframework.util.Assert;
 public class MqttExternalTlsNetworkConfig {
 
   @Bean
-  TlsProperties mqttTlsProperties(
-      @Value("${mqtt.tls.keystore-path:}") String keystorePath,
-      @Value("${mqtt.tls.keystore-password:}") String keystorePassword,
-      @Value("${mqtt.tls.keystore-type:PKCS12}") String keystoreType,
-      @Value("${mqtt.tls.truststore-path:}") String truststorePath,
-      @Value("${mqtt.tls.truststore-password:}") String truststorePassword,
-      @Value("${mqtt.tls.truststore-type:PKCS12}") String truststoreType,
-      @Value("${mqtt.tls.require-client-cert:true}") boolean requireClientCert,
-      @Value("${mqtt.tls.tls-protocols:#{{'TLSv1.3'}}}") List<String> tlsProtocols,
-      @Value("${mqtt.tls.cipher-suites:#{{}}}") List<String> cipherSuites) {
+  TlsProperties externalTlsProperties(
+      @Value("${mqtt.external.tls.keystore-path:}") String keystorePath,
+      @Value("${mqtt.external.tls.keystore-password:}") String keystorePassword,
+      @Value("${mqtt.external.tls.keystore-type:PKCS12}") String keystoreType,
+      @Value("${mqtt.external.tls.truststore-path:}") String truststorePath,
+      @Value("${mqtt.external.tls.truststore-password:}") String truststorePassword,
+      @Value("${mqtt.external.tls.truststore-type:PKCS12}") String truststoreType,
+      @Value("${mqtt.external.tls.require-client-cert:true}") boolean requireClientCert,
+      @Value("${mqtt.external.tls.tls-protocols:#{{'TLSv1.3'}}}") List<String> tlsProtocols,
+      @Value("${mqtt.external.tls.cipher-suites:#{{}}}") List<String> cipherSuites) {
     return TlsProperties.builder()
         .requireClientCert(requireClientCert)
         .keystorePath(keystorePath)
@@ -60,8 +60,8 @@ public class MqttExternalTlsNetworkConfig {
   }
 
   @Bean("externalNetworkSslContext")
-  @ConditionalOnBooleanProperty(name = "mqtt.tls.require-client-cert", havingValue = false)
-  SSLContext sslContext(TlsProperties properties) throws IOException {
+  @ConditionalOnBooleanProperty(name = "mqtt.external.tls.require-client-cert", havingValue = false)
+  SSLContext externalNetworkSslContext(TlsProperties properties) throws IOException {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
@@ -78,8 +78,8 @@ public class MqttExternalTlsNetworkConfig {
   }
 
   @Bean("externalNetworkSslContext")
-  @ConditionalOnBooleanProperty(name = "mqtt.tls.require-client-cert", matchIfMissing = true)
-  SSLContext sslContextRequiringClientCert(TlsProperties properties) throws IOException {
+  @ConditionalOnBooleanProperty(name = "mqtt.external.tls.require-client-cert", matchIfMissing = true)
+  SSLContext externalNetworkMutualSslContext(TlsProperties properties) throws IOException {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
@@ -104,15 +104,15 @@ public class MqttExternalTlsNetworkConfig {
   }
 
   @Bean
-  MqttConnectionFactory tlsMqttConnectionFactory(
+  MqttConnectionFactory externalTlsConnectionFactory(
       MqttServerConnectionConfig externalServerConnectionConfig,
       NetworkMqttUserFactory mqttUserFactory,
       @Value("${mqtt.external.connection.max.packets.by.read:100}") int maxPacketsByRead,
       SSLContext externalNetworkSslContext,
       TlsProperties tlsProperties,
-      ServerNetworkConfig tlsNetworkConfig,
+      ServerNetworkConfig externalTlsNetworkConfig,
       MqttPacketCodec mqttPacketCodec) {
-    DefaultBufferAllocator defaultBufferAllocator = new DefaultBufferAllocator(tlsNetworkConfig);
+    DefaultBufferAllocator defaultBufferAllocator = new DefaultBufferAllocator(externalTlsNetworkConfig);
     return new TlsMqttConnectionFactory(
         externalServerConnectionConfig,
         mqttUserFactory,
@@ -123,12 +123,12 @@ public class MqttExternalTlsNetworkConfig {
   }
 
   @Bean
-  ServerNetworkConfig tlsNetworkConfig(
-      @Value("${mqtt.tls.network.read.buffer.size:512}") int readBufferSize,
-      @Value("${mqtt.tls.network.pending.buffer.size:1024}") int pendingBufferSize,
-      @Value("${mqtt.tls.network.write.buffer.size:1024}") int writeBufferSize,
-      @Value("${mqtt.tls.network.thread.group.name:TlsNetwork}") String threadGroupName,
-      @Value("${mqtt.tls.network.thread.count:#{T(java.lang.Runtime).getRuntime().availableProcessors()}}") int threadGroupMaxSize) {
+  ServerNetworkConfig externalTlsNetworkConfig(
+      @Value("${mqtt.external.tls.network.read.buffer.size:512}") int readBufferSize,
+      @Value("${mqtt.external.tls.network.pending.buffer.size:1024}") int pendingBufferSize,
+      @Value("${mqtt.external.tls.network.write.buffer.size:1024}") int writeBufferSize,
+      @Value("${mqtt.external.tls.network.thread.group.name:TlsNetwork}") String threadGroupName,
+      @Value("${mqtt.external.tls.network.thread.count:#{T(java.lang.Runtime).getRuntime().availableProcessors()}}") int threadGroupMaxSize) {
     return ServerNetworkConfig.SimpleServerNetworkConfig
         .builder()
         .readBufferSize(readBufferSize)
@@ -140,28 +140,28 @@ public class MqttExternalTlsNetworkConfig {
   }
 
   @Bean
-  InetSocketAddress tlsNetworkAddress(
+  InetSocketAddress externalTlsNetworkAddress(
       @Value("${mqtt.external.network.host:localhost}") String host,
-      @Value("${mqtt.tls.network.port:8883}") int port) {
+      @Value("${mqtt.external.tls.network.port:8883}") int port) {
     return new InetSocketAddress(host, port);
   }
 
   @Bean
-  ServerNetwork<MqttConnection> tlsNetwork(
-      ServerNetworkConfig tlsNetworkConfig,
-      MqttConnectionFactory tlsMqttConnectionFactory) {
-    return NetworkFactory.serverNetwork(tlsNetworkConfig, tlsMqttConnectionFactory::newConnection);
+  ServerNetwork<MqttConnection> externalTlsNetwork(
+      ServerNetworkConfig externalTlsNetworkConfig,
+      MqttConnectionFactory externalTlsConnectionFactory) {
+    return NetworkFactory.serverNetwork(externalTlsNetworkConfig, externalTlsConnectionFactory::newConnection);
   }
 
   @Bean
-  ApplicationListener<ApplicationStartedEvent> tlsNetworkStarter(
-      ServerNetwork<MqttConnection> tlsNetwork,
+  ApplicationListener<ApplicationStartedEvent> externalTlsNetworkStarter(
+      ServerNetwork<MqttConnection> externalTlsNetwork,
       ConnectionService externalMqttConnectionService,
-      InetSocketAddress tlsNetworkAddress) {
+      InetSocketAddress externalTlsNetworkAddress) {
     return _ -> {
-      tlsNetwork.start(tlsNetworkAddress);
-      tlsNetwork.onAccept(externalMqttConnectionService::processAcceptedConnection);
-      log.info(tlsNetworkAddress, "Started TLS MQTT network by address:[%s]"::formatted);
+      externalTlsNetwork.start(externalTlsNetworkAddress);
+      externalTlsNetwork.onAccept(externalMqttConnectionService::processAcceptedConnection);
+      log.info(externalTlsNetworkAddress, "Started TLS MQTT network by address:[%s]"::formatted);
     };
   }
 }

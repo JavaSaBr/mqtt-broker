@@ -15,7 +15,7 @@ import org.springframework.test.context.TestPropertySource
     classes = [TlsNetworkTestConfig],
     initializers = [TestSslPropertiesInitializer])
 @TestPropertySource(
-    properties = ["mqtt.external.tls.network.enabled=true", "mqtt.tls.require-client-cert=false"],
+    properties = ["mqtt.external.tls.network.enabled=true", "mqtt.external.tls.require-client-cert=false"],
     locations = "classpath:application-test.properties")
 @Slf4j
 class TlsIntegrationSpecification extends BaseSpecification {
@@ -23,13 +23,13 @@ class TlsIntegrationSpecification extends BaseSpecification {
   static TestSslContexts sslContexts = TestSslContexts.getInstance()
 
   @Autowired(required = false)
-  InetSocketAddress tlsNetworkAddress
+  InetSocketAddress externalTlsNetworkAddress
 
   Mqtt5AsyncClient buildTlsMqtt5Client() {
     return MqttClient.builder()
         .identifier(MqttClientFactory.generateClientId("TLS5"))
-        .serverHost(tlsNetworkAddress.hostName)
-        .serverPort(tlsNetworkAddress.port)
+        .serverHost(externalTlsNetworkAddress.hostName)
+        .serverPort(externalTlsNetworkAddress.port)
         .sslConfig()
         .trustManagerFactory(TlsIntegrationSpecification.sslContexts.buildTrustManagerFactory())
         .applySslConfig()
@@ -41,8 +41,8 @@ class TlsIntegrationSpecification extends BaseSpecification {
   Mqtt3AsyncClient buildTlsMqtt311Client() {
     return MqttClient.builder()
         .identifier(MqttClientFactory.generateClientId("TLS3"))
-        .serverHost(tlsNetworkAddress.hostName)
-        .serverPort(tlsNetworkAddress.port)
+        .serverHost(externalTlsNetworkAddress.hostName)
+        .serverPort(externalTlsNetworkAddress.port)
         .sslConfig()
         .trustManagerFactory(sslContexts.buildTrustManagerFactory())
         .applySslConfig()
