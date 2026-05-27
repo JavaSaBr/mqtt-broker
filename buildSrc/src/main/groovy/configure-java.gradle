@@ -26,12 +26,6 @@ test {
   failOnNoDiscoveredTests = false
 }
 
-sourceSets {
-  test {
-    runtimeClasspath = project.files(runtimeClasspath, rootProject.file('buildSrc/src/test/resources'))
-  }
-}
-
 tasks.withType(Test).configureEach {
   maxParallelForks = 2
   forkEvery = 100
