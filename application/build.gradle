@@ -12,7 +12,9 @@ dependencies {
   implementation projects.aclService
   implementation projects.aclGroovyDsl
   implementation projects.authenticationService
+  implementation libs.rlib.logger.slf4j
   implementation libs.springboot.starter.core
+  implementation libs.springboot.starter.log4j2
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
