@@ -171,6 +171,7 @@ The repository is organized into the following modules:
 - **Runtime-aligned tests**: When a stricter contract is introduced, update integration tests to create objects through the same storage/service path used in production instead of relaxing the implementation to accept detached objects
 - **Concurrency tradeoffs**: If a design uses shared wrappers with atomics after map lookup, treat that as an intentional lifecycle tradeoff; otherwise keep lookup, mutation, and removal under the same lock when stronger consistency matters
 - **Lifecycle accounting**: When runtime objects are reference-counted or consumer-counted, model every temporary and long-lived owner explicitly (for example dispatch phase, retained ownership, subscriber delivery) and balance each `+1` with a clearly defined `-1`
+- **Stateful naming**: Name methods, fields, and exceptions after the state they actually manage; for example, scheduled-removal APIs should describe scheduling state rather than implying the publish has already been removed from storage
 - **Outgoing publish wrappers**: Keep `OutgoingPublish` implementations as transport wrappers around the source `IncomingPublish`; delivery variants may change messageId, QoS, duplicated/retained flags, and subscription IDs, but should reuse the source message content and metadata
 - **Tracking before send**: For tracked delivery flows, register message-tracker state, callbacks, and retry handlers before the first network send so retries and response handlers never observe an untracked publish
 - **Sender cleanup**: If subscriber delivery contributes to lifecycle accounting, every terminal sender path must release that ownership: success, async failure, invalid user type, missing session, invalid flow state, and abandoned delivery
@@ -263,15 +264,30 @@ The codebase contains TODO comments in several classes related to MQTT protocol 
 8. For async service APIs returning `Mono` or `CompletionStage`, use `fromAsync(...)` for returned values and `waitForAsync(...)` when only completion matters
 9. Prefer explicit `test...` fixture variable names and descriptive helper names such as `createAndStorePublish(...)` when the helper both arranges data and performs an action
 10. Prefer domain constants and shared empty values over magic literals when building MQTT test messages and publishes
-11. Close manually created services or clients in `cleanup:` when they own resources or background work
-12. Test fixtures can be used from network and model modules
-13. Tests automatically run with preview features enabled
+11. For services with background cleanup or delayed expiration, test both the direct API contract and one eventual-cleanup path with a short interval or delay
+12. When a storage/service owns secondary resources, assert cleanup of both the primary entry and the related owned resource instead of checking only the main map state
+13. Close manually created services or clients in `cleanup:` when they own resources or background work
+14. Test fixtures can be used from network and model modules
+15. Tests automatically run with preview features enabled
 
 ### When Modifying Build Configuration
 - Root `build.gradle`: Only for repository-wide settings and custom tasks
 - Module `build.gradle`: Module-specific dependencies and configuration
 - `buildSrc/`: Shared build logic used across all modules
 - Never remove `--enable-preview` from Java compilation or test tasks
+
+### When Writing Summary Files
+- Match the requested comparison base exactly (for example `develop` vs current branch, or part-3 vs part-2) and do not mix in changes from earlier parts unless the user asks for full branch scope
+- Focus on meaningful behavioral and architectural changes, not raw diff noise or minor refactors
+- Group related changes into a few clear themes such as storage lifecycle, publish flow, retained handling, sender behavior, tests, and wiring
+- When useful, describe publish or lifecycle changes as short ASCII flow diagrams so ownership transfer and terminal cleanup are easy to follow
+- If the user asks for part-only scope, keep only the delta introduced in that part and remove inherited history from earlier summaries
+
+### When Writing Mermaid Diagrams
+- Always wrap node labels that contain special characters in double quotes: `()`, `.`, `<=`, `>=`, `<`, `>`, `=`, `[]`
+- Example: `B["totalSessions = sessions.size()"]` instead of `B[totalSessions = sessions.size()]`
+- This applies to all node shapes: rectangular `[]`, diamond `{}`, stadium `([])`, etc.
+- Failure to quote such labels causes Mermaid parse errors in GitHub and other renderers
 
 ## Validation Steps
 

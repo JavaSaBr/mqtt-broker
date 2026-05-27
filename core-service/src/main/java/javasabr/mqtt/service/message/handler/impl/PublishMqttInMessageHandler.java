@@ -84,7 +84,7 @@ public class PublishMqttInMessageHandler
     if (finalTopicName == null) {
       return;
     } else if (!authorizationService.authorizePublish(user, finalTopicName)) {
-      log.warning(user.clientId(), finalTopicName, "[%s] Not authorized for publish to:[%s]"::formatted);
+      log.warn(user.clientId(), finalTopicName, "[%s] Not authorized for publish to:[%s]"::formatted);
       handleNotAuthorize(user);
       return;
     }
@@ -140,7 +140,7 @@ public class PublishMqttInMessageHandler
     if (!providedRawTopicName) {
       topicNameByAlias = topicNameMapping.resolve(topicAlias);
       if (topicNameByAlias == null) {
-        log.warning(user.clientId(), topicAlias, "[%s] Unknown TopicAlias:[%d]"::formatted);
+        log.warn(user.clientId(), topicAlias, "[%s] Unknown TopicAlias:[%d]"::formatted);
         handleNotProvidedTopicName(user);
         return null;
       }
@@ -148,7 +148,7 @@ public class PublishMqttInMessageHandler
     } else {
       if (!TopicValidator.validateTopicName(rawTopicName)) {
         handleInvalidTopicName(user);
-        log.warning(user.clientId(), rawTopicName, "[%s] TopicName:[%s] is invalid"::formatted);
+        log.warn(user.clientId(), rawTopicName, "[%s] TopicName:[%s] is invalid"::formatted);
         return null;
       }
       finalTopicName = topicService.createTopicName(user, rawTopicName);

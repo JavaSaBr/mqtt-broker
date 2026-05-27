@@ -94,6 +94,14 @@ public class DatabaseCredentialsSource implements CredentialsSource {
     return Map.of("credentialsSource", getType(), "databaseDriver", dbDriver);
   }
 
+  @JsonValue
+  Object jsonDebugValue() {
+    String dbDriver = connectionPool
+        .getMetadata()
+        .getName();
+    return Map.of("credentialsSource", getType(), "databaseDriver", dbDriver);
+  }
+
   private Mono<Boolean> verifyCredentials(Connection connection, MqttCredentials credentials) {
     return Mono.from(connection
         .createStatement(CREDENTIALS_QUERY)

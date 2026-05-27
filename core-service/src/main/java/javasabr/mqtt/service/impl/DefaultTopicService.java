@@ -24,13 +24,13 @@ public class DefaultTopicService implements TopicService {
   public boolean isValidTopicFilter(NetworkMqttUser user, String rawTopicFilter) {
     if (SharedTopicFilter.isShared(rawTopicFilter)) {
       if (!TopicValidator.validateSharedTopicFilter(rawTopicFilter)) {
-        log.warning(user.clientId(), rawTopicFilter, "[%s] Invalid shared topic filter:[%s]"::formatted);
+        log.warn(user.clientId(), rawTopicFilter, "[%s] Invalid shared topic filter:[%s]"::formatted);
         return false;
       }
       return true;
     }
     if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
-      log.warning(user.clientId(), rawTopicFilter, "[%s] Invalid topic filter:[%s]"::formatted);
+      log.warn(user.clientId(), rawTopicFilter, "[%s] Invalid topic filter:[%s]"::formatted);
       return false;
     }
     return true;
@@ -39,7 +39,7 @@ public class DefaultTopicService implements TopicService {
   @Override
   public TopicName createTopicName(NetworkMqttUser user, String rawTopicName) {
     if (!TopicValidator.validateTopicName(rawTopicName)) {
-      log.warning(user.clientId(), rawTopicName, "[%s] Invalid topic name:[%s]"::formatted);
+      log.warn(user.clientId(), rawTopicName, "[%s] Invalid topic name:[%s]"::formatted);
       return TopicName.INVALID_TOPIC_NAME;
     }
     return TopicName.valueOf(rawTopicName);
@@ -47,14 +47,14 @@ public class DefaultTopicService implements TopicService {
 
   private TopicFilter createSharedTopicFilter(NetworkMqttUser user, String rawTopicFilter) {
     if (!TopicValidator.validateSharedTopicFilter(rawTopicFilter)) {
-      log.warning(user.clientId(), rawTopicFilter, "[%s] Invalid shared topic filter:[%s]"::formatted);
+      log.warn(user.clientId(), rawTopicFilter, "[%s] Invalid shared topic filter:[%s]"::formatted);
       return TopicFilter.INVALID_TOPIC_FILTER;
     }
 
     SharedTopicFilter sharedTopicFilter = SharedTopicFilter.valueOf(rawTopicFilter);
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     if (sharedTopicFilter.levelsCount() > connectionConfig.maxTopicLevels()) {
-      log.warning(user.clientId(), rawTopicFilter, "[%s] Too deep shared topic filter:[%s]"::formatted);
+      log.warn(user.clientId(), rawTopicFilter, "[%s] Too deep shared topic filter:[%s]"::formatted);
       return TopicFilter.INVALID_TOPIC_FILTER;
     }
 
@@ -63,14 +63,14 @@ public class DefaultTopicService implements TopicService {
 
   private TopicFilter createStandardTopicFilter(NetworkMqttUser user, String rawTopicFilter) {
     if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
-      log.warning(user.clientId(), rawTopicFilter, "[%s] Invalid topic filter:[%s]"::formatted);
+      log.warn(user.clientId(), rawTopicFilter, "[%s] Invalid topic filter:[%s]"::formatted);
       return TopicFilter.INVALID_TOPIC_FILTER;
     }
 
     TopicFilter topicFilter = TopicFilter.valueOf(rawTopicFilter);
     MqttClientConnectionConfig connectionConfig = user.connectionConfig();
     if (topicFilter.levelsCount() > connectionConfig.maxTopicLevels()) {
-      log.warning(user.clientId(), rawTopicFilter, "[%s] Too deep topic filter:[%s]"::formatted);
+      log.warn(user.clientId(), rawTopicFilter, "[%s] Too deep topic filter:[%s]"::formatted);
       return TopicFilter.INVALID_TOPIC_FILTER;
     }
 

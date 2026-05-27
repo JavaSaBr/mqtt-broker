@@ -29,6 +29,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 class ExpiredSessionCleaner {
 
+  private static final int PART_SIZE = 400;
+  
   MutableArray<ExpirableSession> sessionsToCheck = ArrayFactory.mutableArray(ExpirableSession.class);
   MutableArray<ExpirableSession> expiredSessions = ArrayFactory.mutableArray(ExpirableSession.class);
 
@@ -38,30 +40,31 @@ class ExpiredSessionCleaner {
     if (sessions.isEmpty()) {
       return;
     }
-    long stamp = sessions.readLock();
-    try {
-      sessions.values(sessionsToCheck);
-    } finally {
-      sessions.readUnlock(stamp);
+    int partIndex = 0;
+    while (partIndex >= 0) {
+      long stamp = sessions.readLock();
+      try {
+        partIndex = sessions.values(sessionsToCheck, partIndex, PART_SIZE);
+      } finally {
+        sessions.readUnlock(stamp);
+      }
+      if (!sessionsToCheck.isEmpty()) {
+        if (collectExpiredSessions()) {
+          deleteExpiredSessions();
+        }
+        sessionsToCheck.clear();
+      }
     }
-    if (sessionsToCheck.isEmpty()) {
-      return;
-    }
-    collectExpiredSessions();
-    if (!expiredSessions.isEmpty()) {
-      deleteExpiredSessions();
-      expiredSessions.clear();
-    }
-    sessionsToCheck.clear();
   }
 
-  private void collectExpiredSessions() {
+  private boolean collectExpiredSessions() {
     long currentTime = System.currentTimeMillis();
     for (ExpirableSession expirableSession : sessionsToCheck) {
       if (expirableSession.expireAfter() < currentTime) {
         expiredSessions.add(expirableSession);
       }
     }
+    return !expiredSessions.isEmpty();
   }
 
   private void deleteExpiredSessions() {
@@ -79,5 +82,6 @@ class ExpiredSessionCleaner {
     } finally {
       sessions.writeUnlock(stamp);
     }
+    expiredSessions.clear();
   }
 }

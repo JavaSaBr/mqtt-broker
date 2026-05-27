@@ -1,14 +1,20 @@
 package javasabr.mqtt.service.publish.impl
 
 import javasabr.mqtt.model.MqttProperties
+import javasabr.mqtt.model.PayloadFormat
 import javasabr.mqtt.model.QoS
 import javasabr.mqtt.model.data.type.StringPair
 import javasabr.mqtt.model.publish.PublishData
 import javasabr.mqtt.model.topic.TopicName
 import javasabr.mqtt.network.message.in.MqttInMessage
+import javasabr.mqtt.service.publish.exception.AlreadyScheduledForRemovalPublishStorageException
+import javasabr.mqtt.service.publish.exception.NotScheduledForRemovalPublishStorageException
+import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 import javasabr.rlib.collections.array.IntArray
+
+import java.time.Duration
 
 import static java.nio.charset.StandardCharsets.UTF_8
 
@@ -16,7 +22,9 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
 
   def "should store incoming publish with all attributes"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def testPublishId = UUID.randomUUID()
         def testTopicAlias = 7
         def testMessageId = 15
@@ -29,7 +37,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             new StringPair("key-1", "value-1"),
             new StringPair("key-2", "value-2"))
     when:
-        def incomingPublish = storage.store(
+        def incomingPublish = publishStorage.store(
             testPublishId,
             testMessageId,
             testQos,
@@ -43,8 +51,8 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             testTopicAlias,
             testUserProperties)
     then:
-        storage.storedPublishes.size() == 1
-        storage.storedPublishes.containsKey(testPublishId)
+        publishStorage.storedPublishes.size() == 1
+        publishStorage.storedPublishes.containsKey(testPublishId)
         with(incomingPublish) {
           id() == testPublishId
           messageId() == testMessageId
@@ -56,20 +64,24 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
           retained()
           subscriptionIds() == testSubscriptionIds
           messageExpiryInterval() == 60_000
-          topicAlias() == testTopicAlias
-          userProperties() == testUserProperties
-        }
+           topicAlias() == testTopicAlias
+           userProperties() == testUserProperties
+         }
+    cleanup:
+        publishStorage.close()
   }
 
   def "should not allow to store incoming publish twice with the same id"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
         def publishId = UUID.randomUUID()
         def topicName = TopicName.valueOf("topic/main")
         def data = PublishData.wrap("payload".getBytes(UTF_8))
         def testMessageId1 = 6
         def testMessageId2 = 9
-        storage.store(
+        publishStorage.store(
             publishId,
             testMessageId1,
             QoS.AT_LEAST_ONCE,
@@ -84,7 +96,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
             MqttInMessage.EMPTY_USER_PROPERTIES)
 
     when:
-        storage.store(
+        publishStorage.store(
             publishId,
             testMessageId2,
             QoS.AT_MOST_ONCE,
@@ -100,60 +112,202 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
     then:
         def exception = thrown(IllegalArgumentException)
         exception.message == "Publish:[${publishId}] already exists"
-        storage.storedPublishes.size() == 1
+        publishStorage.storedPublishes.size() == 1
+    cleanup:
+        publishStorage.close()
   }
 
-  def "should remove stored incoming publish"() {
+  def "should remove stored incoming publish with related publish data"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
+        def incomingPublish = createAndStorePublishWithRegisteredData(publishStorage, dataStorage)
     when:
-        storage.remove(incomingPublish)
+        publishStorage.remove(incomingPublish)
     then:
-        storage.storedPublishes.isEmpty()
-        !storage.storedPublishes.containsKey(incomingPublish.id())
+        publishStorage.storedPublishes.isEmpty()
+        !publishStorage.storedPublishes.containsKey(incomingPublish.id())
+        dataStorage.findById(incomingPublish.data().id()) == null
+    cleanup:
+        publishStorage.close()
   }
 
   def "should keep stored publish until all consumers are handled"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
-        storage.increaseConsumerCount(incomingPublish, 3)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.increaseConsumerCount(incomingPublish, 3)
     when:
-        storage.decreaseConsumerCount(incomingPublish, 2)
+        publishStorage.decreaseConsumerCount(incomingPublish, 2)
     then:
-        storage.storedPublishes.size() == 1
-        storage.storedPublishes.containsKey(incomingPublish.id())
+        publishStorage.storedPublishes.size() == 1
+        publishStorage.storedPublishes.containsKey(incomingPublish.id())
     when:
-        storage.decreaseConsumerCount(incomingPublish, 1)
+        publishStorage.decreaseConsumerCount(incomingPublish, 1)
     then:
-        storage.storedPublishes.isEmpty()
+        publishStorage.storedPublishes.isEmpty()
+    cleanup:
+        publishStorage.close()
   }
 
   def "should not allow to change consumer count update for missing publish"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
-        storage.remove(incomingPublish)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.remove(incomingPublish)
     when:
-        storage.increaseConsumerCount(incomingPublish, 1)
+        publishStorage.increaseConsumerCount(incomingPublish, 1)
     then:
-        def exception = thrown(IllegalArgumentException)
+        def exception = thrown(UnknownPublishStorageException)
         exception.message == "Unknown publish:[${incomingPublish.id()}]"
-        storage.storedPublishes.isEmpty()
+        exception.id() == incomingPublish.id()
+        publishStorage.storedPublishes.isEmpty()
+    cleanup:
+        publishStorage.close()
   }
 
   def "should throw exception when consumer count is decreased below zero"() {
     given:
-        def storage = new InMemoryIncomingPublishStorage()
-        def incomingPublish = createAndStorePublish(storage)
-        storage.increaseConsumerCount(incomingPublish, 1)
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.increaseConsumerCount(incomingPublish, 1)
     when:
-        storage.decreaseConsumerCount(incomingPublish, 2)
+        publishStorage.decreaseConsumerCount(incomingPublish, 2)
     then:
         def exception = thrown(IllegalArgumentException)
         exception.message == "Unexpected result of decreaseConsumerCount:[-1] for publish:[${incomingPublish.id()}]"
-        storage.storedPublishes.containsKey(incomingPublish.id())
+        publishStorage.storedPublishes.containsKey(incomingPublish.id())
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should schedule removal for stored publish"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        def testDelay = Duration.ofSeconds(5)
+    when:
+        publishStorage.scheduleRemoval(incomingPublish, testDelay)
+    then:
+        publishStorage.scheduledRemovals.size() == 1
+        publishStorage.scheduledRemovals.containsKey(incomingPublish.id())
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should not allow to schedule removal twice for the same publish"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        def testDelay = Duration.ofSeconds(5)
+        publishStorage.scheduleRemoval(incomingPublish, testDelay)
+    when:
+        publishStorage.scheduleRemoval(incomingPublish, testDelay)
+    then:
+        def exception = thrown(AlreadyScheduledForRemovalPublishStorageException)
+        exception.message == "Publish:[${incomingPublish.id()}] is already scheduled for removal"
+        publishStorage.scheduledRemovals.size() == 1
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should not allow to schedule removal for missing publish"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.remove(incomingPublish)
+    when:
+        publishStorage.scheduleRemoval(incomingPublish, Duration.ofSeconds(5))
+    then:
+        def exception = thrown(UnknownPublishStorageException)
+        exception.message == "Unknown publish:[${incomingPublish.id()}]"
+        exception.id() == incomingPublish.id()
+        publishStorage.scheduledRemovals.isEmpty()
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should cancel scheduled removal for publish"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+        publishStorage.scheduleRemoval(incomingPublish, Duration.ofSeconds(5))
+    when:
+        publishStorage.cancelScheduledRemoval(incomingPublish)
+    then:
+        publishStorage.scheduledRemovals.isEmpty()
+        publishStorage.storedPublishes.containsKey(incomingPublish.id())
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should throw exception when canceling removal for not scheduled publish"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 1000
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublish(publishStorage)
+    when:
+        publishStorage.cancelScheduledRemoval(incomingPublish)
+    then:
+        def exception = thrown(NotScheduledForRemovalPublishStorageException)
+        exception.message == "Publish:[${incomingPublish.id()}] is not scheduled for removal"
+        publishStorage.scheduledRemovals.isEmpty()
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should cancel scheduled removal if scheduled and keep publish in storage"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 10
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublishWithRegisteredData(publishStorage, dataStorage)
+        publishStorage.scheduleRemoval(incomingPublish, Duration.ofMillis(40))
+    when:
+        publishStorage.cancelScheduledRemovalIfScheduled(incomingPublish)
+        waitUntil(150) {
+          publishStorage.scheduledRemovals.isEmpty()
+        }
+    then:
+        publishStorage.storedPublishes.containsKey(incomingPublish.id())
+        dataStorage.findById(incomingPublish.data().id()) != null
+    cleanup:
+        publishStorage.close()
+  }
+
+  def "should remove scheduled publish from storage after delay"() {
+    given:
+        def dataStorage = new InMemoryPublishDataStorage()
+        def cleanupIntervalInMs = 10
+        def publishStorage = new InMemoryIncomingPublishStorage(dataStorage, cleanupIntervalInMs)
+        def incomingPublish = createAndStorePublishWithRegisteredData(publishStorage, dataStorage)
+    when:
+        publishStorage.scheduleRemoval(incomingPublish, Duration.ofMillis(1))
+        waitUntil(1000) {
+          dataStorage.findById(incomingPublish.data().id()) == null
+        }
+    then:
+        publishStorage.storedPublishes.isEmpty()
+        publishStorage.scheduledRemovals.isEmpty()
+        dataStorage.findById(incomingPublish.data().id()) == null
+    cleanup:
+        publishStorage.close()
   }
 
   private static def createAndStorePublish(InMemoryIncomingPublishStorage storage) {
@@ -164,6 +318,30 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         TopicName.valueOf("topic/main"),
         null,
         PublishData.wrap("payload".getBytes(UTF_8)),
+        false,
+        false,
+        IntArray.of(5),
+        60_000,
+        3,
+        Array.of(new StringPair("key", "value")))
+  }
+
+  private static def createAndStorePublishWithRegisteredData(
+      InMemoryIncomingPublishStorage storage,
+      InMemoryPublishDataStorage dataStorage) {
+    def testData = dataStorage.store(
+        UUID.randomUUID(),
+        null,
+        PayloadFormat.BINARY,
+        "payload".getBytes(UTF_8),
+        null)
+    return storage.store(
+        UUID.randomUUID(),
+        1,
+        QoS.AT_LEAST_ONCE,
+        TopicName.valueOf("topic/main"),
+        null,
+        testData,
         false,
         false,
         IntArray.of(5),

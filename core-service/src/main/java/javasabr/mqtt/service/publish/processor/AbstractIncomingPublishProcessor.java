@@ -35,7 +35,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
   @Override
   public final void process(NetworkMqttUser user, IncomingPublish publish) {
     if (!expectedUserType.isInstance(user)) {
-      log.warning(user.clientId(), user.getClass(), publish.id(), 
+      log.warn(user.clientId(), user.getClass(), publish.id(), 
           "[%s] Not expected user of type:[%s], publish:[%s] will be dropped"::formatted);
       incomingPublishStorage.removeIfExist(publish);
       return;
@@ -43,7 +43,7 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     U expectedUser = expectedUserType.cast(user);
     NetworkMqttSession session = expectedUser.session();
     if (session == null) {
-      log.warning(user.clientId(), publish.id(), 
+      log.warn(user.clientId(), publish.id(), 
           "[%s] Session is already closed, publish:[%s] will be dropped"::formatted);
       incomingPublishStorage.removeIfExist(publish);
       return;
@@ -156,6 +156,6 @@ public abstract class AbstractIncomingPublishProcessor<U extends NetworkMqttUser
     log.debug(user.clientId(), response.messageType(), response, "[%s] Send feedback:[%s] -> %s"::formatted);
     MessageTacker messageTacker = session.inMessageTracker();
     user.sendAsync(response)
-        .thenAccept(_ -> messageTacker.remove(messageId));
+        .thenAccept(_ -> messageTacker.removeIfExist(messageId));
   }
 }

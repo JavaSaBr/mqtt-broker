@@ -17,7 +17,10 @@ import javasabr.mqtt.network.message.out.PublishCompleteMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishMqtt5OutMessage
 import javasabr.mqtt.network.message.out.PublishReceivedMqtt5OutMessage
 import javasabr.mqtt.service.TestExternalNetworkMqttUser
+import javasabr.mqtt.service.publish.exception.UnknownPublishStorageException
 import javasabr.rlib.collections.array.Array
+
+import java.time.Duration
 
 class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
 
@@ -298,5 +301,97 @@ class Qos2IncomingPublishProcessorTest extends QosIncomingPublishProcessorTest {
           reason() == null
           userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
         }
+  }
+
+  def "should provide packet identifier not found for too late publish release"() {
+    given:
+        def processor = new Qos2IncomingPublishProcessor(
+            defaultSubscriptionService,
+            defaultPublishDispatcher,
+            defaultMessageOutFactoryService,
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
+        def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
+        def user = publisher.user() as TestExternalNetworkMqttUser
+        def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/6")
+        def expectedMessageId = 35
+        def session = user.session()
+        def inMessageTracker = session.inMessageTracker()
+        def incomingPublish = preparePublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
+    when:
+        processor.process(user, incomingPublish)
+    then:
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+          messageId() == expectedMessageId
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+        }
+    when: 'simulate timeout cleanup before PUBREL arrives'
+        defaultIncomingPublishStorage.cancelScheduledRemoval(incomingPublish)
+        def publishRelease = PublishReleaseMqttInMessage
+            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
+        defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
+    then:
+        with(user.nextSentMessage(PublishCompleteMqtt5OutMessage)) {
+          reasonCode() == PublishCompletedReasonCode.PACKET_IDENTIFIER_NOT_FOUND
+          messageId() == expectedMessageId
+          reason() == null
+          userProperties() == MqttOutMessage.EMPTY_USER_PROPERTIES
+        }
+        inMessageTracker.stored(expectedMessageId) == null
+        session.incomingProcessingPublishes().size() == 0
+  }
+
+  def "should drop publish without feedback when publish release arrives without tracked message meta"() {
+    given:
+        def processor = new Qos2IncomingPublishProcessor(
+            defaultSubscriptionService,
+            defaultPublishDispatcher,
+            defaultMessageOutFactoryService,
+            defaultRetainMessageService,
+            defaultIncomingPublishStorage)
+        def publisher = mockedExternalConnection(MqttVersion.MQTT_5)
+        def user = publisher.user() as TestExternalNetworkMqttUser
+        def topicName = defaultTopicService.createTopicName(user, "Qos2IncomingPublishProcessorTest/7")
+        def expectedMessageId = 35
+        def session = user.session()
+        def inMessageTracker = session.inMessageTracker()
+        def incomingPublish = preparePublish(
+            expectedMessageId,
+            QoS.EXACTLY_ONCE,
+            topicName,
+            testPayloadBytes)
+    when:
+        processor.process(user, incomingPublish)
+    then:
+        with(user.nextSentMessage(PublishReceivedMqtt5OutMessage)) {
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+          messageId() == expectedMessageId
+        }
+        with(inMessageTracker.stored(expectedMessageId)) {
+          messageType() == MqttMessageType.PUBLISH
+          reasonCode() == PublishReceivedReasonCode.SUCCESS
+        }
+    when: 'tracked message meta is missing but callback is still registered'
+        inMessageTracker.remove(expectedMessageId)
+        def publishRelease = PublishReleaseMqttInMessage
+            .of(expectedMessageId, PublishReleaseReasonCode.SUCCESS)
+        defaultPublishReleaseMqttInMessageHandler.processValidMessage(publisher, publishRelease)
+    then:
+        user.isEmpty()
+        inMessageTracker.stored(expectedMessageId) == null
+        session.incomingProcessingPublishes().size() == 0
+    when:
+        defaultIncomingPublishStorage.scheduleRemoval(incomingPublish, Duration.ofSeconds(1))
+    then:
+        def exception = thrown(UnknownPublishStorageException)
+        exception.id() == incomingPublish.id()
   }
 }

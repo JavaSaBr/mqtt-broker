@@ -38,10 +38,10 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
   public final void processValidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     NetworkMqttUser user = connection.user();
     if (!expectedUser.isInstance(user)) {
-      log.warning(user, "Received not expected user:[%s]"::formatted);
+      log.warn(user, "Received not expected user:[%s]"::formatted);
       return;
     } else if (!expectedMessage.isInstance(mqttInMessage)) {
-      log.warning(mqttInMessage, "Received not expected message:[%s]"::formatted);
+      log.warn(mqttInMessage, "Received not expected message:[%s]"::formatted);
       return;
     }
     U castedUser = expectedUser.cast(user);
@@ -49,7 +49,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     if (requireSession()) {
       NetworkMqttSession session = user.session();
       if (session == null) {
-        log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+        log.warn(user.clientId(), "[%s] Session is already closed"::formatted);
         handleSessionIsAlreadyClosed(user);
         return;
       }
@@ -63,10 +63,10 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
   public final void processInvalidMessage(MqttConnection connection, MqttInMessage mqttInMessage) {
     NetworkMqttUser user = connection.user();
     if (!expectedUser.isInstance(user)) {
-      log.warning(user, "Received not expected user:[%s]"::formatted);
+      log.warn(user, "Received not expected user:[%s]"::formatted);
       return;
     } else if (!expectedMessage.isInstance(mqttInMessage)) {
-      log.warning(mqttInMessage, "Received not expected message:[%s]"::formatted);
+      log.warn(mqttInMessage, "Received not expected message:[%s]"::formatted);
       return;
     }
     U castedUser = expectedUser.cast(user);
@@ -74,7 +74,7 @@ public abstract class AbstractMqttInMessageHandler<U extends NetworkMqttUser, M 
     if (requireSession()) {
       NetworkMqttSession session = user.session();
       if (session == null) {
-        log.warning(user.clientId(), "[%s] Session is already closed"::formatted);
+        log.warn(user.clientId(), "[%s] Session is already closed"::formatted);
         handleSessionIsAlreadyClosed(user);
         return;
       }

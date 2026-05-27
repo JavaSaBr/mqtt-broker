@@ -83,7 +83,7 @@ public class SubscribeMqttInMessageHandler extends
     int messageId = subscribeMessage.messageId();
     MessageTacker messageTacker = session.inMessageTracker();
     if (messageTacker.stored(messageId) != null) {
-      log.warning(user.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
+      log.warn(user.clientId(), messageId, "[%s] MessageId:[%d] is already in use"::formatted);
       handleMessageIdIsInUse(user, subscribeMessage);
       return;
     }
@@ -93,7 +93,7 @@ public class SubscribeMqttInMessageHandler extends
     int subscriptionId = subscribeMessage.subscriptionId();
     if (subscriptionId != MqttProperties.SUBSCRIPTION_ID_IS_NOT_SET) {
       if (!connectionConfig.subscriptionIdAvailable()) {
-        log.warning(
+        log.warn(
             user.clientId(), subscriptionId,
             "[%s] Provided subscriptionId:[%d] but server doesn't allow it"::formatted);
         handleSubscriptionIdNotSupported(user, session, subscribeMessage);
@@ -179,7 +179,7 @@ public class SubscribeMqttInMessageHandler extends
     user.sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
-            .remove(messageId));
+            .removeIfExist(messageId));
   }
 
   private void sendSubscribeResults(
@@ -197,7 +197,7 @@ public class SubscribeMqttInMessageHandler extends
     user.sendAsync(response)
         .thenAccept(_ -> session
             .inMessageTracker()
-            .remove(messageId));
+            .removeIfExist(messageId));
   }
 
   private void sendRetainedPublishes(MqttUser user, Array<SubscriptionResult> subscribeResults) {

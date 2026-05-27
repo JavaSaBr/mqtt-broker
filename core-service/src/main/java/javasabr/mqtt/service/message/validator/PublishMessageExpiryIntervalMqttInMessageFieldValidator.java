@@ -27,7 +27,7 @@ public class PublishMessageExpiryIntervalMqttInMessageFieldValidator extends
     long messageExpiryInterval = message.messageExpiryInterval();
     if (messageExpiryInterval != MqttProperties.MESSAGE_EXPIRY_INTERVAL_IS_NOT_SET
         && messageExpiryInterval < MqttProperties.MESSAGE_EXPIRY_INTERVAL_MIN) {
-      log.warning(user.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
+      log.warn(user.clientId(), "[%s] Provided invalid MessageExpiryInterval"::formatted);
       handleInvalidMessageExpiryInterval(user);
       return true;
     }

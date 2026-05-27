@@ -30,14 +30,14 @@ public class PublishTopicAliasMqttInMessageFieldValidator extends
     if (!providedRawTopicName) {
       int topicAlias = message.topicAlias();
       if (topicAlias == MqttProperties.TOPIC_ALIAS_NOT_SET) {
-        log.warning(user.clientId(), "[%s] Not provided any information about TopicName"::formatted);
+        log.warn(user.clientId(), "[%s] Not provided any information about TopicName"::formatted);
         handleNotProvidedTopicName(user);
         return true;
       }
       MqttClientConnectionConfig connectionConfig = connection.clientConnectionConfig();
       int topicAliasMaxValue = connectionConfig.topicAliasMaxValue();
       if (topicAlias < MqttProperties.TOPIC_ALIAS_MIN || topicAlias > topicAliasMaxValue) {
-        log.warning(user.clientId(), topicAlias, "[%s] Provided invalid TopicAlias:[%d]"::formatted);
+        log.warn(user.clientId(), topicAlias, "[%s] Provided invalid TopicAlias:[%d]"::formatted);
         handleInvalidTopicAlias(user);
         return true;
       }

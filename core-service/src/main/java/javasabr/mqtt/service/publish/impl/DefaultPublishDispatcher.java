@@ -50,7 +50,7 @@ public class DefaultPublishDispatcher implements PublishDispatcher {
       //noinspection DataFlowIssue
       publishSenders[subscription.qos().level()].sendToSubscriber(publish, user);
     } catch (IndexOutOfBoundsException | NullPointerException ex) {
-      log.warning(publish, "Received not supported publish message:[%s]"::formatted);
+      log.warn(publish, "Received not supported publish message:[%s]"::formatted);
     }
   }
 
