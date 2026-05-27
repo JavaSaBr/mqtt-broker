@@ -4,6 +4,8 @@ import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCo
 import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PayloadFormatIndicator
 
+import java.util.concurrent.CompletableFuture
+
 class TlsCommunicationTest extends TlsIntegrationSpecification {
 
   def "MQTT 3.1.1 client should connect over TLS"() {
@@ -32,7 +34,7 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
     given:
         def publisher = buildTlsMqtt311Client()
         def subscriber = buildTlsMqtt311Client()
-        def receivedPayload = null
+        def receivedPayload = new CompletableFuture()
     when:
         publisher.connect().join()
         subscriber.connect().join()
@@ -42,7 +44,7 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
               it.payload.ifPresent {
                 byte[] bytes = new byte[it.remaining()]
                 it.get(bytes)
-                receivedPayload = new String(bytes)
+                receivedPayload.complete(new String(bytes))
               }
             }
             .send()
@@ -52,9 +54,8 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
             .payload("hello-tls".bytes)
             .send()
             .join()
-        Thread.sleep(1000)
     then:
-        receivedPayload == "hello-tls"
+        receivedPayload.join() == "hello-tls"
     cleanup:
         publisher.disconnect().join()
         subscriber.disconnect().join()
@@ -64,7 +65,7 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
     given:
         def publisher = buildTlsMqtt5Client()
         def subscriber = buildTlsMqtt5Client()
-        def receivedPayload = null
+        def receivedPayload = new CompletableFuture()
     when:
         publisher.connect().join()
         subscriber.connect().join()
@@ -74,7 +75,7 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
               it.payload.ifPresent {
                 byte[] bytes = new byte[it.remaining()]
                 it.get(bytes)
-                receivedPayload = new String(bytes)
+                receivedPayload.complete(new String(bytes))
               }
             }
             .send()
@@ -85,9 +86,8 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
             .payload("hello-tls".bytes)
             .send()
             .join()
-        Thread.sleep(1000)
     then:
-        receivedPayload == "hello-tls"
+        receivedPayload.join() == "hello-tls"
     cleanup:
         publisher.disconnect().join()
         subscriber.disconnect().join()
@@ -95,7 +95,7 @@ class TlsCommunicationTest extends TlsIntegrationSpecification {
 
   def "should reject plain TCP connection to TLS port"() {
     when:
-        def socket = new Socket(tlsNetworkAddress.hostName, tlsNetworkAddress.port)
+        def socket = new Socket(externalTlsNetworkAddress.hostName, externalTlsNetworkAddress.port)
         socket.soTimeout = 3000
         def input = socket.getInputStream()
         input.read()
