@@ -66,11 +66,6 @@ public class TlsMqttConnection extends MqttConnection {
   }
 
   @Override
-  protected void sendImpl(WritableNetworkPacket<MqttConnection> packet) {
-    super.sendImpl(packet);
-  }
-
-  @Override
   protected NetworkPacketReader createPacketReader(MqttPacketCodec mqttPacketCodec) {
     return new TlsMqttMessageReader(
         this,
