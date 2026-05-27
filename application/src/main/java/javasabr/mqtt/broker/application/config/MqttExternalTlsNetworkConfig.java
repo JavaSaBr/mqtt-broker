@@ -125,8 +125,8 @@ public class MqttExternalTlsNetworkConfig {
       @Value("${mqtt.external.tls.network.read.buffer.size:512}") int readBufferSize,
       @Value("${mqtt.external.tls.network.pending.buffer.size:1024}") int pendingBufferSize,
       @Value("${mqtt.external.tls.network.write.buffer.size:1024}") int writeBufferSize,
-      @Value("${mqtt.external.tls.network.thread.group.name:TlsNetwork}") String threadGroupName,
-      @Value("${mqtt.external.tls.network.thread.count:#{T(java.lang.Runtime).getRuntime().availableProcessors()}}") int threadGroupMaxSize) {
+      @Value("${mqtt.external.tls.network.thread.group.name:ExternalTlsNetwork}") String threadGroupName,
+      @Value("${mqtt.external.tls.network.thread.count:1}") int threadGroupMaxSize) {
     return ServerNetworkConfig.SimpleServerNetworkConfig
         .builder()
         .readBufferSize(readBufferSize)
