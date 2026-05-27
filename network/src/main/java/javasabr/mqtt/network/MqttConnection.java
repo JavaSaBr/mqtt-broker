@@ -89,7 +89,8 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
         this::updateLastActivity,
         this::handleReceivedValidPacket,
         this::handleReceivedInvalidPacket,
-        maxPacketsByRead, mqttPacketCodec);
+        maxPacketsByRead,
+        mqttPacketCodec);
   }
 
   protected NetworkPacketWriter createPacketWriter(MqttPacketCodec mqttPacketCodec) {

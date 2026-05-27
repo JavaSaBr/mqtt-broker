@@ -40,7 +40,14 @@ public class TlsMqttConnection extends MqttConnection {
       boolean clientMode,
       MqttPacketCodec mqttPacketCodec) {
     this.sslEngine = sslContext.createSSLEngine();
-    super(network, channel, bufferAllocator, maxPacketsByRead, serverConnectionConfig, mqttUserFactory, mqttPacketCodec);
+    super(
+        network,
+        channel,
+        bufferAllocator,
+        maxPacketsByRead,
+        serverConnectionConfig,
+        mqttUserFactory,
+        mqttPacketCodec);
     this.sslEngine.setUseClientMode(clientMode);
     this.sslEngine.setNeedClientAuth(tlsProperties.requireClientCert());
     List<String> tlsProtocols = tlsProperties.tlsProtocols();
@@ -72,7 +79,8 @@ public class TlsMqttConnection extends MqttConnection {
         this::handleReceivedInvalidPacket,
         sslEngine,
         this::sendInBackground,
-        maxPacketsByRead, mqttPacketCodec);
+        maxPacketsByRead,
+        mqttPacketCodec);
   }
 
   @Override

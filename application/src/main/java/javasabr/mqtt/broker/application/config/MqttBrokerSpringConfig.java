@@ -398,10 +398,8 @@ public class MqttBrokerSpringConfig {
     return new ExternalNetworkMqttUserFactory(externalNetworkMqttUserReleaseHandler);
   }
 
-
   @Bean
-  MqttPacketCodec mqttPacketCreator() {
+  MqttPacketCodec mqttPacketCodec() {
     return new MqttPacketCodec();
   }
-
 }

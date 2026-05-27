@@ -1,5 +1,7 @@
 package javasabr.mqtt.broker.application.config;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -28,7 +30,6 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.Assert;
 
 @CustomLog
 @Configuration(proxyBeanMethods = false)
@@ -83,16 +84,12 @@ public class MqttExternalTlsNetworkConfig {
     String keyStoreType = properties.keystoreType();
     String keyStorePath = properties.keystorePath();
     String keyStorePassword = properties.keystorePassword();
-
     String trustStoreType = properties.truststoreType();
     String trustStorePath = properties.truststorePath();
     String trustStorePassword = properties.truststorePassword();
-    Assert.hasText(trustStoreType, "trustStoreType is blank");
-    Assert.hasText(trustStorePath, "trustStorePath is blank");
-    Assert.hasText(trustStorePassword, "trustStorePassword is blank");
 
     try (InputStream keyStoreData = Files.newInputStream(Paths.get(keyStorePath));
-         InputStream trustStoreData = Files.newInputStream(Paths.get(trustStorePath))) {
+         InputStream trustStoreData = Files.newInputStream(Paths.get(requireNonNull(trustStorePath)))) {
       return NetworkUtils.createSslContext(
           keyStoreType,
           keyStoreData,
@@ -119,7 +116,8 @@ public class MqttExternalTlsNetworkConfig {
         maxPacketsByRead,
         externalNetworkSslContext,
         tlsProperties,
-        defaultBufferAllocator, mqttPacketCodec);
+        defaultBufferAllocator,
+        mqttPacketCodec);
   }
 
   @Bean

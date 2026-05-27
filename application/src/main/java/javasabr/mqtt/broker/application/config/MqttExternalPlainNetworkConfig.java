@@ -29,7 +29,7 @@ public class MqttExternalPlainNetworkConfig {
       @Value("${mqtt.external.network.read.buffer.size:512}") int readBufferSize,
       @Value("${mqtt.external.network.pending.buffer.size:1024}") int pendingBufferSize,
       @Value("${mqtt.external.network.write.buffer.size:512}") int writeBufferSize,
-      @Value("${mqtt.external.network.thread.group.name:ExternalNetwork}") String threadGroupName,
+      @Value("${mqtt.external.network.thread.group.name:ExternalPlainNetwork}") String threadGroupName,
       @Value("${mqtt.external.network.thread.count:1}") int threadGroupMaxSize) {
     return ServerNetworkConfig.SimpleServerNetworkConfig
         .builder()
@@ -50,7 +50,8 @@ public class MqttExternalPlainNetworkConfig {
     return new PlainMqttConnectionFactory(
         externalServerConnectionConfig,
         mqttUserFactory,
-        maxPacketsByRead, mqttPacketCodec);
+        maxPacketsByRead,
+        mqttPacketCodec);
   }
 
   @Bean

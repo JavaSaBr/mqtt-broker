@@ -1,9 +1,9 @@
-package javasabr.mqtt.network.message
+package javasabr.mqtt.network.message.plain
 
 
 import javasabr.mqtt.network.MqttConnection
 import javasabr.mqtt.network.NetworkUnitSpecification
-import javasabr.mqtt.network.message.plain.PlainMqttMessageReader
+import javasabr.mqtt.network.message.MqttPacketCodec
 import javasabr.rlib.network.Network
 import javasabr.rlib.network.ServerNetworkConfig
 import javasabr.rlib.network.impl.DefaultBufferAllocator

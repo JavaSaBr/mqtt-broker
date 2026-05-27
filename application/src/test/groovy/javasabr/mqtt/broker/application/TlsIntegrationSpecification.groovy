@@ -22,7 +22,7 @@ class TlsIntegrationSpecification extends BaseSpecification {
 
   static TestSslContexts sslContexts = TestSslContexts.getInstance()
 
-  @Autowired(required = false)
+  @Autowired
   InetSocketAddress externalTlsNetworkAddress
 
   Mqtt5AsyncClient buildTlsMqtt5Client() {
@@ -34,7 +34,7 @@ class TlsIntegrationSpecification extends BaseSpecification {
         .trustManagerFactory(TlsIntegrationSpecification.sslContexts.buildTrustManagerFactory())
         .applySslConfig()
         .useMqttVersion5()
-        .addDisconnectedListener { log.info "[TLS/mqtt5] disconnected: ${it.cause.message}" }
+        .addDisconnectedListener { log.info "[TLS/mqtt5] disconnected: ${it.cause?.message}" }
         .buildAsync()
   }
 
@@ -47,7 +47,7 @@ class TlsIntegrationSpecification extends BaseSpecification {
         .trustManagerFactory(sslContexts.buildTrustManagerFactory())
         .applySslConfig()
         .useMqttVersion3()
-        .addDisconnectedListener { log.info "[TLS/mqtt311] disconnected: ${it.cause.message}" }
+        .addDisconnectedListener { log.info "[TLS/mqtt311] disconnected: ${it.cause?.message}" }
         .buildAsync()
   }
 }

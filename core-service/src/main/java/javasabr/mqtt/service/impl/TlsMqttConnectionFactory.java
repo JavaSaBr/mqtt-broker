@@ -47,6 +47,7 @@ public class TlsMqttConnectionFactory extends PlainMqttConnectionFactory {
         clientFactory,
         sslContext,
         tlsProperties,
-        false, mqttPacketCodec);
+        false,
+        mqttPacketCodec);
   }
 }

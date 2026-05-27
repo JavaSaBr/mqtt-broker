@@ -25,8 +25,8 @@ public record TlsProperties(
       PropertyAssert.notBlank(truststorePassword, "truststorePassword");
       PropertyAssert.notBlank(truststoreType, "truststoreType");
     }
-    PropertyAssert.notNull(tlsProtocols, "tlsProtocols is null");
-    PropertyAssert.positive(tlsProtocols.size(), "tlsProtocols is empty");
+    PropertyAssert.notNull(tlsProtocols, "tlsProtocols");
+    PropertyAssert.positive(tlsProtocols.size(), "tlsProtocols.size");
     tlsProtocols.forEach(tlsProtocol -> PropertyAssert.notBlank(tlsProtocol, "tlsProtocol"));
     if (cipherSuites != null) {
       cipherSuites.forEach(cipherSuite -> PropertyAssert.notBlank(cipherSuite, "cipherSuite"));

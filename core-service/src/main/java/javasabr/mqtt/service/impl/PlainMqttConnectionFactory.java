@@ -30,6 +30,7 @@ public class PlainMqttConnectionFactory implements MqttConnectionFactory {
         bufferAllocator,
         maxPacketsByRead,
         serverConnectionConfig,
-        clientFactory, mqttPacketCodec);
+        clientFactory,
+        mqttPacketCodec);
   }
 }
