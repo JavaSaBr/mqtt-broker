@@ -90,12 +90,6 @@ public class DatabaseCredentialsSource implements CredentialsSource {
 
   @JsonValue
   Object jsonDebugValue() {
-    String dbDriver = connectionPool.getMetadata().getName();
-    return Map.of("credentialsSource", getType(), "databaseDriver", dbDriver);
-  }
-
-  @JsonValue
-  Object jsonDebugValue() {
     String dbDriver = connectionPool
         .getMetadata()
         .getName();
