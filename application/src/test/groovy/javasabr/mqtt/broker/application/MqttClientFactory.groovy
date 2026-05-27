@@ -17,7 +17,7 @@ class MqttClientFactory {
         .serverPort(address.getPort())
         .useMqttVersion5()
         .addDisconnectedListener {
-          println "[${clientId}|mqtt5] disconnected:[${it.cause.message}]"
+          println "[${clientId}|mqtt5] disconnected:[${it.cause?.message}]"
         }
         .build()
         .toAsync()
@@ -30,7 +30,7 @@ class MqttClientFactory {
         .serverPort(address.getPort())
         .useMqttVersion3()
         .addDisconnectedListener {
-          println "[${clientId}|mqtt311] disconnected:[${it.cause.message}]"
+          println "[${clientId}|mqtt311] disconnected:[${it.cause?.message}]"
         }
         .build()
         .toAsync()
