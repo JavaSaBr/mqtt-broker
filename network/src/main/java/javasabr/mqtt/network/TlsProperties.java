@@ -17,19 +17,19 @@ public record TlsProperties(
     List<String> tlsProtocols,
     @Nullable List<String> cipherSuites) {
   public TlsProperties {
-    PropertyAssert.notBlank(keystorePath, "keystorePath is empty");
-    PropertyAssert.notBlank(keystorePassword, "keystorePassword is empty");
-    PropertyAssert.notBlank(keystoreType, "keystoreType is empty");
+    PropertyAssert.notBlank(keystorePath, "keystorePath");
+    PropertyAssert.notBlank(keystorePassword, "keystorePassword");
+    PropertyAssert.notBlank(keystoreType, "keystoreType");
     if (requireClientCert) {
-      PropertyAssert.notBlank(truststorePath, "truststorePath is empty");
-      PropertyAssert.notBlank(truststorePassword, "truststorePassword is empty");
-      PropertyAssert.notBlank(truststoreType, "truststoreType is empty");
+      PropertyAssert.notBlank(truststorePath, "truststorePath");
+      PropertyAssert.notBlank(truststorePassword, "truststorePassword");
+      PropertyAssert.notBlank(truststoreType, "truststoreType");
     }
     PropertyAssert.notNull(tlsProtocols, "tlsProtocols is null");
     PropertyAssert.positive(tlsProtocols.size(), "tlsProtocols is empty");
-    tlsProtocols.forEach(tlsProtocol -> PropertyAssert.notBlank(tlsProtocol, "tlsProtocol is empty"));
+    tlsProtocols.forEach(tlsProtocol -> PropertyAssert.notBlank(tlsProtocol, "tlsProtocol"));
     if (cipherSuites != null) {
-      cipherSuites.forEach(cipherSuite -> PropertyAssert.notBlank(cipherSuite, "cipherSuite is empty"));
+      cipherSuites.forEach(cipherSuite -> PropertyAssert.notBlank(cipherSuite, "cipherSuite"));
     }
   }
 }
