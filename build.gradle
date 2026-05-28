@@ -26,6 +26,13 @@ subprojects {
       url  "https://gitlab.com/api/v4/projects/37512056/packages/maven"
     }
   }
+
+  configurations.configureEach {
+    resolutionStrategy.force 'org.slf4j:slf4j-api:2.+'
+    exclude group: "org.slf4j", module: "slf4j-log4j12"
+    exclude group: "org.slf4j", module: "slf4j-reload4j"
+    exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+  }
 }
 
 tasks.register("buildSingleArtifact", GradleBuild) {
@@ -38,11 +45,6 @@ tasks.register("buildSingleArtifactWithoutTests", GradleBuild) {
   group = "build"
   description = "Build all modules without tests -> Build result artifact"
   tasks = ['classes', 'bootJar']
-}
-
-configurations.each {
-  it.exclude group: "org.slf4j", module: "slf4j-log4j12"
-  it.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
 }
 
 wrapper {

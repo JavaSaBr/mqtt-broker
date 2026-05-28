@@ -2,7 +2,7 @@ package javasabr.mqtt.broker.application
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
-import javasabr.mqtt.broker.application.config.MqttBrokerTestConfig
+import javasabr.mqtt.broker.application.config.PlainNetworkTestConfig
 import javasabr.mqtt.model.MqttClientConnectionConfig
 import javasabr.mqtt.model.MqttProperties
 import javasabr.mqtt.model.MqttServerConnectionConfig
@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
 
 @TestPropertySource("classpath:application-test.properties")
-@SpringJUnitConfig(classes = MqttBrokerTestConfig)
+@SpringJUnitConfig(classes = PlainNetworkTestConfig)
 class IntegrationSpecification extends BaseSpecification {
 
   public static final encoding = StandardCharsets.UTF_8
@@ -28,7 +28,7 @@ class IntegrationSpecification extends BaseSpecification {
   public static final keepAlive = 120
 
   @Autowired
-  InetSocketAddress externalNetworkAddress
+  InetSocketAddress externalPlainNetworkAddress
 
   @Autowired
   MqttServerConnectionConfig externalConnectionConfig
@@ -42,11 +42,11 @@ class IntegrationSpecification extends BaseSpecification {
   }
 
   def buildExternalMqtt311Client(String clientId) {
-    return MqttClientFactory.buildMqtt311Client(clientId, externalNetworkAddress)
+    return MqttClientFactory.buildMqtt311Client(clientId, externalPlainNetworkAddress)
   }
 
   def buildExternalMqtt5Client(String clientId) {
-    return MqttClientFactory.buildMqtt5Client(clientId, externalNetworkAddress)
+    return MqttClientFactory.buildMqtt5Client(clientId, externalPlainNetworkAddress)
   }
 
   def generateClientId() {
@@ -75,16 +75,16 @@ class IntegrationSpecification extends BaseSpecification {
 
   def buildMqtt5MockClient() {
     return new MqttMockClient(
-        externalNetworkAddress.getHostName(),
-        externalNetworkAddress.getPort(),
+        externalPlainNetworkAddress.getHostName(),
+        externalPlainNetworkAddress.getPort(),
         mqtt5MockedConnection(externalConnectionConfig)
     )
   }
 
   def buildMqtt311MockClient() {
     return new MqttMockClient(
-        externalNetworkAddress.getHostName(),
-        externalNetworkAddress.getPort(),
+        externalPlainNetworkAddress.getHostName(),
+        externalPlainNetworkAddress.getPort(),
         mqtt311MockedConnection(externalConnectionConfig)
     )
   }

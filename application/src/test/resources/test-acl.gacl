@@ -45,3 +45,21 @@ allowSubscribe {
     anyTopic()
   }
 }
+
+allowPublish {
+  users {
+    clientId startsWith("TLS")
+  }
+  topics {
+    match("tls/#")
+  }
+}
+
+allowSubscribe {
+  users {
+    clientId startsWith("TLS")
+  }
+  topics {
+    match("tls/#")
+  }
+}

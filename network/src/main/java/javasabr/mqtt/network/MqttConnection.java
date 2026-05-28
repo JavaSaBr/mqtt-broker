@@ -4,8 +4,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import javasabr.mqtt.model.MqttClientConnectionConfig;
 import javasabr.mqtt.model.MqttServerConnectionConfig;
 import javasabr.mqtt.model.MqttVersion;
-import javasabr.mqtt.network.message.MqttMessageReader;
-import javasabr.mqtt.network.message.MqttMessageWriter;
+import javasabr.mqtt.network.message.MqttPacketCodec;
+import javasabr.mqtt.network.message.plain.PlainMqttMessageReader;
+import javasabr.mqtt.network.message.plain.PlainMqttMessageWriter;
 import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUser;
 import javasabr.mqtt.network.user.NetworkMqttUserFactory;
@@ -44,11 +45,12 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
       BufferAllocator bufferAllocator,
       int maxPacketsByRead,
       MqttServerConnectionConfig serverConnectionConfig,
-      NetworkMqttUserFactory mqttUserFactory) {
+      NetworkMqttUserFactory mqttUserFactory,
+      MqttPacketCodec mqttPacketCodec) {
     super(network, channel, bufferAllocator, maxPacketsByRead);
     this.serverConnectionConfig = serverConnectionConfig;
-    this.packetReader = createPacketReader();
-    this.packetWriter = createPacketWriter();
+    this.packetReader = createPacketReader(mqttPacketCodec);
+    this.packetWriter = createPacketWriter(mqttPacketCodec);
     this.user = mqttUserFactory.createNetworkUser(this);
   }
 
@@ -81,32 +83,31 @@ public class MqttConnection extends AbstractConnection<MqttConnection> {
     return user;
   }
 
-  private NetworkPacketReader createPacketReader() {
-    return new MqttMessageReader(
+  protected NetworkPacketReader createPacketReader(MqttPacketCodec mqttPacketCodec) {
+    return new PlainMqttMessageReader(
         this,
         this::updateLastActivity,
         this::handleReceivedValidPacket,
         this::handleReceivedInvalidPacket,
-        maxPacketsByRead);
+        maxPacketsByRead,
+        mqttPacketCodec);
   }
 
-  private NetworkPacketWriter createPacketWriter() {
-    return new MqttMessageWriter(
+  protected NetworkPacketWriter createPacketWriter(MqttPacketCodec mqttPacketCodec) {
+    return new PlainMqttMessageWriter(
         this,
         this::updateLastActivity,
         this::nextPacketToWrite,
         this::serializedPacket,
-        this::handleSentPacket);
-  }
-
-  @Override
-  public String toString() {
-    return remoteAddress;
+        this::handleSentPacket,
+        mqttPacketCodec);
   }
 
   @Override
   protected void doClose() {
-    user.release().subscribe();
+    user.release()
+        .doOnError(e -> log.error(remoteAddress, e, "Failed to release user session [%s]"::formatted))
+        .subscribe();
     super.doClose();
   }
 }

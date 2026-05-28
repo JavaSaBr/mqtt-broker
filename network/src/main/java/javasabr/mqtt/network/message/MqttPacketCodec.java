@@ -2,8 +2,6 @@ package javasabr.mqtt.network.message;
 
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
-import java.util.function.Consumer;
-import javasabr.mqtt.network.MqttConnection;
 import javasabr.mqtt.network.message.in.AuthenticationMqttInMessage;
 import javasabr.mqtt.network.message.in.ConnectAckMqttInMessage;
 import javasabr.mqtt.network.message.in.ConnectMqttInMessage;
@@ -20,18 +18,20 @@ import javasabr.mqtt.network.message.in.SubscribeAckMqttInMessage;
 import javasabr.mqtt.network.message.in.SubscribeMqttInMessage;
 import javasabr.mqtt.network.message.in.UnsubscribeAckMqttInMessage;
 import javasabr.mqtt.network.message.in.UnsubscribeMqttInMessage;
+import javasabr.mqtt.network.message.out.MqttOutMessage;
 import javasabr.mqtt.network.util.MqttDataUtils;
 import javasabr.rlib.common.util.ArrayUtils;
 import javasabr.rlib.common.util.NumberUtils;
 import javasabr.rlib.functions.ByteFunction;
-import javasabr.rlib.network.packet.impl.AbstractNetworkPacketReader;
 import lombok.CustomLog;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
-public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage, MqttConnection> {
+public final class MqttPacketCodec {
 
-  private static final int PACKET_LENGTH_START_BYTE = 2;
+  private static final int MAX_MBI_SIZE = 4;
+  private static final int HEADER_TYPE_SIZE = 1;
+  private static final int PAYLOAD_OFFSET = MAX_MBI_SIZE + HEADER_TYPE_SIZE;
 
   private static final ByteFunction<MqttInMessage>[] PACKET_FACTORIES = ArrayUtils.array(
       _ -> {
@@ -53,29 +53,12 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
       DisconnectMqttInMessage::new,
       AuthenticationMqttInMessage::new);
 
-  public MqttMessageReader(
-      MqttConnection connection,
-      Runnable updateActivityFunction,
-      Consumer<MqttInMessage> validPacketHandler,
-      Consumer<MqttInMessage> invalidPacketHandler,
-      int maxPacketsByRead) {
-    super(connection, updateActivityFunction, validPacketHandler, invalidPacketHandler, maxPacketsByRead);
-  }
-
-  @Override
-  protected boolean canStartReadPacket(ByteBuffer buffer) {
-    return buffer.remaining() >= PACKET_LENGTH_START_BYTE;
-  }
-
-  @Override
-  protected int readFullPacketLength(ByteBuffer buffer) {
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901021
+  public int decodePacketLength(ByteBuffer buffer) {
     int prevPos = buffer.position();
-
-    // skip first byte of packet type
     buffer.get();
     int dataSize = MqttDataUtils.readMbi(buffer);
     if (dataSize == -1) {
+      buffer.position(prevPos);
       return -1;
     }
 
@@ -84,13 +67,7 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
   }
 
   @Nullable
-  @Override
-  protected MqttInMessage createPacketFor(
-      ByteBuffer buffer,
-      int startPacketPosition,
-      int packetLength,
-      int dataLength) {
-    // https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901021
+  public MqttInMessage decodePacket(ByteBuffer buffer, int startPacketPosition) {
     int firstByte = Byte.toUnsignedInt(buffer.get(startPacketPosition));
     byte type = NumberUtils.getHighByteBits(firstByte);
     byte info = NumberUtils.getLowByteBits(firstByte);
@@ -100,5 +77,28 @@ public class MqttMessageReader extends AbstractNetworkPacketReader<MqttInMessage
       log.error(e.getMessage());
       return null;
     }
+  }
+
+  public int calculateEncodedPacketSize(int payloadLength) {
+    return PAYLOAD_OFFSET + payloadLength;
+  }
+
+  public void prepareEncodingBuffer(ByteBuffer buffer) {
+    buffer
+        .clear()
+        .position(PAYLOAD_OFFSET);
+  }
+
+  public void encodeHeader(MqttOutMessage packet, ByteBuffer buffer) {
+    int maxBufferPosition = buffer.position();
+    int payloadSize = maxBufferPosition - PAYLOAD_OFFSET;
+    int messageTypeAndFlagsOffset = MAX_MBI_SIZE - MqttDataUtils.sizeOfMbi(payloadSize);
+    buffer
+        .position(messageTypeAndFlagsOffset)
+        .put((byte) packet.messageTypeAndFlags());
+    MqttDataUtils
+        .writeMbi(payloadSize, buffer)
+        .position(messageTypeAndFlagsOffset)
+        .limit(maxBufferPosition);
   }
 }

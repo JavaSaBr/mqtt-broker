@@ -23,6 +23,7 @@ import javasabr.mqtt.auth.api.database.DatabaseConnectionProperties;
 import javasabr.mqtt.auth.api.database.DatabaseCredentials;
 import javasabr.mqtt.auth.api.database.DatabasePoolProperties;
 import javasabr.mqtt.auth.api.database.DatabaseTimeoutProperties;
+import javasabr.mqtt.base.util.DebugUtils;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.experimental.FieldDefaults;
@@ -84,8 +85,7 @@ public class DatabaseCredentialsSource implements CredentialsSource {
 
   @Override
   public String toString() {
-    String dbDriver = connectionPool.getMetadata().getName();
-    return "{ \"credentialsSource\": \"%s\", \"databaseDriver\": \"%s\" }".formatted(getType(), dbDriver);
+    return DebugUtils.toJsonString(this);
   }
 
   @JsonValue

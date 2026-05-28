@@ -21,4 +21,10 @@ public class PropertyAssert {
       throw new BrokerConfigurationException(message.formatted(args));
     }
   }
+
+  public static void notBlank(String value, String property) {
+    if (StringUtils.isBlank(value)) {
+      throw new BrokerConfigurationException("%s is not specified".formatted(property));
+    }
+  }
 }
