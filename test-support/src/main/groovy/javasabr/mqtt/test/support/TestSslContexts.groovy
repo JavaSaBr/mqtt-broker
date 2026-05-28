@@ -92,7 +92,9 @@ class TestSslContexts {
     Files.deleteIfExists(serverKeystore)
     Files.deleteIfExists(clientKeystore)
     Files.deleteIfExists(truststore)
-    Files.list(tempDir).forEach { Files.deleteIfExists(it) }
+    try (var paths = Files.list(tempDir)) {
+      paths.forEach { Files.deleteIfExists(it) }
+    }
     Files.deleteIfExists(tempDir)
   }
 
