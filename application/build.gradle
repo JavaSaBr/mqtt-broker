@@ -3,6 +3,7 @@ plugins {
   id("configure-java")
   id("groovy")
   id("org.springframework.boot")
+  id 'org.graalvm.buildtools.native'
 }
 
 description = "Standard configuration of standalone version of MQTT Broker"
@@ -18,6 +19,9 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
+  runtimeOnly projects.credentialsSourceFile
+  runtimeOnly projects.authenticationProviderBasic
+
   testImplementation projects.credentialsSourceFile
   testImplementation projects.authenticationProviderBasic
 }
@@ -34,4 +38,50 @@ bootRun {
 
 bootJar {
   mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
+}
+
+jar {
+  from(sourceSets.aot.output)
+}
+
+tasks.named('processAot') {
+  jvmArgs += '-Dauthentication.credentials-source.file.enabled=true'
+  jvmArgs += '-Dauthentication.provider.basic.enabled=true'
+}
+
+graalvmNative {
+  toolchainDetection = true
+  binaries {
+    main {
+      sharedLibrary = false
+      mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
+      buildArgs.add("--enable-preview")
+      javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+        vendor = JvmVendorSpec.matching("GraalVM Community")
+      }
+    }
+  }
+}
+
+def nativeCompileDir = layout.buildDirectory.dir('native/nativeCompile').get().asFile.absolutePath
+
+tasks.register('copyNativeTestProperties', Copy) {
+  from('src/test/resources/application-test.properties') {
+    rename 'application-test.properties', 'application.properties'
+    filter { line -> line.replace('classpath:auth/credentials-test', "file://${nativeCompileDir}/auth/credentials-test") }
+  }
+  from('src/test/resources/log4j2-test.xml') {
+    rename 'log4j2-test.xml', 'log4j2.xml'
+  }
+  from('src/test/resources') {
+    include 'auth/credentials-test'
+  }
+  into layout.buildDirectory.dir('native/nativeCompile')
+}
+
+tasks.named('nativeCompile') {
+  dependsOn(':authentication-provider-basic:jar')
+  dependsOn(':credentials-source-file:jar')
+  finalizedBy copyNativeTestProperties
 }
