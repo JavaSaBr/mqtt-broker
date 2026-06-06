@@ -23,6 +23,8 @@ flyway="11.19.0"
 spock = "2.4-M6-groovy-4.0"
 # https://mvnrepository.com/artifact/org.apache.groovy/groovy-all
 groovy = "4.0.28"
+# https://mvnrepository.com/artifact/org.junit/junit-bom
+junit = "6.0.2"
 # https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
 springboot = '4.0.6'
 # https://mvnrepository.com/artifact/org.springframework/spring-core
@@ -87,6 +89,7 @@ spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
 spock-spring = { module = "org.spockframework:spock-spring", version.ref = "spock" }
 groovy-core = { module = "org.apache.groovy:groovy", version.ref = "groovy" }
 groovy-all = { module = "org.apache.groovy:groovy-all", version.ref = "groovy" }
+junit-platform-testkit = { module = "org.junit.platform:junit-platform-testkit", version.ref = "junit" }
 byte-buddy-dep = { module = "net.bytebuddy:byte-buddy-dep", version.ref = "byte-buddy" }
 objenesis = { module = "org.objenesis:objenesis", version.ref = "objenesis" }
 hivemq-mqtt-client = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqtt-client" }

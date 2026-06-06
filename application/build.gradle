@@ -17,13 +17,13 @@ dependencies {
   implementation libs.springboot.starter.core
   implementation libs.springboot.starter.log4j2
 
-  testImplementation projects.testSupport
-  testImplementation testFixtures(projects.network)
   runtimeOnly projects.credentialsSourceFile
   runtimeOnly projects.authenticationProviderBasic
-
+  testImplementation projects.testSupport
+  testImplementation testFixtures(projects.network)
   testImplementation projects.credentialsSourceFile
   testImplementation projects.authenticationProviderBasic
+  testImplementation libs.junit.platform.testkit
 }
 
 tasks.withType(GroovyCompile).configureEach {
@@ -64,24 +64,29 @@ graalvmNative {
   }
 }
 
-def nativeCompileDir = layout.buildDirectory.dir('native/nativeCompile').get().asFile.absolutePath
-
 tasks.register('copyNativeTestProperties', Copy) {
   from('src/test/resources/application-test.properties') {
-    rename 'application-test.properties', 'application.properties'
-    filter { line -> line.replace('classpath:auth/credentials-test', "file://${nativeCompileDir}/auth/credentials-test") }
+    rename 'application-test.properties', "application.properties"
   }
   from('src/test/resources/log4j2-test.xml') {
-    rename 'log4j2-test.xml', 'log4j2.xml'
+    rename 'log4j2-test.xml', "log4j2.xml"
   }
-  from('src/test/resources') {
-    include 'auth/credentials-test'
+  from('src/test/resources/auth/credentials-test') {
+    into 'auth'
   }
-  into layout.buildDirectory.dir('native/nativeCompile')
+  from('src/test/resources/test-acl.gacl')
+  into layout.buildDirectory.dir("native/nativeCompile")
 }
 
-tasks.named('nativeCompile') {
-  dependsOn(':authentication-provider-basic:jar')
-  dependsOn(':credentials-source-file:jar')
-  finalizedBy copyNativeTestProperties
+tasks.named("nativeCompile") {
+  dependsOn ':authentication-provider-basic:jar', ':credentials-source-file:jar', 'processAotResources'
+}
+
+tasks.register('nativeImageTest', Test) {
+  dependsOn 'nativeCompile', 'copyNativeTestProperties'
+  finalizedBy 'test'
+}
+
+tasks.named('copyNativeTestProperties') {
+  mustRunAfter 'nativeCompile'
 }
