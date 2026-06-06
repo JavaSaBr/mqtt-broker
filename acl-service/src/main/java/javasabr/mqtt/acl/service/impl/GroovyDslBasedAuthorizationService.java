@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import javasabr.mqtt.acl.engine.AclEngine;
+import javasabr.mqtt.base.util.ClassPathUriResolver;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
 import javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader;
@@ -17,7 +18,7 @@ import lombok.CustomLog;
 public class GroovyDslBasedAuthorizationService extends AclEngineBasedAuthorizationService {
 
   public void loadFrom(URI resource) {
-    Path localFile = Path.of(resource);
+    Path localFile = ClassPathUriResolver.resolveToPath(resource);
     if (Files.notExists(localFile)) {
       throw new AclConfigurationException("ACL configuration:[%s] doesn't exist".formatted(resource));
     } else if (Files.isDirectory(localFile)) {

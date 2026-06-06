@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.api.exception.CredentialsSourceException;
+import javasabr.mqtt.base.util.ClassPathUriResolver;
 import javasabr.mqtt.base.util.DebugUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +25,7 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   }
 
   private void init() {
-    Path path = Path.of(fileName);
+    Path path = ClassPathUriResolver.resolveToPath(fileName);
     if (!Files.exists(path)) {
       throw new CredentialsSourceException("Credentials file:[%s] could not be found".formatted(fileName));
     }
