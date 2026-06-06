@@ -19,10 +19,9 @@ dependencies {
 
   runtimeOnly projects.credentialsSourceFile
   runtimeOnly projects.authenticationProviderBasic
+
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
-  testImplementation projects.credentialsSourceFile
-  testImplementation projects.authenticationProviderBasic
   testImplementation libs.junit.platform.testkit
 }
 
@@ -32,7 +31,6 @@ tasks.withType(GroovyCompile).configureEach {
 }
 
 bootRun {
-  mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
   jvmArgs += "--enable-preview"
 }
 
@@ -40,21 +38,11 @@ bootJar {
   mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
 }
 
-jar {
-  from(sourceSets.aot.output)
-}
-
-tasks.named('processAot') {
-  jvmArgs += '-Dauthentication.credentials-source.file.enabled=true'
-  jvmArgs += '-Dauthentication.provider.basic.enabled=true'
-}
-
 graalvmNative {
   toolchainDetection = true
   binaries {
     main {
       sharedLibrary = false
-      mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
       buildArgs.add("--enable-preview")
       javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
@@ -64,7 +52,20 @@ graalvmNative {
   }
 }
 
-tasks.register('copyNativeTestProperties', Copy) {
+jar {
+  from(sourceSets.aot.output)
+}
+
+processAot {
+  jvmArgs([
+      '-Dauthentication.credentials-source.file.enabled=true',
+      '-Dauthentication.provider.basic.enabled=true',
+      '-Dmqtt.external.tls.network.enabled=true',
+  ])
+}
+
+tasks.register('copyNativeImageTestResources', Copy) {
+  mustRunAfter 'nativeCompile'
   from('src/test/resources/application-test.properties') {
     rename 'application-test.properties', "application.properties"
   }
@@ -78,15 +79,7 @@ tasks.register('copyNativeTestProperties', Copy) {
   into layout.buildDirectory.dir("native/nativeCompile")
 }
 
-tasks.named("nativeCompile") {
-  dependsOn ':authentication-provider-basic:jar', ':credentials-source-file:jar', 'processAotResources'
-}
-
 tasks.register('nativeImageTest', Test) {
-  dependsOn 'nativeCompile', 'copyNativeTestProperties'
+  dependsOn 'nativeCompile', 'copyNativeImageTestResources'
   finalizedBy 'test'
-}
-
-tasks.named('copyNativeTestProperties') {
-  mustRunAfter 'nativeCompile'
 }
