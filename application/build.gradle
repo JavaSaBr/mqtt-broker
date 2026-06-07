@@ -83,3 +83,22 @@ tasks.register('nativeImageTest', Test) {
   dependsOn 'nativeCompile', 'copyNativeImageTestResources'
   finalizedBy 'test'
 }
+
+sourceSets {
+  loadTest {
+    compileClasspath += sourceSets.test.output
+    runtimeClasspath += sourceSets.test.output
+  }
+}
+
+configurations {
+  loadTestImplementation.extendsFrom testImplementation
+  loadTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+tasks.register('loadTest', Test) {
+  group = 'verification'
+  testClassesDirs = sourceSets.loadTest.output.classesDirs
+  classpath = sourceSets.loadTest.runtimeClasspath
+  useJUnitPlatform()
+}

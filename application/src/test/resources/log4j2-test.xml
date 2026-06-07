@@ -6,7 +6,7 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger name="javasabr.mqtt.network.impl.AbstractNetworkMqttUser" level="DEBUG" additivity="false">
+    <!--<Logger name="javasabr.mqtt.network.impl.AbstractNetworkMqttUser" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Logger>
     <Logger name="javasabr.mqtt.service.impl.DefaultConnectionService" level="DEBUG" additivity="false">
@@ -29,7 +29,7 @@
     </Logger>
     <Logger name="javasabr.mqtt.service.impl.InMemorySubscriptionService" level="DEBUG" additivity="false">
       <AppenderRef ref="BrokerConsoleTest"/>
-    </Logger>
+    </Logger>-->
     <Root level="INFO">
       <AppenderRef ref="BrokerConsoleTest"/>
     </Root>
