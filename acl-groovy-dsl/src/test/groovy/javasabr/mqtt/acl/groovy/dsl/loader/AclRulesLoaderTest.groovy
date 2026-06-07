@@ -25,6 +25,9 @@ import javasabr.mqtt.service.acl.TestRulesGenerator
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
+import java.nio.file.Files
+import java.nio.file.NoSuchFileException
+import java.nio.file.Path
 import java.util.concurrent.CompletionException
 
 import static javasabr.mqtt.acl.engine.model.Action.ALLOW
@@ -38,29 +41,29 @@ class AclRulesLoaderTest extends UnitSpecification {
     given:
         def ruleFile = TestRulesGenerator.generate(100)
     when:
-        def load = AclRulesLoader.load(ruleFile.toString())
+        def load = AclRulesLoader.load(new FileInputStream(ruleFile))
     then:
         load.get(SUBSCRIBE).size() == 50
         load.get(PUBLISH).size() == 50
         ruleFile.delete()
   }
 
-  def "should throw exception if config not exists"(String configPath, String errorMessage) {
+  def "should throw exception if config not exists"(String configPath) {
     when:
-        AclRulesLoader.load(configPath)
+        AclRulesLoader.load(Files.newInputStream(Path.of(configPath)))
     then:
-        def exception = thrown(AclConfigurationException)
-        exception.message == errorMessage
+        def exception = thrown(NoSuchFileException)
+        exception.message == configPath
     where:
-        configPath         | errorMessage
-        "not/existed/path" | 'Config file:[not/existed/path] doesn\'t exist'
+        configPath         | _
+        "not/existed/path" | _
   }
 
   def "should work fine with only publish rules"() {
     given:
         def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.gacl")
     when:
-        def ruleMap = AclRulesLoader.load(onlyPublishRulesAclPath)
+        def ruleMap = AclRulesLoader.load(Files.newInputStream(Path.of(onlyPublishRulesAclPath)))
     then:
         noExceptionThrown()
         !ruleMap.get(PUBLISH).isEmpty()
@@ -71,7 +74,7 @@ class AclRulesLoaderTest extends UnitSpecification {
     given:
         def invalidAclPath = getAbsolutePath("acl/config/invalid/${invalidAclFileName}")
     when:
-        AclRulesLoader.load(invalidAclPath)
+        AclRulesLoader.load(Files.newInputStream(Path.of(invalidAclPath)))
     then:
         def exception = thrown CompletionException
         exceptionClass.isInstance exception.cause
@@ -98,7 +101,7 @@ class AclRulesLoaderTest extends UnitSpecification {
   def "should parse Groovy DSL config"() {
     when:
         def absolutePath = getAbsolutePath("acl/config/acl.gacl")
-        def rules = AclRulesLoader.load(absolutePath)
+        def rules = AclRulesLoader.load(Files.newInputStream(Path.of(absolutePath)))
     then:
         verifyAll(rules.get(PUBLISH)) {
           size() == 3

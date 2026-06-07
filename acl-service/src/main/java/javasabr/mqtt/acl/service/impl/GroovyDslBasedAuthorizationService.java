@@ -1,15 +1,15 @@
 package javasabr.mqtt.acl.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import javasabr.mqtt.acl.engine.AclEngine;
-import javasabr.mqtt.base.util.ClassPathUriResolver;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
 import javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader;
 import javasabr.mqtt.acl.service.AclEngineBasedAuthorizationService;
+import javasabr.mqtt.base.util.ClassPathResourceResolver;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
 import lombok.CustomLog;
@@ -18,15 +18,14 @@ import lombok.CustomLog;
 public class GroovyDslBasedAuthorizationService extends AclEngineBasedAuthorizationService {
 
   public void loadFrom(URI resource) {
-    Path localFile = ClassPathUriResolver.resolveToPath(resource);
-    if (Files.notExists(localFile)) {
-      throw new AclConfigurationException("ACL configuration:[%s] doesn't exist".formatted(resource));
-    } else if (Files.isDirectory(localFile)) {
-      throw new AclConfigurationException("ACL configuration:[%s] is directory".formatted(resource));
+    try {
+      InputStream localFile =  ClassPathResourceResolver.newInputStream(resource);
+      Map<Operation, Array<AclRule>> loadedAclRulesMap = AclRulesLoader.load(localFile);
+      switchTo(new AclEngine(loadedAclRulesMap));
+      log.info(resource, loadedAclRulesMap, GroovyDslBasedAuthorizationService::buildServiceDescription);
+    } catch (IOException e) {
+      throw new AclConfigurationException("ACL configuration issue:[%s]".formatted(resource), e);
     }
-    Map<Operation, Array<AclRule>> loadedAclRulesMap = AclRulesLoader.load(localFile);
-    switchTo(new AclEngine(loadedAclRulesMap));
-    log.info(resource, loadedAclRulesMap, GroovyDslBasedAuthorizationService::buildServiceDescription);
   }
 
   private static String buildServiceDescription(URI resource, Map<Operation, Array<AclRule>> aclRulesMap) {
