@@ -4,6 +4,7 @@ plugins {
   id("groovy")
   id("org.springframework.boot")
   id 'org.graalvm.buildtools.native'
+  id 'io.gatling.gradle' version '3.15.0'
 }
 
 description = "Standard configuration of standalone version of MQTT Broker"
@@ -17,6 +18,7 @@ dependencies {
   implementation libs.springboot.starter.core
   implementation libs.springboot.starter.log4j2
 
+  runtimeOnly projects.credentialsSourceDb
   runtimeOnly projects.credentialsSourceFile
   runtimeOnly projects.authenticationProviderBasic
 
@@ -61,6 +63,7 @@ processAot {
       '-Dauthentication.credentials-source.file.enabled=true',
       '-Dauthentication.provider.basic.enabled=true',
       '-Dmqtt.external.tls.network.enabled=true',
+      '-Dacl.engine.type=groovy-dsl'
   ])
 }
 
@@ -94,6 +97,15 @@ sourceSets {
 configurations {
   loadTestImplementation.extendsFrom testImplementation
   loadTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+  gatlingImplementation libs.gatling.charts.highcharts
+  gatlingImplementation libs.gatling.mqtt.java
+}
+
+ext {
+    reportsDir = layout.buildDirectory.dir("reports")
 }
 
 tasks.register('loadTest', Test) {

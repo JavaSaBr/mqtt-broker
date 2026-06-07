@@ -79,4 +79,14 @@ public class DatabaseCredentialsSourceSpringConfig {
         .databaseMigrationLocations(new String[]{databaseMigrationLocation})
         .build();
   }
+
+  @Bean
+  DatabaseCredentials readerDatabaseCredentials() {
+    return new DatabaseCredentials("postgres", "mysecretpassword");
+  }
+
+  @Bean
+  DatabaseCredentials adminDatabaseCredentials() {
+    return new DatabaseCredentials("postgres", "mysecretpassword");
+  }
 }
