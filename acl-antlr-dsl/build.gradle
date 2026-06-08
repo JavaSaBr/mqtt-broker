@@ -1,0 +1,32 @@
+plugins {
+  id("java-library")
+  id("configure-java")
+  id("antlr")
+}
+
+def antlrOutputRoot = layout.buildDirectory.dir("generated/sources/antlr/java/main").get().asFile
+
+generateGrammarSource {
+  outputDirectory = antlrOutputRoot
+  arguments += ['-visitor', '-no-listener', '-package', 'javasabr.mqtt.acl.java.dsl']
+  doLast {
+    def targetDir = file("${antlrOutputRoot}/javasabr/mqtt/acl/java/dsl")
+    targetDir.mkdirs()
+    ant.move(todir: targetDir) {
+      fileset(dir: outputDirectory) {
+        include(name: '*.java')
+      }
+    }
+  }
+}
+
+dependencies {
+  api projects.aclEngine
+  api libs.rlib.collections
+
+  antlr libs.antlr
+  implementation libs.antlr.runtime
+
+  testImplementation testFixtures(projects.model)
+  testImplementation projects.testSupport
+}
