@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<Configuration>
   <Appenders>
-    <Console name="BrokerConsoleMain" target="SYSTEM_OUT">
+    <Console name="BrokerConsoleTest" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{yyyy-mm-dd HH:mm:ss.SSS} %highlight{%-5level} --- %logger{1} : %msg%n%throwable"/>
     </Console>
   </Appenders>
   <Loggers>
+    <Logger name="javasabr.mqtt.network.impl.AbstractNetworkMqttUser" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.impl.DefaultConnectionService" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.model.network.impl.DefaultMqttSession" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.publish.impl.DefaultIncomingPublishRouter" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.publish.processor.AbstractIncomingPublishProcessor" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.publish.processor.Qos1IncomingPublishProcessor" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.session.impl.InMemoryMqttSessionService" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
+    <Logger name="javasabr.mqtt.service.impl.InMemorySubscriptionService" level="DEBUG" additivity="false">
+      <AppenderRef ref="BrokerConsoleTest"/>
+    </Logger>
     <Root level="INFO">
-      <AppenderRef ref="BrokerConsoleMain"/>
+      <AppenderRef ref="BrokerConsoleTest"/>
     </Root>
   </Loggers>
 </Configuration>

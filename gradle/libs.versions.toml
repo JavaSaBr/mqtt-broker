@@ -47,8 +47,13 @@ legacy-jackson = "2.21.1"
 netty = "4.2.13.Final"
 # https://mvnrepository.com/artifact/org.antlr/antlr4
 antlr = "4.13.1"
+# https://mvnrepository.com/artifact/io.gatling/gatling-app
+gatling = "3.15.0"
 
 [libraries]
+# ... (existing content)
+gatling-charts-highcharts = { module = "io.gatling.highcharts:gatling-charts-highcharts", version.ref = "gatling" }
+gatling-mqtt-java = { module = "io.gatling:gatling-mqtt-java", version.ref = "gatling" }
 rlib-network = { module = "javasabr.rlib:rlib-network", version.ref = "rlib" }
 rlib-logger-api = { module = "javasabr.rlib:rlib-logger-api", version.ref = "rlib" }
 rlib-logger-slf4j = { module = "javasabr.rlib:rlib-logger-slf4j", version.ref = "rlib" }

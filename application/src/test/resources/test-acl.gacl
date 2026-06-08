@@ -63,3 +63,23 @@ allowSubscribe {
     match("tls/#")
   }
 }
+
+
+allowPublish {
+  users {
+    clientId startsWith("LoadTest")
+  }
+  topics {
+    match("loadtest/#")
+  }
+}
+
+allowSubscribe {
+  users {
+    clientId startsWith("LoadTest")
+  }
+  topics {
+    match("loadtest/#")
+  }
+}
+
