@@ -6,12 +6,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClassPathResourceResolver {
 
   private static final ClassLoader CLASS_LOADER = ClassPathResourceResolver.class.getClassLoader();
-
-  private ClassPathResourceResolver() {}
 
   public static InputStream newInputStream(URI uri) throws IOException {
     if (uri == null) {
