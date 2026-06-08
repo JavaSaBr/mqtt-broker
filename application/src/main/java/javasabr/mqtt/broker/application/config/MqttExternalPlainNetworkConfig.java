@@ -12,6 +12,7 @@ import javasabr.rlib.network.NetworkFactory;
 import javasabr.rlib.network.ServerNetworkConfig;
 import javasabr.rlib.network.server.ServerNetwork;
 import lombok.CustomLog;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -62,6 +63,11 @@ public class MqttExternalPlainNetworkConfig {
   }
 
   @Bean
+  @RegisterReflectionForBinding({
+      java.util.function.Consumer[].class,
+      java.util.function.BiConsumer[].class,
+      reactor.core.publisher.FluxSink[].class
+  })
   ServerNetwork<MqttConnection> externalPlainNetwork(
       ServerNetworkConfig externalPlainNetworkConfig,
       MqttConnectionFactory externalPlainConnectionFactory) {

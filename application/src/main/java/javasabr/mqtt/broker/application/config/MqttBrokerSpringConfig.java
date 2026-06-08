@@ -59,6 +59,7 @@ import javasabr.mqtt.service.publish.sender.SubscriberPublishSender;
 import javasabr.mqtt.service.session.MqttSessionService;
 import javasabr.mqtt.service.session.impl.InMemoryMqttSessionService;
 import lombok.CustomLog;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -129,6 +130,7 @@ public class MqttBrokerSpringConfig {
   }
   
   @Bean
+  @RegisterReflectionForBinding(java.util.UUID[].class)
   IncomingPublishStorage incomingPublishStorage(
       PublishDataStorage publishDataStorage,
       @Value("${in.memory.incoming.publish.storage.clean.interval.ms:60000}") int cleanInterval) {
