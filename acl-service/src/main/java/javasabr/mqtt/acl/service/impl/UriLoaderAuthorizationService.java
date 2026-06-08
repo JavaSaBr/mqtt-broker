@@ -1,14 +1,15 @@
 package javasabr.mqtt.acl.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Function;
 import javasabr.mqtt.acl.engine.AclEngine;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
 import javasabr.mqtt.acl.service.AclEngineBasedAuthorizationService;
+import javasabr.mqtt.base.util.ClassPathResourceResolver;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
@@ -21,18 +22,17 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationService {
 
-  Function<Path, Map<Operation, Array<AclRule>>> rulerLoader;
+  Function<InputStream, Map<Operation, Array<AclRule>>> rulerLoader;
 
   public void loadFrom(URI resource) {
-    Path localFile = Path.of(resource);
-    if (Files.notExists(localFile)) {
-      throw new AclConfigurationException("ACL configuration:[%s] doesn't exist".formatted(resource));
-    } else if (Files.isDirectory(localFile)) {
-      throw new AclConfigurationException("ACL configuration:[%s] is directory".formatted(resource));
+    try {
+      InputStream localFile =  ClassPathResourceResolver.newInputStream(resource);
+      Map<Operation, Array<AclRule>> loadedAclRulesMap = rulerLoader.apply(localFile);
+      switchTo(new AclEngine(loadedAclRulesMap));
+      log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
+    } catch (IOException e) {
+      throw new AclConfigurationException("ACL configuration issue:[%s]".formatted(resource), e);
     }
-    Map<Operation, Array<AclRule>> loadedAclRulesMap = rulerLoader.apply(localFile);
-    switchTo(new AclEngine(loadedAclRulesMap));
-    log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
   }
 
   private static String buildServiceDescription(URI resource, Map<Operation, Array<AclRule>> aclRulesMap) {

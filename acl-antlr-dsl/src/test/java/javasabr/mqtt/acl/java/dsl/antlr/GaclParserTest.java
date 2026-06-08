@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -37,9 +39,9 @@ class GaclParserTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void shouldParseFullFeaturedGaclFile() {
+  void shouldParseFullFeaturedGaclFile() throws IOException {
     Path gaclFile = Paths.get(RESOURCES_DIR, "test-acl-full.gacl");
-    Map<Operation, Array<AclRule>> rules = AclRulesLoader.load(gaclFile);
+    Map<Operation, Array<AclRule>> rules = AclRulesLoader.load(Files.newInputStream(gaclFile));
 
     Array<AclRule> publishRules = rules.get(PUBLISH);
     assertEquals(3, publishRules.size());
@@ -153,9 +155,9 @@ class GaclParserTest {
   }
 
   @Test
-  void shouldParseShorthandGaclFile() {
+  void shouldParseShorthandGaclFile() throws IOException {
     Path gaclFile = Paths.get(RESOURCES_DIR, "test-acl-shorthand.gacl");
-    Map<Operation, Array<AclRule>> rules = AclRulesLoader.load(gaclFile);
+    Map<Operation, Array<AclRule>> rules = AclRulesLoader.load(Files.newInputStream(gaclFile));
 
     Array<AclRule> publishRules = rules.get(PUBLISH);
     assertEquals(3, publishRules.size());
@@ -207,9 +209,9 @@ class GaclParserTest {
   }
 
   @Test
-  void shouldProduceSameResultAsAntlrDslBuilder() {
+  void shouldProduceSameResultAsAntlrDslBuilder() throws IOException {
     Path gaclFile = Paths.get(RESOURCES_DIR, "test-acl-full.gacl");
-    Map<Operation, Array<AclRule>> parsedRules = AclRulesLoader.load(gaclFile);
+    Map<Operation, Array<AclRule>> parsedRules = AclRulesLoader.load(Files.newInputStream(gaclFile));
 
     Map<Operation, Array<AclRule>> builtRules = AclRulesLoader.build(root -> root
         .allowPublish(rule -> rule
@@ -283,12 +285,12 @@ class GaclParserTest {
   @Test
   void shouldThrowForNonExistentFile() {
     Path nonExistent = Paths.get("non-existent.gacl");
-    AclConfigurationException exception = assertThrows(
-        AclConfigurationException.class,
-        () -> AclRulesLoader.load(nonExistent));
+    java.nio.file.NoSuchFileException exception = assertThrows(
+        java.nio.file.NoSuchFileException.class,
+        () -> AclRulesLoader.load(Files.newInputStream(nonExistent)));
     assertTrue(exception
         .getMessage()
-        .contains("doesn't exist"));
+        .contains("non-existent.gacl"));
   }
 
   @Test
@@ -296,7 +298,7 @@ class GaclParserTest {
     Path invalidFile = Paths.get(RESOURCES_DIR, "invalid/invalid-syntax.gacl");
     AclConfigurationException exception = assertThrows(
         AclConfigurationException.class,
-        () -> AclRulesLoader.load(invalidFile));
+        () -> AclRulesLoader.load(Files.newInputStream(invalidFile)));
     assertTrue(exception
         .getMessage()
         .startsWith("Syntax error at line"));

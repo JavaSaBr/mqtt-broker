@@ -1,6 +1,7 @@
 package javasabr.mqtt.acl.java.dsl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -24,15 +25,12 @@ public class AclRulesLoader {
     return RuleContainerBuilder.groupRulesByOperation(builder.build());
   }
 
-  public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
-    if (Files.notExists(aclConfigPath)) {
-      throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath));
-    }
+  public static Map<Operation, Array<AclRule>> load(InputStream aclConfig) {
     GaclLexer lexer;
     try {
-      lexer = new GaclLexer(CharStreams.fromPath(aclConfigPath));
+      lexer = new GaclLexer(CharStreams.fromStream(aclConfig));
     } catch (IOException e) {
-      throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
+      throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfig), e);
     }
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     GaclParser parser = new GaclParser(tokens);
