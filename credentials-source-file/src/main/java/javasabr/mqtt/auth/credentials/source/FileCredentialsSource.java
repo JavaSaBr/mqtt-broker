@@ -2,6 +2,7 @@ package javasabr.mqtt.auth.credentials.source;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
@@ -22,8 +23,8 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   }
 
   private void init() {
-    try {
-      reset(ClassPathResourceResolver.newInputStream(fileName));
+    try (InputStream aclInputStream = ClassPathResourceResolver.newInputStream(fileName)) {
+      reset(aclInputStream);
     } catch (IOException e) {
       throw new CredentialsSourceException("Error during credentials file read", e);
     }

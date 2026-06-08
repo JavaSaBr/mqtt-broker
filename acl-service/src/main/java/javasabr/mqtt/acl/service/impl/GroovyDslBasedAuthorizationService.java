@@ -18,9 +18,8 @@ import lombok.CustomLog;
 public class GroovyDslBasedAuthorizationService extends AclEngineBasedAuthorizationService {
 
   public void loadFrom(URI resource) {
-    try {
-      InputStream localFile =  ClassPathResourceResolver.newInputStream(resource);
-      Map<Operation, Array<AclRule>> loadedAclRulesMap = AclRulesLoader.load(localFile);
+    try (InputStream aclInputStream =  ClassPathResourceResolver.newInputStream(resource)) {
+      Map<Operation, Array<AclRule>> loadedAclRulesMap = AclRulesLoader.load(aclInputStream);
       switchTo(new AclEngine(loadedAclRulesMap));
       log.info(resource, loadedAclRulesMap, GroovyDslBasedAuthorizationService::buildServiceDescription);
     } catch (IOException e) {

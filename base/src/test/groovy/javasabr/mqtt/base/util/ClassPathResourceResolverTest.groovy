@@ -18,25 +18,30 @@ class ClassPathResourceResolverTest extends UnitSpecification {
     then:
         new String(result.readAllBytes(), StandardCharsets.UTF_8) == "hello"
     cleanup:
+        result.close()
         Files.deleteIfExists(tempFile)
   }
 
   def "should resolve classpath URI to existing Path"() {
     given:
-        def uri = URI.create("classpath:javasabr/mqtt/base/util/ClassPathResourceStreamer.class")
+        def uri = URI.create("classpath:javasabr/mqtt/base/util/ClassPathResourceResolver.class")
     when:
         def result = ClassPathResourceResolver.newInputStream(uri)
     then:
         result.available() > 0
+    cleanup:
+        result.close()
   }
 
   def "should handle classpath URI with leading slash"() {
     given:
-        def uri = URI.create("classpath:/javasabr/mqtt/base/util/ClassPathResourceStreamer.class")
+        def uri = URI.create("classpath:/javasabr/mqtt/base/util/ClassPathResourceResolver.class")
     when:
         def result = ClassPathResourceResolver.newInputStream(uri)
     then:
         result.available() > 0
+    cleanup:
+        result.close()
   }
 
   def "should throw NullPointerException for null URI"() {
@@ -75,6 +80,7 @@ class ClassPathResourceResolverTest extends UnitSpecification {
     then:
         new String(result.readAllBytes(), StandardCharsets.UTF_8) == "fallback content"
     cleanup:
+        result.close()
         Files.deleteIfExists(resourceFile)
         Files.deleteIfExists(testDir)
   }
