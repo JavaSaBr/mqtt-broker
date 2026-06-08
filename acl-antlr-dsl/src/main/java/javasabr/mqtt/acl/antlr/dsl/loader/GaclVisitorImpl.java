@@ -1,4 +1,4 @@
-package javasabr.mqtt.acl.java.dsl.antlr;
+package javasabr.mqtt.acl.antlr.dsl.loader;
 
 import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
@@ -29,15 +29,15 @@ import javasabr.mqtt.acl.java.dsl.GaclParser.TopicMatcherContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.TopicsSectionContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.UserConditionContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.UsersSectionContext;
-import javasabr.mqtt.acl.java.dsl.builder.AclRuleBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.AclRulesBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.AllOfUserConditionBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.AnyOfUserConditionBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.MultiUserConditionBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.TopicsBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.UserConditionBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.UserMatchersBuilder;
-import javasabr.mqtt.acl.java.dsl.builder.UsersBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.AclRuleBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.AclRulesBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.AllOfUserConditionBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.AnyOfUserConditionBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.MultiUserConditionBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.TopicsBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.UserConditionBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.UserMatchersBuilder;
+import javasabr.mqtt.acl.antlr.dsl.builder.UsersBuilder;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

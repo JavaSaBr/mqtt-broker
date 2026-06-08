@@ -1,4 +1,4 @@
-package javasabr.mqtt.acl.java.dsl;
+package javasabr.mqtt.acl.antlr.dsl.loader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,13 +8,16 @@ import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
-import javasabr.mqtt.acl.java.dsl.antlr.AclSyntaxErrorListener;
-import javasabr.mqtt.acl.java.dsl.antlr.GaclVisitorImpl;
-import javasabr.mqtt.acl.java.dsl.builder.AclRulesBuilder;
+import javasabr.mqtt.acl.java.dsl.GaclLexer;
+import javasabr.mqtt.acl.java.dsl.GaclParser;
+import javasabr.mqtt.acl.antlr.dsl.builder.AclRulesBuilder;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 
 public class AclRulesLoader {
 
@@ -34,13 +37,24 @@ public class AclRulesLoader {
     } catch (IOException e) {
       throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
     }
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    GaclParser parser = new GaclParser(tokens);
+    GaclParser parser = new GaclParser(new CommonTokenStream(lexer));
     parser.addErrorListener(new AclSyntaxErrorListener());
-    GaclParser.AclConfigContext tree = parser.aclConfig();
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder();
-    GaclVisitorImpl visitor = new GaclVisitorImpl(aclRulesBuilder);
-    visitor.visit(tree);
+    new GaclVisitorImpl(aclRulesBuilder).visit(parser.aclConfig());
     return RuleContainerBuilder.groupRulesByOperation(aclRulesBuilder.build());
+  }
+
+  private static class AclSyntaxErrorListener extends BaseErrorListener {
+
+    @Override
+    public void syntaxError(
+        Recognizer<?, ?> recognizer,
+        Object offendingSymbol,
+        int line,
+        int position,
+        String msg,
+        RecognitionException e) {
+      throw new AclConfigurationException("Syntax error at line %d, column %d: %s".formatted(line, position, msg), e);
+    }
   }
 }

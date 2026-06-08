@@ -1,7 +1,7 @@
 package javasabr.mqtt.acl.service.conifg;
 
 import java.net.URI;
-import javasabr.mqtt.acl.java.dsl.AclRulesLoader;
+import javasabr.mqtt.acl.antlr.dsl.loader.AclRulesLoader;
 import javasabr.mqtt.acl.service.impl.UriLoaderAuthorizationService;
 import javasabr.mqtt.service.AuthorizationService;
 import lombok.CustomLog;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @CustomLog
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "acl.engine.type", havingValue = "antlr-dsl")
-@ConditionalOnClass(name = "javasabr.mqtt.acl.java.dsl.AclRulesLoader")
+@ConditionalOnClass(name = "javasabr.mqtt.acl.antlr.dsl.loader.AclRulesLoader")
 public class AntlrDslBasedAclServiceSpringConfig {
 
   @Bean

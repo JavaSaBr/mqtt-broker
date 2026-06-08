@@ -1,4 +1,4 @@
-package javasabr.mqtt.acl.java.dsl.builder;
+package javasabr.mqtt.acl.antlr.dsl.builder;
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition;

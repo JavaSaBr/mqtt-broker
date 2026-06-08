@@ -1,4 +1,4 @@
-package javasabr.mqtt.acl.java.dsl.builder;
+package javasabr.mqtt.acl.antlr.dsl.builder;
 
 import java.util.HashSet;
 import java.util.Set;

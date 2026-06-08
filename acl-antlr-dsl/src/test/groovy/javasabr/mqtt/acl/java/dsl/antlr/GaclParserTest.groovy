@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.java.dsl.antlr
 
+import javasabr.mqtt.acl.antlr.dsl.loader.GaclVisitorImpl
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
@@ -14,7 +15,7 @@ import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
 import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
 import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
 import javasabr.mqtt.acl.engine.model.rule.AbstractAclRule
-import javasabr.mqtt.acl.java.dsl.AclRulesLoader
+import javasabr.mqtt.acl.antlr.dsl.loader.AclRulesLoader
 import spock.lang.Specification
 
 import java.nio.file.Paths

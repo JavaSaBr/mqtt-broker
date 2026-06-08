@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.java.dsl
 
+import javasabr.mqtt.acl.antlr.dsl.loader.AclRulesLoader
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
