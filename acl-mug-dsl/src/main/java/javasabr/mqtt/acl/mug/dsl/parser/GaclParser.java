@@ -85,7 +85,7 @@ public class GaclParser {
               .between("{", "}"),
           (id, matchers) -> matchers
               .stream()
-              .map(m -> toBlockCondition(id, m))
+              .map(m -> toUserCondition(id, m))
               .collect(Collectors.toList())),
       Parser
           .word("allOf")
@@ -196,21 +196,6 @@ public class GaclParser {
     }
   }
 
-  public static String unquote(String text) {
-    String content = text.substring(1, text.length() - 1);
-    StringBuilder sb = new StringBuilder(content.length());
-    for (int i = 0; i < content.length(); i++) {
-      char c = content.charAt(i);
-      if (c == '\\' && i + 1 < content.length()) {
-        sb.append(content.charAt(i + 1));
-        i++;
-      } else {
-        sb.append(c);
-      }
-    }
-    return sb.toString();
-  }
-
   private static Parser<AclRule> createDirective(
       String keyword,
       BiFunction<MqttUserCondition, TopicCondition, AclRule> factory) {
@@ -223,19 +208,10 @@ public class GaclParser {
 
   private static MqttUserCondition toUserCondition(String identityType, ValueMatcher<String> matcher) {
     return switch (identityType) {
-      case "userName" -> new UserNameCondition(matcher);
-      case "clientId" -> new ClientIdCondition(matcher);
-      case "ipAddress" -> new IpAddressCondition(matcher);
+      case "userName", "userNames" -> new UserNameCondition(matcher);
+      case "clientId", "clientIds" -> new ClientIdCondition(matcher);
+      case "ipAddress", "ipAddresses" -> new IpAddressCondition(matcher);
       default -> throw new AclConfigurationException("Unknown identity type: " + identityType);
-    };
-  }
-
-  private static MqttUserCondition toBlockCondition(String blockType, ValueMatcher<String> matcher) {
-    return switch (blockType) {
-      case "userNames" -> new UserNameCondition(matcher);
-      case "clientIds" -> new ClientIdCondition(matcher);
-      case "ipAddresses" -> new IpAddressCondition(matcher);
-      default -> throw new AclConfigurationException("Unknown identity block type: " + blockType);
     };
   }
 

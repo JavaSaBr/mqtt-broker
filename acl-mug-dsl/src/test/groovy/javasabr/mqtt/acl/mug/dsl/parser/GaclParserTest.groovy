@@ -295,22 +295,6 @@ class GaclParserTest extends Specification {
         e.message.startsWith("Syntax error at line")
   }
 
-  def "should unquote strings correctly"() {
-    expect:
-        AclRulesLoader.unquote(input) == expectedOutput
-
-    where:
-        input                 | expectedOutput
-        '"simple"'            | 'simple'
-        "'simple'"            | 'simple'
-        '"has space"'         | 'has space'
-        '"sensor10$"'         | 'sensor10$'
-        '"sensor10\\$"'       | 'sensor10$'
-        '"back\\\\slash"'     | 'back\\slash'
-        "'device/{clientId}'" | 'device/{clientId}'
-  }
-
-
   @Unroll
   def "should parse string literal containing #pattern without treating it as a comment"() {
     when:

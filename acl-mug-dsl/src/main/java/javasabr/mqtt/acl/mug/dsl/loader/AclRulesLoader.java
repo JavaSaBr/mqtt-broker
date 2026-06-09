@@ -39,8 +39,4 @@ public class AclRulesLoader {
     arr.addAll(rules);
     return RuleContainerBuilder.groupRulesByOperation(Array.copyOf(arr));
   }
-
-  public static String unquote(String text) {
-    return GaclParser.unquote(text);
-  }
 }
