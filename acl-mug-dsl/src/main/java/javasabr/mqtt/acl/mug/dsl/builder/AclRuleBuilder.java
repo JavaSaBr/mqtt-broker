@@ -46,5 +46,10 @@ public abstract class AclRuleBuilder {
     return buildImpl();
   }
 
+  public AclRuleBuilder apply(Consumer<AclRuleBuilder> config) {
+    config.accept(this);
+    return this;
+  }
+
   protected abstract AclRule buildImpl();
 }

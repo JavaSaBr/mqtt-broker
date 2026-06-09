@@ -1,61 +1,38 @@
 package javasabr.mqtt.acl.mug.dsl.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.ArrayFactory;
-import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.collections.array.ArrayBuilder;
 
+/**
+ * Builds list of {@link AclRule} from ACL configuration.
+ */
 public class AclRulesBuilder {
 
-  private final List<CompletableFuture<AclRule>> ruleBuilderFutures = new ArrayList<>();
+  private final ArrayBuilder<AclRule> rules = new ArrayBuilder<>(AclRule.class);
 
   public Array<AclRule> build() {
-    MutableArray<AclRule> rules = ArrayFactory.mutableArray(AclRule.class);
-    ruleBuilderFutures.forEach(future -> {
-      try {
-        rules.add(future.join());
-      } catch (CompletionException e) {
-        Throwable cause = e.getCause();
-        if (cause instanceof RuntimeException) {
-          throw (RuntimeException) cause;
-        } else if (cause instanceof Error) {
-          throw (Error) cause;
-        }
-        throw e;
-      }
-    });
-    return rules;
+    return rules.build();
   }
 
   public AclRulesBuilder allowPublish(Consumer<AclRuleBuilder> config) {
-    ruleBuilderFutures.add(startBuilderAsync(new AllowPublishAclRuleBuilder(), config));
+    rules.add(new AllowPublishAclRuleBuilder().apply(config).build());
     return this;
   }
 
   public AclRulesBuilder denyPublish(Consumer<AclRuleBuilder> config) {
-    ruleBuilderFutures.add(startBuilderAsync(new DenyPublishAclRuleBuilder(), config));
+    rules.add(new DenyPublishAclRuleBuilder().apply(config).build());
     return this;
   }
 
   public AclRulesBuilder allowSubscribe(Consumer<AclRuleBuilder> config) {
-    ruleBuilderFutures.add(startBuilderAsync(new AllowSubscribeAclRuleBuilder(), config));
+    rules.add(new AllowSubscribeAclRuleBuilder().apply(config).build());
     return this;
   }
 
   public AclRulesBuilder denySubscribe(Consumer<AclRuleBuilder> config) {
-    ruleBuilderFutures.add(startBuilderAsync(new DenySubscribeAclRuleBuilder(), config));
+    rules.add(new DenySubscribeAclRuleBuilder().apply(config).build());
     return this;
-  }
-
-  private static CompletableFuture<AclRule> startBuilderAsync(AclRuleBuilder builder, Consumer<AclRuleBuilder> config) {
-    return CompletableFuture.supplyAsync(() -> {
-      config.accept(builder);
-      return builder.build();
-    });
   }
 }
