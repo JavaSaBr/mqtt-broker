@@ -28,18 +28,24 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayCollectors;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GaclParser {
 
-  private static final CharPredicate WHITESPACE = CharPredicate.anyOf(" \t\r\n");
+  CharPredicate WHITESPACE = CharPredicate.anyOf(" \t\r\n");
 
-  private static final Parser<String> STRING = Parser.anyOf(
+  Parser<String> STRING = Parser.anyOf(
       Parser.quotedByWithEscapes('"', '"', Parser.chars(1)),
       Parser.quotedByWithEscapes('\'', '\'', Parser.chars(1)));
 
-  private static final Parser<ValueMatcher<String>> USER_MATCHER = Parser.anyOf(
+  Parser<ValueMatcher<String>> USER_MATCHER = Parser.anyOf(
       Parser
           .word("startsWith")
           .then(STRING.between("(", ")"))
@@ -61,23 +67,22 @@ public class GaclParser {
           .followedBy("()")
           .thenReturn(ValueMatcher.MATCH_ANY_STRING));
 
-  private static final Parser<String> IDENTITY_TYPE = Parser.anyOf(
+  Parser<String> IDENTITY_TYPE = Parser.anyOf(
       Parser.word("userName"),
       Parser.word("clientId"),
       Parser.word("ipAddress"));
 
-  private static final Parser<String> IDENTITY_BLOCK_TYPE = Parser.anyOf(
+  Parser<String> IDENTITY_BLOCK_TYPE = Parser.anyOf(
       Parser.word("userNames"),
       Parser.word("clientIds"),
       Parser.word("ipAddresses"));
 
-  private static final Parser<List<MqttUserCondition>> USER_CONDITION =
-      Parser.define(uc -> Parser.<List<MqttUserCondition>>anyOf(
+  Parser<List<MqttUserCondition>> USER_CONDITION = Parser.define(uc -> Parser.<List<MqttUserCondition>>anyOf(
       Parser
           .word("anyUser")
           .followedBy("()")
           .thenReturn(List.of(MqttUserCondition.MATCH_ANY)),
-      Parser.sequence(IDENTITY_TYPE, USER_MATCHER, (id, m) -> List.of(toUserCondition(id, m))),
+      Parser.sequence(IDENTITY_TYPE, USER_MATCHER, (id, matcher) -> List.of(toUserCondition(id, matcher))),
       Parser.sequence(
           IDENTITY_BLOCK_TYPE,
           USER_MATCHER
@@ -85,7 +90,7 @@ public class GaclParser {
               .between("{", "}"),
           (id, matchers) -> matchers
               .stream()
-              .map(m -> toUserCondition(id, m))
+              .map(matcher -> toUserCondition(id, matcher))
               .collect(Collectors.toList())),
       Parser
           .word("allOf")
@@ -93,11 +98,11 @@ public class GaclParser {
               .atLeastOnce()
               .between("{", "}")
               .map(lists -> {
-                List<MqttUserCondition> flat = lists
+                Array<MqttUserCondition> flat = lists
                     .stream()
                     .flatMap(List::stream)
-                    .collect(Collectors.toList());
-                return List.<MqttUserCondition>of(new AllOfCondition(toArray(flat)));
+                    .collect(ArrayCollectors.toArray(MqttUserCondition.class));
+                return List.of(new AllOfCondition(flat));
               })),
       Parser
           .word("anyOf")
@@ -105,39 +110,39 @@ public class GaclParser {
               .atLeastOnce()
               .between("{", "}")
               .map(lists -> {
-                List<MqttUserCondition> flat = lists
+                Array<MqttUserCondition> flat = lists
                     .stream()
                     .flatMap(List::stream)
-                    .collect(Collectors.toList());
-                return List.<MqttUserCondition>of(new AnyOfCondition(toArray(flat)));
+                    .collect(ArrayCollectors.toArray(MqttUserCondition.class));
+                return List.of(new AnyOfCondition(flat));
               }))));
 
-  private static final Parser<MqttUserCondition> USERS_SECTION = Parser
+  Parser<MqttUserCondition> USERS_SECTION = Parser
       .word("users")
       .then(USER_CONDITION
           .atLeastOnce()
           .between("{", "}")
           .map(lists -> {
-            List<MqttUserCondition> flat = lists
+            Array<MqttUserCondition> flat = lists
                 .stream()
                 .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .collect(ArrayCollectors.toArray(MqttUserCondition.class));
             if (flat.isEmpty()) {
               return MqttUserCondition.MATCH_NONE;
             }
             if (flat.size() == 1) {
-              return flat.getFirst();
+              return flat.get(0);
             }
-            return new AnyOfCondition(toArray(flat));
+            return new AnyOfCondition(flat);
           }));
 
-  private static final Parser<TopicMatcher> TOPIC_MATCHER = Parser.anyOf(
+  Parser<TopicMatcher> TOPIC_MATCHER = Parser.anyOf(
       Parser
           .word("eq")
           .then(STRING.between("(", ")"))
           .map(s -> {
             if (!TopicValidator.validateTopicName(s)) {
-              throw new AclConfigurationException("Invalid topic name:[" + s + "]");
+              throw new AclConfigurationException("Invalid topic name:[%s]".formatted(s));
             }
             return (TopicMatcher) new TopicNameMatcher(TopicName.valueOf(s));
           }),
@@ -146,7 +151,7 @@ public class GaclParser {
           .then(STRING.between("(", ")"))
           .map(s -> {
             if (!TopicValidator.validateTopicFilter(s)) {
-              throw new AclConfigurationException("Invalid topic filter:[" + s + "]");
+              throw new AclConfigurationException("Invalid topic filter:[%s]".formatted(s));
             }
             return (TopicMatcher) new TopicFilterMatcher(TopicFilter.valueOf(s));
           }),
@@ -165,7 +170,7 @@ public class GaclParser {
           .followedBy("()")
           .thenReturn(TopicMatcher.MATCH_ANY));
 
-  private static final Parser<Array<TopicMatcher>> TOPICS_SECTION = Parser
+  Parser<Array<TopicMatcher>> TOPICS_SECTION = Parser
       .word("topics")
       .then(TOPIC_MATCHER
           .atLeastOnce()
@@ -176,27 +181,24 @@ public class GaclParser {
             return Array.copyOf(arr);
           }));
 
-  private static final Parser<AclRule> DIRECTIVE = Parser.anyOf(
+  Parser<AclRule> DIRECTIVE = Parser.anyOf(
       createDirective("allowPublish", AllowPublishAclRule::new),
       createDirective("denyPublish", DenyPublishAclRule::new),
       createDirective("allowSubscribe", AllowSubscribeAclRule::new),
       createDirective("denySubscribe", DenySubscribeAclRule::new));
 
-  private GaclParser() {
-  }
-
-  public static List<AclRule> parse(String input) {
+  public List<AclRule> parse(String input) {
     String cleaned = stripComments(input);
     try {
       return DIRECTIVE
           .atLeastOnce()
           .parseSkipping(WHITESPACE, cleaned);
     } catch (Parser.ParseException e) {
-      throw new AclConfigurationException("Syntax error at " + toLineColumn(cleaned, e.getSourceIndex()));
+      throw new AclConfigurationException("Syntax error at %s".formatted(toLineColumn(cleaned, e.getSourceIndex())));
     }
   }
 
-  private static Parser<AclRule> createDirective(
+  private Parser<AclRule> createDirective(
       String keyword,
       BiFunction<MqttUserCondition, TopicCondition, AclRule> factory) {
     return Parser
@@ -206,22 +208,16 @@ public class GaclParser {
             .between("{", "}"));
   }
 
-  private static MqttUserCondition toUserCondition(String identityType, ValueMatcher<String> matcher) {
+  private MqttUserCondition toUserCondition(String identityType, ValueMatcher<String> matcher) {
     return switch (identityType) {
       case "userName", "userNames" -> new UserNameCondition(matcher);
       case "clientId", "clientIds" -> new ClientIdCondition(matcher);
       case "ipAddress", "ipAddresses" -> new IpAddressCondition(matcher);
-      default -> throw new AclConfigurationException("Unknown identity type: " + identityType);
+      default -> throw new AclConfigurationException("Unknown identity type: %s".formatted(identityType));
     };
   }
 
-  private static Array<MqttUserCondition> toArray(List<MqttUserCondition> list) {
-    MutableArray<MqttUserCondition> arr = ArrayFactory.mutableArray(MqttUserCondition.class);
-    arr.addAll(list);
-    return Array.copyOf(arr);
-  }
-
-  private static String stripComments(String input) {
+  private String stripComments(String input) {
     StringBuilder sb = new StringBuilder(input.length());
     int i = 0;
     boolean inString = false;
@@ -268,7 +264,7 @@ public class GaclParser {
     return sb.toString();
   }
 
-  private static String toLineColumn(String input, int index) {
+  private String toLineColumn(String input, int index) {
     int line = 1;
     int col = 1;
     for (int i = 0; i < index && i < input.length(); i++) {
@@ -279,6 +275,6 @@ public class GaclParser {
         col++;
       }
     }
-    return "line " + line + ", column " + col;
+    return "line %s, column %s".formatted(line, col);
   }
 }
