@@ -1,7 +1,7 @@
 package javasabr.mqtt.broker.application.config;
 
 import java.util.Collection;
-import javasabr.mqtt.acl.service.conifg.AntlrDslBasedAclServiceSpringConfig;
+import javasabr.mqtt.acl.service.conifg.MugDslBasedAclServiceSpringConfig;
 import javasabr.mqtt.auth.api.AuthenticationService;
 import javasabr.mqtt.auth.service.config.AuthenticationServiceSpringConfig;
 import javasabr.mqtt.model.MqttProperties;
@@ -70,7 +70,7 @@ import org.springframework.core.env.Environment;
 
 @Import({
     AuthenticationServiceSpringConfig.class,
-    AntlrDslBasedAclServiceSpringConfig.class,
+    MugDslBasedAclServiceSpringConfig.class,
     MqttExternalPlainNetworkConfig.class,
     MqttExternalTlsNetworkConfig.class
 })
