@@ -8,6 +8,5 @@ dependencies {
   api projects.coreService
   api libs.springboot.starter.autoconfigure
   compileOnlyApi projects.aclGroovyDsl
-  compileOnlyApi projects.aclAntlrDsl
   compileOnlyApi projects.aclMugDsl
 }

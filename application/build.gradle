@@ -10,7 +10,7 @@ description = "Standard configuration of standalone version of MQTT Broker"
 dependencies {
   implementation projects.coreService
   implementation projects.aclService
-  implementation projects.aclAntlrDsl
+  implementation projects.aclMugDsl
   implementation projects.authenticationService
   implementation libs.rlib.logger.slf4j
   implementation libs.springboot.starter.core

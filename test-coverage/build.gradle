@@ -14,5 +14,5 @@ dependencies {
   jacocoAggregation projects.aclEngine
   jacocoAggregation projects.aclGroovyDsl
   jacocoAggregation projects.aclService
-  jacocoAggregation projects.aclAntlrDsl
+  jacocoAggregation projects.aclMugDsl
 }
