@@ -192,7 +192,7 @@ public class GaclParser {
           .atLeastOnce()
           .parseSkipping(WHITESPACE, cleaned);
     } catch (Parser.ParseException e) {
-      throw new AclConfigurationException("Syntax error at " + toLineColumn(input, e.getSourceIndex()));
+      throw new AclConfigurationException("Syntax error at " + toLineColumn(cleaned, e.getSourceIndex()));
     }
   }
 
@@ -248,19 +248,44 @@ public class GaclParser {
   private static String stripComments(String input) {
     StringBuilder sb = new StringBuilder(input.length());
     int i = 0;
+    boolean inString = false;
+    char stringDelimiter = '\0';
     while (i < input.length()) {
-      if (i + 1 < input.length() && input.charAt(i) == '/' && input.charAt(i + 1) == '/') {
+      char c = input.charAt(i);
+      if (inString) {
+        sb.append(c);
+        if (c == '\\' && i + 1 < input.length()) {
+          i++;
+          sb.append(input.charAt(i));
+        } else if (c == stringDelimiter) {
+          inString = false;
+        }
+        i++;
+      } else if (c == '"' || c == '\'') {
+        inString = true;
+        stringDelimiter = c;
+        sb.append(c);
+        i++;
+      } else if (i + 1 < input.length() && c == '/' && input.charAt(i + 1) == '/') {
         while (i < input.length() && input.charAt(i) != '\n') {
           i++;
         }
-      } else if (i + 1 < input.length() && input.charAt(i) == '/' && input.charAt(i + 1) == '*') {
+      } else if (i + 1 < input.length() && c == '/' && input.charAt(i + 1) == '*') {
         i += 2;
-        while (i + 1 < input.length() && !(input.charAt(i) == '*' && input.charAt(i + 1) == '/')) {
+        boolean closed = false;
+        while (i + 1 < input.length()) {
+          if (input.charAt(i) == '*' && input.charAt(i + 1) == '/') {
+            i += 2;
+            closed = true;
+            break;
+          }
           i++;
         }
-        i += 2;
+        if (!closed) {
+          throw new AclConfigurationException("Unterminated block comment");
+        }
       } else {
-        sb.append(input.charAt(i));
+        sb.append(c);
         i++;
       }
     }

@@ -1,4 +1,4 @@
-package javasabr.mqtt.acl.mug.dsl
+package javasabr.mqtt.acl.mug.dsl.parser
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
@@ -16,6 +16,7 @@ import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
 import javasabr.mqtt.acl.engine.model.rule.AbstractAclRule
 import javasabr.mqtt.acl.mug.dsl.loader.AclRulesLoader
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.nio.file.Paths
 
@@ -307,5 +308,48 @@ class GaclParserTest extends Specification {
         '"sensor10\\$"'       | 'sensor10$'
         '"back\\\\slash"'     | 'back\\slash'
         "'device/{clientId}'" | 'device/{clientId}'
+  }
+
+
+  @Unroll
+  def "should parse string literal containing #pattern without treating it as a comment"() {
+    when:
+        def rules = GaclParser.parse("""allowPublish {
+  users { userName eq("$pattern") }
+  topics { anyTopic() }
+}""")
+
+    then:
+        rules.size() == 1
+
+    where:
+        pattern << ['//admin', 'a/*b']
+  }
+
+  def "should report correct error position relative to original input when comments are present"() {
+    when:
+        GaclParser.parse("""// comment line 1
+// comment line 2
+allowPublish {
+  users { anyUser() }
+  topics { bad() }
+}""")
+
+    then:
+        def e = thrown(AclConfigurationException)
+        e.message == "Syntax error at line 5, column 12"
+  }
+
+  def "should report clear error for unterminated block comment"() {
+    when:
+        GaclParser.parse("""allowPublish {
+  users { anyUser() }
+  /* this comment is never closed
+  topics { anyTopic() }
+}""")
+
+    then:
+        def e = thrown(AclConfigurationException)
+        e.message.toLowerCase().contains("unterminated") || e.message.toLowerCase().contains("unclosed")
   }
 }

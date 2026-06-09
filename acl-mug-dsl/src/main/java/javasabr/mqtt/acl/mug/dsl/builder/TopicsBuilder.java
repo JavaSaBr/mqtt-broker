@@ -39,7 +39,7 @@ public class TopicsBuilder {
     try {
       matchers.add(DynamicTopicMatcher.autoBuild(rawTopic));
     } catch (RuntimeException e) {
-      throw new AclConfigurationException(e.getMessage());
+      throw new AclConfigurationException(e.getMessage(), e);
     }
     return this;
   }
