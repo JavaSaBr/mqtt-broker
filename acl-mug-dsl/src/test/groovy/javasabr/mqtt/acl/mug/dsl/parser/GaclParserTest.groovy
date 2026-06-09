@@ -309,31 +309,4 @@ class GaclParserTest extends Specification {
     where:
         pattern << ['//admin', 'a/*b']
   }
-
-  def "should report correct error position relative to original input when comments are present"() {
-    when:
-        GaclParser.parse("""// comment line 1
-// comment line 2
-allowPublish {
-  users { anyUser() }
-  topics { bad() }
-}""")
-
-    then:
-        def e = thrown(AclConfigurationException)
-        e.message == "Syntax error at line 5, column 12"
-  }
-
-  def "should report clear error for unterminated block comment"() {
-    when:
-        GaclParser.parse("""allowPublish {
-  users { anyUser() }
-  /* this comment is never closed
-  topics { anyTopic() }
-}""")
-
-    then:
-        def e = thrown(AclConfigurationException)
-        e.message.toLowerCase().contains("unterminated") || e.message.toLowerCase().contains("unclosed")
-  }
 }

@@ -188,13 +188,12 @@ public class GaclParser {
       createDirective("denySubscribe", DenySubscribeAclRule::new));
 
   public List<AclRule> parse(String input) {
-    String cleaned = stripComments(input);
     try {
       return DIRECTIVE
           .atLeastOnce()
-          .parseSkipping(WHITESPACE, cleaned);
+          .parseSkipping(WHITESPACE, input);
     } catch (Parser.ParseException e) {
-      throw new AclConfigurationException("Syntax error at %s".formatted(toLineColumn(cleaned, e.getSourceIndex())));
+      throw new AclConfigurationException("Syntax error at %s".formatted(toLineColumn(input, e.getSourceIndex())));
     }
   }
 
@@ -215,53 +214,6 @@ public class GaclParser {
       case "ipAddress", "ipAddresses" -> new IpAddressCondition(matcher);
       default -> throw new AclConfigurationException("Unknown identity type: %s".formatted(identityType));
     };
-  }
-
-  private String stripComments(String input) {
-    StringBuilder sb = new StringBuilder(input.length());
-    int i = 0;
-    boolean inString = false;
-    char stringDelimiter = '\0';
-    while (i < input.length()) {
-      char c = input.charAt(i);
-      if (inString) {
-        sb.append(c);
-        if (c == '\\' && i + 1 < input.length()) {
-          i++;
-          sb.append(input.charAt(i));
-        } else if (c == stringDelimiter) {
-          inString = false;
-        }
-        i++;
-      } else if (c == '"' || c == '\'') {
-        inString = true;
-        stringDelimiter = c;
-        sb.append(c);
-        i++;
-      } else if (i + 1 < input.length() && c == '/' && input.charAt(i + 1) == '/') {
-        while (i < input.length() && input.charAt(i) != '\n') {
-          i++;
-        }
-      } else if (i + 1 < input.length() && c == '/' && input.charAt(i + 1) == '*') {
-        i += 2;
-        boolean closed = false;
-        while (i + 1 < input.length()) {
-          if (input.charAt(i) == '*' && input.charAt(i + 1) == '/') {
-            i += 2;
-            closed = true;
-            break;
-          }
-          i++;
-        }
-        if (!closed) {
-          throw new AclConfigurationException("Unterminated block comment");
-        }
-      } else {
-        sb.append(c);
-        i++;
-      }
-    }
-    return sb.toString();
   }
 
   private String toLineColumn(String input, int index) {
