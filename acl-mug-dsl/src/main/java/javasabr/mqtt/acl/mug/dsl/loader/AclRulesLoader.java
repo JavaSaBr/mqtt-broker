@@ -26,19 +26,17 @@ public class AclRulesLoader {
 
   public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
     if (Files.notExists(aclConfigPath)) {
-      throw new AclConfigurationException(
-          "Config file:[%s] doesn't exist".formatted(aclConfigPath));
+      throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath));
     }
     String content;
     try {
       content = Files.readString(aclConfigPath);
     } catch (IOException e) {
-      throw new AclConfigurationException(
-          "Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
+      throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
     }
     List<AclRule> rules = GaclParser.parse(content);
     MutableArray<AclRule> arr = ArrayFactory.mutableArray(AclRule.class);
-    rules.forEach(arr::add);
+    arr.addAll(rules);
     return RuleContainerBuilder.groupRulesByOperation(Array.copyOf(arr));
   }
 

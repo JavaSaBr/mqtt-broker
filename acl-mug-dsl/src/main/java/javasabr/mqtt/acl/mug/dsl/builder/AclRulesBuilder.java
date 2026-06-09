@@ -20,8 +20,11 @@ public class AclRulesBuilder {
       try {
         rules.add(future.join());
       } catch (CompletionException e) {
-        if (e.getCause() instanceof RuntimeException) {
-          throw (RuntimeException) e.getCause();
+        Throwable cause = e.getCause();
+        if (cause instanceof RuntimeException) {
+          throw (RuntimeException) cause;
+        } else if (cause instanceof Error) {
+          throw (Error) cause;
         }
         throw e;
       }

@@ -19,7 +19,7 @@ public class TopicsBuilder {
   public TopicsBuilder eq(String rawTopicName) {
     checkAnyTopic();
     if (!TopicValidator.validateTopicName(rawTopicName)) {
-      throw new AclConfigurationException("Invalid topic name:[" + rawTopicName + "]");
+      throw new AclConfigurationException("Invalid topic name:[%s]".formatted(rawTopicName));
     }
     matchers.add(new TopicNameMatcher(TopicName.valueOf(rawTopicName)));
     return this;
@@ -28,7 +28,7 @@ public class TopicsBuilder {
   public TopicsBuilder match(String rawTopicFilter) {
     checkAnyTopic();
     if (!TopicValidator.validateTopicFilter(rawTopicFilter)) {
-      throw new AclConfigurationException("Invalid topic filter:[" + rawTopicFilter + "]");
+      throw new AclConfigurationException("Invalid topic filter:[%s]".formatted(rawTopicFilter));
     }
     matchers.add(new TopicFilterMatcher(TopicFilter.valueOf(rawTopicFilter)));
     return this;

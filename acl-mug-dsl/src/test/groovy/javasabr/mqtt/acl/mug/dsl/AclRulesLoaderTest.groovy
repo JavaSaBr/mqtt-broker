@@ -1,6 +1,5 @@
 package javasabr.mqtt.acl.mug.dsl
 
-import javasabr.mqtt.acl.mug.dsl.loader.AclRulesLoader
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
 import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
@@ -13,6 +12,7 @@ import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
 import javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher
 import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
 import javasabr.mqtt.acl.engine.model.rule.AbstractAclRule
+import javasabr.mqtt.acl.mug.dsl.loader.AclRulesLoader
 import spock.lang.Specification
 
 import static javasabr.mqtt.acl.engine.model.Action.ALLOW
