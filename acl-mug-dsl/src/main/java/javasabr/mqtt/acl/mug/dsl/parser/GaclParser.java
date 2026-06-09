@@ -1,0 +1,240 @@
+package javasabr.mqtt.acl.mug.dsl.parser;
+
+import com.google.common.labs.parse.Parser;
+import com.google.mu.util.CharPredicate;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
+import javasabr.mqtt.acl.engine.model.condition.AllOfCondition;
+import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition;
+import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition;
+import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition;
+import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition;
+import javasabr.mqtt.acl.engine.model.condition.TopicCondition;
+import javasabr.mqtt.acl.engine.model.condition.UserNameCondition;
+import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.UserMatchers;
+import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;
+import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher;
+import javasabr.mqtt.acl.engine.model.rule.AclRule;
+import javasabr.mqtt.acl.engine.model.rule.AllowPublishAclRule;
+import javasabr.mqtt.acl.engine.model.rule.AllowSubscribeAclRule;
+import javasabr.mqtt.acl.engine.model.rule.DenyPublishAclRule;
+import javasabr.mqtt.acl.engine.model.rule.DenySubscribeAclRule;
+import javasabr.mqtt.model.topic.TopicFilter;
+import javasabr.mqtt.model.topic.TopicName;
+import javasabr.mqtt.model.topic.TopicValidator;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+
+public class GaclParser {
+
+  private static final CharPredicate WHITESPACE = CharPredicate.anyOf(" \t\r\n");
+
+  private static final Parser<String> STRING = Parser.anyOf(
+      Parser.quotedByWithEscapes('"', '"', Parser.chars(1)),
+      Parser.quotedByWithEscapes('\'', '\'', Parser.chars(1)));
+
+  private static final Parser<ValueMatcher<String>> USER_MATCHER = Parser.anyOf(
+      Parser.word("startsWith").then(STRING.between("(", ")")).map(UserMatchers::startsWith),
+      Parser.word("contains").then(STRING.between("(", ")")).map(UserMatchers::contains),
+      Parser.word("eq").then(STRING.between("(", ")")).map(UserMatchers::eq),
+      Parser.word("regex").then(STRING.between("(", ")")).map(UserMatchers::regex),
+      Parser.word("anyValue").followedBy("()").thenReturn(ValueMatcher.MATCH_ANY_STRING));
+
+  private static final Parser<String> IDENTITY_TYPE = Parser.anyOf(
+      Parser.word("userName"),
+      Parser.word("clientId"),
+      Parser.word("ipAddress"));
+
+  private static final Parser<String> IDENTITY_BLOCK_TYPE = Parser.anyOf(
+      Parser.word("userNames"),
+      Parser.word("clientIds"),
+      Parser.word("ipAddresses"));
+
+  @SuppressWarnings("unchecked")
+  private static final Parser<List<MqttUserCondition>> USER_CONDITION = Parser.define(uc ->
+      Parser.<List<MqttUserCondition>>anyOf(
+          Parser.word("anyUser")
+              .followedBy("()")
+              .thenReturn(List.of(MqttUserCondition.MATCH_ANY)),
+          Parser.sequence(IDENTITY_TYPE, USER_MATCHER,
+              (id, m) -> List.of(toUserCondition(id, m))),
+          Parser.sequence(IDENTITY_BLOCK_TYPE,
+              USER_MATCHER.atLeastOnce().between("{", "}"),
+              (id, matchers) -> matchers.stream()
+                  .map(m -> toBlockCondition(id, m))
+                  .collect(Collectors.toList())),
+          Parser.word("allOf").then(
+              uc.atLeastOnce().between("{", "}").map(lists -> {
+                List<MqttUserCondition> flat = lists.stream()
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+                return List.<MqttUserCondition>of(new AllOfCondition(toArray(flat)));
+              })),
+          Parser.word("anyOf").then(
+              uc.atLeastOnce().between("{", "}").map(lists -> {
+                List<MqttUserCondition> flat = lists.stream()
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+                return List.<MqttUserCondition>of(new AnyOfCondition(toArray(flat)));
+              }))));
+
+  private static final Parser<MqttUserCondition> USERS_SECTION =
+      Parser.word("users").then(
+          USER_CONDITION.atLeastOnce().between("{", "}").map(lists -> {
+            List<MqttUserCondition> flat = lists.stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+            if (flat.isEmpty()) {
+              return MqttUserCondition.MATCH_NONE;
+            }
+            if (flat.size() == 1) {
+              return flat.get(0);
+            }
+            return new AnyOfCondition(toArray(flat));
+          }));
+
+  private static final Parser<TopicMatcher> TOPIC_MATCHER = Parser.anyOf(
+      Parser.word("eq").then(STRING.between("(", ")")).map(s -> {
+        if (!TopicValidator.validateTopicName(s)) {
+          throw new AclConfigurationException("Invalid topic name:[" + s + "]");
+        }
+        return (TopicMatcher) new TopicNameMatcher(TopicName.valueOf(s));
+      }),
+      Parser.word("match").then(STRING.between("(", ")")).map(s -> {
+        if (!TopicValidator.validateTopicFilter(s)) {
+          throw new AclConfigurationException("Invalid topic filter:[" + s + "]");
+        }
+        return (TopicMatcher) new TopicFilterMatcher(TopicFilter.valueOf(s));
+      }),
+      Parser.word("dynamic").then(STRING.between("(", ")")).map(s -> {
+        try {
+          return DynamicTopicMatcher.autoBuild(s);
+        } catch (RuntimeException e) {
+          throw new AclConfigurationException(e.getMessage());
+        }
+      }),
+      Parser.word("anyTopic").followedBy("()").thenReturn(TopicMatcher.MATCH_ANY));
+
+  private static final Parser<Array<TopicMatcher>> TOPICS_SECTION =
+      Parser.word("topics").then(
+          TOPIC_MATCHER.atLeastOnce().between("{", "}").map(matchers -> {
+            MutableArray<TopicMatcher> arr = ArrayFactory.mutableArray(TopicMatcher.class);
+            matchers.forEach(arr::add);
+            return Array.copyOf(arr);
+          }));
+
+  private static final Parser<AclRule> DIRECTIVE = Parser.anyOf(
+      createDirective("allowPublish", AllowPublishAclRule::new),
+      createDirective("denyPublish", DenyPublishAclRule::new),
+      createDirective("allowSubscribe", AllowSubscribeAclRule::new),
+      createDirective("denySubscribe", DenySubscribeAclRule::new));
+
+  private GaclParser() {}
+
+  public static List<AclRule> parse(String input) {
+    String cleaned = stripComments(input);
+    try {
+      return DIRECTIVE.atLeastOnce().parseSkipping(WHITESPACE, cleaned);
+    } catch (Parser.ParseException e) {
+      throw new AclConfigurationException(
+          "Syntax error at " + toLineColumn(input, e.getSourceIndex()));
+    }
+  }
+
+  public static String unquote(String text) {
+    String content = text.substring(1, text.length() - 1);
+    StringBuilder sb = new StringBuilder(content.length());
+    for (int i = 0; i < content.length(); i++) {
+      char c = content.charAt(i);
+      if (c == '\\' && i + 1 < content.length()) {
+        sb.append(content.charAt(i + 1));
+        i++;
+      } else {
+        sb.append(c);
+      }
+    }
+    return sb.toString();
+  }
+
+  private static Parser<AclRule> createDirective(String keyword,
+      BiFunction<MqttUserCondition, TopicCondition, AclRule> factory) {
+    return Parser.word(keyword).then(
+        Parser.sequence(USERS_SECTION, TOPICS_SECTION,
+            (uc, tm) -> factory.apply(uc, new TopicCondition(tm)))
+            .between("{", "}"));
+  }
+
+  private static MqttUserCondition toUserCondition(String identityType,
+      ValueMatcher<String> matcher) {
+    return switch (identityType) {
+      case "userName" -> new UserNameCondition(matcher);
+      case "clientId" -> new ClientIdCondition(matcher);
+      case "ipAddress" -> new IpAddressCondition(matcher);
+      default -> throw new AclConfigurationException(
+          "Unknown identity type: " + identityType);
+    };
+  }
+
+  private static MqttUserCondition toBlockCondition(String blockType,
+      ValueMatcher<String> matcher) {
+    return switch (blockType) {
+      case "userNames" -> new UserNameCondition(matcher);
+      case "clientIds" -> new ClientIdCondition(matcher);
+      case "ipAddresses" -> new IpAddressCondition(matcher);
+      default -> throw new AclConfigurationException(
+          "Unknown identity block type: " + blockType);
+    };
+  }
+
+  private static Array<MqttUserCondition> toArray(List<MqttUserCondition> list) {
+    MutableArray<MqttUserCondition> arr =
+        ArrayFactory.mutableArray(MqttUserCondition.class);
+    list.forEach(arr::add);
+    return Array.copyOf(arr);
+  }
+
+  private static String stripComments(String input) {
+    StringBuilder sb = new StringBuilder(input.length());
+    int i = 0;
+    while (i < input.length()) {
+      if (i + 1 < input.length()
+          && input.charAt(i) == '/' && input.charAt(i + 1) == '/') {
+        while (i < input.length() && input.charAt(i) != '\n') {
+          i++;
+        }
+      } else if (i + 1 < input.length()
+          && input.charAt(i) == '/' && input.charAt(i + 1) == '*') {
+        i += 2;
+        while (i + 1 < input.length()
+            && !(input.charAt(i) == '*' && input.charAt(i + 1) == '/')) {
+          i++;
+        }
+        i += 2;
+      } else {
+        sb.append(input.charAt(i));
+        i++;
+      }
+    }
+    return sb.toString();
+  }
+
+  private static String toLineColumn(String input, int index) {
+    int line = 1;
+    int col = 1;
+    for (int i = 0; i < index && i < input.length(); i++) {
+      if (input.charAt(i) == '\n') {
+        line++;
+        col = 1;
+      } else {
+        col++;
+      }
+    }
+    return "line " + line + ", column " + col;
+  }
+}

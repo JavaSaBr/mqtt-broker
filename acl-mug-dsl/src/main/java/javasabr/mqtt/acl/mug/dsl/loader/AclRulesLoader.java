@@ -1,0 +1,48 @@
+package javasabr.mqtt.acl.mug.dsl.loader;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder;
+import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
+import javasabr.mqtt.acl.engine.model.rule.AclRule;
+import javasabr.mqtt.acl.mug.dsl.builder.AclRulesBuilder;
+import javasabr.mqtt.acl.mug.dsl.parser.GaclParser;
+import javasabr.mqtt.model.acl.Operation;
+import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayFactory;
+import javasabr.rlib.collections.array.MutableArray;
+
+public class AclRulesLoader {
+
+  public static Map<Operation, Array<AclRule>> build(Consumer<AclRulesBuilder> config) {
+    AclRulesBuilder builder = new AclRulesBuilder();
+    config.accept(builder);
+    return RuleContainerBuilder.groupRulesByOperation(builder.build());
+  }
+
+  public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
+    if (Files.notExists(aclConfigPath)) {
+      throw new AclConfigurationException(
+          "Config file:[%s] doesn't exist".formatted(aclConfigPath));
+    }
+    String content;
+    try {
+      content = Files.readString(aclConfigPath);
+    } catch (IOException e) {
+      throw new AclConfigurationException(
+          "Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
+    }
+    List<AclRule> rules = GaclParser.parse(content);
+    MutableArray<AclRule> arr = ArrayFactory.mutableArray(AclRule.class);
+    rules.forEach(arr::add);
+    return RuleContainerBuilder.groupRulesByOperation(Array.copyOf(arr));
+  }
+
+  public static String unquote(String text) {
+    return GaclParser.unquote(text);
+  }
+}

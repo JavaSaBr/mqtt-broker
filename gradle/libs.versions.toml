@@ -45,6 +45,8 @@ legacy-jackson = "2.21.1"
 netty = "4.2.13.Final"
 # https://mvnrepository.com/artifact/org.antlr/antlr4
 antlr = "4.13.1"
+# https://mvnrepository.com/artifact/com.google.mug/mug
+mug = "10.3"
 
 [libraries]
 rlib-network = { module = "javasabr.rlib:rlib-network", version.ref = "rlib" }
@@ -95,6 +97,8 @@ hivemq-mqtt-client = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "
 moquette-broker = { module = "io.moquette:moquette-broker", version.ref = "moquette-broker" }
 antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }
 antlr-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
+mug = { module = "com.google.mug:mug", version.ref = "mug" }
+mug-dot-parse = { module = "com.google.mug:dot-parse", version.ref = "mug" }
 
 [bundles]
 netty-bundle = ["netty-handler", "netty-common", "netty-transport", "netty-codec", "netty-codechttp", "netty-codecdns"]
