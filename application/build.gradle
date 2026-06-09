@@ -64,7 +64,7 @@ processAot {
       '-Dauthentication.credentials-source.file.enabled=true',
       '-Dauthentication.provider.basic.enabled=true',
       '-Dmqtt.external.tls.network.enabled=true',
-      '-Dacl.engine.type=groovy-dsl'
+      '-Dacl.engine.type=mug-dsl'
   ])
 }
 
