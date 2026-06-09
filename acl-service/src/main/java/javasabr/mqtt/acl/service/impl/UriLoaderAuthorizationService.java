@@ -21,7 +21,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationService {
 
-  Function<Path, Map<Operation, Array<AclRule>>> rulerLoader;
+  Function<Path, Map<Operation, Array<AclRule>>> rulesLoader;
 
   public void loadFrom(URI resource) {
     Path localFile = Path.of(resource);
@@ -30,7 +30,7 @@ public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationSe
     } else if (Files.isDirectory(localFile)) {
       throw new AclConfigurationException("ACL configuration:[%s] is directory".formatted(resource));
     }
-    Map<Operation, Array<AclRule>> loadedAclRulesMap = rulerLoader.apply(localFile);
+    Map<Operation, Array<AclRule>> loadedAclRulesMap = rulesLoader.apply(localFile);
     switchTo(new AclEngine(loadedAclRulesMap));
     log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
   }

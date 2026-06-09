@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 public class GroovyDslBasedAclServiceSpringConfig {
 
   @Bean
-  AuthorizationService authorizationService(@Value("${acl.engine.groovy.dsl.config}") URI aclConfigUri) {
+  AuthorizationService authorizationService(@Value("${acl.engine.config.path}") URI aclConfigUri) {
     log.info("Initializing Groovy-DSL based AuthorizationService...");
     var authorizationService = new UriLoaderAuthorizationService(AclRulesLoader::load);
     authorizationService.loadFrom(aclConfigUri);
