@@ -60,6 +60,7 @@ jar {
 
 processAot {
   jvmArgs([
+      '-Dauthentication.credentials-source.database.enabled=true',
       '-Dauthentication.credentials-source.file.enabled=true',
       '-Dauthentication.provider.basic.enabled=true',
       '-Dmqtt.external.tls.network.enabled=true',
@@ -84,7 +85,15 @@ tasks.register('copyNativeImageTestResources', Copy) {
 
 tasks.register('nativeImageTest', Test) {
   dependsOn 'nativeCompile', 'copyNativeImageTestResources'
-  finalizedBy 'test'
+  useJUnitPlatform()
+
+  group = 'verification'
+  testClassesDirs = sourceSets.test.output.classesDirs
+  classpath = sourceSets.test.runtimeClasspath
+  
+  filter {
+    includeTestsMatching 'javasabr.mqtt.broker.application.NativeImageVerificationTest'
+  }
 }
 
 sourceSets {

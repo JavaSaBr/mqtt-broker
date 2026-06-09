@@ -10,9 +10,6 @@
       "type": "ch.qos.logback.classic.LoggerContext"
     },
     {
-      "type": "char[]"
-    },
-    {
       "type": "com.fasterxml.jackson.annotation.JacksonAnnotation"
     },
     {
@@ -40,7 +37,135 @@
       "type": "com.fasterxml.jackson.dataformat.yaml.YAMLFactory"
     },
     {
+      "type": "com.sun.crypto.provider.AESCipher$General",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.AESKeyGenerator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.ARCFOURCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DESCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DESedeCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DHParameters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.HKDFKeyDerivation$HKDFSHA384",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "javax.crypto.KDFParameters"
+          ]
+        }
+      ]
+    },
+    {
       "type": "com.sun.crypto.provider.HmacCore$HmacSHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.HmacCore$HmacSHA384",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.HmacPKCS12PBECore$HmacPKCS12PBE_SHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBEKeyFactory$PBEWithMD5AndDES",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBES2Core$HmacSHA256AndAES_256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBES2Parameters$General",
       "methods": [
         {
           "name": "<init>",
@@ -94,6 +219,15 @@
       ]
     },
     {
+      "type": "com.sun.crypto.provider.TlsMasterSecretGenerator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
       "type": "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl",
       "methods": [
         {
@@ -103,499 +237,7 @@
       ]
     },
     {
-      "type": "groovy.grape.GrabAnnotationTransformation",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "groovy.io.FileType"
-    },
-    {
-      "type": "groovy.lang.Binding",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setVariable",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.BindingBeanInfo"
-    },
-    {
-      "type": "groovy.lang.BindingCustomizer"
-    },
-    {
-      "type": "groovy.lang.Buildable"
-    },
-    {
-      "type": "groovy.lang.Closure",
-      "fields": [
-        {
-          "name": "DELEGATE_ONLY"
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.Closure$1"
-    },
-    {
-      "type": "groovy.lang.Closure$1BeanInfo"
-    },
-    {
-      "type": "groovy.lang.Closure$1Customizer"
-    },
-    {
-      "type": "groovy.lang.ClosureBeanInfo"
-    },
-    {
-      "type": "groovy.lang.ClosureCustomizer"
-    },
-    {
-      "type": "groovy.lang.EmptyRange"
-    },
-    {
-      "type": "groovy.lang.ExpandoMetaClass"
-    },
-    {
-      "type": "groovy.lang.ExpandoMetaClassBeanInfo"
-    },
-    {
-      "type": "groovy.lang.ExpandoMetaClassCustomizer"
-    },
-    {
-      "type": "groovy.lang.GString"
-    },
-    {
-      "type": "groovy.lang.GroovyCallable"
-    },
-    {
-      "type": "groovy.lang.GroovyObject",
-      "methods": [
-        {
-          "name": "getProperty",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "invokeMethod",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.GroovyObjectSupport"
-    },
-    {
-      "type": "groovy.lang.GroovyObjectSupportBeanInfo"
-    },
-    {
-      "type": "groovy.lang.GroovyObjectSupportCustomizer"
-    },
-    {
-      "type": "groovy.lang.GroovyShell",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "groovy.lang.Binding"
-          ]
-        },
-        {
-          "name": "evaluate",
-          "parameterTypes": [
-            "java.io.File"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.GroovyShellBeanInfo"
-    },
-    {
-      "type": "groovy.lang.GroovyShellCustomizer"
-    },
-    {
-      "type": "groovy.lang.GroovySystem"
-    },
-    {
-      "type": "groovy.lang.IntRange"
-    },
-    {
-      "type": "groovy.lang.ListWithDefault"
-    },
-    {
       "type": "groovy.lang.MetaClass"
-    },
-    {
-      "type": "groovy.lang.MetaClassImpl"
-    },
-    {
-      "type": "groovy.lang.MetaClassImplBeanInfo"
-    },
-    {
-      "type": "groovy.lang.MetaClassImplCustomizer"
-    },
-    {
-      "type": "groovy.lang.MetaMethod",
-      "methods": [
-        {
-          "name": "doMethodInvoke",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.Object[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.MetaObjectProtocol",
-      "methods": [
-        {
-          "name": "getProperty",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "invokeConstructor",
-          "parameterTypes": [
-            "java.lang.Object[]"
-          ]
-        },
-        {
-          "name": "invokeMethod",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.String",
-            "java.lang.Object[]"
-          ]
-        },
-        {
-          "name": "invokeStaticMethod",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.String",
-            "java.lang.Object[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.MetaProperty",
-      "methods": [
-        {
-          "name": "getProperty",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "groovy.lang.MutableMetaClass"
-    },
-    {
-      "type": "groovy.lang.ObjectRange"
-    },
-    {
-      "type": "groovy.lang.Range"
-    },
-    {
-      "type": "groovy.lang.Reference"
-    },
-    {
-      "type": "groovy.lang.ReferenceBeanInfo"
-    },
-    {
-      "type": "groovy.lang.ReferenceCustomizer"
-    },
-    {
-      "type": "groovy.lang.Script"
-    },
-    {
-      "type": "groovy.lang.ScriptBeanInfo"
-    },
-    {
-      "type": "groovy.lang.ScriptCustomizer"
-    },
-    {
-      "type": "groovy.lang.SpreadMap"
-    },
-    {
-      "type": "groovy.lang.Writable"
-    },
-    {
-      "type": "groovy.lang.groovydoc.Groovydoc"
-    },
-    {
-      "type": "groovy.runtime.metaclass.CustomMetaClassCreationHandle"
-    },
-    {
-      "type": "groovy.runtime.metaclass.groovy.lang.BindingMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.groovy.lang.Closure$1MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.groovy.lang.ClosureMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.groovy.lang.ExpandoMetaClassMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.groovy.lang.GroovyShellMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.groovy.lang.ReferenceMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.java.lang.BooleanMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.java.lang.ClassMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.java.nio.file.FilesMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.java.util.ArrayListMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.java.util.concurrent.CompletableFutureMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.builder.RuleContainerBuilderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.ActionMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.condition.ClientIdConditionMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.condition.MqttUserConditionMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.condition.TopicConditionMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcherMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.matcher.TopicMatcherMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcherMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.matcher.UserMatchersMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcherMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.rule.AllowPublishAclRuleMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.engine.model.rule.AllowSubscribeAclRuleMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder$_build_closure1MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder$_startBuilderAsync_closure2MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.AllowPublishAclRuleBuilderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.AllowSubscribeAclRuleBuilderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.TopicMatchersFactoryMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader$_load_closure1MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.model.acl.OperationMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.model.topic.TopicFilterMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.model.topic.TopicNameMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.mqtt.model.topic.TopicValidatorMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.rlib.collections.array.ArrayFactoryMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.rlib.collections.array.ArrayMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.rlib.collections.array.MutableArrayMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.rlib.collections.array.impl.DefaultMutableArrayMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.javasabr.rlib.collections.array.impl.ImmutableArrayMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.org.codehaus.groovy.runtime.MethodClosureMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.org.codehaus.groovy.runtime.NullObjectMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.org.springframework.beans.factory.groovy.GroovyBeanDefinitionReaderMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.sun.nio.fs.UnixPathMetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure1$_closure10MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure1$_closure11MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure1MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure2$_closure12MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure2$_closure13MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure2MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure3$_closure14MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure3$_closure15MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure3MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure4$_closure16MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure4$_closure17MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure4MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure5$_closure18MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure5$_closure19MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure5MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure6$_closure20MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure6$_closure21MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure6MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure7$_closure22MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure7$_closure23MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure7MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure8$_closure24MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure8$_closure25MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure8MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure9$_closure26MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure9$_closure27MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-acl$_run_closure9MetaClass"
-    },
-    {
-      "type": "groovy.runtime.metaclass.test-aclMetaClass"
-    },
-    {
-      "type": "groovy.transform.Generated"
-    },
-    {
-      "type": "groovy.transform.Internal"
-    },
-    {
-      "type": "groovy.util.BufferedIterator"
-    },
-    {
-      "type": "groovy.util.ProxyGenerator",
-      "methods": [
-        {
-          "name": "instantiateAggregate",
-          "parameterTypes": [
-            "java.util.Map",
-            "java.util.List"
-          ]
-        },
-        {
-          "name": "instantiateAggregateFromBaseClass",
-          "parameterTypes": [
-            "java.util.Map",
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "int[]"
     },
     {
       "type": "io.micrometer.context.ContextRegistry"
@@ -656,39 +298,6 @@
       "type": "jakarta.servlet.Servlet"
     },
     {
-      "type": "java.beans.EventSetDescriptor[]"
-    },
-    {
-      "type": "java.beans.MethodDescriptor[]"
-    },
-    {
-      "type": "java.beans.PropertyDescriptor[]"
-    },
-    {
-      "type": "java.beans.PropertyVetoException"
-    },
-    {
-      "type": "java.beans.Transient",
-      "methods": [
-        {
-          "name": "value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "java.io.BufferedInputStream"
-    },
-    {
-      "type": "java.io.BufferedOutputStream"
-    },
-    {
-      "type": "java.io.BufferedReader"
-    },
-    {
-      "type": "java.io.BufferedWriter"
-    },
-    {
       "type": "java.io.Closeable"
     },
     {
@@ -701,49 +310,7 @@
       ]
     },
     {
-      "type": "java.io.DataInputStream"
-    },
-    {
-      "type": "java.io.DataOutputStream"
-    },
-    {
-      "type": "java.io.File"
-    },
-    {
-      "type": "java.io.Flushable"
-    },
-    {
-      "type": "java.io.InputStream"
-    },
-    {
-      "type": "java.io.ObjectInputStream"
-    },
-    {
-      "type": "java.io.ObjectOutputStream"
-    },
-    {
-      "type": "java.io.ObjectStreamField[]"
-    },
-    {
-      "type": "java.io.OutputStream"
-    },
-    {
-      "type": "java.io.PrintStream"
-    },
-    {
-      "type": "java.io.PrintWriter"
-    },
-    {
-      "type": "java.io.Reader"
-    },
-    {
       "type": "java.io.Serializable"
-    },
-    {
-      "type": "java.io.Writer"
-    },
-    {
-      "type": "java.lang.Appendable"
     },
     {
       "type": "java.lang.AutoCloseable"
@@ -761,50 +328,13 @@
       ]
     },
     {
-      "type": "java.lang.BooleanBeanInfo"
-    },
-    {
-      "type": "java.lang.BooleanCustomizer"
-    },
-    {
-      "type": "java.lang.CharSequence"
-    },
-    {
-      "type": "java.lang.CharSequence[]"
-    },
-    {
-      "type": "java.lang.Character"
-    },
-    {
       "type": "java.lang.Class",
       "methods": [
         {
-          "name": "forName",
-          "parameterTypes": [
-            "java.lang.String",
-            "boolean",
-            "java.lang.ClassLoader"
-          ]
-        },
-        {
           "name": "getModule",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPermittedSubclasses",
-          "parameterTypes": []
-        },
-        {
-          "name": "isSealed",
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "java.lang.ClassBeanInfo"
-    },
-    {
-      "type": "java.lang.ClassCustomizer"
     },
     {
       "type": "java.lang.ClassLoader",
@@ -818,50 +348,10 @@
       "type": "java.lang.Class[]"
     },
     {
-      "type": "java.lang.Cloneable"
-    },
-    {
       "type": "java.lang.Comparable"
     },
     {
-      "type": "java.lang.Deprecated",
-      "methods": [
-        {
-          "name": "forRemoval",
-          "parameterTypes": []
-        },
-        {
-          "name": "since",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "java.lang.Double"
-    },
-    {
-      "type": "java.lang.Enum"
-    },
-    {
-      "type": "java.lang.EnumBeanInfo"
-    },
-    {
-      "type": "java.lang.EnumCustomizer"
-    },
-    {
-      "type": "java.lang.Float"
-    },
-    {
-      "type": "java.lang.FunctionalInterface"
-    },
-    {
-      "type": "java.lang.Integer"
-    },
-    {
       "type": "java.lang.Iterable"
-    },
-    {
-      "type": "java.lang.Long"
     },
     {
       "type": "java.lang.Module",
@@ -873,75 +363,13 @@
       ]
     },
     {
-      "type": "java.lang.Number",
-      "methods": [
-        {
-          "name": "byteValue",
-          "parameterTypes": []
-        },
-        {
-          "name": "doubleValue",
-          "parameterTypes": []
-        },
-        {
-          "name": "floatValue",
-          "parameterTypes": []
-        },
-        {
-          "name": "intValue",
-          "parameterTypes": []
-        },
-        {
-          "name": "longValue",
-          "parameterTypes": []
-        },
-        {
-          "name": "shortValue",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "java.lang.Object",
-      "methods": [
-        {
-          "name": "equals",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "toString",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "java.lang.ObjectBeanInfo"
-    },
-    {
-      "type": "java.lang.ObjectCustomizer"
+      "type": "java.lang.Object"
     },
     {
       "type": "java.lang.Object[]"
     },
     {
-      "type": "java.lang.Process"
-    },
-    {
-      "type": "java.lang.Readable"
-    },
-    {
       "type": "java.lang.Record"
-    },
-    {
-      "type": "java.lang.RecordBeanInfo"
-    },
-    {
-      "type": "java.lang.RecordCustomizer"
-    },
-    {
-      "type": "java.lang.Runnable"
     },
     {
       "type": "java.lang.SecurityManager",
@@ -955,16 +383,7 @@
       ]
     },
     {
-      "type": "java.lang.Short"
-    },
-    {
       "type": "java.lang.String"
-    },
-    {
-      "type": "java.lang.StringBuffer"
-    },
-    {
-      "type": "java.lang.StringBuilder"
     },
     {
       "type": "java.lang.String[]"
@@ -979,9 +398,6 @@
       ]
     },
     {
-      "type": "java.lang.System$Logger"
-    },
-    {
       "type": "java.lang.Thread",
       "methods": [
         {
@@ -989,12 +405,6 @@
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "java.lang.Throwable"
-    },
-    {
-      "type": "java.lang.annotation.Annotation[]"
     },
     {
       "type": "java.lang.annotation.Documented"
@@ -1007,12 +417,6 @@
     },
     {
       "type": "java.lang.annotation.Target"
-    },
-    {
-      "type": "java.lang.constant.Constable"
-    },
-    {
-      "type": "java.lang.constant.ConstantDesc"
     },
     {
       "type": "java.lang.foreign.Arena",
@@ -1088,12 +492,6 @@
       ]
     },
     {
-      "type": "java.lang.invoke.TypeDescriptor"
-    },
-    {
-      "type": "java.lang.invoke.TypeDescriptor$OfField"
-    },
-    {
       "type": "java.lang.management.ManagementFactory",
       "methods": [
         {
@@ -1112,24 +510,6 @@
       ]
     },
     {
-      "type": "java.lang.reflect.AnnotatedElement"
-    },
-    {
-      "type": "java.lang.reflect.AnnotatedType[]"
-    },
-    {
-      "type": "java.lang.reflect.Constructor[]"
-    },
-    {
-      "type": "java.lang.reflect.Field[]"
-    },
-    {
-      "type": "java.lang.reflect.GenericDeclaration"
-    },
-    {
-      "type": "java.lang.reflect.Method[]"
-    },
-    {
       "type": "java.lang.reflect.ParameterizedType",
       "methods": [
         {
@@ -1143,31 +523,6 @@
       ]
     },
     {
-      "type": "java.lang.reflect.Proxy",
-      "methods": [
-        {
-          "name": "newProxyInstance",
-          "parameterTypes": [
-            "java.lang.ClassLoader",
-            "java.lang.Class[]",
-            "java.lang.reflect.InvocationHandler"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.lang.reflect.RecordComponent[]"
-    },
-    {
-      "type": "java.lang.reflect.Type"
-    },
-    {
-      "type": "java.lang.reflect.TypeVariable[]"
-    },
-    {
-      "type": "java.lang.reflect.Type[]"
-    },
-    {
       "type": "java.lang.reflect.WildcardType",
       "methods": [
         {
@@ -1177,47 +532,7 @@
       ]
     },
     {
-      "type": "java.math.BigDecimal",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "double"
-          ]
-        },
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "long"
-          ]
-        },
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.math.BigInteger"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.math.BigInteger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
       "type": "java.net.InetSocketAddress"
-    },
-    {
-      "type": "java.net.ServerSocket"
-    },
-    {
-      "type": "java.net.Socket"
     },
     {
       "type": "java.net.URI",
@@ -1229,9 +544,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "java.net.URL"
     },
     {
       "type": "java.nio.ByteBuffer",
@@ -1270,60 +582,6 @@
       ]
     },
     {
-      "type": "java.nio.charset.Charset"
-    },
-    {
-      "type": "java.nio.file.DirectoryStream$Filter"
-    },
-    {
-      "type": "java.nio.file.FileVisitor"
-    },
-    {
-      "type": "java.nio.file.Files",
-      "methods": [
-        {
-          "name": "notExists",
-          "parameterTypes": [
-            "java.nio.file.Path",
-            "java.nio.file.LinkOption[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.nio.file.FilesBeanInfo"
-    },
-    {
-      "type": "java.nio.file.FilesCustomizer"
-    },
-    {
-      "type": "java.nio.file.LinkOption[]"
-    },
-    {
-      "type": "java.nio.file.Path",
-      "methods": [
-        {
-          "name": "toFile",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "java.nio.file.WatchEvent$Kind[]"
-    },
-    {
-      "type": "java.nio.file.WatchService"
-    },
-    {
-      "type": "java.nio.file.Watchable"
-    },
-    {
-      "type": "java.nio.file.attribute.FileAttribute[]"
-    },
-    {
-      "type": "java.nio.file.attribute.UserPrincipal"
-    },
-    {
       "type": "java.security.AccessController",
       "methods": [
         {
@@ -1335,10 +593,16 @@
       ]
     },
     {
-      "type": "java.security.PrivilegedAction"
+      "type": "java.security.AlgorithmParametersSpi"
     },
     {
-      "type": "java.security.PrivilegedExceptionAction"
+      "type": "java.security.KeyStoreSpi"
+    },
+    {
+      "type": "java.security.interfaces.RSAPrivateKey"
+    },
+    {
+      "type": "java.security.interfaces.RSAPublicKey"
     },
     {
       "type": "java.sql.Date"
@@ -1350,105 +614,16 @@
       "type": "java.util.AbstractCollection"
     },
     {
-      "type": "java.util.AbstractCollectionBeanInfo"
-    },
-    {
-      "type": "java.util.AbstractCollectionCustomizer"
-    },
-    {
-      "type": "java.util.AbstractList"
-    },
-    {
-      "type": "java.util.AbstractListBeanInfo"
-    },
-    {
-      "type": "java.util.AbstractListCustomizer"
-    },
-    {
       "type": "java.util.AbstractMap"
     },
     {
-      "type": "java.util.ArrayList",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.util.Collection"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.util.ArrayListBeanInfo"
-    },
-    {
-      "type": "java.util.ArrayListCustomizer"
-    },
-    {
-      "type": "java.util.BitSet"
-    },
-    {
-      "type": "java.util.Collection",
-      "methods": [
-        {
-          "name": "add",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "contains",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "isEmpty",
-          "parameterTypes": []
-        },
-        {
-          "name": "size",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "java.util.Collections",
-      "methods": [
-        {
-          "name": "singletonMap",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.util.Comparator"
-    },
-    {
-      "type": "java.util.Deque"
+      "type": "java.util.Collection"
     },
     {
       "type": "java.util.EnumMap$Values"
     },
     {
-      "type": "java.util.Enumeration"
-    },
-    {
       "type": "java.util.EventListener"
-    },
-    {
-      "type": "java.util.HashSet",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.util.Collection"
-          ]
-        }
-      ]
     },
     {
       "type": "java.util.ImmutableCollections$AbstractImmutableMap"
@@ -1457,771 +632,40 @@
       "type": "java.util.ImmutableCollections$MapN"
     },
     {
-      "type": "java.util.Iterator"
-    },
-    {
-      "type": "java.util.List",
-      "methods": [
-        {
-          "name": "add",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.util.Locale"
-    },
-    {
       "type": "java.util.Map"
-    },
-    {
-      "type": "java.util.Map$Entry"
-    },
-    {
-      "type": "java.util.NavigableSet"
-    },
-    {
-      "type": "java.util.Objects",
-      "methods": [
-        {
-          "name": "nonNull",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.util.Optional"
-    },
-    {
-      "type": "java.util.OptionalDouble"
-    },
-    {
-      "type": "java.util.OptionalInt"
-    },
-    {
-      "type": "java.util.OptionalLong"
-    },
-    {
-      "type": "java.util.Optional[]"
-    },
-    {
-      "type": "java.util.Random"
-    },
-    {
-      "type": "java.util.RandomAccess"
-    },
-    {
-      "type": "java.util.ResourceBundle"
-    },
-    {
-      "type": "java.util.SequencedCollection"
-    },
-    {
-      "type": "java.util.Set"
-    },
-    {
-      "type": "java.util.SortedMap"
-    },
-    {
-      "type": "java.util.SortedSet"
-    },
-    {
-      "type": "java.util.Spliterator"
-    },
-    {
-      "type": "java.util.Timer"
-    },
-    {
-      "type": "java.util.TimerTask"
     },
     {
       "type": "java.util.UUID[]"
     },
     {
-      "type": "java.util.concurrent.BlockingQueue"
-    },
-    {
-      "type": "java.util.concurrent.Callable"
-    },
-    {
-      "type": "java.util.concurrent.CompletableFuture",
-      "methods": [
-        {
-          "name": "join",
-          "parameterTypes": []
-        },
-        {
-          "name": "supplyAsync",
-          "parameterTypes": [
-            "java.util.function.Supplier"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "java.util.concurrent.CompletableFutureBeanInfo"
-    },
-    {
-      "type": "java.util.concurrent.CompletableFutureCustomizer"
-    },
-    {
-      "type": "java.util.concurrent.CompletableFuture[]"
-    },
-    {
-      "type": "java.util.concurrent.CompletionStage"
-    },
-    {
-      "type": "java.util.concurrent.Executor"
-    },
-    {
-      "type": "java.util.concurrent.Future"
-    },
-    {
-      "type": "java.util.function.BiConsumer"
-    },
-    {
       "type": "java.util.function.BiConsumer[]"
-    },
-    {
-      "type": "java.util.function.BiFunction"
-    },
-    {
-      "type": "java.util.function.BiPredicate"
-    },
-    {
-      "type": "java.util.function.Consumer"
     },
     {
       "type": "java.util.function.Consumer[]"
     },
     {
-      "type": "java.util.function.DoubleFunction"
-    },
-    {
-      "type": "java.util.function.DoublePredicate"
-    },
-    {
-      "type": "java.util.function.Function"
-    },
-    {
-      "type": "java.util.function.IntFunction"
-    },
-    {
-      "type": "java.util.function.IntPredicate"
-    },
-    {
-      "type": "java.util.function.LongFunction"
-    },
-    {
-      "type": "java.util.function.LongPredicate"
-    },
-    {
-      "type": "java.util.function.Predicate"
-    },
-    {
-      "type": "java.util.function.Supplier"
-    },
-    {
-      "type": "java.util.function.ToDoubleFunction"
-    },
-    {
-      "type": "java.util.function.ToIntFunction"
-    },
-    {
-      "type": "java.util.function.ToLongFunction"
-    },
-    {
-      "type": "java.util.function.UnaryOperator"
-    },
-    {
       "type": "java.util.logging.LogManager"
-    },
-    {
-      "type": "java.util.regex.Matcher"
-    },
-    {
-      "type": "java.util.regex.Pattern"
-    },
-    {
-      "type": "java.util.stream.BaseStream"
-    },
-    {
-      "type": "java.util.stream.DoubleStream"
-    },
-    {
-      "type": "java.util.stream.IntStream"
-    },
-    {
-      "type": "java.util.stream.LongStream"
-    },
-    {
-      "type": "java.util.stream.Stream"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.builder.RuleContainerBuilder",
-      "methods": [
-        {
-          "name": "groupRulesByOperation",
-          "parameterTypes": [
-            "javasabr.rlib.collections.array.Array"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.builder.RuleContainerBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.builder.RuleContainerBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.Action",
-      "fields": [
-        {
-          "name": "ALLOW"
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.ActionBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.ActionCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.ClientIdCondition",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.engine.model.matcher.ValueMatcher"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.ClientIdConditionBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.ClientIdConditionCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.MqttUserCondition",
-      "fields": [
-        {
-          "name": "MATCH_ANY"
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.MqttUserConditionBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.MqttUserConditionCustomizer"
     },
     {
       "type": "javasabr.mqtt.acl.engine.model.condition.MqttUserCondition[]"
     },
     {
-      "type": "javasabr.mqtt.acl.engine.model.condition.TopicCondition",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javasabr.rlib.collections.array.Array"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.TopicConditionBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.condition.TopicConditionCustomizer"
-    },
-    {
       "type": "javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher[]"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javasabr.mqtt.model.topic.TopicFilter"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcherBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcherCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicMatcher",
-      "fields": [
-        {
-          "name": "MATCH_ANY"
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicMatcherBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicMatcherCustomizer"
     },
     {
       "type": "javasabr.mqtt.acl.engine.model.matcher.TopicMatcher[]"
     },
     {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javasabr.mqtt.model.topic.TopicName"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcherBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcherCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.UserMatchers",
-      "methods": [
-        {
-          "name": "startsWith",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.UserMatchersBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.UserMatchersCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.ValueMatcher"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher",
-      "methods": [
-        {
-          "name": "autoBuild",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcherBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcherCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AbstractAclRule"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AbstractAclRuleBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AbstractAclRuleCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AclRule"
-    },
-    {
       "type": "javasabr.mqtt.acl.engine.model.rule.AclRule[]"
     },
     {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AllowPublishAclRule",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.engine.model.condition.MqttUserCondition",
-            "javasabr.mqtt.acl.engine.model.condition.TopicCondition"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AllowPublishAclRuleBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AllowPublishAclRuleCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AllowSubscribeAclRule",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.engine.model.condition.MqttUserCondition",
-            "javasabr.mqtt.acl.engine.model.condition.TopicCondition"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AllowSubscribeAclRuleBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.engine.model.rule.AllowSubscribeAclRuleCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRuleBuilder",
-      "methods": [
-        {
-          "name": "build",
-          "parameterTypes": []
-        },
-        {
-          "name": "getTopicMatchers",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserCondition",
-          "parameterTypes": []
-        },
-        {
-          "name": "topics",
-          "parameterTypes": [
-            "groovy.lang.Closure"
-          ]
-        },
-        {
-          "name": "users",
-          "parameterTypes": [
-            "groovy.lang.Closure"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRuleBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRuleBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "allowPublish",
-          "parameterTypes": [
-            "groovy.lang.Closure"
-          ]
-        },
-        {
-          "name": "allowSubscribe",
-          "parameterTypes": [
-            "groovy.lang.Closure"
-          ]
-        },
-        {
-          "name": "build",
-          "parameterTypes": []
-        },
-        {
-          "name": "putConfigToBuilder",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.groovy.dsl.builder.AclRuleBuilder",
-            "groovy.lang.Closure"
-          ]
-        },
-        {
-          "name": "startBuilderAsync",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.groovy.dsl.builder.AclRuleBuilder",
-            "groovy.lang.Closure"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder$_build_closure1",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder$_startBuilderAsync_closure2",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AllowPublishAclRuleBuilder",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "buildImpl",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AllowPublishAclRuleBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AllowPublishAclRuleBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AllowSubscribeAclRuleBuilder",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "buildImpl",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AllowSubscribeAclRuleBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.AllowSubscribeAclRuleBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.MultiUserConditionBuilder"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.MultiUserConditionBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.MultiUserConditionBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.PublishAclRuleBuilder"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.PublishAclRuleBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.PublishAclRuleBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.SubscribeAclRuleBuilder"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.SubscribeAclRuleBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.SubscribeAclRuleBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.TopicMatchersFactory",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "anyTopic",
-          "parameterTypes": []
-        },
-        {
-          "name": "dynamic",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "eq",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "match",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.TopicMatchersFactoryBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.TopicMatchersFactoryCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilder",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "anyTopic",
-          "parameterTypes": []
-        },
-        {
-          "name": "build",
-          "parameterTypes": []
-        },
-        {
-          "name": "configure",
-          "parameterTypes": [
-            "groovy.lang.Closure"
-          ]
-        },
-        {
-          "name": "dynamic",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "eq",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "match",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.TopicsBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilder",
-      "methods": [
-        {
-          "name": "configure",
-          "parameterTypes": [
-            "groovy.lang.Closure"
-          ]
-        },
-        {
-          "name": "getConditions",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UserConditionBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UserMatchersFactory",
-      "methods": [
-        {
-          "name": "startsWith",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UserMatchersFactoryBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UserMatchersFactoryCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilder",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "build",
-          "parameterTypes": []
-        },
-        {
-          "name": "clientId",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.engine.model.matcher.ValueMatcher"
-          ]
-        },
-        {
-          "name": "super$3$clientId",
-          "parameterTypes": [
-            "javasabr.mqtt.acl.engine.model.matcher.ValueMatcher"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilderBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.builder.UsersBuilderCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader"
-    },
-    {
-      "type": "javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader$_load_closure1",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
+      "type": "javasabr.mqtt.acl.java.dsl.AclRulesLoader"
     },
     {
       "type": "javasabr.mqtt.acl.service.AclEngineBasedAuthorizationService"
     },
     {
-      "type": "javasabr.mqtt.acl.service.conifg.GroovyDslBasedAclServiceSpringConfig",
+      "type": "javasabr.mqtt.acl.service.conifg.AntlrDslBasedAclServiceSpringConfig",
       "methods": [
         {
           "name": "<init>",
@@ -2236,7 +680,7 @@
       ]
     },
     {
-      "type": "javasabr.mqtt.acl.service.impl.GroovyDslBasedAuthorizationService"
+      "type": "javasabr.mqtt.acl.service.impl.UriLoaderAuthorizationService"
     },
     {
       "type": "javasabr.mqtt.auth.api.AuthenticationMethod"
@@ -2704,16 +1148,83 @@
       ]
     },
     {
-      "type": "javasabr.mqtt.broker.application.config.MqttExternalTlsNetworkConfig"
+      "type": "javasabr.mqtt.broker.application.config.MqttExternalTlsNetworkConfig",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "externalNetworkSslContext",
+          "parameterTypes": [
+            "javasabr.mqtt.network.TlsProperties"
+          ]
+        },
+        {
+          "name": "externalTlsConnectionFactory",
+          "parameterTypes": [
+            "javasabr.mqtt.model.MqttServerConnectionConfig",
+            "javasabr.mqtt.network.user.NetworkMqttUserFactory",
+            "int",
+            "javax.net.ssl.SSLContext",
+            "javasabr.mqtt.network.TlsProperties",
+            "javasabr.rlib.network.ServerNetworkConfig",
+            "javasabr.mqtt.network.message.MqttPacketCodec"
+          ]
+        },
+        {
+          "name": "externalTlsNetwork",
+          "parameterTypes": [
+            "javasabr.rlib.network.ServerNetworkConfig",
+            "javasabr.mqtt.network.MqttConnectionFactory"
+          ]
+        },
+        {
+          "name": "externalTlsNetworkAddress",
+          "parameterTypes": [
+            "java.lang.String",
+            "int"
+          ]
+        },
+        {
+          "name": "externalTlsNetworkConfig",
+          "parameterTypes": [
+            "int",
+            "int",
+            "int",
+            "java.lang.String",
+            "int"
+          ]
+        },
+        {
+          "name": "externalTlsNetworkStarter",
+          "parameterTypes": [
+            "javasabr.rlib.network.server.ServerNetwork",
+            "javasabr.mqtt.service.ConnectionService",
+            "java.net.InetSocketAddress"
+          ]
+        },
+        {
+          "name": "externalTlsProperties",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "boolean",
+            "java.util.List",
+            "java.util.List"
+          ]
+        }
+      ]
     },
     {
       "type": "javasabr.mqtt.model.MqttMessageProperty[]"
     },
     {
       "type": "javasabr.mqtt.model.MqttServerConnectionConfig"
-    },
-    {
-      "type": "javasabr.mqtt.model.MqttUser"
     },
     {
       "type": "javasabr.mqtt.model.MqttVersion"
@@ -2729,23 +1240,6 @@
     },
     {
       "type": "javasabr.mqtt.model.SubscribeRetainHandling"
-    },
-    {
-      "type": "javasabr.mqtt.model.acl.Operation",
-      "fields": [
-        {
-          "name": "PUBLISH"
-        },
-        {
-          "name": "SUBSCRIBE"
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.model.acl.OperationBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.model.acl.OperationCustomizer"
     },
     {
       "type": "javasabr.mqtt.model.data.type.StringPair[]"
@@ -2879,70 +1373,13 @@
       ]
     },
     {
-      "type": "javasabr.mqtt.model.topic.AbstractTopicBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.AbstractTopicCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicFilter",
-      "methods": [
-        {
-          "name": "valueOf",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicFilterBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicFilterCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicName",
-      "methods": [
-        {
-          "name": "valueOf",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicNameBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicNameCustomizer"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicValidator",
-      "methods": [
-        {
-          "name": "validateTopicFilter",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "validateTopicName",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicValidatorBeanInfo"
-    },
-    {
-      "type": "javasabr.mqtt.model.topic.TopicValidatorCustomizer"
+      "type": "javasabr.mqtt.model.topic.TopicName"
     },
     {
       "type": "javasabr.mqtt.network.MqttConnectionFactory"
+    },
+    {
+      "type": "javasabr.mqtt.network.TlsProperties"
     },
     {
       "type": "javasabr.mqtt.network.handler.NetworkMqttUserReleaseHandler"
@@ -3141,6 +1578,9 @@
       "type": "javasabr.mqtt.service.impl.PlainMqttConnectionFactory"
     },
     {
+      "type": "javasabr.mqtt.service.impl.TlsMqttConnectionFactory"
+    },
+    {
       "type": "javasabr.mqtt.service.message.handler.MqttInMessageHandler"
     },
     {
@@ -3270,107 +1710,6 @@
       "type": "javasabr.mqtt.service.session.impl.NotExpirableSession[]"
     },
     {
-      "type": "javasabr.rlib.collections.array.Array",
-      "methods": [
-        {
-          "name": "copyOf",
-          "parameterTypes": [
-            "javasabr.rlib.collections.array.Array"
-          ]
-        },
-        {
-          "name": "first",
-          "parameterTypes": []
-        },
-        {
-          "name": "isEmpty",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "javasabr.rlib.collections.array.ArrayBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.ArrayCustomizer"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.ArrayFactory",
-      "methods": [
-        {
-          "name": "mutableArray",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.rlib.collections.array.ArrayFactoryBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.ArrayFactoryCustomizer"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.MutableArray",
-      "methods": [
-        {
-          "name": "ofType",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "javasabr.rlib.collections.array.MutableArrayBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.MutableArrayCustomizer"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.UnsafeArray"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.UnsafeMutableArray"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.AbstractArray"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.AbstractArrayBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.AbstractArrayCustomizer"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.AbstractMutableArray"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.AbstractMutableArrayBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.AbstractMutableArrayCustomizer"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.DefaultMutableArray"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.DefaultMutableArrayBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.DefaultMutableArrayCustomizer"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.ImmutableArray"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.ImmutableArrayBeanInfo"
-    },
-    {
-      "type": "javasabr.rlib.collections.array.impl.ImmutableArrayCustomizer"
-    },
-    {
       "type": "javasabr.rlib.common.AliasedEnum"
     },
     {
@@ -3425,7 +1764,13 @@
       "type": "javasabr.rlib.network.server.ServerNetwork"
     },
     {
-      "type": "javasabr.rlib.network.server.impl.DefaultServerNetwork"
+      "type": "javasabr.rlib.network.server.impl.DefaultServerNetwork",
+      "methods": [
+        {
+          "name": "shutdown",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "javax.money.MonetaryAmount"
@@ -3434,13 +1779,13 @@
       "type": "javax.naming.InitialContext"
     },
     {
+      "type": "javax.net.ssl.SSLContext"
+    },
+    {
       "type": "javax.servlet.Servlet"
     },
     {
       "type": "jdk.crac.management.CRaCMXBean"
-    },
-    {
-      "type": "jdk.internal.jrtfs.JrtFileSystemProvider"
     },
     {
       "type": "jdk.internal.loader.ClassLoaders$AppClassLoader"
@@ -3450,18 +1795,6 @@
     },
     {
       "type": "jdk.internal.misc.Unsafe"
-    },
-    {
-      "type": "jdk.internal.reflect.CallerSensitive"
-    },
-    {
-      "type": "jdk.internal.vm.annotation.ForceInline"
-    },
-    {
-      "type": "jdk.internal.vm.annotation.IntrinsicCandidate"
-    },
-    {
-      "type": "jdk.internal.vm.annotation.Stable"
     },
     {
       "type": "kotlin.Metadata"
@@ -4775,512 +3108,6 @@
       "type": "org.apache.logging.slf4j.SLF4JServiceProvider"
     },
     {
-      "type": "org.codehaus.groovy.reflection.stdclasses.CachedSAMClass",
-      "methods": [
-        {
-          "name": "coerceToSAM",
-          "parameterTypes": [
-            "groovy.lang.Closure",
-            "java.lang.reflect.Method",
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.ConvertedClosure",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "groovy.lang.Closure",
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.DefaultGroovyMethodsSupport"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.DefaultGroovyStaticMethods"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.GStringImpl"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.GeneratedClosure"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.GroovyCategorySupport",
-      "methods": [
-        {
-          "name": "hasCategoryInCurrentThread",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.InvokerHelper",
-      "methods": [
-        {
-          "name": "getMetaClass",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.MethodClosure"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.MethodClosureBeanInfo"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.MethodClosureCustomizer"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.NullObject"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.NullObjectBeanInfo"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.NullObjectCustomizer"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.callsite.CallSite"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.callsite.CallSite[]"
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgm$101",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "org.codehaus.groovy.reflection.CachedClass",
-            "java.lang.Class",
-            "java.lang.Class[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgm$103",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "org.codehaus.groovy.reflection.CachedClass",
-            "java.lang.Class",
-            "java.lang.Class[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgm$27",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "org.codehaus.groovy.reflection.CachedClass",
-            "java.lang.Class",
-            "java.lang.Class[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgm$914",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "org.codehaus.groovy.reflection.CachedClass",
-            "java.lang.Class",
-            "java.lang.Class[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgm$915",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "org.codehaus.groovy.reflection.CachedClass",
-            "java.lang.Class",
-            "java.lang.Class[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgm$97",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "org.codehaus.groovy.reflection.CachedClass",
-            "java.lang.Class",
-            "java.lang.Class[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.NumberNumberDiv",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.NumberNumberMinus",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.NumberNumberMultiply",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.NumberNumberPlus",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.BooleanArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.BooleanArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.ByteArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.ByteArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.CharacterArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.CharacterArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.DoubleArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.DoubleArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.FloatArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.FloatArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.IntegerArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.IntegerArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.LongArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.LongArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.ObjectArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.ObjectArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.ShortArrayGetAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.dgmimpl.arrays.ShortArrayPutAtMetaMethod",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation",
-      "methods": [
-        {
-          "name": "asArray",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.Class"
-          ]
-        },
-        {
-          "name": "castToType",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.runtime.typehandling.GroovyCastException",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.Object",
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.vmplugin.v10.PluginDefaultGroovyMethods"
-    },
-    {
-      "type": "org.codehaus.groovy.vmplugin.v16.Java16",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.vmplugin.v8.IndyGuardsFiltersAndSignatures",
-      "methods": [
-        {
-          "name": "invokeGroovyObjectInvoker",
-          "parameterTypes": [
-            "groovy.lang.MissingMethodException",
-            "java.lang.Object",
-            "java.lang.String",
-            "java.lang.Object[]"
-          ]
-        },
-        {
-          "name": "isNull",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "isSameMetaClass",
-          "parameterTypes": [
-            "groovy.lang.MetaClass",
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "sameClass",
-          "parameterTypes": [
-            "java.lang.Class",
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "sameClasses",
-          "parameterTypes": [
-            "java.lang.Class[]",
-            "java.lang.Object[]"
-          ]
-        },
-        {
-          "name": "setBeanProperties",
-          "parameterTypes": [
-            "groovy.lang.MetaClass",
-            "java.lang.Object",
-            "java.util.Map"
-          ]
-        },
-        {
-          "name": "unwrap",
-          "parameterTypes": [
-            "groovy.lang.GroovyRuntimeException"
-          ]
-        },
-        {
-          "name": "unwrap",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.vmplugin.v8.IndyInterface",
-      "methods": [
-        {
-          "name": "fromCache",
-          "parameterTypes": [
-            "java.lang.invoke.MutableCallSite",
-            "java.lang.Class",
-            "java.lang.String",
-            "int",
-            "java.lang.Boolean",
-            "java.lang.Boolean",
-            "java.lang.Boolean",
-            "java.lang.Object",
-            "java.lang.Object[]"
-          ]
-        },
-        {
-          "name": "selectMethod",
-          "parameterTypes": [
-            "java.lang.invoke.MutableCallSite",
-            "java.lang.Class",
-            "java.lang.String",
-            "int",
-            "java.lang.Boolean",
-            "java.lang.Boolean",
-            "java.lang.Boolean",
-            "java.lang.Object",
-            "java.lang.Object[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.codehaus.groovy.vmplugin.v8.PluginDefaultGroovyMethods"
-    },
-    {
-      "type": "org.codehaus.groovy.vmplugin.v9.PluginDefaultGroovyMethods"
-    },
-    {
       "type": "org.crac.Core"
     },
     {
@@ -5576,31 +3403,7 @@
       "type": "org.springframework.beans.factory.config.BeanFactoryPostProcessor"
     },
     {
-      "type": "org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader"
-    },
-    {
-      "type": "org.springframework.beans.factory.groovy.GroovyBeanDefinitionReaderBeanInfo"
-    },
-    {
-      "type": "org.springframework.beans.factory.groovy.GroovyBeanDefinitionReaderCustomizer"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.AbstractBeanDefinitionReader"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.AbstractBeanDefinitionReaderBeanInfo"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.AbstractBeanDefinitionReaderCustomizer"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.BeanDefinitionReader"
-    },
-    {
       "type": "org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.BeanNameGenerator"
     },
     {
       "type": "org.springframework.boot.ApplicationProperties"
@@ -5628,6 +3431,9 @@
     },
     {
       "type": "org.springframework.boot.autoconfigure.condition.ConditionalOnBean"
+    },
+    {
+      "type": "org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty"
     },
     {
       "type": "org.springframework.boot.autoconfigure.condition.ConditionalOnClass"
@@ -5893,9 +3699,6 @@
       "type": "org.springframework.boot.loader.launch.LaunchedClassLoader"
     },
     {
-      "type": "org.springframework.boot.loader.nio.file.NestedFileSystemProvider"
-    },
-    {
       "type": "org.springframework.boot.logging.java.JavaLoggingSystem$Factory",
       "methods": [
         {
@@ -6108,18 +3911,6 @@
       "type": "org.springframework.core.annotation.Order"
     },
     {
-      "type": "org.springframework.core.env.Environment"
-    },
-    {
-      "type": "org.springframework.core.env.EnvironmentCapable"
-    },
-    {
-      "type": "org.springframework.core.io.Resource"
-    },
-    {
-      "type": "org.springframework.core.io.ResourceLoader"
-    },
-    {
       "type": "org.springframework.core.type.classreading.CachingMetadataReaderFactory"
     },
     {
@@ -6135,6 +3926,15 @@
       "type": "org.springframework.util.ConcurrentReferenceHashMap$Segment[]"
     },
     {
+      "type": "reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber"
+    },
+    {
+      "type": "reactor.core.publisher.FluxIterable$IterableSubscription"
+    },
+    {
+      "type": "reactor.core.publisher.FluxIterable$IterableSubscriptionConditional"
+    },
+    {
       "type": "reactor.core.publisher.FluxSink[]"
     },
     {
@@ -6145,6 +3945,12 @@
     },
     {
       "type": "reactor.core.publisher.MonoFlatMap$FlatMapMain"
+    },
+    {
+      "type": "reactor.core.publisher.Operators$BaseFluxToMonoOperator"
+    },
+    {
+      "type": "reactor.core.publisher.Operators$MultiSubscriptionSubscriber"
     },
     {
       "type": "reactor.core.publisher.Operators$ScalarSubscription"
@@ -6204,16 +4010,34 @@
       ]
     },
     {
-      "type": "sun.nio.fs.UnixPath"
+      "type": "sun.security.pkcs12.PKCS12KeyStore",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
-      "type": "sun.nio.fs.UnixPathBeanInfo"
+      "type": "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
-      "type": "sun.nio.fs.UnixPathCustomizer"
+      "type": "sun.security.provider.DSA$SHA224withDSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
-      "type": "sun.security.provider.MD5",
+      "type": "sun.security.provider.DSA$SHA256withDSA",
       "methods": [
         {
           "name": "<init>",
@@ -6278,6 +4102,219 @@
       ]
     },
     {
+      "type": "sun.security.provider.X509Factory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.PSSParameters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAKeyFactory$Legacy",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAPSSSignature",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA224withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA384withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.SSLContextImpl$TLS12Context",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityInfoAccessExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.BasicConstraintsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CRLDistributionPointsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CertificatePoliciesExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.ExtendedKeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.KeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.NetscapeCertTypeExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.PrivateKeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectAlternativeNameExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
       "type": "sun.text.resources.cldr.FormatData"
     },
     {
@@ -6288,266 +4325,6 @@
     },
     {
       "type": "sun.util.resources.cldr.CalendarData"
-    },
-    {
-      "type": "test-acl",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "groovy.lang.Binding"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure1",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure1$_closure10",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure1$_closure11",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure2",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure2$_closure12",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure2$_closure13",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure3",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure3$_closure14",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure3$_closure15",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure4",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure4$_closure16",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure4$_closure17",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure5",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure5$_closure18",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure5$_closure19",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure6",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure6$_closure20",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure6$_closure21",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure7",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure7$_closure22",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure7$_closure23",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure8",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure8$_closure24",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure8$_closure25",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure9",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure9$_closure26",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-acl$_run_closure9$_closure27",
-      "methods": [
-        {
-          "name": "doCall",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "test-aclBeanInfo"
-    },
-    {
-      "type": "test-aclCustomizer"
     },
     {
       "type": "tools.jackson.databind.deser.Deserializers[]"
@@ -6597,18 +4374,19 @@
           ]
         }
       }
+    },
+    {
+      "type": {
+        "lambda": {
+          "declaringClass": "javasabr.mqtt.broker.application.config.MqttExternalTlsNetworkConfig",
+          "interfaces": [
+            "org.springframework.context.ApplicationListener"
+          ]
+        }
+      }
     }
   ],
   "resources": [
-    {
-      "glob": "META-INF/dgminfo"
-    },
-    {
-      "glob": "META-INF/groovy/org.codehaus.groovy.runtime.ExtensionModule"
-    },
-    {
-      "glob": "META-INF/groovy/org.codehaus.groovy.source.Extensions"
-    },
     {
       "glob": "META-INF/log4j-provider.properties"
     },
@@ -6629,9 +4407,6 @@
     },
     {
       "glob": "META-INF/services/java.nio.channels.spi.AsynchronousChannelProvider"
-    },
-    {
-      "glob": "META-INF/services/java.nio.file.spi.FileSystemProvider"
     },
     {
       "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
@@ -6656,12 +4431,6 @@
     },
     {
       "glob": "META-INF/services/org.apache.logging.log4j.util.PropertySource"
-    },
-    {
-      "glob": "META-INF/services/org.codehaus.groovy.runtime.ExtensionModule"
-    },
-    {
-      "glob": "META-INF/services/org.codehaus.groovy.transform.ASTTransformation"
     },
     {
       "glob": "META-INF/services/org.flywaydb.core.extensibility.Plugin"
@@ -6698,9 +4467,6 @@
     },
     {
       "glob": "application.yml"
-    },
-    {
-      "glob": "auth/credentials-test"
     },
     {
       "glob": "banner.txt"
@@ -6755,6 +4521,9 @@
     },
     {
       "glob": "javasabr/mqtt/broker/application/config/MqttExternalPlainNetworkConfig.class"
+    },
+    {
+      "glob": "javasabr/mqtt/broker/application/config/MqttExternalTlsNetworkConfig.class"
     },
     {
       "glob": "log4j2-test.jsn"
@@ -6854,15 +4623,6 @@
     },
     {
       "glob": "spring.properties"
-    },
-    {
-      "glob": "test-acl.gacl"
-    },
-    {
-      "glob": "test-aclBeanInfo.groovy"
-    },
-    {
-      "glob": "test-aclCustomizer.groovy"
     },
     {
       "module": "java.base",

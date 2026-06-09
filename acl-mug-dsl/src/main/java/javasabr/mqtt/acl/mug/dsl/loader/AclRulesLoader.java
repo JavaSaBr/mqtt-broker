@@ -1,6 +1,8 @@
 package javasabr.mqtt.acl.mug.dsl.loader;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -24,21 +26,18 @@ public class AclRulesLoader {
     return RuleContainerBuilder.groupRulesByOperation(builder.build());
   }
 
-  public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
-    if (Files.notExists(aclConfigPath)) {
-      throw new AclConfigurationException(
-          "Config file:[%s] doesn't exist".formatted(aclConfigPath));
-    }
+  public static Map<Operation, Array<AclRule>> load(InputStream aclConfigPath) {
+
     String content;
     try {
-      content = Files.readString(aclConfigPath);
+      content = new InputStreamReader(aclConfigPath).readAllAsString();
     } catch (IOException e) {
       throw new AclConfigurationException(
           "Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
     }
     List<AclRule> rules = GaclParser.parse(content);
     MutableArray<AclRule> arr = ArrayFactory.mutableArray(AclRule.class);
-    rules.forEach(arr::add);
+    arr.addAll(rules);
     return RuleContainerBuilder.groupRulesByOperation(Array.copyOf(arr));
   }
 

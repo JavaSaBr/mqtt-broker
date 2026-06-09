@@ -25,9 +25,8 @@ public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationSe
   Function<InputStream, Map<Operation, Array<AclRule>>> rulerLoader;
 
   public void loadFrom(URI resource) {
-    try {
-      InputStream localFile =  ClassPathResourceResolver.newInputStream(resource);
-      Map<Operation, Array<AclRule>> loadedAclRulesMap = rulerLoader.apply(localFile);
+    try (InputStream aclInputStream =  ClassPathResourceResolver.newInputStream(resource)) {
+      Map<Operation, Array<AclRule>> loadedAclRulesMap = rulerLoader.apply(aclInputStream);
       switchTo(new AclEngine(loadedAclRulesMap));
       log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
     } catch (IOException e) {

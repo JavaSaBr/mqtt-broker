@@ -20,12 +20,12 @@ public class NativeConfigurationHints implements RuntimeHintsRegistrar {
       };
 
   private static final String[] JDK_ARRAY_TYPES = {
-      "java.util.function.Consumer[]",
-      "java.util.function.BiConsumer[]",
-      "java.nio.ByteBuffer[]",
-      "reactor.core.publisher.FluxSink[]",
-      "java.lang.String[]",
-      "java.util.UUID[]",
+//      "java.util.function.Consumer[]",
+//      "java.util.function.BiConsumer[]",
+//      "java.nio.ByteBuffer[]",
+//      "reactor.core.publisher.FluxSink[]",
+//      "java.lang.String[]",
+//      "java.util.UUID[]",
       };
 
   @Override

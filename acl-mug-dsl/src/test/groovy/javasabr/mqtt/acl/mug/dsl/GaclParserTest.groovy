@@ -17,6 +17,8 @@ import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
 import javasabr.mqtt.acl.engine.model.rule.AbstractAclRule
 import spock.lang.Specification
 
+import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.nio.file.Paths
 
 import static javasabr.mqtt.acl.engine.model.Action.ALLOW
@@ -33,7 +35,7 @@ class GaclParserTest extends Specification {
         def gaclFile = Paths.get(RESOURCES_DIR, "test-acl-full.gacl")
 
     when:
-        def rules = AclRulesLoader.load(gaclFile)
+        def rules = AclRulesLoader.load(Files.newInputStream(gaclFile))
 
     then:
         with(rules.get(PUBLISH)) {
@@ -124,7 +126,7 @@ class GaclParserTest extends Specification {
         def gaclFile = Paths.get(RESOURCES_DIR, "test-acl-shorthand.gacl")
 
     when:
-        def rules = AclRulesLoader.load(gaclFile)
+        def rules = AclRulesLoader.load(Files.newInputStream(gaclFile))
 
     then:
         with(rules.get(PUBLISH)) {
@@ -258,7 +260,7 @@ class GaclParserTest extends Specification {
         }
 
     when:
-        def parsedRules = AclRulesLoader.load(gaclFile)
+        def parsedRules = AclRulesLoader.load(Files.newInputStream(gaclFile))
         def builtRules = AclRulesLoader.build(programmaticallyDefinedRules)
 
     then:
@@ -275,11 +277,11 @@ class GaclParserTest extends Specification {
         def nonExistent = Paths.get("non-existent.gacl")
 
     when:
-        AclRulesLoader.load(nonExistent)
+        AclRulesLoader.load(Files.newInputStream(nonExistent))
 
     then:
-        def e = thrown(AclConfigurationException)
-        e.message.contains("doesn't exist")
+        def e = thrown(NoSuchFileException)
+        e.message == "non-existent.gacl"
   }
 
   def "should report syntax errors"() {
@@ -287,7 +289,7 @@ class GaclParserTest extends Specification {
         def invalidFile = Paths.get(RESOURCES_DIR, "invalid/invalid-syntax.gacl")
 
     when:
-        AclRulesLoader.load(invalidFile)
+        AclRulesLoader.load(Files.newInputStream(invalidFile))
 
     then:
         def e = thrown(AclConfigurationException)
