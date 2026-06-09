@@ -20,7 +20,7 @@ import javasabr.mqtt.acl.java.dsl.GaclParser.DynamicTopicContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.EqMatcherContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.EqTopicContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.MatchTopicContext;
-import javasabr.mqtt.acl.java.dsl.GaclParser.MatcherCallContext;
+import javasabr.mqtt.acl.java.dsl.GaclParser.UserMatcherContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.RegexMatcherContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.RuleBodyContext;
 import javasabr.mqtt.acl.java.dsl.GaclParser.ShorthandUserConditionContext;
@@ -114,7 +114,7 @@ public class GaclVisitorImpl extends GaclBaseVisitor<Void> {
   }
 
   private <B extends UserConditionBuilder<B>> void applyShorthand(B builder, ShorthandUserConditionContext ctx) {
-    ValueMatcher<String> matcher = resolveMatcher(ctx.matcherCall());
+    ValueMatcher<String> matcher = resolveMatcher(ctx.userMatcher());
     String identity = ctx
         .identityType()
         .getText();
@@ -131,7 +131,7 @@ public class GaclVisitorImpl extends GaclBaseVisitor<Void> {
         .identityBlockType()
         .getText();
     Consumer<UserMatchersBuilder> config = mb -> {
-      for (MatcherCallContext mc : ctx.matcherCall()) {
+      for (UserMatcherContext mc : ctx.userMatcher()) {
         applyMatcherCall(mb, mc);
       }
     };
@@ -143,7 +143,7 @@ public class GaclVisitorImpl extends GaclBaseVisitor<Void> {
     }
   }
 
-  private void applyMatcherCall(UserMatchersBuilder mb, MatcherCallContext ctx) {
+  private void applyMatcherCall(UserMatchersBuilder mb, UserMatcherContext ctx) {
     switch (ctx) {
       case StartsWithMatcherContext c -> mb.startsWith(unquote(c
           .STRING()
@@ -162,7 +162,7 @@ public class GaclVisitorImpl extends GaclBaseVisitor<Void> {
     }
   }
 
-  private ValueMatcher<String> resolveMatcher(MatcherCallContext ctx) {
+  private ValueMatcher<String> resolveMatcher(UserMatcherContext ctx) {
     switch (ctx) {
       case StartsWithMatcherContext c -> {
         return UserMatchers.startsWith(unquote(c

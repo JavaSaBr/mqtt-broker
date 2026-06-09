@@ -21,8 +21,8 @@ usersSection
 
 userCondition
     : 'anyUser' '(' ')'                                 #anyUserCondition
-    | identityType matcherCall                          #shorthandUserCondition
-    | identityBlockType '{' matcherCall* '}'            #blockUserCondition
+    | identityType userMatcher                          #shorthandUserCondition
+    | identityBlockType '{' userMatcher* '}'            #blockUserCondition
     | 'allOf' '{' userCondition* '}'                    #allOfCondition
     | 'anyOf' '{' userCondition* '}'                    #anyOfCondition
     ;
@@ -39,7 +39,7 @@ identityBlockType
     | 'ipAddresses'
     ;
 
-matcherCall
+userMatcher
     : 'startsWith' '(' STRING ')'     #startsWithMatcher
     | 'contains' '(' STRING ')'       #containsMatcher
     | 'eq' '(' STRING ')'             #eqMatcher
