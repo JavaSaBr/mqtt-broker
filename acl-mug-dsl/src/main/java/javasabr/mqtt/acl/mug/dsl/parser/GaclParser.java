@@ -28,9 +28,8 @@ import javasabr.mqtt.model.topic.TopicFilter;
 import javasabr.mqtt.model.topic.TopicName;
 import javasabr.mqtt.model.topic.TopicValidator;
 import javasabr.rlib.collections.array.Array;
+import javasabr.rlib.collections.array.ArrayBuilder;
 import javasabr.rlib.collections.array.ArrayCollectors;
-import javasabr.rlib.collections.array.ArrayFactory;
-import javasabr.rlib.collections.array.MutableArray;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.UtilityClass;
@@ -175,11 +174,8 @@ public class GaclParser {
       .then(TOPIC_MATCHER
           .atLeastOnce()
           .between("{", "}")
-          .map(matchers -> {
-            MutableArray<TopicMatcher> arr = ArrayFactory.mutableArray(TopicMatcher.class);
-            arr.addAll(matchers);
-            return Array.copyOf(arr);
-          }));
+          .map(matchers -> new ArrayBuilder<>(TopicMatcher.class).add(matchers))
+          .map(ArrayBuilder::build));
 
   Parser<AclRule> DIRECTIVE = Parser.anyOf(
       createDirective("allowPublish", AllowPublishAclRule::new),

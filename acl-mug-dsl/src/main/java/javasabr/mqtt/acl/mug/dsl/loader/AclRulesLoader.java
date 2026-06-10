@@ -3,7 +3,6 @@ package javasabr.mqtt.acl.mug.dsl.loader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder;
@@ -13,13 +12,14 @@ import javasabr.mqtt.acl.mug.dsl.builder.AclRulesBuilder;
 import javasabr.mqtt.acl.mug.dsl.parser.GaclParser;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
-import javasabr.rlib.collections.array.ArrayFactory;
-import javasabr.rlib.collections.array.MutableArray;
+import javasabr.rlib.collections.array.ArrayBuilder;
 
 public class AclRulesLoader {
 
   public static Map<Operation, Array<AclRule>> build(Consumer<AclRulesBuilder> config) {
-    return RuleContainerBuilder.groupRulesByOperation(new AclRulesBuilder().apply(config).build());
+    return RuleContainerBuilder.groupRulesByOperation(new AclRulesBuilder()
+        .apply(config)
+        .build());
   }
 
   public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
@@ -32,9 +32,9 @@ public class AclRulesLoader {
     } catch (IOException e) {
       throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
     }
-    List<AclRule> rules = GaclParser.parse(content);
-    MutableArray<AclRule> arr = ArrayFactory.mutableArray(AclRule.class);
-    arr.addAll(rules);
-    return RuleContainerBuilder.groupRulesByOperation(Array.copyOf(arr));
+    Array<AclRule> rules = new ArrayBuilder<>(AclRule.class)
+        .add(GaclParser.parse(content))
+        .build();
+    return RuleContainerBuilder.groupRulesByOperation(rules);
   }
 }
