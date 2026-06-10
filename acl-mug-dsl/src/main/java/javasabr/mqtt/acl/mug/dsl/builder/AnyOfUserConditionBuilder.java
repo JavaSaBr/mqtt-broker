@@ -8,16 +8,12 @@ import javasabr.rlib.collections.array.Array;
 public class AnyOfUserConditionBuilder extends MultiUserConditionBuilder<AnyOfUserConditionBuilder> {
 
   public AnyOfUserConditionBuilder allOf(Consumer<AllOfUserConditionBuilder> config) {
-    AllOfUserConditionBuilder builder = new AllOfUserConditionBuilder();
-    config.accept(builder);
-    conditions.add(builder.build());
+    conditions.add(new AllOfUserConditionBuilder().apply(config).build());
     return this;
   }
 
   public AnyOfUserConditionBuilder anyOf(Consumer<AnyOfUserConditionBuilder> config) {
-    AnyOfUserConditionBuilder builder = new AnyOfUserConditionBuilder();
-    config.accept(builder);
-    conditions.add(builder.build());
+    conditions.add(new AnyOfUserConditionBuilder().apply(config).build());
     return this;
   }
 

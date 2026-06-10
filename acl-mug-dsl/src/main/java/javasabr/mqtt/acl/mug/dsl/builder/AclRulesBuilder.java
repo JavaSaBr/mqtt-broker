@@ -8,7 +8,7 @@ import javasabr.rlib.collections.array.ArrayBuilder;
 /**
  * Builds list of {@link AclRule} from ACL configuration.
  */
-public class AclRulesBuilder {
+public class AclRulesBuilder extends ConfigurableBuilder<AclRulesBuilder> {
 
   private final ArrayBuilder<AclRule> rules = new ArrayBuilder<>(AclRule.class);
 

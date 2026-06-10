@@ -14,9 +14,7 @@ public class AllOfUserConditionBuilder extends UserConditionBuilder<AllOfUserCon
   private final Set<UserIdentity> alreadySetIdentities = new HashSet<>();
 
   public AllOfUserConditionBuilder anyOf(Consumer<AnyOfUserConditionBuilder> config) {
-    AnyOfUserConditionBuilder builder = new AnyOfUserConditionBuilder();
-    config.accept(builder);
-    conditions.add(builder.build());
+    conditions.add(new AnyOfUserConditionBuilder().apply(config).build());
     return this;
   }
 

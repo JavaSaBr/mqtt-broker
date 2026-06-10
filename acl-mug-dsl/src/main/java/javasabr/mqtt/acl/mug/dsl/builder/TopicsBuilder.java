@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.mug.dsl.builder;
 
+import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher;
 import javasabr.mqtt.acl.engine.model.matcher.TopicMatcher;
@@ -12,7 +13,7 @@ import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 
-public class TopicsBuilder {
+public class TopicsBuilder extends ConfigurableBuilder<TopicsBuilder> {
 
   private final MutableArray<TopicMatcher> matchers = ArrayFactory.mutableArray(TopicMatcher.class);
 

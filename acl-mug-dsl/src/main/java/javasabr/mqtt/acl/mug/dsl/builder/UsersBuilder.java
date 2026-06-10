@@ -9,17 +9,13 @@ public class UsersBuilder extends MultiUserConditionBuilder<UsersBuilder> {
 
   public UsersBuilder allOf(Consumer<AllOfUserConditionBuilder> config) {
     checkAnyUser();
-    AllOfUserConditionBuilder builder = new AllOfUserConditionBuilder();
-    config.accept(builder);
-    conditions.add(builder.build());
+    conditions.add(new AllOfUserConditionBuilder().apply(config).build());
     return this;
   }
 
   public UsersBuilder anyOf(Consumer<AnyOfUserConditionBuilder> config) {
     checkAnyUser();
-    AnyOfUserConditionBuilder builder = new AnyOfUserConditionBuilder();
-    config.accept(builder);
-    conditions.add(builder.build());
+    conditions.add(new AnyOfUserConditionBuilder().apply(config).build());
     return this;
   }
 

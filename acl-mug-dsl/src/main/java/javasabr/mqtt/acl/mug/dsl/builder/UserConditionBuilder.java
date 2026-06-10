@@ -1,5 +1,6 @@
 package javasabr.mqtt.acl.mug.dsl.builder;
 
+import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition;
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition;
@@ -11,7 +12,7 @@ import javasabr.rlib.collections.array.ArrayFactory;
 import javasabr.rlib.collections.array.MutableArray;
 
 @SuppressWarnings("unchecked")
-public abstract class UserConditionBuilder<B extends UserConditionBuilder<B>> {
+public abstract class UserConditionBuilder<B extends UserConditionBuilder<B>> extends ConfigurableBuilder<B> {
 
   protected final MutableArray<MqttUserCondition> conditions = ArrayFactory.mutableArray(MqttUserCondition.class);
 

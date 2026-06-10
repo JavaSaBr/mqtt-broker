@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class AclRuleBuilder {
+public abstract class AclRuleBuilder extends ConfigurableBuilder<AclRuleBuilder> {
 
   MqttUserCondition userCondition;
   Array<TopicMatcher> topicMatchers;
@@ -21,9 +21,7 @@ public abstract class AclRuleBuilder {
     if (userCondition != null) {
       throw new AclConfigurationException("Only one users section allowed");
     }
-    UsersBuilder builder = new UsersBuilder();
-    config.accept(builder);
-    userCondition = builder.build();
+    userCondition = new UsersBuilder().apply(config).build();
     return this;
   }
 
@@ -31,9 +29,7 @@ public abstract class AclRuleBuilder {
     if (topicMatchers != null) {
       throw new AclConfigurationException("Only one topics section allowed");
     }
-    TopicsBuilder builder = new TopicsBuilder();
-    config.accept(builder);
-    topicMatchers = builder.build();
+    topicMatchers = new TopicsBuilder().apply(config).build();
     return this;
   }
 
@@ -44,11 +40,6 @@ public abstract class AclRuleBuilder {
       throw new AclConfigurationException("Topics section is not defined");
     }
     return buildImpl();
-  }
-
-  public AclRuleBuilder apply(Consumer<AclRuleBuilder> config) {
-    config.accept(this);
-    return this;
   }
 
   protected abstract AclRule buildImpl();

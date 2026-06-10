@@ -19,9 +19,7 @@ import javasabr.rlib.collections.array.MutableArray;
 public class AclRulesLoader {
 
   public static Map<Operation, Array<AclRule>> build(Consumer<AclRulesBuilder> config) {
-    AclRulesBuilder builder = new AclRulesBuilder();
-    config.accept(builder);
-    return RuleContainerBuilder.groupRulesByOperation(builder.build());
+    return RuleContainerBuilder.groupRulesByOperation(new AclRulesBuilder().apply(config).build());
   }
 
   public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
