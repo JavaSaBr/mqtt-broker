@@ -21,7 +21,9 @@ public abstract class AclRuleBuilder extends ConfigurableBuilder<AclRuleBuilder>
     if (userCondition != null) {
       throw new AclConfigurationException("Only one users section allowed");
     }
-    userCondition = new UsersBuilder().apply(config).build();
+    userCondition = new UsersBuilder()
+        .apply(config)
+        .build();
     return this;
   }
 
@@ -29,7 +31,9 @@ public abstract class AclRuleBuilder extends ConfigurableBuilder<AclRuleBuilder>
     if (topicMatchers != null) {
       throw new AclConfigurationException("Only one topics section allowed");
     }
-    topicMatchers = new TopicsBuilder().apply(config).build();
+    topicMatchers = new TopicsBuilder()
+        .apply(config)
+        .build();
     return this;
   }
 

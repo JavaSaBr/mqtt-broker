@@ -17,22 +17,30 @@ public class AclRulesBuilder extends ConfigurableBuilder<AclRulesBuilder> {
   }
 
   public AclRulesBuilder allowPublish(Consumer<AclRuleBuilder> config) {
-    rules.add(new AllowPublishAclRuleBuilder().apply(config).build());
+    rules.add(new AllowPublishAclRuleBuilder()
+        .apply(config)
+        .build());
     return this;
   }
 
   public AclRulesBuilder denyPublish(Consumer<AclRuleBuilder> config) {
-    rules.add(new DenyPublishAclRuleBuilder().apply(config).build());
+    rules.add(new DenyPublishAclRuleBuilder()
+        .apply(config)
+        .build());
     return this;
   }
 
   public AclRulesBuilder allowSubscribe(Consumer<AclRuleBuilder> config) {
-    rules.add(new AllowSubscribeAclRuleBuilder().apply(config).build());
+    rules.add(new AllowSubscribeAclRuleBuilder()
+        .apply(config)
+        .build());
     return this;
   }
 
   public AclRulesBuilder denySubscribe(Consumer<AclRuleBuilder> config) {
-    rules.add(new DenySubscribeAclRuleBuilder().apply(config).build());
+    rules.add(new DenySubscribeAclRuleBuilder()
+        .apply(config)
+        .build());
     return this;
   }
 }

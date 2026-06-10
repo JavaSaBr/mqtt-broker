@@ -1,7 +1,6 @@
 package javasabr.mqtt.acl.mug.dsl.builder;
 
 import java.util.Collection;
-import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.matcher.UserMatchers;
 import javasabr.mqtt.acl.engine.model.matcher.ValueMatcher;

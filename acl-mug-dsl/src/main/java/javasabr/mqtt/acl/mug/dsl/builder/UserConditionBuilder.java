@@ -1,6 +1,5 @@
 package javasabr.mqtt.acl.mug.dsl.builder;
 
-import java.util.function.Consumer;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition;
 import javasabr.mqtt.acl.engine.model.condition.IpAddressCondition;
