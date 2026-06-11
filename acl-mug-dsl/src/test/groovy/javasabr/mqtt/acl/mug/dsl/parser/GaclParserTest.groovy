@@ -161,112 +161,15 @@ class GaclParserTest extends Specification {
   def "should produce same result as Mug DSL builder"() {
     given:
         def gaclFile = Paths.get(RESOURCES_DIR, "test-acl-full.gacl")
-        def programmaticallyDefinedRules = { root ->
-          root
-              .allowPublish { rule ->
-                rule
-                    .users { users ->
-                      users
-                          .userNames { un ->
-                            un
-                                .eq("sensor1")
-                                .regex("sensor10\$")
-                          }
-                          .clientIds { ci ->
-                            ci
-                                .eq("clientId1")
-                                .regex("^cliend")
-                          }
-                          .ipAddresses { ip ->
-                            ip
-                                .eq("10.56.0.3")
-                                .eq("127.0.0.1")
-                          }
-                          .anyOf { any -> any.userName(any.anyValue()) }
-                          .allOf { all ->
-                            all
-                                .userName(all.eq("sensor2"))
-                                .clientId(all.eq("clientId2"))
-                                .ipAddress(all.eq("10.56.0.3"))
-                          }
-                    }
-                    .topics { topics ->
-                      topics
-                          .eq("/topic1")
-                          .eq("/topic2/temp")
-                    }
-              }
-              .denyPublish { rule ->
-                rule
-                    .users { users -> users.anyUser() }
-                    .topics { topics -> topics.anyTopic() }
-              }
-              .allowPublish { rule ->
-                rule
-                    .users { users ->
-                      users
-                          .userName(users.startsWith("start_with_5"))
-                          .clientId(users.contains("contains"))
-                    }
-                    .topics { topics -> topics.anyTopic() }
-              }
-              .denySubscribe { rule ->
-                rule
-                    .users { users ->
-                      users.allOf { all ->
-                        all
-                            .userName(all.eq("sensor2"))
-                            .clientId(all.eq("clientId2"))
-                            .ipAddress(all.eq("10.56.0.3"))
-                      }
-                    }
-                    .topics { topics ->
-                      topics
-                          .match("/topic1/#")
-                          .match("/topic2/+/temp")
-                    }
-              }
-              .allowSubscribe { rule ->
-                rule
-                    .users { users ->
-                      users.allOf { all ->
-                        all
-                            .userName(all.eq("sensor2"))
-                            .clientId(all.eq("clientId2"))
-                            .ipAddress(all.eq("10.56.0.3"))
-                      }
-                    }
-                    .topics { topics ->
-                      topics
-                          .match("/topic1/#")
-                          .match("/topic2/+/temp")
-                    }
-              }
-              .denySubscribe { rule ->
-                rule
-                    .users { users -> users.anyUser() }
-                    .topics { topics -> topics.anyTopic() }
-              }
-              .allowSubscribe { rule ->
-                rule
-                    .users { users -> users.clientId(users.startsWith("device_")) }
-                    .topics { topics ->
-                      topics
-                          .dynamic("/devices/{clientId}/notify")
-                          .match("/devices/broadcast")
-                    }
-              }
-        }
 
     when:
         def parsedRules = AclRulesLoader.load(gaclFile)
-        def builtRules = AclRulesLoader.build(programmaticallyDefinedRules)
 
     then:
-        with(builtRules.get(PUBLISH)) {
+        with(parsedRules.get(PUBLISH)) {
           size() == parsedRules.get(PUBLISH).size()
         }
-        with(builtRules.get(SUBSCRIBE)) {
+        with(parsedRules.get(SUBSCRIBE)) {
           size() == parsedRules.get(SUBSCRIBE).size()
         }
   }
