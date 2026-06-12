@@ -7,6 +7,7 @@ import javasabr.mqtt.model.message.MqttMessageType;
  */
 public class PingRequestMqttInMessage extends MqttInMessage {
 
+  public static final byte MESSAGE_FLAGS = 0b0000_0000;
   public static final byte MESSAGE_TYPE = (byte) MqttMessageType.PING_REQUEST.ordinal();
 
   public PingRequestMqttInMessage(byte messageFlags) {
@@ -21,5 +22,10 @@ public class PingRequestMqttInMessage extends MqttInMessage {
   @Override
   public MqttMessageType messageType() {
     return MqttMessageType.PING_REQUEST;
+  }
+
+  @Override
+  protected boolean validMessageFlags(byte messageFlags) {
+    return messageFlags == MESSAGE_FLAGS;
   }
 }
