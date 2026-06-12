@@ -87,11 +87,43 @@ class GaclParserTest extends Specification {
         thrown(AclConfigurationException)
   }
 
-  def "should throw exception for invalid syntax"() {
+  def "should handle empty users section"() {
     when:
-        parser.parse("invalid syntax")
+        parser.parse("""allowPublish {
+          users {}
+          topics { anyTopic() }
+        }""")
     then:
         thrown(AclConfigurationException)
+  }
+
+  def "should handle empty users section"() {
+    when:
+        parser.parse("""allowPublish {
+          users { userId() }
+          topics { anyTopic() }
+        }""")
+    then:
+        thrown(AclConfigurationException)
+  }
+
+  def "should handle blank input"() {
+    when:
+        parser.parse("")
+    then:
+        thrown(AclConfigurationException)
+  }
+
+  def "should trigger line column calculation for multi-line error"() {
+    when:
+        parser.parse("""allowPublish {
+          users { anyUser() }
+          topics { anyTopic() }
+        }
+        invalid""")
+    then:
+        def e = thrown(AclConfigurationException)
+        e.message.contains("line 5, column 9")
   }
 }
 
