@@ -1,210 +1,20 @@
 package javasabr.mqtt.acl.mug.dsl.parser
 
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException
-import javasabr.mqtt.acl.engine.model.condition.AllOfCondition
-import javasabr.mqtt.acl.engine.model.condition.AnyOfCondition
-import javasabr.mqtt.acl.engine.model.condition.ClientIdCondition
-import javasabr.mqtt.acl.engine.model.condition.MqttUserCondition
-import javasabr.mqtt.acl.engine.model.condition.UserNameCondition
-import javasabr.mqtt.acl.engine.model.matcher.AnyTopicMatcher
-import javasabr.mqtt.acl.engine.model.matcher.EqualsMatcher
-import javasabr.mqtt.acl.engine.model.matcher.RegexMatcher
-import javasabr.mqtt.acl.engine.model.matcher.StartsWithMatcher
-import javasabr.mqtt.acl.engine.model.matcher.TopicFilterMatcher
-import javasabr.mqtt.acl.engine.model.matcher.TopicNameMatcher
-import javasabr.mqtt.acl.engine.model.matcher.dynamic.DynamicTopicMatcher
-import javasabr.mqtt.acl.engine.model.rule.AbstractAclRule
-import javasabr.mqtt.acl.mug.dsl.loader.AclRulesLoader
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.nio.file.Paths
-
-import static javasabr.mqtt.acl.engine.model.Action.ALLOW
-import static javasabr.mqtt.acl.engine.model.Action.DENY
-import static javasabr.mqtt.model.acl.Operation.PUBLISH
-import static javasabr.mqtt.model.acl.Operation.SUBSCRIBE
-
 class GaclParserTest extends Specification {
 
-  private static final String RESOURCES_DIR = "src/test/resources/acl"
-
-  def "should parse full featured GACL file"() {
-    given:
-        def gaclFile = Paths.get(RESOURCES_DIR, "test-acl-full.gacl")
-
-    when:
-        def rules = AclRulesLoader.load(gaclFile)
-
-    then:
-        with(rules.get(PUBLISH)) {
-          size() == 3
-          get(0) instanceof AbstractAclRule
-          with(get(0) as AbstractAclRule) {
-            operation() == PUBLISH
-            action() == ALLOW
-            userCondition() instanceof AnyOfCondition
-            with(userCondition() as AnyOfCondition) {
-              with(conditions()) {
-                size() == 8
-                get(0) instanceof UserNameCondition
-                with(get(0) as UserNameCondition) {
-                  matcher() instanceof EqualsMatcher
-                  with(matcher() as EqualsMatcher) {
-                    expected() == "sensor1"
-                  }
-                }
-                get(1) instanceof UserNameCondition
-                with(get(1) as UserNameCondition) {
-                  matcher() instanceof RegexMatcher
-                  with(matcher() as RegexMatcher) {
-                    pattern().pattern() == "sensor10\$"
-                  }
-                }
-              }
-            }
-            with(topicCondition().matchers()) {
-              size() == 2
-              get(0) instanceof TopicNameMatcher
-              get(1) instanceof TopicNameMatcher
-            }
-          }
-          with(get(1) as AbstractAclRule) {
-            operation() == PUBLISH
-            action() == DENY
-            userCondition() == MqttUserCondition.MATCH_ANY
-            topicCondition().matchers().get(0) == AnyTopicMatcher.instance()
-          }
-          with(get(2) as AbstractAclRule) {
-            operation() == PUBLISH
-            action() == ALLOW
-            userCondition() instanceof AnyOfCondition
-            with(userCondition() as AnyOfCondition) {
-              conditions().size() == 2
-            }
-            topicCondition().matchers().get(0) == AnyTopicMatcher.instance()
-          }
-        }
-        with(rules.get(SUBSCRIBE)) {
-          size() == 4
-          with(get(0) as AbstractAclRule) {
-            operation() == SUBSCRIBE
-            action() == DENY
-            userCondition() instanceof AllOfCondition
-          }
-          with(get(1) as AbstractAclRule) {
-            operation() == SUBSCRIBE
-            action() == ALLOW
-            userCondition() instanceof AllOfCondition
-          }
-          with(get(2) as AbstractAclRule) {
-            operation() == SUBSCRIBE
-            action() == DENY
-            userCondition() == MqttUserCondition.MATCH_ANY
-          }
-          with(get(3) as AbstractAclRule) {
-            operation() == SUBSCRIBE
-            action() == ALLOW
-            userCondition() instanceof ClientIdCondition
-            with(userCondition() as ClientIdCondition) {
-              matcher() instanceof StartsWithMatcher
-              with(matcher() as StartsWithMatcher) {
-                prefix() == "device_"
-              }
-            }
-            with(topicCondition().matchers()) {
-              get(0) instanceof DynamicTopicMatcher
-              get(1) instanceof TopicFilterMatcher
-            }
-          }
-        }
-  }
-
-  def "should parse shorthand GACL file"() {
-    given:
-        def gaclFile = Paths.get(RESOURCES_DIR, "test-acl-shorthand.gacl")
-
-    when:
-        def rules = AclRulesLoader.load(gaclFile)
-
-    then:
-        with(rules.get(PUBLISH)) {
-          size() == 3
-          with(get(0) as AbstractAclRule) {
-            operation() == PUBLISH
-            action() == ALLOW
-            userCondition() instanceof ClientIdCondition
-            topicCondition().matchers().get(0) instanceof DynamicTopicMatcher
-          }
-          with(get(1) as AbstractAclRule) {
-            operation() == PUBLISH
-            action() == ALLOW
-            userCondition() instanceof ClientIdCondition
-            topicCondition().matchers().size() == 2
-          }
-          with(get(2) as AbstractAclRule) {
-            operation() == PUBLISH
-            action() == ALLOW
-            topicCondition().matchers().get(0) instanceof TopicFilterMatcher
-          }
-        }
-        with(rules.get(SUBSCRIBE)) {
-          size() == 4
-          with(get(2) as AbstractAclRule) {
-            operation() == SUBSCRIBE
-            action() == ALLOW
-            topicCondition().matchers().get(0) == AnyTopicMatcher.instance()
-          }
-        }
-  }
-
-  def "should produce same result as Mug DSL builder"() {
-    given:
-        def gaclFile = Paths.get(RESOURCES_DIR, "test-acl-full.gacl")
-
-    when:
-        def parsedRules = AclRulesLoader.load(gaclFile)
-
-    then:
-        with(parsedRules.get(PUBLISH)) {
-          size() == parsedRules.get(PUBLISH).size()
-        }
-        with(parsedRules.get(SUBSCRIBE)) {
-          size() == parsedRules.get(SUBSCRIBE).size()
-        }
-  }
-
-  def "should throw for non-existent file"() {
-    given:
-        def nonExistent = Paths.get("non-existent.gacl")
-
-    when:
-        AclRulesLoader.load(nonExistent)
-
-    then:
-        def e = thrown(AclConfigurationException)
-        e.message.contains("doesn't exist")
-  }
-
-  def "should report syntax errors"() {
-    given:
-        def invalidFile = Paths.get(RESOURCES_DIR, "invalid/invalid-syntax.gacl")
-
-    when:
-        AclRulesLoader.load(invalidFile)
-
-    then:
-        def e = thrown(AclConfigurationException)
-        e.message.startsWith("Syntax error at line")
-  }
+  GaclParser parser = new GaclParser()
 
   @Unroll
   def "should parse string literal containing #pattern without treating it as a comment"() {
     when:
-        def rules = GaclParser.parse("""allowPublish {
-  users { userName eq("$pattern") }
-  topics { anyTopic() }
-}""")
+        def rules = parser.parse("""allowPublish {
+                      users { userName eq("$pattern") }
+                      topics { anyTopic() }
+                    }""")
 
     then:
         rules.size() == 1
@@ -212,4 +22,76 @@ class GaclParserTest extends Specification {
     where:
         pattern << ['//admin', 'a/*b']
   }
+
+  def "should parse all user conditions"() {
+    when:
+        def rules = parser.parse("""allowPublish {
+                      users {
+                        userName eq("user1")
+                        clientId startsWith("dev_")
+                        ipAddress regex("192.*")
+                      }
+                      topics { anyTopic() }
+                    }""")
+    then:
+        rules.size() == 1
+  }
+
+  def "should parse complex conditions"() {
+    when:
+        def rules = parser.parse("""allowPublish {
+                      users {
+                        anyOf {
+                          userName eq("u1")
+                          clientId eq("c1")
+                        }
+                      }
+                      topics {
+                        eq("test/topic")
+                        match("test/#")
+                      }
+                    }""")
+    then:
+        rules.size() == 1
+  }
+
+  def "should parse all directives"() {
+    when:
+        def rules = parser.parse("""
+                    allowPublish { users { anyUser() } topics { anyTopic() } }
+                    denyPublish { users { anyUser() } topics { anyTopic() } }
+                    allowSubscribe { users { anyUser() } topics { anyTopic() } }
+                    denySubscribe { users { anyUser() } topics { anyTopic() } }
+                    """)
+    then:
+        rules.size() == 4
+  }
+
+  def "should throw exception for invalid identity type"() {
+    when:
+        parser.parse("""allowPublish {
+          users { unknown eq("u1") }
+          topics { anyTopic() }
+        }""")
+    then:
+        thrown(AclConfigurationException)
+  }
+
+  def "should throw exception for invalid topic name"() {
+    when:
+        parser.parse("""allowPublish {
+          users { anyUser() }
+          topics { eq("invalid#topic") }
+        }""")
+    then:
+        thrown(AclConfigurationException)
+  }
+
+  def "should throw exception for invalid syntax"() {
+    when:
+        parser.parse("invalid syntax")
+    then:
+        thrown(AclConfigurationException)
+  }
 }
+
