@@ -2,6 +2,7 @@ package javasabr.mqtt.acl.service.conifg;
 
 import java.net.URI;
 import javasabr.mqtt.acl.mug.dsl.loader.AclRulesLoader;
+import javasabr.mqtt.acl.mug.dsl.parser.GaclParser;
 import javasabr.mqtt.acl.service.impl.UriLoaderAuthorizationService;
 import javasabr.mqtt.service.AuthorizationService;
 import lombok.CustomLog;
@@ -18,10 +19,17 @@ import org.springframework.context.annotation.Configuration;
 public class MugDslBasedAclServiceSpringConfig {
 
   @Bean
-  AuthorizationService authorizationService(@Value("${acl.engine.config.path}") URI aclConfigUri) {
+  AuthorizationService authorizationService(
+      @Value("${acl.engine.config.path}") URI aclConfigUri,
+      AclRulesLoader mugAclRulesLoader) {
     log.info("Initializing Mug-DSL based AuthorizationService...");
-    var authorizationService = new UriLoaderAuthorizationService(AclRulesLoader::load);
+    var authorizationService = new UriLoaderAuthorizationService(mugAclRulesLoader::load);
     authorizationService.loadFrom(aclConfigUri);
     return authorizationService;
+  }
+
+  @Bean
+  AclRulesLoader mugAclRulesLoader() {
+    return new AclRulesLoader(new GaclParser());
   }
 }

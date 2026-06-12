@@ -11,10 +11,14 @@ import javasabr.mqtt.acl.mug.dsl.parser.GaclParser;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
 import javasabr.rlib.collections.array.ArrayBuilder;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class AclRulesLoader {
 
-  public static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
+  private final GaclParser parser ;
+
+  public Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
     if (Files.notExists(aclConfigPath)) {
       throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath));
     }
@@ -25,7 +29,7 @@ public class AclRulesLoader {
       throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
     }
     Array<AclRule> rules = new ArrayBuilder<>(AclRule.class)
-        .add(GaclParser.parse(content))
+        .add(parser.parse(content))
         .build();
     return RuleContainerBuilder.groupRulesByOperation(rules);
   }

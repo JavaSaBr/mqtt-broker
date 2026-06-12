@@ -32,9 +32,7 @@ import javasabr.rlib.collections.array.ArrayBuilder;
 import javasabr.rlib.collections.array.ArrayCollectors;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GaclParser {
 
