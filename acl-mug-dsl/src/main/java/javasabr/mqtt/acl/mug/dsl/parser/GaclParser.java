@@ -36,53 +36,53 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GaclParser {
 
-  CharPredicate WHITESPACE = CharPredicate.anyOf(" \t\r\n");
+  CharPredicate whitespace = CharPredicate.anyOf(" \t\r\n");
 
-  Parser<String> STRING = Parser.anyOf(
+  Parser<String> string = Parser.anyOf(
       Parser.quotedByWithEscapes('"', '"', Parser.chars(1)),
       Parser.quotedByWithEscapes('\'', '\'', Parser.chars(1)));
 
-  Parser<ValueMatcher<String>> USER_MATCHER = Parser.anyOf(
+  Parser<ValueMatcher<String>> userMatcher = Parser.anyOf(
       Parser
           .word("startsWith")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(UserMatchers::startsWith),
       Parser
           .word("contains")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(UserMatchers::contains),
       Parser
           .word("eq")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(UserMatchers::eq),
       Parser
           .word("regex")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(UserMatchers::regex),
       Parser
           .word("anyValue")
           .followedBy("()")
           .thenReturn(ValueMatcher.MATCH_ANY_STRING));
 
-  Parser<String> IDENTITY_TYPE = Parser.anyOf(
+  Parser<String> identityType = Parser.anyOf(
       Parser.word("userName"),
       Parser.word("clientId"),
       Parser.word("ipAddress"));
 
-  Parser<String> IDENTITY_BLOCK_TYPE = Parser.anyOf(
+  Parser<String> identityBlockType = Parser.anyOf(
       Parser.word("userNames"),
       Parser.word("clientIds"),
       Parser.word("ipAddresses"));
 
-  Parser<List<MqttUserCondition>> USER_CONDITION = Parser.define(uc -> Parser.<List<MqttUserCondition>>anyOf(
+  Parser<List<MqttUserCondition>> userCondition = Parser.define(uc -> Parser.<List<MqttUserCondition>>anyOf(
       Parser
           .word("anyUser")
           .followedBy("()")
           .thenReturn(List.of(MqttUserCondition.MATCH_ANY)),
-      Parser.sequence(IDENTITY_TYPE, USER_MATCHER, (id, matcher) -> List.of(toUserCondition(id, matcher))),
+      Parser.sequence(identityType, userMatcher, (id, matcher) -> List.of(toUserCondition(id, matcher))),
       Parser.sequence(
-          IDENTITY_BLOCK_TYPE,
-          USER_MATCHER
+          identityBlockType,
+          userMatcher
               .atLeastOnce()
               .between("{", "}"),
           (id, matchers) -> matchers
@@ -114,9 +114,9 @@ public class GaclParser {
                 return List.of(new AnyOfCondition(flat));
               }))));
 
-  Parser<MqttUserCondition> USERS_SECTION = Parser
+  Parser<MqttUserCondition> usersSection = Parser
       .word("users")
-      .then(USER_CONDITION
+      .then(userCondition
           .atLeastOnce()
           .between("{", "}")
           .map(lists -> {
@@ -133,10 +133,10 @@ public class GaclParser {
             return new AnyOfCondition(flat);
           }));
 
-  Parser<TopicMatcher> TOPIC_MATCHER = Parser.anyOf(
+  Parser<TopicMatcher> topicMatcher = Parser.anyOf(
       Parser
           .word("eq")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(s -> {
             if (!TopicValidator.validateTopicName(s)) {
               throw new AclConfigurationException("Invalid topic name:[%s]".formatted(s));
@@ -145,7 +145,7 @@ public class GaclParser {
           }),
       Parser
           .word("match")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(s -> {
             if (!TopicValidator.validateTopicFilter(s)) {
               throw new AclConfigurationException("Invalid topic filter:[%s]".formatted(s));
@@ -154,7 +154,7 @@ public class GaclParser {
           }),
       Parser
           .word("dynamic")
-          .then(STRING.between("(", ")"))
+          .then(string.between("(", ")"))
           .map(s -> {
             try {
               return DynamicTopicMatcher.autoBuild(s);
@@ -167,15 +167,15 @@ public class GaclParser {
           .followedBy("()")
           .thenReturn(TopicMatcher.MATCH_ANY));
 
-  Parser<Array<TopicMatcher>> TOPICS_SECTION = Parser
+  Parser<Array<TopicMatcher>> topicsSection = Parser
       .word("topics")
-      .then(TOPIC_MATCHER
+      .then(topicMatcher
           .atLeastOnce()
           .between("{", "}")
           .map(matchers -> new ArrayBuilder<>(TopicMatcher.class).add(matchers))
           .map(ArrayBuilder::build));
 
-  Parser<AclRule> DIRECTIVE = Parser.anyOf(
+  Parser<AclRule> directive = Parser.anyOf(
       createDirective("allowPublish", AllowPublishAclRule::new),
       createDirective("denyPublish", DenyPublishAclRule::new),
       createDirective("allowSubscribe", AllowSubscribeAclRule::new),
@@ -183,9 +183,9 @@ public class GaclParser {
 
   public List<AclRule> parse(String input) {
     try {
-      return DIRECTIVE
+      return directive
           .atLeastOnce()
-          .parseSkipping(WHITESPACE, input);
+          .parseSkipping(whitespace, input);
     } catch (Parser.ParseException e) {
       throw new AclConfigurationException("Syntax error at %s".formatted(toLineColumn(input, e.getSourceIndex())));
     }
@@ -197,7 +197,7 @@ public class GaclParser {
     return Parser
         .word(keyword)
         .then(Parser
-            .sequence(USERS_SECTION, TOPICS_SECTION, (uc, tm) -> factory.apply(uc, new TopicCondition(tm)))
+            .sequence(usersSection, topicsSection, (uc, tm) -> factory.apply(uc, new TopicCondition(tm)))
             .between("{", "}"));
   }
 
