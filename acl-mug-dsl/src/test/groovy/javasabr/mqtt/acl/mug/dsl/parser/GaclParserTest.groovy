@@ -87,7 +87,7 @@ class GaclParserTest extends Specification {
         thrown(AclConfigurationException)
   }
 
-  def "should handle empty users section"() {
+  def "should throw exception for empty users section"() {
     when:
         parser.parse("""allowPublish {
           users {}
@@ -97,7 +97,7 @@ class GaclParserTest extends Specification {
         thrown(AclConfigurationException)
   }
 
-  def "should handle empty users section"() {
+  def "should throw exception for empty user id"() {
     when:
         parser.parse("""allowPublish {
           users { userId() }
@@ -107,7 +107,7 @@ class GaclParserTest extends Specification {
         thrown(AclConfigurationException)
   }
 
-  def "should handle blank input"() {
+  def "should throw exception for blank input"() {
     when:
         parser.parse("")
     then:
