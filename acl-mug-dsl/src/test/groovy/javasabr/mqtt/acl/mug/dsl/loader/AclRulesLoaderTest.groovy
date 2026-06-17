@@ -34,7 +34,7 @@ class AclRulesLoaderTest extends Specification {
         Path unreadableFile = Files.createTempFile("unreadable", ".gacl")
         // Make the file unreadable to trigger IOException during Files.readString
         unreadableFile.toFile().setReadable(false)
-        
+
     when:
         loader.load(unreadableFile)
 

@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AclRulesLoader {
 
-  private final GaclParser parser ;
+  private final GaclParser parser;
 
   public Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
     if (Files.notExists(aclConfigPath)) {
