@@ -159,7 +159,7 @@ public class GaclParser {
             try {
               return DynamicTopicMatcher.autoBuild(s);
             } catch (RuntimeException e) {
-              throw new AclConfigurationException(e.getMessage());
+              throw new AclConfigurationException("Invalid dynamic topic pattern", e);
             }
           }),
       Parser
