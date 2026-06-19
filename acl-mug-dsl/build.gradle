@@ -1,0 +1,16 @@
+plugins {
+  id("groovy")
+  id("java-library")
+  id("configure-java")
+}
+
+dependencies {
+  api projects.aclEngine
+  api libs.rlib.collections
+
+  implementation libs.mug
+  implementation libs.mug.dot.parse
+
+  testImplementation testFixtures(projects.model)
+  testImplementation projects.testSupport
+}
