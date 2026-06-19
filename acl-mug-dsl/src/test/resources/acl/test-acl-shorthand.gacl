@@ -1,0 +1,65 @@
+allowPublish {
+  users {
+    clientId startsWith("device_")
+  }
+  topics {
+    dynamic('service/+/device/{clientId}')
+  }
+}
+
+allowSubscribe {
+  users {
+    clientId startsWith("device_")
+  }
+  topics {
+    dynamic('device/{clientId}')
+    eq('broadcast/devices')
+  }
+}
+
+allowPublish {
+  users {
+    clientId startsWith("service_")
+  }
+  topics {
+    match('device/+')
+    eq('broadcast/devices')
+  }
+}
+
+allowSubscribe {
+  users {
+    clientId startsWith("service_")
+  }
+  topics {
+    match('service/+/device/+')
+    match('service/+/instance/{clientId}')
+  }
+}
+
+allowSubscribe {
+  users {
+    clientId startsWith("system_")
+  }
+  topics {
+    anyTopic()
+  }
+}
+
+allowPublish {
+  users {
+    clientId startsWith("TLS")
+  }
+  topics {
+    match("tls/#")
+  }
+}
+
+allowSubscribe {
+  users {
+    clientId startsWith("TLS")
+  }
+  topics {
+    match("tls/#")
+  }
+}
