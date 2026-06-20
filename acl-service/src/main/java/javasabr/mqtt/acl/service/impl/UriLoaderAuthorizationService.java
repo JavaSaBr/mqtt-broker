@@ -1,6 +1,5 @@
 package javasabr.mqtt.acl.service.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
@@ -29,8 +28,8 @@ public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationSe
       Map<Operation, Array<AclRule>> aclRulesMap = rulesLoader.apply(aclInputStream);
       switchTo(new AclEngine(aclRulesMap));
       log.info(resource, aclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
-    } catch (IOException e) {
-      throw new AclConfigurationException("ACL configuration issue:[%s]".formatted(resource), e);
+    } catch (Exception e) {
+      throw new AclConfigurationException("Unable to load ACL configuration:[%s]".formatted(resource), e);
     }
   }
 

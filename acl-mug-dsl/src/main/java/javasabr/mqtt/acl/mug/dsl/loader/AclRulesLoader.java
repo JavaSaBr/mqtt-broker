@@ -22,7 +22,7 @@ public class AclRulesLoader {
     try {
       content = new InputStreamReader(aclConfigInputStream).readAllAsString();
     } catch (Exception e) {
-      throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigInputStream), e);
+      throw new AclConfigurationException("Failed to read ACL input stream", e);
     }
     Array<AclRule> rules = new ArrayBuilder<>(AclRule.class)
         .add(parser.parse(content))
