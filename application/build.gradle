@@ -3,7 +3,6 @@ plugins {
   id("configure-java")
   id("groovy")
   id("org.springframework.boot")
-  id 'org.graalvm.buildtools.native'
 }
 
 description = "Standard configuration of standalone version of MQTT Broker"
@@ -36,59 +35,4 @@ bootRun {
 
 bootJar {
   mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
-}
-
-graalvmNative {
-  toolchainDetection = true
-  binaries {
-    main {
-      sharedLibrary = false
-      buildArgs.add("--enable-preview")
-      javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
-        vendor = JvmVendorSpec.matching("GraalVM Community")
-      }
-    }
-  }
-}
-
-jar {
-  from(sourceSets.aot.output)
-}
-
-processAot {
-  jvmArgs([
-      '-Dauthentication.credentials-source.database.enabled=true',
-      '-Dauthentication.credentials-source.file.enabled=true',
-      '-Dauthentication.provider.basic.enabled=true',
-      '-Dmqtt.external.tls.network.enabled=true',
-  ])
-}
-
-tasks.register('copyNativeImageTestResources', Copy) {
-  mustRunAfter 'nativeCompile'
-  from('src/test/resources/application-test.properties') {
-    rename 'application-test.properties', "application.properties"
-  }
-  from('src/test/resources/log4j2-test.xml') {
-    rename 'log4j2-test.xml', "log4j2.xml"
-  }
-  from('src/test/resources/auth/credentials-test') {
-    into 'auth'
-  }
-  from('src/test/resources/test-acl.gacl')
-  into layout.buildDirectory.dir("native/nativeCompile")
-}
-
-tasks.register('nativeImageTest', Test) {
-  dependsOn 'nativeCompile', 'copyNativeImageTestResources'
-  useJUnitPlatform()
-
-  group = 'verification'
-  testClassesDirs = sourceSets.test.output.classesDirs
-  classpath = sourceSets.test.runtimeClasspath
-  
-  filter {
-    includeTestsMatching 'javasabr.mqtt.broker.application.NativeImageVerificationTest'
-  }
 }
