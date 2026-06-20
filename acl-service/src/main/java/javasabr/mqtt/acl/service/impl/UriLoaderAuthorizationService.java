@@ -4,24 +4,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.function.Function;
 import javasabr.mqtt.acl.engine.AclEngine;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
-import javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader;
 import javasabr.mqtt.acl.service.AclEngineBasedAuthorizationService;
 import javasabr.mqtt.base.util.ClassPathResourceResolver;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
+import lombok.AccessLevel;
 import lombok.CustomLog;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @CustomLog
-public class GroovyDslBasedAuthorizationService extends AclEngineBasedAuthorizationService {
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationService {
+
+  Function<InputStream, Map<Operation, Array<AclRule>>> rulesLoader;
 
   public void loadFrom(URI resource) {
     try (InputStream aclInputStream =  ClassPathResourceResolver.newInputStream(resource)) {
-      Map<Operation, Array<AclRule>> loadedAclRulesMap = AclRulesLoader.load(aclInputStream);
+      Map<Operation, Array<AclRule>> loadedAclRulesMap = rulesLoader.apply(aclInputStream);
       switchTo(new AclEngine(loadedAclRulesMap));
-      log.info(resource, loadedAclRulesMap, GroovyDslBasedAuthorizationService::buildServiceDescription);
+      log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
     } catch (IOException e) {
       throw new AclConfigurationException("ACL configuration issue:[%s]".formatted(resource), e);
     }
@@ -30,8 +37,11 @@ public class GroovyDslBasedAuthorizationService extends AclEngineBasedAuthorizat
   private static String buildServiceDescription(URI resource, Map<Operation, Array<AclRule>> aclRulesMap) {
     var builder = new StringBuilder();
     builder.append("{\n");
-    builder.append("  \"SOURCE\":\"").append(resource).append("\",\n");
-    
+    builder
+        .append("  \"SOURCE\":\"")
+        .append(resource)
+        .append("\",\n");
+
     int count = 0;
     for (Map.Entry<Operation, Array<AclRule>> entry : aclRulesMap.entrySet()) {
       Operation operation = entry.getKey();

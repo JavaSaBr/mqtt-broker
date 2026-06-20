@@ -1,7 +1,8 @@
 package javasabr.mqtt.acl.service.conifg;
 
 import java.net.URI;
-import javasabr.mqtt.acl.service.impl.GroovyDslBasedAuthorizationService;
+import javasabr.mqtt.acl.groovy.dsl.loader.AclRulesLoader;
+import javasabr.mqtt.acl.service.impl.UriLoaderAuthorizationService;
 import javasabr.mqtt.service.AuthorizationService;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +18,9 @@ import org.springframework.context.annotation.Configuration;
 public class GroovyDslBasedAclServiceSpringConfig {
 
   @Bean
-  AuthorizationService authorizationService(@Value("${acl.engine.groovy.dsl.config}") URI aclConfigUri) {
+  AuthorizationService authorizationService(@Value("${acl.engine.config.path}") URI aclConfigUri) {
     log.info("Initializing Groovy-DSL based AuthorizationService...");
-    var authorizationService = new GroovyDslBasedAuthorizationService();
+    var authorizationService = new UriLoaderAuthorizationService(AclRulesLoader::load);
     authorizationService.loadFrom(aclConfigUri);
     return authorizationService;
   }

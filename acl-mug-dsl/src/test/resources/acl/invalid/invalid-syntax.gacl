@@ -1,0 +1,8 @@
+allowPublish {
+  users {
+    invalidKeyword("test")
+  }
+  topics {
+    eq("/topic1")
+  }
+}
