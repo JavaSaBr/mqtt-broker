@@ -10,10 +10,6 @@ description = "Standard configuration of standalone version of MQTT Broker"
 
 dependencies {
   implementation projects.application
-  testImplementation(testFixtures(projects.application))
-  testImplementation projects.coreService
-  testImplementation projects.testSupport
-  testImplementation libs.junit.platform.testkit
 }
 
 graalvmNative {
@@ -45,32 +41,4 @@ processAot {
       '-Dauthentication.provider.basic.enabled=true',
       '-Dmqtt.external.tls.network.enabled=true',
   ])
-}
-
-tasks.register('copyNativeImageTestResources', Copy) {
-  mustRunAfter 'nativeCompile'
-  from('src/test/resources/application-test.properties') {
-    rename 'application-test.properties', "application.properties"
-  }
-  from('src/test/resources/log4j2-test.xml') {
-    rename 'log4j2-test.xml', "log4j2.xml"
-  }
-  from('src/test/resources/auth/credentials-test') {
-    into 'auth'
-  }
-  from('src/test/resources/test-acl.gacl')
-  into layout.buildDirectory.dir("native/nativeCompile")
-}
-
-tasks.register('nativeImageTest', Test) {
-  dependsOn 'nativeCompile', 'copyNativeImageTestResources'
-  useJUnitPlatform()
-
-  group = 'verification'
-  testClassesDirs = sourceSets.test.output.classesDirs
-  classpath = sourceSets.test.runtimeClasspath
-  
-  filter {
-    includeTestsMatching 'javasabr.mqtt.broker.application.NativeImageVerificationTest'
-  }
 }

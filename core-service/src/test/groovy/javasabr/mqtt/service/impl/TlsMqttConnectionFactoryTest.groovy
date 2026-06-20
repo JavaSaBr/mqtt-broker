@@ -2,16 +2,17 @@ package javasabr.mqtt.service.impl
 
 import javasabr.mqtt.model.MqttServerConnectionConfig
 import javasabr.mqtt.model.QoS
-import javasabr.mqtt.network.message.MqttPacketCodec
-import javasabr.mqtt.network.user.NetworkMqttUserFactory
-import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
 import javasabr.mqtt.network.TlsProperties
-import javasabr.rlib.network.impl.DefaultBufferAllocator
-import spock.lang.Specification
+import javasabr.mqtt.network.message.MqttPacketCodec
+import javasabr.mqtt.network.user.ConfigurableNetworkMqttUser
+import javasabr.mqtt.network.user.NetworkMqttUserFactory
 import javasabr.rlib.network.Network
 import javasabr.rlib.network.ServerNetworkConfig
-import java.nio.channels.AsynchronousSocketChannel
+import javasabr.rlib.network.impl.DefaultBufferAllocator
+import spock.lang.Specification
+
 import javax.net.ssl.SSLContext
+import java.nio.channels.AsynchronousSocketChannel
 
 class TlsMqttConnectionFactoryTest extends Specification {
 

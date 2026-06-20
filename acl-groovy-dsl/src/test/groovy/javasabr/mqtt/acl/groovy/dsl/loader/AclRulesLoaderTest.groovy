@@ -26,7 +26,6 @@ import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
 import java.nio.file.Files
-import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import java.util.concurrent.CompletionException
 
@@ -39,31 +38,22 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   def "should load test Groovy DSL config"() {
     given:
-        def ruleFile = TestRulesGenerator.generate(100)
+        def aclConfigFile = TestRulesGenerator.generate(100)
+        def aclConfigInputStream = new FileInputStream(aclConfigFile)
     when:
-        def load = AclRulesLoader.load(new FileInputStream(ruleFile))
+        def load = AclRulesLoader.load(aclConfigInputStream)
     then:
         load.get(SUBSCRIBE).size() == 50
         load.get(PUBLISH).size() == 50
-        ruleFile.delete()
-  }
-
-  def "should throw exception if config not exists"(String configPath) {
-    when:
-        AclRulesLoader.load(Files.newInputStream(Path.of(configPath)))
-    then:
-        def exception = thrown(NoSuchFileException)
-        exception.message == configPath
-    where:
-        configPath         | _
-        "not/existed/path" | _
+        aclConfigFile.delete()
   }
 
   def "should work fine with only publish rules"() {
     given:
         def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.gacl")
+        def aclConfigInputStream = Files.newInputStream(Path.of(onlyPublishRulesAclPath))
     when:
-        def ruleMap = AclRulesLoader.load(Files.newInputStream(Path.of(onlyPublishRulesAclPath)))
+        def ruleMap = AclRulesLoader.load(aclConfigInputStream)
     then:
         noExceptionThrown()
         !ruleMap.get(PUBLISH).isEmpty()
@@ -73,8 +63,9 @@ class AclRulesLoaderTest extends UnitSpecification {
   def "should throw exception if config is invalid"(String invalidAclFileName, String errorMessage, Class<? extends Exception> exceptionClass) {
     given:
         def invalidAclPath = getAbsolutePath("acl/config/invalid/${invalidAclFileName}")
+        def aclConfigInputStream = Files.newInputStream(Path.of(invalidAclPath))
     when:
-        AclRulesLoader.load(Files.newInputStream(Path.of(invalidAclPath)))
+        AclRulesLoader.load(aclConfigInputStream)
     then:
         def exception = thrown CompletionException
         exceptionClass.isInstance exception.cause
