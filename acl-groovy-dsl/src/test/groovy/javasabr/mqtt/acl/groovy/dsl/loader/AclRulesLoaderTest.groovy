@@ -99,9 +99,11 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   @SuppressWarnings('GroovyAccessibility')
   def "should parse Groovy DSL config"() {
-    when:
+    given:
         def absolutePath = getAbsolutePath("acl/config/acl.gacl")
-        def rules = AclRulesLoader.load(Files.newInputStream(Path.of(absolutePath)))
+        def aclConfigInputStream = Files.newInputStream(Path.of(absolutePath))
+    when:
+        def rules = AclRulesLoader.load(aclConfigInputStream)
     then:
         verifyAll(rules.get(PUBLISH)) {
           size() == 3
@@ -214,8 +216,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               with(matcher as StartsWithMatcher) { prefix() == "device_" }
             }
             with(topicCondition().matchers) {
-              with(get(0) as DynamicTopicMatcher<TopicName>) { 
-                originalTopic.rawTopic() == "/devices/{clientId}/notify" 
+              with(get(0) as DynamicTopicMatcher<TopicName>) {
+                originalTopic.rawTopic() == "/devices/{clientId}/notify"
                 resolvers.length == 4
                 resolvers[0].class == NoOpsTopicSegmentResolver
                 resolvers[1].class == NoOpsTopicSegmentResolver

@@ -28,11 +28,11 @@ class AclRulesLoaderTest extends Specification {
 
   def "should load rules successfully"() {
     given:
-        def mockedRulesDefinition = "mock content"
-        def stream = new ByteArrayInputStream(mockedRulesDefinition.getBytes())
+        def aclConfigMock = "mock content"
+        def aclConfigInputStream = new ByteArrayInputStream(aclConfigMock.getBytes())
 
     when:
-        def rules = loader.load(stream)
+        def rules = loader.load(aclConfigInputStream)
 
     then:
         1 * parser.parse("mock content") >> []

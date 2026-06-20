@@ -7,8 +7,8 @@ import javasabr.mqtt.model.acl.Operation
 import javasabr.rlib.collections.array.Array
 
 class AclRulesLoader {
-  
-  static Map<Operation, Array<AclRule>> load(InputStream aclConfigPath) {
+
+  static Map<Operation, Array<AclRule>> load(InputStream aclConfigInputStream) {
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
 
     def binding = new Binding()
@@ -20,8 +20,8 @@ class AclRulesLoader {
     }
 
     def groovyShell = new GroovyShell(binding)
-    groovyShell.evaluate(new InputStreamReader(aclConfigPath))
-    
+    groovyShell.evaluate(new InputStreamReader(aclConfigInputStream))
+
     return RuleContainerBuilder.groupRulesByOperation(aclRulesBuilder.build())
   }
 }

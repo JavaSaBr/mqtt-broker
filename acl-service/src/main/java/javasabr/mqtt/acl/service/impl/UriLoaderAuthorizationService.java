@@ -26,9 +26,9 @@ public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationSe
 
   public void loadFrom(URI resource) {
     try (InputStream aclInputStream =  ClassPathResourceResolver.newInputStream(resource)) {
-      Map<Operation, Array<AclRule>> loadedAclRulesMap = rulesLoader.apply(aclInputStream);
-      switchTo(new AclEngine(loadedAclRulesMap));
-      log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
+      Map<Operation, Array<AclRule>> aclRulesMap = rulesLoader.apply(aclInputStream);
+      switchTo(new AclEngine(aclRulesMap));
+      log.info(resource, aclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
     } catch (IOException e) {
       throw new AclConfigurationException("ACL configuration issue:[%s]".formatted(resource), e);
     }

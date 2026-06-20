@@ -1,6 +1,5 @@
 package javasabr.mqtt.acl.mug.dsl.loader;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
@@ -18,12 +17,12 @@ public class AclRulesLoader {
 
   private final GaclParser parser;
 
-  public Map<Operation, Array<AclRule>> load(InputStream aclConfigPath) {
+  public Map<Operation, Array<AclRule>> load(InputStream aclConfigInputStream) {
     String content;
     try {
-      content = new InputStreamReader(aclConfigPath).readAllAsString();
+      content = new InputStreamReader(aclConfigInputStream).readAllAsString();
     } catch (Exception e) {
-      throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigPath), e);
+      throw new AclConfigurationException("Failed to read ACL file:[%s]".formatted(aclConfigInputStream), e);
     }
     Array<AclRule> rules = new ArrayBuilder<>(AclRule.class)
         .add(parser.parse(content))
