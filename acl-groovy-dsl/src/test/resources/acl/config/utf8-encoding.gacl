@@ -1,0 +1,10 @@
+package acl.config
+
+allowPublish {
+  users {
+    anyUser()
+  }
+  topics {
+    eq("/tëméric")
+  }
+}

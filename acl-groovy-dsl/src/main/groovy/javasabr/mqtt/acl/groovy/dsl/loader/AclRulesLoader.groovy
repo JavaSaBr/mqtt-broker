@@ -1,26 +1,16 @@
 package javasabr.mqtt.acl.groovy.dsl.loader
 
 import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder
-import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.engine.model.rule.AclRule
 import javasabr.mqtt.acl.groovy.dsl.builder.AclRulesBuilder
 import javasabr.mqtt.model.acl.Operation
 import javasabr.rlib.collections.array.Array
 
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.charset.StandardCharsets
 
 class AclRulesLoader {
-  
-  static Map<Operation, Array<AclRule>> load(String aclConfigPath) {
-    return load(Path.of(aclConfigPath))
-  }
-  
-  static Map<Operation, Array<AclRule>> load(Path aclConfigPath) {
-    if (Files.notExists(aclConfigPath)) {
-      throw new AclConfigurationException("Config file:[%s] doesn't exist".formatted(aclConfigPath))
-    }
-    
+
+  static Map<Operation, Array<AclRule>> load(InputStream aclConfigInputStream) {
     AclRulesBuilder aclRulesBuilder = new AclRulesBuilder()
 
     def binding = new Binding()
@@ -32,8 +22,8 @@ class AclRulesLoader {
     }
 
     def groovyShell = new GroovyShell(binding)
-    groovyShell.evaluate(aclConfigPath.toFile())
-    
+    groovyShell.evaluate(new InputStreamReader(aclConfigInputStream, StandardCharsets.UTF_8))
+
     return RuleContainerBuilder.groupRulesByOperation(aclRulesBuilder.build())
   }
 }

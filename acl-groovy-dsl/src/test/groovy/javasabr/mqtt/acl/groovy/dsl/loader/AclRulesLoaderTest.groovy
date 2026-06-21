@@ -25,6 +25,8 @@ import javasabr.mqtt.service.acl.TestRulesGenerator
 import javasabr.mqtt.test.support.UnitSpecification
 import javasabr.rlib.collections.array.Array
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.concurrent.CompletionException
 
 import static javasabr.mqtt.acl.engine.model.Action.ALLOW
@@ -36,31 +38,22 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   def "should load test Groovy DSL config"() {
     given:
-        def ruleFile = TestRulesGenerator.generate(100)
+        def aclConfigFile = TestRulesGenerator.generate(100)
+        def aclConfigInputStream = new FileInputStream(aclConfigFile)
     when:
-        def load = AclRulesLoader.load(ruleFile.toString())
+        def load = AclRulesLoader.load(aclConfigInputStream)
     then:
         load.get(SUBSCRIBE).size() == 50
         load.get(PUBLISH).size() == 50
-        ruleFile.delete()
-  }
-
-  def "should throw exception if config not exists"(String configPath, String errorMessage) {
-    when:
-        AclRulesLoader.load(configPath)
-    then:
-        def exception = thrown(AclConfigurationException)
-        exception.message == errorMessage
-    where:
-        configPath         | errorMessage
-        "not/existed/path" | 'Config file:[not/existed/path] doesn\'t exist'
+        aclConfigFile.delete()
   }
 
   def "should work fine with only publish rules"() {
     given:
         def onlyPublishRulesAclPath = getAbsolutePath("acl/config/acl-publish-only.gacl")
+        def aclConfigInputStream = Files.newInputStream(Path.of(onlyPublishRulesAclPath))
     when:
-        def ruleMap = AclRulesLoader.load(onlyPublishRulesAclPath)
+        def ruleMap = AclRulesLoader.load(aclConfigInputStream)
     then:
         noExceptionThrown()
         !ruleMap.get(PUBLISH).isEmpty()
@@ -70,8 +63,9 @@ class AclRulesLoaderTest extends UnitSpecification {
   def "should throw exception if config is invalid"(String invalidAclFileName, String errorMessage, Class<? extends Exception> exceptionClass) {
     given:
         def invalidAclPath = getAbsolutePath("acl/config/invalid/${invalidAclFileName}")
+        def aclConfigInputStream = Files.newInputStream(Path.of(invalidAclPath))
     when:
-        AclRulesLoader.load(invalidAclPath)
+        AclRulesLoader.load(aclConfigInputStream)
     then:
         def exception = thrown CompletionException
         exceptionClass.isInstance exception.cause
@@ -96,9 +90,11 @@ class AclRulesLoaderTest extends UnitSpecification {
 
   @SuppressWarnings('GroovyAccessibility')
   def "should parse Groovy DSL config"() {
-    when:
+    given:
         def absolutePath = getAbsolutePath("acl/config/acl.gacl")
-        def rules = AclRulesLoader.load(absolutePath)
+        def aclConfigInputStream = Files.newInputStream(Path.of(absolutePath))
+    when:
+        def rules = AclRulesLoader.load(aclConfigInputStream)
     then:
         verifyAll(rules.get(PUBLISH)) {
           size() == 3
@@ -211,8 +207,8 @@ class AclRulesLoaderTest extends UnitSpecification {
               with(matcher as StartsWithMatcher) { prefix() == "device_" }
             }
             with(topicCondition().matchers) {
-              with(get(0) as DynamicTopicMatcher<TopicName>) { 
-                originalTopic.rawTopic() == "/devices/{clientId}/notify" 
+              with(get(0) as DynamicTopicMatcher<TopicName>) {
+                originalTopic.rawTopic() == "/devices/{clientId}/notify"
                 resolvers.length == 4
                 resolvers[0].class == NoOpsTopicSegmentResolver
                 resolvers[1].class == NoOpsTopicSegmentResolver
@@ -223,5 +219,17 @@ class AclRulesLoaderTest extends UnitSpecification {
             }
           }
         }
+  }
+
+  def "should decode Groovy DSL config using UTF-8 charset"() {
+    given:
+        def utf8AclPath = getAbsolutePath("acl/config/utf8-encoding.gacl")
+        def aclConfigInputStream = Files.newInputStream(Path.of(utf8AclPath))
+    when:
+        def rules = AclRulesLoader.load(aclConfigInputStream)
+    then:
+        def publishRule = rules.get(PUBLISH).get(0) as AbstractAclRule
+        def topicMatcher = publishRule.topicCondition().matchers.get(0) as TopicNameMatcher
+        topicMatcher.expected.rawTopic() == "/tëméric"
   }
 }

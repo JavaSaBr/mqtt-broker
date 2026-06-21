@@ -1,17 +1,15 @@
 package javasabr.mqtt.auth.credentials.source;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import javasabr.mqtt.auth.api.CredentialsSourceType;
 import javasabr.mqtt.auth.api.exception.CredentialsSourceException;
+import javasabr.mqtt.base.util.ClassPathResourceResolver;
 import javasabr.mqtt.base.util.DebugUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileCredentialsSource extends InMemoryCredentialsSource {
@@ -24,14 +22,10 @@ public class FileCredentialsSource extends InMemoryCredentialsSource {
   }
 
   private void init() {
-    Path path = Path.of(fileName);
-    if (!Files.exists(path)) {
-      throw new CredentialsSourceException("Credentials file:[%s] could not be found".formatted(fileName));
-    }
-    try {
-      reset(Files.newInputStream(path));
-    } catch (IOException e) {
-      throw new CredentialsSourceException("Error during credentials file read", e);
+    try (InputStream aclInputStream = ClassPathResourceResolver.newInputStream(fileName)) {
+      reset(aclInputStream);
+    } catch (Exception e) {
+      throw new CredentialsSourceException("Unable to reset credentials file:[%s]".formatted(fileName), e);
     }
   }
 

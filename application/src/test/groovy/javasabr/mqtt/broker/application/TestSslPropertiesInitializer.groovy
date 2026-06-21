@@ -7,16 +7,19 @@ import org.springframework.core.env.MapPropertySource
 
 class TestSslPropertiesInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-  TestSslContexts sslContexts = TestSslContexts.getInstance()
+  static final TestSslContexts TEST_SSL_CONTEXT = TestSslContexts.getInstance()
 
   @Override
   void initialize(ConfigurableApplicationContext applicationContext) {
-    def props = [
-        "mqtt.external.tls.keystore-path": sslContexts.serverKeystorePath.toString(),
-        "mqtt.external.tls.keystore-password": sslContexts.password,
-        "mqtt.external.tls.truststore-path": sslContexts.truststore.toString(),
-        "mqtt.external.tls.truststore-password": sslContexts.password
+    applicationContext.environment.propertySources.addFirst(new MapPropertySource("tlsProps", getProps()))
+  }
+
+  static Map<String, Object> getProps() {
+    return [
+        "mqtt.external.tls.keystore-path": TEST_SSL_CONTEXT.serverKeystorePath.toString(),
+        "mqtt.external.tls.keystore-password": TEST_SSL_CONTEXT.password,
+        "mqtt.external.tls.truststore-path": TEST_SSL_CONTEXT.truststore.toString(),
+        "mqtt.external.tls.truststore-password": TEST_SSL_CONTEXT.password
     ]
-    applicationContext.environment.propertySources.addFirst(new MapPropertySource("tlsProps", props))
   }
 }

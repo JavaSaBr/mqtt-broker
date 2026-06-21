@@ -1,14 +1,14 @@
 package javasabr.mqtt.acl.service.impl;
 
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Function;
 import javasabr.mqtt.acl.engine.AclEngine;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
 import javasabr.mqtt.acl.engine.model.rule.AclRule;
 import javasabr.mqtt.acl.service.AclEngineBasedAuthorizationService;
+import javasabr.mqtt.base.util.ClassPathResourceResolver;
 import javasabr.mqtt.model.acl.Operation;
 import javasabr.rlib.collections.array.Array;
 import lombok.AccessLevel;
@@ -21,18 +21,16 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UriLoaderAuthorizationService extends AclEngineBasedAuthorizationService {
 
-  Function<Path, Map<Operation, Array<AclRule>>> rulesLoader;
+  Function<InputStream, Map<Operation, Array<AclRule>>> rulesLoader;
 
   public void loadFrom(URI resource) {
-    Path localFile = Path.of(resource);
-    if (Files.notExists(localFile)) {
-      throw new AclConfigurationException("ACL configuration:[%s] doesn't exist".formatted(resource));
-    } else if (Files.isDirectory(localFile)) {
-      throw new AclConfigurationException("ACL configuration:[%s] is directory".formatted(resource));
+    try (InputStream aclInputStream =  ClassPathResourceResolver.newInputStream(resource)) {
+      Map<Operation, Array<AclRule>> aclRulesMap = rulesLoader.apply(aclInputStream);
+      switchTo(new AclEngine(aclRulesMap));
+      log.info(resource, aclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
+    } catch (Exception e) {
+      throw new AclConfigurationException("Unable to load ACL configuration:[%s]".formatted(resource), e);
     }
-    Map<Operation, Array<AclRule>> loadedAclRulesMap = rulesLoader.apply(localFile);
-    switchTo(new AclEngine(loadedAclRulesMap));
-    log.info(resource, loadedAclRulesMap, UriLoaderAuthorizationService::buildServiceDescription);
   }
 
   private static String buildServiceDescription(URI resource, Map<Operation, Array<AclRule>> aclRulesMap) {

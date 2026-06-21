@@ -18,8 +18,8 @@ dependencies {
 
   testImplementation projects.testSupport
   testImplementation testFixtures(projects.network)
-  testImplementation projects.credentialsSourceFile
-  testImplementation projects.authenticationProviderBasic
+  runtimeOnly projects.credentialsSourceFile
+  runtimeOnly projects.authenticationProviderBasic
 }
 
 tasks.withType(GroovyCompile).configureEach {
@@ -28,7 +28,6 @@ tasks.withType(GroovyCompile).configureEach {
 }
 
 bootRun {
-  mainClass = "javasabr.mqtt.broker.application.MqttBrokerApplication"
   jvmArgs += "--enable-preview"
 }
 

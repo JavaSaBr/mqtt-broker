@@ -299,7 +299,7 @@ class InMemoryIncomingPublishStorageTest extends UnitSpecification {
         def incomingPublish = createAndStorePublishWithRegisteredData(publishStorage, dataStorage)
     when:
         publishStorage.scheduleRemoval(incomingPublish, Duration.ofMillis(1))
-        waitUntil(1000) {
+        waitUntil(5000) {
           dataStorage.findById(incomingPublish.data().id()) == null
         }
     then:

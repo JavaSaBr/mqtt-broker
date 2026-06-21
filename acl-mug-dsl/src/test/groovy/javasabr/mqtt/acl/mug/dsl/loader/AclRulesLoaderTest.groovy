@@ -4,9 +4,7 @@ import javasabr.mqtt.acl.engine.exception.AclConfigurationException
 import javasabr.mqtt.acl.mug.dsl.parser.GaclParser
 import spock.lang.Specification
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.charset.StandardCharsets
 
 class AclRulesLoaderTest extends Specification {
 
@@ -20,7 +18,7 @@ class AclRulesLoaderTest extends Specification {
 
   def "should throw exception when file does not exist"() {
     given:
-        Path nonExistent = Paths.get("non-existent.gacl")
+        InputStream nonExistent = AclRulesLoaderTest.class.getResourceAsStream("non-existent.gacl")
 
     when:
         loader.load(nonExistent)
@@ -29,38 +27,41 @@ class AclRulesLoaderTest extends Specification {
         thrown(AclConfigurationException)
   }
 
-  def "should throw exception when file read fails"() {
-    given:
-        Path unreadableFile = Files.createTempFile("unreadable", ".gacl")
-        // Make the file unreadable to trigger IOException during Files.readString
-        unreadableFile.toFile().setReadable(false)
-
-    when:
-        loader.load(unreadableFile)
-
-    then:
-        thrown(AclConfigurationException)
-
-    cleanup:
-        unreadableFile.toFile().setReadable(true)
-        Files.deleteIfExists(unreadableFile)
-  }
-
   def "should load rules successfully"() {
     given:
-        Path tempFile = Files.createTempFile("test", ".gacl")
-        Files.writeString(tempFile, "mock content")
-
-    and:
-        parser.parse("mock content") >> []
+        def aclConfigMock = "mock content"
+        def aclConfigInputStream = new ByteArrayInputStream(aclConfigMock.getBytes())
 
     when:
-        def rules = loader.load(tempFile)
+        def rules = loader.load(aclConfigInputStream)
 
     then:
+        1 * parser.parse("mock content") >> []
         rules != null
+  }
 
-    cleanup:
-        Files.deleteIfExists(tempFile)
+  def "should decode ACL config using UTF-8 charset"() {
+    given:
+        def nonAsciiContent = "user sënsor = pässwörd"
+        def aclConfigInputStream = new ByteArrayInputStream(nonAsciiContent.getBytes(StandardCharsets.UTF_8))
+    when:
+        loader.load(aclConfigInputStream)
+    then:
+        1 * parser.parse(nonAsciiContent) >> []
+  }
+
+  def "should throw AclConfigurationException when input stream fails during read"() {
+    given:
+        def failingStream = new InputStream() {
+          @Override
+          int read() throws IOException {
+            throw new IOException("simulated read failure")
+          }
+        }
+    when:
+        loader.load(failingStream)
+    then:
+        def exception = thrown(AclConfigurationException)
+        exception.cause instanceof IOException
   }
 }
