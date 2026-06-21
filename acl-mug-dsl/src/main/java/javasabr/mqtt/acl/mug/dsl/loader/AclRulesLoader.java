@@ -2,6 +2,7 @@ package javasabr.mqtt.acl.mug.dsl.loader;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javasabr.mqtt.acl.engine.builder.RuleContainerBuilder;
 import javasabr.mqtt.acl.engine.exception.AclConfigurationException;
@@ -20,7 +21,7 @@ public class AclRulesLoader {
   public Map<Operation, Array<AclRule>> load(InputStream aclConfigInputStream) {
     String content;
     try {
-      content = new InputStreamReader(aclConfigInputStream).readAllAsString();
+      content = new InputStreamReader(aclConfigInputStream, StandardCharsets.UTF_8).readAllAsString();
     } catch (Exception e) {
       throw new AclConfigurationException("Failed to read ACL input stream", e);
     }
