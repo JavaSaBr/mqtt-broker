@@ -44,14 +44,14 @@ class ClassPathResourceResolverTest extends UnitSpecification {
         result.close()
   }
 
-  def "should throw NullPointerException for null URI"() {
+  def "should throw IllegalArgumentException for null URI"() {
     when:
         ClassPathResourceResolver.newInputStream(null)
     then:
         thrown(IllegalArgumentException)
   }
 
-  def "should throw IllegalArgumentException for missing classpath resource"() {
+  def "should throw FileNotFoundException for missing classpath resource"() {
     given:
         def uri = URI.create("classpath:nonexistent/resource.txt")
     when:
@@ -60,7 +60,7 @@ class ClassPathResourceResolverTest extends UnitSpecification {
         thrown(FileNotFoundException)
   }
 
-  def "should throw IllegalArgumentException for classpath URI with blank resource path"() {
+  def "should throw FileNotFoundException for classpath URI with blank resource path"() {
     given:
         def uri = new URI("classpath", " ", null)
     when:
@@ -83,5 +83,47 @@ class ClassPathResourceResolverTest extends UnitSpecification {
         result.close()
         Files.deleteIfExists(resourceFile)
         Files.deleteIfExists(testDir)
+  }
+
+  def "should reject directory URI instead of returning an empty stream"() {
+    given:
+        def tempDir = Files.createTempDirectory("resolver-directory")
+        def uri = tempDir.toUri()
+    when:
+        ClassPathResourceResolver.newInputStream(uri)
+    then:
+        def exception = thrown(IllegalArgumentException)
+        exception.message != null
+        exception.message.toLowerCase().contains("directory")
+    cleanup:
+        Files.deleteIfExists(tempDir)
+  }
+
+  def "should resolve schemeless file URI without NullPointerException"() {
+    given:
+        def tempFile = Files.createTempFile("schemeless", ".txt")
+        Files.writeString(tempFile, "schemeless-content")
+        def uri = URI.create(tempFile.toString())
+    when:
+        def result = ClassPathResourceResolver.newInputStream(uri)
+    then:
+        new String(result.readAllBytes(), StandardCharsets.UTF_8) == "schemeless-content"
+    cleanup:
+        result?.close()
+        Files.deleteIfExists(tempFile)
+  }
+
+  def "should prefer classpath resource over a same-named file in the working directory"() {
+    given:
+        def workingDirShadow = Path.of("cpr-precedence.txt")
+        Files.writeString(workingDirShadow, "from-working-directory")
+        def uri = URI.create("classpath:cpr-precedence.txt")
+    when:
+        def result = ClassPathResourceResolver.newInputStream(uri)
+    then:
+        new String(result.readAllBytes(), StandardCharsets.UTF_8) == "from-classpath\n"
+    cleanup:
+        result?.close()
+        Files.deleteIfExists(workingDirShadow)
   }
 }

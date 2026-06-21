@@ -220,4 +220,16 @@ class AclRulesLoaderTest extends UnitSpecification {
           }
         }
   }
+
+  def "should decode Groovy DSL config using UTF-8 charset"() {
+    given:
+        def utf8AclPath = getAbsolutePath("acl/config/utf8-encoding.gacl")
+        def aclConfigInputStream = Files.newInputStream(Path.of(utf8AclPath))
+    when:
+        def rules = AclRulesLoader.load(aclConfigInputStream)
+    then:
+        def publishRule = rules.get(PUBLISH).get(0) as AbstractAclRule
+        def topicMatcher = publishRule.topicCondition().matchers.get(0) as TopicNameMatcher
+        topicMatcher.expected.rawTopic() == "/tëméric"
+  }
 }

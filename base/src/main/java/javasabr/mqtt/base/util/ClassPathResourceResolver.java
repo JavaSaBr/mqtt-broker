@@ -18,30 +18,28 @@ public final class ClassPathResourceResolver {
     if (uri == null) {
       throw new IllegalArgumentException("URI must not be null");
     }
-    switch (uri.getScheme()) {
-      case "classpath":
-        String sanitizedPath = uri.getSchemeSpecificPart();
-        if (sanitizedPath == null || sanitizedPath.isEmpty()) {
-          throw new IllegalArgumentException("Classpath URI must have a non-empty resource path: %s".formatted(uri));
-        }
-        Path resourcePath = Path.of(sanitizedPath);
-        if (Files.exists(resourcePath)) {
-          return Files.newInputStream(resourcePath);
-        }
-        if (sanitizedPath.startsWith("/")) {
-          sanitizedPath = sanitizedPath.substring(1);
-        }
-        InputStream resourceAsStream = CLASS_LOADER.getResourceAsStream(sanitizedPath);
-        if (resourceAsStream != null) {
-          return resourceAsStream;
-        }
-        throw new FileNotFoundException(uri.toString());
-      default:
-        Path localPath = Path.of(uri);
-        if (Files.exists(localPath)) {
-          return Files.newInputStream(localPath);
-        }
-        throw new FileNotFoundException(uri.toString());
+    if ("classpath".equals(uri.getScheme())) {
+      String sanitizedPath = uri.getSchemeSpecificPart();
+      InputStream resourceAsStream = CLASS_LOADER.getResourceAsStream(sanitizedPath.replaceFirst("^/", ""));
+      if (resourceAsStream != null) {
+        return resourceAsStream;
+      }
+      Path resourcePath = Path.of(sanitizedPath);
+      if (Files.isDirectory(resourcePath)) {
+        throw new IllegalArgumentException("Resource must be a file, not a directory:[%s]".formatted(uri));
+      }
+      if (Files.exists(resourcePath)) {
+        return Files.newInputStream(resourcePath);
+      }
+    } else {
+      Path localPath = Path.of(uri.getPath());
+      if (Files.isDirectory(localPath)) {
+        throw new IllegalArgumentException("Resource must be a file, not a directory:[%s]".formatted(uri));
+      }
+      if (Files.exists(localPath)) {
+        return Files.newInputStream(localPath);
+      }
     }
+    throw new FileNotFoundException(uri.toString());
   }
 }
