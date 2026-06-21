@@ -29,6 +29,7 @@ import javasabr.mqtt.service.impl.InMemorySubscriptionService;
 import javasabr.mqtt.service.message.handler.MqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.ConnectInMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.DisconnectMqttInMessageHandler;
+import javasabr.mqtt.service.message.handler.impl.PingRequestMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishAckMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishCompleteMqttInMessageHandler;
 import javasabr.mqtt.service.message.handler.impl.PublishMqttInMessageHandler;
@@ -244,6 +245,11 @@ public class MqttBrokerSpringConfig {
         subscriptionService,
         messageOutFactoryService,
         topicService);
+  }
+
+  @Bean
+  PingRequestMqttInMessageHandler pingRequestMqttInMessageHandler(MessageOutFactoryService messageOutFactoryService) {
+    return new PingRequestMqttInMessageHandler(messageOutFactoryService);
   }
 
   @Bean
