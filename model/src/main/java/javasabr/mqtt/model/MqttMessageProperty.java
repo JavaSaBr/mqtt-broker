@@ -3,7 +3,6 @@ package javasabr.mqtt.model;
 import javasabr.mqtt.model.data.type.MqttDataType;
 import javasabr.rlib.common.util.ClassUtils;
 import javasabr.rlib.common.util.NumberedEnum;
-import javasabr.rlib.common.util.NumberedEnumMap;
 import javasabr.rlib.common.util.ObjectUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -42,8 +41,8 @@ public enum MqttMessageProperty implements NumberedEnum<MqttMessageProperty> {
   SUBSCRIPTION_IDENTIFIER_AVAILABLE(0x29, MqttDataType.BYTE),
   SHARED_SUBSCRIPTION_AVAILABLE(0x2A, MqttDataType.BYTE);
 
-  private static final NumberedEnumMap<MqttMessageProperty> NUMBERED_MAP =
-      new NumberedEnumMap<>(MqttMessageProperty.class);
+  private static final NumberedEnumLookup<MqttMessageProperty> NUMBERED_MAP =
+      new NumberedEnumLookup<>(MqttMessageProperty.values());
 
   public static MqttMessageProperty byId(int id) {
     return NUMBERED_MAP.require(id);

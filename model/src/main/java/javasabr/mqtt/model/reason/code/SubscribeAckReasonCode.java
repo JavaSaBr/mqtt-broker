@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.reason.code;
 
+import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
-import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -63,8 +63,8 @@ public enum SubscribeAckReasonCode implements NumberedEnum<SubscribeAckReasonCod
    */
   WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED(0xA2);
 
-  private static final NumberedEnumMap<SubscribeAckReasonCode> NUMBERED_MAP =
-      new NumberedEnumMap<>(SubscribeAckReasonCode.class);
+  private static final NumberedEnumLookup<SubscribeAckReasonCode> NUMBERED_MAP =
+      new NumberedEnumLookup<>(SubscribeAckReasonCode.values());
 
   public static SubscribeAckReasonCode ofCode(int code) {
     return NUMBERED_MAP.require(code);

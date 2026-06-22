@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.reason.code;
 
+import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
-import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -51,8 +51,8 @@ public enum PublishReceivedReasonCode implements NumberedEnum<PublishReceivedRea
    */
   PAYLOAD_FORMAT_INVALID(0x99);
 
-  private static final NumberedEnumMap<PublishReceivedReasonCode> NUMBERED_MAP =
-      new NumberedEnumMap<>(PublishReceivedReasonCode.class);
+  private static final NumberedEnumLookup<PublishReceivedReasonCode> NUMBERED_MAP =
+      new NumberedEnumLookup<>(PublishReceivedReasonCode.values());
 
   public static PublishReceivedReasonCode ofCode(int code) {
     return NUMBERED_MAP.require(code);

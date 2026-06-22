@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.reason.code;
 
+import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
-import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -21,8 +21,8 @@ public enum PublishReleaseReasonCode implements NumberedEnum<PublishReleaseReaso
    */
   PACKET_IDENTIFIER_NOT_FOUND(0x92);
 
-  private static final NumberedEnumMap<PublishReleaseReasonCode> NUMBERED_MAP =
-      new NumberedEnumMap<>(PublishReleaseReasonCode.class);
+  private static final NumberedEnumLookup<PublishReleaseReasonCode> NUMBERED_MAP =
+      new NumberedEnumLookup<>(PublishReleaseReasonCode.values());
 
   public static PublishReleaseReasonCode ofCode(int code) {
     return NUMBERED_MAP.require(code);

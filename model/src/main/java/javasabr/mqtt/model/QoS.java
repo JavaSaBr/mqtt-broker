@@ -2,7 +2,6 @@ package javasabr.mqtt.model;
 
 import javasabr.mqtt.model.reason.code.SubscribeAckReasonCode;
 import javasabr.rlib.common.util.NumberedEnum;
-import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ public enum QoS implements NumberedEnum<QoS> {
   EXACTLY_ONCE(2, SubscribeAckReasonCode.GRANTED_QOS_2),
   INVALID(3, SubscribeAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR);
 
-  private static final NumberedEnumMap<QoS> NUMBERED_MAP = new NumberedEnumMap<>(QoS.class);
+  private static final NumberedEnumLookup<QoS> NUMBERED_MAP = new NumberedEnumLookup<>(QoS.values());
 
   public static QoS ofCode(int level) {
     return NUMBERED_MAP.resolve(level, QoS.INVALID);

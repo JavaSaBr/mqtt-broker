@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.reason.code;
 
+import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
-import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -136,8 +136,8 @@ public enum DisconnectReasonCode implements NumberedEnum<DisconnectReasonCode> {
    */
   WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED(0xA2);
 
-  private static final NumberedEnumMap<DisconnectReasonCode> NUMBERED_MAP =
-      new NumberedEnumMap<>(DisconnectReasonCode.class);
+  private static final NumberedEnumLookup<DisconnectReasonCode> NUMBERED_MAP =
+      new NumberedEnumLookup<>(DisconnectReasonCode.values());
 
   public static DisconnectReasonCode ofCode(int code) {
     return NUMBERED_MAP.require(code);

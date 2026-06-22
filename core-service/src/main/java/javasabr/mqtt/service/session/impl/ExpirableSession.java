@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Accessors
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-class ExpirableSession extends NotExpirableSession {
+public class ExpirableSession extends NotExpirableSession {
   long expireAfter;
 
   static ExpirableSession of(Duration expiryInterval, InMemoryNetworkMqttSession session) {
