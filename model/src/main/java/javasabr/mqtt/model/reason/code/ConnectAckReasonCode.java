@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.reason.code;
 
-import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
+import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -101,8 +101,8 @@ public enum ConnectAckReasonCode implements NumberedEnum<ConnectAckReasonCode> {
    */
   CONNECTION_RATE_EXCEEDED(0x01, 0x9F);
 
-  private static final NumberedEnumLookup<ConnectAckReasonCode> MQTT5_NUMBERED_MAP =
-      new NumberedEnumLookup<>(ConnectAckReasonCode.values());
+  private static final NumberedEnumMap<ConnectAckReasonCode> MQTT5_NUMBERED_MAP =
+      new NumberedEnumMap<>(ConnectAckReasonCode.class);
 
   public static ConnectAckReasonCode ofCode(boolean mqtt5, int reasonCode) {
     return mqtt5 ? ofMqtt5Code(reasonCode) : ofMqtt311Code(reasonCode);

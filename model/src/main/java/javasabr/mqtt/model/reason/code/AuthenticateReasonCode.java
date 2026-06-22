@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.reason.code;
 
-import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
+import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -24,8 +24,8 @@ public enum AuthenticateReasonCode implements NumberedEnum<AuthenticateReasonCod
    */
   RE_AUTHENTICATE(0x19);
 
-  private static final NumberedEnumLookup<AuthenticateReasonCode> NUMBERED_MAP =
-      new NumberedEnumLookup<>(AuthenticateReasonCode.values());
+  private static final NumberedEnumMap<AuthenticateReasonCode> NUMBERED_MAP =
+      new NumberedEnumMap<>(AuthenticateReasonCode.class);
 
   public static AuthenticateReasonCode ofCode(int code) {
     return NUMBERED_MAP.require(code);

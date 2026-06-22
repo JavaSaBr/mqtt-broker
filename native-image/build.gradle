@@ -24,8 +24,7 @@ graalvmNative {
   binaries {
     main {
       sharedLibrary = false
-      buildArgs.add("--enable-preview")
-      buildArgs.add("--enable-all-security-services")
+      buildArgs.addAll("--enable-preview", "--enable-all-security-services")
       javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.matching("GraalVM")

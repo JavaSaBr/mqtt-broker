@@ -1,7 +1,7 @@
 package javasabr.mqtt.model.message;
 
-import javasabr.mqtt.model.NumberedEnumLookup;
 import javasabr.rlib.common.util.NumberedEnum;
+import javasabr.rlib.common.util.NumberedEnumMap;
 import lombok.CustomLog;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -104,8 +104,8 @@ public enum MqttMessageType implements NumberedEnum<MqttMessageType> {
    */
   INVALID(16);
 
-  private static final NumberedEnumLookup<MqttMessageType> NUMBERED_MAP =
-      new NumberedEnumLookup<>(MqttMessageType.values());
+  private static final NumberedEnumMap<MqttMessageType> NUMBERED_MAP =
+      new NumberedEnumMap<>(MqttMessageType.class);
 
   public static MqttMessageType fromByte(int messageType) {
     return NUMBERED_MAP.resolve(messageType, MqttMessageType.INVALID);
