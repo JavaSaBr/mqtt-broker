@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Accessors
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class NotExpirableSession {
+class NotExpirableSession {
   long storedAt;
   InMemoryNetworkMqttSession wrapped;
 
