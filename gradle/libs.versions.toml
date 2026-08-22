@@ -24,7 +24,7 @@ spock = "2.4-M6-groovy-4.0"
 # https://mvnrepository.com/artifact/org.apache.groovy/groovy-all
 groovy = "4.0.28"
 # https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
-springboot = '4.0.6'
+springboot = '4.1.1'
 # https://mvnrepository.com/artifact/org.springframework/spring-core
 spring = '7.0.7'
 # https://mvnrepository.com/artifact/org.assertj/assertj-core
